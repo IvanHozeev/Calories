@@ -137,9 +137,6 @@ struct ProfileView: View {
             .navigationTitle("Профиль")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
                         guard let draftProfile else { return }

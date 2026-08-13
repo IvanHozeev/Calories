@@ -3,15 +3,33 @@ import Charts
 
 struct WeeklyChartView: View {
     let days: [DaySummary]
+    var title: String = "Эта неделя"
 
     private var goal: Int {
         days.first?.goal ?? 0
     }
 
+    private var useWeekdayLabels: Bool {
+        days.count <= 7
+    }
+
+    /// Шаг между подписями на оси X — чтобы при 30/90 днях подписи не наезжали друг на друга,
+    /// показываем примерно 5-6 подписей независимо от длины диапазона.
+    private var axisStride: Int {
+        max(1, days.count / 6)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Эта неделя")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                Spacer()
+                Text("Цель: \(goal) ккал")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 8)
 
             Chart {
                 ForEach(days) { day in
@@ -24,21 +42,23 @@ struct WeeklyChartView: View {
                             ? Color.red.gradient
                             : Color.green.gradient
                     )
-                    .cornerRadius(6)
+                    .cornerRadius(4)
                 }
 
                 RuleMark(y: .value("Цель", goal))
                     .foregroundStyle(.secondary)
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
-                    .annotation(position: .top, alignment: .leading) {
-                        Text("Цель: \(goal)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
             }
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day)) { _ in
-                    AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
+                if useWeekdayLabels {
+                    AxisMarks(values: .stride(by: .day)) { _ in
+                        AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
+                    }
+                } else {
+                    AxisMarks(values: .stride(by: .day, count: axisStride)) { _ in
+                        AxisGridLine()
+                        AxisValueLabel(format: .dateTime.day().month(.defaultDigits))
+                    }
                 }
             }
             .frame(height: 200)

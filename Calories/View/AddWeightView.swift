@@ -49,10 +49,6 @@ struct AddWeightView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
                 }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Готово") { weightFocused = false }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
                         guard let weight, weight > 0 else { return }

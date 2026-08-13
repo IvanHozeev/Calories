@@ -16,6 +16,11 @@ struct WeightChartView: View {
         entries.count <= 7
     }
 
+    /// Шаг между подписями на оси X — как в WeeklyChartView, чтобы подписи не наезжали друг на друга.
+    private var axisStride: Int {
+        max(1, entries.count / 6)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Динамика веса")
@@ -39,9 +44,9 @@ struct WeightChartView: View {
                         AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
                     }
                 } else {
-                    AxisMarks(values: .automatic(desiredCount: 6)) { _ in
-                        AxisValueLabel(format: .dateTime.day().month(.defaultDigits))
+                    AxisMarks(values: .stride(by: .day, count: axisStride)) { _ in
                         AxisGridLine()
+                        AxisValueLabel(format: .dateTime.day().month(.defaultDigits))
                     }
                 }
             }

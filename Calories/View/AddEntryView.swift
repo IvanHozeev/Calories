@@ -7,6 +7,8 @@ struct AddEntryView: View {
     @State private var selectedDate: Date
     @State private var searchText = ""
 
+    @State private var draftItems: [MealItem] = []
+
     @State private var quickCalories = ""
 
     @State private var manualName = ""
@@ -17,9 +19,29 @@ struct AddEntryView: View {
 
     @State private var showingNewFood = false
 
+    private enum Field: Hashable {
+        case quickCalories, manualName, manualCalories, manualProtein, manualFat, manualCarbs
+    }
+    @FocusState private var focusedField: Field?
+
     init(store: CalorieStore, initialDate: Date = Date()) {
         self.store = store
         _selectedDate = State(initialValue: initialDate)
+    }
+
+    private var draftTotalCalories: Int {
+        draftItems.reduce(0) { $0 + $1.calories }
+    }
+
+    private var draftTotalMacros: Macros {
+        draftItems.reduce(Macros.zero) { $0 + $1.macros }
+    }
+
+    /// Имя итоговой записи — из названий добавленных продуктов, с ограничением длины.
+    private var mealName: String {
+        let joined = draftItems.map(\.name).joined(separator: ", ")
+        guard joined.count > 60 else { return joined }
+        return String(joined.prefix(60)) + "…"
     }
 
     private var filteredCustomFoods: [FoodItem] {
@@ -49,14 +71,51 @@ struct AddEntryView: View {
                 }
 
                 Section {
+                    if draftItems.isEmpty {
+                        Text("Пока пусто — добавь продукты ниже, потом сохрани приём пищи разом")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(draftItems) { item in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name)
+                                    Text("Б\(Int(item.macros.protein)) Ж\(Int(item.macros.fat)) У\(Int(item.macros.carbs))")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Text("\(item.calories) ккал")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .onDelete { offsets in
+                            draftItems.remove(atOffsets: offsets)
+                        }
+
+                        HStack {
+                            Text("Итого")
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Text("\(draftTotalCalories) ккал")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                    }
+                } header: {
+                    Text("Приём пищи")
+                }
+
+                Section {
                     HStack {
                         TextField("Ккал", text: $quickCalories)
                             .keyboardType(.numberPad)
                             .font(.title3.weight(.semibold))
-                        Button("Добавить") {
+                            .focused($focusedField, equals: .quickCalories)
+                        Button("В приём пищи") {
                             guard let calories = Int(quickCalories) else { return }
-                            store.add(name: "Приём пищи", calories: calories, date: entryDate)
-                            dismiss()
+                            draftItems.append(MealItem(name: "Продукт", calories: calories, macros: .zero))
+                            quickCalories = ""
+                            focusedField = nil
                         }
                         .disabled(Int(quickCalories) == nil)
                         .buttonStyle(.borderedProminent)
@@ -64,33 +123,43 @@ struct AddEntryView: View {
                 } header: {
                     Text("Быстро — только калории")
                 } footer: {
-                    Text("Для восстановления данных за прошлый день: выбери дату выше и впиши сколько всего было съедено.")
+                    Text("Для восстановления данных за прошлый день: выбери дату выше и впиши сколько было съедено.")
                 }
 
                 Section("Подробнее (название, БЖУ)") {
                     TextField("Название", text: $manualName)
+                        .focused($focusedField, equals: .manualName)
                     TextField("Калории", text: $manualCalories)
                         .keyboardType(.numberPad)
+                        .focused($focusedField, equals: .manualCalories)
                     HStack {
                         TextField("Белки, г", text: $manualProtein)
                             .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .manualProtein)
                         TextField("Жиры, г", text: $manualFat)
                             .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .manualFat)
                         TextField("Углеводы, г", text: $manualCarbs)
                             .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .manualCarbs)
                     }
-                    Button("Добавить") {
+                    Button("В приём пищи") {
                         guard let calories = Int(manualCalories) else { return }
                         let name = manualName.trimmingCharacters(in: .whitespaces).isEmpty
-                            ? "Приём пищи"
+                            ? "Продукт"
                             : manualName
                         let macros = Macros(
                             protein: Double(manualProtein.replacingOccurrences(of: ",", with: ".")) ?? 0,
                             fat: Double(manualFat.replacingOccurrences(of: ",", with: ".")) ?? 0,
                             carbs: Double(manualCarbs.replacingOccurrences(of: ",", with: ".")) ?? 0
                         )
-                        store.add(name: name, calories: calories, macros: macros, date: entryDate)
-                        dismiss()
+                        draftItems.append(MealItem(name: name, calories: calories, macros: macros))
+                        manualName = ""
+                        manualCalories = ""
+                        manualProtein = ""
+                        manualFat = ""
+                        manualCarbs = ""
+                        focusedField = nil
                     }
                     .disabled(Int(manualCalories) == nil)
                 }
@@ -99,7 +168,9 @@ struct AddEntryView: View {
                     Section("Мои продукты") {
                         ForEach(filteredCustomFoods) { food in
                             NavigationLink {
-                                FoodQuantityView(store: store, food: food, date: entryDate)
+                                FoodQuantityView(food: food) { item in
+                                    draftItems.append(item)
+                                }
                             } label: {
                                 foodRow(food)
                             }
@@ -121,7 +192,9 @@ struct AddEntryView: View {
                     } else {
                         ForEach(filteredBuiltInFoods) { food in
                             NavigationLink {
-                                FoodQuantityView(store: store, food: food, date: entryDate)
+                                FoodQuantityView(food: food) { item in
+                                    draftItems.append(item)
+                                }
                             } label: {
                                 foodRow(food)
                             }
@@ -130,7 +203,8 @@ struct AddEntryView: View {
                 }
             }
             .searchable(text: $searchText, prompt: "Поиск продукта")
-            .navigationTitle("Добавить")
+            .scrollDismissesKeyboard(.interactively)
+            .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -143,6 +217,17 @@ struct AddEntryView: View {
                         Image(systemName: "plus.app")
                     }
                 }
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, date: entryDate)
+                        dismiss()
+                    } label: {
+                        Text(draftItems.isEmpty ? "Сохранить" : "Сохранить (\(draftTotalCalories) ккал)")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(draftItems.isEmpty)
+                }
             }
             .sheet(isPresented: $showingNewFood) {
                 NewFoodSheet(store: store)
@@ -151,7 +236,7 @@ struct AddEntryView: View {
         }
     }
 
-    /// День из пикера + текущее время суток — чтобы у записей был осмысленный порядок и время.
+    /// День из пикера + текущее время суток — чтобы у приёма пищи было осмысленное время.
     private var entryDate: Date {
         let calendar = Calendar.current
         var dayComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
@@ -187,22 +272,27 @@ private struct NewFoodSheet: View {
     @State private var protein = ""
     @State private var fat = ""
     @State private var carbs = ""
-    @FocusState private var nameFocused: Bool
+    private enum Field: Hashable { case name, calories, protein, fat, carbs }
+    @FocusState private var focusedField: Field?
 
     var body: some View {
         NavigationStack {
             Form {
                 Section("Новый продукт (на 100 г)") {
                     TextField("Название", text: $name)
-                        .focused($nameFocused)
+                        .focused($focusedField, equals: .name)
                     TextField("Калории", text: $caloriesPer100g)
                         .keyboardType(.numberPad)
+                        .focused($focusedField, equals: .calories)
                     TextField("Белки, г", text: $protein)
                         .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .protein)
                     TextField("Жиры, г", text: $fat)
                         .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .fat)
                     TextField("Углеводы, г", text: $carbs)
                         .keyboardType(.decimalPad)
+                        .focused($focusedField, equals: .carbs)
                 }
             }
             .navigationTitle("Свой продукт")
@@ -228,7 +318,7 @@ private struct NewFoodSheet: View {
                     .fontWeight(.semibold)
                 }
             }
-            .onAppear { nameFocused = true }
+            .onAppear { focusedField = .name }
         }
     }
 }

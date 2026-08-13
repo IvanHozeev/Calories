@@ -89,7 +89,7 @@ struct WeightView: View {
             }
 
             Section {
-                WeeklyChartView(days: recentCalorieDays, title: "Калории за тот же период")
+                WeeklyChartView(days: recentCalorieDays)
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
             } footer: {

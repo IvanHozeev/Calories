@@ -63,6 +63,20 @@ struct ContentView: View {
                         .padding(.horizontal)
                     }
 
+                    if let plan = store.plan {
+                        NavigationLink {
+                            PlanView(store: store)
+                        } label: {
+                            PlanCard(
+                                plan: plan,
+                                currentWeight: store.latestWeight?.weightKg,
+                                status: store.planAdherence()?.status ?? .insufficientData
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal)
+                    }
+
                     MacrosCard(macros: store.macrosToday, proteinTarget: store.proteinTarget)
                         .padding(.horizontal)
 
@@ -165,6 +179,56 @@ struct ContentView: View {
                 }
             }
         }
+    }
+}
+
+private struct PlanCard: View {
+    let plan: Plan
+    let currentWeight: Double?
+    let status: PlanStatus
+
+    private var statusInfo: (text: String, color: Color, icon: String) {
+        switch status {
+        case .insufficientData: return ("Собираем данные", .secondary, "clock")
+        case .onTrack: return ("По графику", .green, "checkmark.circle.fill")
+        case .ahead: return ("Опережаешь график", .blue, "arrow.up.circle.fill")
+        case .behind: return ("Отстаёшь от графика", .orange, "exclamationmark.triangle.fill")
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Label("План", systemImage: "sparkles")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Spacer()
+                Text(plan.daysRemaining > 0 ? "\(plan.daysRemaining) дн. осталось" : "Срок истёк")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            ProgressView(value: plan.progress)
+                .tint(.blue)
+
+            HStack {
+                Text(String(format: "%.1f → %.1f кг", plan.startWeightKg, plan.targetWeightKg))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let currentWeight {
+                    Text(String(format: "сейчас %.1f кг", currentWeight))
+                        .font(.caption.weight(.medium))
+                }
+            }
+
+            Label(statusInfo.text, systemImage: statusInfo.icon)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(statusInfo.color)
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
 

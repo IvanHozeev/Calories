@@ -12,16 +12,24 @@ final class CalorieStore: ObservableObject {
         didSet { UserDefaults.standard.set(dailyGoal, forKey: Keys.goal) }
     }
     @Published private(set) var profile: UserProfile?
+    @Published private(set) var plan: Plan?
+    @Published var isPremium: Bool {
+        didSet { UserDefaults.standard.set(isPremium, forKey: Keys.premium) }
+    }
 
     private enum Keys {
         static let goal = "daily_goal"
         static let profile = "user_profile"
+        static let plan = "active_plan"
+        static let premium = "is_premium"
     }
 
     init(context: ModelContext) {
         self.context = context
         self.dailyGoal = UserDefaults.standard.object(forKey: Keys.goal) as? Int ?? 2000
         self.profile = Self.loadProfile()
+        self.plan = Self.loadPlan()
+        self.isPremium = UserDefaults.standard.bool(forKey: Keys.premium)
         refresh()
     }
 
@@ -31,7 +39,7 @@ final class CalorieStore: ObservableObject {
         if let data = try? JSONEncoder().encode(newProfile) {
             UserDefaults.standard.set(data, forKey: Keys.profile)
         }
-        if syncDailyGoal {
+        if syncDailyGoal, plan == nil {
             dailyGoal = newProfile.calorieTarget
         }
     }
@@ -39,6 +47,40 @@ final class CalorieStore: ObservableObject {
     private static func loadProfile() -> UserProfile? {
         guard let data = UserDefaults.standard.data(forKey: Keys.profile) else { return nil }
         return try? JSONDecoder().decode(UserProfile.self, from: data)
+    }
+
+    /// Запускает план — считает точную дневную норму под срок/целевой вес и делает её текущей целью.
+    func startPlan(_ newPlan: Plan) {
+        plan = newPlan
+        if let data = try? JSONEncoder().encode(newPlan) {
+            UserDefaults.standard.set(data, forKey: Keys.plan)
+        }
+        if let profile {
+            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
+        }
+    }
+
+    /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
+    func cancelPlan() {
+        plan = nil
+        UserDefaults.standard.removeObject(forKey: Keys.plan)
+        if let profile {
+            dailyGoal = profile.calorieTarget
+        }
+    }
+
+    /// Сдвигает срок плана (сохраняя дату старта, начальный и целевой вес) — используется,
+    /// когда фактический темп медленнее/быстрее прогноза и план продлевают/сокращают.
+    func extendPlan(to newEndDate: Date) {
+        guard var updated = plan else { return }
+        let days = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
+        updated.durationWeeks = max(1, Int((Double(days) / 7).rounded(.up)))
+        startPlan(updated)
+    }
+
+    private static func loadPlan() -> Plan? {
+        guard let data = UserDefaults.standard.data(forKey: Keys.plan) else { return nil }
+        return try? JSONDecoder().decode(Plan.self, from: data)
     }
 
     /// Перечитывает записи и продукты из базы. Вызывается после каждого изменения.
@@ -166,6 +208,82 @@ final class CalorieStore: ObservableObject {
         let cutoff = Calendar.current.date(byAdding: .day, value: -count, to: Date()) ?? .distantPast
         let cutoffStart = Calendar.current.startOfDay(for: cutoff)
         return weightEntries.filter { $0.date >= cutoffStart }
+    }
+
+    /// Сверяет факт по журналу взвешиваний с линейным прогнозом плана. nil, если плана или профиля нет.
+    func planAdherence() -> PlanAdherence? {
+        guard let plan, let profile else { return nil }
+
+        let totalDays = Double(plan.durationWeeks * 7)
+        let elapsedDays = min(max(Date().timeIntervalSince(plan.startDate) / 86400, 0), totalDays)
+        let expectedWeightToday = plan.startWeightKg + plan.totalWeightChangeKg * (totalDays > 0 ? elapsedDays / totalDays : 0)
+
+        // Записи веса с начала плана, тренд — среднее по последним до 7 из них (сглаживает суточный шум).
+        let relevantEntries = weightEntries.filter { $0.date >= plan.startDate }
+        guard relevantEntries.last != nil else {
+            return PlanAdherence(
+                expectedWeightToday: expectedWeightToday,
+                actualWeightToday: nil,
+                observedWeeklyRateKg: nil,
+                projectedEndDate: nil,
+                recalibratedDailyCalories: nil,
+                status: .insufficientData
+            )
+        }
+        let recentWindow = relevantEntries.suffix(7)
+        let actualWeightToday = recentWindow.reduce(0) { $0 + $1.weightKg } / Double(recentWindow.count)
+
+        let elapsedWeeks = elapsedDays / 7
+        // Нужна минимум неделя данных с начала плана, иначе темп слишком шумный, чтобы на него опираться.
+        guard elapsedWeeks >= 1, relevantEntries.count >= 2 else {
+            return PlanAdherence(
+                expectedWeightToday: expectedWeightToday,
+                actualWeightToday: actualWeightToday,
+                observedWeeklyRateKg: nil,
+                projectedEndDate: nil,
+                recalibratedDailyCalories: nil,
+                status: .insufficientData
+            )
+        }
+
+        let observedWeeklyRate = (actualWeightToday - plan.startWeightKg) / elapsedWeeks
+
+        var projectedEndDate: Date?
+        if observedWeeklyRate != 0 {
+            let remainingChange = plan.targetWeightKg - actualWeightToday
+            let weeksNeeded = remainingChange / observedWeeklyRate
+            if weeksNeeded.isFinite, weeksNeeded > 0 {
+                projectedEndDate = Calendar.current.date(byAdding: .day, value: Int((weeksNeeded * 7).rounded()), to: Date())
+            }
+        }
+
+        let remainingDays = totalDays - elapsedDays
+        var recalibratedDailyCalories: Int?
+        if remainingDays > 0 {
+            let remainingChangeNeeded = plan.targetWeightKg - actualWeightToday
+            let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDays
+            recalibratedDailyCalories = Int((profile.tdee + dailyDelta).rounded())
+        }
+
+        let deviation = actualWeightToday - expectedWeightToday
+        let threshold = max(0.3, abs(plan.totalWeightChangeKg) * 0.05)
+        let status: PlanStatus
+        if abs(deviation) <= threshold {
+            status = .onTrack
+        } else if (plan.totalWeightChangeKg < 0 && deviation > 0) || (plan.totalWeightChangeKg > 0 && deviation < 0) {
+            status = .behind
+        } else {
+            status = .ahead
+        }
+
+        return PlanAdherence(
+            expectedWeightToday: expectedWeightToday,
+            actualWeightToday: actualWeightToday,
+            observedWeeklyRateKg: observedWeeklyRate,
+            projectedEndDate: projectedEndDate,
+            recalibratedDailyCalories: recalibratedDailyCalories,
+            status: status
+        )
     }
 
     private func save() {

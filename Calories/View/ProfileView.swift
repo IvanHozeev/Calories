@@ -11,6 +11,8 @@ struct ProfileView: View {
     @State private var activityLevel: ActivityLevel
     @State private var goal: Goal
     @State private var proteinPerKgText: String
+    @State private var showingPlan = false
+    @State private var showingPaywall = false
 
     init(store: CalorieStore) {
         self.store = store
@@ -101,11 +103,42 @@ struct ProfileView: View {
                     }
                 }
 
-                Section("Цель") {
+                Section {
                     Picker("Цель", selection: $goal) {
                         ForEach(Goal.allCases) { Text($0.title).tag($0) }
                     }
                     .pickerStyle(.segmented)
+
+                    if goal != .maintenance {
+                        Button {
+                            if store.isPremium {
+                                showingPlan = true
+                            } else {
+                                showingPaywall = true
+                            }
+                        } label: {
+                            HStack {
+                                Image(systemName: "sparkles")
+                                Text(store.plan != nil ? "План активен — открыть" : "Получить план под эту цель")
+                                Spacer()
+                                if !store.isPremium {
+                                    Text("PRO")
+                                        .font(.caption2.bold())
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.yellow.opacity(0.3))
+                                        .clipShape(Capsule())
+                                }
+                            }
+                        }
+                        .disabled(store.profile == nil)
+                    }
+                } header: {
+                    Text("Цель")
+                } footer: {
+                    if goal != .maintenance, store.profile == nil {
+                        Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
+                    }
                 }
 
                 Section {
@@ -146,6 +179,12 @@ struct ProfileView: View {
                     .disabled(draftProfile == nil)
                     .fontWeight(.semibold)
                 }
+            }
+            .sheet(isPresented: $showingPlan) {
+                PlanView(store: store)
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView(store: store)
             }
         }
     }

@@ -207,3 +207,79 @@ struct UserProfile: Codable, Equatable {
         proteinPerKg * weightKg
     }
 }
+
+/// Персональный план: срок в неделях и целевой вес, с точным расчётом дневной нормы калорий
+/// (в отличие от фиксированного множителя calorieMultiplier у Goal). Одна активная запись —
+/// хранится в UserDefaults (JSON), как и профиль.
+struct Plan: Codable, Equatable {
+    var startDate: Date
+    var durationWeeks: Int
+    var startWeightKg: Double
+    var targetWeightKg: Double
+
+    /// Грубое общепринятое приближение: ~7700 ккал на 1 кг жировой массы.
+    static let kcalPerKg: Double = 7700
+
+    var endDate: Date {
+        Calendar.current.date(byAdding: .day, value: durationWeeks * 7, to: startDate) ?? startDate
+    }
+
+    var totalWeightChangeKg: Double {
+        targetWeightKg - startWeightKg
+    }
+
+    var weeklyRateKg: Double {
+        guard durationWeeks > 0 else { return 0 }
+        return totalWeightChangeKg / Double(durationWeeks)
+    }
+
+    /// Суточная поправка к TDEE (отрицательная — дефицит, положительная — профицит).
+    var dailyCalorieDelta: Double {
+        let totalDays = Double(durationWeeks * 7)
+        guard totalDays > 0 else { return 0 }
+        return (totalWeightChangeKg * Self.kcalPerKg) / totalDays
+    }
+
+    func dailyCalorieTarget(tdee: Double) -> Int {
+        Int((tdee + dailyCalorieDelta).rounded())
+    }
+
+    /// Свыше ~1% веса в неделю большинство источников считает агрессивным темпом.
+    func isAggressivePace(relativeToWeightKg weightKg: Double) -> Bool {
+        guard weightKg > 0 else { return false }
+        return abs(weeklyRateKg) / weightKg * 100 > 1.0
+    }
+
+    var progress: Double {
+        let total = endDate.timeIntervalSince(startDate)
+        guard total > 0 else { return 1 }
+        return min(max(Date().timeIntervalSince(startDate) / total, 0), 1)
+    }
+
+    var daysRemaining: Int {
+        max(0, Calendar.current.dateComponents([.day], from: Date(), to: endDate).day ?? 0)
+    }
+}
+
+enum PlanStatus {
+    case insufficientData
+    case onTrack
+    case ahead
+    case behind
+}
+
+/// Сверка факта (по журналу взвешиваний) с линейным прогнозом плана.
+/// Не хранится — считается на лету в CalorieStore.planAdherence().
+struct PlanAdherence {
+    let expectedWeightToday: Double
+    let actualWeightToday: Double?
+    let observedWeeklyRateKg: Double?
+    let projectedEndDate: Date?
+    let recalibratedDailyCalories: Int?
+    let status: PlanStatus
+
+    var deviationKg: Double? {
+        guard let actualWeightToday else { return nil }
+        return actualWeightToday - expectedWeightToday
+    }
+}

@@ -1,0 +1,166 @@
+import SwiftUI
+
+struct ProfileView: View {
+    @ObservedObject var store: CalorieStore
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var weightText: String
+    @State private var heightText: String
+    @State private var ageText: String
+    @State private var sex: Sex
+    @State private var activityLevel: ActivityLevel
+    @State private var goal: Goal
+    @State private var proteinPerKgText: String
+
+    init(store: CalorieStore) {
+        self.store = store
+        let profile = store.profile
+        _weightText = State(initialValue: profile.map { String(format: "%.0f", $0.weightKg) } ?? "")
+        _heightText = State(initialValue: profile.map { String(format: "%.0f", $0.heightCm) } ?? "")
+        _ageText = State(initialValue: profile.map { String($0.age) } ?? "")
+        _sex = State(initialValue: profile?.sex ?? .male)
+        _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
+        _goal = State(initialValue: profile?.goal ?? .maintenance)
+        _proteinPerKgText = State(initialValue: profile.map { String(format: "%.1f", $0.proteinPerKg) } ?? String(format: "%.1f", UserProfile.defaultProteinPerKg))
+    }
+
+    private var weight: Double? { Double(weightText.replacingOccurrences(of: ",", with: ".")) }
+    private var height: Double? { Double(heightText.replacingOccurrences(of: ",", with: ".")) }
+    private var age: Int? { Int(ageText) }
+    private var proteinPerKg: Double? { Double(proteinPerKgText.replacingOccurrences(of: ",", with: ".")) }
+
+    private var draftProfile: UserProfile? {
+        guard let weight, weight > 0,
+              let height, height > 0,
+              let age, age > 0,
+              let proteinPerKg, proteinPerKg > 0 else { return nil }
+        return UserProfile(
+            weightKg: weight,
+            heightCm: height,
+            age: age,
+            sex: sex,
+            activityLevel: activityLevel,
+            goal: goal,
+            proteinPerKg: proteinPerKg
+        )
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Параметры тела") {
+                    Picker("Пол", selection: $sex) {
+                        ForEach(Sex.allCases) { Text($0.title).tag($0) }
+                    }
+                    HStack {
+                        Text("Вес, кг")
+                        Spacer()
+                        TextField("70", text: $weightText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                    HStack {
+                        Text("Рост, см")
+                        Spacer()
+                        TextField("175", text: $heightText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                    HStack {
+                        Text("Возраст")
+                        Spacer()
+                        TextField("30", text: $ageText)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                }
+
+                Section("Уровень активности") {
+                    ForEach(ActivityLevel.allCases) { level in
+                        Button {
+                            activityLevel = level
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(level.title)
+                                        .foregroundStyle(.primary)
+                                    Text(level.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if activityLevel == level {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.green)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Section("Цель") {
+                    Picker("Цель", selection: $goal) {
+                        ForEach(Goal.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                }
+
+                Section {
+                    HStack {
+                        Text("Белка на кг веса")
+                        Spacer()
+                        TextField("1.7", text: $proteinPerKgText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                        Text("г")
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Норма белка")
+                } footer: {
+                    Text("Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц.")
+                }
+
+                if let draftProfile {
+                    Section("Расчёт") {
+                        resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) ккал")
+                        resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) ккал")
+                        resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) ккал", highlighted: true)
+                        resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) г", highlighted: true)
+                    }
+                }
+            }
+            .navigationTitle("Профиль")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        guard let draftProfile else { return }
+                        store.updateProfile(draftProfile)
+                        dismiss()
+                    }
+                    .disabled(draftProfile == nil)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
+    private func resultRow(title: String, value: String, highlighted: Bool = false) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(highlighted ? .primary : .secondary)
+            Spacer()
+            Text(value)
+                .font(highlighted ? .body.weight(.semibold) : .body)
+                .foregroundStyle(highlighted ? .green : .primary)
+        }
+    }
+}

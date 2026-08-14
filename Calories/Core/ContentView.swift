@@ -6,7 +6,43 @@ struct ContentView: View {
     @State private var showingAdd = false
     @State private var showingGoalEditor = false
     @State private var showingProfile = false
+    @State private var showingStreakInfo = false
     @State private var goalText = ""
+
+    private var weightKg: Double? {
+        store.latestWeight?.weightKg ?? store.profile?.weightKg
+    }
+
+    private var fatTarget: Double? {
+        weightKg.map { $0 * 0.8 }
+    }
+
+    // Что приоритетнее добрать на оставшиеся калории:
+    // белок → жиры → углеводы. Показываем только первый незакрытый.
+    private var macroSuggestion: String? {
+        let remaining = store.remaining
+        guard remaining > 0, store.profile != nil else { return nil }
+
+        let m = store.macrosToday
+        let carbsTarget: Double = 130
+
+        if let pt = store.proteinTarget, pt > 0, m.protein < pt {
+            let canEat = Int(min(Double(remaining) / 4.0, pt - m.protein))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г белка"
+        }
+        if let ft = fatTarget, ft > 0, m.fat < ft {
+            let canEat = Int(min(Double(remaining) / 9.0, ft - m.fat))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г жиров"
+        }
+        if m.carbs < carbsTarget {
+            let canEat = Int(min(Double(remaining) / 4.0, carbsTarget - m.carbs))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г углеводов"
+        }
+        return nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -17,7 +53,7 @@ struct ContentView: View {
                         goal: store.todayGoal,
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
-                        fatTarget: (store.latestWeight?.weightKg ?? store.profile?.weightKg).map { $0 * 0.8 },
+                        fatTarget: fatTarget,
                         carbsTarget: 130
                     )
                     .padding(.top, 12)
@@ -84,9 +120,10 @@ struct ContentView: View {
                     MacrosCard(
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
-                        weightKg: store.latestWeight?.weightKg ?? store.profile?.weightKg
+                        weightKg: store.latestWeight?.weightKg ?? store.profile?.weightKg,
+                        suggestion: macroSuggestion
                     )
-                        .padding(.horizontal)
+                    .padding(.horizontal)
 
                     HStack(spacing: 12) {
                         StatCard(
@@ -145,13 +182,6 @@ struct ContentView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Сегодня")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        HistoryView(store: store)
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                    }
-                }
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink {
                         ProfileView(store: store)
@@ -168,6 +198,26 @@ struct ContentView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
+                        showingStreakInfo = true
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "bolt.fill")
+                            Text("\(store.streak)")
+                                .font(.subheadline.bold())
+                                .monospacedDigit()
+                        }
+                        .foregroundStyle(store.streak > 0 ? .orange : .secondary)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        HistoryView(store: store)
+                    } label: {
+                        Image(systemName: "clock.arrow.circlepath")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
                         showingAdd = true
                     } label: {
                         Image(systemName: "plus.circle.fill")
@@ -177,6 +227,11 @@ struct ContentView: View {
             .sheet(isPresented: $showingAdd) {
                 AddEntryView(store: store)
                     .presentationDetents([.medium, .large])
+            }
+            .sheet(isPresented: $showingStreakInfo) {
+                StreakInfoSheet(streak: store.streak)
+                    .presentationDetents([.height(300)])
+                    .presentationDragIndicator(.visible)
             }
             .alert("Дневная цель", isPresented: $showingGoalEditor) {
                 TextField("Ккал в день", text: $goalText)
@@ -260,6 +315,7 @@ private struct MacrosCard: View {
     let macros: Macros
     let proteinTarget: Double?
     let weightKg: Double?
+    let suggestion: String?
 
     @State private var selectedMacro: MacroKind?
 
@@ -285,7 +341,21 @@ private struct MacrosCard: View {
                         .tint(.blue)
                 }
             }
+
+            if let suggestion {
+                HStack(spacing: 6) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.yellow)
+                    Text(suggestion)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            }
         }
+        .animation(.easeInOut(duration: 0.3), value: suggestion)
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
@@ -453,6 +523,51 @@ private struct EntryRow: View {
             .buttonStyle(.plain)
         }
         .padding()
+    }
+}
+
+private struct StreakInfoSheet: View {
+    let streak: Int
+
+    private var daysLabel: String {
+        switch streak % 10 {
+        case 1 where streak % 100 != 11: return "день"
+        case 2...4 where !(streak % 100 >= 12 && streak % 100 <= 14): return "дня"
+        default: return "дней"
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            HStack(alignment: .lastTextBaseline, spacing: 8) {
+                Image(systemName: "bolt.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(streak > 0 ? .orange : .secondary)
+                Text("\(streak)")
+                    .font(.system(size: 64, weight: .bold, design: .rounded))
+                    .foregroundStyle(streak > 0 ? .orange : .primary)
+                    .monospacedDigit()
+            }
+
+            Text(streak > 0 ? "\(daysLabel) подряд" : "Начни сегодня")
+                .font(.title3)
+                .foregroundStyle(.secondary)
+
+            Divider()
+                .padding(.horizontal, 32)
+
+            Text(streak > 0
+                 ? "Каждый день, когда ты укладываешься в дневной лимит калорий, стрик растёт на +1. Выйди за лимит — и он обнулится."
+                 : "Уложись в дневной лимит калорий сегодня — и стрик начнёт расти. Каждый день в рамках нормы добавляет +1.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+
+            Spacer()
+        }
     }
 }
 

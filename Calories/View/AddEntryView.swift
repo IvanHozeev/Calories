@@ -18,6 +18,7 @@ struct AddEntryView: View {
     @State private var manualCarbs = ""
 
     @State private var showingNewFood = false
+    @State private var editingFood: FoodItem? = nil
 
     private enum Field: Hashable {
         case quickCalories, manualName, manualCalories, manualProtein, manualFat, manualCarbs
@@ -156,12 +157,20 @@ struct AddEntryView: View {
                             } label: {
                                 foodRow(food)
                             }
-                            .swipeActions {
+                            .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
                                     store.deleteCustomFood(food)
                                 } label: {
                                     Label("Удалить", systemImage: "trash")
                                 }
+                            }
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    editingFood = food
+                                } label: {
+                                    Label("Изменить", systemImage: "pencil")
+                                }
+                                .tint(.blue)
                             }
                         }
                     }
@@ -253,6 +262,10 @@ struct AddEntryView: View {
                 NewFoodSheet(store: store)
                     .presentationDetents([.medium])
             }
+            .sheet(item: $editingFood) { food in
+                NewFoodSheet(store: store, editingFood: food)
+                    .presentationDetents([.medium])
+            }
         }
     }
 
@@ -287,6 +300,8 @@ private struct NewFoodSheet: View {
     @ObservedObject var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
+    var editingFood: FoodItem? = nil
+
     @State private var name = ""
     @State private var caloriesPer100g = ""
     @State private var protein = ""
@@ -295,10 +310,12 @@ private struct NewFoodSheet: View {
     private enum Field: Hashable { case name, calories, protein, fat, carbs }
     @FocusState private var focusedField: Field?
 
+    private var isEditing: Bool { editingFood != nil }
+
     var body: some View {
         NavigationStack {
             Form {
-                Section("Новый продукт (на 100 г)") {
+                Section(isEditing ? "Продукт (на 100 г)" : "Новый продукт (на 100 г)") {
                     TextField("Название", text: $name)
                         .focused($focusedField, equals: .name)
                     TextField("Калории", text: $caloriesPer100g)
@@ -315,7 +332,7 @@ private struct NewFoodSheet: View {
                         .focused($focusedField, equals: .carbs)
                 }
             }
-            .navigationTitle("Свой продукт")
+            .navigationTitle(isEditing ? "Редактировать" : "Свой продукт")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -325,20 +342,30 @@ private struct NewFoodSheet: View {
                     Button("Сохранить") {
                         guard let calories = Int(caloriesPer100g),
                               !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                        store.addCustomFood(
-                            name: name,
-                            caloriesPer100g: calories,
-                            protein: Double(protein.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                            fat: Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                            carbs: Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
-                        )
+                        let p = Double(protein.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        let f = Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        let c = Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        if let food = editingFood {
+                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c)
+                        } else {
+                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c)
+                        }
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || Int(caloriesPer100g) == nil)
                     .fontWeight(.semibold)
                 }
             }
-            .onAppear { focusedField = .name }
+            .onAppear {
+                if let food = editingFood {
+                    name = food.name
+                    caloriesPer100g = "\(food.caloriesPer100g)"
+                    protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
+                    fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
+                    carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
+                }
+                focusedField = .name
+            }
         }
     }
 }

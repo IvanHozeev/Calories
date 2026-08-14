@@ -28,6 +28,7 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var historyDays: [DaySummary] = []
     @Published private(set) var hasWeighedToday: Bool = false
     @Published private(set) var adherence: PlanAdherence?
+    @Published private(set) var streak: Int = 0
 
     // O(1) словари для быстрого поиска
     private var entriesByDay: [Date: [FoodEntry]] = [:]
@@ -150,10 +151,32 @@ final class CalorieStore: ObservableObject {
         let last6 = lastSevenDays.filter { !calendar.isDateInToday($0.date) }
         let last6Dates = Set(last6.map { $0.date })
         let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
-        historyDays = last6 + olderDays  // last6 новее olderDays — оба уже sorted desc
+        historyDays = (last6 + olderDays).sorted { $0.date > $1.date }
 
         hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
         adherence = computePlanAdherence()
+
+        // Стрик: последовательные дни, когда пользователь уложился в лимит калорий.
+        // Сегодня засчитывается, если уже есть записи и они в пределах нормы (день ещё не кончился —
+        // не штрафуем за превышение, только поощряем за успех). Прошлые дни — строго.
+        var streakCount = 0
+        let today = calendar.startOfDay(for: Date())
+
+        let todayTotal = (entriesByDay[today] ?? []).reduce(0) { $0 + $1.calories }
+        if todayTotal > 0, todayTotal <= (goalsByDay[today] ?? effectiveGoal(for: today)) {
+            streakCount += 1
+        }
+
+        var pastDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
+        while true {
+            let dayTotal = (entriesByDay[pastDate] ?? []).reduce(0) { $0 + $1.calories }
+            let dayGoal = goalsByDay[pastDate] ?? effectiveGoal(for: pastDate)
+            guard dayTotal > 0, dayTotal <= dayGoal else { break }
+            streakCount += 1
+            guard let prev = calendar.date(byAdding: .day, value: -1, to: pastDate) else { break }
+            pastDate = prev
+        }
+        streak = streakCount
     }
 
     /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём
@@ -243,6 +266,15 @@ final class CalorieStore: ObservableObject {
 
     func deleteCustomFood(_ food: FoodItem) {
         context.delete(food)
+        save()
+    }
+
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
+        food.name = name
+        food.caloriesPer100g = caloriesPer100g
+        food.protein = protein
+        food.fat = fat
+        food.carbs = carbs
         save()
     }
 

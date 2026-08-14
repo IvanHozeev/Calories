@@ -79,6 +79,22 @@ final class WeightEntry: Identifiable {
     }
 }
 
+/// Зафиксированная цель по калориям на конкретный (уже прошедший) день. Как только день
+/// перестаёт быть сегодняшним, для него один раз записывается снапшот — дальше правки
+/// профиля/плана/цикла на него уже не влияют. Модель SwiftData.
+@Model
+final class GoalRecord: Identifiable {
+    var id: UUID
+    var date: Date
+    var goal: Int
+
+    init(id: UUID = UUID(), date: Date, goal: Int) {
+        self.id = id
+        self.date = date
+        self.goal = goal
+    }
+}
+
 /// Сводка по одному дню — вычисляется на лету из записей, не хранится отдельно.
 struct DaySummary: Identifiable {
     let date: Date
@@ -216,9 +232,47 @@ struct Plan: Codable, Equatable {
     var durationWeeks: Int
     var startWeightKg: Double
     var targetWeightKg: Double
+    /// Автоматический недельный цикл калорий вокруг среднего плана — типичная практика
+    /// бодибилдеров (меньше калорий в будни, рефид на выходных). Среднее за неделю
+    /// остаётся точно равно dailyCalorieTarget — меняется только распределение по дням.
+    var cyclingEnabled: Bool = false
+
+    init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double, cyclingEnabled: Bool = false) {
+        self.startDate = startDate
+        self.durationWeeks = durationWeeks
+        self.startWeightKg = startWeightKg
+        self.targetWeightKg = targetWeightKg
+        self.cyclingEnabled = cyclingEnabled
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled
+    }
+
+    // Явный init(from:), чтобы уже сохранённые планы (записанные до появления cyclingEnabled)
+    // не переставали декодироваться — отсутствующее поле просто трактуется как false.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        startDate = try container.decode(Date.self, forKey: .startDate)
+        durationWeeks = try container.decode(Int.self, forKey: .durationWeeks)
+        startWeightKg = try container.decode(Double.self, forKey: .startWeightKg)
+        targetWeightKg = try container.decode(Double.self, forKey: .targetWeightKg)
+        cyclingEnabled = try container.decodeIfPresent(Bool.self, forKey: .cyclingEnabled) ?? false
+    }
 
     /// Грубое общепринятое приближение: ~7700 ккал на 1 кг жировой массы.
     static let kcalPerKg: Double = 7700
+
+    /// Смещения от среднего по дням недели, Пн=0…Вс=6 — сумма равна нулю, поэтому
+    /// среднее за 7 дней всегда равно dailyCalorieTarget(tdee:), меняется лишь форма.
+    /// Будни чуть ниже среднего, выходные — рефид, как принято у бодибилдеров.
+    private static let weeklyCycleOffsets: [Double] = [-0.08, -0.08, -0.12, -0.08, -0.08, 0.14, 0.30]
+
+    private static func mondayBasedWeekdayIndex(for date: Date) -> Int {
+        // Calendar.weekday: 1=Вс … 7=Сб. Приводим к Пн=0 … Вс=6.
+        let weekday = Calendar.current.component(.weekday, from: date)
+        return (weekday + 5) % 7
+    }
 
     var endDate: Date {
         Calendar.current.date(byAdding: .day, value: durationWeeks * 7, to: startDate) ?? startDate
@@ -240,8 +294,26 @@ struct Plan: Codable, Equatable {
         return (totalWeightChangeKg * Self.kcalPerKg) / totalDays
     }
 
+    /// Средняя дневная норма — без учёта цикла.
     func dailyCalorieTarget(tdee: Double) -> Int {
         Int((tdee + dailyCalorieDelta).rounded())
+    }
+
+    /// Норма на конкретную дату — с учётом недельного цикла, если он включён.
+    func calorieTarget(for date: Date, tdee: Double) -> Int {
+        let base = Double(dailyCalorieTarget(tdee: tdee))
+        guard cyclingEnabled else { return Int(base.rounded()) }
+        let offset = Self.weeklyCycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
+        return Int((base * (1 + offset)).rounded())
+    }
+
+    /// Раскладка нормы по дням недели (Пн…Вс) — для превью в UI.
+    func weeklyCalorieBreakdown(tdee: Double) -> [(label: String, calories: Int)] {
+        let labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        let base = Double(dailyCalorieTarget(tdee: tdee))
+        return Self.weeklyCycleOffsets.enumerated().map { index, offset in
+            (labels[index], Int((base * (1 + offset)).rounded()))
+        }
     }
 
     /// Свыше ~1% веса в неделю большинство источников считает агрессивным темпом.

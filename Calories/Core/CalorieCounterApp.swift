@@ -8,7 +8,7 @@ struct CalorieCounterApp: App {
 
     init() {
         do {
-            let container = try ModelContainer(for: FoodEntry.self, FoodItem.self, WeightEntry.self)
+            let container = try ModelContainer(for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self)
             self.container = container
             _store = StateObject(wrappedValue: CalorieStore(context: container.mainContext))
         } catch {

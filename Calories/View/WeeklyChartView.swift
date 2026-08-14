@@ -5,8 +5,22 @@ struct WeeklyChartView: View {
     let days: [DaySummary]
     var title: String = "Эта неделя"
 
-    private var goal: Int {
-        days.first?.goal ?? 0
+    private var uniqueGoals: [Int] {
+        Array(Set(days.map(\.goal))).sorted()
+    }
+
+    /// Если у всех дней одна и та же цель — не цикл, можно рисовать единую линию/подпись.
+    private var flatGoal: Int? {
+        uniqueGoals.count == 1 ? uniqueGoals.first : nil
+    }
+
+    private var goalLabel: String {
+        if let flatGoal {
+            return "Цель: \(flatGoal) ккал"
+        } else if let min = uniqueGoals.first, let max = uniqueGoals.last {
+            return "Цель: \(min)–\(max) ккал (цикл)"
+        }
+        return ""
     }
 
     private var useWeekdayLabels: Bool {
@@ -25,7 +39,7 @@ struct WeeklyChartView: View {
                 Text(title)
                     .font(.headline)
                 Spacer()
-                Text("Цель: \(goal) ккал")
+                Text(goalLabel)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -45,9 +59,13 @@ struct WeeklyChartView: View {
                     .cornerRadius(4)
                 }
 
-                RuleMark(y: .value("Цель", goal))
-                    .foregroundStyle(.secondary)
-                    .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                // Линию цели рисуем только когда она одна на все дни — при цикле она бы
+                // просто путала (день сравнивается со своей целью через цвет столбца, не с линией).
+                if let flatGoal {
+                    RuleMark(y: .value("Цель", flatGoal))
+                        .foregroundStyle(.secondary)
+                        .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
+                }
             }
             .chartXAxis {
                 if useWeekdayLabels {

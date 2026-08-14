@@ -10,15 +10,18 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(.vertical) {
                 VStack(spacing: 24) {
                     ProgressRing(
                         progress: store.progress,
                         consumed: store.consumedToday,
-                        goal: store.dailyGoal
+                        goal: store.todayGoal
                     )
                     .padding(.top, 12)
                     .onTapGesture {
+                        // Пока активен недельный цикл, ручное редактирование не имеет смысла —
+                        // цифра всё равно берётся из цикла, а не из dailyGoal. Правка — в плане.
+                        guard store.plan?.cyclingEnabled != true else { return }
                         goalText = String(store.dailyGoal)
                         showingGoalEditor = true
                     }
@@ -70,7 +73,7 @@ struct ContentView: View {
                             PlanCard(
                                 plan: plan,
                                 currentWeight: store.latestWeight?.weightKg,
-                                status: store.planAdherence()?.status ?? .insufficientData
+                                                status: store.adherence?.status ?? .insufficientData
                             )
                         }
                         .buttonStyle(.plain)
@@ -121,7 +124,7 @@ struct ContentView: View {
                         } else {
                             VStack(spacing: 0) {
                                 ForEach(store.todayEntries) { entry in
-                                    EntryRow(store: store, entry: entry)
+                                    EntryRow(entry: entry) { store.delete(entry: entry) }
                                     if entry.id != store.todayEntries.last?.id {
                                         Divider().padding(.leading, 16)
                                     }
@@ -133,9 +136,11 @@ struct ContentView: View {
                         }
                     }
 
-                    Spacer(minLength: 80)
                 }
+                .padding(.bottom, 80)
+                .frame(maxWidth: .infinity)
             }
+            .scrollBounceBehavior(.basedOnSize)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Сегодня")
             .toolbar {
@@ -420,8 +425,8 @@ private struct StatCard: View {
 }
 
 private struct EntryRow: View {
-    @ObservedObject var store: CalorieStore
     let entry: FoodEntry
+    let onDelete: () -> Void
 
     var body: some View {
         HStack {
@@ -438,9 +443,7 @@ private struct EntryRow: View {
                 .foregroundStyle(.secondary)
 
             Button {
-                withAnimation {
-                    store.delete(entry: entry)
-                }
+                withAnimation { onDelete() }
             } label: {
                 Image(systemName: "minus.circle.fill")
                     .foregroundStyle(.red)
@@ -454,7 +457,7 @@ private struct EntryRow: View {
 
 #Preview {
     let container = try! ModelContainer(
-        for: FoodEntry.self, FoodItem.self, WeightEntry.self,
+        for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     ContentView(store: CalorieStore(context: container.mainContext))

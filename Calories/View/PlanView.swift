@@ -6,12 +6,14 @@ struct PlanView: View {
 
     @State private var targetWeightText: String
     @State private var durationWeeks: Int
+    @State private var cyclingEnabled: Bool
 
     init(store: CalorieStore) {
         self.store = store
         let fallbackStart = store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 70
         _targetWeightText = State(initialValue: String(format: "%.1f", store.plan?.targetWeightKg ?? fallbackStart))
         _durationWeeks = State(initialValue: store.plan?.durationWeeks ?? 8)
+        _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
     }
 
     private var startWeight: Double {
@@ -32,7 +34,8 @@ struct PlanView: View {
             startDate: store.plan?.startDate ?? Date(),
             durationWeeks: durationWeeks,
             startWeightKg: startWeight,
-            targetWeightKg: targetWeight
+            targetWeightKg: targetWeight,
+            cyclingEnabled: cyclingEnabled
         )
     }
 
@@ -69,6 +72,25 @@ struct PlanView: View {
                     Stepper("Недель: \(durationWeeks)", value: $durationWeeks, in: 1...52)
                 }
 
+                Section {
+                    Toggle("Недельный цикл калорий", isOn: $cyclingEnabled)
+                } footer: {
+                    Text("Автоматически распределяет калории по дням недели: чуть меньше в будни, рефид на выходных. Среднее за неделю остаётся тем же — меняется только распределение.")
+                }
+
+                if cyclingEnabled, let draftPlan {
+                    Section("Раскладка по дням") {
+                        ForEach(draftPlan.weeklyCalorieBreakdown(tdee: tdee), id: \.label) { day in
+                            HStack {
+                                Text(day.label)
+                                Spacer()
+                                Text("\(day.calories) ккал")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+
                 if let draftPlan {
                     Section("Расчёт") {
                         resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
@@ -99,13 +121,14 @@ struct PlanView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
+                    CheckmarkButton {
                         guard let draftPlan else { return }
                         store.startPlan(draftPlan)
                         dismiss()
                     }
                     .disabled(draftPlan == nil)
                     .fontWeight(.semibold)
+              
                 }
             }
         }
@@ -132,7 +155,7 @@ struct PlanView: View {
                     resultRow("При текущем темпе цель — к", projectedEndDate.formatted(.dateTime.day().month(.wide)))
                 }
 
-                if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal {
+                if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal, !plan.cyclingEnabled {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Чтобы успеть к \(plan.endDate.formatted(.dateTime.day().month(.wide))) при текущем факте, норму стоит скорректировать:")
                             .font(.caption)
@@ -142,6 +165,10 @@ struct PlanView: View {
                         }
                         .buttonStyle(.bordered)
                     }
+                } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
+                    Text("При включённом недельном цикле точную корректировку стоит вносить через целевой вес/срок выше — расчёт (\(recalibrated) ккал/день в среднем) учтёт её автоматически.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                 }
 
                 if let projectedEndDate = adherence.projectedEndDate,

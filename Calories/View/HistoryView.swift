@@ -3,16 +3,6 @@ import SwiftUI
 struct HistoryView: View {
     @ObservedObject var store: CalorieStore
 
-    /// Последние 7 дней (кроме сегодня) показываются всегда, даже без записей —
-    /// чтобы можно было открыть пустой день и добавить в него данные задним числом.
-    /// Более старые дни добавляются, только если в них уже есть записи.
-    private var days: [DaySummary] {
-        let recent = store.lastSevenDays.filter { !Calendar.current.isDateInToday($0.date) }
-        let recentDates = Set(recent.map { Calendar.current.startOfDay(for: $0.date) })
-        let older = store.pastDays.filter { !recentDates.contains(Calendar.current.startOfDay(for: $0.date)) }
-        return (recent + older).sorted { $0.date > $1.date }
-    }
-
     var body: some View {
         List {
             Section {
@@ -22,7 +12,7 @@ struct HistoryView: View {
             }
 
             Section("Дни") {
-                ForEach(days) { day in
+                ForEach(store.historyDays) { day in
                     NavigationLink {
                         DayDetailView(store: store, date: day.date)
                     } label: {

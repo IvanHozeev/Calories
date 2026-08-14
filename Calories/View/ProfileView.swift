@@ -171,7 +171,7 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
+                    CheckmarkButton {
                         guard let draftProfile else { return }
                         store.updateProfile(draftProfile)
                         dismiss()

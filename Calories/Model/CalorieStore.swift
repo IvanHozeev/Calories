@@ -8,6 +8,7 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var entries: [FoodEntry] = []
     @Published private(set) var customFoods: [FoodItem] = []
     @Published private(set) var weightEntries: [WeightEntry] = []
+    @Published private(set) var goalRecords: [GoalRecord] = []
     @Published var dailyGoal: Int {
         didSet { UserDefaults.standard.set(dailyGoal, forKey: Keys.goal) }
     }
@@ -16,6 +17,20 @@ final class CalorieStore: ObservableObject {
     @Published var isPremium: Bool {
         didSet { UserDefaults.standard.set(isPremium, forKey: Keys.premium) }
     }
+
+    // Кэшированные производные — перестраиваются в rebuildCaches() после каждого изменения данных
+    @Published private(set) var todayEntries: [FoodEntry] = []
+    @Published private(set) var consumedToday: Int = 0
+    @Published private(set) var macrosToday: Macros = .zero
+    @Published private(set) var days: [DaySummary] = []
+    @Published private(set) var pastDays: [DaySummary] = []
+    @Published private(set) var lastSevenDays: [DaySummary] = []
+    @Published private(set) var historyDays: [DaySummary] = []
+    @Published private(set) var adherence: PlanAdherence?
+
+    // O(1) словари для быстрого поиска
+    private var entriesByDay: [Date: [FoodEntry]] = [:]
+    private var goalsByDay: [Date: Int] = [:]
 
     private enum Keys {
         static let goal = "daily_goal"
@@ -31,6 +46,7 @@ final class CalorieStore: ObservableObject {
         self.plan = Self.loadPlan()
         self.isPremium = UserDefaults.standard.bool(forKey: Keys.premium)
         refresh()
+        lockPastGoals()
     }
 
     /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
@@ -69,12 +85,11 @@ final class CalorieStore: ObservableObject {
         }
     }
 
-    /// Сдвигает срок плана (сохраняя дату старта, начальный и целевой вес) — используется,
-    /// когда фактический темп медленнее/быстрее прогноза и план продлевают/сокращают.
+    /// Сдвигает срок плана (сохраняя дату старта, начальный и целевой вес).
     func extendPlan(to newEndDate: Date) {
         guard var updated = plan else { return }
-        let days = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
-        updated.durationWeeks = max(1, Int((Double(days) / 7).rounded(.up)))
+        let daysCount = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
+        updated.durationWeeks = max(1, Int((Double(daysCount) / 7).rounded(.up)))
         startPlan(updated)
     }
 
@@ -83,7 +98,7 @@ final class CalorieStore: ObservableObject {
         return try? JSONDecoder().decode(Plan.self, from: data)
     }
 
-    /// Перечитывает записи и продукты из базы. Вызывается после каждого изменения.
+    /// Перечитывает все данные из базы и перестраивает кэш.
     func refresh() {
         let entryDescriptor = FetchDescriptor<FoodEntry>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         entries = (try? context.fetch(entryDescriptor)) ?? []
@@ -93,18 +108,84 @@ final class CalorieStore: ObservableObject {
 
         let weightDescriptor = FetchDescriptor<WeightEntry>(sortBy: [SortDescriptor(\.date, order: .forward)])
         weightEntries = (try? context.fetch(weightDescriptor)) ?? []
+
+        let goalDescriptor = FetchDescriptor<GoalRecord>(sortBy: [SortDescriptor(\.date, order: .forward)])
+        goalRecords = (try? context.fetch(goalDescriptor)) ?? []
+
+        rebuildCaches()
     }
 
-    var todayEntries: [FoodEntry] {
-        entries.filter { Calendar.current.isDateInToday($0.date) }
+    private func rebuildCaches() {
+        let calendar = Calendar.current
+
+        // Строим O(1)-словари один раз
+        entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
+        goalsByDay = Dictionary(uniqueKeysWithValues: goalRecords.map {
+            (calendar.startOfDay(for: $0.date), $0.goal)
+        })
+
+        // Агрегаты за сегодня — один проход по entries
+        todayEntries = entries.filter { calendar.isDateInToday($0.date) }
+        consumedToday = todayEntries.reduce(0) { $0 + $1.calories }
+        macrosToday = todayEntries.reduce(Macros.zero) { $0 + $1.macros }
+
+        // Сводки по дням — один проход по сгруппированному словарю
+        // entries уже отсортированы по дате desc, порядок внутри группы сохраняется
+        let allDays = entriesByDay.map { day, dayEntries in
+            DaySummary(date: day, entries: dayEntries, goal: goal(for: day))
+        }.sorted { $0.date > $1.date }
+        days = allDays
+        pastDays = allDays.filter { !calendar.isDateInToday($0.date) }
+
+        // Последние 7 дней включая пустые — O(7) через словарь
+        lastSevenDays = (0..<7).reversed().map { offset in
+            let date = calendar.date(byAdding: .day, value: -offset, to: Date()) ?? Date()
+            let day = calendar.startOfDay(for: date)
+            return DaySummary(date: day, entries: entriesByDay[day] ?? [], goal: goal(for: day))
+        }
+
+        // История: последние 6 дней (не сегодня) всегда + старые дни с записями
+        // Set из 6 дат для O(1) исключения из pastDays
+        let last6 = lastSevenDays.filter { !calendar.isDateInToday($0.date) }
+        let last6Dates = Set(last6.map { $0.date })
+        let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
+        historyDays = last6 + olderDays  // last6 новее olderDays — оба уже sorted desc
+
+        adherence = computePlanAdherence()
     }
 
-    var consumedToday: Int {
-        todayEntries.reduce(0) { $0 + $1.calories }
+    /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём
+    /// цифру из цикла на этот день недели, иначе — обычный dailyGoal.
+    func effectiveGoal(for date: Date) -> Int {
+        if let plan, plan.cyclingEnabled, let profile {
+            return plan.calorieTarget(for: date, tdee: profile.tdee)
+        }
+        return dailyGoal
     }
 
-    var macrosToday: Macros {
-        todayEntries.reduce(Macros.zero) { $0 + $1.macros }
+    /// Зафиксированная цель на дату (из снапшота) — иначе живой расчёт. O(1) через goalsByDay.
+    private func goal(for date: Date) -> Int {
+        let day = Calendar.current.startOfDay(for: date)
+        return goalsByDay[day] ?? effectiveGoal(for: day)
+    }
+
+    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую эффективную цель
+    /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
+    func lockPastGoals() {
+        let today = Calendar.current.startOfDay(for: Date())
+        let entryDates = Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
+        let datesToLock = entryDates.subtracting(goalsByDay.keys).filter { $0 < today }
+        guard !datesToLock.isEmpty else { return }
+
+        var newRecords: [GoalRecord] = []
+        for date in datesToLock {
+            let record = GoalRecord(date: date, goal: effectiveGoal(for: date))
+            context.insert(record)
+            newRecords.append(record)
+        }
+        try? context.save()
+        goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
+        rebuildCaches()
     }
 
     /// Целевой белок в граммах — nil, если профиль ещё не заполнен.
@@ -112,39 +193,24 @@ final class CalorieStore: ObservableObject {
         profile?.proteinTargetGrams
     }
 
+    /// Цель на сегодня — то, что показывается в кольце/статистике.
+    var todayGoal: Int {
+        effectiveGoal(for: Date())
+    }
+
     var remaining: Int {
-        dailyGoal - consumedToday
+        todayGoal - consumedToday
     }
 
     var progress: Double {
-        guard dailyGoal > 0 else { return 0 }
-        return min(Double(consumedToday) / Double(dailyGoal), 1.0)
+        guard todayGoal > 0 else { return 0 }
+        return min(Double(consumedToday) / Double(todayGoal), 1.0)
     }
 
-    /// Все дни, по которым есть записи (включая сегодня), отсортированы от новых к старым.
-    var days: [DaySummary] {
-        let grouped = Dictionary(grouping: entries) { Calendar.current.startOfDay(for: $0.date) }
-        return grouped
-            .map { day, entries in
-                DaySummary(
-                    date: day,
-                    entries: entries.sorted { $0.date > $1.date },
-                    goal: dailyGoal
-                )
-            }
-            .sorted { $0.date > $1.date }
-    }
-
-    /// Прошлые дни, без сегодняшнего.
-    var pastDays: [DaySummary] {
-        days.filter { !Calendar.current.isDateInToday($0.date) }
-    }
-
-    /// Сводка за конкретный день.
+    /// Сводка за конкретный день — O(1) через entriesByDay.
     func summary(for date: Date) -> DaySummary {
         let day = Calendar.current.startOfDay(for: date)
-        let dayEntries = entries.filter { Calendar.current.isDate($0.date, inSameDayAs: day) }
-        return DaySummary(date: day, entries: dayEntries, goal: dailyGoal)
+        return DaySummary(date: day, entries: entriesByDay[day] ?? [], goal: goal(for: day))
     }
 
     /// Последние N дней (включая сегодня), от старого к новому — для графиков.
@@ -154,11 +220,6 @@ final class CalorieStore: ObservableObject {
             let date = calendar.date(byAdding: .day, value: -offset, to: Date()) ?? Date()
             return summary(for: date)
         }
-    }
-
-    /// Последние 7 дней (включая сегодня), от старого к новому — для графика по неделям.
-    var lastSevenDays: [DaySummary] {
-        lastDays(7)
     }
 
     func add(name: String, calories: Int, macros: Macros = .zero, date: Date = Date()) {
@@ -210,15 +271,16 @@ final class CalorieStore: ObservableObject {
         return weightEntries.filter { $0.date >= cutoffStart }
     }
 
-    /// Сверяет факт по журналу взвешиваний с линейным прогнозом плана. nil, если плана или профиля нет.
-    func planAdherence() -> PlanAdherence? {
+    /// Сверяет факт с линейным прогнозом плана. Возвращает кэшированный результат из adherence.
+    func planAdherence() -> PlanAdherence? { adherence }
+
+    private func computePlanAdherence() -> PlanAdherence? {
         guard let plan, let profile else { return nil }
 
         let totalDays = Double(plan.durationWeeks * 7)
         let elapsedDays = min(max(Date().timeIntervalSince(plan.startDate) / 86400, 0), totalDays)
         let expectedWeightToday = plan.startWeightKg + plan.totalWeightChangeKg * (totalDays > 0 ? elapsedDays / totalDays : 0)
 
-        // Записи веса с начала плана, тренд — среднее по последним до 7 из них (сглаживает суточный шум).
         let relevantEntries = weightEntries.filter { $0.date >= plan.startDate }
         guard relevantEntries.last != nil else {
             return PlanAdherence(
@@ -234,7 +296,6 @@ final class CalorieStore: ObservableObject {
         let actualWeightToday = recentWindow.reduce(0) { $0 + $1.weightKg } / Double(recentWindow.count)
 
         let elapsedWeeks = elapsedDays / 7
-        // Нужна минимум неделя данных с начала плана, иначе темп слишком шумный, чтобы на него опираться.
         guard elapsedWeeks >= 1, relevantEntries.count >= 2 else {
             return PlanAdherence(
                 expectedWeightToday: expectedWeightToday,
@@ -289,5 +350,6 @@ final class CalorieStore: ObservableObject {
     private func save() {
         try? context.save()
         refresh()
+        lockPastGoals()
     }
 }

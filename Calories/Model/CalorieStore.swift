@@ -26,6 +26,7 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var pastDays: [DaySummary] = []
     @Published private(set) var lastSevenDays: [DaySummary] = []
     @Published private(set) var historyDays: [DaySummary] = []
+    @Published private(set) var hasWeighedToday: Bool = false
     @Published private(set) var adherence: PlanAdherence?
 
     // O(1) словари для быстрого поиска
@@ -151,6 +152,7 @@ final class CalorieStore: ObservableObject {
         let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
         historyDays = last6 + olderDays  // last6 новее olderDays — оба уже sorted desc
 
+        hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
         adherence = computePlanAdherence()
     }
 
@@ -258,10 +260,6 @@ final class CalorieStore: ObservableObject {
     /// Последняя по дате запись веса.
     var latestWeight: WeightEntry? {
         weightEntries.last
-    }
-
-    var hasWeighedToday: Bool {
-        weightEntries.contains { Calendar.current.isDateInToday($0.date) }
     }
 
     /// Записи веса за последние N дней, от старого к новому.

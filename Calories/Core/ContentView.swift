@@ -13,14 +13,15 @@ struct ContentView: View {
             ScrollView(.vertical) {
                 VStack(spacing: 24) {
                     ProgressRing(
-                        progress: store.progress,
                         consumed: store.consumedToday,
-                        goal: store.todayGoal
+                        goal: store.todayGoal,
+                        macros: store.macrosToday,
+                        proteinTarget: store.proteinTarget,
+                        fatTarget: (store.latestWeight?.weightKg ?? store.profile?.weightKg).map { $0 * 0.8 },
+                        carbsTarget: 130
                     )
                     .padding(.top, 12)
-                    .onTapGesture {
-                        // Пока активен недельный цикл, ручное редактирование не имеет смысла —
-                        // цифра всё равно берётся из цикла, а не из dailyGoal. Правка — в плане.
+                    .onLongPressGesture {
                         guard store.plan?.cyclingEnabled != true else { return }
                         goalText = String(store.dailyGoal)
                         showingGoalEditor = true

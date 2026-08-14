@@ -98,7 +98,7 @@ struct WeightView: View {
 
             if !store.weightEntries.isEmpty {
                 Section("Все записи") {
-                    ForEach(recentWeightEntries.reversed()) { entry in
+                    ForEach(store.weightEntries.reversed()) { entry in
                         HStack {
                             Text(entry.date.formatted(.dateTime.day().month(.wide)))
                             Spacer()

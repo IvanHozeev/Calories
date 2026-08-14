@@ -29,6 +29,12 @@ struct AddEntryView: View {
         _selectedDate = State(initialValue: initialDate)
     }
 
+    /// Быстрый ввод «только калории» имеет смысл лишь для восстановления прошлых дней —
+    /// для сегодняшнего дня продукт стоит указывать явно.
+    private var isToday: Bool {
+        Calendar.current.isDateInToday(selectedDate)
+    }
+
     private var draftTotalCalories: Int {
         draftItems.reduce(0) { $0 + $1.calories }
     }
@@ -39,7 +45,11 @@ struct AddEntryView: View {
 
     /// Имя итоговой записи — из названий добавленных продуктов, с ограничением длины.
     private var mealName: String {
-        let joined = draftItems.map(\.name).joined(separator: ", ")
+        joinedName(draftItems)
+    }
+
+    private func joinedName(_ items: [MealItem]) -> String {
+        let joined = items.map(\.name).joined(separator: ", ")
         guard joined.count > 60 else { return joined }
         return String(joined.prefix(60)) + "…"
     }
@@ -68,6 +78,11 @@ struct AddEntryView: View {
                         in: ...Date(),
                         displayedComponents: .date
                     )
+                }
+                .onChange(of: selectedDate) { _, newValue in
+                    if Calendar.current.isDateInToday(newValue) {
+                        quickCalories = ""
+                    }
                 }
 
                 Section {
@@ -105,25 +120,51 @@ struct AddEntryView: View {
                     Text("Приём пищи")
                 }
 
-                Section {
-                    HStack {
-                        TextField("Ккал", text: $quickCalories)
-                            .keyboardType(.numberPad)
-                            .font(.title3.weight(.semibold))
-                            .focused($focusedField, equals: .quickCalories)
-                        Button("В приём пищи") {
-                            guard let calories = Int(quickCalories) else { return }
-                            draftItems.append(MealItem(name: "Продукт", calories: calories, macros: .zero))
-                            quickCalories = ""
-                            focusedField = nil
+                if !isToday {
+                    Section {
+                        HStack {
+                            TextField("Ккал", text: $quickCalories)
+                                .keyboardType(.numberPad)
+                                .font(.title3.weight(.semibold))
+                                .focused($focusedField, equals: .quickCalories)
+                            Button("Сохранить") {
+                                guard let calories = Int(quickCalories) else { return }
+                                let items = draftItems + [MealItem(name: "Приём пищи", calories: calories, macros: .zero)]
+                                let totalCalories = items.reduce(0) { $0 + $1.calories }
+                                let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
+                                let name = items.count == 1 ? "Приём пищи" : joinedName(items)
+                                store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
+                                dismiss()
+                            }
+                            .disabled(Int(quickCalories) == nil)
+                            .buttonStyle(.borderedProminent)
                         }
-                        .disabled(Int(quickCalories) == nil)
-                        .buttonStyle(.borderedProminent)
+                    } header: {
+                        Text("Быстро — только калории")
+                    } footer: {
+                        Text("Для восстановления данных за прошлый день: впиши сколько всего было съедено — сохранится сразу, без черновика. Если уже добавлены другие продукты выше, они попадут в ту же запись.")
                     }
-                } header: {
-                    Text("Быстро — только калории")
-                } footer: {
-                    Text("Для восстановления данных за прошлый день: выбери дату выше и впиши сколько было съедено.")
+                }
+                
+                if !filteredCustomFoods.isEmpty {
+                    Section("Мои продукты") {
+                        ForEach(filteredCustomFoods) { food in
+                            NavigationLink {
+                                FoodQuantityView(food: food) { item in
+                                    draftItems.append(item)
+                                }
+                            } label: {
+                                foodRow(food)
+                            }
+                            .swipeActions {
+                                Button(role: .destructive) {
+                                    store.deleteCustomFood(food)
+                                } label: {
+                                    Label("Удалить", systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Section("Подробнее (название, БЖУ)") {
@@ -162,27 +203,6 @@ struct AddEntryView: View {
                         focusedField = nil
                     }
                     .disabled(Int(manualCalories) == nil)
-                }
-
-                if !filteredCustomFoods.isEmpty {
-                    Section("Мои продукты") {
-                        ForEach(filteredCustomFoods) { food in
-                            NavigationLink {
-                                FoodQuantityView(food: food) { item in
-                                    draftItems.append(item)
-                                }
-                            } label: {
-                                foodRow(food)
-                            }
-                            .swipeActions {
-                                Button(role: .destructive) {
-                                    store.deleteCustomFood(food)
-                                } label: {
-                                    Label("Удалить", systemImage: "trash")
-                                }
-                            }
-                        }
-                    }
                 }
 
                 Section("База продуктов") {

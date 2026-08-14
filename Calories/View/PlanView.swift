@@ -98,9 +98,6 @@ struct PlanView: View {
             .navigationTitle(store.plan == nil ? "Новый план" : "План")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
                         guard let draftPlan else { return }

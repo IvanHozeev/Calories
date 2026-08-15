@@ -3,9 +3,9 @@ import SwiftData
 
 struct ContentView: View {
     @ObservedObject var store: CalorieStore
+    var selectedTab: Binding<Int>
     @State private var showingAdd = false
     @State private var showingGoalEditor = false
-    @State private var showingProfile = false
     @State private var showingStreakInfo = false
     @State private var editingEntry: FoodEntry? = nil
     @State private var goalText = ""
@@ -30,8 +30,8 @@ struct ContentView: View {
                     }
 
                     if store.profile == nil {
-                        Button {
-                            showingProfile = true
+                        NavigationLink {
+                            ProfileView(store: store)
                         } label: {
                             HStack {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
@@ -47,9 +47,10 @@ struct ContentView: View {
                             .background(Color.blue.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
+                        .buttonStyle(.plain)
                     } else if !store.hasWeighedToday {
-                        NavigationLink {
-                            WeightView(store: store)
+                        Button {
+                            selectedTab.wrappedValue = 1
                         } label: {
                             HStack {
                                 Image(systemName: "scalemass")
@@ -65,6 +66,7 @@ struct ContentView: View {
                             .background(Color.orange.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
+                        .buttonStyle(.plain)
                     }
 
                     if let plan = store.plan {
@@ -139,11 +141,12 @@ struct ContentView: View {
                     }
 
                 }
-                .padding(.horizontal)
                 .padding(.bottom, 80)
                 .frame(maxWidth: .infinity)
             }
+            .padding(.horizontal)
             .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Сегодня")
             .toolbar {
@@ -151,14 +154,7 @@ struct ContentView: View {
                     NavigationLink {
                         ProfileView(store: store)
                     } label: {
-                        Image(systemName: "person")
-                    }
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink {
-                        WeightView(store: store)
-                    } label: {
-                        Image(systemName: "scalemass")
+                        Image(systemName: "person.circle")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -350,5 +346,5 @@ private struct StreakInfoSheet: View {
         for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    ContentView(store: CalorieStore(context: container.mainContext))
+    ContentView(store: CalorieStore(context: container.mainContext), selectedTab: .constant(0))
 }

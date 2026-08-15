@@ -7,6 +7,7 @@ final class CalorieStore: ObservableObject {
 
     @Published private(set) var entries: [FoodEntry] = []
     @Published private(set) var customFoods: [FoodItem] = []
+    @Published private(set) var dishes: [Dish] = []
     @Published private(set) var weightEntries: [WeightEntry] = []
     @Published private(set) var goalRecords: [GoalRecord] = []
     @Published var dailyGoal: Int {
@@ -35,11 +36,14 @@ final class CalorieStore: ObservableObject {
     private var entriesByDay: [Date: [FoodEntry]] = [:]
     private var goalsByDay: [Date: Int] = [:]
 
+    @Published private(set) var recentFoodNames: [String] = []
+
     private enum Keys {
         static let goal = "daily_goal"
         static let profile = "user_profile"
         static let plan = "active_plan"
         static let premium = "is_premium"
+        static let recentFoods = "recent_food_names"
     }
 
     init(context: ModelContext) {
@@ -48,8 +52,19 @@ final class CalorieStore: ObservableObject {
         self.profile = Self.loadProfile()
         self.plan = Self.loadPlan()
         self.isPremium = UserDefaults.standard.bool(forKey: Keys.premium)
+        self.recentFoodNames = UserDefaults.standard.stringArray(forKey: Keys.recentFoods) ?? []
         refresh()
         lockPastGoals()
+    }
+
+    func recordRecentFoods(_ names: [String]) {
+        var updated = recentFoodNames
+        for name in names.reversed() {
+            updated.removeAll { $0 == name }
+            updated.insert(name, at: 0)
+        }
+        recentFoodNames = Array(updated.prefix(20))
+        UserDefaults.standard.set(recentFoodNames, forKey: Keys.recentFoods)
     }
 
     /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
@@ -108,6 +123,9 @@ final class CalorieStore: ObservableObject {
 
         let foodDescriptor = FetchDescriptor<FoodItem>(sortBy: [SortDescriptor(\.name)])
         customFoods = (try? context.fetch(foodDescriptor)) ?? []
+
+        let dishDescriptor = FetchDescriptor<Dish>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
+        dishes = (try? context.fetch(dishDescriptor)) ?? []
 
         let weightDescriptor = FetchDescriptor<WeightEntry>(sortBy: [SortDescriptor(\.date, order: .forward)])
         weightEntries = (try? context.fetch(weightDescriptor)) ?? []
@@ -255,17 +273,17 @@ final class CalorieStore: ObservableObject {
         guard remaining > 0, profile != nil else { return nil }
         let m = macrosToday
         if let pt = proteinTarget, pt > 0, m.protein < pt {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerProteinGram, pt - m.protein))
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerProteinGram, pt - m.protein).rounded())
             guard canEat > 0 else { return nil }
             return "Добери ещё \(canEat) г белка"
         }
         if let ft = fatTarget, ft > 0, m.fat < ft {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerFatGram, ft - m.fat))
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerFatGram, ft - m.fat).rounded())
             guard canEat > 0 else { return nil }
             return "Добери ещё \(canEat) г жиров"
         }
         if m.carbs < MacroTargets.carbsMinimum {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, MacroTargets.carbsMinimum - m.carbs))
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, MacroTargets.carbsMinimum - m.carbs).rounded())
             guard canEat > 0 else { return nil }
             return "Добери ещё \(canEat) г углеводов"
         }
@@ -301,8 +319,8 @@ final class CalorieStore: ObservableObject {
         }
     }
 
-    func add(name: String, calories: Int, macros: Macros = .zero, date: Date = Date()) {
-        let entry = FoodEntry(name: name, calories: calories, macros: macros, date: date)
+    func add(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, date: Date = Date()) {
+        let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date)
         context.insert(entry)
         save()
     }
@@ -312,10 +330,11 @@ final class CalorieStore: ObservableObject {
         save()
     }
 
-    func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, date: Date) {
+    func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, grams: Double?, date: Date) {
         entry.name = name
         entry.calories = calories
         entry.macros = macros
+        entry.grams = grams
         entry.date = date
         save()
     }
@@ -337,6 +356,23 @@ final class CalorieStore: ObservableObject {
         food.protein = protein
         food.fat = fat
         food.carbs = carbs
+        save()
+    }
+
+    func addDish(name: String, ingredients: [DishIngredient]) {
+        let dish = Dish(name: name, ingredients: ingredients)
+        context.insert(dish)
+        save()
+    }
+
+    func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient]) {
+        dish.name = name
+        dish.ingredients = ingredients
+        save()
+    }
+
+    func deleteDish(_ dish: Dish) {
+        context.delete(dish)
         save()
     }
 

@@ -59,15 +59,17 @@ final class FoodEntry: Identifiable {
     var protein: Double
     var fat: Double
     var carbs: Double
+    var grams: Double?
     var date: Date
 
-    init(id: UUID = UUID(), name: String, calories: Int, macros: Macros = .zero, date: Date = Date()) {
+    init(id: UUID = UUID(), name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, date: Date = Date()) {
         self.id = id
         self.name = name
         self.calories = calories
         self.protein = macros.protein
         self.fat = macros.fat
         self.carbs = macros.carbs
+        self.grams = grams
         self.date = date
     }
 
@@ -81,12 +83,64 @@ final class FoodEntry: Identifiable {
     }
 }
 
+/// Ингредиент блюда — снапшот БЖУ на момент добавления, чтобы при правке продукта блюдо не ломалось.
+struct DishIngredient: Codable, Identifiable {
+    var id: UUID = UUID()
+    var foodName: String
+    var caloriesPer100g: Int
+    var macrosPer100g: Macros
+    var grams: Double
+
+    var calories: Int { Int((Double(caloriesPer100g) * grams / 100).rounded()) }
+    var macros: Macros { macrosPer100g.scaled(by: grams) }
+}
+
+/// Пользовательское блюдо — собирается из нескольких продуктов. Модель SwiftData.
+@Model
+final class Dish: Identifiable {
+    var id: UUID
+    var name: String
+    var ingredientsData: Data
+    var createdAt: Date
+
+    init(id: UUID = UUID(), name: String, ingredients: [DishIngredient] = [], createdAt: Date = Date()) {
+        self.id = id
+        self.name = name
+        self.ingredientsData = (try? JSONEncoder().encode(ingredients)) ?? Data()
+        self.createdAt = createdAt
+    }
+
+    var ingredients: [DishIngredient] {
+        get { (try? JSONDecoder().decode([DishIngredient].self, from: ingredientsData)) ?? [] }
+        set { ingredientsData = (try? JSONEncoder().encode(newValue)) ?? Data() }
+    }
+
+    var totalCalories: Int { ingredients.reduce(0) { $0 + $1.calories } }
+    var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
+    var totalGrams: Double { ingredients.reduce(0) { $0 + $1.grams } }
+
+    var caloriesPer100g: Int {
+        guard totalGrams > 0 else { return 0 }
+        return Int((Double(totalCalories) / totalGrams * 100).rounded())
+    }
+
+    var macrosPer100g: Macros {
+        guard totalGrams > 0 else { return .zero }
+        return Macros(
+            protein: totalMacros.protein / totalGrams * 100,
+            fat: totalMacros.fat / totalGrams * 100,
+            carbs: totalMacros.carbs / totalGrams * 100
+        )
+    }
+}
+
 /// Одна позиция в черновике приёма пищи — до нажатия «Сохранить» нигде не хранится.
 struct MealItem: Identifiable {
     let id = UUID()
     var name: String
     var calories: Int
     var macros: Macros
+    var grams: Double? = nil
 }
 
 /// Запись взвешивания. Модель SwiftData.

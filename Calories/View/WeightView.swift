@@ -117,7 +117,6 @@ struct WeightView: View {
             }
         }
         .navigationTitle("Вес")
-        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
                 .presentationDetents([.medium])

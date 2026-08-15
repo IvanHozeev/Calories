@@ -8,7 +8,7 @@ struct CalorieCounterApp: App {
 
     init() {
         do {
-            let container = try ModelContainer(for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self)
+            let container = try ModelContainer(for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self)
             self.container = container
             _store = StateObject(wrappedValue: CalorieStore(context: container.mainContext))
         } catch {
@@ -18,7 +18,7 @@ struct CalorieCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(store: store)
+            RootView(store: store)
         }
         .modelContainer(container)
     }

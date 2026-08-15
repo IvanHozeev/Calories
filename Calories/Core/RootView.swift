@@ -1,0 +1,26 @@
+import SwiftUI
+
+struct RootView: View {
+    @ObservedObject var store: CalorieStore
+    @State private var selectedTab = 0
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            ContentView(store: store, selectedTab: $selectedTab)
+                .tabItem { Label("Сегодня", systemImage: "book.fill") }
+                .tag(0)
+
+            NavigationStack {
+                WeightView(store: store)
+            }
+            .tabItem { Label("Вес", systemImage: "figure.stand") }
+            .tag(1)
+
+            NavigationStack {
+                MyFoodView(store: store)
+            }
+            .tabItem { Label("Еда", systemImage: "fork.knife") }
+            .tag(2)
+        }
+    }
+}

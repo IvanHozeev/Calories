@@ -6,24 +6,13 @@ struct AddEntryView: View {
 
     @State private var selectedDate: Date
     @State private var searchText = ""
-
     @State private var draftItems: [MealItem] = []
 
     @State private var quickCalories = ""
-
-    @State private var manualName = ""
-    @State private var manualCalories = ""
-    @State private var manualProtein = ""
-    @State private var manualFat = ""
-    @State private var manualCarbs = ""
-
     @State private var showingNewFood = false
     @State private var editingFood: FoodItem? = nil
 
-    private enum Field: Hashable {
-        case quickCalories, manualName, manualCalories, manualProtein, manualFat, manualCarbs
-    }
-    @FocusState private var focusedField: Field?
+    @FocusState private var quickCaloriesFocused: Bool
 
     init(store: CalorieStore, initialDate: Date = Date()) {
         self.store = store
@@ -69,6 +58,14 @@ struct AddEntryView: View {
         return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
+    private var recentFoodItems: [FoodItem] {
+        guard searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        let all = store.customFoods + FoodDatabase.items
+        return store.recentFoodNames.prefix(8).compactMap { name in
+            all.first { $0.name == name }
+        }
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -86,12 +83,8 @@ struct AddEntryView: View {
                     }
                 }
 
-                Section {
-                    if draftItems.isEmpty {
-                        Text("Пока пусто — добавь продукты ниже, потом сохрани приём пищи разом")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    } else {
+                if !draftItems.isEmpty {
+                    Section("Приём пищи") {
                         ForEach(draftItems) { item in
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -117,8 +110,6 @@ struct AddEntryView: View {
                                 .font(.subheadline.weight(.semibold))
                         }
                     }
-                } header: {
-                    Text("Приём пищи")
                 }
 
                 if !isToday {
@@ -127,13 +118,14 @@ struct AddEntryView: View {
                             TextField("Ккал", text: $quickCalories)
                                 .keyboardType(.numberPad)
                                 .font(.title3.weight(.semibold))
-                                .focused($focusedField, equals: .quickCalories)
+                                .focused($quickCaloriesFocused)
                             Button("Сохранить") {
                                 guard let calories = Int(quickCalories) else { return }
                                 let items = draftItems + [MealItem(name: "Приём пищи", calories: calories, macros: .zero)]
                                 let totalCalories = items.reduce(0) { $0 + $1.calories }
                                 let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
                                 let name = items.count == 1 ? "Приём пищи" : joinedName(items)
+                                store.recordRecentFoods(draftItems.map(\.name))
                                 store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
                                 dismiss()
                             }
@@ -147,6 +139,20 @@ struct AddEntryView: View {
                     }
                 }
                 
+                if !recentFoodItems.isEmpty {
+                    Section("Недавнее") {
+                        ForEach(recentFoodItems) { food in
+                            NavigationLink {
+                                FoodQuantityView(food: food) { item in
+                                    draftItems.append(item)
+                                }
+                            } label: {
+                                foodRow(food)
+                            }
+                        }
+                    }
+                }
+
                 if !filteredCustomFoods.isEmpty {
                     Section("Мои продукты") {
                         ForEach(filteredCustomFoods) { food in
@@ -174,44 +180,6 @@ struct AddEntryView: View {
                             }
                         }
                     }
-                }
-
-                Section("Подробнее (название, БЖУ)") {
-                    TextField("Название", text: $manualName)
-                        .focused($focusedField, equals: .manualName)
-                    TextField("Калории", text: $manualCalories)
-                        .keyboardType(.numberPad)
-                        .focused($focusedField, equals: .manualCalories)
-                    HStack {
-                        TextField("Белки, г", text: $manualProtein)
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .manualProtein)
-                        TextField("Жиры, г", text: $manualFat)
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .manualFat)
-                        TextField("Углеводы, г", text: $manualCarbs)
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .manualCarbs)
-                    }
-                    Button("В приём пищи") {
-                        guard let calories = Int(manualCalories) else { return }
-                        let name = manualName.trimmingCharacters(in: .whitespaces).isEmpty
-                            ? "Продукт"
-                            : manualName
-                        let macros = Macros(
-                            protein: Double(manualProtein.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                            fat: Double(manualFat.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                            carbs: Double(manualCarbs.replacingOccurrences(of: ",", with: ".")) ?? 0
-                        )
-                        draftItems.append(MealItem(name: name, calories: calories, macros: macros))
-                        manualName = ""
-                        manualCalories = ""
-                        manualProtein = ""
-                        manualFat = ""
-                        manualCarbs = ""
-                        focusedField = nil
-                    }
-                    .disabled(Int(manualCalories) == nil)
                 }
 
                 Section("База продуктов") {
@@ -248,7 +216,9 @@ struct AddEntryView: View {
                 }
                 ToolbarItem(placement: .bottomBar) {
                     Button {
-                        store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, date: entryDate)
+                        store.recordRecentFoods(draftItems.map(\.name))
+                        let grams = draftItems.count == 1 ? draftItems[0].grams : nil
+                        store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
                         dismiss()
                     } label: {
                         Text(draftItems.isEmpty ? "Сохранить" : "Сохранить (\(draftTotalCalories) ккал)")
@@ -296,7 +266,7 @@ struct AddEntryView: View {
     }
 }
 
-private struct NewFoodSheet: View {
+struct NewFoodSheet: View {
     @ObservedObject var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
@@ -339,7 +309,7 @@ private struct NewFoodSheet: View {
                     Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
+                    CheckmarkButton {
                         guard let calories = Int(caloriesPer100g),
                               !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                         let p = Double(protein.replacingOccurrences(of: ",", with: ".")) ?? 0

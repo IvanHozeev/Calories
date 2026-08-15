@@ -6,6 +6,8 @@ struct FoodQuantityView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var grams: Double = 100
+    @State private var gramsText: String = "100"
+    @FocusState private var gramsFocused: Bool
 
     private var calories: Int {
         Int((Double(food.caloriesPer100g) * grams / 100).rounded())
@@ -37,14 +39,29 @@ struct FoodQuantityView: View {
 
             Section("Количество, г") {
                 Stepper(value: $grams, in: 5...2000, step: 10) {
-                    Text("\(Int(grams)) г")
+                    TextField("Граммы", text: $gramsText)
+                        .keyboardType(.numberPad)
+                        .focused($gramsFocused)
                         .font(.body.weight(.medium))
+                        .onChange(of: gramsText) { _, newValue in
+                            if let value = Double(newValue), value > 0 {
+                                grams = min(value, 2000)
+                            }
+                        }
+                        .onChange(of: grams) { _, newValue in
+                            if !gramsFocused {
+                                gramsText = "\(Int(newValue))"
+                            }
+                        }
                 }
 
                 HStack {
                     ForEach([100, 150, 200, 500], id: \.self) { value in
-                        Button("\(value) г") { grams = Double(value) }
-                            .buttonStyle(.bordered)
+                        Button("\(value) г") {
+                            grams = Double(value)
+                            gramsText = "\(value)"
+                        }
+                        .buttonStyle(.bordered)
                     }
                 }
             }
@@ -54,7 +71,7 @@ struct FoodQuantityView: View {
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("В приём пищи") {
-                    onAdd(MealItem(name: food.name, calories: calories, macros: macros))
+                    onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
                     dismiss()
                 }
                 .fontWeight(.semibold)

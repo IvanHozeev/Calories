@@ -3,8 +3,8 @@ import SwiftData
 
 struct ContentView: View {
     @ObservedObject var store: CalorieStore
-    var selectedTab: Binding<Int>
     @State private var showingAdd = false
+    @State private var showingAddWeight = false
     @State private var showingGoalEditor = false
     @State private var showingStreakInfo = false
     @State private var editingEntry: FoodEntry? = nil
@@ -50,7 +50,7 @@ struct ContentView: View {
                         .buttonStyle(.plain)
                     } else if !store.hasWeighedToday {
                         Button {
-                            selectedTab.wrappedValue = 1
+                            showingAddWeight = true
                         } label: {
                             HStack {
                                 Image(systemName: "scalemass")
@@ -141,23 +141,17 @@ struct ContentView: View {
                     }
 
                 }
+                .padding(.horizontal)
                 .padding(.bottom, 80)
-                .frame(maxWidth: .infinity)
+                .containerRelativeFrame(.horizontal)
             }
-            .padding(.horizontal)
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Сегодня")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink {
-                        ProfileView(store: store)
-                    } label: {
-                        Image(systemName: "person.circle")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingStreakInfo = true
                     } label: {
@@ -188,6 +182,10 @@ struct ContentView: View {
             .sheet(isPresented: $showingAdd) {
                 AddEntryView(store: store)
                     .presentationDetents([.medium, .large])
+            }
+            .sheet(isPresented: $showingAddWeight) {
+                AddWeightView(store: store)
+                    .presentationDetents([.medium])
             }
             .sheet(item: $editingEntry) { entry in
                 EditEntrySheet(store: store, entry: entry)
@@ -346,5 +344,5 @@ private struct StreakInfoSheet: View {
         for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    ContentView(store: CalorieStore(context: container.mainContext), selectedTab: .constant(0))
+    ContentView(store: CalorieStore(context: container.mainContext))
 }

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ProfileView: View {
     @ObservedObject var store: CalorieStore
-    @Environment(\.dismiss) private var dismiss
 
     @State private var weightText: String
     @State private var heightText: String
@@ -13,11 +12,12 @@ struct ProfileView: View {
     @State private var proteinPerKgText: String
     @State private var showingPlan = false
     @State private var showingPaywall = false
+    @State private var showingAddWeight = false
 
     init(store: CalorieStore) {
         self.store = store
         let profile = store.profile
-        _weightText = State(initialValue: profile.map { String(format: "%.0f", $0.weightKg) } ?? "")
+        _weightText = State(initialValue: store.latestWeight.map { String(format: "%.0f", $0.weightKg) } ?? profile.map { String(format: "%.0f", $0.weightKg) } ?? "")
         _heightText = State(initialValue: profile.map { String(format: "%.0f", $0.heightCm) } ?? "")
         _ageText = State(initialValue: profile.map { String($0.age) } ?? "")
         _sex = State(initialValue: profile?.sex ?? .male)
@@ -48,9 +48,34 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
-                Section("Параметры тела") {
+        Form {
+            Section {
+                HStack {
+                    Text("Текущий вес")
+                    Spacer()
+                    if let latest = store.latestWeight {
+                        Text(String(format: "%.1f кг", latest.weightKg))
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Не записан")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Button {
+                    showingAddWeight = true
+                } label: {
+                    Label(store.hasWeighedToday ? "Обновить вес за сегодня" : "Записать вес", systemImage: "plus.circle")
+                }
+                NavigationLink {
+                    WeightView(store: store)
+                } label: {
+                    Label("История и график", systemImage: "chart.line.uptrend.xyaxis")
+                }
+            } header: {
+                Text("Вес")
+            }
+
+            Section("Параметры тела") {
                     Picker("Пол", selection: $sex) {
                         ForEach(Sex.allCases) { Text($0.title).tag($0) }
                     }
@@ -168,17 +193,8 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Профиль")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    CheckmarkButton {
-                        guard let draftProfile else { return }
-                        store.updateProfile(draftProfile)
-                        dismiss()
-                    }
-                    .disabled(draftProfile == nil)
-                    .fontWeight(.semibold)
-                }
+            .onChange(of: draftProfile) { _, newProfile in
+                if let p = newProfile { store.updateProfile(p) }
             }
             .sheet(isPresented: $showingPlan) {
                 PlanView(store: store)
@@ -186,7 +202,10 @@ struct ProfileView: View {
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
-        }
+            .sheet(isPresented: $showingAddWeight) {
+                AddWeightView(store: store)
+                    .presentationDetents([.medium])
+            }
     }
 
     private func resultRow(title: String, value: String, highlighted: Bool = false) -> some View {

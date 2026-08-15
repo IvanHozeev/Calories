@@ -380,6 +380,10 @@ final class CalorieStore: ObservableObject {
         let entry = WeightEntry(weightKg: kg, date: date)
         context.insert(entry)
         save()
+        if var p = profile {
+            p.weightKg = kg
+            updateProfile(p, syncDailyGoal: false)
+        }
     }
 
     func deleteWeight(_ entry: WeightEntry) {

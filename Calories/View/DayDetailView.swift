@@ -4,6 +4,7 @@ struct DayDetailView: View {
     @ObservedObject var store: CalorieStore
     let date: Date
     @State private var showingAdd = false
+    @State private var editingEntry: FoodEntry? = nil
 
     private var day: DaySummary {
         store.summary(for: date)
@@ -41,27 +42,7 @@ struct DayDetailView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(day.entries) { entry in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(entry.name)
-                                Text("Б\(Int(entry.macros.protein)) Ж\(Int(entry.macros.fat)) У\(Int(entry.macros.carbs)) · " + entry.date.formatted(date: .omitted, time: .shortened))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text("\(entry.calories) ккал")
-                                .foregroundStyle(.secondary)
-
-                            Button {
-                                withAnimation {
-                                    store.delete(entry: entry)
-                                }
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .foregroundStyle(.red)
-                            }
-                            .buttonStyle(.plain)
-                        }
+                        EntryRow(entry: entry, onDelete: { store.delete(entry: entry) }, onEdit: { editingEntry = entry })
                     }
                 }
             }
@@ -79,6 +60,10 @@ struct DayDetailView: View {
         }
         .sheet(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date)
+                .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $editingEntry) { entry in
+            EditEntrySheet(store: store, entry: entry)
                 .presentationDetents([.medium, .large])
         }
     }

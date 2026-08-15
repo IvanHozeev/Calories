@@ -7,6 +7,7 @@ struct PlanView: View {
     @State private var targetWeightText: String
     @State private var durationWeeks: Int
     @State private var cyclingEnabled: Bool
+    @State private var weekendStyle: WeekendStyle
 
     init(store: CalorieStore) {
         self.store = store
@@ -14,6 +15,7 @@ struct PlanView: View {
         _targetWeightText = State(initialValue: String(format: "%.1f", store.plan?.targetWeightKg ?? fallbackStart))
         _durationWeeks = State(initialValue: store.plan?.durationWeeks ?? 8)
         _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
+        _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
     }
 
     private var startWeight: Double {
@@ -35,7 +37,8 @@ struct PlanView: View {
             durationWeeks: durationWeeks,
             startWeightKg: startWeight,
             targetWeightKg: targetWeight,
-            cyclingEnabled: cyclingEnabled
+            cyclingEnabled: cyclingEnabled,
+            weekendStyle: weekendStyle
         )
     }
 
@@ -74,6 +77,13 @@ struct PlanView: View {
 
                 Section {
                     Toggle("Недельный цикл калорий", isOn: $cyclingEnabled)
+                    if cyclingEnabled {
+                        Picker("Выходные дни", selection: $weekendStyle) {
+                            ForEach(WeekendStyle.allCases) { style in
+                                Text(style.title).tag(style)
+                            }
+                        }
+                    }
                 } footer: {
                     Text("Автоматически распределяет калории по дням недели: чуть меньше в будни, рефид на выходных. Среднее за неделю остаётся тем же — меняется только распределение.")
                 }
@@ -95,7 +105,12 @@ struct PlanView: View {
                     Section("Расчёт") {
                         resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
                         resultRow("Темп", String(format: "%+.2f кг/нед", draftPlan.weeklyRateKg))
-                        resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) ккал", highlighted: true)
+                        if draftPlan.cyclingEnabled {
+                            resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) ккал")
+                            resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) ккал", highlighted: true)
+                        } else {
+                            resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) ккал", highlighted: true)
+                        }
 
                         if draftPlan.isAggressivePace(relativeToWeightKg: startWeight) {
                             Label(

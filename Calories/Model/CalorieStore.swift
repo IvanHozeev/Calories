@@ -157,30 +157,30 @@ final class CalorieStore: ObservableObject {
         hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
         adherence = computePlanAdherence()
 
-        // Стрик: последовательные дни, когда пользователь уложился в лимит калорий.
-        // Сегодня засчитывается, если уже есть записи и они в пределах нормы (день ещё не кончился —
-        // не штрафуем за превышение, только поощряем за успех). Прошлые дни — строго.
-        var streakCount = 0
+        let (currentStreak, bestStreakVal) = computeStreak()
+        streak = currentStreak
+        bestStreak = bestStreakVal
+    }
+
+    private func computeStreak() -> (current: Int, best: Int) {
+        let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
+        var currentStreak = 0
         let todayTotal = (entriesByDay[today] ?? []).reduce(0) { $0 + $1.calories }
         if todayTotal > 0, todayTotal <= (goalsByDay[today] ?? effectiveGoal(for: today)) {
-            streakCount += 1
+            currentStreak += 1
         }
-
         var pastDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
         while true {
             let dayTotal = (entriesByDay[pastDate] ?? []).reduce(0) { $0 + $1.calories }
             let dayGoal = goalsByDay[pastDate] ?? effectiveGoal(for: pastDate)
             guard dayTotal > 0, dayTotal <= dayGoal else { break }
-            streakCount += 1
+            currentStreak += 1
             guard let prev = calendar.date(byAdding: .day, value: -1, to: pastDate) else { break }
             pastDate = prev
         }
-        streak = streakCount
 
-        // Лучший стрик: перебираем все прошлые дни с записями по порядку
-        // и ищем самую длинную последовательность дней в пределах нормы.
         var best = 0
         var run = 0
         var prevDate: Date? = nil
@@ -197,7 +197,8 @@ final class CalorieStore: ObservableObject {
                 run = 0
             }
         }
-        bestStreak = max(best, streakCount)
+
+        return (currentStreak, max(best, currentStreak))
     }
 
     /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём
@@ -239,6 +240,38 @@ final class CalorieStore: ObservableObject {
         profile?.proteinTargetGrams
     }
 
+    /// Текущий вес — из последнего взвешивания, иначе из профиля.
+    var weightKg: Double? {
+        latestWeight?.weightKg ?? profile?.weightKg
+    }
+
+    /// Минимальная дневная норма жиров исходя из веса.
+    var fatTarget: Double? {
+        weightKg.map { $0 * MacroTargets.fatPerKg }
+    }
+
+    /// Подсказка что добрать на оставшиеся калории: белок → жиры → углеводы.
+    var macroSuggestion: String? {
+        guard remaining > 0, profile != nil else { return nil }
+        let m = macrosToday
+        if let pt = proteinTarget, pt > 0, m.protein < pt {
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerProteinGram, pt - m.protein))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г белка"
+        }
+        if let ft = fatTarget, ft > 0, m.fat < ft {
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerFatGram, ft - m.fat))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г жиров"
+        }
+        if m.carbs < MacroTargets.carbsMinimum {
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, MacroTargets.carbsMinimum - m.carbs))
+            guard canEat > 0 else { return nil }
+            return "Добери ещё \(canEat) г углеводов"
+        }
+        return nil
+    }
+
     /// Цель на сегодня — то, что показывается в кольце/статистике.
     var todayGoal: Int {
         effectiveGoal(for: Date())
@@ -276,6 +309,14 @@ final class CalorieStore: ObservableObject {
 
     func delete(entry: FoodEntry) {
         context.delete(entry)
+        save()
+    }
+
+    func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, date: Date) {
+        entry.name = name
+        entry.calories = calories
+        entry.macros = macros
+        entry.date = date
         save()
     }
 

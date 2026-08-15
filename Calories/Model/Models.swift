@@ -25,6 +25,30 @@ struct Macros: Codable, Hashable {
     }
 }
 
+/// Единая точка для всех констант макронутриентов — расчётов и UI.
+enum MacroTargets {
+    static let fatPerKg: Double = 0.8
+    static let carbsMinimum: Double = 130
+    static let kcalPerProteinGram: Double = 4
+    static let kcalPerFatGram: Double = 9
+    static let kcalPerCarbGram: Double = 4
+}
+
+/// Категория макронутриента — для поповеров и навигации в MacrosCard.
+enum MacroKind: String, Identifiable {
+    case protein, fat, carbs
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .protein: return "Белки"
+        case .fat: return "Жиры"
+        case .carbs: return "Углеводы"
+        }
+    }
+}
+
 /// Запись о приёме пищи. Модель SwiftData — хранится в настоящей базе данных на диске,
 /// не сериализуется целиком при каждом изменении, в отличие от прежнего JSON+UserDefaults.
 @Model
@@ -224,6 +248,31 @@ struct UserProfile: Codable, Equatable {
     }
 }
 
+/// Выбор дней выходных для недельного цикла калорий.
+/// Пн=0…Вс=6; смещения в каждом случае суммируются в 0, среднее остаётся неизменным.
+enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
+    case satSun   // стандартный мир: Сб+Вс
+    case friSat   // Израиль: Пт+Сб
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .satSun: return "Сб — Вс"
+        case .friSat: return "Пт — Сб (Израиль)"
+        }
+    }
+
+    /// Смещения от среднего по дням Пн=0…Вс=6.
+    /// Сумма = 0; рабочие дни ниже нормы, выходные — рефид.
+    var cycleOffsets: [Double] {
+        switch self {
+        case .satSun: return [-0.08, -0.08, -0.12, -0.08, -0.08, 0.14, 0.30]
+        case .friSat: return [-0.08, -0.08, -0.12, -0.08, 0.30, 0.14, -0.08]
+        }
+    }
+}
+
 /// Персональный план: срок в неделях и целевой вес, с точным расчётом дневной нормы калорий
 /// (в отличие от фиксированного множителя calorieMultiplier у Goal). Одна активная запись —
 /// хранится в UserDefaults (JSON), как и профиль.
@@ -236,21 +285,23 @@ struct Plan: Codable, Equatable {
     /// бодибилдеров (меньше калорий в будни, рефид на выходных). Среднее за неделю
     /// остаётся точно равно dailyCalorieTarget — меняется только распределение по дням.
     var cyclingEnabled: Bool = false
+    var weekendStyle: WeekendStyle = .satSun
 
-    init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double, cyclingEnabled: Bool = false) {
+    init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double, cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
         self.startDate = startDate
         self.durationWeeks = durationWeeks
         self.startWeightKg = startWeightKg
         self.targetWeightKg = targetWeightKg
         self.cyclingEnabled = cyclingEnabled
+        self.weekendStyle = weekendStyle
     }
 
     private enum CodingKeys: String, CodingKey {
-        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled
+        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled, weekendStyle
     }
 
-    // Явный init(from:), чтобы уже сохранённые планы (записанные до появления cyclingEnabled)
-    // не переставали декодироваться — отсутствующее поле просто трактуется как false.
+    // Явный init(from:), чтобы уже сохранённые планы не переставали декодироваться —
+    // отсутствующие поля трактуются как дефолтные значения.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         startDate = try container.decode(Date.self, forKey: .startDate)
@@ -258,15 +309,11 @@ struct Plan: Codable, Equatable {
         startWeightKg = try container.decode(Double.self, forKey: .startWeightKg)
         targetWeightKg = try container.decode(Double.self, forKey: .targetWeightKg)
         cyclingEnabled = try container.decodeIfPresent(Bool.self, forKey: .cyclingEnabled) ?? false
+        weekendStyle = try container.decodeIfPresent(WeekendStyle.self, forKey: .weekendStyle) ?? .satSun
     }
 
     /// Грубое общепринятое приближение: ~7700 ккал на 1 кг жировой массы.
     static let kcalPerKg: Double = 7700
-
-    /// Смещения от среднего по дням недели, Пн=0…Вс=6 — сумма равна нулю, поэтому
-    /// среднее за 7 дней всегда равно dailyCalorieTarget(tdee:), меняется лишь форма.
-    /// Будни чуть ниже среднего, выходные — рефид, как принято у бодибилдеров.
-    private static let weeklyCycleOffsets: [Double] = [-0.08, -0.08, -0.12, -0.08, -0.08, 0.14, 0.30]
 
     private static func mondayBasedWeekdayIndex(for date: Date) -> Int {
         // Calendar.weekday: 1=Вс … 7=Сб. Приводим к Пн=0 … Вс=6.
@@ -303,7 +350,7 @@ struct Plan: Codable, Equatable {
     func calorieTarget(for date: Date, tdee: Double) -> Int {
         let base = Double(dailyCalorieTarget(tdee: tdee))
         guard cyclingEnabled else { return Int(base.rounded()) }
-        let offset = Self.weeklyCycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
+        let offset = weekendStyle.cycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
         return Int((base * (1 + offset)).rounded())
     }
 
@@ -311,7 +358,7 @@ struct Plan: Codable, Equatable {
     func weeklyCalorieBreakdown(tdee: Double) -> [(label: String, calories: Int)] {
         let labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
         let base = Double(dailyCalorieTarget(tdee: tdee))
-        return Self.weeklyCycleOffsets.enumerated().map { index, offset in
+        return weekendStyle.cycleOffsets.enumerated().map { index, offset in
             (labels[index], Int((base * (1 + offset)).rounded()))
         }
     }

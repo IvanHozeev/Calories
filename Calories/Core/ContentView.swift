@@ -7,42 +7,8 @@ struct ContentView: View {
     @State private var showingGoalEditor = false
     @State private var showingProfile = false
     @State private var showingStreakInfo = false
+    @State private var editingEntry: FoodEntry? = nil
     @State private var goalText = ""
-
-    private var weightKg: Double? {
-        store.latestWeight?.weightKg ?? store.profile?.weightKg
-    }
-
-    private var fatTarget: Double? {
-        weightKg.map { $0 * 0.8 }
-    }
-
-    // Что приоритетнее добрать на оставшиеся калории:
-    // белок → жиры → углеводы. Показываем только первый незакрытый.
-    private var macroSuggestion: String? {
-        let remaining = store.remaining
-        guard remaining > 0, store.profile != nil else { return nil }
-
-        let m = store.macrosToday
-        let carbsTarget: Double = 130
-
-        if let pt = store.proteinTarget, pt > 0, m.protein < pt {
-            let canEat = Int(min(Double(remaining) / 4.0, pt - m.protein))
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г белка"
-        }
-        if let ft = fatTarget, ft > 0, m.fat < ft {
-            let canEat = Int(min(Double(remaining) / 9.0, ft - m.fat))
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г жиров"
-        }
-        if m.carbs < carbsTarget {
-            let canEat = Int(min(Double(remaining) / 4.0, carbsTarget - m.carbs))
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г углеводов"
-        }
-        return nil
-    }
 
     var body: some View {
         NavigationStack {
@@ -53,8 +19,8 @@ struct ContentView: View {
                         goal: store.todayGoal,
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
-                        fatTarget: fatTarget,
-                        carbsTarget: 130
+                        fatTarget: store.fatTarget,
+                        carbsTarget: MacroTargets.carbsMinimum
                     )
                     .padding(.top, 12)
                     .onLongPressGesture {
@@ -117,8 +83,9 @@ struct ContentView: View {
                     MacrosCard(
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
-                        weightKg: store.latestWeight?.weightKg ?? store.profile?.weightKg,
-                        suggestion: macroSuggestion
+                        fatTarget: store.fatTarget,
+                        weightKg: store.weightKg,
+                        suggestion: store.macroSuggestion
                     )
 
                     HStack(spacing: 12) {
@@ -156,7 +123,11 @@ struct ContentView: View {
                         } else {
                             VStack(spacing: 0) {
                                 ForEach(store.todayEntries) { entry in
-                                    EntryRow(entry: entry) { store.delete(entry: entry) }
+                                    EntryRow(
+                                        entry: entry,
+                                        onDelete: { store.delete(entry: entry) },
+                                        onEdit: { editingEntry = entry }
+                                    )
                                     if entry.id != store.todayEntries.last?.id {
                                         Divider().padding(.leading, 16)
                                     }
@@ -220,6 +191,10 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAdd) {
                 AddEntryView(store: store)
+                    .presentationDetents([.medium, .large])
+            }
+            .sheet(item: $editingEntry) { entry in
+                EditEntrySheet(store: store, entry: entry)
                     .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingStreakInfo) {
@@ -291,202 +266,6 @@ private struct PlanCard: View {
     }
 }
 
-private enum MacroKind: String, Identifiable {
-    case protein, fat, carbs
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .protein: return "Белки"
-        case .fat: return "Жиры"
-        case .carbs: return "Углеводы"
-        }
-    }
-}
-
-private struct MacrosCard: View {
-    let macros: Macros
-    let proteinTarget: Double?
-    let weightKg: Double?
-    let suggestion: String?
-
-    @State private var selectedMacro: MacroKind?
-    @State private var visibleSuggestion: String?
-
-    var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                macroColumn(.protein, value: macros.protein, color: .blue)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .protein },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.protein) }
-                Divider().frame(height: 36)
-                macroColumn(.fat, value: macros.fat, color: .orange)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .fat },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.fat) }
-                Divider().frame(height: 36)
-                macroColumn(.carbs, value: macros.carbs, color: .purple)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .carbs },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.carbs) }
-            }
-
-            if let proteinTarget, proteinTarget > 0 {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text("Белок: \(Int(macros.protein.rounded())) из \(Int(proteinTarget.rounded())) г")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                    ProgressView(value: min(macros.protein / proteinTarget, 1.0))
-                        .tint(.blue)
-                }
-            }
-
-            if let s = visibleSuggestion {
-                HStack(spacing: 6) {
-                    Image(systemName: "lightbulb.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.yellow)
-                    Text(s)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-                .transition(.opacity)
-            }
-        }
-        // Нет .animation на всём VStack — иначе SwiftUI замеряет идеальный
-        // (unconstrained) размер при анимации и временно расширяет контент ScrollView.
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .onAppear { visibleSuggestion = suggestion }
-        .onChange(of: suggestion) { _, newValue in
-            withAnimation(.easeInOut(duration: 0.3)) {
-                visibleSuggestion = newValue
-            }
-        }
-    }
-
-    private func value(for kind: MacroKind) -> Double {
-        switch kind {
-        case .protein: return macros.protein
-        case .fat: return macros.fat
-        case .carbs: return macros.carbs
-        }
-    }
-
-    private func macroColumn(_ kind: MacroKind, value: Double, color: Color) -> some View {
-        Button {
-            selectedMacro = kind
-        } label: {
-            VStack(spacing: 4) {
-                Text(String(format: "%.0f г", value))
-                    .font(.title3.bold())
-                    .foregroundStyle(color)
-                Text(kind.title)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-
-    /// Принятый минимум для гормонального здоровья (тестостерон, эстроген, кожа, волосы) — ниже
-    /// этого порога исследования фиксируют падение половых гормонов.
-    private static let fatMinPerKg = 0.8
-    /// RDA (Institute of Medicine) — минимум глюкозы для работы мозга, не зависит от веса.
-    private static let carbsMinAbsolute = 130.0
-
-    private func target(for kind: MacroKind) -> Double? {
-        switch kind {
-        case .protein: return proteinTarget
-        case .fat: return weightKg.map { $0 * Self.fatMinPerKg }
-        case .carbs: return Self.carbsMinAbsolute
-        }
-    }
-
-    private func note(for kind: MacroKind) -> String {
-        switch kind {
-        case .protein: return "Из профиля — норма белка на кг веса под твою цель."
-        case .fat: return "≥0.8 г/кг — принятый минимум для гормонального здоровья."
-        case .carbs: return "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса."
-        }
-    }
-
-    private func macroPopover(_ kind: MacroKind) -> some View {
-        let total = value(for: kind)
-        let target = target(for: kind)
-
-        return ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(kind.title)
-                    .font(.headline)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Факт")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if let weightKg, weightKg > 0 {
-                        Text(String(format: "%.2f г/кг", total / weightKg))
-                            .font(.title2.bold())
-                        Text(String(format: "%.0f г при весе %.1f кг", total, weightKg))
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text(String(format: "%.0f г", total))
-                            .font(.title2.bold())
-                    }
-                }
-
-                Divider()
-
-                if let target {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Цель" + (kind == .carbs ? " (минимум)" : ""))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if kind != .carbs, let weightKg, weightKg > 0 {
-                            Text(String(format: "%.2f г/кг", target / weightKg))
-                                .font(.title3.bold())
-                            Text(String(format: "≈ %.0f г", target))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Text(String(format: "%.0f г", target))
-                                .font(.title3.bold())
-                        }
-                    }
-
-                    Text(note(for: kind))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                } else {
-                    Text(kind == .protein
-                         ? "Чтобы увидеть цель, заполни профиль."
-                         : "Чтобы увидеть цель, укажи вес — в профиле или на экране «Вес».")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding()
-        }
-        .frame(width: 280)
-        .presentationCompactAdaptation(.popover)
-    }
-}
-
 private struct StatCard: View {
     let title: String
     let value: String
@@ -507,37 +286,6 @@ private struct StatCard: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-}
-
-private struct EntryRow: View {
-    let entry: FoodEntry
-    let onDelete: () -> Void
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.name)
-                    .font(.body)
-                Text("Б\(Int(entry.macros.protein)) Ж\(Int(entry.macros.fat)) У\(Int(entry.macros.carbs)) · " + entry.date.formatted(date: .omitted, time: .shortened))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Text("\(entry.calories) ккал")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
-
-            Button {
-                withAnimation { onDelete() }
-            } label: {
-                Image(systemName: "minus.circle.fill")
-                    .foregroundStyle(.red)
-                    .imageScale(.medium)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding()
     }
 }
 

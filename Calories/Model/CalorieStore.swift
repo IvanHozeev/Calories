@@ -29,6 +29,7 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var hasWeighedToday: Bool = false
     @Published private(set) var adherence: PlanAdherence?
     @Published private(set) var streak: Int = 0
+    @Published private(set) var bestStreak: Int = 0
 
     // O(1) словари для быстрого поиска
     private var entriesByDay: [Date: [FoodEntry]] = [:]
@@ -177,6 +178,26 @@ final class CalorieStore: ObservableObject {
             pastDate = prev
         }
         streak = streakCount
+
+        // Лучший стрик: перебираем все прошлые дни с записями по порядку
+        // и ищем самую длинную последовательность дней в пределах нормы.
+        var best = 0
+        var run = 0
+        var prevDate: Date? = nil
+        for date in entriesByDay.keys.filter({ !calendar.isDateInToday($0) }).sorted() {
+            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
+            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
+            if dayTotal > 0, dayTotal <= dayGoal {
+                let consecutive = prevDate.map { calendar.date(byAdding: .day, value: 1, to: $0) == date } ?? false
+                run = consecutive ? run + 1 : 1
+                prevDate = date
+                best = max(best, run)
+            } else {
+                prevDate = nil
+                run = 0
+            }
+        }
+        bestStreak = max(best, streakCount)
     }
 
     /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём

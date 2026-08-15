@@ -81,7 +81,6 @@ struct ContentView: View {
                             .background(Color.blue.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
-                        .padding(.horizontal)
                     } else if !store.hasWeighedToday {
                         NavigationLink {
                             WeightView(store: store)
@@ -100,7 +99,6 @@ struct ContentView: View {
                             .background(Color.orange.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
-                        .padding(.horizontal)
                     }
 
                     if let plan = store.plan {
@@ -110,11 +108,10 @@ struct ContentView: View {
                             PlanCard(
                                 plan: plan,
                                 currentWeight: store.latestWeight?.weightKg,
-                                                status: store.adherence?.status ?? .insufficientData
+                                status: store.adherence?.status ?? .insufficientData
                             )
                         }
                         .buttonStyle(.plain)
-                        .padding(.horizontal)
                     }
 
                     MacrosCard(
@@ -123,7 +120,6 @@ struct ContentView: View {
                         weightKg: store.latestWeight?.weightKg ?? store.profile?.weightKg,
                         suggestion: macroSuggestion
                     )
-                    .padding(.horizontal)
 
                     HStack(spacing: 12) {
                         StatCard(
@@ -139,7 +135,6 @@ struct ContentView: View {
                             color: .blue
                         )
                     }
-                    .padding(.horizontal)
 
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
@@ -147,7 +142,6 @@ struct ContentView: View {
                                 .font(.headline)
                             Spacer()
                         }
-                        .padding(.horizontal)
 
                         if store.todayEntries.isEmpty {
                             VStack(spacing: 8) {
@@ -170,11 +164,11 @@ struct ContentView: View {
                             }
                             .background(Color(.secondarySystemGroupedBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 16))
-                            .padding(.horizontal)
                         }
                     }
 
                 }
+                .padding(.horizontal)
                 .padding(.bottom, 80)
                 .frame(maxWidth: .infinity)
             }
@@ -229,8 +223,8 @@ struct ContentView: View {
                     .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingStreakInfo) {
-                StreakInfoSheet(streak: store.streak)
-                    .presentationDetents([.height(300)])
+                StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak)
+                    .presentationDetents([.height(360)])
                     .presentationDragIndicator(.visible)
             }
             .alert("Дневная цель", isPresented: $showingGoalEditor) {
@@ -318,21 +312,34 @@ private struct MacrosCard: View {
     let suggestion: String?
 
     @State private var selectedMacro: MacroKind?
+    @State private var visibleSuggestion: String?
 
     var body: some View {
         VStack(spacing: 12) {
             HStack {
                 macroColumn(.protein, value: macros.protein, color: .blue)
+                    .popover(isPresented: Binding(
+                        get: { selectedMacro == .protein },
+                        set: { if !$0 { selectedMacro = nil } }
+                    )) { macroPopover(.protein) }
                 Divider().frame(height: 36)
                 macroColumn(.fat, value: macros.fat, color: .orange)
+                    .popover(isPresented: Binding(
+                        get: { selectedMacro == .fat },
+                        set: { if !$0 { selectedMacro = nil } }
+                    )) { macroPopover(.fat) }
                 Divider().frame(height: 36)
                 macroColumn(.carbs, value: macros.carbs, color: .purple)
+                    .popover(isPresented: Binding(
+                        get: { selectedMacro == .carbs },
+                        set: { if !$0 { selectedMacro = nil } }
+                    )) { macroPopover(.carbs) }
             }
 
             if let proteinTarget, proteinTarget > 0 {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text("Белок: \(Int(macros.protein)) из \(Int(proteinTarget)) г")
+                        Text("Белок: \(Int(macros.protein.rounded())) из \(Int(proteinTarget.rounded())) г")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer()
@@ -342,25 +349,29 @@ private struct MacrosCard: View {
                 }
             }
 
-            if let suggestion {
+            if let s = visibleSuggestion {
                 HStack(spacing: 6) {
                     Image(systemName: "lightbulb.fill")
                         .font(.caption2)
                         .foregroundStyle(.yellow)
-                    Text(suggestion)
+                    Text(s)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
                 }
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
+                .transition(.opacity)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: suggestion)
+        // Нет .animation на всём VStack — иначе SwiftUI замеряет идеальный
+        // (unconstrained) размер при анимации и временно расширяет контент ScrollView.
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .popover(item: $selectedMacro) { kind in
-            macroPopover(kind)
+        .onAppear { visibleSuggestion = suggestion }
+        .onChange(of: suggestion) { _, newValue in
+            withAnimation(.easeInOut(duration: 0.3)) {
+                visibleSuggestion = newValue
+            }
         }
     }
 
@@ -416,58 +427,62 @@ private struct MacrosCard: View {
         let total = value(for: kind)
         let target = target(for: kind)
 
-        return VStack(alignment: .leading, spacing: 12) {
-            Text(kind.title)
-                .font(.headline)
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(kind.title)
+                    .font(.headline)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Факт")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let weightKg, weightKg > 0 {
-                    Text(String(format: "%.2f г/кг", total / weightKg))
-                        .font(.title2.bold())
-                    Text(String(format: "%.0f г при весе %.1f кг", total, weightKg))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text(String(format: "%.0f г", total))
-                        .font(.title2.bold())
-                }
-            }
-
-            Divider()
-
-            if let target {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Цель" + (kind == .carbs ? " (минимум)" : ""))
+                    Text("Факт")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    if kind != .carbs, let weightKg, weightKg > 0 {
-                        Text(String(format: "%.2f г/кг", target / weightKg))
-                            .font(.title3.bold())
-                        Text(String(format: "≈ %.0f г", target))
+                    if let weightKg, weightKg > 0 {
+                        Text(String(format: "%.2f г/кг", total / weightKg))
+                            .font(.title2.bold())
+                        Text(String(format: "%.0f г при весе %.1f кг", total, weightKg))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text(String(format: "%.0f г", target))
-                            .font(.title3.bold())
+                        Text(String(format: "%.0f г", total))
+                            .font(.title2.bold())
                     }
                 }
 
-                Text(note(for: kind))
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text(kind == .protein
-                     ? "Чтобы увидеть цель, заполни профиль."
-                     : "Чтобы увидеть цель, укажи вес — в профиле или на экране «Вес».")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Divider()
+
+                if let target {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Цель" + (kind == .carbs ? " (минимум)" : ""))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        if kind != .carbs, let weightKg, weightKg > 0 {
+                            Text(String(format: "%.2f г/кг", target / weightKg))
+                                .font(.title3.bold())
+                            Text(String(format: "≈ %.0f г", target))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Text(String(format: "%.0f г", target))
+                                .font(.title3.bold())
+                        }
+                    }
+
+                    Text(note(for: kind))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text(kind == .protein
+                         ? "Чтобы увидеть цель, заполни профиль."
+                         : "Чтобы увидеть цель, укажи вес — в профиле или на экране «Вес».")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            .padding()
         }
-        .padding()
-        .frame(minWidth: 220)
+        .frame(width: 280)
         .presentationCompactAdaptation(.popover)
     }
 }
@@ -528,12 +543,13 @@ private struct EntryRow: View {
 
 private struct StreakInfoSheet: View {
     let streak: Int
+    let bestStreak: Int
 
-    private var daysLabel: String {
-        switch streak % 10 {
-        case 1 where streak % 100 != 11: return "день"
-        case 2...4 where !(streak % 100 >= 12 && streak % 100 <= 14): return "дня"
-        default: return "дней"
+    private func label(_ n: Int) -> String {
+        switch n % 10 {
+        case 1 where n % 100 != 11: return "День"
+        case 2...4 where !(n % 100 >= 12 && n % 100 <= 14): return "Дня"
+        default: return "Дней"
         }
     }
 
@@ -551,20 +567,30 @@ private struct StreakInfoSheet: View {
                     .monospacedDigit()
             }
 
-            Text(streak > 0 ? "\(daysLabel) подряд" : "Начни сегодня")
+            Text(streak > 0 ? "\(label(streak)) подряд" : "Начни сегодня")
                 .font(.title3)
                 .foregroundStyle(.secondary)
+
+            if bestStreak > streak {
+                Label("Рекорд: \(bestStreak) \(label(bestStreak))", systemImage: "trophy.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.yellow)
+            }
 
             Divider()
                 .padding(.horizontal, 32)
 
-            Text(streak > 0
-                 ? "Каждый день, когда ты укладываешься в дневной лимит калорий, стрик растёт на +1. Выйди за лимит — и он обнулится."
-                 : "Уложись в дневной лимит калорий сегодня — и стрик начнёт расти. Каждый день в рамках нормы добавляет +1.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+            VStack(spacing: 8) {
+                Text("Чем выше стрик — тем лучше результат.")
+                    .font(.callout.weight(.medium))
+                    .multilineTextAlignment(.center)
+
+                Text("Если ты каждый день вмещаешься в норму, ты точно движешься к цели. Выйди за лимит — стрик обнулится.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 32)
 
             Spacer()
         }

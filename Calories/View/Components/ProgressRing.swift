@@ -48,11 +48,15 @@ struct ProgressRing: View {
             Circle()
                 .trim(from: 0, to: ringProgress)
                 .stroke(
-                    AngularGradient(colors: ringColors, center: .center),
+                    LinearGradient(
+                        colors: ringColors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
                     style: StrokeStyle(lineWidth: 18, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.45, dampingFraction: 0.8), value: ringProgress)
+                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: ringProgress)
 
             centerLabel
                 .id(mode)
@@ -62,7 +66,7 @@ struct ProgressRing: View {
         .onTapGesture {
             let all = Mode.allCases
             let next = all[(all.firstIndex(of: mode)! + 1) % all.count]
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.82)) {
                 mode = next
             }
         }

@@ -33,15 +33,23 @@ struct MacrosCard: View {
             }
 
             if let proteinTarget, proteinTarget > 0 {
+                let proteinMet = macros.protein >= proteinTarget
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                    HStack(spacing: 4) {
                         Text("Белок: \(Int(macros.protein.rounded())) из \(Int(proteinTarget.rounded())) г")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(proteinMet ? .green : .secondary)
+                        if proteinMet {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.green)
+                        }
                         Spacer()
                     }
-                    ProgressView(value: min(macros.protein / proteinTarget, 1.0))
-                        .tint(.blue)
+                    if !proteinMet {
+                        ProgressView(value: macros.protein / proteinTarget)
+                            .tint(.blue)
+                    }
                 }
             }
 

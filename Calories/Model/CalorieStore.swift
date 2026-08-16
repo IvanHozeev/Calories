@@ -31,6 +31,7 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var adherence: PlanAdherence?
     @Published private(set) var streak: Int = 0
     @Published private(set) var bestStreak: Int = 0
+    @Published private(set) var loggingStreak: Int = 0
 
     // O(1) словари для быстрого поиска
     private var entriesByDay: [Date: [FoodEntry]] = [:]
@@ -175,15 +176,17 @@ final class CalorieStore: ObservableObject {
         hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
         adherence = computePlanAdherence()
 
-        let (currentStreak, bestStreakVal) = computeStreak()
+        let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
         streak = currentStreak
         bestStreak = bestStreakVal
+        loggingStreak = currentLoggingStreak
     }
 
-    private func computeStreak() -> (current: Int, best: Int) {
+    private func computeStreak() -> (current: Int, best: Int, logging: Int) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
+        // On-goal streak (логирование + попадание в калории)
         var currentStreak = 0
         let todayTotal = (entriesByDay[today] ?? []).reduce(0) { $0 + $1.calories }
         if todayTotal > 0, todayTotal <= (goalsByDay[today] ?? effectiveGoal(for: today)) {
@@ -216,7 +219,18 @@ final class CalorieStore: ObservableObject {
             }
         }
 
-        return (currentStreak, max(best, currentStreak))
+        // Logging streak (просто есть записи за день)
+        var loggingStreak = 0
+        if todayTotal > 0 { loggingStreak += 1 }
+        var logDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
+        while true {
+            guard (entriesByDay[logDate] ?? []).reduce(0, { $0 + $1.calories }) > 0 else { break }
+            loggingStreak += 1
+            guard let prev = calendar.date(byAdding: .day, value: -1, to: logDate) else { break }
+            logDate = prev
+        }
+
+        return (currentStreak, max(best, currentStreak), loggingStreak)
     }
 
     /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём

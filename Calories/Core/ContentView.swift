@@ -155,13 +155,7 @@ struct ContentView: View {
                     Button {
                         showingStreakInfo = true
                     } label: {
-                        HStack(spacing: 3) {
-                            Image(systemName: "bolt.fill")
-                            Text("\(store.streak)")
-                                .font(.subheadline.bold())
-                                .monospacedDigit()
-                        }
-                        .foregroundStyle(store.streak > 0 ? .orange : .secondary)
+                        StreakBadge(streak: store.streak, loggingStreak: store.loggingStreak)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -192,8 +186,8 @@ struct ContentView: View {
                     .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingStreakInfo) {
-                StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak)
-                    .presentationDetents([.height(360)])
+                StreakInfoSheet(streak: store.streak, loggingStreak: store.loggingStreak, bestStreak: store.bestStreak)
+                    .presentationDetents([.height(420)])
                     .presentationDragIndicator(.visible)
             }
             .alert("Дневная цель", isPresented: $showingGoalEditor) {
@@ -227,7 +221,7 @@ private struct PlanCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("План", systemImage: "sparkles")
+                Label(plan.title, systemImage: "sparkles")
                     .font(.headline)
                     .foregroundStyle(.primary)
                 Spacer()
@@ -283,8 +277,29 @@ private struct StatCard: View {
     }
 }
 
+private struct StreakBadge: View {
+    let streak: Int
+    let loggingStreak: Int
+
+    private var isOnGoal: Bool { streak > 0 }
+    private var isLogging: Bool { loggingStreak > 0 }
+    private var displayCount: Int { isOnGoal ? streak : loggingStreak }
+    private var color: Color { isOnGoal ? .blue : (isLogging ? .orange : .secondary) }
+
+    var body: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "bolt.fill")
+            Text("\(displayCount)")
+                .font(.subheadline.bold())
+                .monospacedDigit()
+        }
+        .foregroundStyle(color)
+    }
+}
+
 private struct StreakInfoSheet: View {
     let streak: Int
+    let loggingStreak: Int
     let bestStreak: Int
 
     private func label(_ n: Int) -> String {
@@ -299,19 +314,9 @@ private struct StreakInfoSheet: View {
         VStack(spacing: 16) {
             Spacer()
 
-            HStack(alignment: .lastTextBaseline, spacing: 8) {
-                Image(systemName: "bolt.fill")
-                    .font(.system(size: 40))
-                    .foregroundStyle(streak > 0 ? .orange : .secondary)
-                Text("\(streak)")
-                    .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundStyle(streak > 0 ? .orange : .primary)
-                    .monospacedDigit()
-            }
-
-            Text(streak > 0 ? "\(label(streak)) подряд" : "Начни сегодня")
-                .font(.title3)
-                .foregroundStyle(.secondary)
+            StreakBadge(streak: streak, loggingStreak: loggingStreak)
+                .font(.system(size: 44))
+                .padding(.bottom, 4)
 
             if bestStreak > streak {
                 Label("Рекорд: \(bestStreak) \(label(bestStreak))", systemImage: "trophy.fill")
@@ -336,6 +341,7 @@ private struct StreakInfoSheet: View {
 
             Spacer()
         }
+        .padding(.horizontal, 16)
     }
 }
 

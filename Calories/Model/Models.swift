@@ -251,9 +251,9 @@ enum Goal: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .fatLoss: return "Потеря жира"
+        case .fatLoss: return "Снижение веса"
         case .maintenance: return "Поддержание"
-        case .muscleGain: return "Набор массы"
+        case .muscleGain: return "Набор веса"
         }
     }
 
@@ -373,6 +373,12 @@ struct Plan: Codable, Equatable {
         // Calendar.weekday: 1=Вс … 7=Сб. Приводим к Пн=0 … Вс=6.
         let weekday = Calendar.current.component(.weekday, from: date)
         return (weekday + 5) % 7
+    }
+
+    var title: String {
+        if targetWeightKg < startWeightKg { return "Снижение веса" }
+        if targetWeightKg > startWeightKg { return "Набор веса" }
+        return "Поддержание веса"
     }
 
     var endDate: Date {

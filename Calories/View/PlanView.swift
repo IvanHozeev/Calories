@@ -18,8 +18,12 @@ struct PlanView: View {
         _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
     }
 
+    private var currentWeight: Double {
+        store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 0
+    }
+
     private var startWeight: Double {
-        store.plan?.startWeightKg ?? store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 0
+        store.plan?.startWeightKg ?? currentWeight
     }
 
     private var targetWeight: Double? {
@@ -49,8 +53,16 @@ struct PlanView: View {
                     HStack {
                         Text("Текущий вес")
                         Spacer()
-                        Text(String(format: "%.1f кг", startWeight))
+                        Text(String(format: "%.1f кг", currentWeight))
                             .foregroundStyle(.secondary)
+                    }
+                    if let plan = store.plan, plan.startWeightKg != currentWeight {
+                        HStack {
+                            Text("Старт плана")
+                            Spacer()
+                            Text(String(format: "%.1f кг", plan.startWeightKg))
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 } footer: {
                     Text(store.latestWeight != nil
@@ -132,7 +144,7 @@ struct PlanView: View {
                     }
                 }
             }
-            .navigationTitle(store.plan == nil ? "Новый план" : "План")
+            .navigationTitle(store.plan.map(\.title) ?? "Новый план")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

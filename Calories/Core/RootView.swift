@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @ObservedObject var store: CalorieStore
+    @ObservedObject var stepStore: StepStore
     @State private var selectedTab = 0
 
     var body: some View {
@@ -21,6 +22,10 @@ struct RootView: View {
             }
             .tabItem { Label("Еда", systemImage: "fork.knife") }
             .tag(2)
+
+            StepsView(store: stepStore)
+                .tabItem { Label("Шаги", systemImage: "figure.walk") }
+                .tag(3)
         }
     }
 }

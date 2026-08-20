@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 import Combine
+import WidgetKit
 
 final class CalorieStore: ObservableObject {
     private let context: ModelContext
@@ -179,6 +180,10 @@ final class CalorieStore: ObservableObject {
         streak = currentStreak
         bestStreak = bestStreakVal
         loggingStreak = currentLoggingStreak
+
+        let groupDefaults = UserDefaults(suiteName: "group.calories.shared")
+        groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
+        groupDefaults?.set(todayGoal, forKey: "widget_goal_today")
     }
 
     private func computeStreak() -> (current: Int, best: Int, logging: Int) {
@@ -496,5 +501,6 @@ final class CalorieStore: ObservableObject {
         try? context.save()
         refresh()
         lockPastGoals()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 }

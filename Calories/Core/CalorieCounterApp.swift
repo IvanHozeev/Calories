@@ -5,6 +5,7 @@ import SwiftData
 struct CalorieCounterApp: App {
     private let container: ModelContainer
     @StateObject private var store: CalorieStore
+    @StateObject private var stepStore = StepStore()
 
     init() {
         do {
@@ -18,7 +19,7 @@ struct CalorieCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(store: store)
+            RootView(store: store, stepStore: stepStore)
         }
         .modelContainer(container)
     }

@@ -1,6 +1,7 @@
 @preconcurrency import HealthKit
 import Foundation
 import Combine
+import WidgetKit
 
 struct StepDay: Identifiable {
     let date: Date
@@ -14,6 +15,7 @@ final class StepStore: ObservableObject {
 
     @Published private(set) var stepsToday: Int = 0
     @Published private(set) var distanceTodayKm: Double = 0
+    @Published private(set) var activeCaloriesToday: Int = 0
     @Published private(set) var weekHistory: [StepDay] = []
     @Published private(set) var monthHistory: [StepDay] = []
     @Published private(set) var isAuthorized: Bool = false
@@ -36,19 +38,37 @@ final class StepStore: ObservableObject {
         guard HKHealthStore.isHealthDataAvailable() else { return }
         let types: Set<HKObjectType> = [
             HKQuantityType(.stepCount),
-            HKQuantityType(.distanceWalkingRunning)
+            HKQuantityType(.distanceWalkingRunning),
+            HKQuantityType(.activeEnergyBurned)
         ]
         healthStore.requestAuthorization(toShare: nil, read: types) { [weak self] success, _ in
             Task { @MainActor [weak self] in
                 self?.isAuthorized = success
-                if success { self?.fetchAll() }
+                if success {
+                    self?.fetchAll()
+                    self?.setupObserver()
+                }
             }
         }
+    }
+
+    private func setupObserver() {
+        let type = HKQuantityType(.stepCount)
+        let query = HKObserverQuery(sampleType: type, predicate: nil) { [weak self] _, _, error in
+            guard error == nil else { return }
+            Task { @MainActor [weak self] in
+                self?.fetchStepsToday()
+                self?.fetchDistanceToday()
+            }
+        }
+        healthStore.execute(query)
+        healthStore.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
     }
 
     func fetchAll() {
         fetchStepsToday()
         fetchDistanceToday()
+        fetchActiveCaloriesToday()
         fetchHistory(days: 30)
     }
 
@@ -65,6 +85,24 @@ final class StepStore: ObservableObject {
             Task { @MainActor [weak self] in
                 self?.stepsToday = steps
                 UserDefaults(suiteName: "group.calories.shared")?.set(steps, forKey: "widget_steps_today")
+                WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    private func fetchActiveCaloriesToday() {
+        let type = HKQuantityType(.activeEnergyBurned)
+        let start = Calendar.current.startOfDay(for: Date())
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date())
+        let query = HKStatisticsQuery(
+            quantityType: type,
+            quantitySamplePredicate: predicate,
+            options: .cumulativeSum
+        ) { [weak self] _, result, _ in
+            let kcal = Int(result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0)
+            Task { @MainActor [weak self] in
+                self?.activeCaloriesToday = kcal
             }
         }
         healthStore.execute(query)

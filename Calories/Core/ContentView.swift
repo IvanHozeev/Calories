@@ -33,38 +33,40 @@ struct ContentView: View {
                         NavigationLink {
                             ProfileView(store: store)
                         } label: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Image(systemName: "person.crop.circle.badge.questionmark")
-                                Text("Заполните профиль, чтобы рассчитать цель по калориям и белку")
                                     .font(.footnote)
-                                    .multilineTextAlignment(.leading)
+                                Text("Заполните профиль, чтобы рассчитать цель")
+                                    .font(.caption)
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.caption)
+                                    .font(.caption2)
                             }
                             .foregroundStyle(.blue)
-                            .padding()
-                            .background(Color.blue.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.blue.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
                     } else if !store.hasWeighedToday {
                         Button {
                             showingAddWeight = true
                         } label: {
-                            HStack {
+                            HStack(spacing: 8) {
                                 Image(systemName: "scalemass")
-                                Text("Не забудь взвеситься сегодня")
                                     .font(.footnote)
-                                    .multilineTextAlignment(.leading)
+                                Text("Не забудь взвеситься сегодня")
+                                    .font(.caption)
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.caption)
+                                    .font(.caption2)
                             }
                             .foregroundStyle(.orange)
-                            .padding()
-                            .background(Color.orange.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.orange.opacity(0.08))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                         }
                         .buttonStyle(.plain)
                     }
@@ -89,21 +91,6 @@ struct ContentView: View {
                         weightKg: store.weightKg,
                         suggestion: store.macroSuggestion
                     )
-
-                    HStack(spacing: 12) {
-                        StatCard(
-                            title: "Осталось",
-                            value: "\(store.remaining)",
-                            icon: "flame.fill",
-                            color: store.remaining >= 0 ? .green : .red
-                        )
-                        StatCard(
-                            title: "Приёмов пищи",
-                            value: "\(store.todayEntries.count)",
-                            icon: "fork.knife",
-                            color: .blue
-                        )
-                    }
 
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
@@ -155,7 +142,7 @@ struct ContentView: View {
                     Button {
                         showingStreakInfo = true
                     } label: {
-                        StreakBadge(streak: store.streak, loggingStreak: store.loggingStreak)
+                        StreakBadge(streak: store.streak)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -186,8 +173,8 @@ struct ContentView: View {
                     .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingStreakInfo) {
-                StreakInfoSheet(streak: store.streak, loggingStreak: store.loggingStreak, bestStreak: store.bestStreak)
-                    .presentationDetents([.height(420)])
+                StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)
+                    .presentationDetents([.height(500)])
                     .presentationDragIndicator(.visible)
             }
             .alert("Дневная цель", isPresented: $showingGoalEditor) {
@@ -254,42 +241,20 @@ private struct PlanCard: View {
     }
 }
 
-private struct StatCard: View {
-    let title: String
-    let value: String
-    let icon: String
-    let color: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: icon)
-                .foregroundStyle(color)
-            Text(value)
-                .font(.title2.bold())
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-}
-
 private struct StreakBadge: View {
     let streak: Int
-    let loggingStreak: Int
 
-    private var isOnGoal: Bool { streak > 0 }
-    private var isLogging: Bool { loggingStreak > 0 }
-    private var displayCount: Int { isOnGoal ? streak : loggingStreak }
-    private var color: Color { isOnGoal ? .blue : (isLogging ? .orange : .secondary) }
+    private var color: Color {
+        if streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
+        if streak >= 30 { return .red }
+        if streak >= 7 { return .orange }
+        return streak > 0 ? .orange : .secondary
+    }
 
     var body: some View {
         HStack(spacing: 3) {
-            Image(systemName: "bolt.fill")
-            Text("\(displayCount)")
+            Image(systemName: "flame.fill")
+            Text("\(streak)")
                 .font(.subheadline.bold())
                 .monospacedDigit()
         }
@@ -299,49 +264,120 @@ private struct StreakBadge: View {
 
 private struct StreakInfoSheet: View {
     let streak: Int
-    let loggingStreak: Int
     let bestStreak: Int
+    let store: CalorieStore
 
-    private func label(_ n: Int) -> String {
-        switch n % 10 {
-        case 1 where n % 100 != 11: return "День"
-        case 2...4 where !(n % 100 >= 12 && n % 100 <= 14): return "Дня"
-        default: return "Дней"
+    private var milestoneColor: Color {
+        if streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
+        if streak >= 30 { return .red }
+        if streak >= 7 { return .orange }
+        return streak > 0 ? .orange : .secondary
+    }
+
+    private var streakLabel: String {
+        switch streak % 10 {
+        case 1 where streak % 100 != 11: return "день подряд"
+        case 2...4 where !(streak % 100 >= 12 && streak % 100 <= 14): return "дня подряд"
+        default: return "дней подряд"
         }
     }
 
+    private let milestones: [(Int, String, String)] = [
+        (7, "7 дней", "flame"),
+        (14, "2 недели", "flame"),
+        (30, "Месяц", "trophy"),
+        (100, "100 дней", "star")
+    ]
+
     var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-
-            StreakBadge(streak: streak, loggingStreak: loggingStreak)
-                .font(.system(size: 44))
-                .padding(.bottom, 4)
-
-            if bestStreak > streak {
-                Label("Рекорд: \(bestStreak) \(label(bestStreak))", systemImage: "trophy.fill")
+        VStack(spacing: 0) {
+            VStack(spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(milestoneColor)
+                    Text("\(streak)")
+                        .font(.system(size: 56, weight: .bold, design: .rounded))
+                        .foregroundStyle(milestoneColor)
+                        .monospacedDigit()
+                }
+                Text(streakLabel)
                     .font(.subheadline)
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(.secondary)
+                if bestStreak > streak {
+                    Label("Рекорд: \(bestStreak) дней", systemImage: "trophy.fill")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.yellow)
+                        .padding(.top, 2)
+                }
             }
+            .padding(.top, 28)
+            .padding(.bottom, 20)
 
             Divider()
-                .padding(.horizontal, 32)
 
-            VStack(spacing: 8) {
-                Text("Чем выше стрик — тем лучше результат.")
-                    .font(.callout.weight(.medium))
-                    .multilineTextAlignment(.center)
-
-                Text("Если ты каждый день вмещаешься в норму, ты точно движешься к цели. Выйди за лимит — стрик обнулится.")
-                    .font(.callout)
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Последние 14 дней")
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+                miniCalendar
             }
-            .padding(.horizontal, 32)
+            .padding()
+
+            Divider()
+
+            HStack(spacing: 0) {
+                ForEach(milestones, id: \.0) { (days, label, icon) in
+                    let reached = streak >= days || bestStreak >= days
+                    VStack(spacing: 6) {
+                        Image(systemName: "\(icon).fill")
+                            .font(.title2)
+                            .foregroundStyle(reached ? .orange : Color(.systemGray4))
+                        Text(label)
+                            .font(.caption2)
+                            .foregroundStyle(reached ? .primary : .secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .padding()
 
             Spacer()
         }
-        .padding(.horizontal, 16)
+    }
+
+    private var miniCalendar: some View {
+        let history = store.goalHistory(days: 14)
+        return HStack(spacing: 0) {
+            ForEach(history, id: \.date) { day in
+                let isToday = Calendar.current.isDateInToday(day.date)
+                VStack(spacing: 4) {
+                    Circle()
+                        .fill(dotColor(for: day))
+                        .frame(width: 20, height: 20)
+                        .overlay(
+                            isToday
+                                ? Circle().stroke(Color.primary.opacity(0.5), lineWidth: 2)
+                                : nil
+                        )
+                    Text(dayLetter(day.date))
+                        .font(.system(size: 8))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private func dotColor(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
+        if day.onGoal { return .green }
+        if day.hasEntries { return .orange }
+        return Color(.systemGray5)
+    }
+
+    private func dayLetter(_ date: Date) -> String {
+        let weekday = Calendar.current.component(.weekday, from: date)
+        return ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][weekday - 1]
     }
 }
 

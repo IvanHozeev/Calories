@@ -31,6 +31,44 @@ struct StepsView: View {
         history.filter { $0.steps >= store.stepGoal }.count
     }
 
+    private var weeklyTotal: Int {
+        store.weekHistory.reduce(0) { $0 + $1.steps }
+    }
+
+    private var prevWeekAverage: Int {
+        let month = store.monthHistory
+        guard month.count >= 14 else { return 0 }
+        let prevWeek = Array(month.dropLast(7).suffix(7))
+        let nonZero = prevWeek.filter { $0.steps > 0 }
+        guard !nonZero.isEmpty else { return 0 }
+        return nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
+    }
+
+    private var trendPercent: Double? {
+        guard prevWeekAverage > 0, average > 0 else { return nil }
+        return Double(average - prevWeekAverage) / Double(prevWeekAverage) * 100
+    }
+
+    private var goalStreak: Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let sorted = store.monthHistory.sorted { $0.date > $1.date }
+        var streak = 0
+        var expected = today
+        for day in sorted {
+            let dayStart = calendar.startOfDay(for: day.date)
+            guard dayStart == expected else { break }
+            let steps = dayStart == today ? store.stepsToday : day.steps
+            if steps >= store.stepGoal {
+                streak += 1
+                expected = calendar.date(byAdding: .day, value: -1, to: expected) ?? expected
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -72,6 +110,7 @@ struct StepsView: View {
             VStack(spacing: 16) {
                 todayCard
                 chartCard
+                trendsCard
                 statsCard
             }
             .padding(.horizontal)
@@ -193,6 +232,62 @@ struct StepsView: View {
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var trendsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Обзор")
+                .font(.headline)
+
+            HStack(spacing: 0) {
+                trendCell
+                Divider().frame(height: 40)
+                statCell(
+                    title: "Стрик",
+                    value: "\(goalStreak)",
+                    subtitle: goalStreak == 1 ? "день" : "дней"
+                )
+                Divider().frame(height: 40)
+                statCell(
+                    title: "Неделя",
+                    value: weeklyTotal > 0 ? weeklyTotal.formatted() : "—",
+                    subtitle: "шагов"
+                )
+                Divider().frame(height: 40)
+                statCell(
+                    title: "Калории",
+                    value: store.activeCaloriesToday > 0 ? "\(store.activeCaloriesToday)" : "—",
+                    subtitle: "ккал актив."
+                )
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var trendCell: some View {
+        VStack(spacing: 4) {
+            if let trend = trendPercent {
+                HStack(spacing: 2) {
+                    Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
+                        .font(.caption.weight(.bold))
+                    Text(String(format: "%.0f%%", abs(trend)))
+                        .font(.title3.weight(.semibold))
+                        .monospacedDigit()
+                }
+                .foregroundStyle(trend >= 0 ? .green : .red)
+            } else {
+                Text("—")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+            Text("vs пред. неделя")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var statsCard: some View {

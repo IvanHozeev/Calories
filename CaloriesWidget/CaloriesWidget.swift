@@ -201,7 +201,7 @@ struct StepsProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<StepsEntry>) -> Void) {
         let entry = loadEntry()
-        let next = Calendar.current.date(byAdding: .minute, value: 30, to: Date()) ?? Date()
+        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
         completion(Timeline(entries: [entry], policy: .after(next)))
     }
 

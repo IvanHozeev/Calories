@@ -76,13 +76,18 @@ struct ProgressRing: View {
     private var centerLabel: some View {
         switch mode {
         case .calories:
-            VStack(spacing: 4) {
+            let remaining = goal - consumed
+            VStack(spacing: 2) {
                 Text("\(consumed)")
                     .font(.system(size: 42, weight: .bold, design: .rounded))
                     .contentTransition(.numericText())
                 Text("из \(goal) ккал")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text(remaining >= 0 ? "\(remaining) осталось" : "перебор \(-remaining)")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(remaining >= 0 ? .green : .red)
+                    .contentTransition(.numericText())
             }
         case .protein:
             macroCenter("Белок", value: macros.protein, target: proteinTarget, color: .blue)

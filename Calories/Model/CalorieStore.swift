@@ -186,6 +186,17 @@ final class CalorieStore: ObservableObject {
         groupDefaults?.set(todayGoal, forKey: "widget_goal_today")
     }
 
+    func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return (0..<days).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
+            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
+            return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
+        }
+    }
+
     private func computeStreak() -> (current: Int, best: Int, logging: Int) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())

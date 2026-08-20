@@ -8,10 +8,12 @@ struct NewDishSheet: View {
     @State private var name = ""
     @State private var ingredients: [DishIngredient] = []
     @State private var showingIngredientPicker = false
+    @State private var showDiscardAlert = false
 
     private var totalCalories: Int { ingredients.reduce(0) { $0 + $1.calories } }
     private var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && !ingredients.isEmpty }
+    private var hasChanges: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty || !ingredients.isEmpty }
 
     var body: some View {
         NavigationStack {
@@ -67,9 +69,20 @@ struct NewDishSheet: View {
             }
             .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(hasChanges)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                    Button("Отмена") {
+                        if hasChanges {
+                            showDiscardAlert = true
+                        } else {
+                            dismiss()
+                        }
+                    }
+                    .confirmationDialog("Отменить изменения?", isPresented: $showDiscardAlert, titleVisibility: .visible) {
+                        Button("Отменить изменения", role: .destructive) { dismiss() }
+                        Button("Продолжить", role: .cancel) {}
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     CheckmarkButton {

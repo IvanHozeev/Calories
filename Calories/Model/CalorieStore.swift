@@ -145,7 +145,6 @@ final class CalorieStore: ObservableObject {
         goalsByDay = Dictionary(uniqueKeysWithValues: goalRecords.map {
             (calendar.startOfDay(for: $0.date), $0.goal)
         })
-
         // Агрегаты за сегодня — один проход по entries
         todayEntries = entries.filter { calendar.isDateInToday($0.date) }
         consumedToday = todayEntries.reduce(0) { $0 + $1.calories }

@@ -58,11 +58,25 @@ struct AddEntryView: View {
         return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
 
+    private var filteredDishes: [Dish] {
+        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return store.dishes
+        }
+        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+
     private var recentFoodItems: [FoodItem] {
         guard searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
         let all = store.customFoods + FoodDatabase.items
         return store.recentFoodNames.prefix(8).compactMap { name in
             all.first { $0.name == name }
+        }
+    }
+
+    private var recentDishItems: [Dish] {
+        guard searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        return store.recentFoodNames.prefix(8).compactMap { name in
+            store.dishes.first { $0.name == name }
         }
     }
 
@@ -138,8 +152,8 @@ struct AddEntryView: View {
                         Text("Для восстановления данных за прошлый день: впиши сколько всего было съедено — сохранится сразу, без черновика. Если уже добавлены другие продукты выше, они попадут в ту же запись.")
                     }
                 }
-                
-                if !recentFoodItems.isEmpty {
+
+                if !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
                             NavigationLink {
@@ -148,6 +162,29 @@ struct AddEntryView: View {
                                 }
                             } label: {
                                 foodRow(food)
+                            }
+                        }
+                        ForEach(recentDishItems) { dish in
+                            NavigationLink {
+                                DishQuantityView(dish: dish) { item in
+                                    draftItems.append(item)
+                                }
+                            } label: {
+                                dishRow(dish)
+                            }
+                        }
+                    }
+                }
+
+                if !filteredDishes.isEmpty {
+                    Section("Мои блюда") {
+                        ForEach(filteredDishes) { dish in
+                            NavigationLink {
+                                DishQuantityView(dish: dish) { item in
+                                    draftItems.append(item)
+                                }
+                            } label: {
+                                dishRow(dish)
                             }
                         }
                     }
@@ -260,6 +297,21 @@ struct AddEntryView: View {
             }
             Spacer()
             Text("\(food.caloriesPer100g) ккал/100г")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func dishRow(_ dish: Dish) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(dish.name)
+                Text("Б\(Int(dish.macrosPer100g.protein)) Ж\(Int(dish.macrosPer100g.fat)) У\(Int(dish.macrosPer100g.carbs))")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Text("\(dish.caloriesPer100g) ккал/100г")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

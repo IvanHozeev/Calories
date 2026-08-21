@@ -4,14 +4,16 @@ import SwiftData
 struct FoodQuantityView: View {
     let food: FoodItem
     let onAdd: (MealItem) -> Void
+    var onSave: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var grams: Double
     @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
 
-    init(food: FoodItem, onAdd: @escaping (MealItem) -> Void) {
+    init(food: FoodItem, onSave: (() -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.food = food
+        self.onSave = onSave
         self.onAdd = onAdd
         let g = food.defaultGrams > 0 ? food.defaultGrams : 100
         _grams = State(initialValue: g)
@@ -64,16 +66,19 @@ struct FoodQuantityView: View {
                         }
                 }
 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                    ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
-                        Button("\(value) г") {
-                            grams = Double(value)
-                            gramsText = "\(value)"
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
+                            Button("\(value) г") {
+                                grams = Double(value)
+                                gramsText = "\(value)"
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
                     }
+                    .padding(.vertical, 2)
                 }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
         }
         .navigationTitle("Порция")
@@ -85,6 +90,19 @@ struct FoodQuantityView: View {
                     dismiss()
                 }
                 .fontWeight(.semibold)
+            }
+            if let onSave {
+                ToolbarItem(placement: .bottomBar) {
+                    Button {
+                        onSave()
+                        dismiss()
+                    } label: {
+                        Label("Сохранить в мои продукты", systemImage: "bookmark")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                }
             }
         }
     }
@@ -160,16 +178,19 @@ struct DishQuantityView: View {
                         }
                 }
 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                    ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
-                        Button("\(value) г") {
-                            grams = Double(value)
-                            gramsText = "\(value)"
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
+                            Button("\(value) г") {
+                                grams = Double(value)
+                                gramsText = "\(value)"
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
                     }
+                    .padding(.vertical, 2)
                 }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
 
             if !dish.ingredients.isEmpty {
@@ -283,16 +304,19 @@ struct FoodDetailView: View {
                         }
                 }
 
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
-                    ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
-                        Button("\(value) г") {
-                            grams = Double(value)
-                            gramsText = "\(value)"
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
+                            Button("\(value) г") {
+                                grams = Double(value)
+                                gramsText = "\(value)"
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        .buttonStyle(.bordered)
-                        .frame(maxWidth: .infinity)
                     }
+                    .padding(.vertical, 2)
                 }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             } header: {
                 Text("Порция по умолчанию")
             } footer: {

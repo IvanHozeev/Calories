@@ -182,6 +182,17 @@ struct ProfileView: View {
 
                 if let draftProfile {
                     Section("Расчёт") {
+                        HStack {
+                            Text("ИМТ")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(String(format: "%.1f", draftProfile.bmi))
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(bmiColor(draftProfile.bmi))
+                            Text("· \(bmiLabel(draftProfile.bmi))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                         resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) ккал")
                         resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) ккал")
                         resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) ккал", highlighted: true)
@@ -242,6 +253,24 @@ struct ProfileView: View {
                 AddWeightView(store: store)
                     .presentationDetents([.medium])
             }
+    }
+
+    private func bmiColor(_ bmi: Double) -> Color {
+        switch bmi {
+        case ..<18.5: return .blue
+        case 18.5..<25: return .green
+        case 25..<30: return .yellow
+        default: return .red
+        }
+    }
+
+    private func bmiLabel(_ bmi: Double) -> String {
+        switch bmi {
+        case ..<18.5: return "Недовес"
+        case 18.5..<25: return "Норма"
+        case 25..<30: return "Избыточный"
+        default: return "Ожирение"
+        }
     }
 
     private func resultRow(title: String, value: String, highlighted: Bool = false) -> some View {

@@ -109,7 +109,7 @@ struct WeightView: View {
                             Button(role: .destructive) {
                                 store.deleteWeight(entry)
                             } label: {
-                                Label("Удалить", systemImage: "trash")
+                                Image(systemName: "trash")
                             }
                         }
                     }

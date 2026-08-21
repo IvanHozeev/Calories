@@ -4,7 +4,6 @@ struct MyFoodView: View {
     @ObservedObject var store: CalorieStore
     @State private var showingNewFood = false
     @State private var showingNewDish = false
-    @State private var editingDish: Dish? = nil
     @State private var showingScanner = false
 
     var body: some View {
@@ -39,9 +38,6 @@ struct MyFoodView: View {
         .sheet(isPresented: $showingNewDish) {
             NewDishSheet(store: store)
         }
-        .sheet(item: $editingDish) { dish in
-            NewDishSheet(store: store, editingDish: dish)
-        }
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerSheet(store: store)
         }
@@ -58,29 +54,24 @@ struct MyFoodView: View {
     private var dishesSection: some View {
         Section {
             ForEach(store.dishes) { dish in
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(dish.name)
-                    Text("\(dish.ingredients.count) ингр. · \(dish.totalCalories) ккал · Б\(Int(dish.totalMacros.protein)) Ж\(Int(dish.totalMacros.fat)) У\(Int(dish.totalMacros.carbs))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                NavigationLink {
+                    NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
+                } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(dish.name)
+                        Text("\(dish.ingredients.count) ингр. · \(dish.totalCalories) ккал · Б\(Int(dish.totalMacros.protein)) Ж\(Int(dish.totalMacros.fat)) У\(Int(dish.totalMacros.carbs))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .swipeActions(edge: .trailing) {
                     Button(role: .destructive) {
                         store.deleteDish(dish)
                     } label: {
-                        Label("Удалить", systemImage: "trash")
+                        Image(systemName: "trash")
                     }
-                }
-                .swipeActions(edge: .leading) {
-                    Button {
-                        editingDish = dish
-                    } label: {
-                        Label("Изменить", systemImage: "pencil")
-                    }
-                    .tint(.blue)
                 }
             }
-
         } header: {
             Text("Мои блюда")
         }
@@ -103,7 +94,7 @@ struct MyFoodView: View {
                     Button(role: .destructive) {
                         store.deleteCustomFood(food)
                     } label: {
-                        Label("Удалить", systemImage: "trash")
+                        Image(systemName: "trash")
                     }
                 }
             }

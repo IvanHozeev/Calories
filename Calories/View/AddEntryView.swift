@@ -106,7 +106,7 @@ struct AddEntryView: View {
             } else {
                 ForEach(offResults) { food in
                     NavigationLink {
-                        FoodQuantityView(food: food) { item in
+                        FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }) { item in
                             draftItems.append(item)
                         }
                     } label: {
@@ -238,14 +238,14 @@ struct AddEntryView: View {
                                 Button(role: .destructive) {
                                     store.deleteCustomFood(food)
                                 } label: {
-                                    Label("Удалить", systemImage: "trash")
+                                    Image(systemName: "trash")
                                 }
                             }
                             .swipeActions(edge: .leading) {
                                 Button {
                                     editingFood = food
                                 } label: {
-                                    Label("Изменить", systemImage: "pencil")
+                                    Image(systemName: "pencil")
                                 }
                                 .tint(.blue)
                             }
@@ -264,7 +264,7 @@ struct AddEntryView: View {
                     } else {
                         ForEach(filteredBuiltInFoods) { food in
                             NavigationLink {
-                                FoodQuantityView(food: food) { item in
+                                FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -366,6 +366,20 @@ struct AddEntryView: View {
         dayComponents.minute = timeComponents.minute
         dayComponents.second = timeComponents.second
         return calendar.date(from: dayComponents) ?? selectedDate
+    }
+
+    private func isSaved(_ food: FoodItem) -> Bool {
+        store.customFoods.contains { $0.name == food.name }
+    }
+
+    private func saveToMyFoods(_ food: FoodItem) {
+        store.addCustomFood(
+            name: food.name,
+            caloriesPer100g: food.caloriesPer100g,
+            protein: food.protein,
+            fat: food.fat,
+            carbs: food.carbs
+        )
     }
 
     private func foodRow(_ food: FoodItem) -> some View {

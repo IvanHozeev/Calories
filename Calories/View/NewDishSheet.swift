@@ -4,6 +4,7 @@ struct NewDishSheet: View {
     @ObservedObject var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
     var editingDish: Dish? = nil
+    var isEmbedded: Bool = false
 
     @State private var name = ""
     @State private var ingredients: [DishIngredient] = []
@@ -16,99 +17,101 @@ struct NewDishSheet: View {
     private var hasChanges: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty || !ingredients.isEmpty }
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section("Название") {
-                    TextField("Борщ, куриная грудка с рисом...", text: $name)
-                }
+        if isEmbedded {
+            listContent
+        } else {
+            NavigationStack { listContent }
+        }
+    }
 
-                Section("Состав") {
-                    ForEach(ingredients) { ingredient in
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(ingredient.foodName)
-                                Text("\(Int(ingredient.grams)) г")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text("\(ingredient.calories) ккал")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .onDelete { offsets in
-                        ingredients.remove(atOffsets: offsets)
-                    }
+    private var listContent: some View {
+        List {
+            Section("Название") {
+                TextField("Борщ, куриная грудка с рисом...", text: $name)
+            }
 
-                    Button {
-                        showingIngredientPicker = true
-                    } label: {
-                        Label("Добавить ингредиент", systemImage: "plus")
-                    }
-                }
-
-                if !ingredients.isEmpty {
-                    Section {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("\(totalCalories) ккал")
-                                    .font(.headline)
-                                Text("Б\(Int(totalMacros.protein)) Ж\(Int(totalMacros.fat)) У\(Int(totalMacros.carbs))")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text("\(Int(ingredients.reduce(0) { $0 + $1.grams })) г всего")
+            Section("Состав") {
+                ForEach(ingredients) { ingredient in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(ingredient.foodName)
+                            Text("\(Int(ingredient.grams)) г")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                    } header: {
-                        Text("Итого")
+                        Spacer()
+                        Text("\(ingredient.calories) ккал")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .onDelete { offsets in
+                    ingredients.remove(atOffsets: offsets)
+                }
+
+                Button {
+                    showingIngredientPicker = true
+                } label: {
+                    Label("Добавить ингредиент", systemImage: "plus")
+                }
+            }
+
+            if !ingredients.isEmpty {
+                Section("Итого") {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(totalCalories) ккал")
+                                .font(.headline)
+                            Text("Б\(Int(totalMacros.protein)) Ж\(Int(totalMacros.fat)) У\(Int(totalMacros.carbs))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text("\(Int(ingredients.reduce(0) { $0 + $1.grams })) г всего")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
-            .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
-            .navigationBarTitleDisplayMode(.inline)
-            .interactiveDismissDisabled(hasChanges)
-            .toolbar {
+        }
+        .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
+        .navigationBarTitleDisplayMode(.inline)
+        .interactiveDismissDisabled(!isEmbedded && hasChanges)
+        .confirmationDialog("Отменить изменения?", isPresented: $showDiscardAlert, titleVisibility: .visible) {
+            Button("Отменить изменения", role: .destructive) { dismiss() }
+            Button("Продолжить", role: .cancel) {}
+        }
+        .toolbar {
+            if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") {
-                        if hasChanges {
-                            showDiscardAlert = true
-                        } else {
-                            dismiss()
-                        }
+                        if hasChanges { showDiscardAlert = true } else { dismiss() }
                     }
-                    .confirmationDialog("Отменить изменения?", isPresented: $showDiscardAlert, titleVisibility: .visible) {
-                        Button("Отменить изменения", role: .destructive) { dismiss() }
-                        Button("Продолжить", role: .cancel) {}
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    CheckmarkButton {
-                        let trimmed = name.trimmingCharacters(in: .whitespaces)
-                        guard !trimmed.isEmpty, !ingredients.isEmpty else { return }
-                        if let dish = editingDish {
-                            store.updateDish(dish, name: trimmed, ingredients: ingredients)
-                        } else {
-                            store.addDish(name: trimmed, ingredients: ingredients)
-                        }
-                        dismiss()
-                    }
-                    .disabled(!canSave)
-                    .fontWeight(.semibold)
                 }
             }
-            .sheet(isPresented: $showingIngredientPicker) {
-                IngredientPickerSheet(store: store) { ingredient in
-                    ingredients.append(ingredient)
+            ToolbarItem(placement: .confirmationAction) {
+                CheckmarkButton {
+                    let trimmed = name.trimmingCharacters(in: .whitespaces)
+                    guard !trimmed.isEmpty, !ingredients.isEmpty else { return }
+                    if let dish = editingDish {
+                        store.updateDish(dish, name: trimmed, ingredients: ingredients)
+                    } else {
+                        store.addDish(name: trimmed, ingredients: ingredients)
+                    }
+                    dismiss()
                 }
+                .disabled(!canSave)
+                .fontWeight(.semibold)
             }
-            .onAppear {
-                if let dish = editingDish {
-                    name = dish.name
-                    ingredients = dish.ingredients
-                }
+        }
+        .sheet(isPresented: $showingIngredientPicker) {
+            IngredientPickerSheet(store: store) { ingredient in
+                ingredients.append(ingredient)
+            }
+        }
+        .onAppear {
+            if let dish = editingDish {
+                name = dish.name
+                ingredients = dish.ingredients
             }
         }
     }

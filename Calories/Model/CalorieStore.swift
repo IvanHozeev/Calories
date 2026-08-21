@@ -35,6 +35,8 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var loggingStreak: Int = 0
     @Published private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
     @Published private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
+    @Published private(set) var adaptedTodayGoal: Int = 0
+    @Published private(set) var calorieBankBonus: Int = 0
 
     // O(1) словари для быстрого поиска
     private var entriesByDay: [Date: [FoodEntry]] = [:]
@@ -96,6 +98,7 @@ final class CalorieStore: ObservableObject {
         if let profile {
             dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
         }
+        rebuildCaches()
     }
 
     /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
@@ -105,6 +108,7 @@ final class CalorieStore: ObservableObject {
         if let profile {
             dailyGoal = profile.calorieTarget
         }
+        rebuildCaches()
     }
 
     /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
@@ -197,9 +201,13 @@ final class CalorieStore: ObservableObject {
             return (period, entries.sorted { $0.date < $1.date })
         }
 
+        let adapted = computeAdaptedTodayGoal()
+        adaptedTodayGoal = adapted
+        calorieBankBonus = adapted - effectiveGoal(for: Date())
+
         let groupDefaults = UserDefaults(suiteName: "group.calories.shared")
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
-        groupDefaults?.set(todayGoal, forKey: "widget_goal_today")
+        groupDefaults?.set(adaptedTodayGoal, forKey: "widget_goal_today")
     }
 
     func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {
@@ -335,18 +343,51 @@ final class CalorieStore: ObservableObject {
         return nil
     }
 
-    /// Цель на сегодня — то, что показывается в кольце/статистике.
+    /// Базовая цель на сегодня без поправки банка.
     var todayGoal: Int {
         effectiveGoal(for: Date())
     }
 
     var remaining: Int {
-        todayGoal - consumedToday
+        adaptedTodayGoal - consumedToday
     }
 
     var progress: Double {
-        guard todayGoal > 0 else { return 0 }
-        return min(Double(consumedToday) / Double(todayGoal), 1.0)
+        guard adaptedTodayGoal > 0 else { return 0 }
+        return min(Double(consumedToday) / Double(adaptedTodayGoal), 1.0)
+    }
+
+    /// Адаптированная цель с учётом недельного банка калорий.
+    /// Если сэкономил раньше на неделе — норма растёт. Если перерасход — снижается.
+    private func computeAdaptedTodayGoal() -> Int {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let weekday = calendar.component(.weekday, from: today)
+        // (weekday+5)%7: Sun(1)→6, Mon(2)→0, Tue(3)→1, ..., Sat(7)→5
+        let daysFromMonday = (weekday + 5) % 7
+
+        guard daysFromMonday > 0,
+              let monday = calendar.date(byAdding: .day, value: -daysFromMonday, to: today) else {
+            return effectiveGoal(for: today)
+        }
+
+        let remainingDays = 7 - daysFromMonday
+        var weeklyGoalPast = 0
+        var weeklyConsumedPast = 0
+
+        for offset in 0..<daysFromMonday {
+            guard let date = calendar.date(byAdding: .day, value: offset, to: monday) else { continue }
+            let dayEntries = entriesByDay[date] ?? []
+            guard !dayEntries.isEmpty else { continue }
+            weeklyGoalPast += goal(for: date)
+            weeklyConsumedPast += dayEntries.reduce(0) { $0 + $1.calories }
+        }
+
+        let bank = weeklyGoalPast - weeklyConsumedPast
+        let baseGoal = effectiveGoal(for: today)
+        let bankPerDay = bank / remainingDays
+        let cappedBonus = min(bankPerDay, 500)
+        return max(baseGoal + cappedBonus, 1000)
     }
 
     /// Сводка за конкретный день — O(1) через entriesByDay.

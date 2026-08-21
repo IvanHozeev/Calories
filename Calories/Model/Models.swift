@@ -302,27 +302,42 @@ struct UserProfile: Codable, Equatable {
     }
 }
 
-/// Выбор дней выходных для недельного цикла калорий.
+/// Паттерн недельного цикла калорий.
 /// Пн=0…Вс=6; смещения в каждом случае суммируются в 0, среднее остаётся неизменным.
 enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
+    case monTue   // рефид в начале недели: Пн+Вт
     case satSun   // стандартный мир: Сб+Вс
     case friSat   // Израиль: Пт+Сб
+    case sunMon   // Израиль: Вс+Пн
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
+        case .monTue: return "Пн — Вт"
         case .satSun: return "Сб — Вс"
-        case .friSat: return "Пт — Сб (Израиль)"
+        case .friSat: return "Пт — Сб"
+        case .sunMon: return "Вс — Пн"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .monTue: return "Рефид в начале недели"
+        case .satSun: return "Рефид на выходных"
+        case .friSat: return "Рефид на выходных (Израиль)"
+        case .sunMon: return "Рефид в начале недели (Израиль)"
         }
     }
 
     /// Смещения от среднего по дням Пн=0…Вс=6.
-    /// Сумма = 0; рабочие дни ниже нормы, выходные — рефид.
+    /// Сумма = 0; рефид-дни выше нормы, остальные — ниже.
     var cycleOffsets: [Double] {
         switch self {
+        case .monTue: return [0.14, 0.30, -0.08, -0.12, -0.08, -0.08, -0.08]
         case .satSun: return [-0.08, -0.08, -0.12, -0.08, -0.08, 0.14, 0.30]
         case .friSat: return [-0.08, -0.08, -0.12, -0.08, 0.30, 0.14, -0.08]
+        case .sunMon: return [0.14, -0.08, -0.12, -0.08, -0.08, -0.08, 0.30]
         }
     }
 }

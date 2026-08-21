@@ -142,6 +142,14 @@ struct ProfileView: View {
                         resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) г", highlighted: true)
                     }
                 }
+
+                Section("Настройки") {
+                    NavigationLink {
+                        RemindersView()
+                    } label: {
+                        Label("Напоминания", systemImage: "bell")
+                    }
+                }
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Профиль")

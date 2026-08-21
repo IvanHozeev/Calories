@@ -24,6 +24,7 @@ struct ContentView: View {
     @State private var showingAddWeight = false
     @State private var showingGoalEditor = false
     @State private var showingStreakInfo = false
+    @State private var showingBankInfo = false
     @State private var editingEntry: FoodEntry? = nil
     @State private var goalText = ""
 
@@ -33,7 +34,7 @@ struct ContentView: View {
                 VStack(spacing: 24) {
                     ProgressRing(
                         consumed: store.consumedToday,
-                        goal: store.todayGoal,
+                        goal: store.adaptedTodayGoal,
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
                         fatTarget: store.fatTarget,
@@ -44,6 +45,33 @@ struct ContentView: View {
                         guard store.plan?.cyclingEnabled != true else { return }
                         goalText = String(store.dailyGoal)
                         showingGoalEditor = true
+                    }
+
+                    if store.calorieBankBonus != 0 {
+                        Button { showingBankInfo = true } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                                    .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
+                                Text(store.calorieBankBonus > 0
+                                     ? "+\(store.calorieBankBonus) ккал из недели"
+                                     : "\(store.calorieBankBonus) ккал из недели")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color(.secondarySystemGroupedBackground))
+                            .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        .popover(isPresented: $showingBankInfo) {
+                            CalorieBankPopover(
+                                bonus: store.calorieBankBonus,
+                                baseGoal: store.todayGoal,
+                                adaptedGoal: store.adaptedTodayGoal
+                            )
+                            .presentationCompactAdaptation(.popover)
+                        }
                     }
 
                     if store.profile == nil {
@@ -156,6 +184,7 @@ struct ContentView: View {
                 .padding(.bottom, 80)
                 .containerRelativeFrame(.horizontal)
             }
+            .refreshable { store.refresh() }
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
             .background(Color(.systemGroupedBackground))
@@ -202,7 +231,7 @@ struct ContentView: View {
                     .presentationDragIndicator(.visible)
             }
             .onChange(of: store.consumedToday) { oldValue, newValue in
-                let goal = store.todayGoal
+                let goal = store.adaptedTodayGoal
                 if oldValue < goal && newValue >= goal {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                 }
@@ -407,6 +436,52 @@ private struct StreakInfoSheet: View {
     private func dayLetter(_ date: Date) -> String {
         let weekday = Calendar.current.component(.weekday, from: date)
         return ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][weekday - 1]
+    }
+}
+
+private struct CalorieBankPopover: View {
+    let bonus: Int
+    let baseGoal: Int
+    let adaptedGoal: Int
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Недельный баланс")
+                .font(.headline)
+            Text(bonus > 0
+                 ? "На этой неделе ты сэкономил калории — они распределены по оставшимся дням."
+                 : "На этой неделе был перерасход — норма сегодня снижена.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 8) {
+                HStack {
+                    Text("Базовая норма")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text("\(baseGoal) ккал")
+                }
+                HStack {
+                    Text("Из банка недели")
+                        .foregroundStyle(bonus > 0 ? .green : .orange)
+                    Spacer()
+                    Text(bonus > 0 ? "+\(bonus)" : "\(bonus)")
+                        .foregroundStyle(bonus > 0 ? .green : .orange)
+                        .fontWeight(.medium)
+                }
+                Divider()
+                HStack {
+                    Text("Итого сегодня")
+                        .fontWeight(.semibold)
+                    Spacer()
+                    Text("\(adaptedGoal) ккал")
+                        .fontWeight(.semibold)
+                }
+            }
+            .font(.caption)
+        }
+        .padding()
+        .frame(minWidth: 240)
     }
 }
 

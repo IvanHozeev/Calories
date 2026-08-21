@@ -90,14 +90,25 @@ struct PlanView: View {
                 Section {
                     Toggle("Недельный цикл калорий", isOn: $cyclingEnabled)
                     if cyclingEnabled {
-                        Picker("Выходные дни", selection: $weekendStyle) {
+                        Picker("Рефид-дни", selection: $weekendStyle) {
                             ForEach(WeekendStyle.allCases) { style in
-                                Text(style.title).tag(style)
+                                VStack(alignment: .leading) {
+                                    Text(style.title)
+                                    Text(style.subtitle)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                .tag(style)
                             }
                         }
+                        .pickerStyle(.navigationLink)
                     }
                 } footer: {
-                    Text("Автоматически распределяет калории по дням недели: чуть меньше в будни, рефид на выходных. Среднее за неделю остаётся тем же — меняется только распределение.")
+                    if cyclingEnabled {
+                        Text("В \(weekendStyle.title) калорий больше, в остальные дни — меньше. Среднее за неделю остаётся тем же.")
+                    } else {
+                        Text("Одинаковая норма каждый день. Включи цикл, если хочешь распределить калории по дням недели с рефид-днями.")
+                    }
                 }
 
                 if cyclingEnabled, let draftPlan {

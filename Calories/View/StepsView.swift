@@ -4,50 +4,8 @@ import HealthKit
 
 struct StepsView: View {
     @ObservedObject var store: StepStore
-    @State private var period: StepPeriod = .week
     @State private var showingGoalEditor = false
     @State private var goalText = ""
-
-    enum StepPeriod: String, CaseIterable {
-        case week = "7 дней"
-        case month = "30 дней"
-    }
-
-    private var history: [StepDay] {
-        period == .week ? store.weekHistory : store.monthHistory
-    }
-
-    private var average: Int {
-        let nonZero = history.filter { $0.steps > 0 }
-        guard !nonZero.isEmpty else { return 0 }
-        return nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
-    }
-
-    private var best: StepDay? {
-        history.max(by: { $0.steps < $1.steps })
-    }
-
-    private var daysOnGoal: Int {
-        history.filter { $0.steps >= store.stepGoal }.count
-    }
-
-    private var weeklyTotal: Int {
-        store.weekHistory.reduce(0) { $0 + $1.steps }
-    }
-
-    private var prevWeekAverage: Int {
-        let month = store.monthHistory
-        guard month.count >= 14 else { return 0 }
-        let prevWeek = Array(month.dropLast(7).suffix(7))
-        let nonZero = prevWeek.filter { $0.steps > 0 }
-        guard !nonZero.isEmpty else { return 0 }
-        return nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
-    }
-
-    private var trendPercent: Double? {
-        guard prevWeekAverage > 0, average > 0 else { return nil }
-        return Double(average - prevWeekAverage) / Double(prevWeekAverage) * 100
-    }
 
     var body: some View {
         NavigationStack {
@@ -57,7 +15,7 @@ struct StepsView: View {
                 } else if !store.isAuthorized {
                     authView
                 } else {
-                    mainContent
+                    StepsContentView(store: store)
                 }
             }
             .navigationTitle("Шаги")
@@ -85,7 +43,72 @@ struct StepsView: View {
         }
     }
 
-    private var mainContent: some View {
+    private var authView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "figure.walk.circle")
+                .font(.system(size: 64))
+                .foregroundStyle(.blue)
+            Text("Доступ к шагам")
+                .font(.title2.weight(.semibold))
+            Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+            Button("Разрешить доступ") {
+                store.requestAuthorization()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var unavailableView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "exclamationmark.circle")
+                .font(.system(size: 64))
+                .foregroundStyle(.secondary)
+            Text("Недоступно")
+                .font(.title2.weight(.semibold))
+            Text("Данные о шагах недоступны на этом устройстве.")
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+        }
+        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct StepsContentView: View {
+    @ObservedObject var store: StepStore
+
+    enum StepPeriod: String, CaseIterable {
+        case week = "7 дней"
+        case month = "30 дней"
+    }
+
+    @State private var period: StepPeriod = .week
+    @State private var average: Int = 0
+    @State private var best: StepDay? = nil
+    @State private var daysOnGoal: Int = 0
+
+    private var history: [StepDay] {
+        period == .week ? store.weekHistory : store.monthHistory
+    }
+
+    private var trendPercent: Double? {
+        guard store.prevWeekAverage > 0, average > 0 else { return nil }
+        return Double(average - store.prevWeekAverage) / Double(store.prevWeekAverage) * 100
+    }
+
+    private func recomputePeriodStats() {
+        let h = history
+        let nonZero = h.filter { $0.steps > 0 }
+        average = nonZero.isEmpty ? 0 : nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
+        best = h.max(by: { $0.steps < $1.steps })
+        daysOnGoal = h.filter { $0.steps >= store.stepGoal }.count
+    }
+
+    var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 todayCard
@@ -104,6 +127,10 @@ struct StepsView: View {
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.hidden)
         .background(Color(.systemGroupedBackground))
+        .onAppear { recomputePeriodStats() }
+        .onChange(of: period) { _, _ in recomputePeriodStats() }
+        .onChange(of: store.weekHistory.count) { _, _ in recomputePeriodStats() }
+        .onChange(of: store.monthHistory.count) { _, _ in recomputePeriodStats() }
     }
 
     private var todayCard: some View {
@@ -210,6 +237,7 @@ struct StepsView: View {
                     }
                 }
                 .frame(height: 180)
+                .drawingGroup()
                 .animation(.easeInOut, value: period)
             }
         }
@@ -234,7 +262,7 @@ struct StepsView: View {
                 Divider().frame(height: 40)
                 statCell(
                     title: "Неделя",
-                    value: weeklyTotal > 0 ? weeklyTotal.formatted() : "—",
+                    value: store.weeklyTotal > 0 ? store.weeklyTotal.formatted() : "—",
                     subtitle: "шагов"
                 )
                 Divider().frame(height: 40)
@@ -315,39 +343,5 @@ struct StepsView: View {
             }
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private var authView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "figure.walk.circle")
-                .font(.system(size: 64))
-                .foregroundStyle(.blue)
-            Text("Доступ к шагам")
-                .font(.title2.weight(.semibold))
-            Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-            Button("Разрешить доступ") {
-                store.requestAuthorization()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var unavailableView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.circle")
-                .font(.system(size: 64))
-                .foregroundStyle(.secondary)
-            Text("Недоступно")
-                .font(.title2.weight(.semibold))
-            Text("Данные о шагах недоступны на этом устройстве.")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
-        }
-        .padding(32)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

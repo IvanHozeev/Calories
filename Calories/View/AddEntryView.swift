@@ -14,6 +14,10 @@ struct AddEntryView: View {
     @State private var showingScanner = false
     @State private var editingFood: FoodItem? = nil
 
+    @State private var offResults: [FoodItem] = []
+    @State private var isSearchingOFF = false
+    @State private var noNetwork = false
+
     @FocusState private var quickCaloriesFocused: Bool
 
     init(store: CalorieStore, initialDate: Date = Date()) {
@@ -79,6 +83,37 @@ struct AddEntryView: View {
         guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
         return store.recentFoodNames.prefix(8).compactMap { name in
             store.dishes.first { $0.name == name }
+        }
+    }
+
+    @ViewBuilder private var offSearchSection: some View {
+        Section("Глобальный поиск") {
+            if isSearchingOFF {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text("Ищем в базе данных...")
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
+                .padding(.vertical, 2)
+            } else if noNetwork {
+                Label("Нет подключения к интернету", systemImage: "wifi.slash")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else if offResults.isEmpty {
+                Text("Ничего не найдено")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(offResults) { food in
+                    NavigationLink {
+                        FoodQuantityView(food: food) { item in
+                            draftItems.append(item)
+                        }
+                    } label: {
+                        foodRow(food)
+                    }
+                }
+            }
         }
     }
 
@@ -218,6 +253,10 @@ struct AddEntryView: View {
                     }
                 }
 
+                if isSearchingOFF || !debouncedSearch.isEmpty {
+                    offSearchSection
+                }
+
                 Section("База продуктов") {
                     if filteredBuiltInFoods.isEmpty {
                         Text("Ничего не найдено")
@@ -237,12 +276,34 @@ struct AddEntryView: View {
             }
             .searchable(text: $searchText, prompt: "Поиск продукта")
             .task(id: searchText) {
-                if searchText.isEmpty {
+                guard !searchText.isEmpty else {
                     debouncedSearch = ""
-                } else {
-                    try? await Task.sleep(for: .milliseconds(200))
-                    debouncedSearch = searchText
+                    offResults = []
+                    noNetwork = false
+                    isSearchingOFF = false
+                    return
                 }
+                try? await Task.sleep(for: .milliseconds(200))
+                guard !Task.isCancelled else { return }
+                debouncedSearch = searchText
+                isSearchingOFF = true
+                offResults = []
+                do {
+                    let results = try await OpenFoodService.search(query: searchText)
+                    guard !Task.isCancelled else { isSearchingOFF = false; return }
+                    offResults = results
+                    noNetwork = false
+                } catch let urlError as URLError where
+                    urlError.code == .notConnectedToInternet ||
+                    urlError.code == .networkConnectionLost ||
+                    urlError.code == .timedOut ||
+                    urlError.code == .cannotFindHost ||
+                    urlError.code == .cannotConnectToHost {
+                    noNetwork = true
+                } catch {
+                    // CancellationError или decode error — просто сбрасываем индикатор
+                }
+                isSearchingOFF = false
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Приём пищи")
@@ -287,7 +348,7 @@ struct AddEntryView: View {
             }
             .sheet(isPresented: $showingNewFood) {
                 NewFoodSheet(store: store)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.large])
             }
             .sheet(item: $editingFood) { food in
                 NewFoodSheet(store: store, editingFood: food)
@@ -349,15 +410,67 @@ struct NewFoodSheet: View {
     @State private var protein = ""
     @State private var fat = ""
     @State private var carbs = ""
-    private enum Field: Hashable { case name, calories, protein, fat, carbs }
+    private enum Field: Hashable { case search, name, calories, protein, fat, carbs }
     @FocusState private var focusedField: Field?
+
+    @State private var searchQuery = ""
+    @State private var offResults: [FoodItem] = []
+    @State private var isSearchingOFF = false
 
     private var isEditing: Bool { editingFood != nil }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section(isEditing ? "Продукт (на 100 г)" : "Новый продукт (на 100 г)") {
+                if !isEditing {
+                    Section {
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
+                            TextField("Найти в базе данных...", text: $searchQuery)
+                                .autocorrectionDisabled()
+                                .focused($focusedField, equals: .search)
+                            if isSearchingOFF {
+                                ProgressView()
+                            } else if !searchQuery.isEmpty {
+                                Button {
+                                    searchQuery = ""
+                                    offResults = []
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        if !offResults.isEmpty {
+                            ForEach(offResults.prefix(12), id: \.id) { food in
+                                Button {
+                                    fillFrom(food)
+                                } label: {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(food.name)
+                                                .foregroundStyle(.primary)
+                                            Text("Б\(Int(food.protein)) Ж\(Int(food.fat)) У\(Int(food.carbs))")
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+                                        Text("\(food.caloriesPer100g) ккал/100г")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                    } header: {
+                        Text("Поиск")
+                    }
+                }
+
+                Section(isEditing ? "Продукт (на 100 г)" : "Данные на 100 г") {
                     TextField("Название", text: $name)
                         .focused($focusedField, equals: .name)
                     TextField("Калории", text: $caloriesPer100g)
@@ -373,6 +486,14 @@ struct NewFoodSheet: View {
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .carbs)
                 }
+            }
+            .task(id: searchQuery) {
+                guard !searchQuery.isEmpty else { offResults = []; isSearchingOFF = false; return }
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                isSearchingOFF = true
+                offResults = (try? await OpenFoodService.search(query: searchQuery)) ?? []
+                isSearchingOFF = false
             }
             .navigationTitle(isEditing ? "Редактировать" : "Свой продукт")
             .navigationBarTitleDisplayMode(.inline)
@@ -405,9 +526,22 @@ struct NewFoodSheet: View {
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
                     fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
                     carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
+                    focusedField = .name
+                } else {
+                    focusedField = .search
                 }
-                focusedField = .name
             }
         }
+    }
+
+    private func fillFrom(_ food: FoodItem) {
+        name = food.name
+        caloriesPer100g = "\(food.caloriesPer100g)"
+        protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
+        fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
+        carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
+        searchQuery = ""
+        offResults = []
+        focusedField = .name
     }
 }

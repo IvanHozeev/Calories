@@ -20,6 +20,8 @@ final class StepStore: ObservableObject {
     @Published private(set) var monthHistory: [StepDay] = []
     @Published private(set) var isAuthorized: Bool = false
     @Published private(set) var goalStreak: Int = 0
+    @Published private(set) var weeklyTotal: Int = 0
+    @Published private(set) var prevWeekAverage: Int = 0
 
     @Published var stepGoal: Int {
         didSet {
@@ -71,6 +73,15 @@ final class StepStore: ObservableObject {
         fetchDistanceToday()
         fetchActiveCaloriesToday()
         fetchHistory(days: 30)
+    }
+
+    private func updateDerivedStats() {
+        weeklyTotal = weekHistory.reduce(0) { $0 + $1.steps }
+        let month = monthHistory
+        guard month.count >= 14 else { prevWeekAverage = 0; return }
+        let prevWeek = Array(month.dropLast(7).suffix(7))
+        let nonZero = prevWeek.filter { $0.steps > 0 }
+        prevWeekAverage = nonZero.isEmpty ? 0 : nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
     }
 
     private func updateGoalStreak() {
@@ -172,6 +183,7 @@ final class StepStore: ObservableObject {
             Task { @MainActor [weak self] in
                 self?.monthHistory = finalDays
                 self?.weekHistory = Array(finalDays.suffix(7))
+                self?.updateDerivedStats()
                 self?.updateGoalStreak()
             }
         }

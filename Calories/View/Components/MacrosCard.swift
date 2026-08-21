@@ -5,78 +5,32 @@ struct MacrosCard: View {
     let proteinTarget: Double?
     let fatTarget: Double?
     let weightKg: Double?
-    let suggestion: String?
 
     @State private var selectedMacro: MacroKind?
-    @State private var visibleSuggestion: String?
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                macroColumn(.protein, value: macros.protein, color: .blue)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .protein },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.protein) }
-                Divider().frame(height: 36)
-                macroColumn(.fat, value: macros.fat, color: .orange)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .fat },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.fat) }
-                Divider().frame(height: 36)
-                macroColumn(.carbs, value: macros.carbs, color: .purple)
-                    .popover(isPresented: Binding(
-                        get: { selectedMacro == .carbs },
-                        set: { if !$0 { selectedMacro = nil } }
-                    )) { macroPopover(.carbs) }
-            }
-
-            if let proteinTarget, proteinTarget > 0 {
-                let proteinMet = macros.protein >= proteinTarget
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 4) {
-                        Text("Белок: \(Int(macros.protein.rounded())) из \(Int(proteinTarget.rounded())) г")
-                            .font(.caption)
-                            .foregroundStyle(proteinMet ? .green : .secondary)
-                        if proteinMet {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.caption2)
-                                .foregroundStyle(.green)
-                        }
-                        Spacer()
-                    }
-                    if !proteinMet {
-                        ProgressView(value: macros.protein / proteinTarget)
-                            .tint(.blue)
-                    }
-                }
-            }
-
-            if let s = visibleSuggestion {
-                HStack(spacing: 6) {
-                    Image(systemName: "lightbulb.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.yellow)
-                    Text(s)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                }
-                .transition(.opacity)
-            }
+        HStack {
+            macroColumn(.protein, value: macros.protein, color: .blue)
+                .popover(isPresented: Binding(
+                    get: { selectedMacro == .protein },
+                    set: { if !$0 { selectedMacro = nil } }
+                )) { macroPopover(.protein) }
+            Divider().frame(height: 36)
+            macroColumn(.fat, value: macros.fat, color: .orange)
+                .popover(isPresented: Binding(
+                    get: { selectedMacro == .fat },
+                    set: { if !$0 { selectedMacro = nil } }
+                )) { macroPopover(.fat) }
+            Divider().frame(height: 36)
+            macroColumn(.carbs, value: macros.carbs, color: .purple)
+                .popover(isPresented: Binding(
+                    get: { selectedMacro == .carbs },
+                    set: { if !$0 { selectedMacro = nil } }
+                )) { macroPopover(.carbs) }
         }
-        // Нет .animation на всём VStack — иначе SwiftUI замеряет идеальный
-        // (unconstrained) размер при анимации и временно расширяет контент ScrollView.
         .padding()
         .background(Color(.secondarySystemGroupedBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
-        .onAppear { visibleSuggestion = suggestion }
-        .onChange(of: suggestion) { _, newValue in
-            withAnimation(.easeInOut(duration: 0.3)) {
-                visibleSuggestion = newValue
-            }
-        }
     }
 
     private func value(for kind: MacroKind) -> Double {

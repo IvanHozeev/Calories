@@ -49,68 +49,19 @@ struct ProfileView: View {
 
     var body: some View {
         Form {
-            Section {
-                Picker("Цель", selection: $goal) {
-                    ForEach(Goal.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-
-                if goal != .maintenance {
-                    Button {
-                        if store.isPremium {
-                            showingPlan = true
-                        } else {
-                            showingPaywall = true
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "sparkles")
-                            Text(store.plan != nil ? "План активен — открыть" : "Получить план под эту цель")
-                            Spacer()
-                            if !store.isPremium {
-                                Text("PRO")
-                                    .font(.caption2.bold())
-                                    .padding(.horizontal, 6)
-                                    .padding(.vertical, 2)
-                                    .background(Color.yellow.opacity(0.3))
-                                    .clipShape(Capsule())
-                            }
-                        }
+            if store.plan == nil {
+                Section {
+                    Picker("Цель", selection: $goal) {
+                        ForEach(Goal.allCases) { Text($0.title).tag($0) }
                     }
-                    .disabled(store.profile == nil)
-                }
-            } header: {
-                Text("Цель")
-            } footer: {
-                if goal != .maintenance, store.profile == nil {
-                    Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
-                }
-            }
-
-            Section {
-                HStack {
-                    Text("Текущий вес")
-                    Spacer()
-                    if let latest = store.latestWeight {
-                        Text(String(format: "%.1f кг", latest.weightKg))
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("Не записан")
-                            .foregroundStyle(.secondary)
+                    .pickerStyle(.segmented)
+                } header: {
+                    Text("Цель")
+                } footer: {
+                    if store.profile == nil {
+                        Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
                     }
                 }
-                Button {
-                    showingAddWeight = true
-                } label: {
-                    Label(store.hasWeighedToday ? "Обновить вес за сегодня" : "Записать вес", systemImage: "plus.circle")
-                }
-                NavigationLink {
-                    WeightView(store: store)
-                } label: {
-                    Label("История и график", systemImage: "chart.line.uptrend.xyaxis")
-                }
-            } header: {
-                Text("Вес")
             }
 
             Section("Параметры тела") {
@@ -192,7 +143,38 @@ struct ProfileView: View {
                     }
                 }
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Профиль")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        if store.isPremium {
+                            showingPlan = true
+                        } else {
+                            showingPaywall = true
+                        }
+                    } label: {
+                        Image(systemName: store.plan != nil ? "sparkles" : "sparkles")
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(store.plan != nil ? .yellow : .secondary)
+                    }
+                    .disabled(store.profile == nil && !store.isPremium)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        WeightView(store: store)
+                    } label: {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingAddWeight = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
             .onChange(of: draftProfile) { _, newProfile in
                 if let p = newProfile { store.updateProfile(p) }
             }

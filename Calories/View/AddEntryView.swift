@@ -6,10 +6,12 @@ struct AddEntryView: View {
 
     @State private var selectedDate: Date
     @State private var searchText = ""
+    @State private var debouncedSearch = ""
     @State private var draftItems: [MealItem] = []
 
     @State private var quickCalories = ""
     @State private var showingNewFood = false
+    @State private var showingScanner = false
     @State private var editingFood: FoodItem? = nil
 
     @FocusState private var quickCaloriesFocused: Bool
@@ -45,28 +47,28 @@ struct AddEntryView: View {
     }
 
     private var filteredCustomFoods: [FoodItem] {
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return store.customFoods
         }
-        return store.customFoods.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return store.customFoods.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
     }
 
     private var filteredBuiltInFoods: [FoodItem] {
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return FoodDatabase.items
         }
-        return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
     }
 
     private var filteredDishes: [Dish] {
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return store.dishes
         }
-        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
     }
 
     private var recentFoodItems: [FoodItem] {
-        guard searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
         let all = store.customFoods + FoodDatabase.items
         return store.recentFoodNames.prefix(8).compactMap { name in
             all.first { $0.name == name }
@@ -74,7 +76,7 @@ struct AddEntryView: View {
     }
 
     private var recentDishItems: [Dish] {
-        guard searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
+        guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
         return store.recentFoodNames.prefix(8).compactMap { name in
             store.dishes.first { $0.name == name }
         }
@@ -126,31 +128,28 @@ struct AddEntryView: View {
                     }
                 }
 
-                if !isToday {
-                    Section {
-                        HStack {
-                            TextField("Ккал", text: $quickCalories)
-                                .keyboardType(.numberPad)
-                                .font(.title3.weight(.semibold))
-                                .focused($quickCaloriesFocused)
-                            Button("Сохранить") {
-                                guard let calories = Int(quickCalories) else { return }
-                                let items = draftItems + [MealItem(name: "Приём пищи", calories: calories, macros: .zero)]
-                                let totalCalories = items.reduce(0) { $0 + $1.calories }
-                                let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
-                                let name = items.count == 1 ? "Приём пищи" : joinedName(items)
-                                store.recordRecentFoods(draftItems.map(\.name))
-                                store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
-                                dismiss()
-                            }
-                            .disabled(Int(quickCalories) == nil)
-                            .buttonStyle(.borderedProminent)
+                Section {
+                    HStack {
+                        TextField("Ккал", text: $quickCalories)
+                            .keyboardType(.numberPad)
+                            .font(.title3.weight(.semibold))
+                            .focused($quickCaloriesFocused)
+                        Button("Сохранить") {
+                            guard let calories = Int(quickCalories) else { return }
+                            let items = draftItems + [MealItem(name: "Приём пищи", calories: calories, macros: .zero)]
+                            let totalCalories = items.reduce(0) { $0 + $1.calories }
+                            let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
+                            let name = items.count == 1 ? "Приём пищи" : joinedName(items)
+                            store.recordRecentFoods(draftItems.map(\.name))
+                            store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            dismiss()
                         }
-                    } header: {
-                        Text("Быстро — только калории")
-                    } footer: {
-                        Text("Для восстановления данных за прошлый день: впиши сколько всего было съедено — сохранится сразу, без черновика. Если уже добавлены другие продукты выше, они попадут в ту же запись.")
+                        .disabled(Int(quickCalories) == nil)
+                        .buttonStyle(.borderedProminent)
                     }
+                } header: {
+                    Text("Быстро — только калории")
                 }
 
                 if !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
@@ -237,6 +236,14 @@ struct AddEntryView: View {
                 }
             }
             .searchable(text: $searchText, prompt: "Поиск продукта")
+            .task(id: searchText) {
+                if searchText.isEmpty {
+                    debouncedSearch = ""
+                } else {
+                    try? await Task.sleep(for: .milliseconds(200))
+                    debouncedSearch = searchText
+                }
+            }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
@@ -245,10 +252,17 @@ struct AddEntryView: View {
                     Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingNewFood = true
-                    } label: {
-                        Image(systemName: "plus.app")
+                    HStack(spacing: 16) {
+                        Button {
+                            showingScanner = true
+                        } label: {
+                            Image(systemName: "barcode.viewfinder")
+                        }
+                        Button {
+                            showingNewFood = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
                 ToolbarItem(placement: .bottomBar) {
@@ -256,6 +270,7 @@ struct AddEntryView: View {
                         store.recordRecentFoods(draftItems.map(\.name))
                         let grams = draftItems.count == 1 ? draftItems[0].grams : nil
                         store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         dismiss()
                     } label: {
                         Text(draftItems.isEmpty ? "Сохранить" : "Сохранить (\(draftTotalCalories) ккал)")
@@ -263,6 +278,11 @@ struct AddEntryView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(draftItems.isEmpty)
+                }
+            }
+            .sheet(isPresented: $showingScanner) {
+                BarcodeScannerSheet(store: store) { item in
+                    draftItems.append(item)
                 }
             }
             .sheet(isPresented: $showingNewFood) {

@@ -6,9 +6,17 @@ struct FoodQuantityView: View {
     let onAdd: (MealItem) -> Void
     @Environment(\.dismiss) private var dismiss
 
-    @State private var grams: Double = 100
-    @State private var gramsText: String = "100"
+    @State private var grams: Double
+    @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
+
+    init(food: FoodItem, onAdd: @escaping (MealItem) -> Void) {
+        self.food = food
+        self.onAdd = onAdd
+        let g = food.defaultGrams > 0 ? food.defaultGrams : 100
+        _grams = State(initialValue: g)
+        _gramsText = State(initialValue: "\(Int(g))")
+    }
 
     private var calories: Int {
         Int((Double(food.caloriesPer100g) * grams / 100).rounded())
@@ -187,6 +195,124 @@ struct DishQuantityView: View {
                 }
                 .fontWeight(.semibold)
             }
+        }
+    }
+}
+
+struct FoodDetailView: View {
+    let food: FoodItem
+    let store: CalorieStore
+
+    @State private var grams: Double
+    @State private var gramsText: String
+    @State private var showingEdit = false
+    @FocusState private var gramsFocused: Bool
+
+    init(food: FoodItem, store: CalorieStore) {
+        self.food = food
+        self.store = store
+        let g = food.defaultGrams > 0 ? food.defaultGrams : 100
+        _grams = State(initialValue: g)
+        _gramsText = State(initialValue: "\(Int(g))")
+    }
+
+    private var calories: Int {
+        Int((Double(food.caloriesPer100g) * grams / 100).rounded())
+    }
+
+    private var macros: Macros {
+        food.macrosPer100g.scaled(by: grams)
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                VStack(spacing: 12) {
+                    Text(food.name)
+                        .font(.title3.weight(.semibold))
+                    Text("\(calories) ккал")
+                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .foregroundStyle(.green)
+                        .contentTransition(.numericText())
+                    Text("\(food.caloriesPer100g) ккал / 100 г")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    MacrosRow(macros: macros)
+                        .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+            }
+
+            Section {
+                HStack {
+                    Text("Белки")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(String(format: "%.1f г / 100 г", food.protein))
+                }
+                HStack {
+                    Text("Жиры")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(String(format: "%.1f г / 100 г", food.fat))
+                }
+                HStack {
+                    Text("Углеводы")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(String(format: "%.1f г / 100 г", food.carbs))
+                }
+            } header: {
+                Text("Состав")
+            }
+
+            Section {
+                Stepper(value: $grams, in: 5...2000, step: 5) {
+                    TextField("Граммы", text: $gramsText)
+                        .keyboardType(.numberPad)
+                        .focused($gramsFocused)
+                        .font(.body.weight(.medium))
+                        .onChange(of: gramsText) { _, newValue in
+                            if let value = Double(newValue), value > 0 {
+                                grams = min(value, 2000)
+                            }
+                        }
+                        .onChange(of: grams) { _, newValue in
+                            if !gramsFocused { gramsText = "\(Int(newValue))" }
+                        }
+                }
+
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                    ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
+                        Button("\(value) г") {
+                            grams = Double(value)
+                            gramsText = "\(value)"
+                        }
+                        .buttonStyle(.bordered)
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+            } header: {
+                Text("Порция по умолчанию")
+            } footer: {
+                Text("Это значение будет подставляться при добавлении продукта в приём пищи.")
+            }
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .navigationTitle("Продукт")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Изменить") { showingEdit = true }
+            }
+        }
+        .onChange(of: grams) { _, newValue in
+            store.setDefaultGrams(food, grams: newValue)
+        }
+        .sheet(isPresented: $showingEdit) {
+            NewFoodSheet(store: store, editingFood: food)
+                .presentationDetents([.medium])
         }
     }
 }

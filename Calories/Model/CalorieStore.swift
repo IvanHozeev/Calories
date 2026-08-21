@@ -33,6 +33,8 @@ final class CalorieStore: ObservableObject {
     @Published private(set) var streak: Int = 0
     @Published private(set) var bestStreak: Int = 0
     @Published private(set) var loggingStreak: Int = 0
+    @Published private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
+    @Published private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
 
     // O(1) словари для быстрого поиска
     private var entriesByDay: [Date: [FoodEntry]] = [:]
@@ -180,6 +182,20 @@ final class CalorieStore: ObservableObject {
         streak = currentStreak
         bestStreak = bestStreakVal
         loggingStreak = currentLoggingStreak
+
+        let today14 = calendar.startOfDay(for: Date())
+        streakHistory = (0..<14).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
+            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
+            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
+            return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
+        }
+
+        let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
+        groupedTodayEntries = MealPeriod.allCases.compactMap { period in
+            guard let entries = grouped[period], !entries.isEmpty else { return nil }
+            return (period, entries.sorted { $0.date < $1.date })
+        }
 
         let groupDefaults = UserDefaults(suiteName: "group.calories.shared")
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
@@ -351,12 +367,20 @@ final class CalorieStore: ObservableObject {
     func add(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, date: Date = Date()) {
         let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date)
         context.insert(entry)
-        save()
+        try? context.save()
+        entries = ([entry] + entries).sorted { $0.date > $1.date }
+        rebuildCaches()
+        lockPastGoals()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func delete(entry: FoodEntry) {
         context.delete(entry)
-        save()
+        try? context.save()
+        entries.removeAll { $0.id == entry.id }
+        rebuildCaches()
+        lockPastGoals()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, grams: Double?, date: Date) {
@@ -365,18 +389,28 @@ final class CalorieStore: ObservableObject {
         entry.macros = macros
         entry.grams = grams
         entry.date = date
-        save()
+        try? context.save()
+        entries.sort { $0.date > $1.date }
+        rebuildCaches()
+        lockPastGoals()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs)
         context.insert(food)
-        save()
+        try? context.save()
+        customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteCustomFood(_ food: FoodItem) {
         context.delete(food)
-        save()
+        try? context.save()
+        customFoods.removeAll { $0.id == food.id }
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
@@ -385,39 +419,61 @@ final class CalorieStore: ObservableObject {
         food.protein = protein
         food.fat = fat
         food.carbs = carbs
-        save()
+        try? context.save()
+        customFoods.sort { $0.name < $1.name }
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
+    }
+
+    func setDefaultGrams(_ food: FoodItem, grams: Double) {
+        food.defaultGrams = grams
+        try? context.save()
     }
 
     func addDish(name: String, ingredients: [DishIngredient]) {
         let dish = Dish(name: name, ingredients: ingredients)
         context.insert(dish)
-        save()
+        try? context.save()
+        dishes = [dish] + dishes
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient]) {
         dish.name = name
         dish.ingredients = ingredients
-        save()
+        try? context.save()
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteDish(_ dish: Dish) {
         context.delete(dish)
-        save()
+        try? context.save()
+        dishes.removeAll { $0.id == dish.id }
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func addWeight(_ kg: Double, date: Date = Date()) {
         let entry = WeightEntry(weightKg: kg, date: date)
         context.insert(entry)
-        save()
+        try? context.save()
+        weightEntries = (weightEntries + [entry]).sorted { $0.date < $1.date }
+        rebuildCaches()
         if var p = profile {
             p.weightKg = kg
             updateProfile(p, syncDailyGoal: false)
         }
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteWeight(_ entry: WeightEntry) {
         context.delete(entry)
-        save()
+        try? context.save()
+        weightEntries.removeAll { $0.id == entry.id }
+        rebuildCaches()
+        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     /// Последняя по дате запись веса.
@@ -508,10 +564,4 @@ final class CalorieStore: ObservableObject {
         )
     }
 
-    private func save() {
-        try? context.save()
-        refresh()
-        lockPastGoals()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
-    }
 }

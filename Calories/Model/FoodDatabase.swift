@@ -12,14 +12,16 @@ final class FoodItem: Identifiable {
     var protein: Double
     var fat: Double
     var carbs: Double
+    var defaultGrams: Double = 100
 
-    init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
+    init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, defaultGrams: Double = 100) {
         self.id = id
         self.name = name
         self.caloriesPer100g = caloriesPer100g
         self.protein = protein
         self.fat = fat
         self.carbs = carbs
+        self.defaultGrams = defaultGrams
     }
 
     var macrosPer100g: Macros {

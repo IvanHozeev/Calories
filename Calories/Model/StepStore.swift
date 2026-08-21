@@ -19,6 +19,7 @@ final class StepStore: ObservableObject {
     @Published private(set) var weekHistory: [StepDay] = []
     @Published private(set) var monthHistory: [StepDay] = []
     @Published private(set) var isAuthorized: Bool = false
+    @Published private(set) var goalStreak: Int = 0
 
     @Published var stepGoal: Int {
         didSet {
@@ -72,6 +73,26 @@ final class StepStore: ObservableObject {
         fetchHistory(days: 30)
     }
 
+    private func updateGoalStreak() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let sorted = monthHistory.sorted { $0.date > $1.date }
+        var streak = 0
+        var expected = today
+        for day in sorted {
+            let dayStart = calendar.startOfDay(for: day.date)
+            guard dayStart == expected else { break }
+            let steps = dayStart == today ? stepsToday : day.steps
+            if steps >= stepGoal {
+                streak += 1
+                expected = calendar.date(byAdding: .day, value: -1, to: expected) ?? expected
+            } else {
+                break
+            }
+        }
+        goalStreak = streak
+    }
+
     private func fetchStepsToday() {
         let type = HKQuantityType(.stepCount)
         let start = Calendar.current.startOfDay(for: Date())
@@ -84,6 +105,7 @@ final class StepStore: ObservableObject {
             let steps = Int(result?.sumQuantity()?.doubleValue(for: .count()) ?? 0)
             Task { @MainActor [weak self] in
                 self?.stepsToday = steps
+                self?.updateGoalStreak()
                 UserDefaults(suiteName: "group.calories.shared")?.set(steps, forKey: "widget_steps_today")
                 WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
             }
@@ -150,6 +172,7 @@ final class StepStore: ObservableObject {
             Task { @MainActor [weak self] in
                 self?.monthHistory = finalDays
                 self?.weekHistory = Array(finalDays.suffix(7))
+                self?.updateGoalStreak()
             }
         }
         healthStore.execute(query)

@@ -3,16 +3,14 @@ import SwiftUI
 struct HistoryView: View {
     @ObservedObject var store: CalorieStore
 
+    private var loggedDays: [DaySummary] {
+        store.historyDays.filter { !$0.entries.isEmpty }
+    }
+
     var body: some View {
         List {
             Section {
-                WeeklyChartView(days: store.lastSevenDays)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-            }
-
-            Section("Дни") {
-                ForEach(store.historyDays) { day in
+                ForEach(loggedDays) { day in
                     NavigationLink {
                         DayDetailView(store: store, date: day.date)
                     } label: {
@@ -20,10 +18,11 @@ struct HistoryView: View {
                     }
                 }
             }
+            .listSectionSeparator(.hidden, edges: .top)
         }
         .listStyle(.plain)
         .navigationTitle("История")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
@@ -37,24 +36,27 @@ private struct DayRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(day.date, format: .dateTime.day().month(.wide))
                     .font(.body.weight(.medium))
-                Text(day.entries.isEmpty ? "Нет записей" : "\(day.entries.count) приёмов пищи")
+                Text("\(day.entries.count) \(entriesLabel(day.entries.count))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            if day.entries.isEmpty {
-                Image(systemName: "plus.circle")
-                    .foregroundStyle(.secondary)
-            } else {
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(day.totalCalories) ккал")
-                        .font(.subheadline.weight(.semibold))
-                    Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
-                        .font(.caption)
-                        .foregroundStyle(overGoal ? .red : .green)
-                }
+            VStack(alignment: .trailing, spacing: 4) {
+                Text("\(day.totalCalories) ккал")
+                    .font(.subheadline.weight(.semibold))
+                Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
+                    .font(.caption)
+                    .foregroundStyle(overGoal ? .red : .green)
             }
         }
         .padding(.vertical, 4)
+    }
+
+    private func entriesLabel(_ n: Int) -> String {
+        switch n % 10 {
+        case 1 where n % 100 != 11: return "приём пищи"
+        case 2...4 where !(n % 100 >= 12 && n % 100 <= 14): return "приёма пищи"
+        default: return "приёмов пищи"
+        }
     }
 }

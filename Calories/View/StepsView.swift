@@ -49,26 +49,6 @@ struct StepsView: View {
         return Double(average - prevWeekAverage) / Double(prevWeekAverage) * 100
     }
 
-    private var goalStreak: Int {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let sorted = store.monthHistory.sorted { $0.date > $1.date }
-        var streak = 0
-        var expected = today
-        for day in sorted {
-            let dayStart = calendar.startOfDay(for: day.date)
-            guard dayStart == expected else { break }
-            let steps = dayStart == today ? store.stepsToday : day.steps
-            if steps >= store.stepGoal {
-                streak += 1
-                expected = calendar.date(byAdding: .day, value: -1, to: expected) ?? expected
-            } else {
-                break
-            }
-        }
-        return streak
-    }
-
     var body: some View {
         NavigationStack {
             Group {
@@ -116,6 +96,10 @@ struct StepsView: View {
             .padding(.horizontal)
             .padding(.top, 8)
             .padding(.bottom, 80)
+        }
+        .refreshable {
+            store.fetchAll()
+            try? await Task.sleep(for: .seconds(1))
         }
         .scrollBounceBehavior(.basedOnSize)
         .scrollIndicators(.hidden)
@@ -244,8 +228,8 @@ struct StepsView: View {
                 Divider().frame(height: 40)
                 statCell(
                     title: "Стрик",
-                    value: "\(goalStreak)",
-                    subtitle: goalStreak == 1 ? "день" : "дней"
+                    value: "\(store.goalStreak)",
+                    subtitle: store.goalStreak == 1 ? "день" : "дней"
                 )
                 Divider().frame(height: 40)
                 statCell(

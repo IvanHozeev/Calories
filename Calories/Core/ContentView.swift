@@ -1,6 +1,23 @@
 import SwiftUI
 import SwiftData
 
+enum MealPeriod: String, CaseIterable {
+    case breakfast = "Завтрак"
+    case lunch = "Обед"
+    case dinner = "Ужин"
+    case snack = "Перекус"
+
+    static func period(for date: Date) -> MealPeriod {
+        let h = Calendar.current.component(.hour, from: date)
+        switch h {
+        case 5..<11: return .breakfast
+        case 11..<15: return .lunch
+        case 15..<21: return .dinner
+        default: return .snack
+        }
+    }
+}
+
 struct ContentView: View {
     @ObservedObject var store: CalorieStore
     @State private var showingAdd = false
@@ -88,8 +105,7 @@ struct ContentView: View {
                         macros: store.macrosToday,
                         proteinTarget: store.proteinTarget,
                         fatTarget: store.fatTarget,
-                        weightKg: store.weightKg,
-                        suggestion: store.macroSuggestion
+                        weightKg: store.weightKg
                     )
 
                     VStack(alignment: .leading, spacing: 12) {
@@ -110,20 +126,28 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 40)
                         } else {
-                            VStack(spacing: 0) {
-                                ForEach(store.todayEntries) { entry in
-                                    EntryRow(
-                                        entry: entry,
-                                        onDelete: { store.delete(entry: entry) },
-                                        onEdit: { editingEntry = entry }
-                                    )
-                                    if entry.id != store.todayEntries.last?.id {
-                                        Divider().padding(.leading, 16)
+                            ForEach(store.groupedTodayEntries, id: \.period) { group in
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Text(group.period.rawValue)
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 16)
+                                        .padding(.top, 10)
+                                        .padding(.bottom, 4)
+                                    ForEach(group.entries) { entry in
+                                        EntryRow(
+                                            entry: entry,
+                                            onDelete: { store.delete(entry: entry) },
+                                            onEdit: { editingEntry = entry }
+                                        )
+                                        if entry.id != group.entries.last?.id {
+                                            Divider().padding(.leading, 16)
+                                        }
                                     }
                                 }
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
                             }
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                     }
 
@@ -156,7 +180,7 @@ struct ContentView: View {
                     Button {
                         showingAdd = true
                     } label: {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: "plus")
                     }
                 }
             }
@@ -176,6 +200,12 @@ struct ContentView: View {
                 StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)
                     .presentationDetents([.height(500)])
                     .presentationDragIndicator(.visible)
+            }
+            .onChange(of: store.consumedToday) { oldValue, newValue in
+                let goal = store.todayGoal
+                if oldValue < goal && newValue >= goal {
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                }
             }
             .alert("Дневная цель", isPresented: $showingGoalEditor) {
                 TextField("Ккал в день", text: $goalText)
@@ -347,9 +377,8 @@ private struct StreakInfoSheet: View {
     }
 
     private var miniCalendar: some View {
-        let history = store.goalHistory(days: 14)
-        return HStack(spacing: 0) {
-            ForEach(history, id: \.date) { day in
+        HStack(spacing: 0) {
+            ForEach(store.streakHistory, id: \.date) { day in
                 let isToday = Calendar.current.isDateInToday(day.date)
                 VStack(spacing: 4) {
                     Circle()

@@ -10,6 +10,9 @@ struct ProfileView: View {
     @State private var activityLevel: ActivityLevel
     @State private var goal: Goal
     @State private var proteinPerKgText: String
+    @State private var waistText: String
+    @State private var neckText: String
+    @State private var hipText: String
     @State private var showingPlan = false
     @State private var showingPaywall = false
     @State private var showingAddWeight = false
@@ -24,12 +27,18 @@ struct ProfileView: View {
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
         _proteinPerKgText = State(initialValue: profile.map { String(format: "%.1f", $0.proteinPerKg) } ?? String(format: "%.1f", UserProfile.defaultProteinPerKg))
+        _waistText = State(initialValue: profile?.waistCm.map { String(format: "%.0f", $0) } ?? "")
+        _neckText = State(initialValue: profile?.neckCm.map { String(format: "%.0f", $0) } ?? "")
+        _hipText = State(initialValue: profile?.hipCm.map { String(format: "%.0f", $0) } ?? "")
     }
 
     private var weight: Double? { Double(weightText.replacingOccurrences(of: ",", with: ".")) }
     private var height: Double? { Double(heightText.replacingOccurrences(of: ",", with: ".")) }
     private var age: Int? { Int(ageText) }
     private var proteinPerKg: Double? { Double(proteinPerKgText.replacingOccurrences(of: ",", with: ".")) }
+    private var waist: Double? { Double(waistText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    private var neck: Double? { Double(neckText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    private var hip: Double? { Double(hipText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
 
     private var draftProfile: UserProfile? {
         guard let weight, weight > 0,
@@ -43,8 +52,19 @@ struct ProfileView: View {
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
-            proteinPerKg: proteinPerKg
+            proteinPerKg: proteinPerKg,
+            waistCm: waist,
+            neckCm: neck,
+            hipCm: hip
         )
+    }
+
+    private func bodyFatColor(_ category: String) -> Color {
+        switch category {
+        case "Атлетический", "Фитнес": return .green
+        case "Норма": return .yellow
+        default: return .red
+        }
     }
 
     var body: some View {
@@ -91,6 +111,32 @@ struct ProfileView: View {
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 80)
+                    }
+                    NavigationLink {
+                        BodyFatDetailView(
+                            waistText: $waistText,
+                            neckText: $neckText,
+                            hipText: $hipText,
+                            sex: sex,
+                            profile: draftProfile
+                        )
+                    } label: {
+                        HStack {
+                            Text("Жир % (оценка)")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            if let draftProfile {
+                                Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(bodyFatColor(draftProfile.bodyFatCategory))
+                                Text("· \(draftProfile.bodyFatCategory)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("—")
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
                     }
                 }
 
@@ -207,5 +253,91 @@ struct ProfileView: View {
                 .font(highlighted ? .body.weight(.semibold) : .body)
                 .foregroundStyle(highlighted ? .green : .primary)
         }
+    }
+}
+
+private struct BodyFatDetailView: View {
+    @Binding var waistText: String
+    @Binding var neckText: String
+    @Binding var hipText: String
+    let sex: Sex
+    let profile: UserProfile?
+
+    private var waist: Double? { Double(waistText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    private var neck: Double? { Double(neckText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    private var hip: Double? { Double(hipText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+
+    private func bodyFatColor(_ category: String) -> Color {
+        switch category {
+        case "Атлетический", "Фитнес": return .green
+        case "Норма": return .yellow
+        default: return .red
+        }
+    }
+
+    var body: some View {
+        Form {
+            if let profile {
+                Section {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(format: "%.1f%%", profile.bodyFatPercentage))
+                                .font(.largeTitle.weight(.bold))
+                                .foregroundStyle(bodyFatColor(profile.bodyFatCategory))
+                            Text(profile.bodyFatCategory)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: profile.isNavyMethod ? "ruler" : "scalemass")
+                            .font(.title2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 4)
+                } footer: {
+                    if profile.isNavyMethod {
+                        Text("Метод ВМС США: расчёт по обхватам талии и шеи. Точность ±2–3%. Меряй в одном месте каждый раз.")
+                    } else {
+                        Text("Формула Дойренберга: расчёт по ИМТ. Не различает мышцы и жир — у спортивных людей завышает на 3–5%. Для точности укажи обхваты ниже.")
+                    }
+                }
+            }
+
+            Section {
+                HStack {
+                    Text("Талия, см")
+                    Spacer()
+                    TextField("80", text: $waistText)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                }
+                HStack {
+                    Text("Шея, см")
+                    Spacer()
+                    TextField("37", text: $neckText)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                }
+                if sex == .female {
+                    HStack {
+                        Text("Бёдра, см")
+                        Spacer()
+                        TextField("95", text: $hipText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                    }
+                }
+            } header: {
+                Text("Замеры")
+            } footer: {
+                Text("Меряй утром натощак сантиметровой лентой. Талия — на уровне пупка, шея — под кадыком.")
+            }
+        }
+        .navigationTitle("Жир %")
+        .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
     }
 }

@@ -277,6 +277,9 @@ struct UserProfile: Codable, Equatable {
     var activityLevel: ActivityLevel
     var goal: Goal
     var proteinPerKg: Double
+    var waistCm: Double? = nil
+    var neckCm: Double? = nil
+    var hipCm: Double? = nil   // нужно только женщинам для Navy-метода
 
     static let defaultProteinPerKg: Double = 1.7
 
@@ -299,6 +302,53 @@ struct UserProfile: Codable, Equatable {
     /// Целевой белок в граммах.
     var proteinTargetGrams: Double {
         proteinPerKg * weightKg
+    }
+
+    var bmi: Double {
+        let hm = heightCm / 100
+        return weightKg / (hm * hm)
+    }
+
+    /// Navy-метод (точнее, ±2–3%): требует талию + шею (+ бёдра для женщин).
+    var navyBodyFat: Double? {
+        guard let waist = waistCm, let neck = neckCm, waist > neck else { return nil }
+        let bf: Double
+        switch sex {
+        case .male:
+            bf = 86.010 * log10(waist - neck) - 70.041 * log10(heightCm) + 36.76
+        case .female:
+            guard let hip = hipCm, waist + hip > neck else { return nil }
+            bf = 163.205 * log10(waist + hip - neck) - 97.684 * log10(heightCm) - 78.387
+        }
+        return max(3, min(bf, 60))
+    }
+
+    /// % жира: Navy если замеры есть, иначе Дойренберг (BMI-based, ±5%).
+    var bodyFatPercentage: Double {
+        if let navy = navyBodyFat { return navy }
+        let sexFactor: Double = sex == .male ? 1.0 : 0.0
+        let bf = 1.20 * bmi + 0.23 * Double(age) - 10.8 * sexFactor - 5.4
+        return max(3, min(bf, 60))
+    }
+
+    var isNavyMethod: Bool { navyBodyFat != nil }
+
+    var bodyFatCategory: String {
+        let bf = bodyFatPercentage
+        switch sex {
+        case .male:
+            if bf < 6  { return "Незаменимый жир" }
+            if bf < 14 { return "Атлетический" }
+            if bf < 18 { return "Фитнес" }
+            if bf < 25 { return "Норма" }
+            return "Выше нормы"
+        case .female:
+            if bf < 14 { return "Незаменимый жир" }
+            if bf < 21 { return "Атлетический" }
+            if bf < 25 { return "Фитнес" }
+            if bf < 32 { return "Норма" }
+            return "Выше нормы"
+        }
     }
 }
 

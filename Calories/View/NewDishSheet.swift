@@ -43,9 +43,15 @@ struct NewDishSheet: View {
                         Text("\(ingredient.calories) ккал")
                             .foregroundStyle(.secondary)
                     }
-                }
-                .onDelete { offsets in
-                    ingredients.remove(atOffsets: offsets)
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            if let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) {
+                                ingredients.remove(at: idx)
+                            }
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
                 }
 
                 Button {

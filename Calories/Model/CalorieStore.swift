@@ -360,6 +360,7 @@ final class CalorieStore: ObservableObject {
     /// Адаптированная цель с учётом недельного банка калорий.
     /// Если сэкономил раньше на неделе — норма растёт. Если перерасход — снижается.
     private func computeAdaptedTodayGoal() -> Int {
+        guard isPremium else { return effectiveGoal(for: Date()) }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let weekday = calendar.component(.weekday, from: today)

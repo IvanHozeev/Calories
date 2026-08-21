@@ -328,7 +328,10 @@ struct FoodDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Изменить") { showingEdit = true }
+                Button { showingEdit = true } label: {
+                        Image(systemName: "pencil")
+                    }
+                    .tint(.blue)
             }
         }
         .onChange(of: grams) { _, newValue in

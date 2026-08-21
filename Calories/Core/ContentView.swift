@@ -25,169 +25,170 @@ struct ContentView: View {
     @State private var showingGoalEditor = false
     @State private var showingStreakInfo = false
     @State private var showingBankInfo = false
+    @State private var showingPaywall = false
     @State private var editingEntry: FoodEntry? = nil
     @State private var goalText = ""
 
     var body: some View {
         NavigationStack {
-            ScrollView(.vertical) {
-                VStack(spacing: 24) {
-                    ProgressRing(
-                        consumed: store.consumedToday,
-                        goal: store.adaptedTodayGoal,
-                        macros: store.macrosToday,
-                        proteinTarget: store.proteinTarget,
-                        fatTarget: store.fatTarget,
-                        carbsTarget: MacroTargets.carbsMinimum
-                    )
-                    .padding(.top, 12)
-                    .onLongPressGesture {
-                        guard store.plan?.cyclingEnabled != true else { return }
-                        goalText = String(store.dailyGoal)
-                        showingGoalEditor = true
-                    }
-
-                    if store.calorieBankBonus != 0 {
-                        Button { showingBankInfo = true } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                                    .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
-                                Text(store.calorieBankBonus > 0
-                                     ? "+\(store.calorieBankBonus) ккал из недели"
-                                     : "\(store.calorieBankBonus) ккал из недели")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .font(.caption)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 5)
-                            .background(Color(.secondarySystemGroupedBackground))
-                            .clipShape(Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .popover(isPresented: $showingBankInfo) {
-                            CalorieBankPopover(
-                                bonus: store.calorieBankBonus,
-                                baseGoal: store.todayGoal,
-                                adaptedGoal: store.adaptedTodayGoal
-                            )
-                            .presentationCompactAdaptation(.popover)
-                        }
-                    }
-
-                    if store.profile == nil {
-                        NavigationLink {
-                            ProfileView(store: store)
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "person.crop.circle.badge.questionmark")
-                                    .font(.footnote)
-                                Text("Заполните профиль, чтобы рассчитать цель")
-                                    .font(.caption)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2)
-                            }
-                            .foregroundStyle(.blue)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.blue.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
-                    } else if !store.hasWeighedToday {
-                        Button {
-                            showingAddWeight = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                Image(systemName: "scalemass")
-                                    .font(.footnote)
-                                Text("Не забудь взвеситься сегодня")
-                                    .font(.caption)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption2)
-                            }
-                            .foregroundStyle(.orange)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.orange.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    if let plan = store.plan {
-                        NavigationLink {
-                            PlanView(store: store)
-                        } label: {
-                            PlanCard(
-                                plan: plan,
-                                currentWeight: store.latestWeight?.weightKg,
-                                status: store.adherence?.status ?? .insufficientData
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    MacrosCard(
-                        macros: store.macrosToday,
-                        proteinTarget: store.proteinTarget,
-                        fatTarget: store.fatTarget,
-                        weightKg: store.weightKg
-                    )
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Сегодня")
-                                .font(.headline)
-                            Spacer()
+            List {
+                Section {
+                    VStack(spacing: 24) {
+                        ProgressRing(
+                            consumed: store.consumedToday,
+                            goal: store.adaptedTodayGoal,
+                            macros: store.macrosToday,
+                            proteinTarget: store.proteinTarget,
+                            fatTarget: store.fatTarget,
+                            carbsTarget: MacroTargets.carbsMinimum
+                        )
+                        .padding(.top, 12)
+                        .onLongPressGesture {
+                            guard store.plan?.cyclingEnabled != true else { return }
+                            goalText = String(store.dailyGoal)
+                            showingGoalEditor = true
                         }
 
-                        if store.todayEntries.isEmpty {
-                            VStack(spacing: 8) {
-                                Image(systemName: "tray")
-                                    .font(.largeTitle)
-                                    .foregroundStyle(.secondary)
-                                Text("Пока ничего не добавлено")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
-                        } else {
-                            ForEach(store.groupedTodayEntries, id: \.period) { group in
-                                VStack(alignment: .leading, spacing: 0) {
-                                    Text(group.period.rawValue)
-                                        .font(.caption.weight(.semibold))
+                        if store.calorieBankBonus != 0 {
+                            Button { showingBankInfo = true } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                                        .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
+                                    Text(store.calorieBankBonus > 0
+                                         ? "+\(store.calorieBankBonus) ккал из недели"
+                                         : "\(store.calorieBankBonus) ккал из недели")
                                         .foregroundStyle(.secondary)
-                                        .padding(.horizontal, 16)
-                                        .padding(.top, 10)
-                                        .padding(.bottom, 4)
-                                    ForEach(group.entries) { entry in
-                                        EntryRow(
-                                            entry: entry,
-                                            onDelete: { store.delete(entry: entry) },
-                                            onEdit: { editingEntry = entry }
-                                        )
-                                        if entry.id != group.entries.last?.id {
-                                            Divider().padding(.leading, 16)
-                                        }
-                                    }
                                 }
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
                                 .background(Color(.secondarySystemGroupedBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .popover(isPresented: $showingBankInfo) {
+                                CalorieBankPopover(
+                                    bonus: store.calorieBankBonus,
+                                    baseGoal: store.todayGoal,
+                                    adaptedGoal: store.adaptedTodayGoal
+                                )
+                                .presentationCompactAdaptation(.popover)
+                            }
+                        } else if !store.isPremium {
+                            Button { showingPaywall = true } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "lock.fill")
+                                        .foregroundStyle(.secondary)
+                                    Text("Банк калорий")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color(.secondarySystemGroupedBackground))
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if store.profile == nil {
+                            NavigationLink {
+                                ProfileView(store: store)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "person.crop.circle.badge.questionmark")
+                                        .font(.footnote)
+                                    Text("Заполните профиль, чтобы рассчитать цель")
+                                        .font(.caption)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption2)
+                                }
+                                .foregroundStyle(.blue)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.blue.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .buttonStyle(.plain)
+                        } else if !store.hasWeighedToday {
+                            Button {
+                                showingAddWeight = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "scalemass")
+                                        .font(.footnote)
+                                    Text("Не забудь взвеситься сегодня")
+                                        .font(.caption)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption2)
+                                }
+                                .foregroundStyle(.orange)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.orange.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        if let plan = store.plan {
+                            NavigationLink {
+                                PlanView(store: store)
+                            } label: {
+                                PlanCard(
+                                    plan: plan,
+                                    currentWeight: store.latestWeight?.weightKg,
+                                    status: store.adherence?.status ?? .insufficientData
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        MacrosCard(
+                            macros: store.macrosToday,
+                            proteinTarget: store.proteinTarget,
+                            fatTarget: store.fatTarget,
+                            weightKg: store.weightKg
+                        )
+                    }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                }
+                .listSectionSeparator(.hidden)
+
+                if store.todayEntries.isEmpty {
+                    Section {
+                        VStack(spacing: 8) {
+                            Image(systemName: "tray")
+                                .font(.largeTitle)
+                                .foregroundStyle(.secondary)
+                            Text("Пока ничего не добавлено")
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 40)
+                        .listRowBackground(Color.clear)
+                    }
+                    .listSectionSeparator(.hidden)
+                } else {
+                    ForEach(store.groupedTodayEntries, id: \.period) { group in
+                        Section(group.period.rawValue) {
+                            ForEach(group.entries) { entry in
+                                EntryRow(
+                                    entry: entry,
+                                    onDelete: { store.delete(entry: entry) },
+                                    onEdit: { editingEntry = entry }
+                                )
                             }
                         }
                     }
-
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 80)
-                .containerRelativeFrame(.horizontal)
             }
+            .listStyle(.insetGrouped)
             .refreshable { store.refresh() }
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollIndicators(.hidden)
-            .background(Color(.systemGroupedBackground))
             .navigationTitle("Сегодня")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -229,6 +230,9 @@ struct ContentView: View {
                 StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)
                     .presentationDetents([.height(500)])
                     .presentationDragIndicator(.visible)
+            }
+            .sheet(isPresented: $showingPaywall) {
+                PaywallView(store: store)
             }
             .onChange(of: store.consumedToday) { oldValue, newValue in
                 let goal = store.adaptedTodayGoal

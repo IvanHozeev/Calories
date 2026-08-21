@@ -454,6 +454,7 @@ struct PlanAdherence {
     let actualWeightToday: Double?
     let observedWeeklyRateKg: Double?
     let projectedEndDate: Date?
+    let projectedWeightAtPlanEnd: Double?
     let recalibratedDailyCalories: Int?
     let status: PlanStatus
 

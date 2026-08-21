@@ -182,31 +182,92 @@ struct PlanView: View {
                     resultRow("При текущем темпе цель — к", projectedEndDate.formatted(.dateTime.day().month(.wide)))
                 }
 
-                if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal, !plan.cyclingEnabled {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Чтобы успеть к \(plan.endDate.formatted(.dateTime.day().month(.wide))) при текущем факте, норму стоит скорректировать:")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Button("Поставить \(recalibrated) ккал/день") {
-                            store.dailyGoal = recalibrated
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
-                    Text("При включённом недельном цикле точную корректировку стоит вносить через целевой вес/срок выше — расчёт (\(recalibrated) ккал/день в среднем) учтёт её автоматически.")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-
-                if let projectedEndDate = adherence.projectedEndDate,
-                   projectedEndDate > plan.endDate.addingTimeInterval(7 * 86400) {
-                    Button("Сдвинуть срок плана на \(projectedEndDate.formatted(.dateTime.day().month(.wide)))") {
-                        store.extendPlan(to: projectedEndDate)
-                    }
+                if adherence.status == .ahead {
+                    aheadActions(plan: plan, adherence: adherence)
+                } else {
+                    behindOrOnTrackActions(plan: plan, adherence: adherence)
                 }
             }
         } header: {
             Text("Как идёт план")
+        }
+    }
+
+    @ViewBuilder
+    private func aheadActions(plan: Plan, adherence: PlanAdherence) -> some View {
+        // Вариант 1: замедлить — есть больше, прийти к цели к исходной дате
+        if let recalibrated = adherence.recalibratedDailyCalories, !plan.cyclingEnabled {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Замедлить: при \(recalibrated) ккал/день придёшь к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(plan.endDate.formatted(.dateTime.day().month(.wide))).")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Ставить \(recalibrated) ккал/день") {
+                    store.dailyGoal = recalibrated
+                }
+                .buttonStyle(.bordered)
+            }
+        } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
+            Text("При включённом цикле замедлить темп можно через увеличение целевого веса или срока — расчёт (\(recalibrated) ккал/день в среднем) пересчитается автоматически.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+
+        // Вариант 2: финишировать раньше — принять новый срок
+        if let projectedEndDate = adherence.projectedEndDate,
+           projectedEndDate < plan.endDate.addingTimeInterval(-3 * 86400) {
+            Button("Перенести финиш на \(projectedEndDate.formatted(.dateTime.day().month(.wide)))") {
+                store.reschedulePlan(to: projectedEndDate)
+            }
+        }
+
+        // Вариант 3: углубить цель — показываем к какому весу придёт к исходной дате
+        if let projected = adherence.projectedWeightAtPlanEnd {
+            let rounded = (projected * 10).rounded() / 10
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Углубить цель: при текущем темпе к \(plan.endDate.formatted(.dateTime.day().month(.wide))) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Поставить цель \(String(format: "%.1f", rounded)) кг") {
+                    guard var updated = store.plan else { return }
+                    updated = Plan(
+                        startDate: plan.startDate,
+                        durationWeeks: plan.durationWeeks,
+                        startWeightKg: plan.startWeightKg,
+                        targetWeightKg: rounded,
+                        cyclingEnabled: plan.cyclingEnabled,
+                        weekendStyle: plan.weekendStyle
+                    )
+                    store.startPlan(updated)
+                    targetWeightText = String(format: "%.1f", rounded)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func behindOrOnTrackActions(plan: Plan, adherence: PlanAdherence) -> some View {
+        if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal, !plan.cyclingEnabled {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Чтобы успеть к \(plan.endDate.formatted(.dateTime.day().month(.wide))):")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Ставить \(recalibrated) ккал/день") {
+                    store.dailyGoal = recalibrated
+                }
+                .buttonStyle(.bordered)
+            }
+        } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
+            Text("При включённом цикле точную корректировку стоит вносить через целевой вес/срок — расчёт (\(recalibrated) ккал/день в среднем) учтёт её автоматически.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+
+        if let projectedEndDate = adherence.projectedEndDate,
+           projectedEndDate > plan.endDate.addingTimeInterval(7 * 86400) {
+            Button("Сдвинуть финиш на \(projectedEndDate.formatted(.dateTime.day().month(.wide)))") {
+                store.reschedulePlan(to: projectedEndDate)
+            }
         }
     }
 

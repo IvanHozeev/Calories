@@ -107,8 +107,8 @@ final class CalorieStore: ObservableObject {
         }
     }
 
-    /// Сдвигает срок плана (сохраняя дату старта, начальный и целевой вес).
-    func extendPlan(to newEndDate: Date) {
+    /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
+    func reschedulePlan(to newEndDate: Date) {
         guard var updated = plan else { return }
         let daysCount = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
         updated.durationWeeks = max(1, Int((Double(daysCount) / 7).rounded(.up)))
@@ -505,6 +505,7 @@ final class CalorieStore: ObservableObject {
                 actualWeightToday: nil,
                 observedWeeklyRateKg: nil,
                 projectedEndDate: nil,
+                projectedWeightAtPlanEnd: nil,
                 recalibratedDailyCalories: nil,
                 status: .insufficientData
             )
@@ -519,6 +520,7 @@ final class CalorieStore: ObservableObject {
                 actualWeightToday: actualWeightToday,
                 observedWeeklyRateKg: nil,
                 projectedEndDate: nil,
+                projectedWeightAtPlanEnd: nil,
                 recalibratedDailyCalories: nil,
                 status: .insufficientData
             )
@@ -543,6 +545,11 @@ final class CalorieStore: ObservableObject {
             recalibratedDailyCalories = Int((profile.tdee + dailyDelta).rounded())
         }
 
+        let remainingWeeks = remainingDays / 7
+        let projectedWeightAtPlanEnd = remainingWeeks > 0
+            ? actualWeightToday + observedWeeklyRate * remainingWeeks
+            : nil as Double?
+
         let deviation = actualWeightToday - expectedWeightToday
         let threshold = max(0.3, abs(plan.totalWeightChangeKg) * 0.05)
         let status: PlanStatus
@@ -559,6 +566,7 @@ final class CalorieStore: ObservableObject {
             actualWeightToday: actualWeightToday,
             observedWeeklyRateKg: observedWeeklyRate,
             projectedEndDate: projectedEndDate,
+            projectedWeightAtPlanEnd: projectedWeightAtPlanEnd,
             recalibratedDailyCalories: recalibratedDailyCalories,
             status: status
         )

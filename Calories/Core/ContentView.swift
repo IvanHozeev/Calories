@@ -20,10 +20,12 @@ enum MealPeriod: String, CaseIterable {
 
 struct ContentView: View {
     var store: CalorieStore
+    var stepStore: StepStore
     @State private var showingAdd = false
     @State private var showingAddWeight = false
     @State private var showingGoalEditor = false
-    @State private var showingStreakInfo = false
+    @State private var showingActivity = false
+    @State private var showingSteps = false
     @State private var showingBankInfo = false
     @State private var showingPaywall = false
     @State private var showingPlan = false
@@ -152,6 +154,8 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             weightKg: store.weightKg
                         )
+
+                        StepsCard(store: stepStore) { showingSteps = true }
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -213,23 +217,12 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingStreakInfo = true
-                    } label: {
+                    Button { showingActivity = true } label: {
                         StreakBadge(streak: store.streak)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        HistoryView(store: store)
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingAdd = true
-                    } label: {
+                    Button { showingAdd = true } label: {
                         Image(systemName: "plus")
                     }
                 }
@@ -242,10 +235,11 @@ struct ContentView: View {
                 AddWeightView(store: store)
                     .presentationDetents([.height(320)])
             }
-            .sheet(isPresented: $showingStreakInfo) {
-                StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
+            .sheet(isPresented: $showingActivity) {
+                ActivitySheet(store: store)
+            }
+            .sheet(isPresented: $showingSteps) {
+                StepsView(store: stepStore)
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)
@@ -267,6 +261,224 @@ struct ContentView: View {
                 }
             }
         }
+    }
+}
+
+private struct StepsCard: View {
+    var store: StepStore
+    var onTap: () -> Void
+    @AppStorage("use_imperial") private var useImperial = false
+
+    private var progress: Double {
+        guard store.stepGoal > 0 else { return 0 }
+        return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
+    }
+
+    private var distanceText: String? {
+        guard store.distanceTodayKm > 0 else { return nil }
+        return useImperial
+            ? String(format: "%.1f ми", store.distanceTodayKm * 0.621371)
+            : String(format: "%.1f км", store.distanceTodayKm)
+    }
+
+    var body: some View {
+        if !store.isAuthorized {
+            Button { store.requestAuthorization() } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: "figure.walk.circle")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                    Text("Подключить шаги")
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button(action: onTap) {
+                HStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.blue.opacity(0.2), lineWidth: 4)
+                        Circle()
+                            .trim(from: 0, to: progress)
+                            .stroke(
+                                progress >= 1 ? Color.green : Color.blue,
+                                style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .animation(.easeOut, value: progress)
+                    }
+                    .frame(width: 40, height: 40)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(store.stepsToday.formatted())
+                            .font(.headline)
+                            .monospacedDigit()
+                        Text("из \(store.stepGoal.formatted())")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    if let dist = distanceText {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(dist)
+                                .font(.subheadline.weight(.medium))
+                            Text("дистанция")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
+                .padding()
+                .background(Color(.secondarySystemGroupedBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
+        }
+    }
+}
+
+private struct ActivitySheet: View {
+    let store: CalorieStore
+
+    private var loggedDays: [DaySummary] {
+        store.historyDays.filter { !$0.entries.isEmpty }
+    }
+
+    private var milestoneColor: Color {
+        if store.streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
+        if store.streak >= 30 { return .red }
+        if store.streak >= 7 { return .orange }
+        return store.streak > 0 ? .orange : .secondary
+    }
+
+    private var streakLabel: String {
+        let s = store.streak
+        switch s % 10 {
+        case 1 where s % 100 != 11: return "день подряд"
+        case 2...4 where !(s % 100 >= 12 && s % 100 <= 14): return "дня подряд"
+        default: return s == 0 ? "начни серию сегодня" : "дней подряд"
+        }
+    }
+
+    private let milestones: [(Int, String, String)] = [
+        (7, "7 дней", "flame"),
+        (14, "2 недели", "flame"),
+        (30, "Месяц", "trophy"),
+        (100, "100 дней", "star")
+    ]
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    VStack(spacing: 16) {
+                        VStack(spacing: 8) {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Image(systemName: "flame.fill")
+                                    .font(.system(size: 32))
+                                    .foregroundStyle(milestoneColor)
+                                Text("\(store.streak)")
+                                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                                    .foregroundStyle(milestoneColor)
+                                    .monospacedDigit()
+                            }
+                            Text(streakLabel)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            if store.bestStreak > store.streak && store.bestStreak > 0 {
+                                Label("Рекорд: \(store.bestStreak) дней", systemImage: "trophy.fill")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.yellow)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+
+                        miniCalendar
+
+                        HStack(spacing: 0) {
+                            ForEach(milestones, id: \.0) { (days, label, icon) in
+                                let reached = store.streak >= days || store.bestStreak >= days
+                                VStack(spacing: 6) {
+                                    Image(systemName: "\(icon).fill")
+                                        .font(.title2)
+                                        .foregroundStyle(reached ? .orange : Color(.systemGray4))
+                                    Text(label)
+                                        .font(.caption2)
+                                        .foregroundStyle(reached ? .primary : .secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 8)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                if !loggedDays.isEmpty {
+                    Section("История") {
+                        ForEach(loggedDays) { day in
+                            NavigationLink {
+                                DayDetailView(store: store, date: day.date)
+                            } label: {
+                                DayRow(day: day)
+                            }
+                        }
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Журнал")
+            .navigationBarTitleDisplayMode(.large)
+        }
+    }
+
+    private var miniCalendar: some View {
+        HStack(spacing: 0) {
+            ForEach(store.streakHistory, id: \.date) { day in
+                let isToday = Calendar.current.isDateInToday(day.date)
+                VStack(spacing: 4) {
+                    Circle()
+                        .fill(dotColor(for: day))
+                        .frame(width: 20, height: 20)
+                        .overlay(
+                            isToday
+                                ? Circle().stroke(Color.primary.opacity(0.5), lineWidth: 2)
+                                : nil
+                        )
+                    Text(dayLetter(day.date))
+                        .font(.system(size: 8))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private func dotColor(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
+        if day.onGoal { return .green }
+        if day.hasEntries { return .orange }
+        return Color(.systemGray5)
+    }
+
+    private func dayLetter(_ date: Date) -> String {
+        let weekday = Calendar.current.component(.weekday, from: date)
+        return ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][weekday - 1]
     }
 }
 
@@ -333,129 +545,13 @@ private struct StreakBadge: View {
     var body: some View {
         HStack(spacing: 3) {
             Image(systemName: "flame.fill")
-            Text("\(streak)")
-                .font(.subheadline.bold())
-                .monospacedDigit()
+            if streak > 0 {
+                Text("\(streak)")
+                    .font(.subheadline.bold())
+                    .monospacedDigit()
+            }
         }
         .foregroundStyle(color)
-    }
-}
-
-private struct StreakInfoSheet: View {
-    let streak: Int
-    let bestStreak: Int
-    let store: CalorieStore
-
-    private var milestoneColor: Color {
-        if streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
-        if streak >= 30 { return .red }
-        if streak >= 7 { return .orange }
-        return streak > 0 ? .orange : .secondary
-    }
-
-    private var streakLabel: String {
-        switch streak % 10 {
-        case 1 where streak % 100 != 11: return "день подряд"
-        case 2...4 where !(streak % 100 >= 12 && streak % 100 <= 14): return "дня подряд"
-        default: return "дней подряд"
-        }
-    }
-
-    private let milestones: [(Int, String, String)] = [
-        (7, "7 дней", "flame"),
-        (14, "2 недели", "flame"),
-        (30, "Месяц", "trophy"),
-        (100, "100 дней", "star")
-    ]
-
-    var body: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 8) {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 36))
-                        .foregroundStyle(milestoneColor)
-                    Text("\(streak)")
-                        .font(.system(size: 56, weight: .bold, design: .rounded))
-                        .foregroundStyle(milestoneColor)
-                        .monospacedDigit()
-                }
-                Text(streakLabel)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                if bestStreak > streak {
-                    Label("Рекорд: \(bestStreak) дней", systemImage: "trophy.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.yellow)
-                        .padding(.top, 2)
-                }
-            }
-            .padding(.top, 28)
-            .padding(.bottom, 20)
-
-            Divider()
-
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Последние 14 дней")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                miniCalendar
-            }
-            .padding()
-
-            Divider()
-
-            HStack(spacing: 0) {
-                ForEach(milestones, id: \.0) { (days, label, icon) in
-                    let reached = streak >= days || bestStreak >= days
-                    VStack(spacing: 6) {
-                        Image(systemName: "\(icon).fill")
-                            .font(.title2)
-                            .foregroundStyle(reached ? .orange : Color(.systemGray4))
-                        Text(label)
-                            .font(.caption2)
-                            .foregroundStyle(reached ? .primary : .secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .padding()
-
-            Spacer()
-        }
-    }
-
-    private var miniCalendar: some View {
-        HStack(spacing: 0) {
-            ForEach(store.streakHistory, id: \.date) { day in
-                let isToday = Calendar.current.isDateInToday(day.date)
-                VStack(spacing: 4) {
-                    Circle()
-                        .fill(dotColor(for: day))
-                        .frame(width: 20, height: 20)
-                        .overlay(
-                            isToday
-                                ? Circle().stroke(Color.primary.opacity(0.5), lineWidth: 2)
-                                : nil
-                        )
-                    Text(dayLetter(day.date))
-                        .font(.system(size: 8))
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    private func dotColor(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
-        if day.onGoal { return .green }
-        if day.hasEntries { return .orange }
-        return Color(.systemGray5)
-    }
-
-    private func dayLetter(_ date: Date) -> String {
-        let weekday = Calendar.current.component(.weekday, from: date)
-        return ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][weekday - 1]
     }
 }
 
@@ -511,5 +607,5 @@ private struct CalorieBankPopover: View {
         for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    ContentView(store: CalorieStore(context: container.mainContext))
+    ContentView(store: CalorieStore(context: container.mainContext), stepStore: StepStore())
 }

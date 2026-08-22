@@ -7,7 +7,7 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ContentView(store: store)
+            ContentView(store: store, stepStore: stepStore)
                 .tabItem { Label("Сегодня", systemImage: "book.fill") }
                 .tag(0)
 
@@ -22,10 +22,6 @@ struct RootView: View {
             }
             .tabItem { Label("Еда", systemImage: "fork.knife") }
             .tag(2)
-
-            StepsView(store: stepStore)
-                .tabItem { Label("Шаги", systemImage: "figure.walk") }
-                .tag(3)
         }
     }
 }

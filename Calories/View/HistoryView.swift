@@ -26,7 +26,7 @@ struct HistoryView: View {
     }
 }
 
-private struct DayRow: View {
+struct DayRow: View {
     let day: DaySummary
 
     private var overGoal: Bool { day.totalCalories > day.goal }

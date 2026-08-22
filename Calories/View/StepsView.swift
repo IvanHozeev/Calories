@@ -49,9 +49,7 @@ final class StepsViewModel {
         store.stepsToday >= store.stepGoal
     }
 
-    var distanceText: String {
-        store.distanceTodayKm > 0 ? String(format: "%.1f км", store.distanceTodayKm) : "—"
-    }
+    var distanceKm: Double { store.distanceTodayKm }
 
     var goalPercentText: String {
         let pct = store.stepGoal > 0 ? Int(Double(store.stepsToday) / Double(store.stepGoal) * 100) : 0
@@ -184,6 +182,14 @@ private struct GoalPickerSheet: View {
 private struct StepsContentView: View {
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
+    @AppStorage("use_imperial") private var useImperial = false
+
+    private var distanceText: String {
+        guard viewModel.distanceKm > 0 else { return "—" }
+        return useImperial
+            ? String(format: "%.1f ми", viewModel.distanceKm * 0.621371)
+            : String(format: "%.1f км", viewModel.distanceKm)
+    }
 
     var body: some View {
         List {
@@ -231,7 +237,7 @@ private struct StepsContentView: View {
             }
 
             HStack(spacing: 0) {
-                statCell(title: "Дистанция", value: viewModel.distanceText, subtitle: "")
+                statCell(title: "Дистанция", value: distanceText, subtitle: "")
                 Divider().frame(height: 40)
                 statCell(title: "от цели", value: viewModel.goalPercentText, subtitle: "")
                 Divider().frame(height: 40)

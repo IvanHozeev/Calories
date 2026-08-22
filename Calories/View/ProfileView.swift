@@ -20,15 +20,21 @@ struct ProfileView: View {
     @State private var showingPlan = false
     @State private var showingPaywall = false
     @State private var showingAddWeight = false
-    @AppStorage("use_lbs") private var useLbs = false
-
-    private static let kgToLbs: Double = 2.20462
+    @AppStorage("use_imperial") private var useImperial = false
 
     private func weightDisplayText(_ tenths: Int) -> String {
         let kg = Double(tenths) / 10.0
-        return useLbs
-            ? String(format: "%.1f lbs", kg * Self.kgToLbs)
+        return useImperial
+            ? String(format: "%.1f фунт", kg * 2.20462)
             : String(format: "%.1f кг", kg)
+    }
+
+    private func heightDisplayText(_ cm: Int) -> String {
+        guard useImperial else { return "\(cm) см" }
+        let totalInches = Double(cm) / 2.54
+        let feet = Int(totalInches) / 12
+        let inches = Int(totalInches.truncatingRemainder(dividingBy: 12))
+        return "\(feet)' \(inches)\""
     }
 
     init(store: CalorieStore) {
@@ -98,7 +104,7 @@ struct ProfileView: View {
                         ForEach(Sex.allCases) { Text($0.title).tag($0) }
                     }
                     HStack {
-                        Text(useLbs ? "Вес, lbs" : "Вес, кг")
+                        Text(useImperial ? "Вес, фунт" : "Вес, кг")
                         Spacer()
                         Text(weightDisplayText(weightTenths))
                             .foregroundStyle(.secondary)
@@ -113,8 +119,8 @@ struct ProfileView: View {
                     if showWeightPicker {
                         Picker("Вес", selection: $weightTenths) {
                             ForEach(300...1500, id: \.self) { v in
-                                Text(useLbs
-                                     ? String(format: "%.1f", Double(v) / 10.0 * Self.kgToLbs)
+                                Text(useImperial
+                                     ? String(format: "%.1f", Double(v) / 10.0 * 2.20462)
                                      : String(format: "%.1f", Double(v) / 10.0)
                                 ).tag(v)
                             }
@@ -123,9 +129,9 @@ struct ProfileView: View {
                         .frame(height: 160)
                     }
                     HStack {
-                        Text("Рост, см")
+                        Text(useImperial ? "Рост, фт+дюйм" : "Рост, см")
                         Spacer()
-                        Text("\(heightInt) см")
+                        Text(heightDisplayText(heightInt))
                             .foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
@@ -137,7 +143,9 @@ struct ProfileView: View {
                     }
                     if showHeightPicker {
                         Picker("Рост", selection: $heightInt) {
-                            ForEach(100...250, id: \.self) { Text("\($0)").tag($0) }
+                            ForEach(100...250, id: \.self) { v in
+                                Text(heightDisplayText(v)).tag(v)
+                            }
                         }
                         .pickerStyle(.wheel)
                         .frame(height: 160)
@@ -261,15 +269,10 @@ struct ProfileView: View {
                 }
 
                 Section("Настройки") {
-                    HStack {
-                        Label("Единицы веса", systemImage: "scalemass")
-                        Spacer()
-                        Picker("Единицы", selection: $useLbs) {
-                            Text("кг").tag(false)
-                            Text("lbs").tag(true)
-                        }
-                        .pickerStyle(.segmented)
-                        .fixedSize()
+                    NavigationLink {
+                        UnitsSettingsView()
+                    } label: {
+                        Label("Единицы измерения", systemImage: "globe")
                     }
                     NavigationLink {
                         RemindersView()
@@ -354,6 +357,27 @@ struct ProfileView: View {
                 .font(highlighted ? .body.weight(.semibold) : .body)
                 .foregroundStyle(highlighted ? .green : .primary)
         }
+    }
+}
+
+private struct UnitsSettingsView: View {
+    @AppStorage("use_imperial") private var useImperial = false
+
+    var body: some View {
+        List {
+            Section {
+                Picker("Система", selection: $useImperial) {
+                    Text("Метрическая").tag(false)
+                    Text("Американская").tag(true)
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Система")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Единицы измерения")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

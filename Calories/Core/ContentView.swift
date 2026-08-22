@@ -182,6 +182,14 @@ struct ContentView: View {
                                 } label: {
                                     EntryRow(entry: entry)
                                 }
+                                .swipeActions(edge: .leading) {
+                                    Button {
+                                        store.add(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
+                                    } label: {
+                                        Image(systemName: "plus.square.on.square")
+                                    }
+                                    .tint(.blue)
+                                }
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         store.delete(entry: entry)

@@ -42,7 +42,7 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             carbsTarget: MacroTargets.carbsMinimum
                         )
-                        .padding(.top, 12)
+                        .padding(.top)
                         .simultaneousGesture(
                             LongPressGesture(minimumDuration: 0.5).onEnded { _ in
                                 guard store.plan?.cyclingEnabled != true else { return }
@@ -231,11 +231,11 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
-                    .presentationDetents([.medium])
+                    .presentationDetents([.height(200)])
             }
             .sheet(isPresented: $showingStreakInfo) {
                 StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)
-                    .presentationDetents([.height(500)])
+                    .presentationDetents([.medium])
                     .presentationDragIndicator(.visible)
             }
             .sheet(isPresented: $showingPaywall) {
@@ -491,7 +491,8 @@ private struct CalorieBankPopover: View {
             }
             .font(.caption)
         }
-        .padding()
+        .padding(.horizontal)
+        .padding(.vertical, 25)
         .frame(minWidth: 240)
     }
 }

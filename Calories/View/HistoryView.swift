@@ -20,7 +20,7 @@ struct HistoryView: View {
             }
             .listSectionSeparator(.hidden, edges: .top)
         }
-        .listStyle(.plain)
+        .listStyle(.insetGrouped)
         .navigationTitle("История")
         .navigationBarTitleDisplayMode(.large)
     }

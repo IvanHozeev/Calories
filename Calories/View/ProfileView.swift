@@ -3,16 +3,20 @@ import SwiftUI
 struct ProfileView: View {
     @ObservedObject var store: CalorieStore
 
-    @State private var weightText: String
-    @State private var heightText: String
-    @State private var ageText: String
+    @State private var weightTenths: Int
+    @State private var heightInt: Int
+    @State private var ageInt: Int
+    @State private var proteinTenths: Int
+    @State private var showWeightPicker = false
+    @State private var showHeightPicker = false
+    @State private var showAgePicker = false
+    @State private var showProteinPicker = false
     @State private var sex: Sex
     @State private var activityLevel: ActivityLevel
     @State private var goal: Goal
-    @State private var proteinPerKgText: String
-    @State private var waistText: String
-    @State private var neckText: String
-    @State private var hipText: String
+    @State private var waistCm: Int
+    @State private var neckCm: Int
+    @State private var hipCm: Int
     @State private var showingPlan = false
     @State private var showingPaywall = false
     @State private var showingAddWeight = false
@@ -20,39 +24,34 @@ struct ProfileView: View {
     init(store: CalorieStore) {
         self.store = store
         let profile = store.profile
-        _weightText = State(initialValue: store.latestWeight.map { String(format: "%.0f", $0.weightKg) } ?? profile.map { String(format: "%.0f", $0.weightKg) } ?? "")
-        _heightText = State(initialValue: profile.map { String(format: "%.0f", $0.heightCm) } ?? "")
-        _ageText = State(initialValue: profile.map { String($0.age) } ?? "")
+        let wKg = store.latestWeight?.weightKg ?? profile?.weightKg ?? 70.0
+        _weightTenths = State(initialValue: max(300, Int((wKg * 10).rounded())))
+        let hCm = Int((profile?.heightCm ?? 170).rounded())
+        _heightInt = State(initialValue: hCm > 0 ? hCm : 170)
+        _ageInt = State(initialValue: profile?.age ?? 25)
+        let pKg = profile?.proteinPerKg ?? UserProfile.defaultProteinPerKg
+        _proteinTenths = State(initialValue: max(10, Int((pKg * 10).rounded())))
         _sex = State(initialValue: profile?.sex ?? .male)
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
-        _proteinPerKgText = State(initialValue: profile.map { String(format: "%.1f", $0.proteinPerKg) } ?? String(format: "%.1f", UserProfile.defaultProteinPerKg))
-        _waistText = State(initialValue: profile?.waistCm.map { String(format: "%.0f", $0) } ?? "")
-        _neckText = State(initialValue: profile?.neckCm.map { String(format: "%.0f", $0) } ?? "")
-        _hipText = State(initialValue: profile?.hipCm.map { String(format: "%.0f", $0) } ?? "")
+        _waistCm = State(initialValue: Int((profile?.waistCm ?? 0).rounded()))
+        _neckCm = State(initialValue: Int((profile?.neckCm ?? 0).rounded()))
+        _hipCm = State(initialValue: Int((profile?.hipCm ?? 0).rounded()))
     }
 
-    private var weight: Double? { Double(weightText.replacingOccurrences(of: ",", with: ".")) }
-    private var height: Double? { Double(heightText.replacingOccurrences(of: ",", with: ".")) }
-    private var age: Int? { Int(ageText) }
-    private var proteinPerKg: Double? { Double(proteinPerKgText.replacingOccurrences(of: ",", with: ".")) }
-    private var waist: Double? { Double(waistText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
-    private var neck: Double? { Double(neckText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
-    private var hip: Double? { Double(hipText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    private var waist: Double? { waistCm > 0 ? Double(waistCm) : nil }
+    private var neck: Double? { neckCm > 0 ? Double(neckCm) : nil }
+    private var hip: Double? { hipCm > 0 ? Double(hipCm) : nil }
 
     private var draftProfile: UserProfile? {
-        guard let weight, weight > 0,
-              let height, height > 0,
-              let age, age > 0,
-              let proteinPerKg, proteinPerKg > 0 else { return nil }
-        return UserProfile(
-            weightKg: weight,
-            heightCm: height,
-            age: age,
+        UserProfile(
+            weightKg: Double(weightTenths) / 10.0,
+            heightCm: Double(heightInt),
+            age: ageInt,
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
-            proteinPerKg: proteinPerKg,
+            proteinPerKg: Double(proteinTenths) / 10.0,
             waistCm: waist,
             neckCm: neck,
             hipCm: hip
@@ -68,7 +67,7 @@ struct ProfileView: View {
     }
 
     var body: some View {
-        Form {
+        List {
             if store.plan == nil {
                 Section {
                     Picker("Цель", selection: $goal) {
@@ -91,32 +90,68 @@ struct ProfileView: View {
                     HStack {
                         Text("Вес, кг")
                         Spacer()
-                        TextField("70", text: $weightText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                        Text(String(format: "%.1f кг", Double(weightTenths) / 10.0))
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showWeightPicker.toggle()
+                            if showWeightPicker { showHeightPicker = false; showAgePicker = false; showProteinPicker = false }
+                        }
+                    }
+                    if showWeightPicker {
+                        Picker("Вес", selection: $weightTenths) {
+                            ForEach(300...1500, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 160)
                     }
                     HStack {
                         Text("Рост, см")
                         Spacer()
-                        TextField("175", text: $heightText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                        Text("\(heightInt) см")
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showHeightPicker.toggle()
+                            if showHeightPicker { showWeightPicker = false; showAgePicker = false; showProteinPicker = false }
+                        }
+                    }
+                    if showHeightPicker {
+                        Picker("Рост", selection: $heightInt) {
+                            ForEach(100...250, id: \.self) { Text("\($0)").tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 160)
                     }
                     HStack {
                         Text("Возраст")
                         Spacer()
-                        TextField("30", text: $ageText)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                        Text("\(ageInt) лет")
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showAgePicker.toggle()
+                            if showAgePicker { showWeightPicker = false; showHeightPicker = false; showProteinPicker = false }
+                        }
+                    }
+                    if showAgePicker {
+                        Picker("Возраст", selection: $ageInt) {
+                            ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 160)
                     }
                     NavigationLink {
                         BodyFatDetailView(
-                            waistText: $waistText,
-                            neckText: $neckText,
-                            hipText: $hipText,
+                            waistCm: $waistCm,
+                            neckCm: $neckCm,
+                            hipCm: $hipCm,
                             sex: sex,
                             profile: draftProfile
                         )
@@ -167,12 +202,22 @@ struct ProfileView: View {
                     HStack {
                         Text("Белка на кг веса")
                         Spacer()
-                        TextField("1.7", text: $proteinPerKgText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                        Text("г")
+                        Text(String(format: "%.1f г/кг", Double(proteinTenths) / 10.0))
                             .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showProteinPicker.toggle()
+                            if showProteinPicker { showWeightPicker = false; showHeightPicker = false; showAgePicker = false }
+                        }
+                    }
+                    if showProteinPicker {
+                        Picker("Белок", selection: $proteinTenths) {
+                            ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 160)
                     }
                 } header: {
                     Text("Норма белка")
@@ -208,6 +253,7 @@ struct ProfileView: View {
                     }
                 }
             }
+            .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
             .scrollIndicators(.hidden)
             .navigationTitle("Профиль")
@@ -287,15 +333,15 @@ struct ProfileView: View {
 }
 
 private struct BodyFatDetailView: View {
-    @Binding var waistText: String
-    @Binding var neckText: String
-    @Binding var hipText: String
+    @Binding var waistCm: Int
+    @Binding var neckCm: Int
+    @Binding var hipCm: Int
     let sex: Sex
     let profile: UserProfile?
 
-    private var waist: Double? { Double(waistText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
-    private var neck: Double? { Double(neckText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
-    private var hip: Double? { Double(hipText.replacingOccurrences(of: ",", with: ".")).flatMap { $0 > 0 ? $0 : nil } }
+    @State private var showWaistPicker = false
+    @State private var showNeckPicker = false
+    @State private var showHipPicker = false
 
     private func bodyFatColor(_ category: String) -> Color {
         switch category {
@@ -337,27 +383,68 @@ private struct BodyFatDetailView: View {
                 HStack {
                     Text("Талия, см")
                     Spacer()
-                    TextField("80", text: $waistText)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
+                    Text(waistCm > 0 ? "\(waistCm) см" : "—")
+                        .foregroundStyle(.secondary)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showWaistPicker.toggle()
+                        if showWaistPicker { showNeckPicker = false; showHipPicker = false }
+                    }
+                }
+                if showWaistPicker {
+                    Picker("Талия", selection: $waistCm) {
+                        Text("—").tag(0)
+                        ForEach(50...150, id: \.self) { Text("\($0)").tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+
                 HStack {
                     Text("Шея, см")
                     Spacer()
-                    TextField("37", text: $neckText)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 80)
+                    Text(neckCm > 0 ? "\(neckCm) см" : "—")
+                        .foregroundStyle(.secondary)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showNeckPicker.toggle()
+                        if showNeckPicker { showWaistPicker = false; showHipPicker = false }
+                    }
+                }
+                if showNeckPicker {
+                    Picker("Шея", selection: $neckCm) {
+                        Text("—").tag(0)
+                        ForEach(25...60, id: \.self) { Text("\($0)").tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+
                 if sex == .female {
                     HStack {
                         Text("Бёдра, см")
                         Spacer()
-                        TextField("95", text: $hipText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                        Text(hipCm > 0 ? "\(hipCm) см" : "—")
+                            .foregroundStyle(.secondary)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showHipPicker.toggle()
+                            if showHipPicker { showWaistPicker = false; showNeckPicker = false }
+                        }
+                    }
+                    if showHipPicker {
+                        Picker("Бёдра", selection: $hipCm) {
+                            Text("—").tag(0)
+                            ForEach(60...150, id: \.self) { Text("\($0)").tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 160)
                     }
                 }
             } header: {
@@ -368,6 +455,5 @@ private struct BodyFatDetailView: View {
         }
         .navigationTitle("Жир %")
         .navigationBarTitleDisplayMode(.inline)
-        .scrollDismissesKeyboard(.interactively)
     }
 }

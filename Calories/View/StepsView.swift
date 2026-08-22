@@ -2,10 +2,88 @@ import SwiftUI
 import Charts
 import HealthKit
 
+enum StepPeriod: String, CaseIterable {
+    case week = "7 дней"
+    case month = "30 дней"
+}
+
+@MainActor
+@Observable
+final class StepsViewModel {
+    var period: StepPeriod = .week
+
+    private let store: StepStore
+
+    init(store: StepStore) {
+        self.store = store
+    }
+
+    var history: [StepDay] {
+        period == .week ? store.weekHistory : store.monthHistory
+    }
+
+    var average: Int {
+        let nonZero = history.filter { $0.steps > 0 }
+        return nonZero.isEmpty ? 0 : nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
+    }
+
+    var best: StepDay? {
+        history.max(by: { $0.steps < $1.steps })
+    }
+
+    var daysOnGoal: Int {
+        history.filter { $0.steps >= store.stepGoal }.count
+    }
+
+    var trendPercent: Double? {
+        guard store.prevWeekAverage > 0, average > 0 else { return nil }
+        return Double(average - store.prevWeekAverage) / Double(store.prevWeekAverage) * 100
+    }
+
+    var ringProgress: Double {
+        guard store.stepGoal > 0 else { return 0 }
+        return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
+    }
+
+    var stepGoalAchieved: Bool {
+        store.stepsToday >= store.stepGoal
+    }
+
+    var distanceText: String {
+        store.distanceTodayKm > 0 ? String(format: "%.1f км", store.distanceTodayKm) : "—"
+    }
+
+    var goalPercentText: String {
+        let pct = store.stepGoal > 0 ? Int(Double(store.stepsToday) / Double(store.stepGoal) * 100) : 0
+        return "\(min(pct, 100))%"
+    }
+
+    var goalStreakSubtitle: String {
+        store.goalStreak == 1 ? "день" : "дней"
+    }
+
+    func saveGoal(_ text: String) {
+        if let value = Int(text), value > 0 {
+            store.stepGoal = value
+        }
+    }
+
+    func refresh() async {
+        store.fetchAll()
+        try? await Task.sleep(for: .seconds(1))
+    }
+}
+
 struct StepsView: View {
     @ObservedObject var store: StepStore
-    @State private var showingGoalEditor = false
+    @State private var viewModel: StepsViewModel
     @State private var goalText = ""
+    @State private var showingGoalEditor = false
+
+    init(store: StepStore) {
+        self.store = store
+        _viewModel = State(initialValue: StepsViewModel(store: store))
+    }
 
     var body: some View {
         NavigationStack {
@@ -15,7 +93,7 @@ struct StepsView: View {
                 } else if !store.isAuthorized {
                     authView
                 } else {
-                    StepsContentView(store: store)
+                    StepsContentView(viewModel: viewModel, store: store)
                 }
             }
             .navigationTitle("Шаги")
@@ -36,9 +114,7 @@ struct StepsView: View {
                     .keyboardType(.numberPad)
                 Button("Отмена", role: .cancel) {}
                 Button("Сохранить") {
-                    if let value = Int(goalText), value > 0 {
-                        store.stepGoal = value
-                    }
+                    viewModel.saveGoal(goalText)
                 }
             }
         }
@@ -80,41 +156,35 @@ struct StepsView: View {
 }
 
 private struct StepsContentView: View {
+    @Bindable var viewModel: StepsViewModel
     @ObservedObject var store: StepStore
 
-    enum StepPeriod: String, CaseIterable {
-        case week = "7 дней"
-        case month = "30 дней"
-    }
-
     private enum RingMode: CaseIterable { case steps, distance, goal }
-
-    @State private var period: StepPeriod = .week
     @State private var ringMode: RingMode = .steps
-    @State private var average: Int = 0
-    @State private var best: StepDay? = nil
-    @State private var daysOnGoal: Int = 0
 
-    private var history: [StepDay] {
-        period == .week ? store.weekHistory : store.monthHistory
-    }
-
-    private var trendPercent: Double? {
-        guard store.prevWeekAverage > 0, average > 0 else { return nil }
-        return Double(average - store.prevWeekAverage) / Double(store.prevWeekAverage) * 100
-    }
-
-    private var ringProgress: Double {
-        guard store.stepGoal > 0 else { return 0 }
-        return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
+    var body: some View {
+        List {
+            VStack(spacing: 16) {
+                todayCard
+                chartCard
+                trendsCard
+                statsCard
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+        }
+        .listStyle(.insetGrouped)
+        .refreshable {
+            await viewModel.refresh()
+        }
     }
 
     private var ringColors: [Color] {
-        let done = store.stepsToday >= store.stepGoal
         switch ringMode {
-        case .steps:    return done ? [.orange, .red] : [.blue, .cyan]
-        case .distance: return done ? [.orange, .red] : [.teal, .green]
-        case .goal:     return done ? [.orange, .red] : [.purple, .indigo]
+        case .steps:    return viewModel.stepGoalAchieved ? [.orange, .red] : [.blue, .cyan]
+        case .distance: return viewModel.stepGoalAchieved ? [.orange, .red] : [.teal, .green]
+        case .goal:     return viewModel.stepGoalAchieved ? [.orange, .red] : [.purple, .indigo]
         }
     }
 
@@ -166,40 +236,9 @@ private struct StepsContentView: View {
         }
     }
 
-    private func recomputePeriodStats() {
-        let h = history
-        let nonZero = h.filter { $0.steps > 0 }
-        average = nonZero.isEmpty ? 0 : nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
-        best = h.max(by: { $0.steps < $1.steps })
-        daysOnGoal = h.filter { $0.steps >= store.stepGoal }.count
-    }
-
-    var body: some View {
-        List {
-            VStack(spacing: 16) {
-                todayCard
-                chartCard
-                trendsCard
-                statsCard
-            }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
-        }
-        .listStyle(.insetGrouped)
-        .refreshable {
-            store.fetchAll()
-            try? await Task.sleep(for: .seconds(1))
-        }
-        .onAppear { recomputePeriodStats() }
-        .onChange(of: period) { _, _ in recomputePeriodStats() }
-        .onChange(of: store.weekHistory.count) { _, _ in recomputePeriodStats() }
-        .onChange(of: store.monthHistory.count) { _, _ in recomputePeriodStats() }
-    }
-
     private var todayCard: some View {
         VStack(spacing: 28) {
-            RingView(progress: ringProgress, colors: ringColors, labelID: ringMode) {
+            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: ringMode) {
                 ringLabel
             }
             .onTapGesture {
@@ -211,26 +250,11 @@ private struct StepsContentView: View {
             }
 
             HStack(spacing: 0) {
-                statCell(
-                    title: "Дистанция",
-                    value: store.distanceTodayKm > 0 ? String(format: "%.1f км", store.distanceTodayKm) : "—",
-                    subtitle: ""
-                )
+                statCell(title: "Дистанция", value: viewModel.distanceText, subtitle: "")
                 Divider().frame(height: 40)
-                statCell(
-                    title: "от цели",
-                    value: {
-                        let pct = store.stepGoal > 0 ? Int(Double(store.stepsToday) / Double(store.stepGoal) * 100) : 0
-                        return "\(min(pct, 100))%"
-                    }(),
-                    subtitle: ""
-                )
+                statCell(title: "от цели", value: viewModel.goalPercentText, subtitle: "")
                 Divider().frame(height: 40)
-                statCell(
-                    title: "Цель",
-                    value: store.stepGoal.formatted(),
-                    subtitle: ""
-                )
+                statCell(title: "Цель", value: store.stepGoal.formatted(), subtitle: "")
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
@@ -247,7 +271,7 @@ private struct StepsContentView: View {
                 Text("История")
                     .font(.headline)
                 Spacer()
-                Picker("Период", selection: $period) {
+                Picker("Период", selection: $viewModel.period) {
                     ForEach(StepPeriod.allCases, id: \.self) { p in
                         Text(p.rawValue).tag(p)
                     }
@@ -256,12 +280,12 @@ private struct StepsContentView: View {
                 .frame(width: 160)
             }
 
-            if history.isEmpty {
+            if viewModel.history.isEmpty {
                 Text("Нет данных")
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, minHeight: 160)
             } else {
-                Chart(history) { day in
+                Chart(viewModel.history) { day in
                     BarMark(
                         x: .value("Дата", day.date, unit: .day),
                         y: .value("Шаги", day.steps)
@@ -274,7 +298,7 @@ private struct StepsContentView: View {
                         .foregroundStyle(.orange.opacity(0.7))
                 }
                 .chartXAxis {
-                    let stride = period == .week ? 1 : 5
+                    let stride = viewModel.period == .week ? 1 : 5
                     AxisMarks(values: .stride(by: .day, count: stride)) { _ in
                         AxisGridLine()
                         AxisValueLabel(format: .dateTime.day(), centered: true)
@@ -288,7 +312,7 @@ private struct StepsContentView: View {
                 }
                 .frame(height: 180)
                 .drawingGroup()
-                .animation(.easeInOut, value: period)
+                .animation(.easeInOut, value: viewModel.period)
             }
         }
         .padding()
@@ -307,7 +331,7 @@ private struct StepsContentView: View {
                 statCell(
                     title: "Стрик",
                     value: "\(store.goalStreak)",
-                    subtitle: store.goalStreak == 1 ? "день" : "дней"
+                    subtitle: viewModel.goalStreakSubtitle
                 )
                 Divider().frame(height: 40)
                 statCell(
@@ -330,7 +354,7 @@ private struct StepsContentView: View {
 
     private var trendCell: some View {
         VStack(spacing: 4) {
-            if let trend = trendPercent {
+            if let trend = viewModel.trendPercent {
                 HStack(spacing: 2) {
                     Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
                         .font(.caption.weight(.bold))
@@ -356,20 +380,20 @@ private struct StepsContentView: View {
         HStack(spacing: 0) {
             statCell(
                 title: "Среднее",
-                value: average > 0 ? average.formatted() : "—",
+                value: viewModel.average > 0 ? viewModel.average.formatted() : "—",
                 subtitle: "шагов/день"
             )
             Divider().frame(height: 40)
             statCell(
                 title: "Рекорд",
-                value: best.map { $0.steps.formatted() } ?? "—",
-                subtitle: best.map { $0.date.formatted(.dateTime.day().month(.abbreviated)) } ?? ""
+                value: viewModel.best.map { $0.steps.formatted() } ?? "—",
+                subtitle: viewModel.best.map { $0.date.formatted(.dateTime.day().month(.abbreviated)) } ?? ""
             )
             Divider().frame(height: 40)
             statCell(
                 title: "Дней с целью",
-                value: "\(daysOnGoal)",
-                subtitle: "из \(history.count)"
+                value: "\(viewModel.daysOnGoal)",
+                subtitle: "из \(viewModel.history.count)"
             )
         }
         .padding(.vertical, 16)

@@ -315,6 +315,9 @@ private struct StepsCard: View {
                             )
                             .rotationEffect(.degrees(-90))
                             .animation(.easeOut, value: progress)
+                        Image(systemName: "figure.walk")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundStyle(progress >= 1 ? .green : .blue)
                     }
                     .frame(width: 40, height: 40)
 

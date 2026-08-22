@@ -178,9 +178,9 @@ struct ContentView: View {
                     }
                     .listSectionSeparator(.hidden)
                 } else {
-                    ForEach(store.groupedTodayEntries, id: \.period) { group in
+                    ForEach(store.groupedTodayEntries.reversed(), id: \.period) { group in
                         Section(group.period.rawValue) {
-                            ForEach(group.entries) { entry in
+                            ForEach(group.entries.reversed()) { entry in
                                 NavigationLink(value: entry) {
                                     EntryRow(entry: entry)
                                 }

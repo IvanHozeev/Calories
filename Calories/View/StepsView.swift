@@ -65,7 +65,7 @@ final class StepsViewModel {
     }
 }
 
-struct StepsView: View {
+struct StepsNavigationView: View {
     var store: StepStore
     @State private var viewModel: StepsViewModel
     @State private var selectedGoal: Int = 10_000
@@ -77,35 +77,33 @@ struct StepsView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if !HKHealthStore.isHealthDataAvailable() {
-                    unavailableView
-                } else if !store.isAuthorized {
-                    authView
-                } else {
-                    StepsContentView(viewModel: viewModel, store: store)
+        Group {
+            if !HKHealthStore.isHealthDataAvailable() {
+                unavailableView
+            } else if !store.isAuthorized {
+                authView
+            } else {
+                StepsContentView(viewModel: viewModel, store: store)
+            }
+        }
+        .navigationTitle("Шаги")
+        .scrollIndicators(.hidden)
+        .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
+                    selectedGoal = snapped
+                    showingGoalEditor = true
+                } label: {
+                    Image(systemName: "target")
                 }
             }
-            .navigationTitle("Шаги")
-            .scrollIndicators(.hidden)
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
-                        selectedGoal = snapped
-                        showingGoalEditor = true
-                    } label: {
-                        Image(systemName: "target")
-                    }
-                }
-            }
-            .sheet(isPresented: $showingGoalEditor, onDismiss: {
-                store.stepGoal = selectedGoal
-            }) {
-                GoalPickerSheet(goal: $selectedGoal)
-            }
+        }
+        .sheet(isPresented: $showingGoalEditor, onDismiss: {
+            store.stepGoal = selectedGoal
+        }) {
+            GoalPickerSheet(goal: $selectedGoal)
         }
     }
 

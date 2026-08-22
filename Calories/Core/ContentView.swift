@@ -235,11 +235,11 @@ struct ContentView: View {
                 AddWeightView(store: store)
                     .presentationDetents([.height(320)])
             }
-            .sheet(isPresented: $showingActivity) {
-                ActivitySheet(store: store)
+            .navigationDestination(isPresented: $showingActivity) {
+                ActivityView(store: store)
             }
-            .sheet(isPresented: $showingSteps) {
-                StepsView(store: stepStore)
+            .navigationDestination(isPresented: $showingSteps) {
+                StepsNavigationView(store: stepStore)
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)
@@ -322,7 +322,7 @@ private struct StepsCard: View {
                         Text(store.stepsToday.formatted())
                             .font(.headline)
                             .monospacedDigit()
-                        Text("из \(store.stepGoal.formatted())")
+                        Text("шагов из \(store.stepGoal.formatted())")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -352,7 +352,7 @@ private struct StepsCard: View {
     }
 }
 
-private struct ActivitySheet: View {
+private struct ActivityView: View {
     let store: CalorieStore
 
     private var loggedDays: [DaySummary] {
@@ -383,69 +383,67 @@ private struct ActivitySheet: View {
     ]
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    VStack(spacing: 16) {
-                        VStack(spacing: 8) {
-                            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                                Image(systemName: "flame.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundStyle(milestoneColor)
-                                Text("\(store.streak)")
-                                    .font(.system(size: 52, weight: .bold, design: .rounded))
-                                    .foregroundStyle(milestoneColor)
-                                    .monospacedDigit()
-                            }
-                            Text(streakLabel)
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            if store.bestStreak > store.streak && store.bestStreak > 0 {
-                                Label("Рекорд: \(store.bestStreak) дней", systemImage: "trophy.fill")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.yellow)
-                            }
+        List {
+            Section {
+                VStack(spacing: 16) {
+                    VStack(spacing: 8) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Image(systemName: "flame.fill")
+                                .font(.system(size: 32))
+                                .foregroundStyle(milestoneColor)
+                            Text("\(store.streak)")
+                                .font(.system(size: 52, weight: .bold, design: .rounded))
+                                .foregroundStyle(milestoneColor)
+                                .monospacedDigit()
                         }
-                        .frame(maxWidth: .infinity)
-
-                        miniCalendar
-
-                        HStack(spacing: 0) {
-                            ForEach(milestones, id: \.0) { (days, label, icon) in
-                                let reached = store.streak >= days || store.bestStreak >= days
-                                VStack(spacing: 6) {
-                                    Image(systemName: "\(icon).fill")
-                                        .font(.title2)
-                                        .foregroundStyle(reached ? .orange : Color(.systemGray4))
-                                    Text(label)
-                                        .font(.caption2)
-                                        .foregroundStyle(reached ? .primary : .secondary)
-                                }
-                                .frame(maxWidth: .infinity)
-                            }
+                        Text(streakLabel)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        if store.bestStreak > store.streak && store.bestStreak > 0 {
+                            Label("Рекорд: \(store.bestStreak) дней", systemImage: "trophy.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.yellow)
                         }
                     }
-                    .padding(.vertical, 8)
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                    .frame(maxWidth: .infinity)
 
-                if !loggedDays.isEmpty {
-                    Section("История") {
-                        ForEach(loggedDays) { day in
-                            NavigationLink {
-                                DayDetailView(store: store, date: day.date)
-                            } label: {
-                                DayRow(day: day)
+                    miniCalendar
+
+                    HStack(spacing: 0) {
+                        ForEach(milestones, id: \.0) { (days, label, icon) in
+                            let reached = store.streak >= days || store.bestStreak >= days
+                            VStack(spacing: 6) {
+                                Image(systemName: "\(icon).fill")
+                                    .font(.title2)
+                                    .foregroundStyle(reached ? .orange : Color(.systemGray4))
+                                Text(label)
+                                    .font(.caption2)
+                                    .foregroundStyle(reached ? .primary : .secondary)
                             }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+
+            if !loggedDays.isEmpty {
+                Section("История") {
+                    ForEach(loggedDays) { day in
+                        NavigationLink {
+                            DayDetailView(store: store, date: day.date)
+                        } label: {
+                            DayRow(day: day)
                         }
                     }
                 }
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Журнал")
-            .navigationBarTitleDisplayMode(.large)
         }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Журнал")
+        .navigationBarTitleDisplayMode(.large)
     }
 
     private var miniCalendar: some View {

@@ -88,6 +88,11 @@ struct FoodQuantityView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 16) {
+                    Button("В приём пищи") {
+                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
                     if let onAddAndSave {
                         Button {
                             onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
@@ -96,11 +101,6 @@ struct FoodQuantityView: View {
                                 .foregroundStyle(.green)
                         }
                     }
-                    Button("В приём пищи") {
-                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
                 }
             }
             if let onSave {

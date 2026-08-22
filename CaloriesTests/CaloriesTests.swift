@@ -491,3 +491,133 @@ struct CalorieStoreTests {
         #expect(store.recentFoodNames.count <= 20)
     }
 }
+
+// MARK: - StepStore
+
+@MainActor
+struct StepStoreTests {
+
+    // Очищаем UserDefaults чтобы не зависеть от предыдущих запусков
+    private func makeStore(goal: Int? = nil) -> StepStore {
+        UserDefaults.standard.removeObject(forKey: "step_goal")
+        if let goal {
+            UserDefaults.standard.set(goal, forKey: "step_goal")
+        }
+        return StepStore()
+    }
+
+    @Test func defaultStepGoal_is10000() {
+        let store = makeStore()
+        #expect(store.stepGoal == 10_000)
+    }
+
+    @Test func stepGoal_persistsToUserDefaults() {
+        let store = makeStore()
+        store.stepGoal = 7_500
+        #expect(UserDefaults.standard.integer(forKey: "step_goal") == 7_500)
+    }
+
+    @Test func stepGoal_loadsFromUserDefaults() {
+        let store = makeStore(goal: 5_000)
+        #expect(store.stepGoal == 5_000)
+    }
+
+    @Test func initialStepsToday_isZero() {
+        let store = makeStore()
+        #expect(store.stepsToday == 0)
+    }
+
+    @Test func initialDistanceToday_isZero() {
+        let store = makeStore()
+        #expect(store.distanceTodayKm == 0)
+    }
+
+    @Test func initialActiveCalories_isZero() {
+        let store = makeStore()
+        #expect(store.activeCaloriesToday == 0)
+    }
+
+    @Test func initialWeekHistory_isEmpty() {
+        let store = makeStore()
+        #expect(store.weekHistory.isEmpty)
+    }
+
+    @Test func initialMonthHistory_isEmpty() {
+        let store = makeStore()
+        #expect(store.monthHistory.isEmpty)
+    }
+
+    @Test func initialGoalStreak_isZero() {
+        let store = makeStore()
+        #expect(store.goalStreak == 0)
+    }
+
+    @Test func initialWeeklyTotal_isZero() {
+        let store = makeStore()
+        #expect(store.weeklyTotal == 0)
+    }
+}
+
+// MARK: - ReminderStore
+
+@MainActor
+struct ReminderStoreTests {
+
+    private func makeStore() -> ReminderStore {
+        UserDefaults.standard.removeObject(forKey: "reminders_app_enabled")
+        return ReminderStore()
+    }
+
+    @Test func hasThreeReminders() {
+        let store = makeStore()
+        #expect(store.reminders.count == 3)
+    }
+
+    @Test func reminderIds_areCorrect() {
+        let store = makeStore()
+        let ids = store.reminders.map(\.id)
+        #expect(ids.contains("breakfast"))
+        #expect(ids.contains("lunch"))
+        #expect(ids.contains("dinner"))
+    }
+
+    @Test func reminderTitles_arePresent() {
+        let store = makeStore()
+        #expect(store.reminders.allSatisfy { !$0.title.isEmpty })
+    }
+
+    @Test func defaultAppEnabled_isFalse() {
+        let store = makeStore()
+        #expect(!store.appEnabled)
+    }
+
+    @Test func appEnabled_persistsToUserDefaults() {
+        let store = makeStore()
+        store.appEnabled = true
+        #expect(UserDefaults.standard.bool(forKey: "reminders_app_enabled") == true)
+        store.appEnabled = false
+    }
+
+    @Test func disableNotifications_setsAppEnabledFalse() {
+        let store = makeStore()
+        store.appEnabled = true
+        store.disableNotifications()
+        #expect(!store.appEnabled)
+    }
+
+    @Test func saveAndReschedule_persistsReminderState() {
+        let store = makeStore()
+        store.reminders[0].isEnabled = true
+        store.saveAndReschedule()
+        #expect(UserDefaults.standard.bool(forKey: "reminder_breakfast_on") == true)
+    }
+
+    @Test func saveAndReschedule_persistsReminderTime() {
+        let store = makeStore()
+        let newTime = Date(timeIntervalSince1970: 3600 * 9)
+        store.reminders[0].time = newTime
+        store.saveAndReschedule()
+        let saved = UserDefaults.standard.object(forKey: "reminder_breakfast_time") as? TimeInterval
+        #expect(saved != nil)
+    }
+}

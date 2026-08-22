@@ -177,9 +177,7 @@ struct ContentView: View {
                     ForEach(store.groupedTodayEntries, id: \.period) { group in
                         Section(group.period.rawValue) {
                             ForEach(group.entries) { entry in
-                                NavigationLink {
-                                    EditEntrySheet(store: store, entry: entry, isEmbedded: true)
-                                } label: {
+                                NavigationLink(value: entry) {
                                     EntryRow(entry: entry)
                                 }
                                 .swipeActions(edge: .leading) {
@@ -205,6 +203,9 @@ struct ContentView: View {
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
             .refreshable { store.refresh() }
+            .navigationDestination(for: FoodEntry.self) { entry in
+                EditEntrySheet(store: store, entry: entry, isEmbedded: true)
+            }
             .navigationDestination(isPresented: $showingPlan) {
                 PlanView(store: store)
             }

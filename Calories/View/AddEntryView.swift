@@ -191,7 +191,7 @@ struct AddEntryView: View {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
                             NavigationLink {
-                                FoodQuantityView(food: food) { item in
+                                FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -200,7 +200,7 @@ struct AddEntryView: View {
                         }
                         ForEach(recentDishItems) { dish in
                             NavigationLink {
-                                DishQuantityView(dish: dish) { item in
+                                DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -214,7 +214,7 @@ struct AddEntryView: View {
                     Section("Мои блюда") {
                         ForEach(filteredDishes) { dish in
                             NavigationLink {
-                                DishQuantityView(dish: dish) { item in
+                                DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -228,7 +228,7 @@ struct AddEntryView: View {
                     Section("Мои продукты") {
                         ForEach(filteredCustomFoods) { food in
                             NavigationLink {
-                                FoodQuantityView(food: food) { item in
+                                FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -264,7 +264,7 @@ struct AddEntryView: View {
                     } else {
                         ForEach(filteredBuiltInFoods) { food in
                             NavigationLink {
-                                FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }) { item in
+                                FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }, onAddAndSave: addAndSave) { item in
                                     draftItems.append(item)
                                 }
                             } label: {
@@ -366,6 +366,18 @@ struct AddEntryView: View {
         dayComponents.minute = timeComponents.minute
         dayComponents.second = timeComponents.second
         return calendar.date(from: dayComponents) ?? selectedDate
+    }
+
+    private func addAndSave(_ item: MealItem) {
+        let allItems = draftItems + [item]
+        store.recordRecentFoods(allItems.map(\.name))
+        let totalCalories = allItems.reduce(0) { $0 + $1.calories }
+        let totalMacros = allItems.reduce(Macros.zero) { $0 + $1.macros }
+        let name = allItems.count == 1 ? item.name : joinedName(allItems)
+        let grams = allItems.count == 1 ? item.grams : nil
+        store.add(name: name, calories: totalCalories, macros: totalMacros, grams: grams, date: entryDate)
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        dismiss()
     }
 
     private func isSaved(_ food: FoodItem) -> Bool {

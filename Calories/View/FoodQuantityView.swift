@@ -5,15 +5,17 @@ struct FoodQuantityView: View {
     let food: FoodItem
     let onAdd: (MealItem) -> Void
     var onSave: (() -> Void)? = nil
+    var onAddAndSave: ((MealItem) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var grams: Double
     @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
 
-    init(food: FoodItem, onSave: (() -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
+    init(food: FoodItem, onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.food = food
         self.onSave = onSave
+        self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
         let g = food.defaultGrams > 0 ? food.defaultGrams : 100
         _grams = State(initialValue: g)
@@ -84,12 +86,22 @@ struct FoodQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("В приём пищи") {
-                    onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                    dismiss()
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 16) {
+                    if let onAddAndSave {
+                        Button {
+                            onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        } label: {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        }
+                    }
+                    Button("В приём пищи") {
+                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
                 }
-                .fontWeight(.semibold)
             }
             if let onSave {
                 ToolbarItem(placement: .bottomBar) {
@@ -119,14 +131,16 @@ struct FoodQuantityView: View {
 struct DishQuantityView: View {
     let dish: Dish
     let onAdd: (MealItem) -> Void
+    var onAddAndSave: ((MealItem) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var grams: Double
     @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
 
-    init(dish: Dish, onAdd: @escaping (MealItem) -> Void) {
+    init(dish: Dish, onAddAndSave: ((MealItem) -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.dish = dish
+        self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
         let defaultGrams = dish.totalGrams > 0 ? dish.totalGrams : 100
         _grams = State(initialValue: defaultGrams)
@@ -209,12 +223,22 @@ struct DishQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("В приём пищи") {
-                    onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
-                    dismiss()
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack(spacing: 16) {
+                    if let onAddAndSave {
+                        Button {
+                            onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
+                        } label: {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                        }
+                    }
+                    Button("В приём пищи") {
+                        onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
+                        dismiss()
+                    }
+                    .fontWeight(.semibold)
                 }
-                .fontWeight(.semibold)
             }
         }
     }

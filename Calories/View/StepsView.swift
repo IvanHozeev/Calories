@@ -62,12 +62,6 @@ final class StepsViewModel {
         store.goalStreak == 1 ? "день" : "дней"
     }
 
-    func saveGoal(_ text: String) {
-        if let value = Int(text), value > 0 {
-            store.stepGoal = value
-        }
-    }
-
     func refresh() async {
         store.fetchAll()
         try? await Task.sleep(for: .seconds(1))
@@ -77,7 +71,7 @@ final class StepsViewModel {
 struct StepsView: View {
     var store: StepStore
     @State private var viewModel: StepsViewModel
-    @State private var goalText = ""
+    @State private var selectedGoal: Int = 10_000
     @State private var showingGoalEditor = false
 
     init(store: StepStore) {
@@ -102,20 +96,18 @@ struct StepsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        goalText = "\(store.stepGoal)"
+                        let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
+                        selectedGoal = snapped
                         showingGoalEditor = true
                     } label: {
                         Image(systemName: "target")
                     }
                 }
             }
-            .alert("Цель по шагам", isPresented: $showingGoalEditor) {
-                TextField("Шаги", text: $goalText)
-                    .keyboardType(.numberPad)
-                Button("Отмена", role: .cancel) {}
-                Button("Сохранить") {
-                    viewModel.saveGoal(goalText)
-                }
+            .sheet(isPresented: $showingGoalEditor, onDismiss: {
+                store.stepGoal = selectedGoal
+            }) {
+                GoalPickerSheet(goal: $selectedGoal)
             }
         }
     }
@@ -155,12 +147,40 @@ struct StepsView: View {
     }
 }
 
+private struct GoalPickerSheet: View {
+    @Binding var goal: Int
+    @Environment(\.dismiss) private var dismiss
+
+    private let values = Array(stride(from: 1000, through: 30_000, by: 500))
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Цель по шагам")
+                    .font(.headline)
+                Spacer()
+                Button("Готово") { dismiss() }
+                    .fontWeight(.semibold)
+            }
+            .padding(.horizontal)
+            .padding(.top, 20)
+            .padding(.bottom, 4)
+
+            Picker("Цель", selection: $goal) {
+                ForEach(values, id: \.self) { value in
+                    Text(value.formatted()).tag(value)
+                }
+            }
+            .pickerStyle(.wheel)
+        }
+        .presentationDetents([.height(280)])
+        .presentationDragIndicator(.visible)
+    }
+}
+
 private struct StepsContentView: View {
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
-
-    private enum RingMode: CaseIterable { case steps, distance, goal }
-    @State private var ringMode: RingMode = .steps
 
     var body: some View {
         List {
@@ -181,72 +201,30 @@ private struct StepsContentView: View {
     }
 
     private var ringColors: [Color] {
-        switch ringMode {
-        case .steps:    return viewModel.stepGoalAchieved ? [.orange, .red] : [.blue, .cyan]
-        case .distance: return viewModel.stepGoalAchieved ? [.orange, .red] : [.teal, .green]
-        case .goal:     return viewModel.stepGoalAchieved ? [.orange, .red] : [.purple, .indigo]
-        }
+        viewModel.stepGoalAchieved ? [.orange, .red] : [.blue, .cyan]
     }
 
-    @ViewBuilder private var ringLabel: some View {
-        switch ringMode {
-        case .steps:
-            let remaining = store.stepGoal - store.stepsToday
-            VStack(spacing: 2) {
-                Text(store.stepsToday.formatted())
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Text("из \(store.stepGoal.formatted()) шагов")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(remaining > 0 ? "\(remaining.formatted()) осталось" : "цель достигнута")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(remaining > 0 ? .blue : .green)
-                    .contentTransition(.numericText())
-            }
-        case .distance:
-            VStack(spacing: 2) {
-                Text(store.distanceTodayKm > 0 ? String(format: "%.2f", store.distanceTodayKm) : "—")
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Text("километров")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("дистанция сегодня")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.teal)
-            }
-        case .goal:
-            let pct = store.stepGoal > 0 ? min(Int(Double(store.stepsToday) / Double(store.stepGoal) * 100), 100) : 0
-            VStack(spacing: 2) {
-                Text("\(pct)%")
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Text("от цели")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text(pct >= 100 ? "выполнено" : "\(store.stepGoal.formatted()) шагов")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.purple)
-                    .contentTransition(.numericText())
-            }
+    private var ringLabel: some View {
+        let remaining = store.stepGoal - store.stepsToday
+        return VStack(spacing: 2) {
+            Text(store.stepsToday.formatted())
+                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+            Text("из \(store.stepGoal.formatted()) шагов")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(remaining > 0 ? "\(remaining.formatted()) осталось" : "цель достигнута")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(remaining > 0 ? .blue : .green)
+                .contentTransition(.numericText())
         }
     }
 
     private var todayCard: some View {
         VStack(spacing: 28) {
-            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: ringMode) {
+            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday) {
                 ringLabel
-            }
-            .onTapGesture {
-                let all = RingMode.allCases
-                let next = all[(all.firstIndex(of: ringMode)! + 1) % all.count]
-                withAnimation(.spring(response: 0.55, dampingFraction: 0.82)) {
-                    ringMode = next
-                }
             }
 
             HStack(spacing: 0) {

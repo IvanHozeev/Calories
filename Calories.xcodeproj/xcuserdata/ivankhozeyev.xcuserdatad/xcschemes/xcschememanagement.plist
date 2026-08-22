@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>CaloriesTests.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>CaloriesWidgetExtension.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
@@ -23,6 +28,11 @@
 			<true/>
 		</dict>
 		<key>547895C4302B3D4C00C36433</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>547895D3302B3D4E00C36433</key>
 		<dict>
 			<key>primary</key>
 			<true/>

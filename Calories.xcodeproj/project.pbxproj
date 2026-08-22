@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		540072DE3039BFB2007874B9 /* CaloriesTests.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = 540072DD3039BFB2007874B9 /* CaloriesTests.xctestplan */; };
 		544F064D3037207C00D4693B /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 544F064C3037207C00D4693B /* HealthKit.framework */; };
 		544F0654303723AC00D4693B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 544F0653303723AC00D4693B /* WidgetKit.framework */; };
 		544F0656303723AC00D4693B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 544F0655303723AC00D4693B /* SwiftUI.framework */; };
@@ -52,6 +53,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		540072DD3039BFB2007874B9 /* CaloriesTests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CaloriesTests.xctestplan; sourceTree = "<group>"; };
 		544F064C3037207C00D4693B /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		544F0652303723AC00D4693B /* CaloriesWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CaloriesWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		544F0653303723AC00D4693B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -146,6 +148,7 @@
 		547895BC302B3D4C00C36433 = {
 			isa = PBXGroup;
 			children = (
+				540072DD3039BFB2007874B9 /* CaloriesTests.xctestplan */,
 				544F066B3037244900D4693B /* CaloriesWidgetExtension.entitlements */,
 				547895C7302B3D4C00C36433 /* Calories */,
 				547895D7302B3D4E00C36433 /* CaloriesTests */,
@@ -322,6 +325,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				540072DE3039BFB2007874B9 /* CaloriesTests.xctestplan in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

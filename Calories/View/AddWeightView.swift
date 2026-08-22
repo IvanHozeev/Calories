@@ -4,33 +4,52 @@ struct AddWeightView: View {
     var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
-    @State private var weightText: String
+    @State private var wholeKg: Int
+    @State private var tenths: Int
     @State private var date: Date
-    @FocusState private var weightFocused: Bool
 
     init(store: CalorieStore, initialDate: Date = Date()) {
         self.store = store
         _date = State(initialValue: initialDate)
-        let latest = store.latestWeight?.weightKg
-        _weightText = State(initialValue: latest.map { String(format: "%.1f", $0) } ?? "")
+        let kg = store.latestWeight?.weightKg ?? 70.0
+        _wholeKg = State(initialValue: max(30, min(150, Int(kg))))
+        _tenths = State(initialValue: min(9, Int((kg * 10).truncatingRemainder(dividingBy: 10))))
     }
 
-    private var weight: Double? {
-        Double(weightText.replacingOccurrences(of: ",", with: "."))
+    private var weight: Double {
+        Double(wholeKg) + Double(tenths) / 10.0
     }
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    HStack {
-                        TextField("70.0", text: $weightText)
-                            .keyboardType(.decimalPad)
-                            .font(.system(size: 34, weight: .bold, design: .rounded))
-                            .focused($weightFocused)
+                    HStack(spacing: 0) {
+                        Picker("", selection: $wholeKg) {
+                            ForEach(30...150, id: \.self) { kg in
+                                Text("\(kg)").tag(kg)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(maxWidth: .infinity)
+                        .clipped()
+
+                        Text(",")
+                            .font(.title2.weight(.semibold))
+
+                        Picker("", selection: $tenths) {
+                            ForEach(0...9, id: \.self) { t in
+                                Text("\(t)").tag(t)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(width: 60)
+                        .clipped()
+
                         Text("кг")
-                            .font(.title3)
+                            .font(.body)
                             .foregroundStyle(.secondary)
+                            .padding(.leading, 8)
                     }
                 }
 
@@ -51,15 +70,12 @@ struct AddWeightView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
-                        guard let weight, weight > 0 else { return }
                         store.addWeight(weight, date: date)
                         dismiss()
                     }
-                    .disabled(weight == nil || (weight ?? 0) <= 0)
                     .fontWeight(.semibold)
                 }
             }
-            .onAppear { weightFocused = true }
         }
     }
 }

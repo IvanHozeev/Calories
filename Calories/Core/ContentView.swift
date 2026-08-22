@@ -396,24 +396,24 @@ private struct ActivityView: View {
         List {
             Section {
                 VStack(spacing: 16) {
-                    VStack(spacing: 8) {
+                    VStack(spacing: 6) {
                         if store.streak > 0 {
-                            Text("Ты придерживаешься плана уже")
-                                .font(.subheadline)
+                            (
+                                Text("Ты придерживаешься плана уже ")
+                                    .foregroundStyle(.secondary)
+                                + Text("🔥 \(store.streak) ")
+                                    .foregroundStyle(milestoneColor)
+                                    .fontWeight(.bold)
+                                + Text(streakLabel)
+                                    .foregroundStyle(.secondary)
+                            )
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+                        } else {
+                            Text("Начни серию сегодня")
+                                .font(.headline)
                                 .foregroundStyle(.secondary)
                         }
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Image(systemName: "flame.fill")
-                                .font(.system(size: 32))
-                                .foregroundStyle(milestoneColor)
-                            Text("\(store.streak)")
-                                .font(.system(size: 52, weight: .bold, design: .rounded))
-                                .foregroundStyle(milestoneColor)
-                                .monospacedDigit()
-                        }
-                        Text(streakLabel)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
                         if store.bestStreak > store.streak && store.bestStreak > 0 {
                             Label("Рекорд: \(store.bestStreak) дней", systemImage: "trophy.fill")
                                 .font(.caption.weight(.semibold))

@@ -20,6 +20,16 @@ struct ProfileView: View {
     @State private var showingPlan = false
     @State private var showingPaywall = false
     @State private var showingAddWeight = false
+    @AppStorage("use_lbs") private var useLbs = false
+
+    private static let kgToLbs: Double = 2.20462
+
+    private func weightDisplayText(_ tenths: Int) -> String {
+        let kg = Double(tenths) / 10.0
+        return useLbs
+            ? String(format: "%.1f lbs", kg * Self.kgToLbs)
+            : String(format: "%.1f кг", kg)
+    }
 
     init(store: CalorieStore) {
         self.store = store
@@ -88,9 +98,9 @@ struct ProfileView: View {
                         ForEach(Sex.allCases) { Text($0.title).tag($0) }
                     }
                     HStack {
-                        Text("Вес, кг")
+                        Text(useLbs ? "Вес, lbs" : "Вес, кг")
                         Spacer()
-                        Text(String(format: "%.1f кг", Double(weightTenths) / 10.0))
+                        Text(weightDisplayText(weightTenths))
                             .foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
@@ -102,7 +112,12 @@ struct ProfileView: View {
                     }
                     if showWeightPicker {
                         Picker("Вес", selection: $weightTenths) {
-                            ForEach(300...1500, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                            ForEach(300...1500, id: \.self) { v in
+                                Text(useLbs
+                                     ? String(format: "%.1f", Double(v) / 10.0 * Self.kgToLbs)
+                                     : String(format: "%.1f", Double(v) / 10.0)
+                                ).tag(v)
+                            }
                         }
                         .pickerStyle(.wheel)
                         .frame(height: 160)
@@ -246,6 +261,16 @@ struct ProfileView: View {
                 }
 
                 Section("Настройки") {
+                    HStack {
+                        Label("Единицы веса", systemImage: "scalemass")
+                        Spacer()
+                        Picker("Единицы", selection: $useLbs) {
+                            Text("кг").tag(false)
+                            Text("lbs").tag(true)
+                        }
+                        .pickerStyle(.segmented)
+                        .fixedSize()
+                    }
                     NavigationLink {
                         RemindersView()
                     } label: {

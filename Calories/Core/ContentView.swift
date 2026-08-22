@@ -378,6 +378,13 @@ private struct ActivityView: View {
         }
     }
 
+    private var motivationalText: String {
+        if store.streak >= 30 { return "Продолжай в том же духе — ты уже пример для других!" }
+        if store.streak >= 7 { return "Продолжай в том же духе — ты в отличной форме!" }
+        if store.streak > 0 { return "Продолжай в том же духе — каждый день на счету!" }
+        return "Начни сегодня — первый шаг уже завтра станет серией!"
+    }
+
     private let milestones: [(Int, String, String)] = [
         (7, "7 дней", "flame"),
         (14, "2 недели", "flame"),
@@ -390,6 +397,11 @@ private struct ActivityView: View {
             Section {
                 VStack(spacing: 16) {
                     VStack(spacing: 8) {
+                        if store.streak > 0 {
+                            Text("Ты придерживаешься плана уже")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
                             Image(systemName: "flame.fill")
                                 .font(.system(size: 32))
@@ -411,6 +423,12 @@ private struct ActivityView: View {
                     .frame(maxWidth: .infinity)
 
                     miniCalendar
+
+                    Text(motivationalText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
 
                     HStack(spacing: 0) {
                         ForEach(milestones, id: \.0) { (days, label, icon) in

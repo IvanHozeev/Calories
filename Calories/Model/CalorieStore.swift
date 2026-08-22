@@ -46,6 +46,8 @@ final class CalorieStore {
     // O(1) словари для быстрого поиска
     @ObservationIgnored private var entriesByDay: [Date: [FoodEntry]] = [:]
     @ObservationIgnored private var goalsByDay: [Date: Int] = [:]
+    // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
+    @ObservationIgnored private var goalLockedOnDay: Date? = nil
 
     private(set) var recentFoodNames: [String] = []
 
@@ -296,9 +298,16 @@ final class CalorieStore {
     /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
     func lockPastGoals() {
         let today = Calendar.current.startOfDay(for: Date())
+        // Если сегодня уже лочили и goalsByDay покрывает все прошлые дни — выходим без O(n) скана
+        if goalLockedOnDay == today {
+            let entryDates = Set(entries.lazy.filter {
+                Calendar.current.startOfDay(for: $0.date) < today
+            }.map { Calendar.current.startOfDay(for: $0.date) })
+            guard !entryDates.subtracting(goalsByDay.keys).isEmpty else { return }
+        }
         let entryDates = Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
         let datesToLock = entryDates.subtracting(goalsByDay.keys).filter { $0 < today }
-        guard !datesToLock.isEmpty else { return }
+        guard !datesToLock.isEmpty else { goalLockedOnDay = today; return }
 
         var newRecords: [GoalRecord] = []
         for date in datesToLock {
@@ -308,6 +317,7 @@ final class CalorieStore {
         }
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
+        goalLockedOnDay = today
         rebuildCaches()
     }
 
@@ -417,7 +427,10 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         entries = ([entry] + entries).sorted { $0.date > $1.date }
         rebuildCaches()
-        lockPastGoals()
+        // Прошлая дата — нужно залочить цель; сегодняшняя — нет
+        if Calendar.current.startOfDay(for: date) < Calendar.current.startOfDay(for: Date()) {
+            lockPastGoals()
+        }
         WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
@@ -426,7 +439,7 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         entries.removeAll { $0.id == entry.id }
         rebuildCaches()
-        lockPastGoals()
+        // Удаление не может породить новый незалоченный день — лочить не нужно
         WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 

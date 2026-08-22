@@ -64,7 +64,6 @@ final class StepsViewModel {
 
     func refresh() async {
         store.fetchAll()
-        try? await Task.sleep(for: .seconds(1))
     }
 }
 
@@ -158,9 +157,13 @@ private struct GoalPickerSheet: View {
             HStack {
                 Text("Цель по шагам")
                     .font(.headline)
+                
                 Spacer()
-                Button("Готово") { dismiss() }
-                    .fontWeight(.semibold)
+                
+                CheckmarkButton(action: {
+                    dismiss()
+                })
+                .fontWeight(.semibold)
             }
             .padding(.horizontal)
             .padding(.top, 20)

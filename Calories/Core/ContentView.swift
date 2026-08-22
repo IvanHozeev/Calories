@@ -231,7 +231,7 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
-                    .presentationDetents([.height(200)])
+                    .presentationDetents([.height(320)])
             }
             .sheet(isPresented: $showingStreakInfo) {
                 StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)

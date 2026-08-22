@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WeightView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @State private var showingAddWeight = false
     @State private var rangeDays = 30
 

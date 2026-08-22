@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MyFoodView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @State private var showingNewFood = false
     @State private var showingNewDish = false
     @State private var showingScanner = false

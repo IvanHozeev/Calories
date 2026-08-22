@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct RootView: View {
-    @ObservedObject var store: CalorieStore
-    @ObservedObject var stepStore: StepStore
+    var store: CalorieStore
+    var stepStore: StepStore
     @State private var selectedTab = 0
 
     var body: some View {

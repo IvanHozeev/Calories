@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AddWeightView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var weightText: String

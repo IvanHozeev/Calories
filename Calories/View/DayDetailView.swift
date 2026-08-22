@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DayDetailView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     let date: Date
     @State private var showingAdd = false
 

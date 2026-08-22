@@ -1,6 +1,6 @@
 @preconcurrency import HealthKit
 import Foundation
-import Combine
+import Observation
 import WidgetKit
 
 struct StepDay: Identifiable {
@@ -9,21 +9,22 @@ struct StepDay: Identifiable {
     var id: Date { date }
 }
 
+@Observable
 @MainActor
-final class StepStore: ObservableObject {
-    private let healthStore = HKHealthStore()
+final class StepStore {
+    @ObservationIgnored private let healthStore = HKHealthStore()
 
-    @Published private(set) var stepsToday: Int = 0
-    @Published private(set) var distanceTodayKm: Double = 0
-    @Published private(set) var activeCaloriesToday: Int = 0
-    @Published private(set) var weekHistory: [StepDay] = []
-    @Published private(set) var monthHistory: [StepDay] = []
-    @Published private(set) var isAuthorized: Bool = false
-    @Published private(set) var goalStreak: Int = 0
-    @Published private(set) var weeklyTotal: Int = 0
-    @Published private(set) var prevWeekAverage: Int = 0
+    private(set) var stepsToday: Int = 0
+    private(set) var distanceTodayKm: Double = 0
+    private(set) var activeCaloriesToday: Int = 0
+    private(set) var weekHistory: [StepDay] = []
+    private(set) var monthHistory: [StepDay] = []
+    private(set) var isAuthorized: Bool = false
+    private(set) var goalStreak: Int = 0
+    private(set) var weeklyTotal: Int = 0
+    private(set) var prevWeekAverage: Int = 0
 
-    @Published var stepGoal: Int {
+    var stepGoal: Int {
         didSet {
             UserDefaults.standard.set(stepGoal, forKey: "step_goal")
             UserDefaults(suiteName: "group.calories.shared")?.set(stepGoal, forKey: "widget_step_goal")

@@ -75,7 +75,7 @@ final class StepsViewModel {
 }
 
 struct StepsView: View {
-    @ObservedObject var store: StepStore
+    var store: StepStore
     @State private var viewModel: StepsViewModel
     @State private var goalText = ""
     @State private var showingGoalEditor = false
@@ -157,7 +157,7 @@ struct StepsView: View {
 
 private struct StepsContentView: View {
     @Bindable var viewModel: StepsViewModel
-    @ObservedObject var store: StepStore
+    var store: StepStore
 
     private enum RingMode: CaseIterable { case steps, distance, goal }
     @State private var ringMode: RingMode = .steps

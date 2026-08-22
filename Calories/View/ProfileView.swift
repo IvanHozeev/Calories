@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
 
     @State private var weightTenths: Int
     @State private var heightInt: Int

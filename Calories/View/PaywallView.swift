@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PaywallView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

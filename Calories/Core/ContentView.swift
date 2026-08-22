@@ -19,7 +19,7 @@ enum MealPeriod: String, CaseIterable {
 }
 
 struct ContentView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @State private var showingAdd = false
     @State private var showingAddWeight = false
     @State private var showingGoalEditor = false

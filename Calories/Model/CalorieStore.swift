@@ -1,48 +1,50 @@
 import Foundation
 import SwiftData
-import Combine
+import Observation
 import WidgetKit
 
-final class CalorieStore: ObservableObject {
+@Observable
+@MainActor
+final class CalorieStore {
     private let context: ModelContext
 
-    @Published private(set) var entries: [FoodEntry] = []
-    @Published private(set) var customFoods: [FoodItem] = []
-    @Published private(set) var dishes: [Dish] = []
-    @Published private(set) var weightEntries: [WeightEntry] = []
-    @Published private(set) var goalRecords: [GoalRecord] = []
-    @Published var dailyGoal: Int {
+    private(set) var entries: [FoodEntry] = []
+    private(set) var customFoods: [FoodItem] = []
+    private(set) var dishes: [Dish] = []
+    private(set) var weightEntries: [WeightEntry] = []
+    private(set) var goalRecords: [GoalRecord] = []
+    var dailyGoal: Int {
         didSet { UserDefaults.standard.set(dailyGoal, forKey: Keys.goal) }
     }
-    @Published private(set) var profile: UserProfile?
-    @Published private(set) var plan: Plan?
-    @Published var isPremium: Bool {
+    private(set) var profile: UserProfile?
+    private(set) var plan: Plan?
+    var isPremium: Bool {
         didSet { UserDefaults.standard.set(isPremium, forKey: Keys.premium) }
     }
 
     // Кэшированные производные — перестраиваются в rebuildCaches() после каждого изменения данных
-    @Published private(set) var todayEntries: [FoodEntry] = []
-    @Published private(set) var consumedToday: Int = 0
-    @Published private(set) var macrosToday: Macros = .zero
-    @Published private(set) var days: [DaySummary] = []
-    @Published private(set) var pastDays: [DaySummary] = []
-    @Published private(set) var lastSevenDays: [DaySummary] = []
-    @Published private(set) var historyDays: [DaySummary] = []
-    @Published private(set) var hasWeighedToday: Bool = false
-    @Published private(set) var adherence: PlanAdherence?
-    @Published private(set) var streak: Int = 0
-    @Published private(set) var bestStreak: Int = 0
-    @Published private(set) var loggingStreak: Int = 0
-    @Published private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
-    @Published private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
-    @Published private(set) var adaptedTodayGoal: Int = 0
-    @Published private(set) var calorieBankBonus: Int = 0
+    private(set) var todayEntries: [FoodEntry] = []
+    private(set) var consumedToday: Int = 0
+    private(set) var macrosToday: Macros = .zero
+    private(set) var days: [DaySummary] = []
+    private(set) var pastDays: [DaySummary] = []
+    private(set) var lastSevenDays: [DaySummary] = []
+    private(set) var historyDays: [DaySummary] = []
+    private(set) var hasWeighedToday: Bool = false
+    private(set) var adherence: PlanAdherence?
+    private(set) var streak: Int = 0
+    private(set) var bestStreak: Int = 0
+    private(set) var loggingStreak: Int = 0
+    private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
+    private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
+    private(set) var adaptedTodayGoal: Int = 0
+    private(set) var calorieBankBonus: Int = 0
 
     // O(1) словари для быстрого поиска
-    private var entriesByDay: [Date: [FoodEntry]] = [:]
-    private var goalsByDay: [Date: Int] = [:]
+    @ObservationIgnored private var entriesByDay: [Date: [FoodEntry]] = [:]
+    @ObservationIgnored private var goalsByDay: [Date: Int] = [:]
 
-    @Published private(set) var recentFoodNames: [String] = []
+    private(set) var recentFoodNames: [String] = []
 
     private enum Keys {
         static let goal = "daily_goal"

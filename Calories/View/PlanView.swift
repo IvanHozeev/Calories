@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PlanView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var targetWeightText: String

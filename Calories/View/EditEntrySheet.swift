@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct EditEntrySheet: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     let entry: FoodEntry
     var isEmbedded: Bool = false
     @Environment(\.dismiss) private var dismiss

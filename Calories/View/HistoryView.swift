@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HistoryView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
 
     private var loggedDays: [DaySummary] {
         store.historyDays.filter { !$0.entries.isEmpty }

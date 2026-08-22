@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct NewDishSheet: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
     var editingDish: Dish? = nil
     var isEmbedded: Bool = false
@@ -124,7 +124,7 @@ struct NewDishSheet: View {
 }
 
 struct IngredientPickerSheet: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
     let onAdd: (DishIngredient) -> Void
 

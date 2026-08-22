@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct AddEntryView: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedDate: Date
@@ -414,7 +414,7 @@ struct AddEntryView: View {
 }
 
 struct NewFoodSheet: View {
-    @ObservedObject var store: CalorieStore
+    var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
     var editingFood: FoodItem? = nil

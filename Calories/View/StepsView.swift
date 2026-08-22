@@ -19,6 +19,7 @@ struct StepsView: View {
                 }
             }
             .navigationTitle("Шаги")
+            .scrollIndicators(.hidden)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -58,7 +59,7 @@ struct StepsView: View {
             }
             .buttonStyle(.borderedProminent)
         }
-        .padding(32)
+        .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -73,7 +74,7 @@ struct StepsView: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
         }
-        .padding(32)
+        .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
@@ -86,7 +87,10 @@ private struct StepsContentView: View {
         case month = "30 дней"
     }
 
+    private enum RingMode: CaseIterable { case steps, distance, goal }
+
     @State private var period: StepPeriod = .week
+    @State private var ringMode: RingMode = .steps
     @State private var average: Int = 0
     @State private var best: StepDay? = nil
     @State private var daysOnGoal: Int = 0
@@ -100,6 +104,68 @@ private struct StepsContentView: View {
         return Double(average - store.prevWeekAverage) / Double(store.prevWeekAverage) * 100
     }
 
+    private var ringProgress: Double {
+        guard store.stepGoal > 0 else { return 0 }
+        return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
+    }
+
+    private var ringColors: [Color] {
+        let done = store.stepsToday >= store.stepGoal
+        switch ringMode {
+        case .steps:    return done ? [.orange, .red] : [.blue, .cyan]
+        case .distance: return done ? [.orange, .red] : [.teal, .green]
+        case .goal:     return done ? [.orange, .red] : [.purple, .indigo]
+        }
+    }
+
+    @ViewBuilder private var ringLabel: some View {
+        switch ringMode {
+        case .steps:
+            let remaining = store.stepGoal - store.stepsToday
+            VStack(spacing: 2) {
+                Text(store.stepsToday.formatted())
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Text("из \(store.stepGoal.formatted()) шагов")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(remaining > 0 ? "\(remaining.formatted()) осталось" : "цель достигнута")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(remaining > 0 ? .blue : .green)
+                    .contentTransition(.numericText())
+            }
+        case .distance:
+            VStack(spacing: 2) {
+                Text(store.distanceTodayKm > 0 ? String(format: "%.2f", store.distanceTodayKm) : "—")
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Text("километров")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("дистанция сегодня")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.teal)
+            }
+        case .goal:
+            let pct = store.stepGoal > 0 ? min(Int(Double(store.stepsToday) / Double(store.stepGoal) * 100), 100) : 0
+            VStack(spacing: 2) {
+                Text("\(pct)%")
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Text("от цели")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(pct >= 100 ? "выполнено" : "\(store.stepGoal.formatted()) шагов")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.purple)
+                    .contentTransition(.numericText())
+            }
+        }
+    }
+
     private func recomputePeriodStats() {
         let h = history
         let nonZero = h.filter { $0.steps > 0 }
@@ -109,24 +175,22 @@ private struct StepsContentView: View {
     }
 
     var body: some View {
-        ScrollView {
+        List {
             VStack(spacing: 16) {
                 todayCard
                 chartCard
                 trendsCard
                 statsCard
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
-            .padding(.bottom, 80)
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
         }
+        .listStyle(.insetGrouped)
         .refreshable {
             store.fetchAll()
             try? await Task.sleep(for: .seconds(1))
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .scrollIndicators(.hidden)
-        .background(Color(.systemGroupedBackground))
         .onAppear { recomputePeriodStats() }
         .onChange(of: period) { _, _ in recomputePeriodStats() }
         .onChange(of: store.weekHistory.count) { _, _ in recomputePeriodStats() }
@@ -134,61 +198,47 @@ private struct StepsContentView: View {
     }
 
     private var todayCard: some View {
-        VStack(spacing: 20) {
-            ZStack {
-                Circle()
-                    .stroke(Color.blue.opacity(0.12), lineWidth: 18)
-                Circle()
-                    .trim(from: 0, to: min(Double(store.stepsToday) / Double(store.stepGoal), 1.0))
-                    .stroke(
-                        LinearGradient(colors: [.blue, .cyan], startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 18, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .animation(.easeInOut(duration: 0.9), value: store.stepsToday)
-
-                VStack(spacing: 4) {
-                    Text(store.stepsToday.formatted())
-                        .font(.system(size: 40, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text("шагов")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        VStack(spacing: 28) {
+            RingView(progress: ringProgress, colors: ringColors, labelID: ringMode) {
+                ringLabel
+            }
+            .onTapGesture {
+                let all = RingMode.allCases
+                let next = all[(all.firstIndex(of: ringMode)! + 1) % all.count]
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.82)) {
+                    ringMode = next
                 }
             }
-            .frame(width: 180, height: 180)
 
-            HStack(spacing: 32) {
-                VStack(spacing: 2) {
-                    Text(store.distanceTodayKm > 0 ? String(format: "%.1f км", store.distanceTodayKm) : "—")
-                        .font(.title3.weight(.semibold))
-                    Text("Дистанция")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                VStack(spacing: 2) {
-                    let pct = store.stepGoal > 0 ? Int(Double(store.stepsToday) / Double(store.stepGoal) * 100) : 0
-                    Text("\(min(pct, 100))%")
-                        .font(.title3.weight(.semibold))
-                    Text("от цели")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                VStack(spacing: 2) {
-                    Text(store.stepGoal.formatted())
-                        .font(.title3.weight(.semibold))
-                    Text("Цель")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+            HStack(spacing: 0) {
+                statCell(
+                    title: "Дистанция",
+                    value: store.distanceTodayKm > 0 ? String(format: "%.1f км", store.distanceTodayKm) : "—",
+                    subtitle: ""
+                )
+                Divider().frame(height: 40)
+                statCell(
+                    title: "от цели",
+                    value: {
+                        let pct = store.stepGoal > 0 ? Int(Double(store.stepsToday) / Double(store.stepGoal) * 100) : 0
+                        return "\(min(pct, 100))%"
+                    }(),
+                    subtitle: ""
+                )
+                Divider().frame(height: 40)
+                statCell(
+                    title: "Цель",
+                    value: store.stepGoal.formatted(),
+                    subtitle: ""
+                )
             }
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .padding(.vertical, 24)
-        .padding(.horizontal)
+        .padding(.top, 12)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 20))
     }
 
     private var chartCard: some View {

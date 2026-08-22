@@ -2,8 +2,6 @@ import SwiftUI
 
 struct EntryRow: View {
     let entry: FoodEntry
-    let onDelete: () -> Void
-    var onEdit: (() -> Void)? = nil
 
     var body: some View {
         HStack {
@@ -18,27 +16,7 @@ struct EntryRow: View {
             Text("\(entry.calories) ккал")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
-
-            if let onEdit {
-                Button {
-                    onEdit()
-                } label: {
-                    Image(systemName: "pencil")
-                        .foregroundStyle(.blue)
-                        .imageScale(.medium)
-                }
-                .buttonStyle(.plain)
-            }
-
-            Button {
-                withAnimation { onDelete() }
-            } label: {
-                Image(systemName: "minus.circle.fill")
-                    .foregroundStyle(.red)
-                    .imageScale(.medium)
-            }
-            .buttonStyle(.plain)
         }
-        .padding()
+        .padding(.vertical, 4)
     }
 }

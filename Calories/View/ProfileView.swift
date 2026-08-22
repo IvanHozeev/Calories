@@ -209,6 +209,7 @@ struct ProfileView: View {
                 }
             }
             .scrollDismissesKeyboard(.interactively)
+            .scrollIndicators(.hidden)
             .navigationTitle("Профиль")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

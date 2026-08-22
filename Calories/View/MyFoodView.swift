@@ -12,6 +12,7 @@ struct MyFoodView: View {
             productsSection
         }
         .navigationTitle("Моя еда")
+        .scrollIndicators(.hidden)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showingScanner = true } label: {

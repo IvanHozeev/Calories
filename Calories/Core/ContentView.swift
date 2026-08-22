@@ -26,7 +26,7 @@ struct ContentView: View {
     @State private var showingStreakInfo = false
     @State private var showingBankInfo = false
     @State private var showingPaywall = false
-    @State private var editingEntry: FoodEntry? = nil
+    @State private var showingPlan = false
     @State private var goalText = ""
 
     var body: some View {
@@ -43,11 +43,13 @@ struct ContentView: View {
                             carbsTarget: MacroTargets.carbsMinimum
                         )
                         .padding(.top, 12)
-                        .onLongPressGesture {
-                            guard store.plan?.cyclingEnabled != true else { return }
-                            goalText = String(store.dailyGoal)
-                            showingGoalEditor = true
-                        }
+                        .simultaneousGesture(
+                            LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+                                guard store.plan?.cyclingEnabled != true else { return }
+                                goalText = String(store.dailyGoal)
+                                showingGoalEditor = true
+                            }
+                        )
 
                         if store.calorieBankBonus != 0 {
                             Button { showingBankInfo = true } label: {
@@ -134,9 +136,7 @@ struct ContentView: View {
                         }
 
                         if let plan = store.plan {
-                            NavigationLink {
-                                PlanView(store: store)
-                            } label: {
+                            Button { showingPlan = true } label: {
                                 PlanCard(
                                     plan: plan,
                                     currentWeight: store.latestWeight?.weightKg,
@@ -177,18 +177,29 @@ struct ContentView: View {
                     ForEach(store.groupedTodayEntries, id: \.period) { group in
                         Section(group.period.rawValue) {
                             ForEach(group.entries) { entry in
-                                EntryRow(
-                                    entry: entry,
-                                    onDelete: { store.delete(entry: entry) },
-                                    onEdit: { editingEntry = entry }
-                                )
+                                NavigationLink {
+                                    EditEntrySheet(store: store, entry: entry, isEmbedded: true)
+                                } label: {
+                                    EntryRow(entry: entry)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        store.delete(entry: entry)
+                                    } label: {
+                                        Image(systemName: "trash")
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
             .listStyle(.insetGrouped)
+            .scrollIndicators(.hidden)
             .refreshable { store.refresh() }
+            .navigationDestination(isPresented: $showingPlan) {
+                PlanView(store: store)
+            }
             .navigationTitle("Сегодня")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -221,10 +232,6 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
                     .presentationDetents([.medium])
-            }
-            .sheet(item: $editingEntry) { entry in
-                EditEntrySheet(store: store, entry: entry)
-                    .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingStreakInfo) {
                 StreakInfoSheet(streak: store.streak, bestStreak: store.bestStreak, store: store)

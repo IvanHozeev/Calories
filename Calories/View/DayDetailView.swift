@@ -4,7 +4,6 @@ struct DayDetailView: View {
     @ObservedObject var store: CalorieStore
     let date: Date
     @State private var showingAdd = false
-    @State private var editingEntry: FoodEntry? = nil
 
     private var day: DaySummary {
         store.summary(for: date)
@@ -42,7 +41,18 @@ struct DayDetailView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(day.entries) { entry in
-                        EntryRow(entry: entry, onDelete: { store.delete(entry: entry) }, onEdit: { editingEntry = entry })
+                        NavigationLink {
+                            EditEntrySheet(store: store, entry: entry, isEmbedded: true)
+                        } label: {
+                            EntryRow(entry: entry)
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                store.delete(entry: entry)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
                     }
                 }
             }
@@ -60,10 +70,6 @@ struct DayDetailView: View {
         }
         .sheet(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date)
-                .presentationDetents([.medium, .large])
-        }
-        .sheet(item: $editingEntry) { entry in
-            EditEntrySheet(store: store, entry: entry)
                 .presentationDetents([.medium, .large])
         }
     }

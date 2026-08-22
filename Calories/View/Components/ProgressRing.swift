@@ -1,5 +1,31 @@
 import SwiftUI
 
+struct RingView<Label: View>: View {
+    let progress: Double
+    let colors: [Color]
+    let labelID: AnyHashable
+    @ViewBuilder let label: () -> Label
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.secondary.opacity(0.15), lineWidth: 18)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(
+                    LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                    style: StrokeStyle(lineWidth: 18, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
+            label()
+                .id(labelID)
+                .transition(.opacity.combined(with: .scale(scale: 0.85)))
+        }
+        .frame(width: 220, height: 220)
+    }
+}
+
 struct ProgressRing: View {
     let consumed: Int
     let goal: Int
@@ -41,28 +67,9 @@ struct ProgressRing: View {
     }
 
     var body: some View {
-        ZStack {
-            Circle()
-                .stroke(Color.secondary.opacity(0.15), lineWidth: 18)
-
-            Circle()
-                .trim(from: 0, to: ringProgress)
-                .stroke(
-                    LinearGradient(
-                        colors: ringColors,
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    style: StrokeStyle(lineWidth: 18, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: ringProgress)
-
+        RingView(progress: ringProgress, colors: ringColors, labelID: mode) {
             centerLabel
-                .id(mode)
-                .transition(.opacity.combined(with: .scale(scale: 0.85)))
         }
-        .frame(width: 220, height: 220)
         .onTapGesture {
             let all = Mode.allCases
             let next = all[(all.firstIndex(of: mode)! + 1) % all.count]

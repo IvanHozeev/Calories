@@ -379,20 +379,20 @@ final class CalorieStore {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let weekday = calendar.component(.weekday, from: today)
-        // (weekday+5)%7: Sun(1)→6, Mon(2)→0, Tue(3)→1, ..., Sat(7)→5
-        let daysFromMonday = (weekday + 5) % 7
+        // Respect locale's first weekday (Sun=1 for IL/US, Mon=2 for Europe)
+        let daysFromFirst = (weekday - calendar.firstWeekday + 7) % 7
 
-        guard daysFromMonday > 0,
-              let monday = calendar.date(byAdding: .day, value: -daysFromMonday, to: today) else {
+        guard daysFromFirst > 0,
+              let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today) else {
             return effectiveGoal(for: today)
         }
 
-        let remainingDays = 7 - daysFromMonday
+        let remainingDays = 7 - daysFromFirst
         var weeklyGoalPast = 0
         var weeklyConsumedPast = 0
 
-        for offset in 0..<daysFromMonday {
-            guard let date = calendar.date(byAdding: .day, value: offset, to: monday) else { continue }
+        for offset in 0..<daysFromFirst {
+            guard let date = calendar.date(byAdding: .day, value: offset, to: weekStart) else { continue }
             let dayEntries = entriesByDay[date] ?? []
             guard !dayEntries.isEmpty else { continue }
             weeklyGoalPast += goal(for: date)

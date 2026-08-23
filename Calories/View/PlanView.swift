@@ -53,14 +53,14 @@ struct PlanView: View {
                     HStack {
                         Text("Текущий вес")
                         Spacer()
-                        Text(String(format: "%.1f кг", currentWeight))
+                        Text(String(format: "%.1f \(String(localized: "кг"))", currentWeight))
                             .foregroundStyle(.secondary)
                     }
                     if let plan = store.plan, plan.startWeightKg != currentWeight {
                         HStack {
                             Text("Старт плана")
                             Spacer()
-                            Text(String(format: "%.1f кг", plan.startWeightKg))
+                            Text(String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg))
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -127,12 +127,12 @@ struct PlanView: View {
                 if let draftPlan {
                     Section("Расчёт") {
                         resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
-                        resultRow("Темп", String(format: "%+.2f кг/нед", draftPlan.weeklyRateKg))
+                        resultRow("Темп", String(format: "%+.2f \(String(localized: "кг/нед"))", draftPlan.weeklyRateKg))
                         if draftPlan.cyclingEnabled {
-                            resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) ккал")
-                            resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) ккал", highlighted: true)
+                            resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))")
+                            resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
                         } else {
-                            resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) ккал", highlighted: true)
+                            resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
                         }
 
                         if draftPlan.isAggressivePace(relativeToWeightKg: startWeight) {
@@ -176,12 +176,12 @@ struct PlanView: View {
         Section {
             statusRow(adherence.status)
 
-            resultRow("Ожидаемый вес сегодня", String(format: "%.1f кг", adherence.expectedWeightToday))
+            resultRow("Ожидаемый вес сегодня", String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
             if let actual = adherence.actualWeightToday {
-                resultRow("Фактический вес (тренд)", String(format: "%.1f кг", actual))
+                resultRow("Фактический вес (тренд)", String(format: "%.1f \(String(localized: "кг"))", actual))
             }
             if let deviation = adherence.deviationKg {
-                resultRow("Отклонение", String(format: "%+.1f кг", deviation))
+                resultRow("Отклонение", String(format: "%+.1f \(String(localized: "кг"))", deviation))
             }
 
             if adherence.status == .insufficientData {
@@ -285,10 +285,10 @@ struct PlanView: View {
     private func statusRow(_ status: PlanStatus) -> some View {
         let (text, color, icon): (String, Color, String) = {
             switch status {
-            case .insufficientData: return ("Собираем данные", .secondary, "clock")
-            case .onTrack: return ("Идёшь по графику", .green, "checkmark.circle.fill")
-            case .ahead: return ("Опережаешь график", .blue, "arrow.up.circle.fill")
-            case .behind: return ("Отстаёшь от графика", .orange, "exclamationmark.triangle.fill")
+            case .insufficientData: return (String(localized: "Собираем данные"), .secondary, "clock")
+            case .onTrack: return (String(localized: "Идёшь по графику"), .green, "checkmark.circle.fill")
+            case .ahead: return (String(localized: "Опережаешь график"), .blue, "arrow.up.circle.fill")
+            case .behind: return (String(localized: "Отстаёшь от графика"), .orange, "exclamationmark.triangle.fill")
             }
         }()
         return Label(text, systemImage: icon)
@@ -296,7 +296,7 @@ struct PlanView: View {
             .font(.subheadline.weight(.semibold))
     }
 
-    private func resultRow(_ title: String, _ value: String, highlighted: Bool = false) -> some View {
+    private func resultRow(_ title: LocalizedStringKey, _ value: String, highlighted: Bool = false) -> some View {
         HStack {
             Text(title)
                 .foregroundStyle(highlighted ? .primary : .secondary)

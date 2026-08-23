@@ -11,7 +11,7 @@ struct MacrosRow: View {
         }
     }
 
-    private func macroItem(title: String, value: Double, color: Color) -> some View {
+    private func macroItem(title: LocalizedStringKey, value: Double, color: Color) -> some View {
         VStack(spacing: 2) {
             Text(formatted(value))
                 .font(.subheadline.weight(.semibold))
@@ -23,6 +23,6 @@ struct MacrosRow: View {
     }
 
     private func formatted(_ value: Double) -> String {
-        String(format: "%.0f г", value)
+        String(format: "%.0f \(String(localized: "г"))", value)
     }
 }

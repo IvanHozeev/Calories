@@ -3,7 +3,7 @@ import Charts
 
 struct WeeklyChartView: View {
     let days: [DaySummary]
-    var title: String = "Эта неделя"
+    var title: LocalizedStringKey = "Эта неделя"
 
     private var uniqueGoals: [Int] {
         Array(Set(days.map(\.goal))).sorted()
@@ -15,10 +15,13 @@ struct WeeklyChartView: View {
     }
 
     private var goalLabel: String {
+        let goal = String(localized: "Цель:")
+        let kcal = String(localized: "ккал")
         if let flatGoal {
-            return "Цель: \(flatGoal) ккал"
+            return "\(goal) \(flatGoal) \(kcal)"
         } else if let min = uniqueGoals.first, let max = uniqueGoals.last {
-            return "Цель: \(min)–\(max) ккал (цикл)"
+            let cycle = String(localized: "цикл")
+            return "\(goal) \(min)–\(max) \(kcal) (\(cycle))"
         }
         return ""
     }
@@ -39,7 +42,7 @@ struct WeeklyChartView: View {
                 Text(title)
                     .font(.headline)
                 Spacer()
-                Text(goalLabel)
+                Text(verbatim: goalLabel)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

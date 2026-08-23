@@ -46,10 +46,10 @@ struct MacrosCard: View {
             selectedMacro = kind
         } label: {
             VStack(spacing: 4) {
-                Text(String(format: "%.0f г", value))
+                Text(String(format: "%.0f \(String(localized: "г"))", value))
                     .font(.title3.bold())
                     .foregroundStyle(color)
-                Text(kind.title)
+                Text(LocalizedStringKey(kind.title))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -69,9 +69,9 @@ struct MacrosCard: View {
 
     private func note(for kind: MacroKind) -> String {
         switch kind {
-        case .protein: return "Из профиля — норма белка на кг веса под твою цель."
-        case .fat: return "≥0.8 г/кг — принятый минимум для гормонального здоровья."
-        case .carbs: return "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса."
+        case .protein: return String(localized: "Из профиля — норма белка на кг веса под твою цель.")
+        case .fat: return String(localized: "≥0.8 г/кг — принятый минимум для гормонального здоровья.")
+        case .carbs: return String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")
         }
     }
 
@@ -81,7 +81,7 @@ struct MacrosCard: View {
 
         return ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text(kind.title)
+                Text(LocalizedStringKey(kind.title))
                     .font(.headline)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -89,13 +89,13 @@ struct MacrosCard: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     if let weightKg, weightKg > 0 {
-                        Text(String(format: "%.2f г/кг", total / weightKg))
+                        Text(String(format: "%.2f \(String(localized: "г/кг"))", total / weightKg))
                             .font(.title2.bold())
-                        Text(String(format: "%.0f г при весе %.1f кг", total, weightKg))
+                        Text(String(format: String(localized: "%.0f г при весе %.1f кг"), total, weightKg))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     } else {
-                        Text(String(format: "%.0f г", total))
+                        Text(String(format: "%.0f \(String(localized: "г"))", total))
                             .font(.title2.bold())
                     }
                 }
@@ -104,17 +104,17 @@ struct MacrosCard: View {
 
                 if let target {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Цель" + (kind == .carbs ? " (минимум)" : ""))
+                        Text(LocalizedStringKey(kind == .carbs ? "Цель (минимум)" : "Цель"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if kind != .carbs, let weightKg, weightKg > 0 {
-                            Text(String(format: "%.2f г/кг", target / weightKg))
+                            Text(String(format: "%.2f \(String(localized: "г/кг"))", target / weightKg))
                                 .font(.title3.bold())
-                            Text(String(format: "≈ %.0f г", target))
+                            Text(String(format: "≈ %.0f \(String(localized: "г"))", target))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         } else {
-                            Text(String(format: "%.0f г", target))
+                            Text(String(format: "%.0f \(String(localized: "г"))", target))
                                 .font(.title3.bold())
                         }
                     }

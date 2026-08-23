@@ -5,6 +5,13 @@ import HealthKit
 enum StepPeriod: String, CaseIterable {
     case week = "7 дней"
     case month = "30 дней"
+
+    var localizedTitle: String {
+        switch self {
+        case .week: return String(localized: "7 дней")
+        case .month: return String(localized: "30 дней")
+        }
+    }
 }
 
 @MainActor
@@ -57,7 +64,7 @@ final class StepsViewModel {
     }
 
     var goalStreakSubtitle: String {
-        store.goalStreak == 1 ? "день" : "дней"
+        store.goalStreak == 1 ? String(localized: "день") : String(localized: "дней")
     }
 
     func refresh() async {
@@ -185,8 +192,8 @@ private struct StepsContentView: View {
     private var distanceText: String {
         guard viewModel.distanceKm > 0 else { return "—" }
         return useImperial
-            ? String(format: "%.1f ми", viewModel.distanceKm * 0.621371)
-            : String(format: "%.1f км", viewModel.distanceKm)
+            ? String(format: "%.1f \(String(localized: "ми"))", viewModel.distanceKm * 0.621371)
+            : String(format: "%.1f \(String(localized: "км"))", viewModel.distanceKm)
     }
 
     var body: some View {
@@ -221,10 +228,17 @@ private struct StepsContentView: View {
             Text("из \(store.stepGoal.formatted()) шагов")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Text(remaining > 0 ? "\(remaining.formatted()) осталось" : "цель достигнута")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(remaining > 0 ? .blue : .green)
-                .contentTransition(.numericText())
+            if remaining > 0 {
+                Text("\(remaining.formatted()) осталось")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.blue)
+                    .contentTransition(.numericText())
+            } else {
+                Text("цель достигнута")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.green)
+                    .contentTransition(.numericText())
+            }
         }
     }
 
@@ -235,11 +249,11 @@ private struct StepsContentView: View {
             }
 
             HStack(spacing: 0) {
-                statCell(title: "Дистанция", value: distanceText, subtitle: "")
+                statCell(title: String(localized: "Дистанция"), value: distanceText, subtitle: "")
                 Divider().frame(height: 40)
-                statCell(title: "от цели", value: viewModel.goalPercentText, subtitle: "")
+                statCell(title: String(localized: "от цели"), value: viewModel.goalPercentText, subtitle: "")
                 Divider().frame(height: 40)
-                statCell(title: "Цель", value: store.stepGoal.formatted(), subtitle: "")
+                statCell(title: String(localized: "Цель"), value: store.stepGoal.formatted(), subtitle: "")
             }
             .padding(.vertical, 16)
             .frame(maxWidth: .infinity)
@@ -258,7 +272,7 @@ private struct StepsContentView: View {
                 Spacer()
                 Picker("Период", selection: $viewModel.period) {
                     ForEach(StepPeriod.allCases, id: \.self) { p in
-                        Text(p.rawValue).tag(p)
+                        Text(verbatim: p.localizedTitle).tag(p)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -314,21 +328,21 @@ private struct StepsContentView: View {
                 trendCell
                 Divider().frame(height: 40)
                 statCell(
-                    title: "Стрик",
+                    title: String(localized: "Стрик"),
                     value: "\(store.goalStreak)",
                     subtitle: viewModel.goalStreakSubtitle
                 )
                 Divider().frame(height: 40)
                 statCell(
-                    title: "Неделя",
+                    title: String(localized: "Неделя"),
                     value: store.weeklyTotal > 0 ? store.weeklyTotal.formatted() : "—",
-                    subtitle: "шагов"
+                    subtitle: String(localized: "шагов")
                 )
                 Divider().frame(height: 40)
                 statCell(
-                    title: "Калории",
+                    title: String(localized: "Калории"),
                     value: store.activeCaloriesToday > 0 ? "\(store.activeCaloriesToday)" : "—",
-                    subtitle: "ккал актив."
+                    subtitle: String(localized: "ккал актив.")
                 )
             }
         }
@@ -353,7 +367,7 @@ private struct StepsContentView: View {
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
-            Text("vs пред. неделя")
+            Text(verbatim: String(localized: "vs пред. неделя"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -364,21 +378,21 @@ private struct StepsContentView: View {
     private var statsCard: some View {
         HStack(spacing: 0) {
             statCell(
-                title: "Среднее",
+                title: String(localized: "Среднее"),
                 value: viewModel.average > 0 ? viewModel.average.formatted() : "—",
-                subtitle: "шагов/день"
+                subtitle: String(localized: "шагов/день")
             )
             Divider().frame(height: 40)
             statCell(
-                title: "Рекорд",
+                title: String(localized: "Рекорд"),
                 value: viewModel.best.map { $0.steps.formatted() } ?? "—",
                 subtitle: viewModel.best.map { $0.date.formatted(.dateTime.day().month(.abbreviated)) } ?? ""
             )
             Divider().frame(height: 40)
             statCell(
-                title: "Дней с целью",
+                title: String(localized: "Дней с целью"),
                 value: "\(viewModel.daysOnGoal)",
-                subtitle: "из \(viewModel.history.count)"
+                subtitle: String(format: String(localized: "из %lld"), viewModel.history.count)
             )
         }
         .padding(.vertical, 16)

@@ -421,7 +421,7 @@ final class CalorieStore {
         }
     }
 
-    func add(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, date: Date = Date()) {
+    func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil, date: Date = Date()) {
         let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date)
         context.insert(entry)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }

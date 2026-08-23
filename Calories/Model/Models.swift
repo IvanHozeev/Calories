@@ -42,9 +42,9 @@ enum MacroKind: String, Identifiable {
 
     var title: String {
         switch self {
-        case .protein: return "Белки"
-        case .fat: return "Жиры"
-        case .carbs: return "Углеводы"
+        case .protein: return String(localized: "Белки")
+        case .fat: return String(localized: "Жиры")
+        case .carbs: return String(localized: "Углеводы")
         }
     }
 }
@@ -201,8 +201,8 @@ enum Sex: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .male: return "Мужской"
-        case .female: return "Женский"
+        case .male: return String(localized: "Мужской")
+        case .female: return String(localized: "Женский")
         }
     }
 }
@@ -214,21 +214,21 @@ enum ActivityLevel: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .sedentary: return "Минимальная"
-        case .light: return "Лёгкая"
-        case .moderate: return "Средняя"
-        case .active: return "Высокая"
-        case .veryActive: return "Очень высокая"
+        case .sedentary: return String(localized: "Минимальная")
+        case .light: return String(localized: "Лёгкая")
+        case .moderate: return String(localized: "Средняя")
+        case .active: return String(localized: "Высокая")
+        case .veryActive: return String(localized: "Очень высокая")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .sedentary: return "Сидячая работа, почти нет тренировок"
-        case .light: return "1–3 тренировки в неделю"
-        case .moderate: return "3–5 тренировок в неделю"
-        case .active: return "6–7 тренировок в неделю"
-        case .veryActive: return "Физическая работа + тренировки"
+        case .sedentary: return String(localized: "Сидячая работа, почти нет тренировок")
+        case .light: return String(localized: "1–3 тренировки в неделю")
+        case .moderate: return String(localized: "3–5 тренировок в неделю")
+        case .active: return String(localized: "6–7 тренировок в неделю")
+        case .veryActive: return String(localized: "Физическая работа + тренировки")
         }
     }
 
@@ -251,9 +251,9 @@ enum Goal: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .fatLoss: return "Снижение веса"
-        case .maintenance: return "Поддержание"
-        case .muscleGain: return "Набор веса"
+        case .fatLoss: return String(localized: "Снижение веса")
+        case .maintenance: return String(localized: "Поддержание")
+        case .muscleGain: return String(localized: "Набор веса")
         }
     }
 
@@ -364,19 +364,19 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .monTue: return "Пн — Вт"
-        case .satSun: return "Сб — Вс"
-        case .friSat: return "Пт — Сб"
-        case .sunMon: return "Вс — Пн"
+        case .monTue: return String(localized: "Пн — Вт")
+        case .satSun: return String(localized: "Сб — Вс")
+        case .friSat: return String(localized: "Пт — Сб")
+        case .sunMon: return String(localized: "Вс — Пн")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .monTue: return "Рефид в начале недели"
-        case .satSun: return "Рефид на выходных"
-        case .friSat: return "Рефид на выходных (Израиль)"
-        case .sunMon: return "Рефид в начале недели (Израиль)"
+        case .monTue: return String(localized: "Рефид в начале недели")
+        case .satSun: return String(localized: "Рефид на выходных")
+        case .friSat: return String(localized: "Рефид на выходных (Израиль)")
+        case .sunMon: return String(localized: "Рефид в начале недели (Израиль)")
         }
     }
 
@@ -441,9 +441,9 @@ struct Plan: Codable, Equatable {
     }
 
     var title: String {
-        if targetWeightKg < startWeightKg { return "Снижение веса" }
-        if targetWeightKg > startWeightKg { return "Набор веса" }
-        return "Поддержание веса"
+        if targetWeightKg < startWeightKg { return String(localized: "Снижение веса") }
+        if targetWeightKg > startWeightKg { return String(localized: "Набор веса") }
+        return String(localized: "Поддержание веса")
     }
 
     var endDate: Date {
@@ -481,7 +481,8 @@ struct Plan: Codable, Equatable {
 
     /// Раскладка нормы по дням недели (Пн…Вс) — для превью в UI.
     func weeklyCalorieBreakdown(tdee: Double) -> [(label: String, calories: Int)] {
-        let labels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+        let cal = Calendar.current
+        let labels = Array((1...7).map { i in cal.shortWeekdaySymbols[i % 7] })
         let base = Double(dailyCalorieTarget(tdee: tdee))
         return weekendStyle.cycleOffsets.enumerated().map { index, offset in
             (labels[index], Int((base * (1 + offset)).rounded()))

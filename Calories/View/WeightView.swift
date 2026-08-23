@@ -30,9 +30,9 @@ struct WeightView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if let latest = store.latestWeight {
-                            Text(String(format: "%.1f кг", latest.weightKg))
+                            Text(String(format: "%.1f \(String(localized: "кг"))", latest.weightKg))
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
-                            Text("на " + latest.date.formatted(.dateTime.day().month(.wide)))
+                            Text(verbatim: String(format: String(localized: "на %@"), latest.date.formatted(.dateTime.day().month(.wide))))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         } else {
@@ -47,7 +47,7 @@ struct WeightView: View {
                             Text("За период")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text(String(format: "%+.1f кг", weightChange))
+                            Text(String(format: "%+.1f \(String(localized: "кг"))", weightChange))
                                 .font(.title3.weight(.semibold))
                                 .foregroundStyle(weightChange <= 0 ? .green : .red)
                         }
@@ -102,7 +102,7 @@ struct WeightView: View {
                         HStack {
                             Text(entry.date.formatted(.dateTime.day().month(.wide)))
                             Spacer()
-                            Text(String(format: "%.1f кг", entry.weightKg))
+                            Text(String(format: "%.1f \(String(localized: "кг"))", entry.weightKg))
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions {

@@ -294,19 +294,19 @@ struct FoodDetailView: View {
                     Text("Белки")
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f г / 100 г", food.protein))
+                    Text(String(format: "%.1f \(String(localized: "г / 100 г"))", food.protein))
                 }
                 HStack {
                     Text("Жиры")
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f г / 100 г", food.fat))
+                    Text(String(format: "%.1f \(String(localized: "г / 100 г"))", food.fat))
                 }
                 HStack {
                     Text("Углеводы")
                         .foregroundStyle(.secondary)
                     Spacer()
-                    Text(String(format: "%.1f г / 100 г", food.carbs))
+                    Text(String(format: "%.1f \(String(localized: "г / 100 г"))", food.carbs))
                 }
             } header: {
                 Text("Состав")

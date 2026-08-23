@@ -36,13 +36,13 @@ struct DayRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(day.date, format: .dateTime.day().month(.wide))
                     .font(.body.weight(.medium))
-                Text("\(day.entries.count) \(entriesLabel(day.entries.count))")
+                Text(verbatim: "\(day.entries.count) \(entriesLabel(day.entries.count))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text("\(day.totalCalories) ккал")
+                Text(verbatim: "\(day.totalCalories) \(String(localized: "ккал"))")
                     .font(.subheadline.weight(.semibold))
                 Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
                     .font(.caption)
@@ -54,9 +54,9 @@ struct DayRow: View {
 
     private func entriesLabel(_ n: Int) -> String {
         switch n % 10 {
-        case 1 where n % 100 != 11: return "приём пищи"
-        case 2...4 where !(n % 100 >= 12 && n % 100 <= 14): return "приёма пищи"
-        default: return "приёмов пищи"
+        case 1 where n % 100 != 11: return String(localized: "приём пищи")
+        case 2...4 where !(n % 100 >= 12 && n % 100 <= 14): return String(localized: "приёма пищи")
+        default: return String(localized: "приёмов пищи")
         }
     }
 }

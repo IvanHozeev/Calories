@@ -8,12 +8,12 @@ struct EntryRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.name)
                     .font(.body)
-                Text("Б\(Int(entry.macros.protein)) Ж\(Int(entry.macros.fat)) У\(Int(entry.macros.carbs)) · " + entry.date.formatted(date: .omitted, time: .shortened))
+                Text(verbatim: "\(String(localized: "Б"))\(Int(entry.macros.protein)) \(String(localized: "Ж"))\(Int(entry.macros.fat)) \(String(localized: "У"))\(Int(entry.macros.carbs)) · " + entry.date.formatted(date: .omitted, time: .shortened))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Text("\(entry.calories) ккал")
+            Text(verbatim: "\(entry.calories) \(String(localized: "ккал"))")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
         }

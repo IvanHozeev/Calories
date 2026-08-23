@@ -25,12 +25,12 @@ struct ProfileView: View {
     private func weightDisplayText(_ tenths: Int) -> String {
         let kg = Double(tenths) / 10.0
         return useImperial
-            ? String(format: "%.1f фунт", kg * 2.20462)
-            : String(format: "%.1f кг", kg)
+            ? String(format: "%.1f \(String(localized: "фунт"))", kg * 2.20462)
+            : String(format: "%.1f \(String(localized: "кг"))", kg)
     }
 
     private func heightDisplayText(_ cm: Int) -> String {
-        guard useImperial else { return "\(cm) см" }
+        guard useImperial else { return "\(cm) \(String(localized: "см"))" }
         let totalInches = Double(cm) / 2.54
         let feet = Int(totalInches) / 12
         let inches = Int(totalInches.truncatingRemainder(dividingBy: 12))
@@ -104,7 +104,7 @@ struct ProfileView: View {
                         ForEach(Sex.allCases) { Text($0.title).tag($0) }
                     }
                     HStack {
-                        Text(useImperial ? "Вес, фунт" : "Вес, кг")
+                        Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
                         Spacer()
                         Text(weightDisplayText(weightTenths))
                             .foregroundStyle(.secondary)
@@ -129,7 +129,7 @@ struct ProfileView: View {
                         .frame(height: 160)
                     }
                     HStack {
-                        Text(useImperial ? "Рост, фт+дюйм" : "Рост, см")
+                        Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
                         Spacer()
                         Text(heightDisplayText(heightInt))
                             .foregroundStyle(.secondary)
@@ -187,7 +187,7 @@ struct ProfileView: View {
                                 Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
                                     .font(.body.weight(.semibold))
                                     .foregroundStyle(bodyFatColor(draftProfile.bodyFatCategory))
-                                Text("· \(draftProfile.bodyFatCategory)")
+                                Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             } else {
@@ -225,7 +225,7 @@ struct ProfileView: View {
                     HStack {
                         Text("Белка на кг веса")
                         Spacer()
-                        Text(String(format: "%.1f г/кг", Double(proteinTenths) / 10.0))
+                        Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(proteinTenths) / 10.0))
                             .foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
@@ -257,14 +257,14 @@ struct ProfileView: View {
                             Text(String(format: "%.1f", draftProfile.bmi))
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(bmiColor(draftProfile.bmi))
-                            Text("· \(bmiLabel(draftProfile.bmi))")
+                            (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) ккал")
-                        resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) ккал")
-                        resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) ккал", highlighted: true)
-                        resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) г", highlighted: true)
+                        resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
+                        resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
+                        resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
+                        resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) \(String(localized: "г"))", highlighted: true)
                     }
                 }
 
@@ -278,6 +278,11 @@ struct ProfileView: View {
                         RemindersView()
                     } label: {
                         Label("Напоминания", systemImage: "bell")
+                    }
+                    NavigationLink {
+                        LanguageSettingsView()
+                    } label: {
+                        Label("Язык", systemImage: "character.bubble")
                     }
                 }
             }
@@ -348,7 +353,7 @@ struct ProfileView: View {
         }
     }
 
-    private func resultRow(title: String, value: String, highlighted: Bool = false) -> some View {
+    private func resultRow(title: LocalizedStringKey, value: String, highlighted: Bool = false) -> some View {
         HStack {
             Text(title)
                 .foregroundStyle(highlighted ? .primary : .secondary)
@@ -381,6 +386,61 @@ private struct UnitsSettingsView: View {
     }
 }
 
+private struct LanguageSettingsView: View {
+    @State private var selectedLanguage: String
+    @State private var showRestartAlert = false
+
+    init() {
+        let saved = UserDefaults.standard.array(forKey: "AppleLanguages")?.first as? String
+        let lang: String
+        if let saved {
+            lang = String(saved.prefix(2))
+        } else {
+            lang = Locale.preferredLanguages.first?.hasPrefix("ru") == true ? "ru" : "en"
+        }
+        _selectedLanguage = State(initialValue: lang)
+    }
+
+    var body: some View {
+        List {
+            Section {
+                languageRow(code: "ru", title: "Русский", flag: "🇷🇺")
+                languageRow(code: "en", title: "English", flag: "🇺🇸")
+            } footer: {
+                Text("Для применения нового языка перезапусти приложение.")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .navigationTitle("Язык")
+        .navigationBarTitleDisplayMode(.inline)
+        .alert("Перезапусти приложение", isPresented: $showRestartAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Закрой и открой приложение заново, чтобы язык применился.")
+        }
+    }
+
+    private func languageRow(code: String, title: String, flag: String) -> some View {
+        Button {
+            guard selectedLanguage != code else { return }
+            selectedLanguage = code
+            UserDefaults.standard.set([code], forKey: "AppleLanguages")
+            showRestartAlert = true
+        } label: {
+            HStack {
+                Text(flag)
+                Text(title)
+                    .foregroundStyle(.primary)
+                Spacer()
+                if selectedLanguage == code {
+                    Image(systemName: "checkmark")
+                        .foregroundStyle(.green)
+                }
+            }
+        }
+    }
+}
+
 private struct BodyFatDetailView: View {
     @Binding var waistCm: Int
     @Binding var neckCm: Int
@@ -409,7 +469,7 @@ private struct BodyFatDetailView: View {
                             Text(String(format: "%.1f%%", profile.bodyFatPercentage))
                                 .font(.largeTitle.weight(.bold))
                                 .foregroundStyle(bodyFatColor(profile.bodyFatCategory))
-                            Text(profile.bodyFatCategory)
+                            Text(LocalizedStringKey(profile.bodyFatCategory))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }

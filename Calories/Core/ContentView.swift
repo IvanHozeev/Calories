@@ -179,7 +179,7 @@ struct ContentView: View {
                     .listSectionSeparator(.hidden)
                 } else {
                     ForEach(store.groupedTodayEntries.reversed(), id: \.period) { group in
-                        Section(group.period.rawValue) {
+                        Section(LocalizedStringKey(group.period.rawValue)) {
                             ForEach(group.entries.reversed()) { entry in
                                 NavigationLink(value: entry) {
                                     EntryRow(entry: entry)
@@ -277,8 +277,8 @@ private struct StepsCard: View {
     private var distanceText: String? {
         guard store.distanceTodayKm > 0 else { return nil }
         return useImperial
-            ? String(format: "%.1f ми", store.distanceTodayKm * 0.621371)
-            : String(format: "%.1f км", store.distanceTodayKm)
+            ? String(format: "%.1f \(String(localized: "ми"))", store.distanceTodayKm * 0.621371)
+            : String(format: "%.1f \(String(localized: "км"))", store.distanceTodayKm)
     }
 
     var body: some View {
@@ -372,17 +372,17 @@ private struct ActivityView: View {
     private var streakLabel: String {
         let s = store.streak
         switch s % 10 {
-        case 1 where s % 100 != 11: return "день подряд"
-        case 2...4 where !(s % 100 >= 12 && s % 100 <= 14): return "дня подряд"
-        default: return s == 0 ? "начни серию сегодня" : "дней подряд"
+        case 1 where s % 100 != 11: return String(localized: "день подряд")
+        case 2...4 where !(s % 100 >= 12 && s % 100 <= 14): return String(localized: "дня подряд")
+        default: return s == 0 ? String(localized: "начни серию сегодня") : String(localized: "дней подряд")
         }
     }
 
     private var motivationalText: String {
-        if store.streak >= 30 { return "Продолжай в том же духе — ты уже пример для других!" }
-        if store.streak >= 7 { return "Продолжай в том же духе — ты в отличной форме!" }
-        if store.streak > 0 { return "Продолжай в том же духе — каждый день на счету!" }
-        return "Начни сегодня — первый шаг уже завтра станет серией!"
+        if store.streak >= 30 { return String(localized: "Продолжай в том же духе — ты уже пример для других!") }
+        if store.streak >= 7 { return String(localized: "Продолжай в том же духе — ты в отличной форме!") }
+        if store.streak > 0 { return String(localized: "Продолжай в том же духе — каждый день на счету!") }
+        return String(localized: "Начни сегодня — первый шаг уже завтра станет серией!")
     }
 
     private let milestones: [(Int, String, String)] = [
@@ -437,7 +437,7 @@ private struct ActivityView: View {
                                 Image(systemName: "\(icon).fill")
                                     .font(.title2)
                                     .foregroundStyle(reached ? .orange : Color(.systemGray4))
-                                Text(label)
+                                Text(LocalizedStringKey(label))
                                     .font(.caption2)
                                     .foregroundStyle(reached ? .primary : .secondary)
                             }
@@ -497,7 +497,7 @@ private struct ActivityView: View {
 
     private func dayLetter(_ date: Date) -> String {
         let weekday = Calendar.current.component(.weekday, from: date)
-        return ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][weekday - 1]
+        return Calendar.current.veryShortWeekdaySymbols[weekday - 1]
     }
 }
 
@@ -506,7 +506,7 @@ private struct PlanCard: View {
     let currentWeight: Double?
     let status: PlanStatus
 
-    private var statusInfo: (text: String, color: Color, icon: String) {
+    private var statusInfo: (text: LocalizedStringKey, color: Color, icon: String) {
         switch status {
         case .insufficientData: return ("Собираем данные", .secondary, "clock")
         case .onTrack: return ("По графику", .green, "checkmark.circle.fill")
@@ -522,21 +522,27 @@ private struct PlanCard: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text(plan.daysRemaining > 0 ? "\(plan.daysRemaining) дн. осталось" : "Срок истёк")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if plan.daysRemaining > 0 {
+                    Text("\(plan.daysRemaining) дн. осталось")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Срок истёк")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             ProgressView(value: plan.progress)
                 .tint(.blue)
 
             HStack {
-                Text(String(format: "%.1f → %.1f кг", plan.startWeightKg, plan.targetWeightKg))
+                Text(verbatim: String(format: "%.1f → %.1f \(String(localized: "кг"))", plan.startWeightKg, plan.targetWeightKg))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Spacer()
                 if let currentWeight {
-                    Text(String(format: "сейчас %.1f кг", currentWeight))
+                    Text("сейчас \(String(format: "%.1f", currentWeight)) кг")
                         .font(.caption.weight(.medium))
                 }
             }

@@ -292,11 +292,18 @@
 				};
 			};
 			buildConfigurationList = 547895C0302B3D4C00C36433 /* Build configuration list for PBXProject "Calories" */;
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ru,
+				he,
+				ar,
+				es,
+				"pt-BR",
+				fr,
+				de,
 			);
 			mainGroup = 547895BC302B3D4C00C36433;
 			minimizedProjectReferenceProxies = 1;

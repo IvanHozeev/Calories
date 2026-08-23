@@ -107,7 +107,7 @@ struct ProgressRing: View {
 
     private func macroCenter(_ name: String, value: Double, target: Double?, color: Color) -> some View {
         VStack(spacing: 2) {
-            Text(name)
+            Text(LocalizedStringKey(name))
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(color)
             Text("\(Int(value)) г")

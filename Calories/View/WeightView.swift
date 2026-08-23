@@ -117,6 +117,7 @@ struct WeightView: View {
             }
         }
         .navigationTitle("Вес")
+        .scrollIndicators(.hidden)
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
                 .presentationDetents([.medium])

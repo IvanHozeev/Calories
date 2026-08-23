@@ -406,6 +406,12 @@ private struct LanguageSettingsView: View {
             Section {
                 languageRow(code: "ru", title: "Русский", flag: "🇷🇺")
                 languageRow(code: "en", title: "English", flag: "🇺🇸")
+                languageRow(code: "he", title: "עברית", flag: "🇮🇱")
+                languageRow(code: "es", title: "Español", flag: "🇪🇸")
+                languageRow(code: "ar", title: "العربية", flag: "🇸🇦")
+                languageRow(code: "pt", title: "Português", flag: "🇧🇷")
+                languageRow(code: "fr", title: "Français", flag: "🇫🇷")
+                languageRow(code: "de", title: "Deutsch", flag: "🇩🇪")
             } footer: {
                 Text("Для применения нового языка перезапусти приложение.")
             }

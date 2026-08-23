@@ -253,7 +253,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 24)
             }
             Spacer()
-            primaryButton(title: "Начать!") {
+            primaryButton(title: "Начать") {
                 store.updateProfile(draftProfile)
                 onboardingCompleted = true
             }

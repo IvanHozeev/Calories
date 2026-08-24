@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Экран конфигурации: параметры тела, активность, подписка и системные настройки.
 /// Сюда заходят раз в месяц — сменить рост или единицы измерения. Всё, что про динамику
@@ -22,6 +23,11 @@ struct SettingsView: View {
     @State private var hipCm: Int
     @State private var showingPaywall = false
     @AppStorage("use_imperial") private var useImperial = false
+
+    @State private var exportDocument: ExportDocument?
+    @State private var exportFilename = ""
+    @State private var showingExporter = false
+    @State private var exportError: String?
 
     private func weightDisplayText(_ tenths: Int) -> String {
         let kg = Double(tenths) / 10.0
@@ -59,6 +65,32 @@ struct SettingsView: View {
     private var waist: Double? { waistCm > 0 ? Double(waistCm) : nil }
     private var neck: Double? { neckCm > 0 ? Double(neckCm) : nil }
     private var hip: Double? { hipCm > 0 ? Double(hipCm) : nil }
+
+    private func dateStamp() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: Date())
+    }
+
+    private func prepareBackup() {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(store.makeBackup()),
+              let text = String(data: data, encoding: .utf8) else {
+            exportError = String(localized: "Не удалось собрать файл.")
+            return
+        }
+        exportDocument = ExportDocument(text: text, type: .json)
+        exportFilename = "calories-backup-\(dateStamp())"
+        showingExporter = true
+    }
+
+    private func prepareCSV() {
+        exportDocument = ExportDocument(text: store.makeDiaryCSV(), type: .commaSeparatedText)
+        exportFilename = "calories-diary-\(dateStamp())"
+        showingExporter = true
+    }
 
     private var draftProfile: UserProfile? {
         UserProfile(
@@ -282,6 +314,23 @@ struct SettingsView: View {
                     }
                 }
 
+                Section {
+                    Button {
+                        prepareBackup()
+                    } label: {
+                        Label("Резервная копия (JSON)", systemImage: "arrow.down.doc")
+                    }
+                    Button {
+                        prepareCSV()
+                    } label: {
+                        Label("Дневник таблицей (CSV)", systemImage: "tablecells")
+                    }
+                } header: {
+                    Text("Данные")
+                } footer: {
+                    Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
+                }
+
                 Section("Системное") {
                     NavigationLink {
                         UnitsSettingsView()
@@ -304,6 +353,24 @@ struct SettingsView: View {
             .scrollDismissesKeyboard(.interactively)
             .scrollIndicators(.hidden)
             .navigationTitle("Настройки")
+            .fileExporter(
+                isPresented: $showingExporter,
+                document: exportDocument,
+                contentType: exportDocument?.type ?? .json,
+                defaultFilename: exportFilename
+            ) { result in
+                if case .failure(let error) = result {
+                    exportError = error.localizedDescription
+                }
+            }
+            .alert("Не удалось сохранить", isPresented: Binding(
+                get: { exportError != nil },
+                set: { if !$0 { exportError = nil } }
+            )) {
+                Button("OK", role: .cancel) { exportError = nil }
+            } message: {
+                Text(exportError ?? "")
+            }
             .onChange(of: draftProfile) { _, newProfile in
                 if let p = newProfile { store.updateProfile(p) }
             }

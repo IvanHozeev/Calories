@@ -50,12 +50,16 @@ struct ProgressDashboardView: View {
                         if let latest = store.latestWeight {
                             Text(String(format: "%.1f \(String(localized: "кг"))", latest.weightKg))
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .minimumScaleFactor(0.6)
+                                .lineLimit(1)
                             Text(verbatim: String(format: String(localized: "на %@"), latest.date.formatted(.dateTime.day().month(.wide))))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("—")
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .minimumScaleFactor(0.6)
+                                .lineLimit(1)
                                 .foregroundStyle(.secondary)
                         }
                     }

@@ -137,6 +137,7 @@ struct ActivityView: View {
                         )
                     Text("\(store.streak)")
                         .font(.system(size: 56, weight: .bold, design: .rounded))
+                        .minimumScaleFactor(0.6)
                         .foregroundStyle(milestoneColor)
                         .monospacedDigit()
                         .contentTransition(.numericText())
@@ -203,11 +204,11 @@ private struct DayStrip: View {
                             .fill(color(for: day).opacity(day.onGoal || day.hasEntries ? 1 : 0.35))
                         if day.onGoal {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 14, weight: .bold))
+                                .font(.subheadline.weight(.bold))
                                 .foregroundStyle(.white)
                         } else {
                             Text("\(Calendar.current.component(.day, from: day.date))")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.footnote.weight(.semibold))
                                 .foregroundStyle(day.hasEntries ? .white : .secondary)
                         }
                     }
@@ -285,7 +286,7 @@ private struct MonthGrid: View {
                         onSelect(day.date)
                     } label: {
                         Text("\(calendar.component(.day, from: day.date))")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(day.hasEntries ? .white : .secondary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 34)

@@ -1,43 +1,128 @@
-//
-//  CaloriesUITests.swift
-//  CaloriesUITests
-//
-//  Created by Ivan Hozeyev on 11/08/2026.
-//
-
 import XCTest
 
+/// UI-тесты держат в узде то, чего не видят юнит-тесты: навигацию и то, что данные
+/// действительно доезжают до экрана. Все регрессии интерфейса этой недели —
+/// съехавшая дуга кольца, обрезанная ось графика, белая рамка вокруг карточки —
+/// ловились глазами, а не сборкой.
 final class CaloriesUITests: XCTestCase {
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
-        // In UI tests it is usually best to stop immediately when a failure occurs.
         continueAfterFailure = false
-
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-    }
-
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    /// Запускаем в предсказуемых условиях: английская локаль, онбординг пропущен.
+    /// Оба параметра — обычные перекрытия UserDefaults через аргументы запуска,
+    /// поэтому в самом приложении не нужен тестовый код.
+    private func launchApp(premium: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
+        app.launchArguments = [
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US",
+            "-onboarding_completed", "YES",
+            "-is_premium", premium ? "YES" : "NO"
+        ]
         app.launch()
+        return app
+    }
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+    // MARK: - Навигация
+
+    @MainActor
+    func testAllThreeTabsOpen() {
+        let app = launchApp()
+
+        XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 5),
+                      "Приложение должно открываться на вкладке «Сегодня»")
+
+        app.tabBars.buttons["Progress"].tap()
+        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5),
+                      "Вкладка «Прогресс» не открылась")
+
+        app.tabBars.buttons["Food"].tap()
+        XCTAssertTrue(app.navigationBars["My Food"].waitForExistence(timeout: 5),
+                      "Вкладка «Еда» не открылась")
+
+        app.tabBars.buttons["Today"].tap()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5),
+                      "Возврат на «Сегодня» не сработал")
     }
 
     @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    func testSettingsReachableFromProgress() {
+        let app = launchApp()
+        app.tabBars.buttons["Progress"].tap()
+
+        app.navigationBars.buttons.element(boundBy: app.navigationBars.buttons.count - 1).tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
+                      "Шестерёнка на «Прогрессе» должна вести в «Настройки»")
+    }
+
+    @MainActor
+    func testSettingsOffersDataExport() {
+        let app = launchApp()
+        app.tabBars.buttons["Progress"].tap()
+        app.navigationBars.buttons.element(boundBy: app.navigationBars.buttons.count - 1).tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+
+        let backup = app.buttons["Backup (JSON)"]
+        // Экспорт лежит внизу списка — доскроллим.
+        var attempts = 0
+        while !backup.isHittable && attempts < 8 {
+            app.swipeUp()
+            attempts += 1
         }
+        XCTAssertTrue(backup.exists, "В настройках должна быть выгрузка резервной копии")
+        XCTAssertTrue(app.buttons["Diary as a table (CSV)"].exists,
+                      "В настройках должна быть выгрузка дневника в CSV")
+    }
+
+    // MARK: - Запись еды
+
+    @MainActor
+    func testQuickCaloriesReachTheRing() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        let field = app.textFields["Kcal"]
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        field.tap()
+        field.typeText("777")
+
+        app.buttons["Save"].firstMatch.tap()
+
+        // Запись должна появиться в дневнике за сегодня.
+        XCTAssertTrue(app.staticTexts["777"].waitForExistence(timeout: 5)
+                      || app.staticTexts.containing(NSPredicate(format: "label CONTAINS '777'")).count > 0,
+                      "Добавленные калории не отобразились на «Сегодня»")
+    }
+
+    // MARK: - Еда
+
+    @MainActor
+    func testFoodTabHasSearchAndSegments() {
+        let app = launchApp()
+        app.tabBars.buttons["Food"].tap()
+        XCTAssertTrue(app.navigationBars["My Food"].waitForExistence(timeout: 5))
+
+        XCTAssertTrue(app.searchFields.firstMatch.exists,
+                      "На «Моей еде» должна быть поисковая строка")
+        XCTAssertTrue(app.buttons["Dishes (0)"].exists || app.buttons.containing(
+            NSPredicate(format: "label BEGINSWITH 'Dishes'")).count > 0,
+                      "Должен быть сегмент «Блюда» со счётчиком")
+    }
+
+    // MARK: - Премиум-гейт
+
+    @MainActor
+    func testPlanCardShowsPaywallWithoutPremium() {
+        let app = launchApp(premium: false)
+        app.tabBars.buttons["Progress"].tap()
+        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5))
+
+        app.staticTexts["Personal plan"].tap()
+        XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5),
+                      "Без премиума карточка плана должна открывать пейволл")
     }
 }

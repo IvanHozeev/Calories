@@ -39,6 +39,9 @@ struct RingView<Label: View>: View {
                 .transition(.opacity.combined(with: .scale(scale: 0.85)))
         }
         .frame(width: 220, height: 220)
+        // Кольцо — фиксированные 220pt, текст внутри масштабировать некуда.
+        // Ограничиваем шкалу, иначе на крупных размерах цифры вылезают за круг.
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
     }
 }
 

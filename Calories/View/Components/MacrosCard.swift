@@ -7,21 +7,28 @@ struct MacrosCard: View {
     let weightKg: Double?
 
     @State private var selectedMacro: MacroKind?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        HStack {
+        // Три колонки на accessibility-размерах ломают слова посреди («Pro-tein»),
+        // поэтому там раскладываем макросы строками.
+        let isBig = dynamicTypeSize.isAccessibilitySize
+        let layout = isBig
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout())
+        return layout {
             macroColumn(.protein, value: macros.protein, color: .blue)
                 .popover(isPresented: Binding(
                     get: { selectedMacro == .protein },
                     set: { if !$0 { selectedMacro = nil } }
                 )) { macroPopover(.protein) }
-            Divider().frame(height: 36)
+            if !isBig { Divider().frame(height: 36) }
             macroColumn(.fat, value: macros.fat, color: .orange)
                 .popover(isPresented: Binding(
                     get: { selectedMacro == .fat },
                     set: { if !$0 { selectedMacro = nil } }
                 )) { macroPopover(.fat) }
-            Divider().frame(height: 36)
+            if !isBig { Divider().frame(height: 36) }
             macroColumn(.carbs, value: macros.carbs, color: .purple)
                 .popover(isPresented: Binding(
                     get: { selectedMacro == .carbs },
@@ -41,18 +48,23 @@ struct MacrosCard: View {
     }
 
     private func macroColumn(_ kind: MacroKind, value: Double, color: Color) -> some View {
-        Button {
+        let isBig = dynamicTypeSize.isAccessibilitySize
+        let inner: AnyLayout = isBig
+            ? AnyLayout(HStackLayout(spacing: 8))
+            : AnyLayout(VStackLayout(spacing: 4))
+        return Button {
             selectedMacro = kind
         } label: {
-            VStack(spacing: 4) {
+            inner {
                 Text(String(format: "%.0f \(String(localized: "г"))", value))
                     .font(.title3.bold())
                     .foregroundStyle(color)
                 Text(LocalizedStringKey(kind.title))
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if isBig { Spacer(minLength: 0) }
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: isBig ? Alignment.leading : Alignment.center)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

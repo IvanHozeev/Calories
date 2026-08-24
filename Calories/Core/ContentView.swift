@@ -329,7 +329,7 @@ private struct StepsCard: View {
                             .rotationEffect(.degrees(-90))
                             .animation(.easeOut, value: progress)
                         Image(systemName: "figure.walk")
-                            .font(.system(size: 16, weight: .medium))
+                            .font(.body.weight(.medium))
                             .foregroundStyle(progress >= 1 ? .green : .blue)
                     }
                     .frame(width: 40, height: 40)
@@ -371,8 +371,15 @@ private struct PlanSummaryRow: View {
     let plan: Plan
     let status: PlanStatus
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        HStack(spacing: 8) {
+        // На accessibility-размерах четыре элемента в строку не помещаются и наезжают
+        // друг на друга — переключаемся на колонку.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
+            : AnyLayout(HStackLayout(spacing: 8))
+        return layout {
             Image(systemName: status.icon)
                 .font(.footnote)
                 .foregroundStyle(status.color)
@@ -381,7 +388,7 @@ private struct PlanSummaryRow: View {
             Text(verbatim: String(format: "· %.1f \(String(localized: "кг"))", plan.targetWeightKg))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Spacer()
+            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
             if plan.daysRemaining > 0 {
                 Text("\(plan.daysRemaining) дн. осталось")
                     .font(.caption2)

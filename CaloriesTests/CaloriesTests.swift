@@ -109,12 +109,12 @@ struct UserProfileTests {
 
     @Test func bmr_male() {
         let bmr = profile(age: 30, heightCm: 175, weightKg: 75, sex: .male).bmr
-        #expect(abs(bmr - 1776) < 5)
+        #expect(abs(bmr - 1699) < 5)
     }
 
     @Test func bmr_female() {
         let bmr = profile(age: 30, heightCm: 165, weightKg: 60, sex: .female).bmr
-        #expect(abs(bmr - 1400) < 20)
+        #expect(abs(bmr - 1320) < 5)
     }
 
     @Test func tdee_greaterThanBmr() {
@@ -234,10 +234,14 @@ struct PlanTests {
 @MainActor
 struct CalorieStoreTests {
 
+    private let container: ModelContainer
     private let store: CalorieStore
 
-    init() throws {
-        let container = try ModelContainer(
+    init() async throws {
+        for key in ["daily_goal", "user_profile", "active_plan", "is_premium"] {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+        container = try ModelContainer(
             for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )

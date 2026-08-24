@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 struct RootView: View {
     var store: CalorieStore
@@ -29,6 +30,12 @@ struct RootView: View {
             set: { _ in }
         )) {
             OnboardingView(store: store)
+        }
+        .onChange(of: store.consumedToday) { _, _ in
+            WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
+        }
+        .onChange(of: store.adaptedTodayGoal) { _, _ in
+            WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
         }
     }
 }

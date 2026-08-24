@@ -1,7 +1,6 @@
 import Foundation
 import SwiftData
 import Observation
-import WidgetKit
 import OSLog
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories", category: "CalorieStore")
@@ -431,7 +430,6 @@ final class CalorieStore {
         if Calendar.current.startOfDay(for: date) < Calendar.current.startOfDay(for: Date()) {
             lockPastGoals()
         }
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func delete(entry: FoodEntry) {
@@ -440,7 +438,6 @@ final class CalorieStore {
         entries.removeAll { $0.id == entry.id }
         rebuildCaches()
         // Удаление не может породить новый незалоченный день — лочить не нужно
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, grams: Double?, date: Date) {
@@ -453,7 +450,6 @@ final class CalorieStore {
         entries.sort { $0.date > $1.date }
         rebuildCaches()
         lockPastGoals()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
@@ -462,7 +458,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteCustomFood(_ food: FoodItem) {
@@ -470,7 +465,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods.removeAll { $0.id == food.id }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
@@ -482,7 +476,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods.sort { $0.name < $1.name }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func setDefaultGrams(_ food: FoodItem, grams: Double) {
@@ -496,7 +489,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes = [dish] + dishes
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient]) {
@@ -504,7 +496,6 @@ final class CalorieStore {
         dish.ingredients = ingredients
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteDish(_ dish: Dish) {
@@ -512,7 +503,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes.removeAll { $0.id == dish.id }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func addWeight(_ kg: Double, date: Date = Date()) {
@@ -525,7 +515,6 @@ final class CalorieStore {
             p.weightKg = kg
             updateProfile(p, syncDailyGoal: false)
         }
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     func deleteWeight(_ entry: WeightEntry) {
@@ -533,7 +522,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         weightEntries.removeAll { $0.id == entry.id }
         rebuildCaches()
-        WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
     }
 
     /// Последняя по дате запись веса.

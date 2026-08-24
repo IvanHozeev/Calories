@@ -1,0 +1,53 @@
+import SwiftUI
+
+/// Строка продукта или блюда в любом списке выбора. Одна на все экраны: раньше
+/// в AddEntryView и MyFoodView лежали свои копии с рассыпанной строкой «Б12 Ж22 У41»
+/// и калориями серым шрифтом на втором плане.
+struct FoodRow: View {
+    let name: String
+    let calories: Int
+    /// Порция, к которой относятся цифры: «100 г», «250 г».
+    let portion: String
+    let macros: Macros
+    /// Подпись слева от порции — например, число ингредиентов у блюда.
+    var detail: String? = nil
+
+    private var hasMacros: Bool {
+        macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(name)
+                    .lineLimit(2)
+
+                HStack(spacing: 6) {
+                    if let detail {
+                        Text(verbatim: detail)
+                        Text(verbatim: "·")
+                    }
+                    Text(verbatim: portion)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                if hasMacros {
+                    MacroTags(macros: macros, compact: true)
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(verbatim: "\(calories)")
+                    .font(.subheadline.weight(.semibold))
+                    .monospacedDigit()
+                Text("ккал")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}

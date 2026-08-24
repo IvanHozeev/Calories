@@ -135,13 +135,13 @@ struct MyFoodView: View {
                     NavigationLink {
                         NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
                     } label: {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(dish.name)
-                            Text(verbatim: "\(dish.ingredients.count) \(String(localized: "ингр.")) · \(dish.totalCalories) \(String(localized: "ккал"))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            MacroTags(macros: dish.totalMacros, compact: true)
-                        }
+                        FoodRow(
+                            name: dish.name,
+                            calories: dish.totalCalories,
+                            portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
+                            macros: dish.totalMacros,
+                            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))"
+                        )
                     }
                     .swipeActions(edge: .leading) {
                         quickAddButton {
@@ -239,13 +239,12 @@ struct MyFoodView: View {
     private func foodRow(_ food: FoodItem) -> some View {
         let grams = food.defaultGrams > 0 ? food.defaultGrams : 100
         let kcal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
-        return VStack(alignment: .leading, spacing: 6) {
-            Text(food.name)
-            Text(verbatim: "\(kcal) \(String(localized: "ккал")) / \(Int(grams)) \(String(localized: "г"))")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            MacroTags(macros: food.macrosPer100g.scaled(by: grams), compact: true)
-        }
+        return FoodRow(
+            name: food.name,
+            calories: kcal,
+            portion: "\(Int(grams)) \(String(localized: "г"))",
+            macros: food.macrosPer100g.scaled(by: grams)
+        )
     }
 
     private func target(for food: FoodItem) -> QuickAddTarget {

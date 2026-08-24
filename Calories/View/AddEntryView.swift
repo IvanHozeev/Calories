@@ -137,29 +137,33 @@ struct AddEntryView: View {
                 if !draftItems.isEmpty {
                     Section("Приём пищи") {
                         ForEach(draftItems) { item in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(item.name)
-                                    Text("Б\(Int(item.macros.protein)) Ж\(Int(item.macros.fat)) У\(Int(item.macros.carbs))")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Text("\(item.calories) ккал")
-                                    .foregroundStyle(.secondary)
-                            }
+                            FoodRow(
+                                name: item.name,
+                                calories: item.calories,
+                                portion: item.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+                                    ?? String(localized: "порция"),
+                                macros: item.macros
+                            )
                         }
                         .onDelete { offsets in
                             draftItems.remove(atOffsets: offsets)
                         }
 
-                        HStack {
-                            Text("Итого")
-                                .font(.subheadline.weight(.semibold))
-                            Spacer()
-                            Text("\(draftTotalCalories) ккал")
-                                .font(.subheadline.weight(.semibold))
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Итого")
+                                    .font(.subheadline.weight(.semibold))
+                                Spacer()
+                                Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
+                                    .font(.title3.weight(.bold))
+                                    .monospacedDigit()
+                                    .foregroundStyle(.green)
+                                    .contentTransition(.numericText())
+                            }
+                            MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros })
                         }
+                        .padding(.vertical, 4)
+                        .animation(.easeInOut(duration: 0.2), value: draftTotalCalories)
                     }
                 }
 
@@ -326,21 +330,27 @@ struct AddEntryView: View {
                         }
                     }
                 }
-                ToolbarItem(placement: .bottomBar) {
-                    Button {
-                        store.recordRecentFoods(draftItems.map(\.name))
-                        let grams = draftItems.count == 1 ? draftItems[0].grams : nil
-                        store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                        dismiss()
-                    } label: {
-                        Text(draftItems.isEmpty ? "Сохранить" : "Сохранить (\(draftTotalCalories) ккал)")
-                            .frame(maxWidth: .infinity)
+                // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,
+                // она не нужна — показываем её только при непустом черновике.
+                if !draftItems.isEmpty {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button {
+                            store.recordRecentFoods(draftItems.map(\.name))
+                            let grams = draftItems.count == 1 ? draftItems[0].grams : nil
+                            store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                            dismiss()
+                        } label: {
+                            Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
+                                .frame(maxWidth: .infinity)
+                                .fontWeight(.semibold)
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(draftItems.isEmpty)
                 }
             }
+            // Чтобы последняя строка не оставалась навсегда под кнопкой.
+            .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerSheet(store: store) { item in
                     draftItems.append(item)
@@ -395,33 +405,22 @@ struct AddEntryView: View {
     }
 
     private func foodRow(_ food: FoodItem) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(food.name)
-                Text("Б\(Int(food.macrosPer100g.protein)) Ж\(Int(food.macrosPer100g.fat)) У\(Int(food.macrosPer100g.carbs))")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Text("\(food.caloriesPer100g) ккал/100г")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
+        FoodRow(
+            name: food.name,
+            calories: food.caloriesPer100g,
+            portion: "100 \(String(localized: "г"))",
+            macros: food.macrosPer100g
+        )
     }
 
     private func dishRow(_ dish: Dish) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(dish.name)
-                Text("Б\(Int(dish.macrosPer100g.protein)) Ж\(Int(dish.macrosPer100g.fat)) У\(Int(dish.macrosPer100g.carbs))")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Text("\(dish.caloriesPer100g) ккал/100г")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
+        FoodRow(
+            name: dish.name,
+            calories: dish.caloriesPer100g,
+            portion: "100 \(String(localized: "г"))",
+            macros: dish.macrosPer100g,
+            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))"
+        )
     }
 }
 

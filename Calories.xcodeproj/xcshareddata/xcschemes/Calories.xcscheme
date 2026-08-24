@@ -28,9 +28,6 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <StoreKitConfigurationFileReference
-         identifier = "../../../Calories/Products.storekit">
-      </StoreKitConfigurationFileReference>
       <TestPlans>
          <TestPlanReference
             reference = "container:CaloriesTests.xctestplan"

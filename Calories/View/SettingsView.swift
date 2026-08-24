@@ -303,6 +303,17 @@ struct SettingsView: View {
                 }
 
                 Section("Подписка") {
+                    #if DEBUG
+                    // Отладочный тумблер: пока продукты StoreKit не грузятся, это
+                    // единственный способ проверять платные экраны. В релиз не попадает.
+                    Toggle(isOn: Binding(
+                        get: { store.isPremium },
+                        set: { store.isPremium = $0 }
+                    )) {
+                        Label("Premium (отладка)", systemImage: "hammer")
+                    }
+                    #endif
+
                     if store.isPremium {
                         Label("Premium активен", systemImage: "checkmark.seal.fill")
                             .foregroundStyle(.green)

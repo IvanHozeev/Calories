@@ -18,16 +18,28 @@ struct CalorieCounterApp: App {
         }
     }
 
+    /// StoreKit может выдать премиум, но не отобрать.
+    ///
+    /// Первая версия просто присваивала `store.isPremium = purchases.isPremium`, и это
+    /// отбирало доступ у всех, у кого StoreKit не ответил: нет сети, не подхватилась
+    /// конфигурация, покупка ещё не восстановлена. Отзыв прав вернём, когда продукты
+    /// будут приходить из App Store Connect и пустой ответ можно будет считать
+    /// достоверным «не куплено».
+    private func applyEntitlements() {
+        if purchases.isPremium {
+            store.isPremium = true
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(store: store, stepStore: stepStore, purchases: purchases)
                 .task {
                     await purchases.load()
-                    // Права из StoreKit перекрывают кэшированный флаг.
-                    store.isPremium = purchases.isPremium
+                    applyEntitlements()
                 }
-                .onChange(of: purchases.isPremium) { _, active in
-                    store.isPremium = active
+                .onChange(of: purchases.isPremium) { _, _ in
+                    applyEntitlements()
                 }
         }
         .modelContainer(container)

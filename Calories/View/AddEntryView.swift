@@ -171,10 +171,10 @@ struct AddEntryView: View {
                             .focused($quickCaloriesFocused)
                         Button("Сохранить") {
                             guard let calories = Int(quickCalories) else { return }
-                            let items = draftItems + [MealItem(name: "Приём пищи", calories: calories, macros: .zero)]
+                            let items = draftItems + [MealItem(name: String(localized: "Приём пищи"), calories: calories, macros: .zero)]
                             let totalCalories = items.reduce(0) { $0 + $1.calories }
                             let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
-                            let name = items.count == 1 ? "Приём пищи" : joinedName(items)
+                            let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
                             store.recordRecentFoods(draftItems.map(\.name))
                             store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()

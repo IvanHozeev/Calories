@@ -193,7 +193,7 @@ struct ContentView: View {
                     .listSectionSeparator(.hidden)
                 } else {
                     ForEach(store.groupedTodayEntries.reversed(), id: \.period) { group in
-                        Section(LocalizedStringKey(group.period.rawValue)) {
+                        Section {
                             ForEach(group.entries.reversed()) { entry in
                                 NavigationLink(value: entry) {
                                     EntryRow(entry: entry)
@@ -213,6 +213,15 @@ struct ContentView: View {
                                         Image(systemName: "trash")
                                     }
                                 }
+                            }
+                        } header: {
+                            // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
+                            // во сколько обошёлся обед, приходится складывать строки глазами.
+                            HStack {
+                                Text(LocalizedStringKey(group.period.rawValue))
+                                Spacer()
+                                Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
+                                    .monospacedDigit()
                             }
                         }
                     }

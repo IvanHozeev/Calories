@@ -1,22 +1,55 @@
 import SwiftUI
 
+/// Строка съеденного за день. Калории — главное число строки, поэтому они крупные
+/// и тёмные, а не серые справа. Макросы идут цветными тегами, как и везде в приложении,
+/// вместо слипшегося «Б6 Ж31 У58».
 struct EntryRow: View {
     let entry: FoodEntry
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var hasMacros: Bool {
+        entry.protein > 0 || entry.fat > 0 || entry.carbs > 0
+    }
+
+    private var portionText: String? {
+        guard let grams = entry.grams, grams > 0 else { return nil }
+        return String(format: "%.0f \(String(localized: "г"))", grams)
+    }
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(entry.name)
                     .font(.body)
-                Text(verbatim: "\(String(localized: "Б"))\(Int(entry.macros.protein)) \(String(localized: "Ж"))\(Int(entry.macros.fat)) \(String(localized: "У"))\(Int(entry.macros.carbs)) · " + entry.date.formatted(date: .omitted, time: .shortened))
-                    .font(.caption)
+                    .lineLimit(2)
+
+                HStack(spacing: 6) {
+                    Text(entry.date, format: .dateTime.hour().minute())
+                    if let portionText {
+                        Text(verbatim: "·")
+                        Text(verbatim: portionText)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                if hasMacros {
+                    MacroTags(macros: entry.macros, compact: true)
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(verbatim: "\(entry.calories)")
+                    .font(.headline)
+                    .monospacedDigit()
+                Text("ккал")
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            Spacer()
-            Text(verbatim: "\(entry.calories) \(String(localized: "ккал"))")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
     }
 }

@@ -6,6 +6,7 @@ struct CalorieCounterApp: App {
     private let container: ModelContainer
     @State private var store: CalorieStore
     @State private var stepStore = StepStore()
+    @State private var purchases = PurchaseService()
 
     init() {
         do {
@@ -19,7 +20,15 @@ struct CalorieCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(store: store, stepStore: stepStore)
+            RootView(store: store, stepStore: stepStore, purchases: purchases)
+                .task {
+                    await purchases.load()
+                    // Права из StoreKit перекрывают кэшированный флаг.
+                    store.isPremium = purchases.isPremium
+                }
+                .onChange(of: purchases.isPremium) { _, active in
+                    store.isPremium = active
+                }
         }
         .modelContainer(container)
     }

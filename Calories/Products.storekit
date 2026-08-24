@@ -1,0 +1,105 @@
+{
+  "identifier": "5A7C1E92-0B4D-4F6A-9C31-8E2D4F7B1A63",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "24.90",
+      "familyShareable": false,
+      "internalID": "C1D2E3F4-1111-2222-3333-444455556666",
+      "localizations": [
+        {
+          "description": "Персональный план, недельный цикл калорий и адаптивная цель — навсегда.",
+          "displayName": "Premium навсегда",
+          "locale": "ru_RU"
+        },
+        {
+          "description": "Personal plan, weekly calorie cycling and an adaptive daily target — forever.",
+          "displayName": "Premium Forever",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "ivankhozeyev.team.Calories.premium.lifetime",
+      "referenceName": "Premium Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "ru_RU",
+    "_storefront": "ISR",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "21398745",
+      "localizations": [],
+      "name": "Calories Premium",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.90",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "A1B2C3D4-5555-6666-7777-888899990000",
+          "introductoryOffer": {
+            "internalID": "F1E2D3C4-AAAA-BBBB-CCCC-DDDDEEEEFFFF",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          },
+          "localizations": [
+            {
+              "description": "Персональный план, недельный цикл калорий и адаптивная цель.",
+              "displayName": "Premium на месяц",
+              "locale": "ru_RU"
+            },
+            {
+              "description": "Personal plan, weekly calorie cycling and an adaptive daily target.",
+              "displayName": "Premium Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "ivankhozeyev.team.Calories.premium.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Premium Monthly",
+          "subscriptionGroupID": "21398745",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "19.90",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "B2C3D4E5-6666-7777-8888-999900001111",
+          "introductoryOffer": {
+            "internalID": "E2D3C4B5-BBBB-CCCC-DDDD-EEEEFFFF0000",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          },
+          "localizations": [
+            {
+              "description": "Персональный план, недельный цикл калорий и адаптивная цель. Выгоднее месячной.",
+              "displayName": "Premium на год",
+              "locale": "ru_RU"
+            },
+            {
+              "description": "Personal plan, weekly calorie cycling and an adaptive daily target. Cheaper than monthly.",
+              "displayName": "Premium Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "ivankhozeyev.team.Calories.premium.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Premium Yearly",
+          "subscriptionGroupID": "21398745",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

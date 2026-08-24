@@ -28,6 +28,9 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <StoreKitConfigurationFileReference
+         identifier = "../../../Calories/Products.storekit">
+      </StoreKitConfigurationFileReference>
       <TestPlans>
          <TestPlanReference
             reference = "container:CaloriesTests.xctestplan"
@@ -46,6 +49,9 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       queueDebuggingEnableBacktraceRecording = "Yes">
+      <StoreKitConfigurationFileReference
+         identifier = "../../../Calories/Products.storekit">
+      </StoreKitConfigurationFileReference>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference

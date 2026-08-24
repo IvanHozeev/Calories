@@ -4,6 +4,7 @@ import WidgetKit
 struct RootView: View {
     var store: CalorieStore
     var stepStore: StepStore
+    var purchases: PurchaseService
     @State private var selectedTab = 0
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
@@ -32,6 +33,7 @@ struct RootView: View {
         )) {
             OnboardingView(store: store)
         }
+        .environment(purchases)
         .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")

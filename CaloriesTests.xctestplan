@@ -8,7 +8,10 @@
   ],
   "defaultOptions": {
     "maximumTestExecutionTimeAllowance": 60,
-    "testTimeoutsEnabled": true
+    "testTimeoutsEnabled": true,
+    "storeKitConfigurationFileReference": {
+      "identifier": "Calories/Products.storekit"
+    }
   },
   "testTargets": [
     {

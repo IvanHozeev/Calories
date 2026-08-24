@@ -113,6 +113,27 @@ final class CaloriesUITests: XCTestCase {
                       "Должен быть сегмент «Блюда» со счётчиком")
     }
 
+    // MARK: - Покупки
+
+    /// Проверяем структуру пейволла, но не сами продукты: конфигурация StoreKit
+    /// применяется только к запуску по схеме из Xcode, а SKTestSession живёт в процессе
+    /// тест-раннера и до приложения в UI-тесте не достаёт. Загрузку продуктов надо
+    /// проверять руками, запустив приложение из Xcode.
+    @MainActor
+    func testPaywallStructure() {
+        let app = launchApp(premium: false)
+        app.tabBars.buttons["Progress"].tap()
+        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5))
+
+        app.staticTexts["Personal plan"].tap()
+        XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5))
+
+        XCTAssertTrue(app.buttons["Restore"].exists,
+                      "Восстановление покупок обязательно для App Review")
+        XCTAssertTrue(app.staticTexts["Plan progress right on the main screen"].exists,
+                      "Перечень фич должен быть переведён, а не падать на русский исходник")
+    }
+
     // MARK: - Премиум-гейт
 
     @MainActor

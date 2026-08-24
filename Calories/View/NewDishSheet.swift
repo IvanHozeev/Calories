@@ -63,19 +63,19 @@ struct NewDishSheet: View {
 
             if !ingredients.isEmpty {
                 Section("Итого") {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("\(totalCalories) ккал")
-                                .font(.headline)
-                            Text("Б\(Int(totalMacros.protein)) Ж\(Int(totalMacros.fat)) У\(Int(totalMacros.carbs))")
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(verbatim: "\(totalCalories) \(String(localized: "ккал"))")
+                                .font(.title3.weight(.semibold))
+                            Spacer()
+                            Text(verbatim: "\(Int(ingredients.reduce(0) { $0 + $1.grams })) \(String(localized: "г всего"))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Spacer()
-                        Text("\(Int(ingredients.reduce(0) { $0 + $1.grams })) г всего")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        MacroTags(macros: totalMacros)
+                        MacroSplitBar(macros: totalMacros)
                     }
+                    .padding(.vertical, 4)
                 }
             }
         }

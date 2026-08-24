@@ -445,6 +445,34 @@ struct NewFoodSheet: View {
 
     private var isEditing: Bool { editingFood != nil }
 
+    private func number(_ text: String) -> Double {
+        Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
+
+    private var draftMacros: Macros {
+        Macros(protein: number(protein), fat: number(fat), carbs: number(carbs))
+    }
+
+    /// Калорийность, вытекающая из БЖУ. Сверка с введённым числом ловит опечатки
+    /// при переносе данных с упаковки — самый частый источник кривых продуктов.
+    private var impliedCalories: Int {
+        Int((draftMacros.protein * MacroTargets.kcalPerProteinGram
+             + draftMacros.fat * MacroTargets.kcalPerFatGram
+             + draftMacros.carbs * MacroTargets.kcalPerCarbGram).rounded())
+    }
+
+    private var enteredCalories: Int { Int(number(caloriesPer100g)) }
+
+    private var hasMacros: Bool {
+        draftMacros.protein > 0 || draftMacros.fat > 0 || draftMacros.carbs > 0
+    }
+
+    /// Расхождение больше 15% почти всегда означает ошибку, а не округление.
+    private var caloriesMismatch: Bool {
+        guard hasMacros, enteredCalories > 0, impliedCalories > 0 else { return false }
+        return abs(Double(enteredCalories - impliedCalories)) / Double(impliedCalories) > 0.15
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -511,6 +539,31 @@ struct NewFoodSheet: View {
                     TextField("Углеводы, г", text: $carbs)
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .carbs)
+                }
+
+                if hasMacros {
+                    Section {
+                        MacroSplitBar(macros: draftMacros)
+                            .padding(.vertical, 4)
+
+                        HStack {
+                            Text("По БЖУ выходит")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(verbatim: "\(impliedCalories) \(String(localized: "ккал"))")
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(caloriesMismatch ? .orange : .primary)
+                        }
+
+                        if caloriesMismatch {
+                            Label("Расходится с введёнными калориями — проверь данные с упаковки.",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    } header: {
+                        Text("Проверка")
+                    }
                 }
             }
             .task(id: searchQuery) {

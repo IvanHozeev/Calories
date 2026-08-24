@@ -45,6 +45,10 @@ struct FoodQuantityView: View {
 
                     MacrosRow(macros: macros)
                         .padding(.top, 4)
+
+                    MacroSplitBar(macros: macros)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 4)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
@@ -251,6 +255,7 @@ struct FoodDetailView: View {
     @State private var grams: Double
     @State private var gramsText: String
     @State private var showingEdit = false
+    @State private var showingQuickAdd = false
     @FocusState private var gramsFocused: Bool
 
     init(food: FoodItem, store: CalorieStore) {
@@ -284,9 +289,26 @@ struct FoodDetailView: View {
                         .foregroundStyle(.secondary)
                     MacrosRow(macros: macros)
                         .padding(.top, 4)
+
+                    MacroSplitBar(macros: macros)
+                        .padding(.top, 8)
+                        .padding(.horizontal, 4)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
+            }
+
+            Section {
+                Button {
+                    showingQuickAdd = true
+                } label: {
+                    Label("Добавить в дневник", systemImage: "plus.circle.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listRowBackground(Color.clear)
             }
 
             Section {
@@ -309,7 +331,7 @@ struct FoodDetailView: View {
                     Text(String(format: "%.1f \(String(localized: "г / 100 г"))", food.carbs))
                 }
             } header: {
-                Text("Состав")
+                Text("Пищевая ценность")
             }
 
             Section {
@@ -348,7 +370,7 @@ struct FoodDetailView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("Продукт")
+        .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -364,6 +386,16 @@ struct FoodDetailView: View {
         .sheet(isPresented: $showingEdit) {
             NewFoodSheet(store: store, editingFood: food)
                 .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showingQuickAdd) {
+            QuickAddSheet(
+                store: store,
+                name: food.name,
+                caloriesPer100g: food.caloriesPer100g,
+                macrosPer100g: food.macrosPer100g,
+                defaultGrams: grams
+            )
+            .presentationDetents([.medium, .large])
         }
     }
 }

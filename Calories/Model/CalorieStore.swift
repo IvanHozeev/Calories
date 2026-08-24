@@ -48,6 +48,7 @@ final class CalorieStore {
     private(set) var streak: Int = 0
     private(set) var bestStreak: Int = 0
     private(set) var loggingStreak: Int = 0
+    private(set) var proteinStreak: Int = 0
     private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
     private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
     private(set) var adaptedTodayGoal: Int = 0
@@ -225,6 +226,8 @@ final class CalorieStore {
         loggingStreak = currentLoggingStreak
 
         let today14 = calendar.startOfDay(for: Date())
+        proteinStreak = computeProteinStreak()
+
         streakHistory = (0..<14).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
             let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
@@ -255,6 +258,30 @@ final class CalorieStore {
             let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
             return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
         }
+    }
+
+    /// Сколько дней подряд закрыта норма белка. Историческая норма нигде не фиксируется,
+    /// поэтому берём текущую из профиля — при смене веса или множителя прошлые дни
+    /// пересчитаются под новую планку. Для достижения этого достаточно.
+    private func computeProteinStreak() -> Int {
+        guard let target = proteinTarget, target > 0 else { return 0 }
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+
+        func hit(_ day: Date) -> Bool {
+            let entries = entriesByDay[day] ?? []
+            guard !entries.isEmpty else { return false }
+            return entries.reduce(0) { $0 + $1.protein } >= target
+        }
+
+        var streak = hit(today) ? 1 : 0
+        var date = calendar.date(byAdding: .day, value: -1, to: today) ?? today
+        while hit(date) {
+            streak += 1
+            guard let prev = calendar.date(byAdding: .day, value: -1, to: date) else { break }
+            date = prev
+        }
+        return streak
     }
 
     private func computeStreak() -> (current: Int, best: Int, logging: Int) {
@@ -348,6 +375,17 @@ final class CalorieStore {
         goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
         goalLockedOnDay = today
         rebuildCaches()
+    }
+
+    /// Достижения на текущий момент. Прогресс берётся из лучшего результата:
+    /// один раз собранная серия не должна пропадать из-за одного сорванного дня.
+    var achievements: [Achievement] {
+        [
+            Achievement(kind: .firstWeek, current: max(streak, bestStreak), target: 7),
+            Achievement(kind: .disciplineMaster, current: max(streak, bestStreak), target: 14),
+            Achievement(kind: .proteinMaster, current: proteinStreak, target: 5),
+            Achievement(kind: .ironWill, current: loggingStreak, target: 30)
+        ]
     }
 
     /// Целевой белок в граммах — nil, если профиль ещё не заполнен.

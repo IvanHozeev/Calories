@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 struct Macros: Codable, Hashable {
     var protein: Double
@@ -545,5 +546,57 @@ struct PlanAdherence {
     var deviationKg: Double? {
         guard let actualWeightToday else { return nil }
         return actualWeightToday - expectedWeightToday
+    }
+}
+
+/// Достижение. Считается на лету из стриков — нигде не хранится, поэтому не может
+/// рассинхронизироваться с фактическими данными и не требует миграций.
+struct Achievement: Identifiable {
+    enum Kind: String, CaseIterable {
+        case firstWeek, disciplineMaster, proteinMaster, ironWill
+    }
+
+    let kind: Kind
+    let current: Int
+    let target: Int
+
+    var id: String { kind.rawValue }
+    var isUnlocked: Bool { current >= target }
+    var progress: Double { target > 0 ? min(Double(current) / Double(target), 1) : 0 }
+
+    var title: String {
+        switch kind {
+        case .firstWeek:        return String(localized: "Первая неделя")
+        case .disciplineMaster: return String(localized: "Мастер дисциплины")
+        case .proteinMaster:    return String(localized: "Мастер белка")
+        case .ironWill:         return String(localized: "Железная воля")
+        }
+    }
+
+    var requirement: String {
+        switch kind {
+        case .firstWeek:        return String(localized: "7 дней подряд в пределах дневной нормы калорий.")
+        case .disciplineMaster: return String(localized: "14 дней подряд в пределах дневной нормы калорий.")
+        case .proteinMaster:    return String(localized: "5 дней подряд закрыта норма белка.")
+        case .ironWill:         return String(localized: "30 дней подряд с записями в дневнике — попадание в цель не требуется.")
+        }
+    }
+
+    var icon: String {
+        switch kind {
+        case .firstWeek:        return "flame.fill"
+        case .disciplineMaster: return "trophy.fill"
+        case .proteinMaster:    return "bolt.fill"
+        case .ironWill:         return "star.fill"
+        }
+    }
+
+    var tint: Color {
+        switch kind {
+        case .firstWeek:        return .orange
+        case .disciplineMaster: return .yellow
+        case .proteinMaster:    return .blue
+        case .ironWill:         return .purple
+        }
     }
 }

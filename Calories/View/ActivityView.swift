@@ -366,28 +366,11 @@ private struct HistoryDayCard: View {
             }
             .frame(height: 6)
 
-            HStack(spacing: 6) {
-                macroTag("Б", value: day.totalMacros.protein, color: .blue)
-                macroTag("Ж", value: day.totalMacros.fat, color: .orange)
-                macroTag("У", value: day.totalMacros.carbs, color: .purple)
-            }
+            MacroTags(macros: day.totalMacros)
         }
         .padding(.vertical, 6)
     }
 
-    private func macroTag(_ letter: LocalizedStringKey, value: Double, color: Color) -> some View {
-        HStack(spacing: 3) {
-            Text(letter)
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(color)
-            Text(verbatim: "\(Int(value.rounded()))")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(color.opacity(0.12), in: Capsule())
-    }
 }
 
 // MARK: - Награды

@@ -2,17 +2,82 @@ import SwiftUI
 
 struct MyFoodView: View {
     var store: CalorieStore
+
     @State private var showingNewFood = false
     @State private var showingNewDish = false
     @State private var showingScanner = false
+    @State private var tab: Tab = .dishes
+    @State private var query = ""
+    @State private var debouncedQuery = ""
+    @State private var remoteResults: [FoodItem] = []
+    @State private var isSearchingRemote = false
+    @State private var quickAdd: QuickAddTarget?
+
+    enum Tab: String, CaseIterable, Identifiable {
+        case dishes, products
+        var id: String { rawValue }
+    }
+
+    /// Что именно кладём в дневник. Блюда и продукты хранятся разными типами,
+    /// поэтому шит принимает уже приведённые к «на 100 г» значения.
+    struct QuickAddTarget: Identifiable {
+        let id = UUID()
+        let name: String
+        let caloriesPer100g: Int
+        let macrosPer100g: Macros
+        let defaultGrams: Double
+    }
+
+    private var trimmedQuery: String {
+        debouncedQuery.trimmingCharacters(in: .whitespaces)
+    }
+
+    private var filteredDishes: [Dish] {
+        guard !trimmedQuery.isEmpty else { return store.dishes }
+        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+    }
+
+    private var filteredProducts: [FoodItem] {
+        guard !trimmedQuery.isEmpty else { return store.customFoods }
+        return store.customFoods.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+    }
 
     var body: some View {
         List {
-            dishesSection
-            productsSection
+            Section {
+                Picker("Раздел", selection: $tab) {
+                    Text("Блюда (\(filteredDishes.count))").tag(Tab.dishes)
+                    Text("Продукты (\(filteredProducts.count))").tag(Tab.products)
+                }
+                .pickerStyle(.segmented)
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+
+            switch tab {
+            case .dishes: dishesSection
+            case .products: productsSection
+            }
+
+            if !trimmedQuery.isEmpty {
+                remoteSection
+            }
         }
         .navigationTitle("Моя еда")
         .scrollIndicators(.hidden)
+        .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))
+        .task(id: query) {
+            // Свои списки фильтруются мгновенно, а сеть дёргаем только после паузы.
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else { return }
+            debouncedQuery = query
+
+            let text = query.trimmingCharacters(in: .whitespaces)
+            guard text.count >= 3 else { remoteResults = []; isSearchingRemote = false; return }
+            isSearchingRemote = true
+            defer { isSearchingRemote = false }
+            remoteResults = (try? await OpenFoodService.search(query: text)) ?? []
+        }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showingScanner = true } label: {
@@ -42,66 +107,162 @@ struct MyFoodView: View {
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerSheet(store: store)
         }
+        .sheet(item: $quickAdd) { target in
+            QuickAddSheet(
+                store: store,
+                name: target.name,
+                caloriesPer100g: target.caloriesPer100g,
+                macrosPer100g: target.macrosPer100g,
+                defaultGrams: target.defaultGrams
+            )
+            .presentationDetents([.medium, .large])
+        }
     }
 
-    private func foodSubtitle(_ food: FoodItem) -> String {
-        let g = food.defaultGrams > 0 ? food.defaultGrams : 100
-        let kcal = Int((Double(food.caloriesPer100g) * g / 100).rounded())
-        let macros = food.macrosPer100g.scaled(by: g)
-        let gramsLabel = g == 100 ? "100 г" : "\(Int(g)) г"
-        return "Б\(Int(macros.protein)) Ж\(Int(macros.fat)) У\(Int(macros.carbs)) · \(kcal) ккал / \(gramsLabel)"
-    }
+    // MARK: - Блюда
 
+    @ViewBuilder
     private var dishesSection: some View {
-        Section {
-            ForEach(store.dishes) { dish in
-                NavigationLink {
-                    NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(dish.name)
-                        Text("\(dish.ingredients.count) ингр. · \(dish.totalCalories) ккал · Б\(Int(dish.totalMacros.protein)) Ж\(Int(dish.totalMacros.fat)) У\(Int(dish.totalMacros.carbs))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.deleteDish(dish)
+        if filteredDishes.isEmpty {
+            Section {
+                Text(trimmedQuery.isEmpty ? "Пока нет своих блюд" : "Ничего не найдено")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            Section {
+                ForEach(filteredDishes) { dish in
+                    NavigationLink {
+                        NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
                     } label: {
-                        Image(systemName: "trash")
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(dish.name)
+                            Text(verbatim: "\(dish.ingredients.count) \(String(localized: "ингр.")) · \(dish.totalCalories) \(String(localized: "ккал"))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            MacroTags(macros: dish.totalMacros, compact: true)
+                        }
+                    }
+                    .swipeActions(edge: .leading) {
+                        quickAddButton {
+                            QuickAddTarget(
+                                name: dish.name,
+                                caloriesPer100g: dish.caloriesPer100g,
+                                macrosPer100g: dish.macrosPer100g,
+                                defaultGrams: dish.totalGrams > 0 ? dish.totalGrams : 100
+                            )
+                        }
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            store.deleteDish(dish)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
                     }
                 }
             }
-        } header: {
-            Text("Мои блюда")
         }
     }
 
+    // MARK: - Продукты
+
+    @ViewBuilder
     private var productsSection: some View {
-        Section {
-            ForEach(store.customFoods) { food in
-                NavigationLink {
-                    FoodDetailView(food: food, store: store)
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(food.name)
-                        Text(foodSubtitle(food))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .swipeActions(edge: .trailing) {
-                    Button(role: .destructive) {
-                        store.deleteCustomFood(food)
+        if filteredProducts.isEmpty {
+            Section {
+                Text(trimmedQuery.isEmpty ? "Пока нет своих продуктов" : "Ничего не найдено")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            Section {
+                ForEach(filteredProducts) { food in
+                    NavigationLink {
+                        FoodDetailView(food: food, store: store)
                     } label: {
-                        Image(systemName: "trash")
+                        foodRow(food)
+                    }
+                    .swipeActions(edge: .leading) {
+                        quickAddButton { target(for: food) }
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            store.deleteCustomFood(food)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
                     }
                 }
             }
-
-        } header: {
-            Text("Мои продукты")
         }
+    }
+
+    // MARK: - Внешняя база
+
+    @ViewBuilder
+    private var remoteSection: some View {
+        Section {
+            if isSearchingRemote {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text("Ищем…")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } else if remoteResults.isEmpty {
+                Text("В базе продуктов ничего не найдено")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(remoteResults) { food in
+                    Button {
+                        quickAdd = target(for: food)
+                    } label: {
+                        HStack {
+                            foodRow(food)
+                            Spacer()
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(.blue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("Открытая база продуктов")
+        }
+    }
+
+    // MARK: - Общее
+
+    private func foodRow(_ food: FoodItem) -> some View {
+        let grams = food.defaultGrams > 0 ? food.defaultGrams : 100
+        let kcal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
+        return VStack(alignment: .leading, spacing: 6) {
+            Text(food.name)
+            Text(verbatim: "\(kcal) \(String(localized: "ккал")) / \(Int(grams)) \(String(localized: "г"))")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            MacroTags(macros: food.macrosPer100g.scaled(by: grams), compact: true)
+        }
+    }
+
+    private func target(for food: FoodItem) -> QuickAddTarget {
+        QuickAddTarget(
+            name: food.name,
+            caloriesPer100g: food.caloriesPer100g,
+            macrosPer100g: food.macrosPer100g,
+            defaultGrams: food.defaultGrams > 0 ? food.defaultGrams : 100
+        )
+    }
+
+    private func quickAddButton(_ make: @escaping () -> QuickAddTarget) -> some View {
+        Button {
+            quickAdd = make()
+        } label: {
+            Image(systemName: "plus.circle.fill")
+        }
+        .tint(.blue)
     }
 }

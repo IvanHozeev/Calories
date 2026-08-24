@@ -13,10 +13,11 @@ struct GlassCard: ViewModifier {
             : [.white.opacity(0.90), .black.opacity(0.04)]
     }
 
-    /// На светлой теме голый ultraThinMaterial темнее прежней белой подложки и выглядит грязным,
-    /// поэтому подмешиваем белый. На тёмной — наоборот, еле заметный высветляющий слой.
+    /// Карточка почти не отличается от фона по цвету — отделяет её тень, а не заливка.
+    /// Прежние 0.55 белого поверх материала давали серое пятно на сером фоне: границы
+    /// читались, но выглядело грязно.
     private var tint: Color {
-        colorScheme == .dark ? .white.opacity(0.06) : .white.opacity(0.55)
+        colorScheme == .dark ? .white.opacity(0.08) : .white.opacity(0.92)
     }
 
     func body(content: Content) -> some View {
@@ -33,7 +34,9 @@ struct GlassCard: ViewModifier {
                         lineWidth: 1
                     )
             )
-            .shadow(color: .black.opacity(colorScheme == .dark ? 0.35 : 0.06), radius: 10, y: 4)
+            // Тень плотная и близкая: широкий мягкий радиус на светлом фоне читается
+            // не как объём, а как серая подложка вокруг карточки.
+            .shadow(color: .black.opacity(colorScheme == .dark ? 0.40 : 0.06), radius: 6, y: 2)
     }
 }
 
@@ -52,7 +55,7 @@ struct GlassRow: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
 
     private var tint: Color {
-        colorScheme == .dark ? .white.opacity(0.06) : .white.opacity(0.55)
+        colorScheme == .dark ? .white.opacity(0.08) : .white.opacity(0.92)
     }
 
     func body(content: Content) -> some View {

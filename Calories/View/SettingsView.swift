@@ -23,6 +23,7 @@ struct SettingsView: View {
     @State private var hipCm: Int
     @State private var showingPaywall = false
     @AppStorage("use_imperial") private var useImperial = false
+    @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
 
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -332,6 +333,14 @@ struct SettingsView: View {
                 }
 
                 Section("Системное") {
+                    Picker(selection: $appTheme) {
+                        ForEach(AppTheme.allCases) { theme in
+                            Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
+                        }
+                    } label: {
+                        Label("Оформление", systemImage: "circle.lefthalf.filled")
+                    }
+
                     NavigationLink {
                         UnitsSettingsView()
                     } label: {

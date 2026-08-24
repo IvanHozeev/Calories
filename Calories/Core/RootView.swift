@@ -6,6 +6,7 @@ struct RootView: View {
     var stepStore: StepStore
     @State private var selectedTab = 0
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
+    @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -31,6 +32,7 @@ struct RootView: View {
         )) {
             OnboardingView(store: store)
         }
+        .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
         }

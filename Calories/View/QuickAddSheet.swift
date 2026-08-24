@@ -50,7 +50,7 @@ struct QuickAddSheet: View {
                             Text(LocalizedStringKey(p.rawValue)).tag(p)
                         }
                     }
-                    .pickerStyle(.segmented)
+                    .pickerStyle(.menu)
                 } header: {
                     Text(name)
                 }

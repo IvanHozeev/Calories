@@ -214,6 +214,13 @@ private struct StepsContentView: View {
         }
     }
 
+    /// Потолок оси Y с запасом. Без него линия цели ложится ровно на верхнюю границу
+    /// домена и подпись «10,000» срезается краем графика.
+    private var chartUpperBound: Double {
+        let maxSteps = viewModel.history.map(\.steps).max() ?? 0
+        return Double(max(store.stepGoal, maxSteps)) * 1.15
+    }
+
     private var ringColors: [Color] {
         viewModel.stepGoalAchieved ? [.orange, .red] : [.blue, .cyan]
     }
@@ -242,11 +249,15 @@ private struct StepsContentView: View {
         }
     }
 
+    /// Кольцо и три показателя — единый блок. Раньше кольцо висело на фоне экрана,
+    /// а под ним лежала отдельная серая плашка: получалась карточка внутри карточки.
     private var todayCard: some View {
-        VStack(spacing: 28) {
+        VStack(spacing: 24) {
             RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday) {
                 ringLabel
             }
+
+            Divider()
 
             HStack(spacing: 0) {
                 statCell(title: String(localized: "Дистанция"), value: distanceText, subtitle: "")
@@ -255,13 +266,10 @@ private struct StepsContentView: View {
                 Divider().frame(height: 40)
                 statCell(title: String(localized: "Цель"), value: store.stepGoal.formatted(), subtitle: "")
             }
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .padding(.top, 12)
+        .padding(.vertical, 20)
         .frame(maxWidth: .infinity)
+        .glassCard()
     }
 
     private var chartCard: some View {
@@ -309,14 +317,14 @@ private struct StepsContentView: View {
                         AxisValueLabel()
                     }
                 }
+                .chartYScale(domain: 0...chartUpperBound)
                 .frame(height: 180)
                 .drawingGroup()
                 .animation(.easeInOut, value: viewModel.period)
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 
     private var trendsCard: some View {
@@ -347,8 +355,7 @@ private struct StepsContentView: View {
             }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 
     private var trendCell: some View {
@@ -397,8 +404,7 @@ private struct StepsContentView: View {
         }
         .padding(.vertical, 16)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 
     private func statCell(title: String, value: String, subtitle: String) -> some View {
@@ -409,6 +415,11 @@ private struct StepsContentView: View {
             Text(title)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                // Ячеек в ряду до четырёх, и длинные подписи вроде «vs пред. неделя»
+                // обрезались многоточием вместо переноса.
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
             if !subtitle.isEmpty {
                 Text(subtitle)
                     .font(.caption2)

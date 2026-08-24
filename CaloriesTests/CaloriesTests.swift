@@ -229,23 +229,39 @@ struct PlanTests {
     }
 }
 
+// MARK: - Test helpers
+
+/// Одноразовый контейнер настроек на каждый тест.
+///
+/// Юнит-тесты хостятся внутри процесса Calories.app (TEST_HOST), поэтому
+/// `UserDefaults.standard` в них — это боевые настройки пользователя: профиль, план,
+/// цель, премиум. Любая запись или очистка `.standard` из тестов уничтожает реальные
+/// данные на устройстве/симуляторе. Поэтому сторы всегда получают отдельный suite.
+enum TestDefaults {
+    static func make() -> UserDefaults {
+        let name = "tests.\(UUID().uuidString)"
+        UserDefaults().removePersistentDomain(forName: name)
+        return UserDefaults(suiteName: name) ?? UserDefaults()
+    }
+}
+
 // MARK: - CalorieStore
 
 @MainActor
+@Suite(.serialized)
 struct CalorieStoreTests {
 
     private let container: ModelContainer
     private let store: CalorieStore
+    private let defaults: UserDefaults
 
     init() async throws {
-        for key in ["daily_goal", "user_profile", "active_plan", "is_premium"] {
-            UserDefaults.standard.removeObject(forKey: key)
-        }
+        defaults = TestDefaults.make()
         container = try ModelContainer(
             for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
-        store = CalorieStore(context: container.mainContext)
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
         store.dailyGoal = 2000
     }
 
@@ -501,13 +517,14 @@ struct CalorieStoreTests {
 @MainActor
 struct StepStoreTests {
 
-    // Очищаем UserDefaults чтобы не зависеть от предыдущих запусков
+    // Свой suite на каждый тест — боевые настройки приложения не трогаем (см. TestDefaults)
+    private let defaults = TestDefaults.make()
+
     private func makeStore(goal: Int? = nil) -> StepStore {
-        UserDefaults.standard.removeObject(forKey: "step_goal")
         if let goal {
-            UserDefaults.standard.set(goal, forKey: "step_goal")
+            defaults.set(goal, forKey: "step_goal")
         }
-        return StepStore()
+        return StepStore(defaults: defaults, groupDefaults: nil)
     }
 
     @Test func defaultStepGoal_is10000() {
@@ -518,7 +535,7 @@ struct StepStoreTests {
     @Test func stepGoal_persistsToUserDefaults() {
         let store = makeStore()
         store.stepGoal = 7_500
-        #expect(UserDefaults.standard.integer(forKey: "step_goal") == 7_500)
+        #expect(defaults.integer(forKey: "step_goal") == 7_500)
     }
 
     @Test func stepGoal_loadsFromUserDefaults() {
@@ -567,9 +584,11 @@ struct StepStoreTests {
 @MainActor
 struct ReminderStoreTests {
 
+    // Свой suite на каждый тест — боевые настройки приложения не трогаем (см. TestDefaults)
+    private let defaults = TestDefaults.make()
+
     private func makeStore() -> ReminderStore {
-        UserDefaults.standard.removeObject(forKey: "reminders_app_enabled")
-        return ReminderStore()
+        ReminderStore(defaults: defaults)
     }
 
     @Test func hasThreeReminders() {
@@ -598,7 +617,7 @@ struct ReminderStoreTests {
     @Test func appEnabled_persistsToUserDefaults() {
         let store = makeStore()
         store.appEnabled = true
-        #expect(UserDefaults.standard.bool(forKey: "reminders_app_enabled") == true)
+        #expect(defaults.bool(forKey: "reminders_app_enabled") == true)
         store.appEnabled = false
     }
 
@@ -613,7 +632,7 @@ struct ReminderStoreTests {
         let store = makeStore()
         store.reminders[0].isEnabled = true
         store.saveAndReschedule()
-        #expect(UserDefaults.standard.bool(forKey: "reminder_breakfast_on") == true)
+        #expect(defaults.bool(forKey: "reminder_breakfast_on") == true)
     }
 
     @Test func saveAndReschedule_persistsReminderTime() {
@@ -621,7 +640,7 @@ struct ReminderStoreTests {
         let newTime = Date(timeIntervalSince1970: 3600 * 9)
         store.reminders[0].time = newTime
         store.saveAndReschedule()
-        let saved = UserDefaults.standard.object(forKey: "reminder_breakfast_time") as? TimeInterval
+        let saved = defaults.object(forKey: "reminder_breakfast_time") as? TimeInterval
         #expect(saved != nil)
     }
 }

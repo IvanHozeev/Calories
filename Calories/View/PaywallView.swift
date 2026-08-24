@@ -1,7 +1,29 @@
 import SwiftUI
 
+/// С какой фичи пользователь пришёл в пейволл. Абстрактная «Подписка» продаёт хуже,
+/// чем конкретный ответ на вопрос, который человек задавал секунду назад.
+enum PaywallFocus {
+    case general
+    case plan
+
+    var headline: String {
+        switch self {
+        case .general: return String(localized: "Premium")
+        case .plan: return String(localized: "Персональный план")
+        }
+    }
+
+    var subtitle: String? {
+        switch self {
+        case .general: return nil
+        case .plan: return String(localized: "Персональный план калорийности под твои цели")
+        }
+    }
+}
+
 struct PaywallView: View {
     var store: CalorieStore
+    var focus: PaywallFocus = .general
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -13,8 +35,17 @@ struct PaywallView: View {
                     .font(.system(size: 56))
                     .foregroundStyle(.yellow)
 
-                Text("Premium")
+                Text(focus.headline)
                     .font(.largeTitle.bold())
+                    .multilineTextAlignment(.center)
+
+                if let subtitle = focus.subtitle {
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 28)
+                }
 
                 VStack(alignment: .leading, spacing: 14) {
                     featureRow("Персональный план: срок в неделях, целевой вес, точная дневная норма калорий")
@@ -54,7 +85,7 @@ struct PaywallView: View {
         }
     }
 
-    private func featureRow(_ text: String) -> some View {
+    private func featureRow(_ text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)

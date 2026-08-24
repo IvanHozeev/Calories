@@ -1,31 +1,6 @@
 import SwiftUI
 
-struct HistoryView: View {
-    var store: CalorieStore
-
-    private var loggedDays: [DaySummary] {
-        store.historyDays.filter { !$0.entries.isEmpty }
-    }
-
-    var body: some View {
-        List {
-            Section {
-                ForEach(loggedDays) { day in
-                    NavigationLink {
-                        DayDetailView(store: store, date: day.date)
-                    } label: {
-                        DayRow(day: day)
-                    }
-                }
-            }
-            .listSectionSeparator(.hidden, edges: .top)
-        }
-        .listStyle(.insetGrouped)
-        .navigationTitle("История")
-        .navigationBarTitleDisplayMode(.large)
-    }
-}
-
+/// Строка одного дня в списке истории — дата, число приёмов пищи, итог и отклонение от цели.
 struct DayRow: View {
     let day: DaySummary
 

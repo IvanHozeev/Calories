@@ -513,6 +513,23 @@ enum PlanStatus {
     case behind
 }
 
+/// Чего именно не хватает для расчёта тренда. Нужно, чтобы вместо пассивных серых часов
+/// показать пользователю, сколько ещё шагов до появления аналитики.
+struct AdherenceDataGap {
+    let weighInsLogged: Int
+    let weighInsRequired: Int
+    let daysUntilTrend: Int
+
+    /// 0…1 — доля собранного, для прогресс-бара.
+    var progress: Double {
+        let byWeighIns = weighInsRequired > 0
+            ? min(Double(weighInsLogged) / Double(weighInsRequired), 1)
+            : 1
+        let byDays = daysUntilTrend <= 0 ? 1.0 : max(0, Double(7 - daysUntilTrend) / 7)
+        return min(byWeighIns, byDays)
+    }
+}
+
 /// Сверка факта (по журналу взвешиваний) с линейным прогнозом плана.
 /// Не хранится — считается на лету в CalorieStore.planAdherence().
 struct PlanAdherence {
@@ -523,6 +540,7 @@ struct PlanAdherence {
     let projectedWeightAtPlanEnd: Double?
     let recalibratedDailyCalories: Int?
     let status: PlanStatus
+    let dataGap: AdherenceDataGap?
 
     var deviationKg: Double? {
         guard let actualWeightToday else { return nil }

@@ -1,8 +1,13 @@
 import SwiftUI
 
-struct WeightView: View {
+/// Вкладка «Прогресс» — рабочий экран: как я двигаюсь к цели.
+/// План, динамика веса, калории за период и журнал взвешиваний. Всё статическое
+/// (рост, возраст, активность, единицы) живёт в «Настройках» под шестерёнкой.
+struct ProgressDashboardView: View {
     var store: CalorieStore
     @State private var showingAddWeight = false
+    @State private var showingPlan = false
+    @State private var showingPaywall = false
     @State private var rangeDays = 30
 
     private static let rangeOptions = [7, 30, 90]
@@ -23,6 +28,19 @@ struct WeightView: View {
 
     var body: some View {
         List {
+            Section {
+                ProfilePlanCard(
+                    store: store,
+                    onOpenPlan: { showingPlan = true },
+                    onShowPaywall: { showingPaywall = true }
+                )
+                // Карточка рисует свой фон сама (акцентный индиго либо стекло),
+                // подложка строки только добавила бы вокруг неё белую рамку.
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
             Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -61,6 +79,7 @@ struct WeightView: View {
                     Label(store.hasWeighedToday ? "Обновить вес за сегодня" : "Записать вес", systemImage: "plus.circle.fill")
                 }
             }
+            .glassRow()
 
             Section {
                 Picker("Период", selection: $rangeDays) {
@@ -73,6 +92,7 @@ struct WeightView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 4)
             }
+            .glassRow()
 
             if !recentWeightEntries.isEmpty {
                 Section {
@@ -80,12 +100,14 @@ struct WeightView: View {
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 }
+                .glassRow()
             } else {
                 Section {
                     Text("Пока нет записей веса за этот период")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                .glassRow()
             }
 
             Section {
@@ -95,6 +117,7 @@ struct WeightView: View {
             } footer: {
                 Text("Сравни динамику веса с калорийностью выше — если вес не двигается, а цель по калориям — дефицит, стоит перепроверить норму в профиле.")
             }
+            .glassRow()
 
             if !store.weightEntries.isEmpty {
                 Section("Все записи") {
@@ -114,13 +137,36 @@ struct WeightView: View {
                         }
                     }
                 }
+                .glassRow()
             }
         }
-        .navigationTitle("Вес")
+        .navigationTitle("Прогресс")
         .scrollIndicators(.hidden)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingAddWeight = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    SettingsView(store: store)
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+            }
+        }
+        .navigationDestination(isPresented: $showingPlan) {
+            PlanView(store: store)
+        }
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
                 .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(store: store, focus: .plan)
         }
     }
 }

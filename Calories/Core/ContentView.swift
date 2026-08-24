@@ -66,8 +66,7 @@ struct ContentView: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .clipShape(Capsule())
+                                .background(.ultraThinMaterial, in: Capsule())
                             }
                             .buttonStyle(.plain)
                             .popover(isPresented: $showingBankInfo) {
@@ -89,15 +88,14 @@ struct ContentView: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(Color(.secondarySystemGroupedBackground))
-                                .clipShape(Capsule())
+                                .background(.ultraThinMaterial, in: Capsule())
                             }
                             .buttonStyle(.plain)
                         }
 
                         if store.profile == nil {
                             NavigationLink {
-                                ProfileView(store: store)
+                                SettingsView(store: store)
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "person.crop.circle.badge.questionmark")
@@ -139,9 +137,8 @@ struct ContentView: View {
 
                         if let plan = store.plan {
                             Button { showingPlan = true } label: {
-                                PlanCard(
+                                PlanSummaryRow(
                                     plan: plan,
-                                    currentWeight: store.latestWeight?.weightKg,
                                     status: store.adherence?.status ?? .insufficientData
                                 )
                             }
@@ -297,8 +294,7 @@ private struct StepsCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 .padding()
-                .background(Color(.secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .glassCard()
             }
             .buttonStyle(.plain)
         } else {
@@ -347,8 +343,7 @@ private struct StepsCard: View {
                         .foregroundStyle(.tertiary)
                 }
                 .padding()
-                .background(Color(.secondarySystemGroupedBackground))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .glassCard()
             }
             .buttonStyle(.plain)
         }
@@ -501,59 +496,40 @@ private struct ActivityView: View {
     }
 }
 
-private struct PlanCard: View {
+/// Компактное напоминание о плане на «Сегодня»: цель, статус и сколько осталось.
+/// Разбор — темп, отклонение, график факт/план — живёт на вкладке «Прогресс»,
+/// здесь нужен только повод туда зайти.
+private struct PlanSummaryRow: View {
     let plan: Plan
-    let currentWeight: Double?
     let status: PlanStatus
 
-    private var statusInfo: (text: LocalizedStringKey, color: Color, icon: String) {
-        switch status {
-        case .insufficientData: return ("Собираем данные", .secondary, "clock")
-        case .onTrack: return ("По графику", .green, "checkmark.circle.fill")
-        case .ahead: return ("Опережаешь график", .blue, "arrow.up.circle.fill")
-        case .behind: return ("Отстаёшь от графика", .orange, "exclamationmark.triangle.fill")
-        }
-    }
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Label(plan.title, systemImage: "sparkles")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Spacer()
-                if plan.daysRemaining > 0 {
-                    Text("\(plan.daysRemaining) дн. осталось")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    Text("Срок истёк")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            ProgressView(value: plan.progress)
-                .tint(.blue)
-
-            HStack {
-                Text(verbatim: String(format: "%.1f → %.1f \(String(localized: "кг"))", plan.startWeightKg, plan.targetWeightKg))
-                    .font(.caption)
+        HStack(spacing: 8) {
+            Image(systemName: status.icon)
+                .font(.footnote)
+                .foregroundStyle(status.color)
+            Text(plan.title)
+                .font(.caption.weight(.medium))
+            Text(verbatim: String(format: "· %.1f \(String(localized: "кг"))", plan.targetWeightKg))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            if plan.daysRemaining > 0 {
+                Text("\(plan.daysRemaining) дн. осталось")
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
-                Spacer()
-                if let currentWeight {
-                    Text("сейчас \(String(format: "%.1f", currentWeight)) кг")
-                        .font(.caption.weight(.medium))
-                }
+            } else {
+                Text("Срок истёк")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
-
-            Label(statusInfo.text, systemImage: statusInfo.icon)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(statusInfo.color)
+            Image(systemName: "chevron.right")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
-        .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .glassCard(cornerRadius: 10)
     }
 }
 

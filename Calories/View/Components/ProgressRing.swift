@@ -6,11 +6,27 @@ struct RingView<Label: View>: View {
     let labelID: AnyHashable
     @ViewBuilder let label: () -> Label
 
-    var body: some View {
-        ZStack {
+    /// Трек кольца. На iOS 26 — Liquid Glass: стеклянный диск, замаскированный в бублик,
+    /// поэтому кольцо преломляет то, что под ним, вместо плоской серой обводки.
+    /// На более старых системах остаётся прежняя обводка — таргет приложения iOS 17.6.
+    @ViewBuilder
+    private var track: some View {
+        if #available(iOS 26.0, *) {
+            Circle()
+                .fill(.clear)
+                .glassEffect(.regular, in: .circle)
+                .mask(Circle().strokeBorder(lineWidth: 18))
+        } else {
             Circle()
                 .stroke(Color.secondary.opacity(0.15), lineWidth: 18)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            track
             Circle()
+                .inset(by: 9)
                 .trim(from: 0, to: progress)
                 .stroke(
                     LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),

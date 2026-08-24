@@ -8,6 +8,7 @@ struct PlanView: View {
     @State private var durationWeeks: Int
     @State private var cyclingEnabled: Bool
     @State private var weekendStyle: WeekendStyle
+    @State private var confirmingCancel = false
 
     init(store: CalorieStore) {
         self.store = store
@@ -149,11 +150,23 @@ struct PlanView: View {
                 if store.plan != nil {
                     Section {
                         Button("Завершить текущий план", role: .destructive) {
-                            store.cancelPlan()
-                            dismiss()
+                            confirmingCancel = true
                         }
                     }
                 }
+            }
+            .confirmationDialog(
+                "Завершить план?",
+                isPresented: $confirmingCancel,
+                titleVisibility: .visible
+            ) {
+                Button("Завершить план", role: .destructive) {
+                    store.cancelPlan()
+                    dismiss()
+                }
+                Button("Отмена", role: .cancel) {}
+            } message: {
+                Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
             }
             .navigationTitle(store.plan.map(\.title) ?? "Новый план")
             .navigationBarTitleDisplayMode(.inline)
@@ -174,6 +187,8 @@ struct PlanView: View {
 
     private func adherenceSection(plan: Plan, adherence: PlanAdherence) -> some View {
         Section {
+            PlanProgressChart(plan: plan, entries: store.weightEntries)
+
             statusRow(adherence.status)
 
             resultRow("Ожидаемый вес сегодня", String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
@@ -185,6 +200,21 @@ struct PlanView: View {
             }
 
             if adherence.status == .insufficientData {
+                if let gap = adherence.dataGap {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ProgressView(value: gap.progress)
+                            .tint(.blue)
+                        if gap.weighInsLogged < gap.weighInsRequired {
+                            Text("Взвешиваний: \(gap.weighInsLogged) из \(gap.weighInsRequired)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else if gap.daysUntilTrend > 0 {
+                            Text("Тренд появится через \(gap.daysUntilTrend) дн.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
                 Text("Пока недостаточно данных — взвешивайся регулярно хотя бы неделю, чтобы увидеть фактический темп.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -283,16 +313,8 @@ struct PlanView: View {
     }
 
     private func statusRow(_ status: PlanStatus) -> some View {
-        let (text, color, icon): (String, Color, String) = {
-            switch status {
-            case .insufficientData: return (String(localized: "Собираем данные"), .secondary, "clock")
-            case .onTrack: return (String(localized: "Идёшь по графику"), .green, "checkmark.circle.fill")
-            case .ahead: return (String(localized: "Опережаешь график"), .blue, "arrow.up.circle.fill")
-            case .behind: return (String(localized: "Отстаёшь от графика"), .orange, "exclamationmark.triangle.fill")
-            }
-        }()
-        return Label(text, systemImage: icon)
-            .foregroundStyle(color)
+        Label(status.title, systemImage: status.icon)
+            .foregroundStyle(status.color)
             .font(.subheadline.weight(.semibold))
     }
 

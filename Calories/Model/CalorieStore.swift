@@ -9,6 +9,11 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories
 @MainActor
 final class CalorieStore {
     private let context: ModelContext
+    /// Хранилище настроек. Инжектится, чтобы тесты не трогали боевые UserDefaults приложения:
+    /// юнит-тесты запускаются внутри процесса Calories.app, и `.standard` там — реальные данные пользователя.
+    @ObservationIgnored private let defaults: UserDefaults
+    /// Общий с виджетом контейнер. Тесты передают nil, чтобы не переписывать боевые данные виджета.
+    @ObservationIgnored private let groupDefaults: UserDefaults?
 
     private(set) var entries: [FoodEntry] = []
     private(set) var customFoods: [FoodItem] = []
@@ -16,12 +21,18 @@ final class CalorieStore {
     private(set) var weightEntries: [WeightEntry] = []
     private(set) var goalRecords: [GoalRecord] = []
     var dailyGoal: Int {
-        didSet { UserDefaults.standard.set(dailyGoal, forKey: Keys.goal) }
+        // Кэш обязателен: adaptedTodayGoal (его читает кольцо на «Сегодня») считается только
+        // в rebuildCaches(). Без этого цель меняется в графиках, но не в кольце — они расходятся,
+        // пока что-нибудь другое не дёрнет пересчёт.
+        didSet {
+            defaults.set(dailyGoal, forKey: Keys.goal)
+            rebuildCaches()
+        }
     }
     private(set) var profile: UserProfile?
     private(set) var plan: Plan?
     var isPremium: Bool {
-        didSet { UserDefaults.standard.set(isPremium, forKey: Keys.premium) }
+        didSet { defaults.set(isPremium, forKey: Keys.premium) }
     }
 
     // Кэшированные производные — перестраиваются в rebuildCaches() после каждого изменения данных
@@ -50,6 +61,8 @@ final class CalorieStore {
 
     private(set) var recentFoodNames: [String] = []
 
+    nonisolated static let appGroup = "group.calories.shared"
+
     private enum Keys {
         static let goal = "daily_goal"
         static let profile = "user_profile"
@@ -58,13 +71,19 @@ final class CalorieStore {
         static let recentFoods = "recent_food_names"
     }
 
-    init(context: ModelContext) {
+    init(
+        context: ModelContext,
+        defaults: UserDefaults = .standard,
+        groupDefaults: UserDefaults? = UserDefaults(suiteName: CalorieStore.appGroup)
+    ) {
         self.context = context
-        self.dailyGoal = UserDefaults.standard.object(forKey: Keys.goal) as? Int ?? 2000
-        self.profile = Self.loadProfile()
-        self.plan = Self.loadPlan()
-        self.isPremium = UserDefaults.standard.bool(forKey: Keys.premium)
-        self.recentFoodNames = UserDefaults.standard.stringArray(forKey: Keys.recentFoods) ?? []
+        self.defaults = defaults
+        self.groupDefaults = groupDefaults
+        self.dailyGoal = defaults.object(forKey: Keys.goal) as? Int ?? 2000
+        self.profile = Self.loadProfile(from: defaults)
+        self.plan = Self.loadPlan(from: defaults)
+        self.isPremium = defaults.bool(forKey: Keys.premium)
+        self.recentFoodNames = defaults.stringArray(forKey: Keys.recentFoods) ?? []
         refresh()
         lockPastGoals()
     }
@@ -76,30 +95,42 @@ final class CalorieStore {
             updated.insert(name, at: 0)
         }
         recentFoodNames = Array(updated.prefix(20))
-        UserDefaults.standard.set(recentFoodNames, forKey: Keys.recentFoods)
+        defaults.set(recentFoodNames, forKey: Keys.recentFoods)
     }
 
     /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
     func updateProfile(_ newProfile: UserProfile, syncDailyGoal: Bool = true) {
         profile = newProfile
         if let data = try? JSONEncoder().encode(newProfile) {
-            UserDefaults.standard.set(data, forKey: Keys.profile)
+            defaults.set(data, forKey: Keys.profile)
         }
         if syncDailyGoal, plan == nil {
             dailyGoal = newProfile.calorieTarget
+        } else {
+            // Профиль участвует в adherence через tdee — пересчитать надо в любом случае.
+            rebuildCaches()
         }
     }
 
-    private static func loadProfile() -> UserProfile? {
-        guard let data = UserDefaults.standard.data(forKey: Keys.profile) else { return nil }
+    private static func loadProfile(from defaults: UserDefaults) -> UserProfile? {
+        guard let data = defaults.data(forKey: Keys.profile) else { return nil }
         return try? JSONDecoder().decode(UserProfile.self, from: data)
     }
 
     /// Запускает план — считает точную дневную норму под срок/целевой вес и делает её текущей целью.
+    ///
+    /// Гейт премиума живёт здесь, а не только в UI: раньше единственной защитой была
+    /// проверка `isPremium` в тулбаре профиля, и любой новый экран мог случайно выдать
+    /// платную фичу бесплатно. Уже сохранённый план продолжает работать — отбирать
+    /// у пользователя то, что он настроил, мы не будем.
     func startPlan(_ newPlan: Plan) {
+        guard isPremium else {
+            logger.warning("startPlan вызван без активного премиума — игнорируем")
+            return
+        }
         plan = newPlan
         if let data = try? JSONEncoder().encode(newPlan) {
-            UserDefaults.standard.set(data, forKey: Keys.plan)
+            defaults.set(data, forKey: Keys.plan)
         }
         if let profile {
             dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
@@ -110,7 +141,7 @@ final class CalorieStore {
     /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
     func cancelPlan() {
         plan = nil
-        UserDefaults.standard.removeObject(forKey: Keys.plan)
+        defaults.removeObject(forKey: Keys.plan)
         if let profile {
             dailyGoal = profile.calorieTarget
         }
@@ -125,8 +156,8 @@ final class CalorieStore {
         startPlan(updated)
     }
 
-    private static func loadPlan() -> Plan? {
-        guard let data = UserDefaults.standard.data(forKey: Keys.plan) else { return nil }
+    private static func loadPlan(from defaults: UserDefaults) -> Plan? {
+        guard let data = defaults.data(forKey: Keys.plan) else { return nil }
         return try? JSONDecoder().decode(Plan.self, from: data)
     }
 
@@ -211,7 +242,6 @@ final class CalorieStore {
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
 
-        let groupDefaults = UserDefaults(suiteName: "group.calories.shared")
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
         groupDefaults?.set(adaptedTodayGoal, forKey: "widget_goal_today")
     }
@@ -555,7 +585,12 @@ final class CalorieStore {
                 projectedEndDate: nil,
                 projectedWeightAtPlanEnd: nil,
                 recalibratedDailyCalories: nil,
-                status: .insufficientData
+                status: .insufficientData,
+                dataGap: AdherenceDataGap(
+                    weighInsLogged: 0,
+                    weighInsRequired: 2,
+                    daysUntilTrend: max(0, 7 - Int(elapsedDays))
+                )
             )
         }
         let recentWindow = relevantEntries.suffix(7)
@@ -570,7 +605,12 @@ final class CalorieStore {
                 projectedEndDate: nil,
                 projectedWeightAtPlanEnd: nil,
                 recalibratedDailyCalories: nil,
-                status: .insufficientData
+                status: .insufficientData,
+                dataGap: AdherenceDataGap(
+                    weighInsLogged: relevantEntries.count,
+                    weighInsRequired: 2,
+                    daysUntilTrend: max(0, 7 - Int(elapsedDays))
+                )
             )
         }
 
@@ -616,7 +656,8 @@ final class CalorieStore {
             projectedEndDate: projectedEndDate,
             projectedWeightAtPlanEnd: projectedWeightAtPlanEnd,
             recalibratedDailyCalories: recalibratedDailyCalories,
-            status: status
+            status: status,
+            dataGap: nil
         )
     }
 

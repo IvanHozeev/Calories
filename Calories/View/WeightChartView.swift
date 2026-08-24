@@ -53,7 +53,6 @@ struct WeightChartView: View {
             .frame(height: 200)
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 }

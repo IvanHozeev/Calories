@@ -20,38 +20,40 @@ final class ReminderStore {
     }
 
     private let center = UNUserNotificationCenter.current()
-    private let defaults = UserDefaults.standard
+    /// См. комментарий в CalorieStore: тесты живут в процессе приложения, `.standard` там боевой.
+    private let defaults: UserDefaults
 
-    init() {
-        appEnabled = UserDefaults.standard.object(forKey: "reminders_app_enabled") as? Bool ?? false
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        appEnabled = defaults.object(forKey: "reminders_app_enabled") as? Bool ?? false
         reminders = [
             ReminderItem(
                 id: "breakfast",
                 title: "Завтрак",
                 notificationBody: "Не забудь записать завтрак 🌅",
-                isEnabled: UserDefaults.standard.bool(forKey: "reminder_breakfast_on"),
-                time: Self.loadTime(key: "reminder_breakfast_time", hour: 8, minute: 0)
+                isEnabled: defaults.bool(forKey: "reminder_breakfast_on"),
+                time: Self.loadTime(from: defaults, key: "reminder_breakfast_time", hour: 8, minute: 0)
             ),
             ReminderItem(
                 id: "lunch",
                 title: "Обед",
                 notificationBody: "Время занести обед 🍽️",
-                isEnabled: UserDefaults.standard.bool(forKey: "reminder_lunch_on"),
-                time: Self.loadTime(key: "reminder_lunch_time", hour: 13, minute: 0)
+                isEnabled: defaults.bool(forKey: "reminder_lunch_on"),
+                time: Self.loadTime(from: defaults, key: "reminder_lunch_time", hour: 13, minute: 0)
             ),
             ReminderItem(
                 id: "dinner",
                 title: "Ужин",
                 notificationBody: "Не забудь внести ужин и закрыть день 🌙",
-                isEnabled: UserDefaults.standard.bool(forKey: "reminder_dinner_on"),
-                time: Self.loadTime(key: "reminder_dinner_time", hour: 19, minute: 0)
+                isEnabled: defaults.bool(forKey: "reminder_dinner_on"),
+                time: Self.loadTime(from: defaults, key: "reminder_dinner_time", hour: 19, minute: 0)
             ),
         ]
         Task { await refreshAuthStatus() }
     }
 
-    private static func loadTime(key: String, hour: Int, minute: Int) -> Date {
-        if let interval = UserDefaults.standard.object(forKey: key) as? TimeInterval {
+    private static func loadTime(from defaults: UserDefaults, key: String, hour: Int, minute: Int) -> Date {
+        if let interval = defaults.object(forKey: key) as? TimeInterval {
             return Date(timeIntervalSince1970: interval)
         }
         var comps = DateComponents()

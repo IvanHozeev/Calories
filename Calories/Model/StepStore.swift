@@ -13,6 +13,10 @@ struct StepDay: Identifiable {
 @MainActor
 final class StepStore {
     @ObservationIgnored private let healthStore = HKHealthStore()
+    /// См. комментарий в CalorieStore: тесты живут в процессе приложения, `.standard` там боевой.
+    @ObservationIgnored private let defaults: UserDefaults
+    /// Общий с виджетом контейнер. Тесты передают nil, чтобы не переписывать боевые данные виджета.
+    @ObservationIgnored private let groupDefaults: UserDefaults?
 
     private(set) var stepsToday: Int = 0
     private(set) var distanceTodayKm: Double = 0
@@ -26,15 +30,20 @@ final class StepStore {
 
     var stepGoal: Int {
         didSet {
-            UserDefaults.standard.set(stepGoal, forKey: "step_goal")
-            UserDefaults(suiteName: "group.calories.shared")?.set(stepGoal, forKey: "widget_step_goal")
+            defaults.set(stepGoal, forKey: "step_goal")
+            groupDefaults?.set(stepGoal, forKey: "widget_step_goal")
         }
     }
 
-    init() {
-        let goal = UserDefaults.standard.object(forKey: "step_goal") as? Int ?? 10_000
+    init(
+        defaults: UserDefaults = .standard,
+        groupDefaults: UserDefaults? = UserDefaults(suiteName: CalorieStore.appGroup)
+    ) {
+        self.defaults = defaults
+        self.groupDefaults = groupDefaults
+        let goal = defaults.object(forKey: "step_goal") as? Int ?? 10_000
         self.stepGoal = goal
-        UserDefaults(suiteName: "group.calories.shared")?.set(goal, forKey: "widget_step_goal")
+        groupDefaults?.set(goal, forKey: "widget_step_goal")
         requestAuthorization()
     }
 
@@ -118,7 +127,7 @@ final class StepStore {
             Task { @MainActor [weak self] in
                 self?.stepsToday = steps
                 self?.updateGoalStreak()
-                UserDefaults(suiteName: "group.calories.shared")?.set(steps, forKey: "widget_steps_today")
+                self?.groupDefaults?.set(steps, forKey: "widget_steps_today")
                 WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
             }
         }
@@ -154,7 +163,7 @@ final class StepStore {
             let km = (result?.sumQuantity()?.doubleValue(for: .meter()) ?? 0) / 1000
             Task { @MainActor [weak self] in
                 self?.distanceTodayKm = km
-                UserDefaults(suiteName: "group.calories.shared")?.set(km, forKey: "widget_distance_km")
+                self?.groupDefaults?.set(km, forKey: "widget_distance_km")
             }
         }
         healthStore.execute(query)

@@ -70,6 +70,12 @@ struct WeeklyChartView: View {
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
                 }
             }
+            .chartYAxis {
+                AxisMarks { _ in
+                    AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [2, 3]))
+                    AxisValueLabel()
+                }
+            }
             .chartXAxis {
                 if useWeekdayLabels {
                     AxisMarks(values: .stride(by: .day)) { _ in
@@ -85,7 +91,6 @@ struct WeeklyChartView: View {
             .frame(height: 200)
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 }

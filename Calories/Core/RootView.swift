@@ -14,9 +14,9 @@ struct RootView: View {
                 .tag(0)
 
             NavigationStack {
-                ProfileView(store: store)
+                ProgressDashboardView(store: store)
             }
-            .tabItem { Label("Профиль", systemImage: "person.fill") }
+            .tabItem { Label("Прогресс", systemImage: "chart.line.uptrend.xyaxis") }
             .tag(1)
 
             NavigationStack {

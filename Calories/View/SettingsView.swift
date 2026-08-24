@@ -1,6 +1,9 @@
 import SwiftUI
 
-struct ProfileView: View {
+/// Экран конфигурации: параметры тела, активность, подписка и системные настройки.
+/// Сюда заходят раз в месяц — сменить рост или единицы измерения. Всё, что про динамику
+/// и результаты, живёт на вкладке «Прогресс».
+struct SettingsView: View {
     var store: CalorieStore
 
     @State private var weightTenths: Int
@@ -17,9 +20,7 @@ struct ProfileView: View {
     @State private var waistCm: Int
     @State private var neckCm: Int
     @State private var hipCm: Int
-    @State private var showingPlan = false
     @State private var showingPaywall = false
-    @State private var showingAddWeight = false
     @AppStorage("use_imperial") private var useImperial = false
 
     private func weightDisplayText(_ tenths: Int) -> String {
@@ -268,7 +269,20 @@ struct ProfileView: View {
                     }
                 }
 
-                Section("Настройки") {
+                Section("Подписка") {
+                    if store.isPremium {
+                        Label("Premium активен", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button {
+                            showingPaywall = true
+                        } label: {
+                            Label("Оформить Premium", systemImage: "sparkles")
+                        }
+                    }
+                }
+
+                Section("Системное") {
                     NavigationLink {
                         UnitsSettingsView()
                     } label: {
@@ -289,49 +303,12 @@ struct ProfileView: View {
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
             .scrollIndicators(.hidden)
-            .navigationTitle("Профиль")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        if store.isPremium {
-                            showingPlan = true
-                        } else {
-                            showingPaywall = true
-                        }
-                    } label: {
-                        Image(systemName: store.plan != nil ? "sparkles" : "sparkles")
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(store.plan != nil ? .yellow : .secondary)
-                    }
-                    .disabled(store.profile == nil && !store.isPremium)
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        WeightView(store: store)
-                    } label: {
-                        Image(systemName: "chart.line.uptrend.xyaxis")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingAddWeight = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
+            .navigationTitle("Настройки")
             .onChange(of: draftProfile) { _, newProfile in
                 if let p = newProfile { store.updateProfile(p) }
             }
-            .sheet(isPresented: $showingPlan) {
-                PlanView(store: store)
-            }
             .sheet(isPresented: $showingPaywall) {
-                PaywallView(store: store)
-            }
-            .sheet(isPresented: $showingAddWeight) {
-                AddWeightView(store: store)
-                    .presentationDetents([.medium])
+                PaywallView(store: store, focus: .plan)
             }
     }
 

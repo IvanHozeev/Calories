@@ -29,8 +29,7 @@ struct MacrosCard: View {
                 )) { macroPopover(.carbs) }
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .glassCard()
     }
 
     private func value(for kind: MacroKind) -> Double {

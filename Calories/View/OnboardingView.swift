@@ -264,8 +264,8 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private func stepShell<Content: View>(
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         @ViewBuilder content: () -> Content,
         next: @escaping () -> Void
     ) -> some View {
@@ -293,7 +293,7 @@ struct OnboardingView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func primaryButton(title: String, action: @escaping () -> Void) -> some View {
+    private func primaryButton(title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .font(.body.weight(.semibold))

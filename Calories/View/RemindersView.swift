@@ -55,6 +55,14 @@ struct RemindersView: View {
         .onAppear {
             Task { await store.refreshAuthStatus() }
         }
+        .alert("Не удалось включить уведомления", isPresented: Binding(
+            get: { store.authError != nil },
+            set: { if !$0 { store.authError = nil } }
+        )) {
+            Button("OK", role: .cancel) { store.authError = nil }
+        } message: {
+            Text(store.authError ?? "")
+        }
     }
 
 }

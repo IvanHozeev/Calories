@@ -54,8 +54,8 @@ final class CalorieStore {
     private(set) var calorieBankBonus: Int = 0
 
     // O(1) словари для быстрого поиска
-    @ObservationIgnored private var entriesByDay: [Date: [FoodEntry]] = [:]
-    @ObservationIgnored private var goalsByDay: [Date: Int] = [:]
+    @ObservationIgnored private(set) var entriesByDay: [Date: [FoodEntry]] = [:]
+    @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
     // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
     @ObservationIgnored private var goalLockedOnDay: Date? = nil
     /// Сутки, на которые собраны кэши. Всё «сегодняшнее» — consumedToday, groupedTodayEntries,
@@ -88,63 +88,9 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-
-    /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
-    func updateProfile(_ newProfile: UserProfile, syncDailyGoal: Bool = true) {
-        profile = newProfile
-        if let data = try? JSONEncoder().encode(newProfile) {
-            defaults.set(data, forKey: Keys.profile)
-        }
-        if syncDailyGoal, plan == nil {
-            dailyGoal = newProfile.calorieTarget
-        } else {
-            // Профиль участвует в adherence через tdee — пересчитать надо в любом случае.
-            rebuildCaches()
-        }
-    }
-
     private static func loadProfile(from defaults: UserDefaults) -> UserProfile? {
         guard let data = defaults.data(forKey: Keys.profile) else { return nil }
         return try? JSONDecoder().decode(UserProfile.self, from: data)
-    }
-
-    /// Запускает план — считает точную дневную норму под срок/целевой вес и делает её текущей целью.
-    ///
-    /// Гейт премиума живёт здесь, а не только в UI: раньше единственной защитой была
-    /// проверка `isPremium` в тулбаре профиля, и любой новый экран мог случайно выдать
-    /// платную фичу бесплатно. Уже сохранённый план продолжает работать — отбирать
-    /// у пользователя то, что он настроил, мы не будем.
-    func startPlan(_ newPlan: Plan) {
-        guard isPremium else {
-            logger.warning("startPlan вызван без активного премиума — игнорируем")
-            return
-        }
-        plan = newPlan
-        if let data = try? JSONEncoder().encode(newPlan) {
-            defaults.set(data, forKey: Keys.plan)
-        }
-        if let profile {
-            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
-        }
-        rebuildCaches()
-    }
-
-    /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
-    func cancelPlan() {
-        plan = nil
-        defaults.removeObject(forKey: Keys.plan)
-        if let profile {
-            dailyGoal = profile.calorieTarget
-        }
-        rebuildCaches()
-    }
-
-    /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
-    func reschedulePlan(to newEndDate: Date) {
-        guard var updated = plan else { return }
-        let daysCount = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
-        updated.durationWeeks = max(1, Int((Double(daysCount) / 7).rounded(.up)))
-        startPlan(updated)
     }
 
     private static func loadPlan(from defaults: UserDefaults) -> Plan? {
@@ -259,106 +205,6 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-    func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        return (0..<days).reversed().compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
-            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
-        }
-    }
-
-    /// Сколько дней подряд закрыта норма белка. Историческая норма нигде не фиксируется,
-    /// поэтому берём текущую из профиля — при смене веса или множителя прошлые дни
-    /// пересчитаются под новую планку. Для достижения этого достаточно.
-    private func computeProteinStreak() -> Int {
-        guard let target = proteinTarget, target > 0 else { return 0 }
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-
-        func hit(_ day: Date) -> Bool {
-            let entries = entriesByDay[day] ?? []
-            guard !entries.isEmpty else { return false }
-            return entries.reduce(0) { $0 + $1.protein } >= target
-        }
-
-        var streak = hit(today) ? 1 : 0
-        var date = calendar.date(byAdding: .day, value: -1, to: today) ?? today
-        while hit(date) {
-            streak += 1
-            guard let prev = calendar.date(byAdding: .day, value: -1, to: date) else { break }
-            date = prev
-        }
-        return streak
-    }
-
-    private func computeStreak() -> (current: Int, best: Int, logging: Int) {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-
-        // On-goal streak (логирование + попадание в калории)
-        var currentStreak = 0
-        let todayTotal = (entriesByDay[today] ?? []).reduce(0) { $0 + $1.calories }
-        if todayTotal > 0, todayTotal <= (goalsByDay[today] ?? effectiveGoal(for: today)) {
-            currentStreak += 1
-        }
-        var pastDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
-        while true {
-            let dayTotal = (entriesByDay[pastDate] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[pastDate] ?? effectiveGoal(for: pastDate)
-            guard dayTotal > 0, dayTotal <= dayGoal else { break }
-            currentStreak += 1
-            guard let prev = calendar.date(byAdding: .day, value: -1, to: pastDate) else { break }
-            pastDate = prev
-        }
-
-        var best = 0
-        var run = 0
-        var prevDate: Date? = nil
-        for date in entriesByDay.keys.filter({ !calendar.isDateInToday($0) }).sorted() {
-            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            if dayTotal > 0, dayTotal <= dayGoal {
-                let consecutive = prevDate.map { calendar.date(byAdding: .day, value: 1, to: $0) == date } ?? false
-                run = consecutive ? run + 1 : 1
-                prevDate = date
-                best = max(best, run)
-            } else {
-                prevDate = nil
-                run = 0
-            }
-        }
-
-        // Logging streak (просто есть записи за день)
-        var loggingStreak = 0
-        if todayTotal > 0 { loggingStreak += 1 }
-        var logDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
-        while true {
-            guard (entriesByDay[logDate] ?? []).reduce(0, { $0 + $1.calories }) > 0 else { break }
-            loggingStreak += 1
-            guard let prev = calendar.date(byAdding: .day, value: -1, to: logDate) else { break }
-            logDate = prev
-        }
-
-        return (currentStreak, max(best, currentStreak), loggingStreak)
-    }
-
-    /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём
-    /// цифру из цикла на этот день недели, иначе — обычный dailyGoal.
-    func effectiveGoal(for date: Date) -> Int {
-        if let plan, plan.cyclingEnabled, let profile {
-            return plan.calorieTarget(for: date, tdee: profile.tdee)
-        }
-        return dailyGoal
-    }
-
-    /// Зафиксированная цель на дату (из снапшота) — иначе живой расчёт. O(1) через goalsByDay.
-    private func goal(for date: Date) -> Int {
-        let day = Calendar.current.startOfDay(for: date)
-        return goalsByDay[day] ?? effectiveGoal(for: day)
-    }
 
     /// Как только день перестаёт быть сегодняшним, фиксирует его текущую эффективную цель
     /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
@@ -387,158 +233,62 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    /// Недавнее — выводится из фактических записей дневника, а не из списка имён,
-    /// который приходилось сопоставлять с каталогами. Продукт из Open Food Facts или
-    /// со сканера штрихкода ни в своих продуктах, ни во встроенной базе не лежит,
-    /// поэтому в «Недавнем» он раньше не появлялся вовсе.
+    // MARK: - Изменение данных
+    // Живут здесь, а не в отдельном файле: им нужны сеттеры private(set)-свойств,
+    // а Swift не пускает к ним через границу файла. Выносить пришлось бы ценой
+    // открытия записи всему модулю — защита важнее размера файла.
+
+    /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
+    func updateProfile(_ newProfile: UserProfile, syncDailyGoal: Bool = true) {
+        profile = newProfile
+        if let data = try? JSONEncoder().encode(newProfile) {
+            defaults.set(data, forKey: Keys.profile)
+        }
+        if syncDailyGoal, plan == nil {
+            dailyGoal = newProfile.calorieTarget
+        } else {
+            // Профиль участвует в adherence через tdee — пересчитать надо в любом случае.
+            rebuildCaches()
+        }
+    }
+
+    /// Запускает план — считает точную дневную норму под срок/целевой вес и делает её текущей целью.
     ///
-    /// Берём только записи с указанным весом: без него пересчитать на 100 г нельзя,
-    /// а быстрые записи «столько-то калорий» переиспользовать всё равно нечего.
-    var recentFoods: [FoodItem] {
-        let dishNames = Set(dishes.map(\.name))
-        var seen = Set<String>()
-        var result: [FoodItem] = []
-        for entry in entries {
-            guard result.count < 8 else { break }
-            guard let grams = entry.grams, grams > 0 else { continue }
-            guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
-            seen.insert(entry.name)
-            let factor = 100 / grams
-            result.append(FoodItem(
-                name: entry.name,
-                caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
-                protein: entry.protein * factor,
-                fat: entry.fat * factor,
-                carbs: entry.carbs * factor,
-                defaultGrams: grams
-            ))
+    /// Гейт премиума живёт здесь, а не только в UI: раньше единственной защитой была
+    /// проверка `isPremium` в тулбаре профиля, и любой новый экран мог случайно выдать
+    /// платную фичу бесплатно. Уже сохранённый план продолжает работать — отбирать
+    /// у пользователя то, что он настроил, мы не будем.
+    func startPlan(_ newPlan: Plan) {
+        guard isPremium else {
+            logger.warning("startPlan вызван без активного премиума — игнорируем")
+            return
         }
-        return result
-    }
-
-    /// Недавно съеденные блюда — по тем же записям дневника.
-    var recentDishes: [Dish] {
-        var seen = Set<String>()
-        var result: [Dish] = []
-        for entry in entries {
-            guard result.count < 8 else { break }
-            guard !seen.contains(entry.name) else { continue }
-            guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
-            seen.insert(entry.name)
-            result.append(dish)
+        plan = newPlan
+        if let data = try? JSONEncoder().encode(newPlan) {
+            defaults.set(data, forKey: Keys.plan)
         }
-        return result
-    }
-
-    /// Достижения на текущий момент. Прогресс берётся из лучшего результата:
-    /// один раз собранная серия не должна пропадать из-за одного сорванного дня.
-    var achievements: [Achievement] {
-        [
-            Achievement(kind: .firstWeek, current: max(streak, bestStreak), target: 7),
-            Achievement(kind: .disciplineMaster, current: max(streak, bestStreak), target: 14),
-            Achievement(kind: .proteinMaster, current: proteinStreak, target: 5),
-            Achievement(kind: .ironWill, current: loggingStreak, target: 30)
-        ]
-    }
-
-    /// Целевой белок в граммах — nil, если профиль ещё не заполнен.
-    var proteinTarget: Double? {
-        profile?.proteinTargetGrams
-    }
-
-    /// Текущий вес — из последнего взвешивания, иначе из профиля.
-    var weightKg: Double? {
-        latestWeight?.weightKg ?? profile?.weightKg
-    }
-
-    /// Минимальная дневная норма жиров исходя из веса.
-    var fatTarget: Double? {
-        weightKg.map { $0 * MacroTargets.fatPerKg }
-    }
-
-    /// Подсказка что добрать на оставшиеся калории: белок → жиры → углеводы.
-    var macroSuggestion: String? {
-        guard remaining > 0, profile != nil else { return nil }
-        let m = macrosToday
-        if let pt = proteinTarget, pt > 0, m.protein < pt {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerProteinGram, pt - m.protein).rounded())
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г белка"
+        if let profile {
+            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
         }
-        if let ft = fatTarget, ft > 0, m.fat < ft {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerFatGram, ft - m.fat).rounded())
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г жиров"
+        rebuildCaches()
+    }
+
+    /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
+    func cancelPlan() {
+        plan = nil
+        defaults.removeObject(forKey: Keys.plan)
+        if let profile {
+            dailyGoal = profile.calorieTarget
         }
-        if m.carbs < MacroTargets.carbsMinimum {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, MacroTargets.carbsMinimum - m.carbs).rounded())
-            guard canEat > 0 else { return nil }
-            return "Добери ещё \(canEat) г углеводов"
-        }
-        return nil
+        rebuildCaches()
     }
 
-    /// Базовая цель на сегодня без поправки банка.
-    var todayGoal: Int {
-        effectiveGoal(for: Date())
-    }
-
-    var remaining: Int {
-        adaptedTodayGoal - consumedToday
-    }
-
-    var progress: Double {
-        guard adaptedTodayGoal > 0 else { return 0 }
-        return min(Double(consumedToday) / Double(adaptedTodayGoal), 1.0)
-    }
-
-    /// Адаптированная цель с учётом недельного банка калорий.
-    /// Если сэкономил раньше на неделе — норма растёт. Если перерасход — снижается.
-    private func computeAdaptedTodayGoal() -> Int {
-        guard isPremium else { return effectiveGoal(for: Date()) }
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today)
-        // Respect locale's first weekday (Sun=1 for IL/US, Mon=2 for Europe)
-        let daysFromFirst = (weekday - calendar.firstWeekday + 7) % 7
-
-        guard daysFromFirst > 0,
-              let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today) else {
-            return effectiveGoal(for: today)
-        }
-
-        let remainingDays = 7 - daysFromFirst
-        var weeklyGoalPast = 0
-        var weeklyConsumedPast = 0
-
-        for offset in 0..<daysFromFirst {
-            guard let date = calendar.date(byAdding: .day, value: offset, to: weekStart) else { continue }
-            let dayEntries = entriesByDay[date] ?? []
-            guard !dayEntries.isEmpty else { continue }
-            weeklyGoalPast += goal(for: date)
-            weeklyConsumedPast += dayEntries.reduce(0) { $0 + $1.calories }
-        }
-
-        let bank = weeklyGoalPast - weeklyConsumedPast
-        let baseGoal = effectiveGoal(for: today)
-        let bankPerDay = bank / remainingDays
-        let cappedBonus = min(bankPerDay, 500)
-        return max(baseGoal + cappedBonus, 1000)
-    }
-
-    /// Сводка за конкретный день — O(1) через entriesByDay.
-    func summary(for date: Date) -> DaySummary {
-        let day = Calendar.current.startOfDay(for: date)
-        return DaySummary(date: day, entries: entriesByDay[day] ?? [], goal: goal(for: day))
-    }
-
-    /// Последние N дней (включая сегодня), от старого к новому — для графиков.
-    func lastDays(_ count: Int) -> [DaySummary] {
-        let calendar = Calendar.current
-        return (0..<count).reversed().map { offset in
-            let date = calendar.date(byAdding: .day, value: -offset, to: Date()) ?? Date()
-            return summary(for: date)
-        }
+    /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
+    func reschedulePlan(to newEndDate: Date) {
+        guard var updated = plan else { return }
+        let daysCount = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
+        updated.durationWeeks = max(1, Int((Double(daysCount) / 7).rounded(.up)))
+        startPlan(updated)
     }
 
     func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil, date: Date = Date()) {
@@ -645,6 +395,49 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Недавнее — выводится из фактических записей дневника, а не из списка имён,
+    /// который приходилось сопоставлять с каталогами. Продукт из Open Food Facts или
+    /// со сканера штрихкода ни в своих продуктах, ни во встроенной базе не лежит,
+    /// поэтому в «Недавнем» он раньше не появлялся вовсе.
+    ///
+    /// Берём только записи с указанным весом: без него пересчитать на 100 г нельзя,
+    /// а быстрые записи «столько-то калорий» переиспользовать всё равно нечего.
+    var recentFoods: [FoodItem] {
+        let dishNames = Set(dishes.map(\.name))
+        var seen = Set<String>()
+        var result: [FoodItem] = []
+        for entry in entries {
+            guard result.count < 8 else { break }
+            guard let grams = entry.grams, grams > 0 else { continue }
+            guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
+            seen.insert(entry.name)
+            let factor = 100 / grams
+            result.append(FoodItem(
+                name: entry.name,
+                caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
+                protein: entry.protein * factor,
+                fat: entry.fat * factor,
+                carbs: entry.carbs * factor,
+                defaultGrams: grams
+            ))
+        }
+        return result
+    }
+
+    /// Недавно съеденные блюда — по тем же записям дневника.
+    var recentDishes: [Dish] {
+        var seen = Set<String>()
+        var result: [Dish] = []
+        for entry in entries {
+            guard result.count < 8 else { break }
+            guard !seen.contains(entry.name) else { continue }
+            guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
+            seen.insert(entry.name)
+            result.append(dish)
+        }
+        return result
+    }
+
     /// Последняя по дате запись веса.
     var latestWeight: WeightEntry? {
         weightEntries.last
@@ -656,100 +449,4 @@ final class CalorieStore {
         let cutoffStart = Calendar.current.startOfDay(for: cutoff)
         return weightEntries.filter { $0.date >= cutoffStart }
     }
-
-    /// Сверяет факт с линейным прогнозом плана. Возвращает кэшированный результат из adherence.
-    func planAdherence() -> PlanAdherence? { adherence }
-
-    private func computePlanAdherence() -> PlanAdherence? {
-        guard let plan, let profile else { return nil }
-
-        let totalDays = Double(plan.durationWeeks * 7)
-        let elapsedDays = min(max(Date().timeIntervalSince(plan.startDate) / 86400, 0), totalDays)
-        let expectedWeightToday = plan.startWeightKg + plan.totalWeightChangeKg * (totalDays > 0 ? elapsedDays / totalDays : 0)
-
-        let relevantEntries = weightEntries.filter { $0.date >= plan.startDate }
-        guard relevantEntries.last != nil else {
-            return PlanAdherence(
-                expectedWeightToday: expectedWeightToday,
-                actualWeightToday: nil,
-                observedWeeklyRateKg: nil,
-                projectedEndDate: nil,
-                projectedWeightAtPlanEnd: nil,
-                recalibratedDailyCalories: nil,
-                status: .insufficientData,
-                dataGap: AdherenceDataGap(
-                    weighInsLogged: 0,
-                    weighInsRequired: 2,
-                    daysUntilTrend: max(0, 7 - Int(elapsedDays))
-                )
-            )
-        }
-        let recentWindow = relevantEntries.suffix(7)
-        let actualWeightToday = recentWindow.reduce(0) { $0 + $1.weightKg } / Double(recentWindow.count)
-
-        let elapsedWeeks = elapsedDays / 7
-        guard elapsedWeeks >= 1, relevantEntries.count >= 2 else {
-            return PlanAdherence(
-                expectedWeightToday: expectedWeightToday,
-                actualWeightToday: actualWeightToday,
-                observedWeeklyRateKg: nil,
-                projectedEndDate: nil,
-                projectedWeightAtPlanEnd: nil,
-                recalibratedDailyCalories: nil,
-                status: .insufficientData,
-                dataGap: AdherenceDataGap(
-                    weighInsLogged: relevantEntries.count,
-                    weighInsRequired: 2,
-                    daysUntilTrend: max(0, 7 - Int(elapsedDays))
-                )
-            )
-        }
-
-        let observedWeeklyRate = (actualWeightToday - plan.startWeightKg) / elapsedWeeks
-
-        var projectedEndDate: Date?
-        if observedWeeklyRate != 0 {
-            let remainingChange = plan.targetWeightKg - actualWeightToday
-            let weeksNeeded = remainingChange / observedWeeklyRate
-            if weeksNeeded.isFinite, weeksNeeded > 0 {
-                projectedEndDate = Calendar.current.date(byAdding: .day, value: Int((weeksNeeded * 7).rounded()), to: Date())
-            }
-        }
-
-        let remainingDays = totalDays - elapsedDays
-        var recalibratedDailyCalories: Int?
-        if remainingDays > 0 {
-            let remainingChangeNeeded = plan.targetWeightKg - actualWeightToday
-            let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDays
-            recalibratedDailyCalories = Int((profile.tdee + dailyDelta).rounded())
-        }
-
-        let remainingWeeks = remainingDays / 7
-        let projectedWeightAtPlanEnd = remainingWeeks > 0
-            ? actualWeightToday + observedWeeklyRate * remainingWeeks
-            : nil as Double?
-
-        let deviation = actualWeightToday - expectedWeightToday
-        let threshold = max(0.3, abs(plan.totalWeightChangeKg) * 0.05)
-        let status: PlanStatus
-        if abs(deviation) <= threshold {
-            status = .onTrack
-        } else if (plan.totalWeightChangeKg < 0 && deviation > 0) || (plan.totalWeightChangeKg > 0 && deviation < 0) {
-            status = .behind
-        } else {
-            status = .ahead
-        }
-
-        return PlanAdherence(
-            expectedWeightToday: expectedWeightToday,
-            actualWeightToday: actualWeightToday,
-            observedWeeklyRateKg: observedWeeklyRate,
-            projectedEndDate: projectedEndDate,
-            projectedWeightAtPlanEnd: projectedWeightAtPlanEnd,
-            recalibratedDailyCalories: recalibratedDailyCalories,
-            status: status,
-            dataGap: nil
-        )
-    }
-
 }

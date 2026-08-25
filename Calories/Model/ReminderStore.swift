@@ -15,6 +15,9 @@ struct ReminderItem: Identifiable {
 final class ReminderStore {
     var reminders: [ReminderItem]
     var authStatus: UNAuthorizationStatus = .notDetermined
+    /// Текст последней ошибки запроса разрешения. Раньше ошибка глоталась пустым catch,
+    /// и тумблер просто не срабатывал — без единого намёка, почему.
+    var authError: String?
     var appEnabled: Bool {
         didSet { defaults.set(appEnabled, forKey: "reminders_app_enabled") }
     }
@@ -72,7 +75,9 @@ final class ReminderStore {
                     appEnabled = true
                     rescheduleAll()
                 }
-            } catch {}
+            } catch {
+                authError = error.localizedDescription
+            }
         case .authorized:
             appEnabled = true
             rescheduleAll()

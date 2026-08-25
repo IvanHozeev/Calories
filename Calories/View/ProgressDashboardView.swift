@@ -163,21 +163,24 @@ struct ProgressDashboardView: View {
                     Image(systemName: "plus")
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    ProfileSettingsView(store: store)
-                } label: {
-                    Image(systemName: "person.crop.circle")
-                }
-            }
-            // Шестерёнка остаётся последней: UI-тест ищет настройки по крайней
-            // правой кнопке, да и по привычке ей место с краю.
-            ToolbarItem(placement: .topBarTrailing) {
+            // Настройки и профиль — слева, справа остаётся только действие «добавить вес».
+            // У обеих кнопок идентификаторы: UI-тесты раньше искали настройки по крайней
+            // правой кнопке и от любой перестановки ломались молча.
+            ToolbarItem(placement: .topBarLeading) {
                 NavigationLink {
                     SettingsView(store: store)
                 } label: {
                     Image(systemName: "gearshape")
                 }
+                .accessibilityIdentifier("openSettings")
+            }
+            ToolbarItem(placement: .topBarLeading) {
+                NavigationLink {
+                    ProfileSettingsView(store: store)
+                } label: {
+                    Image(systemName: "person.crop.circle")
+                }
+                .accessibilityIdentifier("openProfile")
             }
         }
         .navigationDestination(isPresented: $showingPlan) {

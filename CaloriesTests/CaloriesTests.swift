@@ -276,6 +276,39 @@ struct CalorieStoreTests {
         #expect(store.lastSevenDays.count == 7)
     }
 
+    // MARK: Порядок приёмов пищи
+
+    /// Ночной перекус идёт с 23:00 до 05:00, поэтому запись в 00:30 — самая ранняя за день,
+    /// хотя её приём пищи стоит последним в MealPeriod. Порядок групп должен идти
+    /// от свежей записи к старой по фактическому времени.
+    @Test func groupedTodayEntries_orderedByActualTime() {
+        let calendar = Calendar.current
+        func today(hour: Int, minute: Int) -> Date {
+            calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()
+        }
+
+        store.add(name: "Ночной", calories: 100, date: today(hour: 0, minute: 30))
+        store.add(name: "Завтрак", calories: 200, date: today(hour: 9, minute: 0))
+        store.add(name: "Ужин", calories: 300, date: today(hour: 19, minute: 0))
+
+        let periods = store.groupedTodayEntries.map(\.period)
+        #expect(periods == [.dinner, .breakfast, .nightSnack],
+                "Группы должны идти от поздней записи к ранней, а не в порядке перечисления")
+    }
+
+    @Test func groupedTodayEntries_newestFirstInsideGroup() {
+        let calendar = Calendar.current
+        func today(hour: Int) -> Date {
+            calendar.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
+        }
+
+        store.add(name: "Раньше", calories: 100, date: today(hour: 18))
+        store.add(name: "Позже", calories: 200, date: today(hour: 20))
+
+        let dinner = store.groupedTodayEntries.first { $0.period == .dinner }
+        #expect(dinner?.entries.map(\.name) == ["Позже", "Раньше"])
+    }
+
     // MARK: Add entries
 
     @Test func add_updatesConsumedToday() {

@@ -236,9 +236,15 @@ final class CalorieStore {
         }
 
         let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
+        // Группы упорядочены по реальному времени последней записи, а не по порядку
+        // в MealPeriod. Иначе «Перекус» (23:00–05:00) уезжает в начало списка, хотя
+        // записи в нём — с раннего утра, и день читается вперемешку.
         groupedTodayEntries = MealPeriod.allCases.compactMap { period in
             guard let entries = grouped[period], !entries.isEmpty else { return nil }
-            return (period, entries.sorted { $0.date < $1.date })
+            return (period, entries.sorted { $0.date > $1.date })
+        }
+        .sorted { lhs, rhs in
+            (lhs.entries.first?.date ?? .distantPast) > (rhs.entries.first?.date ?? .distantPast)
         }
 
         let adapted = computeAdaptedTodayGoal()

@@ -117,10 +117,6 @@ struct SettingsView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
-        // См. ContentView: ширину задаём отступом списка, фон красим сами.
-        .scrollContentBackground(.hidden)
-        .padding(.horizontal, 16)
-        .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
         .navigationTitle("Настройки")
             .fileExporter(

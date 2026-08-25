@@ -65,13 +65,6 @@ struct MyFoodView: View {
         }
         .glassRow()
         .navigationTitle("Моя еда")
-        // См. ContentView: ширину задаём отступом всего списка, потому что стеклянный
-        // фон ячейки рисует listRowBackground во всю строку и на listRowInsets не
-        // реагирует. Свой фон списка гасим и красим полную ширину сами, иначе в
-        // отступах просвечивает белый фон окна.
-        .scrollContentBackground(.hidden)
-        .padding(.horizontal, 16)
-        .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
         .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))
         .task(id: query) {

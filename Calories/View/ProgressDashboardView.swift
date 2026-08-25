@@ -34,10 +34,9 @@ struct ProgressDashboardView: View {
                     onOpenPlan: { showingPlan = true },
                     onShowPaywall: { showingPaywall = true }
                 )
-                // Карточка рисует фон сама, поэтому строке отступы не нужны вовсе:
-                // системные отступы insetGrouped накладывались поверх и делали карточку
-                // уже соседних секций, где фон рисует listRowBackground во всю строку.
-                .listRowInsets(EdgeInsets())
+                // Карточка рисует свой фон сама (акцентный индиго либо стекло),
+                // подложка строки только добавила бы вокруг неё белую рамку.
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }
@@ -146,14 +145,6 @@ struct ProgressDashboardView: View {
             }
         }
         .navigationTitle("Прогресс")
-        // Ширину задаём отступом всего списка, а не отдельных строк: стеклянный фон
-        // ячейки рисует listRowBackground во всю строку и на listRowInsets не
-        // реагирует, поэтому карточки и ячейки сужаются только вместе со списком.
-        // Свой фон списка гасим и красим полную ширину сами — иначе в отступах
-        // просвечивает белый фон окна и по краям экрана идёт светлая полоса.
-        .scrollContentBackground(.hidden)
-        .padding(.horizontal, 16)
-        .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

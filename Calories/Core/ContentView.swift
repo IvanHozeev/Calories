@@ -139,9 +139,6 @@ struct ContentView: View {
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    // Без горизонтальных отступов: карточки рисуют фон сами и должны
-                    // вставать вровень со стеклянными ячейками списка ниже, у которых
-                    // фон рисует listRowBackground во всю ширину строки.
                     .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
@@ -198,6 +195,14 @@ struct ContentView: View {
             }
             .glassRow()
             .listStyle(.insetGrouped)
+            // Ширину задаём отступом всего списка, а не отдельных строк: стеклянный фон
+            // ячейки рисует listRowBackground во всю строку и на listRowInsets не
+            // реагирует, поэтому карточки и ячейки сужаются только вместе со списком.
+            // Свой фон списка гасим и красим полную ширину сами — иначе в отступах
+            // просвечивает белый фон окна и по краям экрана идёт светлая полоса.
+            .scrollContentBackground(.hidden)
+            .padding(.horizontal, 16)
+            .background(Color(.systemGroupedBackground))
             .scrollIndicators(.hidden)
             .refreshable { store.refresh() }
             .navigationDestination(for: FoodEntry.self) { entry in

@@ -146,6 +146,14 @@ struct ProgressDashboardView: View {
             }
         }
         .navigationTitle("Прогресс")
+        // Ширину задаём отступом всего списка, а не отдельных строк: стеклянный фон
+        // ячейки рисует listRowBackground во всю строку и на listRowInsets не
+        // реагирует, поэтому карточки и ячейки сужаются только вместе со списком.
+        // Свой фон списка гасим и красим полную ширину сами — иначе в отступах
+        // просвечивает белый фон окна и по краям экрана идёт светлая полоса.
+        .scrollContentBackground(.hidden)
+        .padding(.horizontal, 16)
+        .background(Color(.systemGroupedBackground))
         .scrollIndicators(.hidden)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

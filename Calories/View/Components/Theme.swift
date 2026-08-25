@@ -73,3 +73,25 @@ extension View {
         modifier(GlassRow())
     }
 }
+
+/// Цвет пламени по длине серии. Пороги были продублированы в бейдже тулбара
+/// и в hero-карточке «Активности» — при правке одного места они разъезжались.
+enum StreakStyle {
+    static func color(for streak: Int) -> Color {
+        if streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
+        if streak >= 30 { return .red }
+        if streak >= 7 { return .orange }
+        return streak > 0 ? .orange : .secondary
+    }
+}
+
+/// Цвет категории процента жира. Общий для экрана профиля и экрана замеров.
+enum BodyFatStyle {
+    static func color(for category: String) -> Color {
+        switch category {
+        case "Атлетический", "Фитнес": return .green
+        case "Норма": return .yellow
+        default: return .red
+        }
+    }
+}

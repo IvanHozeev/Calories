@@ -98,12 +98,7 @@ struct ActivityView: View {
 
     // MARK: - Верх: стрик
 
-    private var milestoneColor: Color {
-        if store.streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
-        if store.streak >= 30 { return .red }
-        if store.streak >= 7 { return .orange }
-        return store.streak > 0 ? .orange : .secondary
-    }
+    private var milestoneColor: Color { StreakStyle.color(for: store.streak) }
 
     private var streakLabel: String {
         let s = store.streak

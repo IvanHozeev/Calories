@@ -6823,6 +6823,52 @@
         }
       }
     },
+    "Записи не потеряны, но приложение не смогло их прочитать. Попробуй перезапустить устройство. Не переустанавливай приложение — это сотрёт дневник.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سجلاتك لم تُفقد، لكن التطبيق لم يستطع قراءتها. جرّب إعادة تشغيل الجهاز. لا تُعد تثبيت التطبيق — فذلك سيمحو اليوميات."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Einträge sind nicht verloren, aber die App konnte sie nicht lesen. Starte das Gerät neu. Installiere die App nicht neu – das würde das Tagebuch löschen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your entries are not lost, but the app could not read them. Try restarting the device. Do not reinstall the app — that would erase the diary."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tus registros no se han perdido, pero la app no pudo leerlos. Prueba a reiniciar el dispositivo. No reinstales la app: eso borraría el diario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tes entrées ne sont pas perdues, mais l'app n'a pas pu les lire. Essaie de redémarrer l'appareil. Ne réinstalle pas l'app : cela effacerait le journal."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הרישומים שלך לא אבדו, אך האפליקציה לא הצליחה לקרוא אותם. נסה להפעיל מחדש את המכשיר. אל תתקין מחדש את האפליקציה — הדבר ימחק את היומן."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seus registros não foram perdidos, mas o app não conseguiu lê-los. Tente reiniciar o dispositivo. Não reinstale o app — isso apagaria o diário."
+          }
+        }
+      }
+    },
     "Заполни параметры тела ниже — план считается по твоим BMR и TDEE.": {
       "localizations": {
         "ar": {
@@ -10110,6 +10156,52 @@
         }
       }
     },
+    "Не удалось открыть данные": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر فتح بياناتك"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deine Daten konnten nicht geöffnet werden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not open your data"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron abrir tus datos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d'ouvrir tes données"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא ניתן לפתוח את הנתונים שלך"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível abrir seus dados"
+          }
+        }
+      }
+    },
     "Не удалось собрать файл.": {
       "localizations": {
         "ar": {
@@ -10617,6 +10709,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sem dados"
+          }
+        }
+      }
+    },
+    "Нет данных о шагах. Если ты не разрешил доступ, включи его в «Здоровье» → «Доступ» → Calories.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد بيانات خطوات. إذا لم تمنح الإذن، فعّله في «الصحة» ← «المشاركة» ← Calories."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Schrittdaten. Falls du keinen Zugriff erlaubt hast, aktiviere ihn in Health → Freigabe → Calories."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No step data. If you did not grant access, enable it in Health → Sharing → Calories."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin datos de pasos. Si no diste acceso, actívalo en Salud → Compartir → Calories."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune donnée de pas. Si tu n'as pas donné l'accès, active-le dans Santé → Partage → Calories."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אין נתוני צעדים. אם לא אישרת גישה, הפעל אותה ב״בריאות״ ← ״שיתוף״ ← Calories."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem dados de passos. Se você não concedeu acesso, ative em Saúde → Compartilhamento → Calories."
           }
         }
       }
@@ -11685,6 +11823,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Base de alimentos aberta"
+          }
+        }
+      }
+    },
+    "Открыть настройки": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فتح الإعدادات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen öffnen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir Réglages"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פתח הגדרות"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir Ajustes"
           }
         }
       }

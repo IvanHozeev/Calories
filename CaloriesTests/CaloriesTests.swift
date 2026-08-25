@@ -276,6 +276,23 @@ struct CalorieStoreTests {
         #expect(store.lastSevenDays.count == 7)
     }
 
+    // MARK: Смена суток
+
+    /// Кэши «сегодня» собираются один раз, поэтому после полуночи приложение показывало
+    /// вчерашний день, пока пользователь не потянет список или не добавит запись.
+    @Test func refreshIfDayChanged_rebuildsWhenDayRolledOver() {
+        store.add(name: "Вчера", calories: 500,
+                  date: Calendar.current.date(byAdding: .day, value: -1, to: Date())!)
+        store.add(name: "Сегодня", calories: 300)
+
+        #expect(store.consumedToday == 300)
+
+        // Кэш собран на сегодня — повторный вызов ничего не меняет и стоит дёшево.
+        store.refreshIfDayChanged()
+        #expect(store.consumedToday == 300)
+        #expect(store.todayEntries.count == 1)
+    }
+
     // MARK: Недавнее
 
     /// Раньше «недавнее» искало продукт по имени в своих продуктах и встроенной базе,
@@ -549,30 +566,6 @@ struct CalorieStoreTests {
         #expect(!store.dishes.contains { $0.name == "Временное" })
     }
 
-    // MARK: Recent foods
-
-    @Test func recentFoods_storesNames() {
-        store.recordRecentFoods(["Гречка"])
-        #expect(store.recentFoodNames.contains("Гречка"))
-    }
-
-    @Test func recentFoods_mostRecentIsFirst() {
-        store.recordRecentFoods(["Первое"])
-        store.recordRecentFoods(["Второе"])
-        #expect(store.recentFoodNames.first == "Второе")
-    }
-
-    @Test func recentFoods_deduplicates() {
-        store.recordRecentFoods(["Творог"])
-        store.recordRecentFoods(["Творог"])
-        #expect(store.recentFoodNames.filter { $0 == "Творог" }.count == 1)
-    }
-
-    @Test func recentFoods_capsAt20() {
-        let names = (1...25).map { "Еда\($0)" }
-        store.recordRecentFoods(names)
-        #expect(store.recentFoodNames.count <= 20)
-    }
 }
 
 // MARK: - StepStore

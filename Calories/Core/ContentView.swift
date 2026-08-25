@@ -387,12 +387,7 @@ private struct PlanSummaryRow: View {
 private struct StreakBadge: View {
     let streak: Int
 
-    private var color: Color {
-        if streak >= 100 { return Color(red: 1, green: 0.75, blue: 0) }
-        if streak >= 30 { return .red }
-        if streak >= 7 { return .orange }
-        return streak > 0 ? .orange : .secondary
-    }
+    private var color: Color { StreakStyle.color(for: streak) }
 
     var body: some View {
         HStack(spacing: 3) {

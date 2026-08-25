@@ -40,7 +40,6 @@ final class CalorieStore {
     private(set) var consumedToday: Int = 0
     private(set) var macrosToday: Macros = .zero
     private(set) var days: [DaySummary] = []
-    private(set) var pastDays: [DaySummary] = []
     private(set) var lastSevenDays: [DaySummary] = []
     private(set) var historyDays: [DaySummary] = []
     private(set) var hasWeighedToday: Bool = false
@@ -59,8 +58,10 @@ final class CalorieStore {
     @ObservationIgnored private var goalsByDay: [Date: Int] = [:]
     // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
     @ObservationIgnored private var goalLockedOnDay: Date? = nil
-
-    private(set) var recentFoodNames: [String] = []
+    /// Сутки, на которые собраны кэши. Всё «сегодняшнее» — consumedToday, groupedTodayEntries,
+    /// streak — считается один раз в rebuildCaches(), поэтому после полуночи данные устаревают
+    /// молча: приложение продолжает показывать вчерашний день, пока что-нибудь не дёрнет пересчёт.
+    @ObservationIgnored private var cachesBuiltForDay: Date = Calendar.current.startOfDay(for: Date())
 
     nonisolated static let appGroup = "group.calories.shared"
 
@@ -69,7 +70,6 @@ final class CalorieStore {
         static let profile = "user_profile"
         static let plan = "active_plan"
         static let premium = "is_premium"
-        static let recentFoods = "recent_food_names"
     }
 
     init(
@@ -84,20 +84,10 @@ final class CalorieStore {
         self.profile = Self.loadProfile(from: defaults)
         self.plan = Self.loadPlan(from: defaults)
         self.isPremium = defaults.bool(forKey: Keys.premium)
-        self.recentFoodNames = defaults.stringArray(forKey: Keys.recentFoods) ?? []
         refresh()
         lockPastGoals()
     }
 
-    func recordRecentFoods(_ names: [String]) {
-        var updated = recentFoodNames
-        for name in names.reversed() {
-            updated.removeAll { $0 == name }
-            updated.insert(name, at: 0)
-        }
-        recentFoodNames = Array(updated.prefix(20))
-        defaults.set(recentFoodNames, forKey: Keys.recentFoods)
-    }
 
     /// Сохраняет профиль и по умолчанию сразу пересчитывает дневную цель по калориям.
     func updateProfile(_ newProfile: UserProfile, syncDailyGoal: Bool = true) {
@@ -187,9 +177,13 @@ final class CalorieStore {
 
         // Строим O(1)-словари один раз
         entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
-        goalsByDay = Dictionary(uniqueKeysWithValues: goalRecords.map {
-            (calendar.startOfDay(for: $0.date), $0.goal)
-        })
+        // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном
+        // ключе. Две записи могут схлопнуться в один локальный день после смены часового пояса,
+        // и это был бы краш на каждом запуске без возможности выбраться.
+        goalsByDay = Dictionary(
+            goalRecords.map { (calendar.startOfDay(for: $0.date), $0.goal) },
+            uniquingKeysWith: { _, newer in newer }
+        )
         // Агрегаты за сегодня — один проход по entries
         todayEntries = entries.filter { calendar.isDateInToday($0.date) }
         consumedToday = todayEntries.reduce(0) { $0 + $1.calories }
@@ -201,7 +195,7 @@ final class CalorieStore {
             DaySummary(date: day, entries: dayEntries, goal: goal(for: day))
         }.sorted { $0.date > $1.date }
         days = allDays
-        pastDays = allDays.filter { !calendar.isDateInToday($0.date) }
+        let pastDays = allDays.filter { !calendar.isDateInToday($0.date) }
 
         // Последние 7 дней включая пустые — O(7) через словарь
         lastSevenDays = (0..<7).reversed().map { offset in
@@ -251,8 +245,18 @@ final class CalorieStore {
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
 
+        cachesBuiltForDay = calendar.startOfDay(for: Date())
+
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
         groupDefaults?.set(adaptedTodayGoal, forKey: "widget_goal_today")
+    }
+
+    /// Пересобирает кэши, если с момента последнего пересчёта сменились сутки.
+    /// Дёшево, когда день тот же, поэтому вызывать можно на каждую активацию приложения.
+    func refreshIfDayChanged() {
+        guard Calendar.current.startOfDay(for: Date()) != cachesBuiltForDay else { return }
+        refresh()
+        lockPastGoals()
     }
 
     func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {

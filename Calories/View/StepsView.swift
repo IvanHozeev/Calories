@@ -91,6 +91,7 @@ struct StepsNavigationView: View {
                 authView
             } else {
                 StepsContentView(viewModel: viewModel, store: store)
+                    .safeAreaInset(edge: .bottom) { noDataHint }
             }
         }
         .navigationTitle("Шаги")
@@ -111,6 +112,31 @@ struct StepsNavigationView: View {
             store.stepGoal = selectedGoal
         }) {
             GoalPickerSheet(goal: $selectedGoal)
+        }
+    }
+
+    /// HealthKit намеренно не сообщает, дали ли доступ на чтение: запрос возвращает success
+    /// и при отказе тоже. Поэтому отказавший пользователь видел обычный экран с нулями
+    /// и никакого способа понять, что делать. Показываем подсказку, когда данных нет совсем.
+    @ViewBuilder
+    private var noDataHint: some View {
+        if store.stepsToday == 0 && store.weekHistory.allSatisfy({ $0.steps == 0 }) {
+            VStack(spacing: 8) {
+                Text("Нет данных о шагах. Если ты не разрешил доступ, включи его в «Здоровье» → «Доступ» → Calories.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("Открыть настройки") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .font(.caption.weight(.semibold))
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .frame(maxWidth: .infinity)
+            .background(.bar)
         }
     }
 

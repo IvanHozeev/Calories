@@ -75,13 +75,6 @@ struct ProfileSettingsView: View {
         )
     }
 
-    private func bodyFatColor(_ category: String) -> Color {
-        switch category {
-        case "Атлетический", "Фитнес": return .green
-        case "Норма": return .yellow
-        default: return .red
-        }
-    }
 
     var body: some View {
         List {
@@ -187,7 +180,7 @@ struct ProfileSettingsView: View {
                             if let draftProfile {
                                 Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
                                     .font(.body.weight(.semibold))
-                                    .foregroundStyle(bodyFatColor(draftProfile.bodyFatCategory))
+                                    .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory))
                                 Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
@@ -320,13 +313,6 @@ private struct BodyFatDetailView: View {
     @State private var showNeckPicker = false
     @State private var showHipPicker = false
 
-    private func bodyFatColor(_ category: String) -> Color {
-        switch category {
-        case "Атлетический", "Фитнес": return .green
-        case "Норма": return .yellow
-        default: return .red
-        }
-    }
 
     var body: some View {
         Form {
@@ -336,7 +322,7 @@ private struct BodyFatDetailView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(String(format: "%.1f%%", profile.bodyFatPercentage))
                                 .font(.largeTitle.weight(.bold))
-                                .foregroundStyle(bodyFatColor(profile.bodyFatCategory))
+                                .foregroundStyle(BodyFatStyle.color(for: profile.bodyFatCategory))
                             Text(LocalizedStringKey(profile.bodyFatCategory))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)

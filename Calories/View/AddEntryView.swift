@@ -174,7 +174,6 @@ struct AddEntryView: View {
                             let totalCalories = items.reduce(0) { $0 + $1.calories }
                             let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
                             let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
-                            store.recordRecentFoods(draftItems.map(\.name))
                             store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                             dismiss()
@@ -331,7 +330,6 @@ struct AddEntryView: View {
                 if !draftItems.isEmpty {
                     ToolbarItem(placement: .bottomBar) {
                         Button {
-                            store.recordRecentFoods(draftItems.map(\.name))
                             let grams = draftItems.count == 1 ? draftItems[0].grams : nil
                             store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
                             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
@@ -376,7 +374,6 @@ struct AddEntryView: View {
 
     private func addAndSave(_ item: MealItem) {
         let allItems = draftItems + [item]
-        store.recordRecentFoods(allItems.map(\.name))
         let totalCalories = allItems.reduce(0) { $0 + $1.calories }
         let totalMacros = allItems.reduce(Macros.zero) { $0 + $1.macros }
         let name = allItems.count == 1 ? item.name : joinedName(allItems)

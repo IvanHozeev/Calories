@@ -101,7 +101,6 @@ struct QuickAddSheet: View {
                             grams: grams,
                             date: period.dateForToday()
                         )
-                        store.recordRecentFoods([name])
                         dismiss()
                     }
                     .fontWeight(.semibold)

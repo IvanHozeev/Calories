@@ -8,6 +8,7 @@ struct RootView: View {
     @State private var selectedTab = 0
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -34,6 +35,17 @@ struct RootView: View {
             OnboardingView(store: store)
         }
         .environment(purchases)
+        // Всё «сегодняшнее» лежит в кэшах стора и после полуночи устаревает молча.
+        // Ловим оба случая: приложение подняли из фона и сутки сменились прямо на экране.
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                store.refreshIfDayChanged()
+                stepStore.fetchAll()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            store.refreshIfDayChanged()
+        }
         .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")

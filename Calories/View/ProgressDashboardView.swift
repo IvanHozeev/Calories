@@ -34,9 +34,10 @@ struct ProgressDashboardView: View {
                     onOpenPlan: { showingPlan = true },
                     onShowPaywall: { showingPaywall = true }
                 )
-                // Карточка рисует свой фон сама (акцентный индиго либо стекло),
-                // подложка строки только добавила бы вокруг неё белую рамку.
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                // Карточка рисует фон сама, поэтому строке отступы не нужны вовсе:
+                // системные отступы insetGrouped накладывались поверх и делали карточку
+                // уже соседних секций, где фон рисует listRowBackground во всю строку.
+                .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }

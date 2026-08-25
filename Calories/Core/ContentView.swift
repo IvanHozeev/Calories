@@ -139,7 +139,10 @@ struct ContentView: View {
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                    // Без горизонтальных отступов: карточки рисуют фон сами и должны
+                    // вставать вровень со стеклянными ячейками списка ниже, у которых
+                    // фон рисует listRowBackground во всю ширину строки.
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
 

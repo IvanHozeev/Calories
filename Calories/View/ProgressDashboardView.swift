@@ -29,20 +29,6 @@ struct ProgressDashboardView: View {
     var body: some View {
         List {
             Section {
-                ProfilePlanCard(
-                    store: store,
-                    onOpenPlan: { showingPlan = true },
-                    onShowPaywall: { showingPaywall = true }
-                )
-                // Карточка рисует фон сама, поэтому строке отступы не нужны вовсе:
-                // системные отступы insetGrouped накладывались поверх и делали карточку
-                // уже соседних секций, где фон рисует listRowBackground во всю строку.
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Текущий вес")
@@ -85,6 +71,20 @@ struct ProgressDashboardView: View {
                 }
             }
             .glassRow()
+            
+            Section {
+                ProfilePlanCard(
+                    store: store,
+                    onOpenPlan: { showingPlan = true },
+                    onShowPaywall: { showingPaywall = true }
+                )
+                // Карточка рисует фон сама, поэтому строке отступы не нужны вовсе:
+                // системные отступы insetGrouped накладывались поверх и делали карточку
+                // уже соседних секций, где фон рисует listRowBackground во всю строку.
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
 
             Section {
                 Picker("Период", selection: $rangeDays) {

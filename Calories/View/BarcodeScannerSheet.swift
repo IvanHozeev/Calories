@@ -99,15 +99,15 @@ struct BarcodeScannerSheet: View {
         return Form {
             Section("Продукт") {
                 LabeledContent("Название", value: product.name)
-                LabeledContent("Калории", value: "\(product.caloriesPer100g) ккал / 100 г")
+                LabeledContent("Калории", value: "\(product.caloriesPer100g) \(String(localized: "ккал")) / 100 \(String(localized: "г"))")
                 if product.protein > 0 {
-                    LabeledContent("Белки", value: String(format: "%.1f г / 100 г", product.protein))
+                    LabeledContent("Белки", value: String(format: "%.1f \(String(localized: "г / 100 г"))", product.protein))
                 }
                 if product.fat > 0 {
-                    LabeledContent("Жиры", value: String(format: "%.1f г / 100 г", product.fat))
+                    LabeledContent("Жиры", value: String(format: "%.1f \(String(localized: "г / 100 г"))", product.fat))
                 }
                 if product.carbs > 0 {
-                    LabeledContent("Углеводы", value: String(format: "%.1f г / 100 г", product.carbs))
+                    LabeledContent("Углеводы", value: String(format: "%.1f \(String(localized: "г / 100 г"))", product.carbs))
                 }
             }
 
@@ -120,51 +120,82 @@ struct BarcodeScannerSheet: View {
                         .foregroundStyle(.secondary)
                 }
                 if grams > 0 {
-                    LabeledContent("Итого", value: "\(Int((Double(product.caloriesPer100g) * factor).rounded())) ккал")
+                    LabeledContent("Итого", value: "\(Int((Double(product.caloriesPer100g) * factor).rounded())) \(String(localized: "ккал"))")
                         .foregroundStyle(.secondary)
                 }
             }
 
-            Section {
-                if let onAdd {
-                    Button {
-                        guard grams > 0 else { return }
-                        let item = MealItem(
-                            name: product.name,
-                            calories: Int((Double(product.caloriesPer100g) * factor).rounded()),
-                            macros: Macros(
-                                protein: product.protein * factor,
-                                fat: product.fat * factor,
-                                carbs: product.carbs * factor
-                            ),
-                            grams: grams
-                        )
-                        onAdd(item)
-                        dismiss()
-                    } label: {
-                        Text("Добавить в приём пищи")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(grams <= 0)
-                }
-
-                if onAdd == nil {
-                    Button { saveToProducts(product) } label: {
-                        Label("Сохранить в мои продукты", systemImage: "bookmark")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                } else {
-                    Button { saveToProducts(product) } label: {
-                        Label("Сохранить в мои продукты", systemImage: "bookmark")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.bordered)
-                }
-            }
         }
         .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom) { actionBar(product, grams: grams, factor: factor) }
+    }
+
+    /// Кнопки закреплены снизу, а не лежат секцией в форме: внутри строки формы
+    /// borderedProminent во всю ширину читается как синяя плашка в белой рамке,
+    /// и таких плашек было две подряд. Плюс панель не уезжает, когда правишь граммы.
+    @ViewBuilder
+    private func actionBar(_ product: BarcodeProduct, grams: Double, factor: Double) -> some View {
+        let saved = isSaved(product)
+
+        VStack(spacing: 10) {
+            if let onAdd {
+                Button {
+                    guard grams > 0 else { return }
+                    onAdd(MealItem(
+                        name: product.name,
+                        calories: Int((Double(product.caloriesPer100g) * factor).rounded()),
+                        macros: Macros(
+                            protein: product.protein * factor,
+                            fat: product.fat * factor,
+                            carbs: product.carbs * factor
+                        ),
+                        grams: grams
+                    ))
+                    dismiss()
+                } label: {
+                    Label("Добавить в приём пищи", systemImage: "plus.circle.fill")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(grams <= 0)
+            }
+
+            if saved {
+                Label("Уже в моих продуктах", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.green)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            } else if onAdd == nil {
+                // Когда добавлять в приём пищи некуда, сохранение и есть главное действие.
+                Button { saveToProducts(product) } label: {
+                    Label("Сохранить в мои продукты", systemImage: "bookmark")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            } else {
+                Button { saveToProducts(product) } label: {
+                    Label("Сохранить в мои продукты", systemImage: "bookmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .background(.bar)
+    }
+
+    private func isSaved(_ product: BarcodeProduct) -> Bool {
+        store.customFoods.contains {
+            $0.name.localizedCaseInsensitiveCompare(product.name) == .orderedSame
+        }
     }
 
     private func saveToProducts(_ product: BarcodeProduct) {
@@ -196,10 +227,15 @@ struct BarcodeScannerSheet: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 32)
-            Button("Сканировать снова") {
+            Button {
                 phase = .scanning
+            } label: {
+                Label("Сканировать снова", systemImage: "barcode.viewfinder")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: 260)
             }
             .buttonStyle(.borderedProminent)
+            .controlSize(.large)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

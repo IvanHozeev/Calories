@@ -14881,7 +14881,6 @@
       }
     },
     "Профиль": {
-      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -18828,6 +18827,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Excluir o registro?"
+          }
+        }
+      }
+    },
+    "Уже в моих продуктах": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موجود بالفعل في أطعمتي"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schon in Meine Lebensmittel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Already in My Foods"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya está en Mis alimentos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjà dans Mes aliments"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כבר במאכלים שלי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Já está em Meus alimentos"
           }
         }
       }

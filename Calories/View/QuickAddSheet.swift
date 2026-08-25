@@ -84,6 +84,7 @@ struct QuickAddSheet: View {
                     MacroTags(macros: macros)
                 }
             }
+            .glassRow()
             .navigationTitle("Добавить в дневник")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

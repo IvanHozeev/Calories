@@ -79,6 +79,7 @@ struct NewDishSheet: View {
                 }
             }
         }
+        .glassRow()
         .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
         .navigationBarTitleDisplayMode(.inline)
         .interactiveDismissDisabled(!isEmbedded && hasChanges)
@@ -183,6 +184,7 @@ struct IngredientPickerSheet: View {
                 }
             }
         }
+        .glassRow()
         .searchable(text: $searchText, prompt: "Поиск продукта")
         .navigationTitle("Выбери продукт")
         .navigationBarTitleDisplayMode(.inline)

@@ -62,6 +62,7 @@ struct AddWeightView: View {
                     )
                 }
             }
+            .glassRow()
             .navigationTitle("Взвешивание")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

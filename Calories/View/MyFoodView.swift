@@ -63,6 +63,7 @@ struct MyFoodView: View {
                 remoteSection
             }
         }
+        .glassRow()
         .navigationTitle("Моя еда")
         .scrollIndicators(.hidden)
         .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))

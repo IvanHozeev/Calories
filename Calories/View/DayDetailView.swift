@@ -57,6 +57,7 @@ struct DayDetailView: View {
                 }
             }
         }
+        .glassRow()
         .navigationTitle(day.date.formatted(.dateTime.day().month(.wide)))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

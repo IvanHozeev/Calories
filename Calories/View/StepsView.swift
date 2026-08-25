@@ -208,6 +208,7 @@ private struct StepsContentView: View {
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
         }
+        .glassRow()
         .listStyle(.insetGrouped)
         .refreshable {
             await viewModel.refresh()

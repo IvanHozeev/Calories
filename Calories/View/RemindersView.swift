@@ -49,6 +49,7 @@ struct RemindersView: View {
                 }
             }
         }
+        .glassRow()
         .navigationTitle("Напоминания")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

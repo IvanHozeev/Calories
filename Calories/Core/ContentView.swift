@@ -193,6 +193,7 @@ struct ContentView: View {
                     }
                 }
             }
+            .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
             .refreshable { store.refresh() }

@@ -83,6 +83,7 @@ struct ActivityView: View {
                 }
             }
         }
+        .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
         .navigationTitle("Активность")

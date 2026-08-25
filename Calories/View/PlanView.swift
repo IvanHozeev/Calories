@@ -155,6 +155,7 @@ struct PlanView: View {
                     }
                 }
             }
+            .glassRow()
             .confirmationDialog(
                 "Завершить план?",
                 isPresented: $confirmingCancel,

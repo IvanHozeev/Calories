@@ -278,6 +278,7 @@ struct AddEntryView: View {
                     }
                 }
             }
+            .glassRow()
             .searchable(text: $searchText, prompt: "Поиск продукта")
             .task(id: searchText) {
                 guard !searchText.isEmpty else {
@@ -565,6 +566,7 @@ struct NewFoodSheet: View {
                     }
                 }
             }
+            .glassRow()
             .task(id: searchQuery) {
                 guard !searchQuery.isEmpty else { offResults = []; isSearchingOFF = false; return }
                 try? await Task.sleep(for: .milliseconds(300))

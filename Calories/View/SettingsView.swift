@@ -369,6 +369,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .glassRow()
             .listStyle(.insetGrouped)
             .scrollDismissesKeyboard(.interactively)
             .scrollIndicators(.hidden)
@@ -444,6 +445,7 @@ private struct UnitsSettingsView: View {
                 Text("Система")
             }
         }
+        .glassRow()
         .listStyle(.insetGrouped)
         .navigationTitle("Единицы измерения")
         .navigationBarTitleDisplayMode(.inline)
@@ -480,6 +482,7 @@ private struct LanguageSettingsView: View {
                 Text("Для применения нового языка перезапусти приложение.")
             }
         }
+        .glassRow()
         .listStyle(.insetGrouped)
         .navigationTitle("Язык")
         .navigationBarTitleDisplayMode(.inline)
@@ -632,6 +635,7 @@ private struct BodyFatDetailView: View {
                 Text("Меряй утром натощак сантиметровой лентой. Талия — на уровне пупка, шея — под кадыком.")
             }
         }
+        .glassRow()
         .navigationTitle("Жир %")
         .navigationBarTitleDisplayMode(.inline)
     }

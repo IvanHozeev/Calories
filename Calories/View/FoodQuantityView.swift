@@ -89,6 +89,7 @@ struct FoodQuantityView: View {
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
         }
+        .glassRow()
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -228,6 +229,7 @@ struct DishQuantityView: View {
                 }
             }
         }
+        .glassRow()
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -375,6 +377,7 @@ struct FoodDetailView: View {
                 Text("Это значение будет подставляться при добавлении продукта в приём пищи.")
             }
         }
+        .glassRow()
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)

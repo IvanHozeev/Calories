@@ -136,6 +136,7 @@ struct EditEntrySheet: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .glassRow()
         .confirmationDialog("Удалить запись?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("Удалить", role: .destructive) {
                 store.delete(entry: entry)

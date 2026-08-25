@@ -10,8 +10,23 @@ struct NewDishSheet: View {
     @State private var ingredients: [DishIngredient] = []
     @State private var showingIngredientPicker = false
     @State private var showDiscardAlert = false
+    @State private var showingQuickAdd = false
 
     private var totalCalories: Int { ingredients.reduce(0) { $0 + $1.calories } }
+    private var totalGrams: Double { ingredients.reduce(0) { $0 + $1.grams } }
+
+    /// Блюдо кладётся в дневник как продукт: значения на 100 г и порция по умолчанию —
+    /// вес всего блюда, потому что чаще всего съедается оно целиком.
+    private var perHundredGrams: (calories: Int, macros: Macros) {
+        guard totalGrams > 0 else { return (0, .zero) }
+        let factor = 100 / totalGrams
+        return (
+            Int((Double(totalCalories) * factor).rounded()),
+            Macros(protein: totalMacros.protein * factor,
+                   fat: totalMacros.fat * factor,
+                   carbs: totalMacros.carbs * factor)
+        )
+    }
     private var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && !ingredients.isEmpty }
     private var hasChanges: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty || !ingredients.isEmpty }
@@ -77,9 +92,32 @@ struct NewDishSheet: View {
                     }
                     .padding(.vertical, 4)
                 }
+
+                Section {
+                    Button {
+                        showingQuickAdd = true
+                    } label: {
+                        Label("Добавить в дневник", systemImage: "plus.circle.fill")
+                            .font(.body.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                    .listRowBackground(Color.clear)
+                }
             }
         }
         .glassRow()
+        .sheet(isPresented: $showingQuickAdd) {
+            QuickAddSheet(
+                store: store,
+                name: name.trimmingCharacters(in: .whitespaces),
+                caloriesPer100g: perHundredGrams.calories,
+                macrosPer100g: perHundredGrams.macros,
+                defaultGrams: totalGrams
+            )
+            .presentationDetents([.medium, .large])
+        }
         .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
         .navigationBarTitleDisplayMode(.inline)
         .interactiveDismissDisabled(!isEmbedded && hasChanges)

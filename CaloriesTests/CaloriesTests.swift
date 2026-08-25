@@ -276,6 +276,36 @@ struct CalorieStoreTests {
         #expect(store.lastSevenDays.count == 7)
     }
 
+    // MARK: Недавнее
+
+    /// Раньше «недавнее» искало продукт по имени в своих продуктах и встроенной базе,
+    /// поэтому съеденное из внешней базы или со сканера туда не попадало никогда.
+    @Test func recentFoods_includesFoodNotInAnyCatalogue() {
+        store.add(name: "Батончик из сканера", calories: 200,
+                  macros: Macros(protein: 10, fat: 5, carbs: 20), grams: 50)
+
+        let recent = store.recentFoods
+        #expect(recent.first?.name == "Батончик из сканера")
+        // 200 ккал на 50 г — значит 400 на 100 г.
+        #expect(recent.first?.caloriesPer100g == 400)
+        #expect(recent.first?.defaultGrams == 50)
+    }
+
+    @Test func recentFoods_newestFirstAndDeduplicated() {
+        store.add(name: "Первый", calories: 100, grams: 100, date: Date().addingTimeInterval(-300))
+        store.add(name: "Второй", calories: 100, grams: 100, date: Date().addingTimeInterval(-200))
+        store.add(name: "Первый", calories: 100, grams: 100, date: Date().addingTimeInterval(-100))
+
+        #expect(store.recentFoods.map(\.name) == ["Первый", "Второй"])
+    }
+
+    @Test func recentFoods_skipsEntriesWithoutWeight() {
+        store.add(name: "Быстрая запись", calories: 500)
+
+        #expect(store.recentFoods.isEmpty,
+                "Без веса пересчитать на 100 г нельзя, такие записи в недавнем не нужны")
+    }
+
     // MARK: Порядок приёмов пищи
 
     /// Ночной перекус идёт с 23:00 до 05:00, поэтому запись в 00:30 — самая ранняя за день,

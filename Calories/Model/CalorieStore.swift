@@ -383,6 +383,49 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Недавнее — выводится из фактических записей дневника, а не из списка имён,
+    /// который приходилось сопоставлять с каталогами. Продукт из Open Food Facts или
+    /// со сканера штрихкода ни в своих продуктах, ни во встроенной базе не лежит,
+    /// поэтому в «Недавнем» он раньше не появлялся вовсе.
+    ///
+    /// Берём только записи с указанным весом: без него пересчитать на 100 г нельзя,
+    /// а быстрые записи «столько-то калорий» переиспользовать всё равно нечего.
+    var recentFoods: [FoodItem] {
+        let dishNames = Set(dishes.map(\.name))
+        var seen = Set<String>()
+        var result: [FoodItem] = []
+        for entry in entries {
+            guard result.count < 8 else { break }
+            guard let grams = entry.grams, grams > 0 else { continue }
+            guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
+            seen.insert(entry.name)
+            let factor = 100 / grams
+            result.append(FoodItem(
+                name: entry.name,
+                caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
+                protein: entry.protein * factor,
+                fat: entry.fat * factor,
+                carbs: entry.carbs * factor,
+                defaultGrams: grams
+            ))
+        }
+        return result
+    }
+
+    /// Недавно съеденные блюда — по тем же записям дневника.
+    var recentDishes: [Dish] {
+        var seen = Set<String>()
+        var result: [Dish] = []
+        for entry in entries {
+            guard result.count < 8 else { break }
+            guard !seen.contains(entry.name) else { continue }
+            guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
+            seen.insert(entry.name)
+            result.append(dish)
+        }
+        return result
+    }
+
     /// Достижения на текущий момент. Прогресс берётся из лучшего результата:
     /// один раз собранная серия не должна пропадать из-за одного сорванного дня.
     var achievements: [Achievement] {

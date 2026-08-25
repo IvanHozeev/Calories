@@ -73,17 +73,12 @@ struct AddEntryView: View {
 
     private var recentFoodItems: [FoodItem] {
         guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
-        let all = store.customFoods + FoodDatabase.items
-        return store.recentFoodNames.prefix(8).compactMap { name in
-            all.first { $0.name == name }
-        }
+        return store.recentFoods
     }
 
     private var recentDishItems: [Dish] {
         guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
-        return store.recentFoodNames.prefix(8).compactMap { name in
-            store.dishes.first { $0.name == name }
-        }
+        return store.recentDishes
     }
 
     @ViewBuilder private var offSearchSection: some View {

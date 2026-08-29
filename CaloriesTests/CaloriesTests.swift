@@ -936,6 +936,33 @@ struct BodyAnalysisTests {
                 "Без замеров отчёт должен быть пустым, а не полным нулей")
     }
 
+    @Test func plausibleRange_rejectsFatFingeredInput() {
+        // Реальный случай: слипшиеся цифры при вводе дают обхват в миллиарды сантиметров.
+        #expect(!MeasurementSite.chest.isPlausible(10878828196))
+        #expect(!MeasurementSite.wrist.isPlausible(176262.5))
+        #expect(!MeasurementSite.neck.isPlausible(401261087882))
+
+        // Пустое поле и обнуление — это не ошибка, а «не мерил»
+        #expect(MeasurementSite.chest.isPlausible(0))
+
+        // Живые значения проходят, включая края диапазона
+        #expect(MeasurementSite.chest.isPlausible(108))
+        #expect(MeasurementSite.wrist.isPlausible(17))
+        #expect(MeasurementSite.pelvis.isPlausible(81))
+        #expect(MeasurementSite.biceps.isPlausible(44))
+        #expect(MeasurementSite.wrist.isPlausible(12))
+        #expect(MeasurementSite.wrist.isPlausible(25))
+        #expect(!MeasurementSite.wrist.isPlausible(11.9))
+    }
+
+    @Test func plausibleRange_coversEverySite() {
+        // Забыть диапазон для нового места замера — значит пропустить мусор в историю.
+        for site in MeasurementSite.allCases {
+            #expect(site.plausibleRange.lowerBound > 0, "\(site) без нижней границы")
+            #expect(site.plausibleRange.upperBound < 250, "\(site) с бесполезно широкой границей")
+        }
+    }
+
     @Test func pelvisMetrics_separateFrameFromSoftTissue() {
         let m = sample()   // плечи 126, талия 78, таз 81, пояс 82, ягодицы 96
         let insights = BodyAnalysis.insights(measurement: m, profile: nil)
@@ -947,8 +974,9 @@ struct BodyAnalysisTests {
 
         // 78 / 81 = 0.963: талия уже костяка, но не радикально — это «хорошо», не «отлично»
         let waistPelvis = insights.first { $0.id == "waistPelvis" }
+        // Сравниваем вердикт, а не подпись: подпись локализуется и в тесте логики
+        // привязываться к её тексту нельзя.
         #expect(waistPelvis?.verdict == .good)
-        #expect(waistPelvis?.verdictLabel == "Уже костяка")
 
         // Пояс шире талии на 4 см — в пределах нормы
         let visceral = insights.first { $0.id == "beltWaist" }

@@ -17,22 +17,16 @@ struct RootView: View {
                 .tag(0)
 
             NavigationStack {
-                ProgressDashboardView(store: store)
-            }
-            .tabItem { Label("Прогресс", systemImage: "chart.line.uptrend.xyaxis") }
-            .tag(1)
-
-            NavigationStack {
                 MyFoodView(store: store)
             }
             .tabItem { Label("Еда", systemImage: "fork.knife") }
-            .tag(2)
-            
+            .tag(1)
+
             NavigationStack {
-                SettingsView(store: store)
+                BodyView(store: store)
             }
-            .tabItem { Label("Настройки", systemImage: "gearshape") }
-            .tag(3)
+            .tabItem { Label("Тело", systemImage: "figure.arms.open") }
+            .tag(2)
         }
         .fullScreenCover(isPresented: Binding(
             get: { !onboardingCompleted },

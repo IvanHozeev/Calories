@@ -34,9 +34,9 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 5),
                       "Приложение должно открываться на вкладке «Сегодня»")
 
-        app.tabBars.buttons["Progress"].tap()
-        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5),
-                      "Вкладка «Прогресс» не открылась")
+        app.tabBars.buttons["Body"].tap()
+        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5),
+                      "Вкладка «Тело» не открылась")
 
         app.tabBars.buttons["Food"].tap()
         XCTAssertTrue(app.navigationBars["My Food"].waitForExistence(timeout: 5),
@@ -48,17 +48,29 @@ final class CaloriesUITests: XCTestCase {
     }
 
     @MainActor
-    func testSettingsTabOpensSettings() {
+    func testSettingsReachableFromBody() {
         let app = launchApp()
-        app.tabBars.buttons["Settings"].tap()
+        app.tabBars.buttons["Body"].tap()
+        app.buttons["openSettings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Вкладка «Настройки» должна открывать настройки")
+                      "Шестерёнка на «Теле» должна вести в настройки")
+    }
+
+    /// Вход в замеры должен быть виден на пустом экране, иначе фичу просто не найдут.
+    @MainActor
+    func testBodyTabOffersFirstMeasurement() {
+        let app = launchApp()
+        app.tabBars.buttons["Body"].tap()
+        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["addMeasurement"].exists, "В тулбаре должна быть кнопка добавления замера")
+        XCTAssertTrue(app.staticTexts["Weight and trend"].exists, "Вес должен открываться из «Тела»")
     }
 
     @MainActor
     func testSettingsOffersDataExport() {
         let app = launchApp()
-        app.tabBars.buttons["Settings"].tap()
+        app.tabBars.buttons["Body"].tap()
+        app.buttons["openSettings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let backup = app.buttons["Backup (JSON)"]
@@ -71,6 +83,34 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(backup.exists, "В настройках должна быть выгрузка резервной копии")
         XCTAssertTrue(app.buttons["Diary as a table (CSV)"].exists,
                       "В настройках должна быть выгрузка дневника в CSV")
+    }
+
+    /// Слипшиеся при вводе цифры не должны попадать в историю: один такой замер
+    /// ломает и график, и все производные отношения в отчёте.
+    @MainActor
+    func testMeasurementRejectsImplausibleValue() {
+        let app = launchApp()
+        app.tabBars.buttons["Body"].tap()
+        app.buttons["addMeasurement"].tap()
+
+        let chest = app.textFields["field-chest-right"]
+        XCTAssertTrue(chest.waitForExistence(timeout: 5), "Не открылась форма замера")
+        chest.tap()
+        chest.typeText("10878828196")
+
+        XCTAssertTrue(app.staticTexts["range-chest"].waitForExistence(timeout: 2),
+                      "Должна появиться подсказка с ожидаемым диапазоном")
+        XCTAssertFalse(app.buttons["saveMeasurement"].isEnabled,
+                       "Сохранение должно быть заблокировано при неправдоподобном значении")
+
+        // Живое значение снимает блокировку
+        chest.tap()
+        for _ in 0..<11 { chest.typeText(XCUIKeyboardKey.delete.rawValue) }
+        chest.typeText("108")
+
+        XCTAssertFalse(app.staticTexts["range-chest"].exists, "Подсказка должна исчезнуть")
+        XCTAssertTrue(app.buttons["saveMeasurement"].isEnabled,
+                      "С правдоподобным значением сохранение должно быть доступно")
     }
 
     // MARK: - Запись еды
@@ -89,10 +129,15 @@ final class CaloriesUITests: XCTestCase {
 
         app.buttons["Save"].firstMatch.tap()
 
-        // Запись должна появиться в дневнике за сегодня.
-        XCTAssertTrue(app.staticTexts["777"].waitForExistence(timeout: 5)
-                      || app.staticTexts.containing(NSPredicate(format: "label CONTAINS '777'")).count > 0,
-                      "Добавленные калории не отобразились на «Сегодня»")
+        // Запись должна появиться в дневнике за сегодня. Список лежит под карточками,
+        // поэтому доскролливаем: SwiftUI не держит в дереве строки далеко за экраном.
+        let entry = app.staticTexts["777"]
+        var attempts = 0
+        while !entry.exists && attempts < 6 {
+            app.swipeUp()
+            attempts += 1
+        }
+        XCTAssertTrue(entry.exists, "Добавленные калории не отобразились на «Сегодня»")
     }
 
     // MARK: - Еда
@@ -119,8 +164,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testPaywallStructure() {
         let app = launchApp(premium: false)
-        app.tabBars.buttons["Progress"].tap()
-        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
         app.staticTexts["Personal plan"].tap()
         XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5))
@@ -136,8 +180,8 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testPlanCardShowsPaywallWithoutPremium() {
         let app = launchApp(premium: false)
-        app.tabBars.buttons["Progress"].tap()
-        XCTAssertTrue(app.navigationBars["Progress"].waitForExistence(timeout: 5))
+        // Карточка плана теперь единственный вход — она на «Сегодня».
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
         app.staticTexts["Personal plan"].tap()
         XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5),

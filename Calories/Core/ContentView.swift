@@ -118,15 +118,14 @@ struct ContentView: View {
                             .buttonStyle(.plain)
                         }
 
-                        if let plan = store.plan {
-                            Button { showingPlan = true } label: {
-                                PlanSummaryRow(
-                                    plan: plan,
-                                    status: store.adherence?.status ?? .insufficientData
-                                )
-                            }
-                            .buttonStyle(.plain)
-                        }
+                        // Единственный вход в план. Раньше их было два: компактная строка
+                        // здесь и карточка на «Прогрессе» — с разным видом и разным
+                        // содержанием, хотя вели в одно место.
+                        ProfilePlanCard(
+                            store: store,
+                            onOpenPlan: { showingPlan = true },
+                            onShowPaywall: { showingPaywall = true }
+                        )
 
                         MacrosCard(
                             macros: store.macrosToday,
@@ -340,47 +339,6 @@ private struct StepsCard: View {
             }
             .buttonStyle(.plain)
         }
-    }
-}
-
-private struct PlanSummaryRow: View {
-    let plan: Plan
-    let status: PlanStatus
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    var body: some View {
-        // На accessibility-размерах четыре элемента в строку не помещаются и наезжают
-        // друг на друга — переключаемся на колонку.
-        let layout = dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6))
-            : AnyLayout(HStackLayout(spacing: 8))
-        return layout {
-            Image(systemName: status.icon)
-                .font(.footnote)
-                .foregroundStyle(status.color)
-            Text(plan.title)
-                .font(.caption.weight(.medium))
-            Text(verbatim: String(format: "· %.1f \(String(localized: "кг"))", plan.targetWeightKg))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if !dynamicTypeSize.isAccessibilitySize { Spacer() }
-            if plan.daysRemaining > 0 {
-                Text("\(plan.daysRemaining) дн. осталось")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("Срок истёк")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            Image(systemName: "chevron.right")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .glassCard(cornerRadius: 10)
     }
 }
 

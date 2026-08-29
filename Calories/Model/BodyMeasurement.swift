@@ -158,6 +158,33 @@ enum MeasurementSite: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Границы правдоподобия для обхвата. Нужны не для придирок к пользователю,
+    /// а чтобы промах по клавише не попал в историю: один замер с лишней цифрой
+    /// ломает и график, и все производные отношения в отчёте.
+    /// Диапазоны нарочно широкие — от подростка до тяжёлого атлета.
+    var plausibleRange: ClosedRange<Double> {
+        switch self {
+        case .neck:      return 25...70
+        case .shoulders: return 80...180
+        case .chest:     return 60...180
+        case .waist:     return 45...200
+        case .belt:      return 45...200
+        case .pelvis:    return 55...180
+        case .glutes:    return 60...200
+        case .biceps:    return 15...70
+        case .forearm:   return 15...60
+        case .wrist:     return 12...25
+        case .thigh:     return 30...100
+        case .quad:      return 25...90
+        case .calf:      return 20...70
+        }
+    }
+
+    /// Пустое поле — это «не мерил», а не ошибка. Ноль тоже: так замер очищают.
+    func isPlausible(_ value: Double) -> Bool {
+        value == 0 || plausibleRange.contains(value)
+    }
+
     var howTo: String {
         switch self {
         case .neck:

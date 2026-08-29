@@ -18,6 +18,36 @@
             endingLineNumber = "227"
             landmarkName = "lockPastGoals()"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "42A129D3-C038-4F31-8D54-CC63E77F2A9C - 12956f38571aea10"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Calories.CalorieStore.lockPastGoals() -&gt; ()"
+                  moduleName = "Calories.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ivankhozeyev/Desktop/Apps/Calories/Calories/Model/CalorieStore.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "227"
+                  endingLineNumber = "227">
+               </Location>
+               <Location
+                  uuid = "42A129D3-C038-4F31-8D54-CC63E77F2A9C - 12956f38571aea71"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Calories.CalorieStore.lockPastGoals() -&gt; ()"
+                  moduleName = "Calories.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ivankhozeyev/Desktop/Apps/Calories/Calories/Model/CalorieStore.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "228"
+                  endingLineNumber = "228">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

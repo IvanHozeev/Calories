@@ -3,11 +3,9 @@ import SwiftUI
 /// Вкладка «Прогресс» — рабочий экран: как я двигаюсь к цели.
 /// План, динамика веса, калории за период и журнал взвешиваний. Всё статическое
 /// (рост, возраст, активность, единицы) живёт в «Настройках» под шестерёнкой.
-struct ProgressDashboardView: View {
+struct WeightDetailView: View {
     var store: CalorieStore
     @State private var showingAddWeight = false
-    @State private var showingPlan = false
-    @State private var showingPaywall = false
     @State private var rangeDays = 30
 
     private static let rangeOptions = [7, 30, 90]
@@ -28,18 +26,6 @@ struct ProgressDashboardView: View {
 
     var body: some View {
         List {
-            Section {
-                ProfilePlanCard(
-                    store: store,
-                    onOpenPlan: { showingPlan = true },
-                    onShowPaywall: { showingPaywall = true }
-                )
-                // Карточка рисует свой фон сама (акцентный индиго либо стекло),
-                // подложка строки только добавила бы вокруг неё белую рамку.
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
             
             Section {
                 HStack {
@@ -144,7 +130,7 @@ struct ProgressDashboardView: View {
                 .glassRow()
             }
         }
-        .navigationTitle("Прогресс")
+        .navigationTitle("Вес и динамика")
         .scrollIndicators(.hidden)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -167,15 +153,9 @@ struct ProgressDashboardView: View {
 //                .accessibilityIdentifier("openProfile")
 //            }
         }
-        .navigationDestination(isPresented: $showingPlan) {
-            PlanView(store: store)
-        }
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
                 .presentationDetents([.medium])
-        }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store, focus: .plan)
         }
     }
 }

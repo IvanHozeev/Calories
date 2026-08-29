@@ -48,20 +48,17 @@ final class CaloriesUITests: XCTestCase {
     }
 
     @MainActor
-    func testSettingsReachableFromProgress() {
+    func testSettingsTabOpensSettings() {
         let app = launchApp()
-        app.tabBars.buttons["Progress"].tap()
-
-        app.buttons["openSettings"].tap()
+        app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Шестерёнка на «Прогрессе» должна вести в «Настройки»")
+                      "Вкладка «Настройки» должна открывать настройки")
     }
 
     @MainActor
     func testSettingsOffersDataExport() {
         let app = launchApp()
-        app.tabBars.buttons["Progress"].tap()
-        app.buttons["openSettings"].tap()
+        app.tabBars.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let backup = app.buttons["Backup (JSON)"]

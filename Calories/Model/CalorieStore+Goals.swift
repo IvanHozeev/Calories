@@ -170,19 +170,17 @@ extension CalorieStore {
         return min(Double(consumedToday) / Double(adaptedTodayGoal), 1.0)
     }
 
-    /// Адаптированная цель с учётом недельного банка калорий.
-    /// Если сэкономил раньше на неделе — норма растёт. Если перерасход — снижается.
-    func computeAdaptedTodayGoal() -> Int {
-        guard isPremium else { return effectiveGoal(for: Date()) }
+    
+    func adaptedGoal(for date: Date) -> Int {
+        guard isPremium else { return effectiveGoal(for: date) }
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let weekday = calendar.component(.weekday, from: today)
+        let weekday = calendar.component(.weekday, from: date)
         // Respect locale's first weekday (Sun=1 for IL/US, Mon=2 for Europe)
         let daysFromFirst = (weekday - calendar.firstWeekday + 7) % 7
 
         guard daysFromFirst > 0,
-              let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today) else {
-            return effectiveGoal(for: today)
+              let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: date) else {
+            return effectiveGoal(for: date)
         }
 
         let remainingDays = 7 - daysFromFirst
@@ -198,11 +196,15 @@ extension CalorieStore {
         }
 
         let bank = weeklyGoalPast - weeklyConsumedPast
-        let baseGoal = effectiveGoal(for: today)
+        let baseGoal = effectiveGoal(for: date)
         let bankPerDay = bank / remainingDays
         let cappedBonus = min(bankPerDay, 500)
         return max(baseGoal + cappedBonus, 1000)
     }
+    
+    /// Адаптированная цель на сегодня — частный случай adaptedGoal(for:).
+    /// Тело было скопировано дословно, разошлись бы при первой же правке одного из них.
+    func computeAdaptedTodayGoal() -> Int { adaptedGoal(for: Date()) }
 
     /// Сводка за конкретный день — O(1) через entriesByDay.
     func summary(for date: Date) -> DaySummary {

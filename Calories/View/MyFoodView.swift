@@ -97,6 +97,7 @@ struct MyFoodView: View {
                     Image(systemName: "plus")
                 }
             }
+
         }
         .sheet(isPresented: $showingNewFood) {
             NewFoodSheet(store: store)

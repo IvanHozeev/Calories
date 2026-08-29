@@ -475,6 +475,7 @@ struct Plan: Codable, Equatable {
     /// Норма на конкретную дату — с учётом недельного цикла, если он включён.
     func calorieTarget(for date: Date, tdee: Double) -> Int {
         let base = Double(dailyCalorieTarget(tdee: tdee))
+        
         guard cyclingEnabled else { return Int(base.rounded()) }
         let offset = weekendStyle.cycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
         return Int((base * (1 + offset)).rounded())

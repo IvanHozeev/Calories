@@ -206,7 +206,7 @@ final class CalorieStore {
     }
 
 
-    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую эффективную цель
+    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую (адаптированную!)  эффективную цель
     /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
     func lockPastGoals() {
         let today = Calendar.current.startOfDay(for: Date())
@@ -222,8 +222,15 @@ final class CalorieStore {
         guard !datesToLock.isEmpty else { goalLockedOnDay = today; return }
 
         var newRecords: [GoalRecord] = []
-        for date in datesToLock {
-            let record = GoalRecord(date: date, goal: effectiveGoal(for: date))
+        // По возрастанию даты и с немедленной записью в goalsByDay: adaptedGoal(for:)
+        // читает цели предыдущих дней недели через goal(for:), то есть из этого же словаря.
+        // Без сортировки порядок обхода Set недетерминирован, а без записи в словарь дни
+        // одной пачки считали бы банк друг от друга по неадаптированной цели — и итог
+        // зависел бы от того, когда пользователь открыл приложение, а не от данных.
+        for date in datesToLock.sorted() {
+            let lockedGoal = adaptedGoal(for: date)
+            goalsByDay[date] = lockedGoal
+            let record = GoalRecord(date: date, goal: lockedGoal)
             context.insert(record)
             newRecords.append(record)
         }

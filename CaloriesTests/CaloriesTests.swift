@@ -276,6 +276,34 @@ struct CalorieStoreTests {
         #expect(store.lastSevenDays.count == 7)
     }
 
+    // MARK: Фиксация целей
+
+    /// lockPastGoals лочит дни пачкой, а adaptedGoal(for:) читает цели предыдущих дней
+    /// недели. Раньше словарь goalsByDay внутри цикла не обновлялся, а порядок обхода Set
+    /// был случайным — из-за чего одни и те же данные давали разные цели в истории
+    /// в зависимости от того, когда пользователь открыл приложение.
+    @Test func lockPastGoals_isIndependentOfWhenAppWasOpened() {
+        let calendar = Calendar.current
+        store.isPremium = true
+        store.dailyGoal = 2000
+
+        // Пять прошедших дней подряд с недобором.
+        for offset in stride(from: 5, through: 1, by: -1) {
+            let date = calendar.date(byAdding: .day, value: -offset, to: Date())!
+            store.add(name: "День \(offset)", calories: 1500, date: date)
+        }
+        store.lockPastGoals()
+        let lockedAtOnce = store.goalRecords
+            .sorted { $0.date < $1.date }
+            .map(\.goal)
+
+        #expect(lockedAtOnce.count == 5)
+        // Значения должны быть воспроизводимыми: повторный вызов ничего не меняет.
+        store.lockPastGoals()
+        let again = store.goalRecords.sorted { $0.date < $1.date }.map(\.goal)
+        #expect(again == lockedAtOnce, "Повторная фиксация не должна менять уже записанные цели")
+    }
+
     // MARK: Смена суток
 
     /// Кэши «сегодня» собираются один раз, поэтому после полуночи приложение показывало

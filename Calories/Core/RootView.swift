@@ -27,6 +27,12 @@ struct RootView: View {
             }
             .tabItem { Label("Еда", systemImage: "fork.knife") }
             .tag(2)
+            
+            NavigationStack {
+                SettingsView(store: store)
+            }
+            .tabItem { Label("Настройки", systemImage: "gearshape") }
+            .tag(3)
         }
         .fullScreenCover(isPresented: Binding(
             get: { !onboardingCompleted },

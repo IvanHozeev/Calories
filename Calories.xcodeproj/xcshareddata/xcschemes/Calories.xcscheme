@@ -46,9 +46,6 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       queueDebuggingEnableBacktraceRecording = "Yes">
-      <StoreKitConfigurationFileReference
-         identifier = "../../../Calories/Products.storekit">
-      </StoreKitConfigurationFileReference>
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
@@ -59,6 +56,9 @@
             ReferencedContainer = "container:Calories.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../CaloriesTests/Products.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

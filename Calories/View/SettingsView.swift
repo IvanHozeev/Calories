@@ -9,21 +9,20 @@ struct SettingsView: View {
     @State private var showingPaywall = false
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
-
+    
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
     @State private var showingExporter = false
     @State private var exportError: String?
-
-
-
-
+    
+    
+    
     private func dateStamp() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: Date())
     }
-
+    
     private func prepareBackup() {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -37,115 +36,127 @@ struct SettingsView: View {
         exportFilename = "calories-backup-\(dateStamp())"
         showingExporter = true
     }
-
+    
     private func prepareCSV() {
         exportDocument = ExportDocument(text: store.makeDiaryCSV(), type: .commaSeparatedText)
         exportFilename = "calories-diary-\(dateStamp())"
         showingExporter = true
     }
-
-
+    
+    
     var body: some View {
         List {
+            Section {
+                NavigationLink {
+                    ProfileSettingsView(store: store)
+                } label: {
+                    Label("Профиль", systemImage: "person.crop.circle")
+                }
+            } header: {
+                Text("Пользователь")
+            } footer: {
+                Text("Параметры тела, уровень активности и норма белка.")
+            }
+            
             Section("Подписка") {
-                    #if DEBUG
-                    // Отладочный тумблер: пока продукты StoreKit не грузятся, это
-                    // единственный способ проверять платные экраны. В релиз не попадает.
-                    Toggle(isOn: Binding(
-                        get: { store.isPremium },
-                        set: { store.isPremium = $0 }
-                    )) {
-                        Label("Premium (отладка)", systemImage: "hammer")
-                    }
-                    #endif
-
-                    if store.isPremium {
-                        Label("Premium активен", systemImage: "checkmark.seal.fill")
-                            .foregroundStyle(.green)
-                    } else {
-                        Button {
-                            showingPaywall = true
-                        } label: {
-                            Label("Оформить Premium", systemImage: "sparkles")
-                        }
-                    }
+#if DEBUG
+                // Отладочный тумблер: пока продукты StoreKit не грузятся, это
+                // единственный способ проверять платные экраны. В релиз не попадает.
+                Toggle(isOn: Binding(
+                    get: { store.isPremium },
+                    set: { store.isPremium = $0 }
+                )) {
+                    Label("Premium (отладка)", systemImage: "hammer")
                 }
-
-                Section {
+#endif
+                
+                if store.isPremium {
+                    Label("Premium активен", systemImage: "checkmark.seal.fill")
+                        .foregroundStyle(.green)
+                } else {
                     Button {
-                        prepareBackup()
+                        showingPaywall = true
                     } label: {
-                        Label("Резервная копия (JSON)", systemImage: "arrow.down.doc")
-                    }
-                    Button {
-                        prepareCSV()
-                    } label: {
-                        Label("Дневник таблицей (CSV)", systemImage: "tablecells")
-                    }
-                } header: {
-                    Text("Данные")
-                } footer: {
-                    Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
-                }
-
-                Section("Системное") {
-                    Picker(selection: $appTheme) {
-                        ForEach(AppTheme.allCases) { theme in
-                            Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
-                        }
-                    } label: {
-                        Label("Оформление", systemImage: "circle.lefthalf.filled")
-                    }
-
-                    NavigationLink {
-                        UnitsSettingsView()
-                    } label: {
-                        Label("Единицы измерения", systemImage: "globe")
-                    }
-                    NavigationLink {
-                        RemindersView()
-                    } label: {
-                        Label("Напоминания", systemImage: "bell")
-                    }
-                    NavigationLink {
-                        LanguageSettingsView()
-                    } label: {
-                        Label("Язык", systemImage: "character.bubble")
+                        Label("Оформить Premium", systemImage: "sparkles")
                     }
                 }
             }
+            
+            Section {
+                Button {
+                    prepareBackup()
+                } label: {
+                    Label("Резервная копия (JSON)", systemImage: "arrow.down.doc")
+                }
+                Button {
+                    prepareCSV()
+                } label: {
+                    Label("Дневник таблицей (CSV)", systemImage: "tablecells")
+                }
+            } header: {
+                Text("Данные")
+            } footer: {
+                Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
+            }
+            
+            Section("Системное") {
+                Picker(selection: $appTheme) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
+                    }
+                } label: {
+                    Label("Оформление", systemImage: "circle.lefthalf.filled")
+                }
+                
+                NavigationLink {
+                    UnitsSettingsView()
+                } label: {
+                    Label("Единицы измерения", systemImage: "globe")
+                }
+                NavigationLink {
+                    RemindersView()
+                } label: {
+                    Label("Напоминания", systemImage: "bell")
+                }
+                NavigationLink {
+                    LanguageSettingsView()
+                } label: {
+                    Label("Язык", systemImage: "character.bubble")
+                }
+            }
+        }
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .navigationTitle("Настройки")
-            .fileExporter(
-                isPresented: $showingExporter,
-                document: exportDocument,
-                contentType: exportDocument?.type ?? .json,
-                defaultFilename: exportFilename
-            ) { result in
-                if case .failure(let error) = result {
-                    exportError = error.localizedDescription
-                }
+        .fileExporter(
+            isPresented: $showingExporter,
+            document: exportDocument,
+            contentType: exportDocument?.type ?? .json,
+            defaultFilename: exportFilename
+        ) { result in
+            if case .failure(let error) = result {
+                exportError = error.localizedDescription
             }
-            .alert("Не удалось сохранить", isPresented: Binding(
-                get: { exportError != nil },
-                set: { if !$0 { exportError = nil } }
-            )) {
-                Button("OK", role: .cancel) { exportError = nil }
-            } message: {
-                Text(exportError ?? "")
-            }
-            .sheet(isPresented: $showingPaywall) {
-                PaywallView(store: store, focus: .plan)
-            }
+        }
+        .alert("Не удалось сохранить", isPresented: Binding(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Button("OK", role: .cancel) { exportError = nil }
+        } message: {
+            Text(exportError ?? "")
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(store: store, focus: .plan)
+        }
     }
 }
 
 private struct UnitsSettingsView: View {
     @AppStorage("use_imperial") private var useImperial = false
-
+    
     var body: some View {
         List {
             Section {
@@ -168,7 +179,7 @@ private struct UnitsSettingsView: View {
 private struct LanguageSettingsView: View {
     @State private var selectedLanguage: String
     @State private var showRestartAlert = false
-
+    
     init() {
         let saved = UserDefaults.standard.array(forKey: "AppleLanguages")?.first as? String
         let lang: String
@@ -179,7 +190,7 @@ private struct LanguageSettingsView: View {
         }
         _selectedLanguage = State(initialValue: lang)
     }
-
+    
     var body: some View {
         List {
             Section {
@@ -205,7 +216,7 @@ private struct LanguageSettingsView: View {
             Text("Закрой и открой приложение заново, чтобы язык применился.")
         }
     }
-
+    
     private func languageRow(code: String, title: String, flag: String) -> some View {
         Button {
             guard selectedLanguage != code else { return }

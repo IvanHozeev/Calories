@@ -940,7 +940,7 @@ struct BodyAnalysisTests {
         let m = sample()   // плечи 126, талия 78, таз 81, пояс 82, ягодицы 96
         let insights = BodyAnalysis.insights(measurement: m, profile: nil)
 
-        // Структурный V считается от костяка и не зависит от сушки
+        // Знаменатель костный: отношение двигается только за счёт верха, не за счёт диеты
         let structural = insights.first { $0.id == "shouldersPelvis" }
         #expect(structural?.value == "1.56")
         #expect(structural?.verdict == .excellent)

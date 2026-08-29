@@ -18,6 +18,7 @@ final class BodyMeasurement: Identifiable {
     var shouldersCm: Double
     var waistCm: Double
     var beltCm: Double
+    var pelvisCm: Double
     var glutesCm: Double
 
     // Парные: левая и правая стороны меряются отдельно ради контроля симметрии
@@ -38,7 +39,7 @@ final class BodyMeasurement: Identifiable {
         id: UUID = UUID(),
         date: Date = Date(),
         neckCm: Double = 0, chestCm: Double = 0, shouldersCm: Double = 0,
-        waistCm: Double = 0, beltCm: Double = 0, glutesCm: Double = 0,
+        waistCm: Double = 0, beltCm: Double = 0, pelvisCm: Double = 0, glutesCm: Double = 0,
         bicepsLeftCm: Double = 0, bicepsRightCm: Double = 0,
         forearmLeftCm: Double = 0, forearmRightCm: Double = 0,
         wristLeftCm: Double = 0, wristRightCm: Double = 0,
@@ -49,7 +50,8 @@ final class BodyMeasurement: Identifiable {
         self.id = id
         self.date = date
         self.neckCm = neckCm; self.chestCm = chestCm; self.shouldersCm = shouldersCm
-        self.waistCm = waistCm; self.beltCm = beltCm; self.glutesCm = glutesCm
+        self.waistCm = waistCm; self.beltCm = beltCm; self.pelvisCm = pelvisCm
+        self.glutesCm = glutesCm
         self.bicepsLeftCm = bicepsLeftCm; self.bicepsRightCm = bicepsRightCm
         self.forearmLeftCm = forearmLeftCm; self.forearmRightCm = forearmRightCm
         self.wristLeftCm = wristLeftCm; self.wristRightCm = wristRightCm
@@ -66,6 +68,7 @@ final class BodyMeasurement: Identifiable {
         case .shoulders: return shouldersCm
         case .waist:     return waistCm
         case .belt:      return beltCm
+        case .pelvis:    return pelvisCm
         case .glutes:    return glutesCm
         case .biceps:    return side == .left ? bicepsLeftCm : bicepsRightCm
         case .forearm:   return side == .left ? forearmLeftCm : forearmRightCm
@@ -83,6 +86,7 @@ final class BodyMeasurement: Identifiable {
         case .shoulders: shouldersCm = value
         case .waist:     waistCm = value
         case .belt:      beltCm = value
+        case .pelvis:    pelvisCm = value
         case .glutes:    glutesCm = value
         case .biceps:    if side == .left { bicepsLeftCm = value } else { bicepsRightCm = value }
         case .forearm:   if side == .left { forearmLeftCm = value } else { forearmRightCm = value }
@@ -123,7 +127,7 @@ enum BodySide: String, CaseIterable {
 /// Инструкция не украшение — обхват, снятый в другом месте или в другом состоянии мышцы,
 /// делает всю динамику бессмысленной.
 enum MeasurementSite: String, CaseIterable, Identifiable {
-    case neck, shoulders, chest, waist, belt, glutes
+    case neck, shoulders, chest, waist, belt, pelvis, glutes
     case biceps, forearm, wrist
     case thigh, quad, calf
 
@@ -143,6 +147,7 @@ enum MeasurementSite: String, CaseIterable, Identifiable {
         case .chest:     return String(localized: "Грудь")
         case .waist:     return String(localized: "Талия")
         case .belt:      return String(localized: "Пояс")
+        case .pelvis:    return String(localized: "Таз")
         case .glutes:    return String(localized: "Ягодицы")
         case .biceps:    return String(localized: "Бицепс")
         case .forearm:   return String(localized: "Предплечье")
@@ -162,9 +167,11 @@ enum MeasurementSite: String, CaseIterable, Identifiable {
         case .chest:
             return String(localized: "По соскам, лента горизонтально сзади. На спокойном выдохе, грудь не раздувать.")
         case .waist:
-            return String(localized: "В самом узком месте, обычно на ладонь выше пупка. Живот не втягивать.")
+            return String(localized: "В самом узком месте, обычно на ладонь выше пупка. Живот не втягивать, дышать спокойно.")
         case .belt:
-            return String(localized: "Строго на уровне пупка. Это не то же, что талия: пояс показывает висцеральный жир.")
+            return String(localized: "Строго на уровне пупка, лента горизонтально. Не путать с талией: разница между поясом и талией отражает висцеральный жир.")
+        case .pelvis:
+            return String(localized: "По костяшкам подвздошных гребней на пояснице — там, где прощупывается верх таза. Это костяк, он почти не меняется от формы.")
         case .glutes:
             return String(localized: "По самой выступающей точке ягодиц, стопы вместе, мышцы расслаблены.")
         case .biceps:

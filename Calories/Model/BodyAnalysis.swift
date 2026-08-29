@@ -214,6 +214,73 @@ enum BodyAnalysis {
             ))
         }
 
+        // Структурный V: обе величины костные, поэтому не пляшут от формы,
+        // в отличие от плечи/талия. Канонической нормы для таза нет — это ориентир.
+        if shoulders > 0, m.pelvisCm > 0 {
+            let ratio = shoulders / m.pelvisCm
+            let verdict: BodyInsight.Verdict = ratio >= 1.55 ? .excellent : (ratio >= 1.40 ? .good : .watch)
+            out.append(BodyInsight(
+                id: "shouldersPelvis",
+                title: String(localized: "Плечи / таз (структурный V)"),
+                value: String(format: "%.2f", ratio),
+                verdict: verdict,
+                verdictLabel: ratio >= 1.55
+                    ? String(localized: "Широкий верх")
+                    : String(localized: "Ориентир от 1.55"),
+                explanation: String(localized: "Обе величины костные, поэтому показатель не меняется от сушки. Это твой V при любом проценте жира — потолок силуэта.")
+            ))
+        }
+
+        // Сколько мягкого сидит над костяком. Падает по мере сушки и упирается в предел:
+        // когда упёрлось, V растёт уже только через плечи, а не через диету.
+        if waist > 0, m.pelvisCm > 0 {
+            let ratio = waist / m.pelvisCm
+            let verdict: BodyInsight.Verdict = ratio < 0.95 ? .excellent : (ratio <= 1.05 ? .good : .watch)
+            out.append(BodyInsight(
+                id: "waistPelvis",
+                title: String(localized: "Талия / таз"),
+                value: String(format: "%.2f", ratio),
+                verdict: verdict,
+                verdictLabel: {
+                    if ratio < 0.95 { return String(localized: "Заметно уже костяка") }
+                    if ratio < 1.0 { return String(localized: "Уже костяка") }
+                    if ratio <= 1.05 { return String(localized: "Вровень с костяком") }
+                    return String(localized: "Шире костяка")
+                }(),
+                explanation: String(localized: "Показывает, сколько мягких тканей над тазом. Когда талия близка к костяку, дальше резать нечего — силуэт растёт через дельты и широчайшие.")
+            ))
+        }
+
+        // Разница пояса и талии — бытовой индикатор висцерального жира.
+        if waist > 0, m.beltCm > 0 {
+            let delta = m.beltCm - waist
+            let verdict: BodyInsight.Verdict = delta <= 0 ? .excellent : (delta <= 5 ? .good : .watch)
+            out.append(BodyInsight(
+                id: "beltWaist",
+                title: String(localized: "Пояс − талия"),
+                value: String(format: "%+.1f см", delta),
+                verdict: verdict,
+                verdictLabel: delta <= 0
+                    ? String(localized: "Живот плоский")
+                    : (delta <= 5 ? String(localized: "В пределах нормы") : String(localized: "Заметный выступ")),
+                explanation: String(localized: "Пупок сильно шире узкой талии — типичный признак висцерального жира. Индикатор, а не диагноз.")
+            ))
+        }
+
+        // Ягодицы сами по себе ничего не говорят: обхват может быть большим и от широкого
+        // таза. Разница с костяком показывает именно наросшие мышцы.
+        if m.glutesCm > 0, m.pelvisCm > 0 {
+            let delta = m.glutesCm - m.pelvisCm
+            out.append(BodyInsight(
+                id: "glutesPelvis",
+                title: String(localized: "Ягодицы над костяком"),
+                value: String(format: "%+.1f см", delta),
+                verdict: .good,
+                verdictLabel: String(localized: "Мышцы на тазе"),
+                explanation: String(localized: "Обхват ягодиц сам по себе неинформативен — он растёт и от ширины таза. Разница с костяком отделяет мышцы от скелета.")
+            ))
+        }
+
         // Костяк
         if wrist > 0 {
             out.append(BodyInsight(

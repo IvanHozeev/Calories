@@ -865,7 +865,8 @@ struct BodyAnalysisTests {
 
     private func sample() -> BodyMeasurement {
         BodyMeasurement(
-            neckCm: 40, chestCm: 108, shouldersCm: 126, waistCm: 78, beltCm: 82, glutesCm: 96,
+            neckCm: 40, chestCm: 108, shouldersCm: 126, waistCm: 78, beltCm: 82,
+            pelvisCm: 81, glutesCm: 96,
             bicepsLeftCm: 39, bicepsRightCm: 40,
             forearmLeftCm: 31, forearmRightCm: 31.5,
             wristLeftCm: 17, wristRightCm: 17,
@@ -933,6 +934,39 @@ struct BodyAnalysisTests {
         let empty = BodyMeasurement()
         #expect(BodyAnalysis.insights(measurement: empty, profile: nil).isEmpty,
                 "Без замеров отчёт должен быть пустым, а не полным нулей")
+    }
+
+    @Test func pelvisMetrics_separateFrameFromSoftTissue() {
+        let m = sample()   // плечи 126, талия 78, таз 81, пояс 82, ягодицы 96
+        let insights = BodyAnalysis.insights(measurement: m, profile: nil)
+
+        // Структурный V считается от костяка и не зависит от сушки
+        let structural = insights.first { $0.id == "shouldersPelvis" }
+        #expect(structural?.value == "1.56")
+        #expect(structural?.verdict == .excellent)
+
+        // 78 / 81 = 0.963: талия уже костяка, но не радикально — это «хорошо», не «отлично»
+        let waistPelvis = insights.first { $0.id == "waistPelvis" }
+        #expect(waistPelvis?.verdict == .good)
+        #expect(waistPelvis?.verdictLabel == "Уже костяка")
+
+        // Пояс шире талии на 4 см — в пределах нормы
+        let visceral = insights.first { $0.id == "beltWaist" }
+        #expect(visceral?.value == "+4.0 см")
+        #expect(visceral?.verdict == .good)
+
+        // Ягодицы над костяком: 96 − 81
+        #expect(insights.first { $0.id == "glutesPelvis" }?.value == "+15.0 см")
+    }
+
+    @Test func pelvisMetrics_absentWithoutPelvisMeasurement() {
+        let m = sample()
+        m.pelvisCm = 0
+        let ids = BodyAnalysis.insights(measurement: m, profile: nil).map(\.id)
+        #expect(!ids.contains("shouldersPelvis"))
+        #expect(!ids.contains("waistPelvis"))
+        #expect(!ids.contains("glutesPelvis"))
+        #expect(ids.contains("beltWaist"), "Висцеральный индикатор от таза не зависит")
     }
 
     @Test func vTaper_recognisesGoldenRatio() {

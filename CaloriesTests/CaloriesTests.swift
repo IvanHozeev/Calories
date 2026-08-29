@@ -857,3 +857,93 @@ struct LocalizationTests {
         }
     }
 }
+
+// MARK: - Антропометрия
+
+@MainActor
+struct BodyAnalysisTests {
+
+    private func sample() -> BodyMeasurement {
+        BodyMeasurement(
+            neckCm: 40, chestCm: 108, shouldersCm: 126, waistCm: 78, beltCm: 82, glutesCm: 96,
+            bicepsLeftCm: 39, bicepsRightCm: 40,
+            forearmLeftCm: 31, forearmRightCm: 31.5,
+            wristLeftCm: 17, wristRightCm: 17,
+            thighLeftCm: 58, thighRightCm: 58.5,
+            quadLeftCm: 54, quadRightCm: 54,
+            calfLeftCm: 39, calfRightCm: 39
+        )
+    }
+
+    @Test func symmetry_flagsOnlyRealAsymmetry() {
+        let results = BodyAnalysis.symmetry(sample())
+        let biceps = results.first { $0.site == .biceps }
+        let calf = results.first { $0.site == .calf }
+
+        #expect(biceps?.difference == 1.0)
+        #expect(biceps?.verdict == .excellent, "1 см — это погрешность ленты, не перекос")
+        #expect(biceps?.strongerSide == .right)
+        #expect(calf?.difference == 0)
+    }
+
+    @Test func symmetry_skipsIncompletePairs() {
+        let m = sample()
+        m.calfLeftCm = 0
+        let results = BodyAnalysis.symmetry(m)
+        #expect(!results.contains { $0.site == .calf },
+                "Пара без одной стороны не должна попадать в отчёт как нулевая")
+    }
+
+    @Test func symmetry_warnsOnBigGap() {
+        let m = sample()
+        m.bicepsLeftCm = 36
+        m.bicepsRightCm = 40
+        let biceps = BodyAnalysis.symmetry(m).first { $0.site == .biceps }
+        #expect(biceps?.verdict == .watch)
+    }
+
+    @Test func mccallum_derivesFromWrist() {
+        let ideal = BodyAnalysis.mccallum(wristCm: 17)
+        #expect(ideal?.chest == 110.5)                     // 17 × 6.5
+        #expect(abs((ideal?.arm ?? 0) - 39.78) < 0.01)     // 36% груди
+        #expect(BodyAnalysis.mccallum(wristCm: 0) == nil)
+    }
+
+    @Test func ffmi_isNotInflatedByFat() {
+        // Один рост и вес, разный процент жира: у более сухого FFMI должен быть выше.
+        let lean = BodyAnalysis.ffmi(weightKg: 80, heightCm: 180, bodyFatPercent: 10)!
+        let fat = BodyAnalysis.ffmi(weightKg: 80, heightCm: 180, bodyFatPercent: 25)!
+        #expect(lean > fat)
+        #expect(abs(lean - 22.2) < 0.2)
+    }
+
+    @Test func ffmi_rejectsGarbageInput() {
+        #expect(BodyAnalysis.ffmi(weightKg: 0, heightCm: 180, bodyFatPercent: 10) == nil)
+        #expect(BodyAnalysis.ffmi(weightKg: 80, heightCm: 0, bodyFatPercent: 10) == nil)
+        #expect(BodyAnalysis.ffmi(weightKg: 80, heightCm: 180, bodyFatPercent: 0) == nil)
+    }
+
+    @Test func insights_haveStableIdentifiers() {
+        let first = BodyAnalysis.insights(measurement: sample(), profile: nil).map(\.id)
+        let second = BodyAnalysis.insights(measurement: sample(), profile: nil).map(\.id)
+        #expect(first == second, "Пересчёт не должен менять id — иначе SwiftUI перерисовывает список целиком")
+    }
+
+    @Test func insights_skipWhatWasNotMeasured() {
+        let empty = BodyMeasurement()
+        #expect(BodyAnalysis.insights(measurement: empty, profile: nil).isEmpty,
+                "Без замеров отчёт должен быть пустым, а не полным нулей")
+    }
+
+    @Test func vTaper_recognisesGoldenRatio() {
+        let m = sample()
+        m.shouldersCm = 126
+        m.waistCm = 77.9                      // 126 / 77.9 ≈ 1.617
+        let vtaper = BodyAnalysis.insights(measurement: m, profile: nil).first { $0.id == "vtaper" }
+        #expect(vtaper?.verdict == .good)
+
+        m.waistCm = 77.0                      // ≈ 1.636
+        let better = BodyAnalysis.insights(measurement: m, profile: nil).first { $0.id == "vtaper" }
+        #expect(better?.verdict == .excellent)
+    }
+}

@@ -19,7 +19,8 @@ struct CalorieCounterApp: App {
     init() {
         do {
             let container = try ModelContainer(
-                for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self
+                for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self
             )
             self.container = container
             self.storageError = nil

@@ -20,6 +20,7 @@ final class CalorieStore {
     private(set) var dishes: [Dish] = []
     private(set) var weightEntries: [WeightEntry] = []
     private(set) var goalRecords: [GoalRecord] = []
+    private(set) var measurements: [BodyMeasurement] = []
     var dailyGoal: Int {
         // Кэш обязателен: adaptedTodayGoal (его читает кольцо на «Сегодня») считается только
         // в rebuildCaches(). Без этого цель меняется в графиках, но не в кольце — они расходятся,
@@ -105,6 +106,9 @@ final class CalorieStore {
 
         let foodDescriptor = FetchDescriptor<FoodItem>(sortBy: [SortDescriptor(\.name)])
         customFoods = (try? context.fetch(foodDescriptor)) ?? []
+
+        let measurementDescriptor = FetchDescriptor<BodyMeasurement>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        measurements = (try? context.fetch(measurementDescriptor)) ?? []
 
         let dishDescriptor = FetchDescriptor<Dish>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
         dishes = (try? context.fetch(dishDescriptor)) ?? []
@@ -238,6 +242,45 @@ final class CalorieStore {
         goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
         goalLockedOnDay = today
         rebuildCaches()
+    }
+
+    // MARK: - Замеры тела
+
+    /// Последний сеанс замеров — по нему считается отчёт.
+    var latestMeasurement: BodyMeasurement? { measurements.first }
+
+    /// Предыдущий заполненный сеанс, чтобы показать динамику относительно него.
+    var previousMeasurement: BodyMeasurement? {
+        measurements.dropFirst().first
+    }
+
+    /// История одного обхвата от старых к новым — для графика.
+    /// Пропущенные замеры (ноль) не берём: это «не мерил», а не «ноль сантиметров».
+    func measurementHistory(_ site: MeasurementSite, side: BodySide = .right) -> [(date: Date, value: Double)] {
+        measurements
+            .compactMap { m -> (Date, Double)? in
+                let v = site.isPaired ? m.value(site, side) : m.value(site)
+                return v > 0 ? (m.date, v) : nil
+            }
+            .sorted { $0.0 < $1.0 }
+            .map { (date: $0.0, value: $0.1) }
+    }
+
+    func addMeasurement(_ measurement: BodyMeasurement) {
+        context.insert(measurement)
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        measurements = (measurements + [measurement]).sorted { $0.date > $1.date }
+    }
+
+    func deleteMeasurement(_ measurement: BodyMeasurement) {
+        context.delete(measurement)
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        measurements.removeAll { $0.id == measurement.id }
+    }
+
+    func saveMeasurementEdits() {
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        measurements.sort { $0.date > $1.date }
     }
 
     // MARK: - Изменение данных

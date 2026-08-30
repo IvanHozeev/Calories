@@ -1,4 +1,5 @@
 import Testing
+import UIKit
 import Foundation
 import SwiftData
 @testable import Calories
@@ -1090,6 +1091,15 @@ struct BodyAnalysisTests {
         // там ему нечего объяснять — он выведен не из этих замеров.
         let empty = BodyMeasurement(date: Date())
         #expect(!BodyAnalysis.insights(measurement: empty, profile: p).map(\.id).contains("bodyFat"))
+    }
+
+    @Test func everyCategoryIconIsARealSymbol() {
+        // Несуществующее имя символа рисуется пустотой, а не падает — поэтому
+        // опечатку в нём замечаешь только глазами на экране. Пусть замечает тест.
+        for category in FoodCategory.allCases {
+            #expect(UIImage(systemName: category.icon) != nil,
+                    "\(category.rawValue): нет символа «\(category.icon)»")
+        }
     }
 
     @Test func everyBuiltInFoodHasACategory() {

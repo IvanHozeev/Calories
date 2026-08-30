@@ -27,7 +27,7 @@ final class CaloriesUITests: XCTestCase {
     }
 
     /// Список ленивый: то, что ниже экрана, в дереве элементов отсутствует.
-    private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 8) {
+    private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 16) {
         var tries = 0
         while !element.exists && tries < attempts {
             app.swipeUp()
@@ -194,13 +194,16 @@ final class CaloriesUITests: XCTestCase {
             XCTAssertTrue(sources.buttons[name].exists, "Нет источника «\(name)»")
         }
 
-        // База продуктов появляется только на своей вкладке
-        XCTAssertFalse(app.staticTexts["Food Database"].exists,
+        // База разложена по категориям и появляется только на своей вкладке
+        XCTAssertFalse(app.staticTexts["Meat and poultry"].exists,
                        "База не должна показываться на вкладке недавнего")
         sources.buttons["Database"].tap()
-        let header = app.staticTexts["Food Database"]
+        let header = app.staticTexts["Meat and poultry"]
         scrollTo(header, in: app)
         XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
+        let second = app.staticTexts["Fish and seafood"]
+        scrollTo(second, in: app)
+        XCTAssertTrue(second.exists, "Категории должны идти отдельными секциями")
     }
 
     /// Выбор шрифта должен доезжать до интерфейса, а не только сохраняться.

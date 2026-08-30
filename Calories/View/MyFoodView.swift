@@ -278,7 +278,8 @@ struct MyFoodView: View {
             name: food.name,
             calories: kcal,
             portion: "\(Int(grams)) \(String(localized: "г"))",
-            macros: food.macrosPer100g.scaled(by: grams)
+            macros: food.macrosPer100g.scaled(by: grams),
+            icon: food.foodCategory.icon
         )
     }
 

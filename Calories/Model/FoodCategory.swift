@@ -30,17 +30,17 @@ enum FoodCategory: String, CaseIterable, Identifiable {
 
     var icon: String {
         switch self {
-        case .meat:    return "fork.knife"
-        case .fish:    return "fish"
-        case .dairy:   return "carton"
-        case .legumes: return "leaf"
-        case .grains:  return "birthday.cake"
-        case .produce: return "carrot"
-        case .mushrooms: return "circle.hexagongrid"
-        case .fats:    return "drop"
-        case .sweets:  return "candybarphone"
-        case .drinks:  return "cup.and.saucer"
-        case .other:   return "square.grid.2x2"
+        case .meat:      return "fork.knife"
+        case .fish:      return "fish"
+        case .dairy:     return "waterbottle"
+        case .legumes:   return "leaf"
+        case .grains:    return "basket"
+        case .produce:   return "carrot"
+        case .mushrooms: return "umbrella"      // шляпка — самая узнаваемая форма
+        case .fats:      return "drop"
+        case .sweets:    return "birthday.cake"
+        case .drinks:    return "cup.and.saucer"
+        case .other:     return "square.grid.2x2"
         }
     }
 }

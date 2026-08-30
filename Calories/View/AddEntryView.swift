@@ -297,21 +297,30 @@ struct AddEntryView: View {
                 }
 
                 if source == .database {
-                    Section("База продуктов") {
                     if filteredBuiltInFoods.isEmpty {
-                        Text("Ничего не найдено")
-                            .foregroundStyle(.secondary)
+                        Section("База продуктов") {
+                            Text("Ничего не найдено")
+                                .foregroundStyle(.secondary)
+                        }
                     } else {
-                        ForEach(filteredBuiltInFoods) { food in
-                            NavigationLink {
-                                FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }, onAddAndSave: addAndSave) { item in
-                                    draftItems.append(item)
+                        // База разложена по категориям, а не идёт одним списком из
+                        // шести десятков строк. Отдельного контрола для этого не нужно:
+                        // заголовки секций сами работают навигацией.
+                        ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
+                            Section {
+                                ForEach(foods) { food in
+                                    NavigationLink {
+                                        FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }, onAddAndSave: addAndSave) { item in
+                                            draftItems.append(item)
+                                        }
+                                    } label: {
+                                        foodRow(food)
+                                    }
                                 }
-                            } label: {
-                                foodRow(food)
+                            } header: {
+                                Label(category.title, systemImage: category.icon)
                             }
                         }
-                    }
                     }
                 }
 
@@ -444,6 +453,16 @@ struct AddEntryView: View {
         dismiss()
     }
 
+    /// Раскладывает продукты по категориям в порядке самого перечисления —
+    /// он осмысленный (мясо, рыба, молочное...), в отличие от алфавитного.
+    private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
+        let buckets = Dictionary(grouping: foods, by: \.foodCategory)
+        return FoodCategory.allCases.compactMap { category in
+            guard let items = buckets[category], !items.isEmpty else { return nil }
+            return (category, items)
+        }
+    }
+
     /// Пусто ли в выбранном источнике при текущем запросе.
     private var currentSourceIsEmpty: Bool {
         switch source {
@@ -473,7 +492,8 @@ struct AddEntryView: View {
             name: food.name,
             calories: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
-            macros: food.macrosPer100g
+            macros: food.macrosPer100g,
+            icon: food.foodCategory.icon
         )
     }
 

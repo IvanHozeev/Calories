@@ -17,12 +17,36 @@ struct AddEntryView: View {
     @State private var offResults: [FoodItem] = []
     @State private var isSearchingOFF = false
     @State private var noNetwork = false
+    @State private var source: FoodSource = .recent
+
+    /// Откуда берём продукты. Разделение не косметическое: пока источники шли
+    /// сплошным списком, поиск по своим продуктам приходилось выискивать глазами
+    /// среди сотен строк базы, а сетевой запрос уходил на каждое нажатие клавиши.
+    enum FoodSource: String, CaseIterable, Identifiable {
+        case recent, mine, database, online
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .recent:   return String(localized: "Недавнее")
+            case .mine:     return String(localized: "Мои")
+            case .database: return String(localized: "База")
+            case .online:   return String(localized: "Онлайн")
+            }
+        }
+    }
 
     @FocusState private var quickCaloriesFocused: Bool
 
     init(store: CalorieStore, initialDate: Date = Date()) {
         self.store = store
-        _selectedDate = State(initialValue: initialDate)
+        // Открываем на дне, который просили, но со временем «сейчас»: для сегодняшней
+        // записи это привычное поведение, а для прошедшего дня — разумная отправная точка.
+        let calendar = Calendar.current
+        var parts = calendar.dateComponents([.year, .month, .day], from: initialDate)
+        let now = calendar.dateComponents([.hour, .minute], from: Date())
+        parts.hour = now.hour
+        parts.minute = now.minute
+        _selectedDate = State(initialValue: calendar.date(from: parts) ?? initialDate)
     }
 
     /// Быстрый ввод «только калории» имеет смысл лишь для восстановления прошлых дней —
@@ -71,14 +95,18 @@ struct AddEntryView: View {
         return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
     }
 
+    /// Недавнее тоже фильтруется запросом: раньше оно просто исчезало при вводе,
+    /// хотя чаще всего искомое лежит именно там.
     private var recentFoodItems: [FoodItem] {
-        guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
-        return store.recentFoods
+        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return store.recentFoods }
+        return store.recentFoods.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 
     private var recentDishItems: [Dish] {
-        guard debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
-        return store.recentDishes
+        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return store.recentDishes }
+        return store.recentDishes.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 
     @ViewBuilder private var offSearchSection: some View {
@@ -116,11 +144,14 @@ struct AddEntryView: View {
         NavigationStack {
             List {
                 Section {
+                    // Время, а не только дата: поел и записал через час — приём пищи
+                    // должен встать на то время, когда он был, иначе «вчерашний обед»
+                    // попадёт в дневник ночью и перепутает картину дня.
                     DatePicker(
-                        "Дата",
+                        "Когда",
                         selection: $selectedDate,
                         in: ...Date(),
-                        displayedComponents: .date
+                        displayedComponents: [.date, .hourAndMinute]
                     )
                 }
                 .onChange(of: selectedDate) { _, newValue in
@@ -185,7 +216,17 @@ struct AddEntryView: View {
                     Text("Быстро — только калории")
                 }
 
-                if !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
+                Section {
+                    Picker("Источник", selection: $source) {
+                        ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
+                    .listRowBackground(Color.clear)
+                }
+
+                if source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
                             NavigationLink {
@@ -208,7 +249,7 @@ struct AddEntryView: View {
                     }
                 }
 
-                if !filteredDishes.isEmpty {
+                if source == .mine, !filteredDishes.isEmpty {
                     Section("Мои блюда") {
                         ForEach(filteredDishes) { dish in
                             NavigationLink {
@@ -222,7 +263,7 @@ struct AddEntryView: View {
                     }
                 }
 
-                if !filteredCustomFoods.isEmpty {
+                if source == .mine, !filteredCustomFoods.isEmpty {
                     Section("Мои продукты") {
                         ForEach(filteredCustomFoods) { food in
                             NavigationLink {
@@ -251,11 +292,12 @@ struct AddEntryView: View {
                     }
                 }
 
-                if isSearchingOFF || !debouncedSearch.isEmpty {
+                if source == .online {
                     offSearchSection
                 }
 
-                Section("База продуктов") {
+                if source == .database {
+                    Section("База продуктов") {
                     if filteredBuiltInFoods.isEmpty {
                         Text("Ничего не найдено")
                             .foregroundStyle(.secondary)
@@ -270,6 +312,20 @@ struct AddEntryView: View {
                             }
                         }
                     }
+                    }
+                }
+
+                // Пустой результат — тупик, если не подсказать, где искать дальше.
+                if source != .online, currentSourceIsEmpty, !debouncedSearch.isEmpty {
+                    Section {
+                        Button {
+                            source = .online
+                        } label: {
+                            Label("Поискать в интернете", systemImage: "globe")
+                        }
+                    } footer: {
+                        Text("В выбранном источнике ничего не нашлось.")
+                    }
                 }
             }
             .glassRow()
@@ -281,7 +337,14 @@ struct AddEntryView: View {
             .searchable(text: $searchText,
                         placement: .navigationBarDrawer(displayMode: .always),
                         prompt: "Поиск продукта")
-            .task(id: searchText) {
+            // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
+            // на каждое нажатие клавиши, даже когда искали в своих продуктах.
+            .task(id: "\(source.rawValue)|\(searchText)") {
+                debouncedSearch = searchText
+                guard source == .online else {
+                    isSearchingOFF = false
+                    return
+                }
                 guard !searchText.isEmpty else {
                     debouncedSearch = ""
                     offResults = []
@@ -291,7 +354,6 @@ struct AddEntryView: View {
                 }
                 try? await Task.sleep(for: .milliseconds(200))
                 guard !Task.isCancelled else { return }
-                debouncedSearch = searchText
                 isSearchingOFF = true
                 offResults = []
                 do {
@@ -368,16 +430,8 @@ struct AddEntryView: View {
         }
     }
 
-    /// День из пикера + текущее время суток — чтобы у приёма пищи было осмысленное время.
-    private var entryDate: Date {
-        let calendar = Calendar.current
-        var dayComponents = calendar.dateComponents([.year, .month, .day], from: selectedDate)
-        let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: Date())
-        dayComponents.hour = timeComponents.hour
-        dayComponents.minute = timeComponents.minute
-        dayComponents.second = timeComponents.second
-        return calendar.date(from: dayComponents) ?? selectedDate
-    }
+    /// Пикер теперь хранит и время, поэтому подменять его текущим больше не нужно.
+    private var entryDate: Date { selectedDate }
 
     private func addAndSave(_ item: MealItem) {
         let allItems = draftItems + [item]
@@ -388,6 +442,16 @@ struct AddEntryView: View {
         store.add(name: name, calories: totalCalories, macros: totalMacros, grams: grams, date: entryDate)
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         dismiss()
+    }
+
+    /// Пусто ли в выбранном источнике при текущем запросе.
+    private var currentSourceIsEmpty: Bool {
+        switch source {
+        case .recent:   return recentFoodItems.isEmpty && recentDishItems.isEmpty
+        case .mine:     return filteredCustomFoods.isEmpty && filteredDishes.isEmpty
+        case .database: return filteredBuiltInFoods.isEmpty
+        case .online:   return offResults.isEmpty
+        }
     }
 
     private func isSaved(_ food: FoodItem) -> Bool {

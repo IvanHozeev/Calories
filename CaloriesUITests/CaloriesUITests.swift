@@ -149,8 +149,11 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
 
+        // База продуктов живёт на своей вкладке источника
+        app.segmentedControls.firstMatch.buttons["Database"].tap()
         let food = app.staticTexts["Almonds"]
-        XCTAssertTrue(food.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        scrollTo(food, in: app)
+        XCTAssertTrue(food.exists, "Не открылся лист добавления еды")
         food.tap()
 
         let addToMeal = app.buttons["addToMeal"]
@@ -162,6 +165,42 @@ final class CaloriesUITests: XCTestCase {
         // Действие приёма пищи ниже, чем пополнение справочника
         XCTAssertGreaterThan(addToMeal.frame.midY, saveToMyFoods.frame.midY,
                              "«В приём пищи» должно быть внизу, а закладка — наверху")
+    }
+
+    /// Забытый приём пищи должен вставать на своё время, а не на время записи.
+    @MainActor
+    func testMealCarriesTheTimeItWasEaten() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        // В пикере есть и дата, и время — иначе поправить час невозможно
+        let when = app.datePickers.firstMatch
+        XCTAssertTrue(when.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        XCTAssertGreaterThanOrEqual(when.buttons.count, 2,
+                                    "У записи должны настраиваться и день, и время")
+    }
+
+    /// Источники разведены сегментами, чтобы поиск шёл по одному, а не по всем сразу.
+    @MainActor
+    func testFoodSourcesAreSeparated() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        let sources = app.segmentedControls.firstMatch
+        XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя источника")
+        for name in ["Recent", "Mine", "Database", "Online"] {
+            XCTAssertTrue(sources.buttons[name].exists, "Нет источника «\(name)»")
+        }
+
+        // База продуктов появляется только на своей вкладке
+        XCTAssertFalse(app.staticTexts["Food Database"].exists,
+                       "База не должна показываться на вкладке недавнего")
+        sources.buttons["Database"].tap()
+        let header = app.staticTexts["Food Database"]
+        scrollTo(header, in: app)
+        XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
     }
 
     // MARK: - Запись еды

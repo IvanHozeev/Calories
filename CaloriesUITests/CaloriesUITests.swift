@@ -77,7 +77,8 @@ final class CaloriesUITests: XCTestCase {
                       "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
         XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
-        // Ввод замеров — под линейкой в тулбаре, а не строкой в списке
+        // Два входа в замеры: ячейка в параметрах и линейка в тулбаре для быстроты
+        XCTAssertTrue(app.buttons["openMeasurementsRow"].exists, "Ячейка «Замеры» должна остаться")
         app.buttons["openMeasurements"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
                       "Ячейка «Замеры» не открылась")

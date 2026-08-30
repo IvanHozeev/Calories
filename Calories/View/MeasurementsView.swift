@@ -40,6 +40,7 @@ struct MeasurementsView: View {
             sitesSection(legs, title: "Ноги")
 
             estimateExplainer
+            resultsSection
         }
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
@@ -226,6 +227,46 @@ struct MeasurementsView: View {
     private func commit(_ site: MeasurementSite, _ side: BodySide) {
         todaysMeasurement().setValue(values[Self.key(site, side)] ?? 0, for: site, side: side)
         store.saveMeasurementEdits()
+    }
+
+    // MARK: - Результаты
+
+    /// Что следует из снятых обхватов — здесь же, под самими замерами:
+    /// смотреть на выводы логично там, где видно, из чего они выведены.
+    @ViewBuilder
+    private var resultsSection: some View {
+        if let latest = store.latestMeasurement {
+            let insights = BodyAnalysis.insights(measurement: latest, profile: store.profile)
+            if !insights.isEmpty {
+                Section("Результаты") {
+                    ForEach(insights) { insight in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(insight.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(insight.verdictLabel)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(insight.verdict.color)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(insight.verdict.color.opacity(0.12), in: Capsule())
+                            }
+                            Text(insight.value)
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                            Text(insight.explanation)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, 6)
+                    }
+                }
+                .glassRow()
+            }
+        }
     }
 
     // MARK: - Пояснение к подсказкам

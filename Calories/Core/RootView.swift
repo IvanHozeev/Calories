@@ -9,6 +9,7 @@ struct RootView: View {
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
+    @AppStorage("app_text_size") private var appTextSize = AppTextSize.normal.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -51,6 +52,11 @@ struct RootView: View {
         // Начертание задаётся один раз на корне и наследуется всем деревом,
         // поэтому размеры и Dynamic Type нигде не приходится трогать.
         .fontDesign(AppFont(rawValue: appFont)?.design ?? .default)
+        // Смена начертания меняет ширину каждой строки, а значит и всю раскладку.
+        // Без анимации интерфейс перескакивает; с ней текст переезжает плавно.
+        .animation(.easeInOut(duration: 0.25), value: appFont)
+        .modifier(AppTextSizeModifier(size: AppTextSize(rawValue: appTextSize) ?? .normal))
+        .animation(.easeInOut(duration: 0.25), value: appTextSize)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
         }

@@ -22,15 +22,7 @@ enum AppFont: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Подпись показывает само начертание в деле — по названию его не выбрать.
-    var sample: String {
-        switch self {
-        case .system:     return "SF Pro"
-        case .rounded:    return "SF Rounded"
-        case .serif:      return "New York"
-        case .monospaced: return "SF Mono"
-        }
-    }
+
 
     var design: Font.Design {
         switch self {

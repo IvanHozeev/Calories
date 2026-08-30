@@ -101,7 +101,7 @@ struct SettingsView: View {
                     FontSettingsView()
                 } label: {
                     HStack {
-                        Label("Шрифт", systemImage: "textformat")
+                        Label("Шрифт и размер", systemImage: "textformat")
                         Spacer()
                         Text(AppFont(rawValue: appFont)?.title ?? "")
                             .foregroundStyle(.secondary)
@@ -244,39 +244,68 @@ private struct LanguageSettingsView: View {
 /// пришлось бы по названию, ничего не увидев.
 struct FontSettingsView: View {
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
+    @AppStorage("app_text_size") private var appTextSize = AppTextSize.normal.rawValue
 
     var body: some View {
         List {
-            Section {
+            Section("Размер") {
+                VStack(spacing: 8) {
+                    Slider(
+                        value: Binding(
+                            get: { Double(appTextSize) },
+                            set: { appTextSize = Int($0.rounded()) }
+                        ),
+                        in: 0...Double(AppTextSize.allCases.count - 1),
+                        step: 1
+                    ) {
+                        Text("Размер")
+                    } minimumValueLabel: {
+                        Text(verbatim: "A").font(.caption2)
+                    } maximumValueLabel: {
+                        Text(verbatim: "A").font(.title3)
+                    }
+                    .accessibilityIdentifier("textSizeSlider")
+
+                    Text(AppTextSize(rawValue: appTextSize)?.title ?? "")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 4)
+            }
+
+            Section("Начертание") {
                 ForEach(AppFont.allCases) { font in
                     Button {
-                        appFont = font.rawValue
+                        // Глифы подменяются мгновенно — шрифты не интерполируются.
+                        // Анимируется раскладка: при смене начертания меняется ширина
+                        // текста, и без этого весь список дёргается рывком.
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            appFont = font.rawValue
+                        }
                     } label: {
+                        // Образца «каждая строка своим шрифтом» здесь нет намеренно:
+                        // корневой .fontDesign переписывает начертание у любого шрифта
+                        // ниже себя, включая собранный из дескриптора, поэтому все
+                        // строки выглядели бы одинаково. Предпросмотр даёт сам выбор —
+                        // по тапу интерфейс мгновенно перерисовывается целиком.
                         HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(font.title)
-                                    .foregroundStyle(.primary)
-                                Text(verbatim: "\(font.sample) · 1234567890")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            .fontDesign(font.design)
+                            Text(font.title)
+                                .foregroundStyle(.primary)
                             Spacer()
                             if appFont == font.rawValue {
                                 Image(systemName: "checkmark")
                                     .foregroundStyle(.green)
+                                    .transition(.scale.combined(with: .opacity))
                             }
                         }
                     }
                     .accessibilityIdentifier("font-\(font.rawValue)")
                 }
-            } footer: {
-                Text("Все начертания системные. Подключённые шрифты почти никогда не содержат кириллицу и арабскую вязь, поэтому часть языков в них рассыпается.")
             }
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Шрифт")
+        .navigationTitle("Шрифт и размер")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

@@ -216,13 +216,14 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(entry.exists, "В настройках должен быть выбор шрифта")
         entry.tap()
 
-        XCTAssertTrue(app.navigationBars["Font"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Font and size"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.sliders["textSizeSlider"].exists, "Размер текста должен настраиваться ползунком")
         for style in ["system", "rounded", "serif", "monospaced"] {
             XCTAssertTrue(app.buttons["font-\(style)"].exists, "Нет начертания «\(style)»")
         }
 
         app.buttons["font-serif"].tap()
-        app.navigationBars["Font"].buttons.firstMatch.tap()
+        app.navigationBars["Font and size"].buttons.firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Serif"].waitForExistence(timeout: 5),
                       "Выбранное начертание должно быть видно в настройках")
     }

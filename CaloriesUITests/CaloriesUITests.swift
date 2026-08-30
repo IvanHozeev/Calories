@@ -112,13 +112,15 @@ final class CaloriesUITests: XCTestCase {
         // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40
         // Идентификатор на строке перекрыл бы идентификаторы вложенных подсказок,
         // поэтому строку ищем по подписи.
-        let row = app.staticTexts["Biceps · Right"]
+        let row = app.staticTexts["Biceps"]
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Не открылся экран замеров")
         row.tap()
 
-        let wheel = app.pickerWheels.firstMatch
-        XCTAssertTrue(wheel.waitForExistence(timeout: 5), "Строка должна раскрывать колесо")
-        wheel.adjust(toPickerWheelValue: "40")
+        // Парное место раскрывает два колеса: левое и правое
+        XCTAssertTrue(app.pickerWheels.element(boundBy: 1).waitForExistence(timeout: 5),
+                      "У парного места должно быть два колеса")
+        XCTAssertEqual(app.pickerWheels.count, 2)
+        app.pickerWheels.element(boundBy: 1).adjust(toPickerWheelValue: "40")
         row.tap()   // свернуть колесо, иначе соседние строки уезжают за экран
 
         // Предплечье не мерили — должна появиться серая оценка около 32, сразу

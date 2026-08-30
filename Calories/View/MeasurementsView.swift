@@ -54,11 +54,9 @@ struct MeasurementsView: View {
     private func sitesSection(_ sites: [MeasurementSite], title: LocalizedStringKey) -> some View {
         Section {
             ForEach(sites) { site in
-                ForEach(sides(site), id: \.self) { side in
-                    row(site, side)
-                    if expanded == Self.key(site, side) {
-                        wheel(site, side)
-                    }
+                row(site)
+                if expanded == site.rawValue {
+                    wheels(site)
                 }
             }
         } header: {
@@ -67,30 +65,59 @@ struct MeasurementsView: View {
         .glassRow()
     }
 
-    private func row(_ site: MeasurementSite, _ side: BodySide) -> some View {
+    /// Одна строка на место замера. Парные стороны стоят рядом двумя столбиками,
+    /// а не двумя строками: одна мышца — одна строка, иначе список удваивается
+    /// и читается как перечисление конечностей, а не мест замера.
+    private func row(_ site: MeasurementSite) -> some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(site.isPaired ? "\(site.title) · \(side.title)" : site.title)
+                Text(site.title)
                 // Инструкция видна всегда: свёрнутая за кнопкой она не помогает
-                // в тот момент, когда человек стоит с лентой. У парных мест
-                // пишем один раз — вторая сторона мерится так же.
-                if !site.isPaired || side == .left {
-                    Text(site.howTo)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                // в тот момент, когда человек стоит с лентой.
+                Text(site.howTo)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 12)
-            value(site, side)
+
+            VStack(alignment: .trailing, spacing: 2) {
+                HStack(alignment: .bottom, spacing: 14) {
+                    ForEach(sides(site), id: \.self) { side in
+                        VStack(spacing: 1) {
+                            // Подпись стороны повторяет порядок колёс ниже,
+                            // поэтому «41.5 / 44» не приходится расшифровывать.
+                            if site.isPaired {
+                                Text(side.title)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            value(site, side)
+                        }
+                    }
+                }
+                if let source = sharedSource(site) {
+                    Text(source)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.easeInOut(duration: 0.2)) {
-                let key = Self.key(site, side)
-                expanded = expanded == key ? nil : key
+                expanded = expanded == site.rawValue ? nil : site.rawValue
             }
         }
+    }
+
+    /// Пояснение к серой оценке пишем один раз на строку: у обеих сторон
+    /// источник один и тот же, и дублировать его в двух столбиках незачем.
+    private func sharedSource(_ site: MeasurementSite) -> String? {
+        let unmeasured = sides(site).filter { (values[Self.key(site, $0)] ?? 0) == 0 }
+        guard !unmeasured.isEmpty else { return nil }
+        let sources = Set(unmeasured.compactMap { suggestion(site, $0)?.source })
+        return sources.count == 1 ? sources.first : nil
     }
 
     /// Справа либо снятое значение, либо серая оценка с пояснением, откуда она.
@@ -102,21 +129,36 @@ struct MeasurementsView: View {
                 .font(.body.monospacedDigit())
                 .accessibilityIdentifier("value-\(Self.key(site, side))")
         } else if let hint = suggestion(site, side) {
-            VStack(alignment: .trailing, spacing: 1) {
-                // Округляем до целого: десятая доля в оценке обещала бы точность,
-                // которой в ней нет.
-                Text("≈ \(String(format: "%.0f", hint.value))")
-                    .font(.body.monospacedDigit())
-                    .foregroundStyle(.tertiary)
-                    .accessibilityIdentifier("hint-\(Self.key(site, side))")
-                Text(hint.source)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
+            // Округляем до целого: десятая доля в оценке обещала бы точность,
+            // которой в ней нет.
+            Text("≈ \(String(format: "%.0f", hint.value))")
+                .font(.body.monospacedDigit())
+                .foregroundStyle(.tertiary)
+                .accessibilityIdentifier("hint-\(Self.key(site, side))")
         } else {
             Text("—")
                 .foregroundStyle(.tertiary)
                 .accessibilityIdentifier("value-\(Self.key(site, side))")
+        }
+    }
+
+    /// Парные стороны — два колеса рядом, как футы и дюймы в профиле.
+    @ViewBuilder
+    private func wheels(_ site: MeasurementSite) -> some View {
+        if site.isPaired {
+            HStack(spacing: 0) {
+                ForEach(sides(site), id: \.self) { side in
+                    VStack(spacing: 0) {
+                        Text(side.title)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        wheel(site, side)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+        } else {
+            wheel(site, .right)
         }
     }
 
@@ -137,6 +179,7 @@ struct MeasurementsView: View {
         }
         .pickerStyle(.wheel)
         .frame(height: 160)
+        .clipped()
         .accessibilityIdentifier("wheel-\(Self.key(site, side))")
     }
 

@@ -228,6 +228,31 @@ final class CaloriesUITests: XCTestCase {
                       "Выбранное начертание должно быть видно в настройках")
     }
 
+    /// Случайный тап по уровню активности не должен молча менять норму калорий.
+    @MainActor
+    func testActivityLevelChangeAsksFirst() {
+        let app = launchApp()
+        app.tabBars.buttons["Body"].tap()
+        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+
+        let target = app.staticTexts["Very Active"]
+        scrollTo(target, in: app)
+        XCTAssertTrue(target.exists, "Нет уровня активности «Very Active»")
+        target.tap()
+
+        let alert = app.alerts.firstMatch
+        XCTAssertTrue(alert.waitForExistence(timeout: 5), "Смена уровня должна спрашивать подтверждение")
+
+        // Отмена оставляет всё как было
+        alert.buttons["Cancel"].tap()
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+
+        // А подтверждение применяет
+        target.tap()
+        app.alerts.firstMatch.buttons["Change"].tap()
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+    }
+
     // MARK: - Запись еды
 
     @MainActor

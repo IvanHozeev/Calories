@@ -21,6 +21,8 @@ struct BodyView: View {
     @State private var showProteinPicker = false
     @State private var sex: Sex
     @State private var activityLevel: ActivityLevel
+    /// Выбранный, но ещё не подтверждённый уровень активности.
+    @State private var pendingActivity: ActivityLevel?
     @State private var goal: Goal
     @AppStorage("use_imperial") private var useImperial = false
     
@@ -58,6 +60,22 @@ struct BodyView: View {
     /// в профиль: копия рано или поздно расходится с оригиналом.
     private var measurement: BodyMeasurement? { store.latestMeasurement }
     
+    /// Показываем не «вы уверены», а во что именно обойдётся смена:
+    /// новую норму калорий и разницу с текущей.
+    private func activityChangeMessage(to level: ActivityLevel) -> String {
+        guard let current = draftProfile else {
+            return String(localized: "Норма калорий пересчитается.")
+        }
+        var updated = current
+        updated.activityLevel = level
+        let delta = updated.calorieTarget - current.calorieTarget
+        let sign = delta > 0 ? "+" : ""
+        return String(
+            format: String(localized: "Норма станет %d ккал вместо %d — это %@%d ккал в день."),
+            updated.calorieTarget, current.calorieTarget, sign, delta
+        )
+    }
+
     private var measurementsCaption: String {
         guard let latest = store.latestMeasurement else { return String(localized: "Нет замеров") }
         return latest.date.formatted(.dateTime.day().month(.abbreviated))
@@ -204,7 +222,11 @@ struct BodyView: View {
             Section("Уровень активности") {
                 ForEach(ActivityLevel.allCases) { level in
                     Button {
-                        activityLevel = level
+                        // Уровень активности множит TDEE, то есть меняет норму калорий
+                        // на сотни. Промахнуться по соседней строке легко, а последствие
+                        // молчаливое: цифра назавтра другая, а почему — непонятно.
+                        guard level != activityLevel else { return }
+                        pendingActivity = level
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
@@ -294,6 +316,18 @@ struct BodyView: View {
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
+        .alert("Сменить уровень активности?", isPresented: Binding(
+            get: { pendingActivity != nil },
+            set: { if !$0 { pendingActivity = nil } }
+        ), presenting: pendingActivity) { level in
+            Button("Отмена", role: .cancel) { pendingActivity = nil }
+            Button("Сменить") {
+                activityLevel = level
+                pendingActivity = nil
+            }
+        } message: { level in
+            Text(activityChangeMessage(to: level))
+        }
         .navigationTitle("Тело")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

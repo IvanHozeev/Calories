@@ -300,6 +300,34 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func entryCategoriesAreRecoveredFromTheJoinedName() {
+        // Запись дневника категорий не хранит: приём пищи собирается из нескольких
+        // продуктов. Зато его имя склеено из названий через запятую.
+        store.addCustomFood(name: "Мой протеин", caloriesPer100g: 380, protein: 80, fat: 5, carbs: 5, category: .dairy)
+        store.addCustomFood(name: "Мой батончик", caloriesPer100g: 400, protein: 20, fat: 15, carbs: 45, category: .sweets)
+
+        #expect(store.foodCategories(forEntryNamed: "Мой протеин") == [.dairy])
+        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Мой батончик") == [.dairy, .sweets])
+
+        // Незнакомый кусок пропускается, а не отменяет остальные значки
+        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Неизвестно что") == [.dairy])
+        #expect(store.foodCategories(forEntryNamed: "Приём пищи").isEmpty)
+        #expect(store.foodCategories(forEntryNamed: "").isEmpty)
+    }
+
+    @Test func entryCategoriesCollapseRepeats() {
+        // Курица с говядиной — это одно мясо, а не две одинаковые вилки подряд.
+        store.addCustomFood(name: "Курочка", caloriesPer100g: 165, protein: 31, fat: 4, carbs: 0, category: .meat)
+        store.addCustomFood(name: "Говядинка", caloriesPer100g: 250, protein: 26, fat: 15, carbs: 0, category: .meat)
+        #expect(store.foodCategories(forEntryNamed: "Курочка, Говядинка") == [.meat])
+    }
+
+    @Test func entryCategoriesSurviveATruncatedName() {
+        // Длинные имена обрезаются многоточием — обрубок не должен ломать разбор.
+        store.addCustomFood(name: "Мой протеин", caloriesPer100g: 380, protein: 80, fat: 5, carbs: 5, category: .dairy)
+        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Овсянка на в…") == [.dairy])
+    }
+
     // MARK: Initial state
 
     @Test func initialState_noEntries() {

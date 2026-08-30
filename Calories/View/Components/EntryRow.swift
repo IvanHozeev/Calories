@@ -5,6 +5,9 @@ import SwiftUI
 /// вместо слипшегося «Б6 Ж31 У58».
 struct EntryRow: View {
     let entry: FoodEntry
+    /// Значки категорий всех продуктов приёма пищи. Место под них занято всегда,
+    /// даже когда значков нет: иначе названия строк поедут по левому краю.
+    var icons: [String] = []
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -19,6 +22,18 @@ struct EntryRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
+            // Больше трёх не показываем: дальше значки съедают место у названия,
+            // а различать приёмы пищи по четвёртой иконке всё равно не выходит.
+            HStack(spacing: 3) {
+                ForEach(icons.prefix(3), id: \.self) { icon in
+                    Image(systemName: icon)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(width: 44, height: 20, alignment: .leading)
+            .accessibilityHidden(true)
+
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.name)
                     .font(.body)

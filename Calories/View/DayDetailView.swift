@@ -44,7 +44,7 @@ struct DayDetailView: View {
                         NavigationLink {
                             EditEntrySheet(store: store, entry: entry, isEmbedded: true)
                         } label: {
-                            EntryRow(entry: entry)
+                            EntryRow(entry: entry, icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon))
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {

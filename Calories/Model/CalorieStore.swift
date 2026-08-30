@@ -385,6 +385,29 @@ final class CalorieStore {
         lockPastGoals()
     }
 
+    /// Категории всех продуктов, вошедших в приём пищи.
+    ///
+    /// Сама запись их не хранит: приём пищи собирается из нескольких продуктов,
+    /// и одной категории у него нет. Зато имя склеено из названий через запятую —
+    /// по нему состав и восстанавливается. Длинное имя обрезается многоточием,
+    /// поэтому последний кусок может не совпасть ни с чем: тогда он просто
+    /// пропускается, а не портит остальные значки.
+    /// Повторы схлопываются: курица с говядиной — это одно мясо, а не две вилки.
+    func foodCategories(forEntryNamed name: String) -> [FoodCategory] {
+        var seen: Set<FoodCategory> = []
+        var found: [FoodCategory] = []
+        for part in name.components(separatedBy: ", ") {
+            let trimmed = part.trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: CharacterSet(charactersIn: "…"))
+            guard !trimmed.isEmpty else { continue }
+            let match = customFoods.first { $0.name == trimmed }?.foodCategory
+                ?? FoodDatabase.items.first { $0.name == trimmed }?.foodCategory
+            guard let match, seen.insert(match).inserted else { continue }
+            found.append(match)
+        }
+        return found
+    }
+
     func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, category: category)
         context.insert(food)

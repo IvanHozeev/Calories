@@ -161,7 +161,7 @@ struct ContentView: View {
                         Section {
                             ForEach(group.entries) { entry in
                                 NavigationLink(value: entry) {
-                                    EntryRow(entry: entry)
+                                    EntryRow(entry: entry, icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon))
                                 }
                                 .swipeActions(edge: .leading) {
                                     Button {

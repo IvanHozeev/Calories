@@ -273,7 +273,14 @@ struct AddEntryView: View {
                 }
             }
             .glassRow()
-            .searchable(text: $searchText, prompt: "Поиск продукта")
+            // Поиск закреплён в навбаре намеренно. При размещении по умолчанию
+            // строка поиска уходит вниз экрана — туда же, где появляется панель
+            // с кнопкой «Сохранить», как только в черновике есть хоть один продукт.
+            // Панель выигрывала это место, поиск пропадал насовсем, и добавить
+            // второй продукт становилось нечем.
+            .searchable(text: $searchText,
+                        placement: .navigationBarDrawer(displayMode: .always),
+                        prompt: "Поиск продукта")
             .task(id: searchText) {
                 guard !searchText.isEmpty else {
                     debouncedSearch = ""

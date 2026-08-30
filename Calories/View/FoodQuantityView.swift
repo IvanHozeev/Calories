@@ -107,32 +107,45 @@ struct FoodQuantityView: View {
                     .accessibilityIdentifier("saveToMyFoods")
                 }
             }
-            ToolbarItem(placement: .bottomBar) {
-                HStack(spacing: 12) {
-                    Button("В приём пищи") {
-                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                        dismiss()
-                    }
-                    .accessibilityIdentifier("addToMeal")
-                    .frame(maxWidth: .infinity)
-                    .fontWeight(.semibold)
-                    .buttonStyle(.borderedProminent)
+        }
+        // Панель действий своя, а не ToolbarItem: в тулбаре две кнопки склеиваются
+        // в одну капсулу без зазора, и широкая накрывает соседнюю.
+        .safeAreaInset(edge: .bottom) {
+            HStack(spacing: 10) {
+                Button {
+                    onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                    dismiss()
+                } label: {
+                    // Растягивается подпись внутри кнопки, а не сама кнопка:
+                    // иначе её фон занимает всю строку и съедает соседнюю.
+                    Text("В приём пищи")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityIdentifier("addToMeal")
 
-                    // Второй сценарий: не копить приём пищи, а записать этот продукт сразу.
-                    if let onAddAndSave {
-                        Button {
-                            onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                        } label: {
-                            Image(systemName: "checkmark")
-                                .fontWeight(.semibold)
-                                .frame(width: 30)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.green)
-                        .accessibilityLabel("Добавить и сохранить")
+                // Второй сценарий: не копить приём пищи, а записать продукт сразу.
+                if let onAddAndSave {
+                    Button {
+                        onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .fontWeight(.semibold)
+                            .frame(width: 24)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(.green)
+                    .accessibilityIdentifier("addAndSave")
+                    .accessibilityLabel("Добавить и сохранить")
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
+            .background(.bar)
         }
     }
 }
@@ -243,30 +256,40 @@ struct DishQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .bottomBar) {
-                HStack(spacing: 12) {
-                    Button("В приём пищи") {
-                        onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
-                        dismiss()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .fontWeight(.semibold)
-                    .buttonStyle(.borderedProminent)
+        }
+        .safeAreaInset(edge: .bottom) {
+            HStack(spacing: 10) {
+                Button {
+                    onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
+                    dismiss()
+                } label: {
+                    Text("В приём пищи")
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityIdentifier("addToMeal")
 
-                    if let onAddAndSave {
-                        Button {
-                            onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
-                        } label: {
-                            Image(systemName: "checkmark")
-                                .fontWeight(.semibold)
-                                .frame(width: 30)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(.green)
-                        .accessibilityLabel("Добавить и сохранить")
+                if let onAddAndSave {
+                    Button {
+                        onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
+                    } label: {
+                        Image(systemName: "checkmark")
+                            .fontWeight(.semibold)
+                            .frame(width: 24)
                     }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(.green)
+                    .accessibilityIdentifier("addAndSave")
+                    .accessibilityLabel("Добавить и сохранить")
                 }
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
+            .background(.bar)
         }
     }
 }

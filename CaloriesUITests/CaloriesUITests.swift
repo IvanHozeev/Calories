@@ -26,6 +26,15 @@ final class CaloriesUITests: XCTestCase {
         return app
     }
 
+    /// Список ленивый: то, что ниже экрана, в дереве элементов отсутствует.
+    private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 8) {
+        var tries = 0
+        while !element.exists && tries < attempts {
+            app.swipeUp()
+            tries += 1
+        }
+    }
+
     // MARK: - Навигация
 
     @MainActor
@@ -70,7 +79,7 @@ final class CaloriesUITests: XCTestCase {
         app.buttons["openMeasurements"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
                       "Ячейка «Замеры» не открылась")
-        XCTAssertTrue(app.textFields["field-neck-right"].exists,
+        XCTAssertTrue(app.staticTexts["Neck"].exists,
                       "Замеры вводятся прямо в списке, без отдельного листа")
     }
 
@@ -93,31 +102,6 @@ final class CaloriesUITests: XCTestCase {
                       "В настройках должна быть выгрузка дневника в CSV")
     }
 
-    /// Слипшиеся при вводе цифры не должны попадать в историю: один такой замер
-    /// ломает и график, и все производные отношения в отчёте.
-    @MainActor
-    func testMeasurementRejectsImplausibleValue() {
-        let app = launchApp(resetMeasurements: true)
-        app.tabBars.buttons["Body"].tap()
-        app.buttons["openMeasurements"].tap()
-
-        let chest = app.textFields["field-chest-right"]
-        XCTAssertTrue(chest.waitForExistence(timeout: 5), "Не открылся экран замеров")
-        chest.tap()
-        chest.typeText("10878828196")
-
-        XCTAssertTrue(app.staticTexts["range-chest"].waitForExistence(timeout: 2),
-                      "Должна появиться подсказка с ожидаемым диапазоном")
-
-        // Мусор не должен попасть в данные: уходим и возвращаемся
-        app.navigationBars["Measurements"].buttons.firstMatch.tap()
-        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
-        app.buttons["openMeasurements"].tap()
-        XCTAssertTrue(app.textFields["field-chest-right"].waitForExistence(timeout: 5))
-        XCTAssertNotEqual(app.textFields["field-chest-right"].value as? String, "10878828196",
-                          "Неправдоподобное значение не должно было сохраниться")
-    }
-
     /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.
     @MainActor
     func testMeasurementsSuggestMissingSites() {
@@ -125,20 +109,30 @@ final class CaloriesUITests: XCTestCase {
         app.tabBars.buttons["Body"].tap()
         app.buttons["openMeasurements"].tap()
 
-        let biceps = app.textFields["field-biceps-right"]
-        XCTAssertTrue(biceps.waitForExistence(timeout: 5))
-        biceps.tap()
-        biceps.typeText("40")
+        // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40
+        // Идентификатор на строке перекрыл бы идентификаторы вложенных подсказок,
+        // поэтому строку ищем по подписи.
+        let row = app.staticTexts["Biceps · Right"]
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Не открылся экран замеров")
+        row.tap()
 
-        // Предплечье не мерили — в нём должна появиться серая оценка около 32,
-        // причём сразу, без ухода с экрана
-        XCTAssertEqual(app.staticTexts["hint-forearm-right"].label, "32",
-                       "Пустое поле должно подсказывать ожидаемое значение")
+        let wheel = app.pickerWheels.firstMatch
+        XCTAssertTrue(wheel.waitForExistence(timeout: 5), "Строка должна раскрывать колесо")
+        wheel.adjust(toPickerWheelValue: "40")
+        row.tap()   // свернуть колесо, иначе соседние строки уезжают за экран
+
+        // Предплечье не мерили — должна появиться серая оценка около 32, сразу
+        let forearmHint = app.staticTexts["hint-forearm-right"]
+        scrollTo(forearmHint, in: app)
+        XCTAssertEqual(forearmHint.label, "≈ 32",
+                       "Незаполненное место должно подсказываться по пропорциям")
         XCTAssertTrue(app.staticTexts["≈ 80% of biceps"].exists,
                       "Подсказка должна объяснять, откуда взялось число")
 
         // Вторая сторона той же мышцы — самый надёжный ориентир
-        XCTAssertEqual(app.staticTexts["hint-biceps-left"].label, "40",
+        let bicepsLeftHint = app.staticTexts["hint-biceps-left"]
+        scrollTo(bicepsLeftHint, in: app)
+        XCTAssertEqual(bicepsLeftHint.label, "≈ 40",
                        "Непомеренная сторона должна подсказываться по померенной")
     }
 

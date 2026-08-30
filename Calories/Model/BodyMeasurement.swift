@@ -180,6 +180,15 @@ enum MeasurementSite: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Значения для колеса, в десятых долях сантиметра. Шаг 0.5 см — мельче лента
+    /// всё равно не даёт, а колесо с шагом 0.1 пришлось бы крутить впятеро дольше.
+    /// Колесо предлагает только правдоподобное, поэтому мусор не ввести в принципе.
+    var pickerTenths: [Int] {
+        let lower = Int((plausibleRange.lowerBound * 10).rounded())
+        let upper = Int((plausibleRange.upperBound * 10).rounded())
+        return Array(stride(from: lower, through: upper, by: 5))
+    }
+
     /// Пустое поле — это «не мерил», а не ошибка. Ноль тоже: так замер очищают.
     func isPlausible(_ value: Double) -> Bool {
         value == 0 || plausibleRange.contains(value)

@@ -1003,6 +1003,25 @@ struct BodyAnalysisTests {
         #expect(!MeasurementSite.wrist.isPlausible(11.9))
     }
 
+    @Test func pickerOffersOnlyPlausibleValues() {
+        // Колесо — единственный способ ввода, поэтому мусор не должен в нём лежать.
+        for site in MeasurementSite.allCases {
+            let options = site.pickerTenths
+            #expect(!options.isEmpty, "\(site) без вариантов в колесе")
+            for tenths in options {
+                #expect(site.isPlausible(Double(tenths) / 10),
+                        "\(site) предлагает \(Double(tenths) / 10)")
+            }
+            // Границы диапазона должны быть достижимы
+            #expect(Double(options.first!) / 10 == site.plausibleRange.lowerBound)
+            #expect(Double(options.last!) / 10 <= site.plausibleRange.upperBound)
+            // Шаг 0.5 см: мельче лента не даёт
+            if options.count > 1 {
+                #expect(options[1] - options[0] == 5)
+            }
+        }
+    }
+
     @Test func plausibleRange_coversEverySite() {
         // Забыть диапазон для нового места замера — значит пропустить мусор в историю.
         for site in MeasurementSite.allCases {

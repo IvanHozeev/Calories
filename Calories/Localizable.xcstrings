@@ -7651,6 +7651,7 @@
       }
     },
     "Замер": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -7697,6 +7698,7 @@
       }
     },
     "Замеров пока нет": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -9912,6 +9914,7 @@
       }
     },
     "Левая и правая стороны — отдельно, по ним считается симметрия.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -12831,6 +12834,7 @@
       }
     },
     "Новый замер": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -14729,6 +14733,7 @@
       }
     },
     "Первый замер": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -16945,6 +16950,7 @@
       }
     },
     "Последний замер": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -17083,6 +17089,7 @@
       }
     },
     "Потолок по костяку": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -17221,6 +17228,7 @@
       }
     },
     "Править этот замер": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -20280,6 +20288,7 @@
       }
     },
     "Симметрия": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -20603,6 +20612,7 @@
       }
     },
     "Слева/справа и расхождение. До 1 см — погрешность ленты, свыше 2 см стоит смотреть.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -20742,6 +20752,7 @@
       }
     },
     "Сними обхваты лентой — приложение посчитает симметрию, пропорции и покажет, что растёт, а что отстаёт.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -23952,6 +23963,7 @@
       }
     },
     "Формула МакКаллума от запястья %.1f см. Ориентир пропорций, а не цель любой ценой.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -26079,6 +26091,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "ingr."
+          }
+        }
+      }
+    },
+    "как другая сторона": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مثل الجانب الآخر"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "wie die andere Seite"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "same as other side"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "como el otro lado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "comme l'autre côté"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כמו הצד השני"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "como o outro lado"
           }
         }
       }

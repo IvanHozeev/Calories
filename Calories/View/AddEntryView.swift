@@ -263,31 +263,39 @@ struct AddEntryView: View {
                     }
                 }
 
-                if source == .mine, !filteredCustomFoods.isEmpty {
-                    Section("Мои продукты") {
-                        ForEach(filteredCustomFoods) { food in
-                            NavigationLink {
-                                FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
-                                    draftItems.append(item)
-                                }
-                            } label: {
-                                foodRow(food)
-                            }
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    store.deleteCustomFood(food)
+                // Свои продукты тоже разложены по категориям: их накапливается
+                // не меньше, чем в базе. «Недавнее» намеренно оставлено плоским —
+                // там порядок и есть смысл: сверху последнее съеденное, и
+                // группировка сломала бы именно то, ради чего туда заходят.
+                if source == .mine {
+                    ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
+                        Section {
+                            ForEach(foods) { food in
+                                NavigationLink {
+                                    FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
+                                        draftItems.append(item)
+                                    }
                                 } label: {
-                                    Image(systemName: "trash")
+                                    foodRow(food)
+                                }
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        store.deleteCustomFood(food)
+                                    } label: {
+                                        Image(systemName: "trash")
+                                    }
+                                }
+                                .swipeActions(edge: .leading) {
+                                    Button {
+                                        editingFood = food
+                                    } label: {
+                                        Image(systemName: "pencil")
+                                    }
+                                    .tint(.blue)
                                 }
                             }
-                            .swipeActions(edge: .leading) {
-                                Button {
-                                    editingFood = food
-                                } label: {
-                                    Image(systemName: "pencil")
-                                }
-                                .tint(.blue)
-                            }
+                        } header: {
+                            Label(category.title, systemImage: category.icon)
                         }
                     }
                 }

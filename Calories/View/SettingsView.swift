@@ -46,18 +46,6 @@ struct SettingsView: View {
     
     var body: some View {
         List {
-            Section {
-                NavigationLink {
-                    ProfileSettingsView(store: store)
-                } label: {
-                    Label("Профиль", systemImage: "person.crop.circle")
-                }
-            } header: {
-                Text("Пользователь")
-            } footer: {
-                Text("Параметры тела, уровень активности и норма белка.")
-            }
-            
             Section("Подписка") {
 #if DEBUG
                 // Отладочный тумблер: пока продукты StoreKit не грузятся, это

@@ -62,8 +62,14 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
         XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+        // «Тело» — список разделов: профиль с параметрами тела и антропометрия.
+        XCTAssertTrue(app.buttons["openProfile"].exists, "Профиль должен жить на «Теле», а не в настройках")
+        XCTAssertTrue(app.buttons["openWeight"].exists, "Вес должен открываться из «Тела»")
+
+        app.buttons["openMeasurements"].tap()
+        XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
+                      "Ячейка «Замеры» не открылась")
         XCTAssertTrue(app.buttons["addMeasurement"].exists, "В тулбаре должна быть кнопка добавления замера")
-        XCTAssertTrue(app.staticTexts["Weight and trend"].exists, "Вес должен открываться из «Тела»")
     }
 
     @MainActor
@@ -91,6 +97,7 @@ final class CaloriesUITests: XCTestCase {
     func testMeasurementRejectsImplausibleValue() {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
+        app.buttons["openMeasurements"].tap()
         app.buttons["addMeasurement"].tap()
 
         let chest = app.textFields["field-chest-right"]

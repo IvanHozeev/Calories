@@ -1851,6 +1851,52 @@
         }
       }
     },
+    "Антропометрия": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "القياسات الجسمية"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anthropometrie"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anthropometry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antropometría"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anthropométrie"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אנתרופומטריה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antropometria"
+          }
+        }
+      }
+    },
     "Апельсин": {
       "localizations": {
         "ar": {
@@ -12416,6 +12462,52 @@
         }
       }
     },
+    "Нет замеров": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אין"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma"
+          }
+        }
+      }
+    },
     "Нет записей": {
       "localizations": {
         "ar": {
@@ -13338,6 +13430,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "A circunferência dos glúteos sozinha diz pouco: uma pelve larga a infla. A diferença com o osso separa músculo de esqueleto."
+          }
+        }
+      }
+    },
+    "Обхваты снимают раз в неделю-две, вес — каждый день. Поэтому они разведены по разным экранам.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُقاس المحيطات كل أسبوع أو أسبوعين، والوزن يوميًا. لذلك وُضعا في شاشتين منفصلتين."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umfänge misst man alle ein bis zwei Wochen, das Gewicht täglich. Darum liegen sie auf getrennten Bildschirmen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Girths are taken every week or two, weight every day. That is why they live on separate screens."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los contornos se miden cada una o dos semanas; el peso, a diario. Por eso están en pantallas distintas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les tours se prennent toutes les une à deux semaines, le poids chaque jour. D'où deux écrans distincts."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "היקפים נמדדים כל שבוע-שבועיים, משקל כל יום. לכן הם במסכים נפרדים."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As circunferências são medidas a cada uma ou duas semanas; o peso, todo dia. Por isso ficam em telas separadas."
           }
         }
       }
@@ -14452,7 +14590,52 @@
         }
       }
     },
-    "Параметры тела, уровень активности и норма белка.": {},
+    "Параметры тела, уровень активности и норма белка.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بيانات الجسم ومستوى النشاط وهدف البروتين."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Körperdaten, Aktivitätsniveau und Proteinziel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body parameters, activity level and protein target."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parámetros corporales, nivel de actividad y objetivo de proteína."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paramètres corporels, niveau d'activité et objectif de protéines."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "נתוני גוף, רמת פעילות ויעד חלבון."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parâmetros corporais, nível de atividade e meta de proteína."
+          }
+        }
+      }
+    },
     "Первая неделя": {
       "localizations": {
         "ar": {
@@ -16530,7 +16713,52 @@
         }
       }
     },
-    "Пользователь": {},
+    "Пользователь": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المستخدم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Benutzer"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "User"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utilisateur"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "משתמש"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuário"
+          }
+        }
+      }
+    },
     "Помидор": {
       "localizations": {
         "ar": {
@@ -16712,6 +16940,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Recente"
+          }
+        }
+      }
+    },
+    "Последний замер": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "آخر قياس"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Messung"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest measurement"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última medida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dernière mesure"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המדידה האחרונה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última medida"
           }
         }
       }

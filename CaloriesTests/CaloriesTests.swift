@@ -1003,6 +1003,31 @@ struct BodyAnalysisTests {
         #expect(!MeasurementSite.wrist.isPlausible(11.9))
     }
 
+    @Test func sideLabelAgreesWithGender() {
+        // Проверяем раскладку по родам, а не текст: подписи локализованы,
+        // и в английской локали все формы совпадают.
+        // «Левое предплечье», но «левая икра».
+        #expect(MeasurementSite.biceps.gender == .masculine)
+        #expect(MeasurementSite.quad.gender == .masculine)
+        #expect(MeasurementSite.forearm.gender == .neuter)
+        #expect(MeasurementSite.wrist.gender == .neuter)
+        #expect(MeasurementSite.thigh.gender == .neuter)
+        #expect(MeasurementSite.calf.gender == .feminine)
+
+        // У парного места подпись стороны стоит рядом с одной конечностью,
+        // поэтому множественное число там было бы ошибкой.
+        for site in MeasurementSite.allCases where site.isPaired {
+            #expect(site.gender != .plural, "\(site): парное место не может быть во множественном")
+        }
+
+        // Каждая пара «сторона + род» должна давать непустую подпись
+        for gender in [GrammaticalGender.masculine, .feminine, .neuter, .plural] {
+            for side in BodySide.allCases {
+                #expect(!side.title(gender).isEmpty)
+            }
+        }
+    }
+
     @Test func pickerOffersOnlyPlausibleValues() {
         // Колесо — единственный способ ввода, поэтому мусор не должен в нём лежать.
         for site in MeasurementSite.allCases {

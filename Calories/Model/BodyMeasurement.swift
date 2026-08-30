@@ -112,13 +112,30 @@ final class BodyMeasurement: Identifiable {
     }
 }
 
+/// Грамматический род места замера. Нужен только там, где подпись стороны
+/// согласуется с существительным: «левое предплечье», но «левая икра».
+/// Род указан по русскому языку — он же язык разработки. В английском и немецком
+/// подписи сторон не изменяются вовсе, а в испанском, португальском, французском,
+/// арабском и иврите они переведены неизменяемой формой-существительным
+/// («слева»/«справа»), потому что род существительного там свой и с русским
+/// не совпадает: предплечье среднего рода, а antebrazo — мужского.
+enum GrammaticalGender {
+    case masculine, feminine, neuter, plural
+}
+
 enum BodySide: String, CaseIterable {
     case left, right
 
-    var title: String {
-        switch self {
-        case .left:  return String(localized: "Левый")
-        case .right: return String(localized: "Правый")
+    func title(_ gender: GrammaticalGender) -> String {
+        switch (self, gender) {
+        case (.left, .masculine):  return String(localized: "Левый")
+        case (.left, .feminine):   return String(localized: "Левая")
+        case (.left, .neuter):     return String(localized: "Левое")
+        case (.left, .plural):     return String(localized: "Левые")
+        case (.right, .masculine): return String(localized: "Правый")
+        case (.right, .feminine):  return String(localized: "Правая")
+        case (.right, .neuter):    return String(localized: "Правое")
+        case (.right, .plural):    return String(localized: "Правые")
         }
     }
 }
@@ -177,6 +194,27 @@ enum MeasurementSite: String, CaseIterable, Identifiable {
         case .thigh:     return 30...100
         case .quad:      return 25...90
         case .calf:      return 20...70
+        }
+    }
+
+    /// Род названия — для согласования подписи стороны. Парные места указаны
+    /// точно; у непарных род тоже проставлен, чтобы согласование не сломалось,
+    /// если какое-то из них когда-нибудь станет парным.
+    var gender: GrammaticalGender {
+        switch self {
+        case .neck:      return .feminine    // шея
+        case .shoulders: return .plural      // плечи
+        case .chest:     return .feminine    // грудь
+        case .waist:     return .feminine    // талия
+        case .belt:      return .masculine   // пояс
+        case .pelvis:    return .masculine   // таз
+        case .glutes:    return .plural      // ягодицы
+        case .biceps:    return .masculine   // бицепс
+        case .forearm:   return .neuter      // предплечье
+        case .wrist:     return .neuter      // запястье
+        case .thigh:     return .neuter      // бедро
+        case .quad:      return .masculine   // квадрицепс
+        case .calf:      return .feminine    // икра
         }
     }
 

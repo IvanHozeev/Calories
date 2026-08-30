@@ -88,7 +88,7 @@ struct MeasurementsView: View {
                             // Подпись стороны повторяет порядок колёс ниже,
                             // поэтому «41.5 / 44» не приходится расшифровывать.
                             if site.isPaired {
-                                Text(side.title)
+                                Text(side.title(site.gender))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -149,7 +149,7 @@ struct MeasurementsView: View {
             HStack(spacing: 0) {
                 ForEach(sides(site), id: \.self) { side in
                     VStack(spacing: 0) {
-                        Text(side.title)
+                        Text(side.title(site.gender))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         wheel(site, side)

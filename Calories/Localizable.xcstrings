@@ -7133,6 +7133,144 @@
         }
       }
     },
+    "Жир % (по обхватам)": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسبة الدهون (من المحيطات)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Körperfett (aus Umfängen)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body fat (from girths)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grasa % (por contornos)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Masse grasse (par les tours)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחוז שומן (מהיקפים)"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gordura % (por circunferências)"
+          }
+        }
+      }
+    },
+    "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُحسب الدهون بطريقة البحرية الأمريكية من محيطات القياسات بدقة ±2–3%. قِس دائمًا في الموضع نفسه."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Körperfett nutzt die US-Navy-Methode mit den Umfängen aus den Messungen, Genauigkeit ±2–3%. Miss immer an derselben Stelle."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body fat uses the US Navy method on the girths from Measurements, accurate to ±2–3%. Take them at the same spot each time to keep it consistent."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grasa usa el método de la Marina de EE. UU. con los contornos de Medidas, precisión ±2–3%. Mídelos siempre en el mismo punto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La masse grasse utilise la méthode de l'US Navy sur les tours saisis dans Mesures, précision ±2–3%. Mesure toujours au même endroit."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחוז השומן מחושב בשיטת חיל הים האמריקאי מההיקפים שבמדידות, בדיוק ±2–3%. מדוד תמיד באותה נקודה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A gordura usa o método da Marinha dos EUA com as circunferências de Medidas, precisão ±2–3%. Meça sempre no mesmo ponto."
+          }
+        }
+      }
+    },
+    "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُحسب الدهون بمعادلة دورينبرغ من مؤشر كتلة الجسم بدقة ±5%، وهي لا تفرّق بين العضلات والدهون. قِس الرقبة والسرة لتعمل طريقة المحيطات."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Körperfett nutzt die Deurenberg-Formel aus dem BMI, Genauigkeit ±5%: sie unterscheidet Muskeln nicht von Fett. Miss Hals und Nabel, dann greift die Umfangsmethode."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Body fat uses the Deurenberg formula from BMI, accurate to ±5%: it cannot tell muscle from fat. Measure your neck and navel and the girth-based method takes over."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La grasa usa la fórmula de Deurenberg a partir del IMC, precisión ±5%: no distingue músculo de grasa. Mide el cuello y el ombligo y se activará el método por contornos."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La masse grasse utilise la formule de Deurenberg à partir de l'IMC, précision ±5% : elle ne distingue pas le muscle de la graisse. Mesure ton cou et ton nombril et la méthode par les tours prendra le relais."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחוז השומן מחושב בנוסחת דוירנברג לפי BMI, בדיוק ±5%: היא אינה מבחינה בין שריר לשומן. מדוד צוואר וטבור וייכנס לפעולה החישוב לפי היקפים."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A gordura usa a fórmula de Deurenberg a partir do IMC, precisão ±5%: não distingue músculo de gordura. Meça o pescoço e o umbigo e o método por circunferências assume."
+          }
+        }
+      }
+    },
     "Жиры": {
       "localizations": {
         "ar": {
@@ -10794,6 +10932,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Метод ВМС США: расчёт по обхватам талии и шеи. Точность ±2–3%. Меряй в одном месте каждый раз."
+          }
+        }
+      }
+    },
+    "Метод ВМС США: считается по шее и поясу, точность ±2–3%. Он опирается на обхваты, а не на вес, поэтому не путает набранные мышцы с жиром — в отличие от расчёта по ИМТ.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "طريقة البحرية الأمريكية من الرقبة والسرة بدقة ±2–3%. تعتمد على المحيطات لا على الوزن، فلا تخلط العضلات المكتسبة بالدهون كما يفعل الحساب بمؤشر كتلة الجسم."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "US-Navy-Methode aus Hals und Nabel, Genauigkeit ±2–3%. Sie rechnet mit Umfängen statt mit Gewicht und verwechselt aufgebaute Muskeln daher nicht mit Fett, anders als die BMI-Schätzung."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The US Navy method, from neck and navel, accurate to ±2–3%. It works from girths rather than weight, so it does not mistake gained muscle for fat the way a BMI estimate does."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Método de la Marina de EE. UU., a partir del cuello y el ombligo, con precisión de ±2–3%. Parte de los contornos y no del peso, así que no confunde músculo ganado con grasa como sí hace el cálculo por IMC."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Méthode de l'US Navy, à partir du cou et du nombril, précision ±2–3%. Elle part des tours et non du poids : elle ne confond donc pas le muscle gagné avec de la graisse, contrairement au calcul par IMC."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "שיטת חיל הים האמריקאי, לפי הצוואר והטבור, בדיוק של ±2–3%. היא מבוססת על היקפים ולא על משקל, ולכן אינה מחליפה שריר שנבנה בשומן כמו חישוב לפי BMI."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Método da Marinha dos EUA, a partir do pescoço e do umbigo, precisão de ±2–3%. Parte das circunferências e não do peso, então não confunde músculo ganho com gordura como o cálculo por IMC."
           }
         }
       }

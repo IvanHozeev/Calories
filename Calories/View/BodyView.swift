@@ -22,9 +22,6 @@ struct BodyView: View {
     @State private var sex: Sex
     @State private var activityLevel: ActivityLevel
     @State private var goal: Goal
-    @State private var waistCm: Int
-    @State private var neckCm: Int
-    @State private var hipCm: Int
     @AppStorage("use_imperial") private var useImperial = false
 
     private func weightDisplayText(_ tenths: Int) -> String {
@@ -55,14 +52,12 @@ struct BodyView: View {
         _sex = State(initialValue: profile?.sex ?? .male)
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
-        _waistCm = State(initialValue: Int((profile?.waistCm ?? 0).rounded()))
-        _neckCm = State(initialValue: Int((profile?.neckCm ?? 0).rounded()))
-        _hipCm = State(initialValue: Int((profile?.hipCm ?? 0).rounded()))
     }
 
-    private var waist: Double? { waistCm > 0 ? Double(waistCm) : nil }
-    private var neck: Double? { neckCm > 0 ? Double(neckCm) : nil }
-    private var hip: Double? { hipCm > 0 ? Double(hipCm) : nil }
+    /// Обхваты для оценки жира приходят из замеров, а не вводятся здесь второй раз.
+    private var navy: (waist: Double?, neck: Double?, hip: Double?) {
+        store.latestMeasurement?.navyInputs(for: sex) ?? (nil, nil, nil)
+    }
 
     private var draftProfile: UserProfile? {
         UserProfile(
@@ -73,9 +68,9 @@ struct BodyView: View {
             activityLevel: activityLevel,
             goal: goal,
             proteinPerKg: Double(proteinTenths) / 10.0,
-            waistCm: waist,
-            neckCm: neck,
-            hipCm: hip
+            waistCm: navy.waist,
+            neckCm: navy.neck,
+            hipCm: navy.hip
         )
     }
 
@@ -190,33 +185,6 @@ struct BodyView: View {
                         .frame(height: 160)
                     }
                     NavigationLink {
-                        BodyFatDetailView(
-                            waistCm: $waistCm,
-                            neckCm: $neckCm,
-                            hipCm: $hipCm,
-                            sex: sex,
-                            profile: draftProfile
-                        )
-                    } label: {
-                        HStack {
-                            Text("Жир % (оценка)")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            if let draftProfile {
-                                Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory))
-                                Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("—")
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                    }
-
-                    NavigationLink {
                         MeasurementsView(store: store)
                     } label: {
                         HStack {
@@ -281,7 +249,20 @@ struct BodyView: View {
                 }
 
                 if let draftProfile {
-                    Section("Расчёт") {
+                    Section {
+                        HStack {
+                            Text("Жир % (оценка)")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory))
+                            Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .accessibilityIdentifier("bodyFatRow")
+
                         HStack {
                             Text("ИМТ")
                                 .foregroundStyle(.secondary)
@@ -297,6 +278,12 @@ struct BodyView: View {
                         resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
                         resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
                         resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) \(String(localized: "г"))", highlighted: true)
+                    } header: {
+                        Text("Расчёт")
+                    } footer: {
+                        Text(draftProfile.isNavyMethod
+                             ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+                             : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                     }
                 }
         }
@@ -364,126 +351,6 @@ struct BodyView: View {
                 .font(highlighted ? .body.weight(.semibold) : .body)
                 .foregroundStyle(highlighted ? .green : .primary)
         }
-    }
-}
-
-private struct BodyFatDetailView: View {
-    @Binding var waistCm: Int
-    @Binding var neckCm: Int
-    @Binding var hipCm: Int
-    let sex: Sex
-    let profile: UserProfile?
-
-    @State private var showWaistPicker = false
-    @State private var showNeckPicker = false
-    @State private var showHipPicker = false
-
-
-    var body: some View {
-        Form {
-            if let profile {
-                Section {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(String(format: "%.1f%%", profile.bodyFatPercentage))
-                                .font(.largeTitle.weight(.bold))
-                                .foregroundStyle(BodyFatStyle.color(for: profile.bodyFatCategory))
-                            Text(LocalizedStringKey(profile.bodyFatCategory))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: profile.isNavyMethod ? "ruler" : "scalemass")
-                            .font(.title2)
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 4)
-                } footer: {
-                    if profile.isNavyMethod {
-                        Text("Метод ВМС США: расчёт по обхватам талии и шеи. Точность ±2–3%. Меряй в одном месте каждый раз.")
-                    } else {
-                        Text("Формула Дойренберга: расчёт по ИМТ. Не различает мышцы и жир — у спортивных людей завышает на 3–5%. Для точности укажи обхваты ниже.")
-                    }
-                }
-            }
-
-            Section {
-                HStack {
-                    Text("Талия, см")
-                    Spacer()
-                    Text(waistCm > 0 ? "\(waistCm) см" : "—")
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showWaistPicker.toggle()
-                        if showWaistPicker { showNeckPicker = false; showHipPicker = false }
-                    }
-                }
-                if showWaistPicker {
-                    Picker("Талия", selection: $waistCm) {
-                        Text("—").tag(0)
-                        ForEach(50...150, id: \.self) { Text("\($0)").tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-
-                HStack {
-                    Text("Шея, см")
-                    Spacer()
-                    Text(neckCm > 0 ? "\(neckCm) см" : "—")
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showNeckPicker.toggle()
-                        if showNeckPicker { showWaistPicker = false; showHipPicker = false }
-                    }
-                }
-                if showNeckPicker {
-                    Picker("Шея", selection: $neckCm) {
-                        Text("—").tag(0)
-                        ForEach(25...60, id: \.self) { Text("\($0)").tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-
-                if sex == .female {
-                    HStack {
-                        Text("Бёдра, см")
-                        Spacer()
-                        Text(hipCm > 0 ? "\(hipCm) см" : "—")
-                            .foregroundStyle(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showHipPicker.toggle()
-                            if showHipPicker { showWaistPicker = false; showNeckPicker = false }
-                        }
-                    }
-                    if showHipPicker {
-                        Picker("Бёдра", selection: $hipCm) {
-                            Text("—").tag(0)
-                            ForEach(60...150, id: \.self) { Text("\($0)").tag($0) }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 160)
-                    }
-                }
-            } header: {
-                Text("Замеры")
-            } footer: {
-                Text("Меряй утром натощак сантиметровой лентой. Талия — на уровне пупка, шея — под кадыком.")
-            }
-        }
-        .glassRow()
-        .navigationTitle("Жир %")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

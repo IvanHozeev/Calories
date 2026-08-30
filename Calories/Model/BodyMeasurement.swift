@@ -112,6 +112,24 @@ final class BodyMeasurement: Identifiable {
     }
 }
 
+extension BodyMeasurement {
+    /// Обхваты для Navy-метода оценки жира — берутся отсюда, а не спрашиваются
+    /// отдельно: одно и то же место, снятое дважды, рано или поздно разойдётся.
+    ///
+    /// Места разные для мужчин и женщин, и это не придирка. Методика ВМС США
+    /// у мужчин измеряет живот на уровне пупка — это наш «пояс», а вовсе не
+    /// талия в узком месте. У женщин она берёт узкую талию плюс ягодицы.
+    func navyInputs(for sex: Sex) -> (waist: Double?, neck: Double?, hip: Double?) {
+        func known(_ value: Double) -> Double? { value > 0 ? value : nil }
+        switch sex {
+        case .male:
+            return (known(beltCm), known(neckCm), nil)
+        case .female:
+            return (known(waistCm), known(neckCm), known(glutesCm))
+        }
+    }
+}
+
 /// Грамматический род места замера. Нужен только там, где подпись стороны
 /// согласуется с существительным: «левое предплечье», но «левая икра».
 /// Род указан по русскому языку — он же язык разработки. В английском и немецком

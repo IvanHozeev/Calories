@@ -1003,6 +1003,68 @@ struct BodyAnalysisTests {
         #expect(!MeasurementSite.wrist.isPlausible(11.9))
     }
 
+    @Test func navyInputs_useTheSiteEachSexIsActuallyMeasuredAt() {
+        let m = BodyMeasurement(date: Date())
+        m.neckCm = 40
+        m.waistCm = 78     // узкая талия
+        m.beltCm = 84      // на уровне пупка
+        m.glutesCm = 96
+
+        // Методика ВМС США у мужчин меряет живот на уровне пупка — это пояс,
+        // а вовсе не талия в узком месте. Раньше сюда уходила талия.
+        let male = m.navyInputs(for: .male)
+        #expect(male.waist == 84)
+        #expect(male.neck == 40)
+        #expect(male.hip == nil, "Мужчинам бёдра не нужны")
+
+        // У женщин — узкая талия плюс ягодицы
+        let female = m.navyInputs(for: .female)
+        #expect(female.waist == 78)
+        #expect(female.hip == 96)
+    }
+
+    @Test func navyInputs_treatUnmeasuredAsMissingNotZero() {
+        let m = BodyMeasurement(date: Date())
+        m.neckCm = 40
+        let male = m.navyInputs(for: .male)
+        #expect(male.waist == nil, "Неснятый пояс — это «нет данных», а не ноль")
+
+        // С дырой в данных Navy-метод не должен считаться вовсе
+        let profile = UserProfile(
+            weightKg: 80, heightCm: 180, age: 30, sex: .male,
+            activityLevel: .moderate, goal: .maintenance,
+            proteinPerKg: 2.0,
+            waistCm: male.waist, neckCm: male.neck, hipCm: male.hip
+        )
+        #expect(profile.navyBodyFat == nil)
+        #expect(!profile.isNavyMethod)
+        // Но оценка по ИМТ всё равно есть — экран не должен остаться пустым
+        #expect(profile.bodyFatPercentage > 0)
+    }
+
+    @Test func bodyFatAppearsInReportOnlyWhenMeasured() {
+        let m = BodyMeasurement(date: Date())
+        m.neckCm = 40
+        m.beltCm = 84
+
+        let withGirths = UserProfile(
+            weightKg: 80, heightCm: 180, age: 30, sex: .male,
+            activityLevel: .moderate, goal: .maintenance, proteinPerKg: 2.0,
+            waistCm: 84, neckCm: 40, hipCm: nil
+        )
+        let ids = BodyAnalysis.insights(measurement: m, profile: withGirths).map(\.id)
+        #expect(ids.contains("bodyFat"))
+
+        // Без обхватов процент считается по ИМТ, и в отчёт о замерах он не идёт:
+        // там ему нечего объяснять — он выведен не из этих замеров.
+        let withoutGirths = UserProfile(
+            weightKg: 80, heightCm: 180, age: 30, sex: .male,
+            activityLevel: .moderate, goal: .maintenance, proteinPerKg: 2.0,
+            waistCm: nil, neckCm: nil, hipCm: nil
+        )
+        #expect(!BodyAnalysis.insights(measurement: m, profile: withoutGirths).map(\.id).contains("bodyFat"))
+    }
+
     @Test func sideLabelAgreesWithGender() {
         // Проверяем раскладку по родам, а не текст: подписи локализованы,
         // и в английской локали все формы совпадают.

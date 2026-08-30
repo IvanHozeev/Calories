@@ -93,34 +93,44 @@ struct FoodQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 16) {
-                    Button("В приём пищи") {
-                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
-                    if let onAddAndSave {
-                        Button {
-                            onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                        } label: {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                        }
-                    }
-                }
-            }
+            // Пополнение справочника — редкое действие, поэтому оно иконкой наверху.
+            // Внизу под большим пальцем то, ради чего на экран и зашли.
             if let onSave {
-                ToolbarItem(placement: .bottomBar) {
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         onSave()
                         dismiss()
                     } label: {
-                        Label("Сохранить в мои продукты", systemImage: "bookmark")
-                            .frame(maxWidth: .infinity)
+                        Image(systemName: "bookmark")
                     }
+                    .accessibilityLabel("Сохранить в мои продукты")
+                    .accessibilityIdentifier("saveToMyFoods")
+                }
+            }
+            ToolbarItem(placement: .bottomBar) {
+                HStack(spacing: 12) {
+                    Button("В приём пищи") {
+                        onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        dismiss()
+                    }
+                    .accessibilityIdentifier("addToMeal")
+                    .frame(maxWidth: .infinity)
+                    .fontWeight(.semibold)
                     .buttonStyle(.borderedProminent)
-                    .tint(.blue)
+
+                    // Второй сценарий: не копить приём пищи, а записать этот продукт сразу.
+                    if let onAddAndSave {
+                        Button {
+                            onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        } label: {
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                                .frame(width: 30)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.green)
+                        .accessibilityLabel("Добавить и сохранить")
+                    }
                 }
             }
         }
@@ -233,20 +243,27 @@ struct DishQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 16) {
+            ToolbarItem(placement: .bottomBar) {
+                HStack(spacing: 12) {
                     Button("В приём пищи") {
                         onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
                         dismiss()
                     }
+                    .frame(maxWidth: .infinity)
                     .fontWeight(.semibold)
+                    .buttonStyle(.borderedProminent)
+
                     if let onAddAndSave {
                         Button {
                             onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
                         } label: {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                            Image(systemName: "checkmark")
+                                .fontWeight(.semibold)
+                                .frame(width: 30)
                         }
+                        .buttonStyle(.bordered)
+                        .tint(.green)
+                        .accessibilityLabel("Добавить и сохранить")
                     }
                 }
             }

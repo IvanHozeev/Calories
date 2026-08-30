@@ -141,6 +141,29 @@ final class CaloriesUITests: XCTestCase {
                        "Непомеренная сторона должна подсказываться по померенной")
     }
 
+    /// На экране порции внизу лежит то, ради чего на него зашли, а редкое
+    /// пополнение справочника — иконкой в навбаре.
+    @MainActor
+    func testServingScreenPutsActionsWithinReach() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        let food = app.staticTexts["Almonds"]
+        XCTAssertTrue(food.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        food.tap()
+
+        let addToMeal = app.buttons["addToMeal"]
+        XCTAssertTrue(addToMeal.waitForExistence(timeout: 5), "Не открылся экран порции")
+
+        let saveToMyFoods = app.buttons["saveToMyFoods"]
+        XCTAssertTrue(saveToMyFoods.exists, "Сохранение в мои продукты должно быть в навбаре")
+
+        // Действие приёма пищи ниже, чем пополнение справочника
+        XCTAssertGreaterThan(addToMeal.frame.midY, saveToMyFoods.frame.midY,
+                             "«В приём пищи» должно быть внизу, а закладка — наверху")
+    }
+
     // MARK: - Запись еды
 
     @MainActor

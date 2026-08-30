@@ -936,6 +936,54 @@ struct BodyAnalysisTests {
                 "Без замеров отчёт должен быть пустым, а не полным нулей")
     }
 
+    @Test func estimates_fillGapsFromWhatIsAlreadyMeasured() {
+        let m = BodyMeasurement(date: Date())
+        m.bicepsRightCm = 40
+
+        let e = BodyAnalysis.estimates(for: m)
+        // Соседние мышцы растут вместе, связь теснее, чем через костяк
+        #expect(e[.forearm].map { abs($0.value - 32.2) < 0.1 } == true)
+        #expect(e[.neck]?.value == 40)
+        #expect(e[.calf]?.value == 40)
+        // Бицепс снят — предполагать его незачем
+        #expect(e[.biceps] == nil)
+    }
+
+    @Test func estimates_neverOverrideAMeasuredValue() {
+        let m = BodyMeasurement(date: Date())
+        m.bicepsRightCm = 40
+        m.forearmRightCm = 30   // реально снято и заметно ниже расчётных 32.2
+
+        let e = BodyAnalysis.estimates(for: m)
+        #expect(e[.forearm] == nil, "Снятый замер нельзя подменять оценкой")
+    }
+
+    @Test func estimates_preferDirectRatioOverFrame() {
+        let m = BodyMeasurement(date: Date())
+        m.wristRightCm = 17     // МакКаллум дал бы предплечье около 32.0
+        m.bicepsRightCm = 44    // прямое соотношение даёт 35.4
+
+        let e = BodyAnalysis.estimates(for: m)
+        #expect(e[.forearm].map { abs($0.value - 35.4) < 0.2 } == true,
+                "Соотношение с соседней мышцей надёжнее вывода от запястья")
+    }
+
+    @Test func estimates_stayWithinPlausibleRanges() {
+        // Оценка не должна предлагать то, что сама же форма отвергнет как мусор.
+        for wrist in stride(from: 12.0, through: 25.0, by: 0.5) {
+            let m = BodyMeasurement(date: Date())
+            m.wristRightCm = wrist
+            for (site, estimate) in BodyAnalysis.estimates(for: m) {
+                #expect(site.isPlausible(estimate.value),
+                        "\(site) при запястье \(wrist) вышло за диапазон: \(estimate.value)")
+            }
+        }
+    }
+
+    @Test func estimates_areEmptyWithoutAnyInput() {
+        #expect(BodyAnalysis.estimates(for: BodyMeasurement(date: Date())).isEmpty)
+    }
+
     @Test func plausibleRange_rejectsFatFingeredInput() {
         // Реальный случай: слипшиеся цифры при вводе дают обхват в миллиарды сантиметров.
         #expect(!MeasurementSite.chest.isPlausible(10878828196))

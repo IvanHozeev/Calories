@@ -1,232 +1,265 @@
 import SwiftUI
 
-/// Замеры: последний сеанс, симметрия, отчёт о пропорциях и потолок по костяку.
-/// Отдельный экран, потому что на корневом «Теле» это перекрывало всё остальное:
-/// четыре секции с пояснениями читаются как справочник, а не как обзор.
+/// Замеры: один список полей, который заполняешь по мере того, как доходят руки.
+///
+/// Прежняя версия требовала открыть лист, заполнить всё разом и сохранить. На практике
+/// так не меряют: снял грудь и бицепс, до икр добрался через день. Поэтому правка идёт
+/// прямо здесь и сохраняется сразу, а пустые поля показывают серым, сколько там
+/// ожидается по пропорциям от уже снятого.
 struct MeasurementsView: View {
     var store: CalorieStore
 
-    @State private var showingEntry = false
-    @State private var editingMeasurement: BodyMeasurement?
+    /// Черновик по ключу «место-сторона». Пустая строка — «не мерил», это не ноль.
+    @State private var values: [String: String] = [:]
+    @State private var expandedHint: String?
+    @State private var loaded = false
 
-    private var latest: BodyMeasurement? { store.latestMeasurement }
-    private var previous: BodyMeasurement? { store.previousMeasurement }
+    private let torso: [MeasurementSite] = [.neck, .shoulders, .chest, .waist, .belt, .pelvis, .glutes]
+    private let arms: [MeasurementSite] = [.biceps, .forearm, .wrist]
+    private let legs: [MeasurementSite] = [.thigh, .quad, .calf]
+
+    private static func key(_ site: MeasurementSite, _ side: BodySide) -> String {
+        "\(site.rawValue)-\(side.rawValue)"
+    }
+
+    /// Сеанс, который правим: сегодняшний, если он есть, иначе новый.
+    /// Замеры одного дня — это один сеанс, а не запись на каждое поле.
+    /// Именно функция, а не вычисляемое свойство: она создаёт запись, и прятать
+    /// такой побочный эффект за обращением к свойству нельзя.
+    private func todaysMeasurement() -> BodyMeasurement {
+        if let latest = store.latestMeasurement,
+           Calendar.current.isDateInToday(latest.date) {
+            return latest
+        }
+        let fresh = BodyMeasurement(date: Date())
+        store.addMeasurement(fresh)
+        return fresh
+    }
+
+    private var estimates: [MeasurementSite: BodyAnalysis.Estimate] {
+        guard let latest = store.latestMeasurement else { return [:] }
+        return BodyAnalysis.estimates(for: latest)
+    }
 
     var body: some View {
         List {
-            if let latest {
-                measurementsSection(latest)
-                symmetrySection(latest)
-                insightsSection(latest)
-                mccallumSection(latest)
-            } else {
-                Section {
-                    emptyState
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
+            sitesSection(torso, title: "Торс")
+            sitesSection(arms, title: "Руки")
+            sitesSection(legs, title: "Ноги")
+
+            estimateExplainer
+            insightsSection
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .navigationTitle("Замеры")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingEntry = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityIdentifier("addMeasurement")
-            }
-        }
-        .sheet(isPresented: $showingEntry) {
-            MeasurementEntryView(store: store)
-        }
-        .sheet(item: $editingMeasurement) { measurement in
-            MeasurementEntryView(store: store, editing: measurement)
-        }
+        .onAppear(perform: loadOnce)
     }
 
-    // MARK: - Замеры
+    // MARK: - Ввод
 
-    private func measurementsSection(_ m: BodyMeasurement) -> some View {
+    private func sitesSection(_ sites: [MeasurementSite], title: LocalizedStringKey) -> some View {
         Section {
-            ForEach(MeasurementSite.allCases) { site in
-                valueRow(site, m)
+            ForEach(sites) { site in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text(site.title)
+                        Button {
+                            expandedHint = expandedHint == site.rawValue ? nil : site.rawValue
+                        } label: {
+                            Image(systemName: "info.circle").foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        Spacer()
+
+                        if site.isPaired {
+                            sideField(site, .left)
+                            sideField(site, .right)
+                        } else {
+                            field(site, .right, width: 92)
+                        }
+                    }
+
+                    if isOutOfRange(site) {
+                        Text(String(format: String(localized: "Ожидается от %.0f до %.0f см"),
+                                    site.plausibleRange.lowerBound, site.plausibleRange.upperBound))
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .accessibilityIdentifier("range-\(site.rawValue)")
+                    } else if let estimate = estimates[site], isEmpty(site) {
+                        Text(estimate.source)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if expandedHint == site.rawValue {
+                        Text(site.howTo)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .padding(.vertical, 2)
             }
         } header: {
-            HStack {
-                Text("Последний замер")
-                Spacer()
-                Text(m.date, format: .dateTime.day().month(.abbreviated).year())
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        } footer: {
-            Button("Править этот замер") { editingMeasurement = m }
-                .font(.footnote)
+            Text(title)
         }
         .glassRow()
     }
 
-    @ViewBuilder
-    private func valueRow(_ site: MeasurementSite, _ m: BodyMeasurement) -> some View {
-        let current = m.best(site)
-        if current > 0 {
-            HStack {
-                Text(site.title)
-                Spacer()
-                if let delta = delta(site) {
-                    Text(String(format: "%+.1f", delta))
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(delta > 0 ? .green : .orange)
-                        .monospacedDigit()
-                }
-                Text(String(format: "%.1f", current))
-                    .font(.body.weight(.medium))
-                    .monospacedDigit()
+    private func sideField(_ site: MeasurementSite, _ side: BodySide) -> some View {
+        VStack(spacing: 2) {
+            Text(side == .left ? "Л" : "П")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            field(site, side, width: 64)
+        }
+    }
+
+    private func field(_ site: MeasurementSite, _ side: BodySide, width: CGFloat) -> some View {
+        TextField("", text: Binding(
+            get: { values[Self.key(site, side)] ?? "" },
+            set: {
+                values[Self.key(site, side)] = $0
+                commit(site, side)
+            }
+        ))
+        .keyboardType(.decimalPad)
+        .accessibilityIdentifier("field-\(Self.key(site, side))")
+        .multilineTextAlignment(.trailing)
+        .font(.body.monospacedDigit())
+        .frame(width: width)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 8)
+        .background(isInvalid(site, side) ? Color.red.opacity(0.15) : Color(.tertiarySystemFill),
+                    in: RoundedRectangle(cornerRadius: 8))
+        // Подсказка рисуется наложением, а не placeholder'ом: SwiftUI не обновляет
+        // placeholder уже созданного поля, и оценка появлялась бы только при
+        // повторном заходе на экран — ровно не тогда, когда она нужна.
+        .overlay(alignment: .trailing) {
+            if raw(site, side).isEmpty {
+                Text(placeholder(site, side))
+                    .font(.body.monospacedDigit())
+                    .foregroundStyle(.tertiary)
+                    .padding(.trailing, 8)
+                    .allowsHitTesting(false)
+                    .accessibilityIdentifier("hint-\(Self.key(site, side))")
             }
         }
     }
 
-    /// Изменение относительно предыдущего сеанса — ради этого замеры и хранятся историей.
-    private func delta(_ site: MeasurementSite) -> Double? {
-        guard let latest, let previous else { return nil }
-        let now = latest.best(site)
-        let before = previous.best(site)
-        guard now > 0, before > 0, abs(now - before) >= 0.1 else { return nil }
-        return now - before
+    /// Серая подсказка прямо в поле: видно ожидаемое значение, но это именно
+    /// placeholder — в данные оно не попадёт, пока не наберёшь руками.
+    private func placeholder(_ site: MeasurementSite, _ side: BodySide) -> String {
+        // Вторая сторона той же мышцы — самый надёжный ориентир из всех: конечности
+        // почти симметричны, и расхождение больше пары сантиметров само по себе новость.
+        if site.isPaired {
+            let other: BodySide = side == .left ? .right : .left
+            let text = raw(site, other).replacingOccurrences(of: ",", with: ".")
+            if let value = Double(text), site.isPlausible(value), value > 0 {
+                return String(format: "%g", value)
+            }
+        }
+        guard let estimate = estimates[site] else { return "—" }
+        return String(format: "%.0f", estimate.value)
     }
 
-    // MARK: - Симметрия
+    // MARK: - Состояние полей
+
+    private func raw(_ site: MeasurementSite, _ side: BodySide) -> String {
+        (values[Self.key(site, side)] ?? "").trimmingCharacters(in: .whitespaces)
+    }
+
+    private func isEmpty(_ site: MeasurementSite) -> Bool {
+        (site.isPaired ? BodySide.allCases : [.right]).allSatisfy { raw(site, $0).isEmpty }
+    }
+
+    private func isInvalid(_ site: MeasurementSite, _ side: BodySide) -> Bool {
+        let text = raw(site, side)
+        guard !text.isEmpty else { return false }
+        guard let parsed = Double(text.replacingOccurrences(of: ",", with: ".")) else { return true }
+        return !site.isPlausible(parsed)
+    }
+
+    private func isOutOfRange(_ site: MeasurementSite) -> Bool {
+        (site.isPaired ? BodySide.allCases : [.right]).contains { isInvalid(site, $0) }
+    }
+
+    // MARK: - Хранение
+
+    private func loadOnce() {
+        guard !loaded else { return }
+        loaded = true
+        guard let latest = store.latestMeasurement,
+              Calendar.current.isDateInToday(latest.date) else { return }
+        for site in MeasurementSite.allCases {
+            for side in site.isPaired ? BodySide.allCases : [BodySide.right] {
+                let value = latest.value(site, side)
+                if value > 0 { values[Self.key(site, side)] = String(format: "%g", value) }
+            }
+        }
+    }
+
+    /// Сохраняем сразу: экран без кнопки «Готово», уход назад не должен терять набранное.
+    /// Неправдоподобное значение не пишем — поле уже подсвечено красным.
+    private func commit(_ site: MeasurementSite, _ side: BodySide) {
+        let text = raw(site, side)
+        let parsed = text.isEmpty ? 0 : Double(text.replacingOccurrences(of: ",", with: ".")) ?? -1
+        guard parsed >= 0, site.isPlausible(parsed) else { return }
+        todaysMeasurement().setValue(parsed, for: site, side: side)
+        store.saveMeasurementEdits()
+    }
+
+    // MARK: - Пояснение к подсказкам
 
     @ViewBuilder
-    private func symmetrySection(_ m: BodyMeasurement) -> some View {
-        let results = BodyAnalysis.symmetry(m)
-        if !results.isEmpty {
+    private var estimateExplainer: some View {
+        if !estimates.isEmpty {
             Section {
-                ForEach(results) { result in
-                    HStack {
-                        Text(result.site.title)
-                        Spacer()
-                        Text(String(format: "%.1f / %.1f", result.left, result.right))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                        Text(String(format: "%.1f", result.difference))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(result.verdict.color)
-                            .monospacedDigit()
-                            .frame(width: 40, alignment: .trailing)
-                    }
-                }
-            } header: {
-                Text("Симметрия")
+                EmptyView()
             } footer: {
-                Text("Слева/справа и расхождение. До 1 см — погрешность ленты, свыше 2 см стоит смотреть.")
+                Text("Серым показано, сколько примерно ожидается по пропорциям от уже снятого. Это ориентир, а не замер: у людей с одинаковым запястьем разброс достигает нескольких сантиметров. В данные попадает только то, что ты ввёл сам.")
             }
-            .glassRow()
         }
     }
 
     // MARK: - Отчёт
 
     @ViewBuilder
-    private func insightsSection(_ m: BodyMeasurement) -> some View {
-        let insights = BodyAnalysis.insights(measurement: m, profile: store.profile)
-        if !insights.isEmpty {
-            Section("Отчёт") {
-                ForEach(insights) { insight in
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(insight.title)
-                                .font(.subheadline)
+    private var insightsSection: some View {
+        if let latest = store.latestMeasurement {
+            let insights = BodyAnalysis.insights(measurement: latest, profile: store.profile)
+            if !insights.isEmpty {
+                Section("Отчёт") {
+                    ForEach(insights) { insight in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(insight.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(insight.verdictLabel)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(insight.verdict.color)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(insight.verdict.color.opacity(0.12), in: Capsule())
+                            }
+                            Text(insight.value)
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                            Text(insight.explanation)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(insight.verdictLabel)
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(insight.verdict.color)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(insight.verdict.color.opacity(0.12), in: Capsule())
+                                .fixedSize(horizontal: false, vertical: true)
                         }
-                        Text(insight.value)
-                            .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .monospacedDigit()
-                        Text(insight.explanation)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, 6)
                     }
-                    .padding(.vertical, 6)
                 }
-            }
-            .glassRow()
-        }
-    }
-
-    // MARK: - Идеалы МакКаллума
-
-    @ViewBuilder
-    private func mccallumSection(_ m: BodyMeasurement) -> some View {
-        if let ideal = BodyAnalysis.mccallum(wristCm: m.best(.wrist)) {
-            Section {
-                idealRow("Грудь", m.chestCm, ideal.chest)
-                idealRow("Талия", m.waistCm, ideal.waist, lowerIsBetter: true)
-                idealRow("Бицепс", m.best(.biceps), ideal.arm)
-                idealRow("Предплечье", m.best(.forearm), ideal.forearm)
-                idealRow("Шея", m.neckCm, ideal.neck)
-                idealRow("Бедро", m.best(.thigh), ideal.thigh)
-                idealRow("Икра", m.best(.calf), ideal.calf)
-            } header: {
-                Text("Потолок по костяку")
-            } footer: {
-                Text(String(format: String(localized: "Формула МакКаллума от запястья %.1f см. Ориентир пропорций, а не цель любой ценой."), m.best(.wrist)))
-            }
-            .glassRow()
-        }
-    }
-
-    @ViewBuilder
-    private func idealRow(_ title: LocalizedStringKey, _ current: Double, _ target: Double, lowerIsBetter: Bool = false) -> some View {
-        if current > 0 {
-            let reached = lowerIsBetter ? current <= target : current >= target
-            HStack {
-                Text(title)
-                Spacer()
-                Text(String(format: "%.1f / %.1f", current, target))
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(reached ? .green : .primary)
+                .glassRow()
             }
         }
-    }
-
-    // MARK: - Пусто
-
-    private var emptyState: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "figure.arms.open")
-                .font(.system(size: 52))
-                .foregroundStyle(.secondary)
-            Text("Замеров пока нет")
-                .font(.headline)
-            Text("Сними обхваты лентой — приложение посчитает симметрию, пропорции и покажет, что растёт, а что отстаёт.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button {
-                showingEntry = true
-            } label: {
-                Label("Первый замер", systemImage: "plus.circle.fill")
-                    .fontWeight(.semibold)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 32)
-        .padding(.horizontal, 16)
     }
 }

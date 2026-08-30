@@ -91,6 +91,92 @@ enum BodyAnalysis {
         )
     }
 
+    // MARK: - Оценка недостающих замеров
+
+    /// Оценка обхвата, выведенная из уже снятых замеров.
+    /// `source` нужен, чтобы в интерфейсе можно было объяснить, откуда взялось число:
+    /// подсказка без объяснения выглядит как выдумка.
+    struct Estimate {
+        let value: Double
+        let source: String
+    }
+
+    /// Достроить необмеренные места из тех, что уже есть.
+    ///
+    /// Важно понимать границы метода. Обхваты действительно коррелируют между собой —
+    /// на этом стоит и МакКаллум, и правило «предплечье около 80% бицепса». Но это
+    /// корреляция, а не закон: разброс между людьми с одинаковым запястьем достигает
+    /// нескольких сантиметров. Поэтому результат годится как ориентир «примерно столько
+    /// и ожидай», а не как замена ленте, и сохранять его как измеренное значение нельзя.
+    ///
+    /// Источники перебираются по убыванию надёжности: сначала прямые соотношения между
+    /// соседними мышцами, потом вывод от костяка через МакКаллума.
+    static func estimates(for m: BodyMeasurement) -> [MeasurementSite: Estimate] {
+        var out: [MeasurementSite: Estimate] = [:]
+
+        func known(_ site: MeasurementSite) -> Double? {
+            let v = m.best(site)
+            return v > 0 ? v : nil
+        }
+        /// Не затираем ни снятый замер, ни более надёжную оценку, найденную раньше.
+        func offer(_ site: MeasurementSite, _ value: Double, _ source: String) {
+            guard known(site) == nil, out[site] == nil, site.isPlausible(value) else { return }
+            out[site] = Estimate(value: value, source: source)
+        }
+
+        // Соседние мышцы: связь теснее, чем через костяк, потому что растут вместе.
+        if let biceps = known(.biceps) {
+            offer(.forearm, biceps * 0.805, String(localized: "≈ 80% бицепса"))
+            offer(.neck, biceps, String(localized: "≈ бицепс"))
+            offer(.calf, biceps, String(localized: "≈ бицепс"))
+        }
+        if let forearm = known(.forearm) {
+            offer(.biceps, forearm / 0.805, String(localized: "от предплечья"))
+        }
+        if let calf = known(.calf) {
+            offer(.biceps, calf, String(localized: "≈ икра"))
+            offer(.neck, calf, String(localized: "≈ икра"))
+        }
+        if let thigh = known(.thigh) {
+            offer(.quad, thigh * 0.88, String(localized: "≈ 88% бедра"))
+        }
+        if let quad = known(.quad) {
+            offer(.thigh, quad / 0.88, String(localized: "от квадрицепса"))
+        }
+        if let waist = known(.waist) {
+            offer(.belt, waist + 4, String(localized: "талия + 4 см"))
+        }
+        if let belt = known(.belt) {
+            offer(.waist, belt - 4, String(localized: "пояс − 4 см"))
+        }
+
+        // Костяк: работает даже когда мышц ещё не мерил, но и промахивается сильнее.
+        if let ideal = mccallum(wristCm: m.best(.wrist)) {
+            let from = String(localized: "от запястья")
+            offer(.chest, ideal.chest, from)
+            offer(.waist, ideal.waist, from)
+            offer(.biceps, ideal.arm, from)
+            offer(.forearm, ideal.forearm, from)
+            offer(.neck, ideal.neck, from)
+            offer(.thigh, ideal.thigh, from)
+            offer(.calf, ideal.calf, from)
+        }
+
+        // Обхваты, которых у МакКаллума нет. Плечи считаем от груди — соотношение
+        // устойчивее прочих, потому что дельты и грудь тренируются вместе.
+        if let chest = known(.chest) {
+            offer(.shoulders, chest * 1.17, String(localized: "от груди"))
+        }
+        if let glutes = known(.glutes) {
+            offer(.pelvis, glutes * 0.86, String(localized: "от ягодиц"))
+        }
+        if let pelvis = known(.pelvis) {
+            offer(.glutes, pelvis / 0.86, String(localized: "от таза"))
+        }
+
+        return out
+    }
+
     // MARK: - FFMI
 
     /// Индекс сухой массы: сколько мышц на рост, за вычетом жира. В отличие от веса и ИМТ

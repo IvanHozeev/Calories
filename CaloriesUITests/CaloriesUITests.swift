@@ -13,13 +13,14 @@ final class CaloriesUITests: XCTestCase {
     /// Запускаем в предсказуемых условиях: английская локаль, онбординг пропущен.
     /// Оба параметра — обычные перекрытия UserDefaults через аргументы запуска,
     /// поэтому в самом приложении не нужен тестовый код.
-    private func launchApp(premium: Bool = false) -> XCUIApplication {
+    private func launchApp(premium: Bool = false, resetMeasurements: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "-AppleLanguages", "(en)",
             "-AppleLocale", "en_US",
             "-onboarding_completed", "YES",
-            "-is_premium", premium ? "YES" : "NO"
+            "-is_premium", premium ? "YES" : "NO",
+            "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO"
         ]
         app.launch()
         return app
@@ -69,7 +70,8 @@ final class CaloriesUITests: XCTestCase {
         app.buttons["openMeasurements"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
                       "Ячейка «Замеры» не открылась")
-        XCTAssertTrue(app.buttons["addMeasurement"].exists, "В тулбаре должна быть кнопка добавления замера")
+        XCTAssertTrue(app.textFields["field-neck-right"].exists,
+                      "Замеры вводятся прямо в списке, без отдельного листа")
     }
 
     @MainActor
@@ -95,29 +97,49 @@ final class CaloriesUITests: XCTestCase {
     /// ломает и график, и все производные отношения в отчёте.
     @MainActor
     func testMeasurementRejectsImplausibleValue() {
-        let app = launchApp()
+        let app = launchApp(resetMeasurements: true)
         app.tabBars.buttons["Body"].tap()
         app.buttons["openMeasurements"].tap()
-        app.buttons["addMeasurement"].tap()
 
         let chest = app.textFields["field-chest-right"]
-        XCTAssertTrue(chest.waitForExistence(timeout: 5), "Не открылась форма замера")
+        XCTAssertTrue(chest.waitForExistence(timeout: 5), "Не открылся экран замеров")
         chest.tap()
         chest.typeText("10878828196")
 
         XCTAssertTrue(app.staticTexts["range-chest"].waitForExistence(timeout: 2),
                       "Должна появиться подсказка с ожидаемым диапазоном")
-        XCTAssertFalse(app.buttons["saveMeasurement"].isEnabled,
-                       "Сохранение должно быть заблокировано при неправдоподобном значении")
 
-        // Живое значение снимает блокировку
-        chest.tap()
-        for _ in 0..<11 { chest.typeText(XCUIKeyboardKey.delete.rawValue) }
-        chest.typeText("108")
+        // Мусор не должен попасть в данные: уходим и возвращаемся
+        app.navigationBars["Measurements"].buttons.firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+        app.buttons["openMeasurements"].tap()
+        XCTAssertTrue(app.textFields["field-chest-right"].waitForExistence(timeout: 5))
+        XCTAssertNotEqual(app.textFields["field-chest-right"].value as? String, "10878828196",
+                          "Неправдоподобное значение не должно было сохраниться")
+    }
 
-        XCTAssertFalse(app.staticTexts["range-chest"].exists, "Подсказка должна исчезнуть")
-        XCTAssertTrue(app.buttons["saveMeasurement"].isEnabled,
-                      "С правдоподобным значением сохранение должно быть доступно")
+    /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.
+    @MainActor
+    func testMeasurementsSuggestMissingSites() {
+        let app = launchApp(resetMeasurements: true)
+        app.tabBars.buttons["Body"].tap()
+        app.buttons["openMeasurements"].tap()
+
+        let biceps = app.textFields["field-biceps-right"]
+        XCTAssertTrue(biceps.waitForExistence(timeout: 5))
+        biceps.tap()
+        biceps.typeText("40")
+
+        // Предплечье не мерили — в нём должна появиться серая оценка около 32,
+        // причём сразу, без ухода с экрана
+        XCTAssertEqual(app.staticTexts["hint-forearm-right"].label, "32",
+                       "Пустое поле должно подсказывать ожидаемое значение")
+        XCTAssertTrue(app.staticTexts["≈ 80% of biceps"].exists,
+                      "Подсказка должна объяснять, откуда взялось число")
+
+        // Вторая сторона той же мышцы — самый надёжный ориентир
+        XCTAssertEqual(app.staticTexts["hint-biceps-left"].label, "40",
+                       "Непомеренная сторона должна подсказываться по померенной")
     }
 
     // MARK: - Запись еды

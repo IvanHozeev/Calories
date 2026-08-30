@@ -110,6 +110,18 @@ final class CalorieStore {
         let measurementDescriptor = FetchDescriptor<BodyMeasurement>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         measurements = (try? context.fetch(measurementDescriptor)) ?? []
 
+#if DEBUG
+        // Данные симулятора переживают прогоны UI-тестов, поэтому ввод дописывался
+        // к прежнему: «40» превращалось в «4040». Чистить поля клавишами нельзя —
+        // typeText с клавишей удаления в этом окружении не срабатывает.
+        // Только для тестов и только в отладочной сборке.
+        if UserDefaults.standard.bool(forKey: "ui_test_reset_measurements") {
+            for measurement in measurements { context.delete(measurement) }
+            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+            measurements = []
+        }
+#endif
+
         let dishDescriptor = FetchDescriptor<Dish>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
         dishes = (try? context.fetch(dishDescriptor)) ?? []
 

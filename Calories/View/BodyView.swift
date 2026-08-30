@@ -58,6 +58,46 @@ struct BodyView: View {
     /// в профиль: копия рано или поздно расходится с оригиналом.
     private var measurement: BodyMeasurement? { store.latestMeasurement }
 
+    /// Что следует из снятых обхватов. Сам ввод живёт за линейкой в тулбаре —
+    /// мерить садишься раз в неделю-две, а смотреть на выводы хочется каждый раз.
+    @ViewBuilder
+    private var resultsSection: some View {
+        if let measurement {
+            // Процент жира здесь пропускаем: он уже стоит строкой в «Расчёте»
+            // на этом же экране, и показывать одно число дважды незачем.
+            let insights = BodyAnalysis.insights(measurement: measurement, profile: draftProfile)
+                .filter { $0.id != "bodyFat" }
+            if !insights.isEmpty {
+                Section("Результаты") {
+                    ForEach(insights) { insight in
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Text(insight.title)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(insight.verdictLabel)
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(insight.verdict.color)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(insight.verdict.color.opacity(0.12), in: Capsule())
+                            }
+                            Text(insight.value)
+                                .font(.system(size: 26, weight: .bold, design: .rounded))
+                                .monospacedDigit()
+                            Text(insight.explanation)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, 6)
+                    }
+                }
+            }
+        }
+    }
+
     private var draftProfile: UserProfile? {
         UserProfile(
             weightKg: Double(weightTenths) / 10.0,
@@ -179,18 +219,6 @@ struct BodyView: View {
                         .pickerStyle(.wheel)
                         .frame(height: 160)
                     }
-                    NavigationLink {
-                        MeasurementsView(store: store)
-                    } label: {
-                        HStack {
-                            Text("Замеры")
-                            Spacer()
-                            Text(measurementsCaption)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .accessibilityIdentifier("openMeasurements")
                 }
 
                 Section("Уровень активности") {
@@ -281,6 +309,7 @@ struct BodyView: View {
                              : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                     }
                 }
+                resultsSection
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -296,16 +325,20 @@ struct BodyView: View {
                 }
                 .accessibilityIdentifier("openSettings")
             }
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    MeasurementsView(store: store)
+                } label: {
+                    Image(systemName: "ruler")
+                }
+                .accessibilityIdentifier("openMeasurements")
+            }
         }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
         }
     }
 
-    private var measurementsCaption: String {
-        guard let latest = store.latestMeasurement else { return String(localized: "Нет замеров") }
-        return latest.date.formatted(.dateTime.day().month(.abbreviated))
-    }
 
     /// Динамика за месяц: искра и изменение. Строка с одной лишь стрелкой «дальше»
     /// ничего не сообщала бы, а так тренд виден не заходя внутрь.

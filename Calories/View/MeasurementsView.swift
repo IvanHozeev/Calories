@@ -40,7 +40,6 @@ struct MeasurementsView: View {
             sitesSection(legs, title: "Ноги")
 
             estimateExplainer
-            insightsSection
         }
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
@@ -242,41 +241,4 @@ struct MeasurementsView: View {
         }
     }
 
-    // MARK: - Отчёт
-
-    @ViewBuilder
-    private var insightsSection: some View {
-        if let latest = store.latestMeasurement {
-            let insights = BodyAnalysis.insights(measurement: latest, profile: store.profile)
-            if !insights.isEmpty {
-                Section("Отчёт") {
-                    ForEach(insights) { insight in
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(alignment: .firstTextBaseline) {
-                                Text(insight.title)
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text(insight.verdictLabel)
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(insight.verdict.color)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(insight.verdict.color.opacity(0.12), in: Capsule())
-                            }
-                            Text(insight.value)
-                                .font(.system(size: 26, weight: .bold, design: .rounded))
-                                .monospacedDigit()
-                            Text(insight.explanation)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.vertical, 6)
-                    }
-                }
-                .glassRow()
-            }
-        }
-    }
 }

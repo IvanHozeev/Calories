@@ -3315,6 +3315,52 @@
         }
       }
     },
+    "Большинство выводов считается по паре обхватов. Сними ещё несколько — талию, пояс, шею и запястье, они дают больше всего." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معظمها يُحسب من محيطين. خُذ بضعة أخرى: الخصر والسرة والرقبة والمعصم هي الأكثر فائدة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das meiste ergibt sich aus zwei Umfängen. Miss noch ein paar – Taille, Nabel, Hals und Handgelenk bringen am meisten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most of these are worked out from a pair of girths. Take a few more — waist, navel, neck and wrist carry the most."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mayoría se calcula a partir de un par de contornos. Toma algunos más: cintura, ombligo, cuello y muñeca son los que más aportan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La plupart se calculent à partir de deux tours. Prends-en quelques-uns de plus : taille, nombril, cou et poignet sont les plus utiles."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רוב אלה מחושבים משני היקפים. מדוד עוד כמה — מותן, טבור, צוואר ושורש כף היד תורמים הכי הרבה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A maioria é calculada a partir de um par de circunferências. Meça mais algumas: cintura, umbigo, pescoço e punho são as que mais contam."
+          }
+        }
+      }
+    },
     "Борщ, куриная грудка с рисом..." : {
       "localizations" : {
         "ar" : {
@@ -8653,7 +8699,6 @@
       }
     },
     "Замеров пока нет" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14354,7 +14399,6 @@
       }
     },
     "Нет замеров" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18793,6 +18837,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você ainda não tem produtos próprios"
+          }
+        }
+      }
+    },
+    "Пока нечего показать" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا شيء لعرضه بعد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch nichts zu zeigen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to show yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún nada que mostrar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à montrer pour l'instant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדיין אין מה להציג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda nada a mostrar"
           }
         }
       }
@@ -23621,6 +23711,52 @@
         }
       }
     },
+    "Сними обхваты лентой — приложение посчитает пропорции и покажет, что растёт, а что отстаёт." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خُذ محيطاتك بالشريط، وسيحسب التطبيق النسب ويُظهر ما ينمو وما يتأخر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miss deine Umfänge mit dem Band – die App berechnet die Proportionen und zeigt, was wächst und was hinterherhinkt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take your girths with a tape — the app works out the proportions and shows what is growing and what is lagging."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toma tus contornos con cinta: la app calcula las proporciones y muestra qué crece y qué se queda atrás."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prends tes tours au mètre : l'app calcule les proportions et montre ce qui progresse et ce qui traîne."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מדוד את ההיקפים בסרט — האפליקציה תחשב את הפרופורציות ותראה מה גדל ומה מפגר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meça suas circunferências com fita: o app calcula as proporções e mostra o que cresce e o que fica para trás."
+          }
+        }
+      }
+    },
     "Сними обхваты лентой — приложение посчитает симметрию, пропорции и покажет, что растёт, а что отстаёт." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -23664,6 +23800,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meça suas circunferências com fita: o app calcula simetria e proporções e mostra o que cresce e o que fica para trás."
+          }
+        }
+      }
+    },
+    "Снять замеры" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خذ القياسات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messungen nehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take measurements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomar medidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre les mesures"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בצע מדידות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer medidas"
           }
         }
       }

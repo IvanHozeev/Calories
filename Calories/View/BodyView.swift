@@ -10,7 +10,7 @@ import SwiftUI
 /// параметрами тела.
 struct BodyView: View {
     var store: CalorieStore
-
+    
     @State private var weightTenths: Int
     @State private var heightInt: Int
     @State private var ageInt: Int
@@ -23,14 +23,14 @@ struct BodyView: View {
     @State private var activityLevel: ActivityLevel
     @State private var goal: Goal
     @AppStorage("use_imperial") private var useImperial = false
-
+    
     private func weightDisplayText(_ tenths: Int) -> String {
         let kg = Double(tenths) / 10.0
         return useImperial
-            ? String(format: "%.1f \(String(localized: "фунт"))", kg * 2.20462)
-            : String(format: "%.1f \(String(localized: "кг"))", kg)
+        ? String(format: "%.1f \(String(localized: "фунт"))", kg * 2.20462)
+        : String(format: "%.1f \(String(localized: "кг"))", kg)
     }
-
+    
     private func heightDisplayText(_ cm: Int) -> String {
         guard useImperial else { return "\(cm) \(String(localized: "см"))" }
         let totalInches = Double(cm) / 2.54
@@ -38,7 +38,7 @@ struct BodyView: View {
         let inches = Int(totalInches.truncatingRemainder(dividingBy: 12))
         return "\(feet)' \(inches)\""
     }
-
+    
     init(store: CalorieStore) {
         self.store = store
         let profile = store.profile
@@ -53,17 +53,17 @@ struct BodyView: View {
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
     }
-
+    
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
     /// в профиль: копия рано или поздно расходится с оригиналом.
     private var measurement: BodyMeasurement? { store.latestMeasurement }
-
+    
     private var measurementsCaption: String {
         guard let latest = store.latestMeasurement else { return String(localized: "Нет замеров") }
         return latest.date.formatted(.dateTime.day().month(.abbreviated))
     }
-
-
+    
+    
     private var draftProfile: UserProfile? {
         UserProfile(
             weightKg: Double(weightTenths) / 10.0,
@@ -74,8 +74,8 @@ struct BodyView: View {
             goal: goal,
             proteinPerKg: Double(proteinTenths) / 10.0        )
     }
-
-
+    
+    
     var body: some View {
         List {
             if store.plan == nil {
@@ -92,202 +92,203 @@ struct BodyView: View {
                     }
                 }
             }
-
+            
             Section("Параметры тела") {
-                    Picker("Пол", selection: $sex) {
-                        ForEach(Sex.allCases) { Text($0.title).tag($0) }
+                Picker("Пол", selection: $sex) {
+                    ForEach(Sex.allCases) { Text($0.title).tag($0) }
+                }
+                HStack {
+                    Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
+                    Spacer()
+                    Text(weightDisplayText(weightTenths))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showWeightPicker.toggle()
+                        if showWeightPicker { showHeightPicker = false; showAgePicker = false; showProteinPicker = false }
                     }
+                }
+                if showWeightPicker {
+                    Picker("Вес", selection: $weightTenths) {
+                        ForEach(300...1500, id: \.self) { v in
+                            Text(useImperial
+                                 ? String(format: "%.1f", Double(v) / 10.0 * 2.20462)
+                                 : String(format: "%.1f", Double(v) / 10.0)
+                            ).tag(v)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+                
+                NavigationLink {
+                    WeightDetailView(store: store)
+                } label: {
                     HStack {
-                        Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
+                        Text("Динамика")
                         Spacer()
-                        Text(weightDisplayText(weightTenths))
-                            .foregroundStyle(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showWeightPicker.toggle()
-                            if showWeightPicker { showHeightPicker = false; showAgePicker = false; showProteinPicker = false }
-                        }
-                    }
-                    if showWeightPicker {
-                        Picker("Вес", selection: $weightTenths) {
-                            ForEach(300...1500, id: \.self) { v in
-                                Text(useImperial
-                                     ? String(format: "%.1f", Double(v) / 10.0 * 2.20462)
-                                     : String(format: "%.1f", Double(v) / 10.0)
-                                ).tag(v)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 160)
-                    }
-                    NavigationLink {
-                        MeasurementsView(store: store)
-                    } label: {
-                        HStack {
-                            Text("Замеры")
-                            Spacer()
-                            Text(measurementsCaption)
+                        if let trend = weightTrend {
+                            Text(trend.caption)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            WeightSparkline(points: trend.points)
+                                .frame(width: 56, height: 20)
+                        } else {
+                            Text("Мало данных")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
                         }
                     }
-                    .accessibilityIdentifier("openMeasurementsRow")
-
-                    NavigationLink {
-                        WeightDetailView(store: store)
+                }
+                .accessibilityIdentifier("openWeight")
+                
+                NavigationLink {
+                    MeasurementsView(store: store)
+                } label: {
+                    HStack {
+                        Text("Замеры")
+                        Spacer()
+                        Text(measurementsCaption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("openMeasurementsRow")
+                
+                HStack {
+                    Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
+                    Spacer()
+                    Text(heightDisplayText(heightInt))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showHeightPicker.toggle()
+                        if showHeightPicker { showWeightPicker = false; showAgePicker = false; showProteinPicker = false }
+                    }
+                }
+                if showHeightPicker {
+                    Picker("Рост", selection: $heightInt) {
+                        ForEach(100...250, id: \.self) { v in
+                            Text(heightDisplayText(v)).tag(v)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+                HStack {
+                    Text("Возраст")
+                    Spacer()
+                    Text("\(ageInt) лет")
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showAgePicker.toggle()
+                        if showAgePicker { showWeightPicker = false; showHeightPicker = false; showProteinPicker = false }
+                    }
+                }
+                if showAgePicker {
+                    Picker("Возраст", selection: $ageInt) {
+                        ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+            }
+            
+            Section("Уровень активности") {
+                ForEach(ActivityLevel.allCases) { level in
+                    Button {
+                        activityLevel = level
                     } label: {
                         HStack {
-                            Text("Динамика")
-                            Spacer()
-                            if let trend = weightTrend {
-                                Text(trend.caption)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(level.title)
+                                    .foregroundStyle(.primary)
+                                Text(level.subtitle)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
-                                WeightSparkline(points: trend.points)
-                                    .frame(width: 56, height: 20)
-                            } else {
-                                Text("Мало данных")
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
                             }
-                        }
-                    }
-                    .accessibilityIdentifier("openWeight")
-
-                    HStack {
-                        Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
-                        Spacer()
-                        Text(heightDisplayText(heightInt))
-                            .foregroundStyle(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showHeightPicker.toggle()
-                            if showHeightPicker { showWeightPicker = false; showAgePicker = false; showProteinPicker = false }
-                        }
-                    }
-                    if showHeightPicker {
-                        Picker("Рост", selection: $heightInt) {
-                            ForEach(100...250, id: \.self) { v in
-                                Text(heightDisplayText(v)).tag(v)
-                            }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 160)
-                    }
-                    HStack {
-                        Text("Возраст")
-                        Spacer()
-                        Text("\(ageInt) лет")
-                            .foregroundStyle(.secondary)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showAgePicker.toggle()
-                            if showAgePicker { showWeightPicker = false; showHeightPicker = false; showProteinPicker = false }
-                        }
-                    }
-                    if showAgePicker {
-                        Picker("Возраст", selection: $ageInt) {
-                            ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 160)
-                    }
-                }
-
-                Section("Уровень активности") {
-                    ForEach(ActivityLevel.allCases) { level in
-                        Button {
-                            activityLevel = level
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(level.title)
-                                        .foregroundStyle(.primary)
-                                    Text(level.subtitle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if activityLevel == level {
-                                    Image(systemName: "checkmark")
-                                        .foregroundStyle(.green)
-                                }
+                            Spacer()
+                            if activityLevel == level {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.green)
                             }
                         }
                     }
                 }
-
+            }
+            
+            Section {
+                HStack {
+                    Text("Белка на кг веса")
+                    Spacer()
+                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(proteinTenths) / 10.0))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showProteinPicker.toggle()
+                        if showProteinPicker { showWeightPicker = false; showHeightPicker = false; showAgePicker = false }
+                    }
+                }
+                if showProteinPicker {
+                    Picker("Белок", selection: $proteinTenths) {
+                        ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+            } header: {
+                Text("Норма белка")
+            } footer: {
+                Text("Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц.")
+            }
+            
+            if let draftProfile {
                 Section {
                     HStack {
-                        Text("Белка на кг веса")
+                        Text("Жир % (оценка)")
+                            .foregroundStyle(.secondary)
                         Spacer()
-                        Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(proteinTenths) / 10.0))
+                        Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
+                        Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            showProteinPicker.toggle()
-                            if showProteinPicker { showWeightPicker = false; showHeightPicker = false; showAgePicker = false }
-                        }
+                    .accessibilityIdentifier("bodyFatRow")
+                    
+                    HStack {
+                        Text("ИМТ")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(String(format: "%.1f", draftProfile.bmi))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(bmiColor(draftProfile.bmi))
+                        (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                    if showProteinPicker {
-                        Picker("Белок", selection: $proteinTenths) {
-                            ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-                        }
-                        .pickerStyle(.wheel)
-                        .frame(height: 160)
-                    }
+                    resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
+                    resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
+                    resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
+                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) \(String(localized: "г"))", highlighted: true)
                 } header: {
-                    Text("Норма белка")
+                    Text("Расчёт")
                 } footer: {
-                    Text("Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц.")
+                    Text(draftProfile.isNavyMethod(from: measurement)
+                         ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+                         : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                 }
-
-                if let draftProfile {
-                    Section {
-                        HStack {
-                            Text("Жир % (оценка)")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
-                            Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .accessibilityIdentifier("bodyFatRow")
-
-                        HStack {
-                            Text("ИМТ")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(String(format: "%.1f", draftProfile.bmi))
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(bmiColor(draftProfile.bmi))
-                            (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
-                        resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
-                        resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
-                        resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) \(String(localized: "г"))", highlighted: true)
-                    } header: {
-                        Text("Расчёт")
-                    } footer: {
-                        Text(draftProfile.isNavyMethod(from: measurement)
-                             ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
-                             : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
-                    }
-                }
+            }
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -303,21 +304,13 @@ struct BodyView: View {
                 }
                 .accessibilityIdentifier("openSettings")
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    MeasurementsView(store: store)
-                } label: {
-                    Image(systemName: "ruler")
-                }
-                .accessibilityIdentifier("openMeasurements")
-            }
         }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
         }
     }
-
-
+    
+    
     /// Динамика за месяц: искра и изменение. Строка с одной лишь стрелкой «дальше»
     /// ничего не сообщала бы, а так тренд виден не заходя внутрь.
     private var weightTrend: (points: [Double], caption: String)? {
@@ -329,7 +322,7 @@ struct BodyView: View {
         return (recent.map(\.weightKg),
                 String(format: "%+.1f %@", delta, unit))
     }
-
+    
     private func bmiColor(_ bmi: Double) -> Color {
         switch bmi {
         case ..<18.5: return .blue
@@ -338,7 +331,7 @@ struct BodyView: View {
         default: return .red
         }
     }
-
+    
     private func bmiLabel(_ bmi: Double) -> String {
         switch bmi {
         case ..<18.5: return "Недовес"
@@ -347,7 +340,7 @@ struct BodyView: View {
         default: return "Ожирение"
         }
     }
-
+    
     private func resultRow(title: LocalizedStringKey, value: String, highlighted: Bool = false) -> some View {
         HStack {
             Text(title)
@@ -364,7 +357,7 @@ struct BodyView: View {
 /// форма кривой, а числа лежат на экране динамики.
 private struct WeightSparkline: View {
     let points: [Double]
-
+    
     var body: some View {
         GeometryReader { geo in
             if points.count >= 2, let low = points.min(), let high = points.max() {

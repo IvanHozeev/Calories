@@ -77,13 +77,12 @@ final class CaloriesUITests: XCTestCase {
                       "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
         XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
-        // Два входа в замеры: ячейка в параметрах и линейка в тулбаре для быстроты
-        XCTAssertTrue(app.buttons["openMeasurementsRow"].exists, "Ячейка «Замеры» должна остаться")
-        app.buttons["openMeasurements"].tap()
+        app.buttons["openMeasurementsRow"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
                       "Ячейка «Замеры» не открылась")
-        XCTAssertTrue(app.staticTexts["Neck"].exists,
-                      "Замеры вводятся прямо в списке, без отдельного листа")
+        // Сам экран показывает выводы, а ввод живёт за линейкой в его тулбаре
+        XCTAssertTrue(app.buttons["openMeasurementEntry"].exists,
+                      "Ввод замеров должен открываться линейкой в тулбаре")
     }
 
     @MainActor
@@ -110,7 +109,8 @@ final class CaloriesUITests: XCTestCase {
     func testMeasurementsSuggestMissingSites() {
         let app = launchApp(resetMeasurements: true)
         app.tabBars.buttons["Body"].tap()
-        app.buttons["openMeasurements"].tap()
+        app.buttons["openMeasurementsRow"].tap()
+        app.buttons["openMeasurementEntry"].tap()
 
         // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40
         // Идентификатор на строке перекрыл бы идентификаторы вложенных подсказок,

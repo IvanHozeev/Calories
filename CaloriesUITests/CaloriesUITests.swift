@@ -72,9 +72,10 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
         XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
-        // «Тело» — список разделов: профиль с параметрами тела и антропометрия.
-        XCTAssertTrue(app.buttons["openProfile"].exists, "Профиль должен жить на «Теле», а не в настройках")
-        XCTAssertTrue(app.buttons["openWeight"].exists, "Вес должен открываться из «Тела»")
+        // Профиль расформирован: параметры тела лежат прямо на вкладке.
+        XCTAssertTrue(app.staticTexts["Body Parameters"].exists,
+                      "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
+        XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
         app.buttons["openMeasurements"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),

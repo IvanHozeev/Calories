@@ -330,7 +330,7 @@ struct BodyView: View {
         }
         .navigationTitle("Тело")
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: .topBarTrailing) {
                 NavigationLink {
                     SettingsView(store: store)
                 } label: {

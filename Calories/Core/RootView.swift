@@ -55,8 +55,10 @@ struct RootView: View {
         // Смена начертания меняет ширину каждой строки, а значит и всю раскладку.
         // Без анимации интерфейс перескакивает; с ней текст переезжает плавно.
         .animation(.easeInOut(duration: 0.25), value: appFont)
+        // Анимации на смену размера здесь нет намеренно: наложенная на весь корень,
+        // она гоняет транзакцию по всему дереву вместе со стеком навигации, и экран
+        // выбрасывало назад прямо во время перетаскивания ползунка.
         .modifier(AppTextSizeModifier(size: AppTextSize(rawValue: appTextSize) ?? .normal))
-        .animation(.easeInOut(duration: 0.25), value: appTextSize)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
         }

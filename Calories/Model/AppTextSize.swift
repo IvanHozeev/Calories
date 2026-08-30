@@ -31,15 +31,19 @@ enum AppTextSize: Int, CaseIterable, Identifiable {
     }
 }
 
-/// Применяет выбранный размер, а на «обычном» не делает ничего.
+/// Применяет выбранный размер, а на «обычном» пропускает системный без изменений.
+///
+/// Ветвиться здесь нельзя. Раньше на «обычном» возвращался просто `content`, а
+/// иначе `content.dynamicTypeSize(...)` — для SwiftUI это две структурно разные
+/// ветки, и при пересечении границы всё дерево пересоздавалось вместе со стеком
+/// навигации: экран выбрасывало назад прямо во время перетаскивания ползунка.
+/// Поэтому модификатор применяется всегда, а «не вмешиваться» выражается тем,
+/// что наверх уходит тот же размер, который пришёл из системы.
 struct AppTextSizeModifier: ViewModifier {
     let size: AppTextSize
+    @Environment(\.dynamicTypeSize) private var systemSize
 
     func body(content: Content) -> some View {
-        if let override = size.override {
-            content.dynamicTypeSize(override)
-        } else {
-            content
-        }
+        content.dynamicTypeSize(size.override ?? systemSize)
     }
 }

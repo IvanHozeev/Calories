@@ -222,6 +222,15 @@ final class CaloriesUITests: XCTestCase {
             XCTAssertTrue(app.buttons["font-\(style)"].exists, "Нет начертания «\(style)»")
         }
 
+        // Регрессия: смена размера пересоздавала дерево и выбрасывала со экрана
+        let slider = app.sliders["textSizeSlider"]
+        slider.adjust(toNormalizedSliderPosition: 1.0)
+        XCTAssertTrue(app.navigationBars["Font and size"].exists,
+                      "Ползунок размера не должен выбрасывать с экрана")
+        slider.adjust(toNormalizedSliderPosition: 0.0)
+        XCTAssertTrue(app.navigationBars["Font and size"].exists,
+                      "Возврат к мелкому размеру тоже не должен ронять навигацию")
+
         app.buttons["font-serif"].tap()
         app.navigationBars["Font and size"].buttons.firstMatch.tap()
         XCTAssertTrue(app.staticTexts["Serif"].waitForExistence(timeout: 5),
@@ -234,6 +243,15 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
         XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+
+        // Уровень переживает прогоны, а тап по уже выбранному ничего не делает —
+        // поэтому сначала уводим его в заведомо другое положение.
+        let baseline = app.staticTexts["Sedentary"]
+        scrollTo(baseline, in: app)
+        baseline.tap()
+        if app.alerts.firstMatch.waitForExistence(timeout: 2) {
+            app.alerts.firstMatch.buttons["Change"].tap()
+        }
 
         let target = app.staticTexts["Very Active"]
         scrollTo(target, in: app)

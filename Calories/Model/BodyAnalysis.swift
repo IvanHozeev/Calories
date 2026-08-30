@@ -288,8 +288,8 @@ enum BodyAnalysis {
         // Процент жира. Стоит здесь, а не только в расчёте профиля: обхваты,
         // из которых он выведен, снимаются на этом же экране, и увидеть результат
         // логично рядом с ними.
-        if let profile, profile.isNavyMethod {
-            let bf = profile.bodyFatPercentage
+        if let profile, profile.isNavyMethod(from: m) {
+            let bf = profile.bodyFatPercentage(from: m)
             out.append(BodyInsight(
                 id: "bodyFat",
                 title: String(localized: "Жир % (по обхватам)"),
@@ -297,14 +297,14 @@ enum BodyAnalysis {
                 verdict: .good,
                 // Категория приходит строкой из модели, а не литералом,
                 // поэтому ключ локализации строим явно.
-                verdictLabel: String(localized: String.LocalizationValue(profile.bodyFatCategory)),
+                verdictLabel: String(localized: String.LocalizationValue(profile.bodyFatCategory(from: m))),
                 explanation: String(localized: "Метод ВМС США: считается по шее и поясу, точность ±2–3%. Он опирается на обхваты, а не на вес, поэтому не путает набранные мышцы с жиром — в отличие от расчёта по ИМТ.")
             ))
         }
 
         // FFMI
         if let profile,
-           let bf = Optional(profile.bodyFatPercentage),
+           let bf = Optional(profile.bodyFatPercentage(from: m)),
            let value = ffmi(weightKg: profile.weightKg, heightCm: profile.heightCm, bodyFatPercent: bf) {
             let (verdict, label) = ffmiVerdict(value)
             out.append(BodyInsight(

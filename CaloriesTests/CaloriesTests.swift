@@ -148,18 +148,52 @@ struct UserProfileTests {
     }
 
     @Test func navyBodyFat_male_nonNil() {
-        var p = profile(sex: .male)
-        p.waistCm = 85
-        p.neckCm = 37
-        #expect(p.navyBodyFat != nil)
-        #expect(p.navyBodyFat! > 0)
+        let p = profile(sex: .male)
+        let m = BodyMeasurement(date: Date())
+        m.beltCm = 85       // у мужчин метод берёт уровень пупка
+        m.neckCm = 37
+        #expect(p.navyBodyFat(from: m) != nil)
+        #expect(p.navyBodyFat(from: m)! > 0)
     }
 
     @Test func navyBodyFat_nil_whenWaistEqualsNeck() {
-        var p = profile(sex: .male)
-        p.waistCm = 37
-        p.neckCm = 37
-        #expect(p.navyBodyFat == nil)
+        let p = profile(sex: .male)
+        let m = BodyMeasurement(date: Date())
+        m.beltCm = 37
+        m.neckCm = 37
+        #expect(p.navyBodyFat(from: m) == nil)
+    }
+
+    /// Регрессия: процент жира показывался разными числами на двух экранах,
+    /// потому что профиль хранил собственную копию обхватов. Теперь источник
+    /// один, и результат зависит только от переданного замера.
+    @Test func bodyFat_isTheSameNumberEverywhere() {
+        let p = profile(heightCm: 180, sex: .male)
+        let m = BodyMeasurement(date: Date())
+        m.beltCm = 88
+        m.neckCm = 40
+
+        let direct = p.bodyFatPercentage(from: m)
+        #expect(p.isNavyMethod(from: m))
+
+        // То же значение, что уходит в отчёт о замерах
+        let reported = BodyAnalysis.insights(measurement: m, profile: p)
+            .first { $0.id == "bodyFat" }?.value
+        #expect(reported == String(format: "%.1f%%", direct))
+
+        // И то же, что берёт FFMI — он тоже считается от процента жира
+        #expect(BodyAnalysis.ffmi(weightKg: p.weightKg, heightCm: p.heightCm,
+                                  bodyFatPercent: direct) != nil)
+    }
+
+    @Test func bodyFat_fallsBackToBmiWithoutGirths() {
+        let p = profile(sex: .male)
+        let empty = BodyMeasurement(date: Date())
+        #expect(!p.isNavyMethod(from: empty))
+        #expect(!p.isNavyMethod(from: nil))
+        // Дойренберг считается от ИМТ, поэтому замер на него не влияет вовсе
+        #expect(p.bodyFatPercentage(from: empty) == p.bodyFatPercentage(from: nil))
+        #expect(p.bodyFatPercentage(from: nil) > 0)
     }
 }
 
@@ -1033,13 +1067,12 @@ struct BodyAnalysisTests {
         let profile = UserProfile(
             weightKg: 80, heightCm: 180, age: 30, sex: .male,
             activityLevel: .moderate, goal: .maintenance,
-            proteinPerKg: 2.0,
-            waistCm: male.waist, neckCm: male.neck, hipCm: male.hip
+            proteinPerKg: 2.0
         )
-        #expect(profile.navyBodyFat == nil)
-        #expect(!profile.isNavyMethod)
+        #expect(profile.navyBodyFat(from: m) == nil)
+        #expect(!profile.isNavyMethod(from: m))
         // Но оценка по ИМТ всё равно есть — экран не должен остаться пустым
-        #expect(profile.bodyFatPercentage > 0)
+        #expect(profile.bodyFatPercentage(from: m) > 0)
     }
 
     @Test func bodyFatAppearsInReportOnlyWhenMeasured() {
@@ -1047,22 +1080,16 @@ struct BodyAnalysisTests {
         m.neckCm = 40
         m.beltCm = 84
 
-        let withGirths = UserProfile(
+        let p = UserProfile(
             weightKg: 80, heightCm: 180, age: 30, sex: .male,
-            activityLevel: .moderate, goal: .maintenance, proteinPerKg: 2.0,
-            waistCm: 84, neckCm: 40, hipCm: nil
+            activityLevel: .moderate, goal: .maintenance, proteinPerKg: 2.0
         )
-        let ids = BodyAnalysis.insights(measurement: m, profile: withGirths).map(\.id)
-        #expect(ids.contains("bodyFat"))
+        #expect(BodyAnalysis.insights(measurement: m, profile: p).map(\.id).contains("bodyFat"))
 
         // Без обхватов процент считается по ИМТ, и в отчёт о замерах он не идёт:
         // там ему нечего объяснять — он выведен не из этих замеров.
-        let withoutGirths = UserProfile(
-            weightKg: 80, heightCm: 180, age: 30, sex: .male,
-            activityLevel: .moderate, goal: .maintenance, proteinPerKg: 2.0,
-            waistCm: nil, neckCm: nil, hipCm: nil
-        )
-        #expect(!BodyAnalysis.insights(measurement: m, profile: withoutGirths).map(\.id).contains("bodyFat"))
+        let empty = BodyMeasurement(date: Date())
+        #expect(!BodyAnalysis.insights(measurement: empty, profile: p).map(\.id).contains("bodyFat"))
     }
 
     @Test func sideLabelAgreesWithGender() {

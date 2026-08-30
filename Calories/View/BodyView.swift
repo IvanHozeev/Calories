@@ -54,10 +54,9 @@ struct BodyView: View {
         _goal = State(initialValue: profile?.goal ?? .maintenance)
     }
 
-    /// Обхваты для оценки жира приходят из замеров, а не вводятся здесь второй раз.
-    private var navy: (waist: Double?, neck: Double?, hip: Double?) {
-        store.latestMeasurement?.navyInputs(for: sex) ?? (nil, nil, nil)
-    }
+    /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
+    /// в профиль: копия рано или поздно расходится с оригиналом.
+    private var measurement: BodyMeasurement? { store.latestMeasurement }
 
     private var draftProfile: UserProfile? {
         UserProfile(
@@ -67,11 +66,7 @@ struct BodyView: View {
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
-            proteinPerKg: Double(proteinTenths) / 10.0,
-            waistCm: navy.waist,
-            neckCm: navy.neck,
-            hipCm: navy.hip
-        )
+            proteinPerKg: Double(proteinTenths) / 10.0        )
     }
 
 
@@ -254,10 +249,10 @@ struct BodyView: View {
                             Text("Жир % (оценка)")
                                 .foregroundStyle(.secondary)
                             Spacer()
-                            Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage))
+                            Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory))
-                            Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory))
+                                .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
+                            Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -281,7 +276,7 @@ struct BodyView: View {
                     } header: {
                         Text("Расчёт")
                     } footer: {
-                        Text(draftProfile.isNavyMethod
+                        Text(draftProfile.isNavyMethod(from: measurement)
                              ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
                              : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                     }

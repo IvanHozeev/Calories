@@ -278,9 +278,6 @@ struct UserProfile: Codable, Equatable {
     var activityLevel: ActivityLevel
     var goal: Goal
     var proteinPerKg: Double
-    var waistCm: Double? = nil
-    var neckCm: Double? = nil
-    var hipCm: Double? = nil   // нужно только женщинам для Navy-метода
 
     static let defaultProteinPerKg: Double = 1.7
 
@@ -311,31 +308,40 @@ struct UserProfile: Codable, Equatable {
     }
 
     /// Navy-метод (точнее, ±2–3%): требует талию + шею (+ бёдра для женщин).
-    var navyBodyFat: Double? {
-        guard let waist = waistCm, let neck = neckCm, waist > neck else { return nil }
+    ///
+    /// Обхваты приходят параметром, а не хранятся в профиле. Раньше хранились — и
+    /// разъезжались: экран расчёта строил их из свежих замеров, а отчёт читал
+    /// сохранённую копию, из-за чего один и тот же процент жира показывался
+    /// двумя разными числами. У величины должен быть один источник.
+    func navyBodyFat(from measurement: BodyMeasurement?) -> Double? {
+        guard let measurement else { return nil }
+        let inputs = measurement.navyInputs(for: sex)
+        guard let waist = inputs.waist, let neck = inputs.neck, waist > neck else { return nil }
         let bf: Double
         switch sex {
         case .male:
             bf = 86.010 * log10(waist - neck) - 70.041 * log10(heightCm) + 36.76
         case .female:
-            guard let hip = hipCm, waist + hip > neck else { return nil }
+            guard let hip = inputs.hip, waist + hip > neck else { return nil }
             bf = 163.205 * log10(waist + hip - neck) - 97.684 * log10(heightCm) - 78.387
         }
         return max(3, min(bf, 60))
     }
 
     /// % жира: Navy если замеры есть, иначе Дойренберг (BMI-based, ±5%).
-    var bodyFatPercentage: Double {
-        if let navy = navyBodyFat { return navy }
+    func bodyFatPercentage(from measurement: BodyMeasurement?) -> Double {
+        if let navy = navyBodyFat(from: measurement) { return navy }
         let sexFactor: Double = sex == .male ? 1.0 : 0.0
         let bf = 1.20 * bmi + 0.23 * Double(age) - 10.8 * sexFactor - 5.4
         return max(3, min(bf, 60))
     }
 
-    var isNavyMethod: Bool { navyBodyFat != nil }
+    func isNavyMethod(from measurement: BodyMeasurement?) -> Bool {
+        navyBodyFat(from: measurement) != nil
+    }
 
-    var bodyFatCategory: String {
-        let bf = bodyFatPercentage
+    func bodyFatCategory(from measurement: BodyMeasurement?) -> String {
+        let bf = bodyFatPercentage(from: measurement)
         switch sex {
         case .male:
             if bf < 6  { return "Незаменимый жир" }

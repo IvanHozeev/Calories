@@ -203,6 +203,30 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
     }
 
+    /// Выбор шрифта должен доезжать до интерфейса, а не только сохраняться.
+    @MainActor
+    func testFontChoiceIsOfferedAndPersists() {
+        let app = launchApp()
+        app.tabBars.buttons["Body"].tap()
+        app.buttons["openSettings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+
+        let entry = app.buttons["openFontSettings"]
+        scrollTo(entry, in: app)
+        XCTAssertTrue(entry.exists, "В настройках должен быть выбор шрифта")
+        entry.tap()
+
+        XCTAssertTrue(app.navigationBars["Font"].waitForExistence(timeout: 5))
+        for style in ["system", "rounded", "serif", "monospaced"] {
+            XCTAssertTrue(app.buttons["font-\(style)"].exists, "Нет начертания «\(style)»")
+        }
+
+        app.buttons["font-serif"].tap()
+        app.navigationBars["Font"].buttons.firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["Serif"].waitForExistence(timeout: 5),
+                      "Выбранное начертание должно быть видно в настройках")
+    }
+
     // MARK: - Запись еды
 
     @MainActor

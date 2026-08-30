@@ -8,6 +8,7 @@ struct RootView: View {
     @State private var selectedTab = 0
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
+    @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -47,6 +48,9 @@ struct RootView: View {
             store.refreshIfDayChanged()
         }
         .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
+        // Начертание задаётся один раз на корне и наследуется всем деревом,
+        // поэтому размеры и Dynamic Type нигде не приходится трогать.
+        .fontDesign(AppFont(rawValue: appFont)?.design ?? .default)
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
         }

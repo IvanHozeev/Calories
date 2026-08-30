@@ -4819,6 +4819,52 @@
         }
       }
     },
+    "Все начертания системные. Подключённые шрифты почти никогда не содержат кириллицу и арабскую вязь, поэтому часть языков в них рассыпается.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جميعها خطوط النظام. الخطوط المضمّنة نادرًا ما تدعم السيريلية والعربية، فتتفكك بعض اللغات فيها."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle sind Systemschriften. Mitgelieferte Schriften decken Kyrillisch und Arabisch fast nie ab, weshalb einige Sprachen darin zerfallen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All of these are system typefaces. Bundled fonts almost never cover Cyrillic or Arabic, so some languages fall apart in them."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas son tipografías del sistema. Las fuentes incrustadas casi nunca cubren el cirílico ni el árabe, así que algunos idiomas se rompen."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toutes sont des polices système. Les polices embarquées ne couvrent presque jamais le cyrillique ni l'arabe : certaines langues s'y délitent."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כל אלה גופני מערכת. גופנים מוטמעים כמעט אף פעם אינם תומכים בקירילית ובערבית, ולכן חלק מהשפות מתפרקות בהם."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas são fontes do sistema. Fontes incorporadas quase nunca cobrem cirílico ou árabe, então alguns idiomas se quebram nelas."
+          }
+        }
+      }
+    },
     "Второй завтрак": {
       "extractionState": "stale",
       "localizations": {
@@ -11628,6 +11674,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Leite 3,2%"
+          }
+        }
+      }
+    },
+    "Моноширинный": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ثابت العرض"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dicktengleich"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monospaced"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monoespaciada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À chasse fixe"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "רוחב אחיד"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Monoespaçada"
           }
         }
       }
@@ -20851,6 +20943,52 @@
         }
       }
     },
+    "С засечками": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بذيول"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serife"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serif"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con serifa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec empattements"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עם תגים"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Com serifa"
+          }
+        }
+      }
+    },
     "Сахар": {
       "localizations": {
         "ar": {
@@ -21498,6 +21636,52 @@
         }
       }
     },
+    "Системный": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النظام"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del sistema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מערכת"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do sistema"
+          }
+        }
+      }
+    },
     "Сканер штрихкода": {
       "localizations": {
         "ar": {
@@ -21679,6 +21863,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Quantos anos você tem?"
+          }
+        }
+      }
+    },
+    "Скруглённый": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "دائري"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abgerundet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rounded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redondeada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrondie"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מעוגל"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arredondada"
           }
         }
       }
@@ -26050,6 +26280,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Espinafre"
+          }
+        }
+      }
+    },
+    "Шрифт": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخط"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schrift"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Font"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גופן"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte"
           }
         }
       }

@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var showingPaywall = false
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
+    @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -96,6 +97,18 @@ struct SettingsView: View {
                     Label("Оформление", systemImage: "circle.lefthalf.filled")
                 }
                 
+                NavigationLink {
+                    FontSettingsView()
+                } label: {
+                    HStack {
+                        Label("Шрифт", systemImage: "textformat")
+                        Spacer()
+                        Text(AppFont(rawValue: appFont)?.title ?? "")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("openFontSettings")
+
                 NavigationLink {
                     UnitsSettingsView()
                 } label: {
@@ -226,3 +239,44 @@ private struct LanguageSettingsView: View {
     }
 }
 
+
+/// Выбор начертания. Каждый вариант написан своим же шрифтом — иначе выбирать
+/// пришлось бы по названию, ничего не увидев.
+struct FontSettingsView: View {
+    @AppStorage("app_font") private var appFont = AppFont.system.rawValue
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(AppFont.allCases) { font in
+                    Button {
+                        appFont = font.rawValue
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(font.title)
+                                    .foregroundStyle(.primary)
+                                Text(verbatim: "\(font.sample) · 1234567890")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .fontDesign(font.design)
+                            Spacer()
+                            if appFont == font.rawValue {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.green)
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("font-\(font.rawValue)")
+                }
+            } footer: {
+                Text("Все начертания системные. Подключённые шрифты почти никогда не содержат кириллицу и арабскую вязь, поэтому часть языков в них рассыпается.")
+            }
+        }
+        .glassRow()
+        .listStyle(.insetGrouped)
+        .navigationTitle("Шрифт")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}

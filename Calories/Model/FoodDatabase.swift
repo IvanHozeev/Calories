@@ -65,6 +65,13 @@ enum FoodDatabase {
         FoodItem(name: String(localized: "Болгарский перец"), caloriesPer100g: 27, protein: 1.0, fat: 0.3, carbs: 6, category: .produce),
         FoodItem(name: String(localized: "Шпинат"), caloriesPer100g: 23, protein: 2.9, fat: 0.4, carbs: 3.6, category: .produce),
 
+        // Грибы. Значения для сырых: при жарке масло меняет калорийность в разы,
+        // поэтому жареные — это уже свой продукт, а не поправка к этому.
+        FoodItem(name: String(localized: "Шампиньоны"), caloriesPer100g: 22, protein: 3.1, fat: 0.3, carbs: 3.3, category: .mushrooms),
+        FoodItem(name: String(localized: "Вешенки"), caloriesPer100g: 33, protein: 3.3, fat: 0.4, carbs: 6.1, category: .mushrooms),
+        FoodItem(name: String(localized: "Белый гриб"), caloriesPer100g: 34, protein: 3.7, fat: 1.7, carbs: 3.3, category: .mushrooms),
+        FoodItem(name: String(localized: "Лисички"), caloriesPer100g: 38, protein: 1.5, fat: 0.5, carbs: 6.9, category: .mushrooms),
+
         // Крупы и хлеб
         FoodItem(name: String(localized: "Рис варёный"), caloriesPer100g: 130, protein: 2.7, fat: 0.3, carbs: 28, category: .grains),
         FoodItem(name: String(localized: "Гречка варёная"), caloriesPer100g: 110, protein: 4.2, fat: 1.1, carbs: 21, category: .grains),

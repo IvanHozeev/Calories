@@ -1113,6 +1113,7 @@ struct BodyAnalysisTests {
         #expect(counts[.dairy] == 6)
         #expect(counts[.grains] == 7)
         #expect(counts[.produce] == 21)
+        #expect(counts[.mushrooms] == 4)
         // Орехи, масла и арахис: ботанически он бобовое, но искать его будут здесь
         #expect(counts[.fats] == 5)
         #expect(counts[.sweets] == 3)

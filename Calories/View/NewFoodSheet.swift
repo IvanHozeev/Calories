@@ -161,6 +161,9 @@ struct NewFoodSheet: View {
                 offResults = (try? await OpenFoodService.search(query: searchQuery)) ?? []
                 isSearchingOFF = false
             }
+            // Форма внутри листа по умолчанию не прячет клавиатуру при прокрутке,
+            // и свайп вниз упирается в неё вместо того, чтобы её убрать.
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle(isEditing ? "Редактировать" : "Свой продукт")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

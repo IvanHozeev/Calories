@@ -85,6 +85,8 @@ struct QuickAddSheet: View {
                 }
             }
             .glassRow()
+            // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Добавить в дневник")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

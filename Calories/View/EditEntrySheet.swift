@@ -144,6 +144,8 @@ struct EditEntrySheet: View {
             }
             Button("Отмена", role: .cancel) {}
         }
+        // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle("Редактировать")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

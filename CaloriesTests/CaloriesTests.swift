@@ -1092,6 +1092,34 @@ struct BodyAnalysisTests {
         #expect(!BodyAnalysis.insights(measurement: empty, profile: p).map(\.id).contains("bodyFat"))
     }
 
+    @Test func everyBuiltInFoodHasACategory() {
+        // «Другое» у встроенного продукта — почти всегда забытая категория,
+        // а не осознанный выбор: у нас на каждый из них она проставлена руками.
+        let uncategorised = FoodDatabase.items.filter { $0.foodCategory == .other }
+        #expect(uncategorised.isEmpty,
+                "Без категории остались: \(uncategorised.map(\.name).joined(separator: ", "))")
+    }
+
+    @Test func builtInFoodsLandInSensibleCategories() {
+        // Сверяем распределение, а не названия: тесты идут на английской локали,
+        // и сравнение с русскими строками ничего не найдёт.
+        var counts: [FoodCategory: Int] = [:]
+        for item in FoodDatabase.items { counts[item.foodCategory, default: 0] += 1 }
+
+        // Бобовые: чечевица, фасоль, нут и тофу — соя тоже бобовое
+        #expect(counts[.legumes] == 4)
+        #expect(counts[.meat] == 4)
+        #expect(counts[.fish] == 2)
+        #expect(counts[.dairy] == 6)
+        #expect(counts[.grains] == 7)
+        #expect(counts[.produce] == 21)
+        // Орехи, масла и арахис: ботанически он бобовое, но искать его будут здесь
+        #expect(counts[.fats] == 5)
+        #expect(counts[.sweets] == 3)
+        #expect(counts[.drinks] == 5)
+        #expect(counts.values.reduce(0, +) == FoodDatabase.items.count)
+    }
+
     @Test func foodCategory_survivesReorderingOfTheEnum() {
         // Категория хранится строкой: по индексу «Рыба» однажды тихо стала бы
         // «Молочным» у всех сразу, стоит поменять порядок в перечислении.

@@ -8,6 +8,8 @@ struct MyFoodView: View {
     @State private var showingScanner = false
     @State private var tab: Tab = .dishes
     @State private var query = ""
+    /// nil — показывать все категории.
+    @State private var categoryFilter: FoodCategory?
     @State private var debouncedQuery = ""
     @State private var remoteResults: [FoodItem] = []
     @State private var isSearchingRemote = false
@@ -38,8 +40,12 @@ struct MyFoodView: View {
     }
 
     private var filteredProducts: [FoodItem] {
-        guard !trimmedQuery.isEmpty else { return store.customFoods }
-        return store.customFoods.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+        var items = store.customFoods
+        if let categoryFilter {
+            items = items.filter { $0.foodCategory == categoryFilter }
+        }
+        guard !trimmedQuery.isEmpty else { return items }
+        return items.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
     }
 
     var body: some View {
@@ -80,6 +86,26 @@ struct MyFoodView: View {
             remoteResults = (try? await OpenFoodService.search(query: text)) ?? []
         }
         .toolbar {
+            // Фильтр — меню, а не полоса чипов: категорий девять, полосой они
+            // не помещаются и превращаются в горизонтальную прокрутку, где
+            // выбранная категория уезжает из виду.
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Picker("Категория", selection: $categoryFilter) {
+                        Text("Все категории").tag(FoodCategory?.none)
+                        ForEach(usedCategories) { item in
+                            Label(item.title, systemImage: item.icon).tag(FoodCategory?.some(item))
+                        }
+                    }
+                } label: {
+                    Image(systemName: categoryFilter == nil
+                          ? "line.3.horizontal.decrease.circle"
+                          : "line.3.horizontal.decrease.circle.fill")
+                }
+                .accessibilityIdentifier("categoryFilter")
+                .accessibilityLabel("Категория")
+            }
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showingScanner = true } label: {
                     Image(systemName: "barcode.viewfinder")
@@ -122,6 +148,13 @@ struct MyFoodView: View {
     }
 
     // MARK: - Блюда
+
+    /// Только те категории, в которых что-то есть: пустые пункты в фильтре
+    /// обещают продукты, которых нет.
+    private var usedCategories: [FoodCategory] {
+        let used = Set(store.customFoods.map(\.foodCategory))
+        return FoodCategory.allCases.filter { used.contains($0) }
+    }
 
     @ViewBuilder
     private var dishesSection: some View {

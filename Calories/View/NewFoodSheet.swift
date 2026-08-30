@@ -11,6 +11,7 @@ struct NewFoodSheet: View {
     @State private var protein = ""
     @State private var fat = ""
     @State private var carbs = ""
+    @State private var category = FoodCategory.other
     private enum Field: Hashable { case search, name, calories, protein, fat, carbs }
     @FocusState private var focusedField: Field?
 
@@ -116,6 +117,16 @@ struct NewFoodSheet: View {
                         .focused($focusedField, equals: .carbs)
                 }
 
+                Section {
+                    Picker("Категория", selection: $category) {
+                        ForEach(FoodCategory.allCases) { item in
+                            Label(item.title, systemImage: item.icon).tag(item)
+                        }
+                    }
+                } footer: {
+                    Text("По категории потом фильтруется список своих продуктов.")
+                }
+
                 if hasMacros {
                     Section {
                         MacroSplitBar(macros: draftMacros)
@@ -164,9 +175,9 @@ struct NewFoodSheet: View {
                         let f = Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0
                         let c = Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
                         if let food = editingFood {
-                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c)
+                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category)
                         } else {
-                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c)
+                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category)
                         }
                         dismiss()
                     }
@@ -176,6 +187,7 @@ struct NewFoodSheet: View {
             }
             .onAppear {
                 if let food = editingFood {
+                    category = food.foodCategory
                     name = food.name
                     caloriesPer100g = "\(food.caloriesPer100g)"
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""

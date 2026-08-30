@@ -1092,6 +1092,27 @@ struct BodyAnalysisTests {
         #expect(!BodyAnalysis.insights(measurement: empty, profile: p).map(\.id).contains("bodyFat"))
     }
 
+    @Test func foodCategory_survivesReorderingOfTheEnum() {
+        // Категория хранится строкой: по индексу «Рыба» однажды тихо стала бы
+        // «Молочным» у всех сразу, стоит поменять порядок в перечислении.
+        let food = FoodItem(name: "Треска", caloriesPer100g: 82, protein: 18, fat: 0.7, carbs: 0, category: .fish)
+        #expect(food.category == "fish")
+        #expect(food.foodCategory == .fish)
+
+        food.foodCategory = .dairy
+        #expect(food.category == "dairy")
+    }
+
+    @Test func foodCategory_defaultsToOtherForOldRecords() {
+        // У продуктов, заведённых до появления категорий, поля нет вовсе.
+        let legacy = FoodItem(name: "Хлеб", caloriesPer100g: 250, protein: 8, fat: 3, carbs: 48)
+        #expect(legacy.foodCategory == .other)
+
+        // И мусор в поле не должен ронять экран
+        legacy.category = "не-существует"
+        #expect(legacy.foodCategory == .other)
+    }
+
     @Test func sideLabelAgreesWithGender() {
         // Проверяем раскладку по родам, а не текст: подписи локализованы,
         // и в английской локали все формы совпадают.

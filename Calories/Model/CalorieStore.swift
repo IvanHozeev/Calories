@@ -385,8 +385,8 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
-        let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs)
+    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other) {
+        let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, category: category)
         context.insert(food)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
@@ -400,7 +400,8 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double) {
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other) {
+        food.foodCategory = category
         food.name = name
         food.caloriesPer100g = caloriesPer100g
         food.protein = protein

@@ -13,8 +13,11 @@ final class FoodItem: Identifiable {
     var fat: Double
     var carbs: Double
     var defaultGrams: Double = 100
+    /// Значение по умолчанию обязательно: без него SwiftData не смигрирует
+    /// уже сохранённые продукты, а они у пользователя есть.
+    var category: String = FoodCategory.other.rawValue
 
-    init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, defaultGrams: Double = 100) {
+    init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, defaultGrams: Double = 100, category: FoodCategory = .other) {
         self.id = id
         self.name = name
         self.caloriesPer100g = caloriesPer100g
@@ -22,6 +25,12 @@ final class FoodItem: Identifiable {
         self.fat = fat
         self.carbs = carbs
         self.defaultGrams = defaultGrams
+        self.category = category.rawValue
+    }
+
+    var foodCategory: FoodCategory {
+        get { FoodCategory(rawValue: category) ?? .other }
+        set { category = newValue.rawValue }
     }
 
     var macrosPer100g: Macros {

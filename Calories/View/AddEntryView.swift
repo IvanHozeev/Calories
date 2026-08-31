@@ -151,12 +151,12 @@ struct AddEntryView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(offResults) { food in
-                    Button {
-                        serving = .food(food, savable: true, quickSave: false)
-                    } label: {
-                        foodRow(food)
-                    }
-                    .buttonStyle(.plain)
+                    // Тап ловим по всей строке: у .plain-кнопки в списке
+                    // «живыми» остаются только сами буквы, и первый тап
+                    // по пустому месту строки пропадает впустую.
+                    foodRow(food)
+                        .contentShape(Rectangle())
+                        .onTapGesture { serving = .food(food, savable: true, quickSave: false) }
                 }
             }
         }
@@ -253,20 +253,14 @@ struct AddEntryView: View {
                 if isSearching || source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
-                            Button {
-                                serving = .food(food, savable: false, quickSave: true)
-                            } label: {
-                                foodRow(food)
-                            }
-                            .buttonStyle(.plain)
+                            foodRow(food)
+                                .contentShape(Rectangle())
+                                .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
                         }
                         ForEach(recentDishItems) { dish in
-                            Button {
-                                serving = .dish(dish)
-                            } label: {
-                                dishRow(dish)
-                            }
-                            .buttonStyle(.plain)
+                            dishRow(dish)
+                                .contentShape(Rectangle())
+                                .onTapGesture { serving = .dish(dish) }
                         }
                     }
                 }
@@ -274,12 +268,9 @@ struct AddEntryView: View {
                 if isSearching || source == .mine, !filteredDishes.isEmpty {
                     Section("Мои блюда") {
                         ForEach(filteredDishes) { dish in
-                            Button {
-                                serving = .dish(dish)
-                            } label: {
-                                dishRow(dish)
-                            }
-                            .buttonStyle(.plain)
+                            dishRow(dish)
+                                .contentShape(Rectangle())
+                                .onTapGesture { serving = .dish(dish) }
                         }
                     }
                 }
@@ -292,12 +283,9 @@ struct AddEntryView: View {
                     ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
                         Section {
                             ForEach(foods) { food in
-                                Button {
-                                    serving = .food(food, savable: false, quickSave: true)
-                                } label: {
-                                    foodRow(food)
-                                }
-                                .buttonStyle(.plain)
+                                foodRow(food)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         store.deleteCustomFood(food)
@@ -337,12 +325,9 @@ struct AddEntryView: View {
                         ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
                             Section {
                                 ForEach(foods) { food in
-                                    Button {
-                                        serving = .food(food, savable: true, quickSave: true)
-                                    } label: {
-                                        foodRow(food)
-                                    }
-                                    .buttonStyle(.plain)
+                                    foodRow(food)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture { serving = .food(food, savable: true, quickSave: true) }
                                 }
                             } header: {
                                 Label(category.title, systemImage: category.icon)

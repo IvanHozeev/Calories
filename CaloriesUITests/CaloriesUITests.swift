@@ -286,6 +286,28 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertFalse(app.alerts.firstMatch.exists)
     }
 
+    /// Жалоба из жизни: первый тап по строке «не слышен». Подозрение на клавиатуру —
+    /// после поиска она открыта, и тап может уходить на её закрытие.
+    @MainActor
+    func testFoodRowOpensOnTheFirstTapWhileSearching() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        let search = app.searchFields.firstMatch
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("Beef")
+
+        // Поиск идёт по всем источникам, поэтому совпадений может быть несколько
+        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
+        row.tap()   // ровно один тап
+
+        XCTAssertTrue(app.buttons["addToMeal"].waitForExistence(timeout: 3),
+                      "Строка должна открываться с первого тапа, даже когда открыта клавиатура")
+    }
+
     // MARK: - Запись еды
 
     @MainActor

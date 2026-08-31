@@ -15,7 +15,6 @@ struct BodyView: View {
     @State private var heightInt: Int
     @State private var ageInt: Int
     @State private var proteinTenths: Int
-    @State private var showWeightPicker = false
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
@@ -115,52 +114,28 @@ struct BodyView: View {
                 Picker("Пол", selection: $sex) {
                     ForEach(Sex.allCases) { Text($0.title).tag($0) }
                 }
-                HStack {
-                    Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
-                    Spacer()
-                    Text(weightDisplayText(weightTenths))
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showWeightPicker.toggle()
-                        if showWeightPicker { showHeightPicker = false; showAgePicker = false; showProteinPicker = false }
-                    }
-                }
-                if showWeightPicker {
-                    Picker("Вес", selection: $weightTenths) {
-                        ForEach(300...1500, id: \.self) { v in
-                            Text(useImperial
-                                 ? String(format: "%.1f", Double(v) / 10.0 * 2.20462)
-                                 : String(format: "%.1f", Double(v) / 10.0)
-                            ).tag(v)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-                
+                // Вес ведёт на свой экран, а не открывает колесо: он меняется
+                // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
+                // Динамика переехала туда же — отдельной строке рядом делать нечего.
                 NavigationLink {
                     WeightDetailView(store: store)
                 } label: {
                     HStack {
-                        Text("Динамика")
+                        Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
                         Spacer()
                         if let trend = weightTrend {
                             Text(trend.caption)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             WeightSparkline(points: trend.points)
-                                .frame(width: 56, height: 20)
-                        } else {
-                            Text("Мало данных")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                                .frame(width: 44, height: 18)
                         }
+                        Text(weightDisplayText(weightTenths))
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .accessibilityIdentifier("openWeight")
+                
                 
                 NavigationLink {
                     MeasurementsView(store: store)
@@ -185,7 +160,7 @@ struct BodyView: View {
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showHeightPicker.toggle()
-                        if showHeightPicker { showWeightPicker = false; showAgePicker = false; showProteinPicker = false }
+                        if showHeightPicker { showAgePicker = false; showProteinPicker = false }
                     }
                 }
                 if showHeightPicker {
@@ -207,7 +182,7 @@ struct BodyView: View {
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showAgePicker.toggle()
-                        if showAgePicker { showWeightPicker = false; showHeightPicker = false; showProteinPicker = false }
+                        if showAgePicker { showHeightPicker = false; showProteinPicker = false }
                     }
                 }
                 if showAgePicker {
@@ -257,7 +232,7 @@ struct BodyView: View {
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         showProteinPicker.toggle()
-                        if showProteinPicker { showWeightPicker = false; showHeightPicker = false; showAgePicker = false }
+                        if showProteinPicker { showHeightPicker = false; showAgePicker = false }
                     }
                 }
                 if showProteinPicker {
@@ -345,8 +320,8 @@ struct BodyView: View {
     }
     
     
-    /// Динамика за месяц: искра и изменение. Строка с одной лишь стрелкой «дальше»
-    /// ничего не сообщала бы, а так тренд виден не заходя внутрь.
+    /// Динамика за месяц: искра и изменение прямо в строке веса — тренд виден,
+    /// не заходя внутрь.
     private var weightTrend: (points: [Double], caption: String)? {
         let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
         let recent = store.weightEntries.filter { $0.date >= cutoff }.sorted { $0.date < $1.date }

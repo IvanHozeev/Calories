@@ -95,6 +95,27 @@ struct ProfilePlanCard: View {
                 chevron
             }
 
+            // Где мы на дистанции. Без этого карточка показывала цель и темп,
+            // но не отвечала на первый же вопрос: сколько ещё это терпеть.
+            HStack(spacing: 6) {
+                Text(String(format: String(localized: "Неделя %d из %d"),
+                            plan.currentWeek, plan.durationWeeks))
+                    .font(.caption.weight(.medium))
+                if plan.weeksRemaining > 0 {
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text(String(format: String(localized: "осталось %d нед."), plan.weeksRemaining))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text("последняя неделя")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             HStack(spacing: 6) {
                 Text(String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg))
                     .font(.subheadline.weight(.semibold))

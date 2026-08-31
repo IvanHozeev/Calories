@@ -413,6 +413,16 @@ struct Plan: Codable, Equatable {
     var cyclingEnabled: Bool = false
     var weekendStyle: WeekendStyle = .satSun
 
+    /// Идущая неделя плана, считая с первой. Упирается в длительность: после
+    /// финиша номер расти не должен, иначе «неделя 14 из 12».
+    var currentWeek: Int {
+        let days = Calendar.current.dateComponents([.day], from: startDate, to: Date()).day ?? 0
+        return min(max(days / 7 + 1, 1), durationWeeks)
+    }
+
+    /// Сколько полных недель осталось после идущей.
+    var weeksRemaining: Int { max(durationWeeks - currentWeek, 0) }
+
     init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double, cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
         self.startDate = startDate
         self.durationWeeks = durationWeeks

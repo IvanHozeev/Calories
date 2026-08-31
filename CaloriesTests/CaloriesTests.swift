@@ -300,6 +300,16 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func diaryRowShowsCategoryOfAFreshCustomProduct() {
+        // Ровно сценарий из жизни: завёл свой хлеб, съел, посмотрел в дневник.
+        store.addCustomFood(name: "Хлеб с семенами", caloriesPer100g: 280, protein: 9, fat: 6, carbs: 45, category: .grains)
+        store.add(name: "Хлеб с семенами", calories: 140, macros: Macros(protein: 4.5, fat: 3, carbs: 22.5), grams: 50)
+
+        let entry = store.entries.first { $0.name == "Хлеб с семенами" }
+        #expect(entry != nil, "Запись не попала в дневник")
+        #expect(store.foodCategories(forEntryNamed: "Хлеб с семенами") == [.grains])
+    }
+
     @Test func recentFoodsKeepTheirCategory() {
         // Недавнее пересобирается из записей дневника: категорию оно должно
         // восстанавливать по названию, иначе весь список показывает «Другое».

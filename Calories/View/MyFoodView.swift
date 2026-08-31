@@ -16,7 +16,7 @@ struct MyFoodView: View {
     @State private var quickAdd: QuickAddTarget?
 
     enum Tab: String, CaseIterable, Identifiable {
-        case dishes, products
+        case dishes, products, database
         var id: String { rawValue }
     }
 
@@ -48,12 +48,33 @@ struct MyFoodView: View {
         return items.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
     }
 
+    /// Встроенная база. Она тут не для полноты: свой продукт заводят как раз
+    /// глядя на похожий из базы, и ради этого раньше приходилось уходить в
+    /// лист добавления еды.
+    private var filteredDatabase: [FoodItem] {
+        var items = FoodDatabase.items
+        if let categoryFilter {
+            items = items.filter { $0.foodCategory == categoryFilter }
+        }
+        guard !trimmedQuery.isEmpty else { return items }
+        return items.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+    }
+
+    /// Категории берём из того раздела, который открыт: фильтровать базу по
+    /// категориям своих продуктов бессмысленно, и наоборот.
+    private var usedCategories: [FoodCategory] {
+        let source = tab == .database ? FoodDatabase.items : store.customFoods
+        let used = Set(source.map(\.foodCategory))
+        return FoodCategory.allCases.filter { used.contains($0) }
+    }
+
     var body: some View {
         List {
             Section {
                 Picker("Раздел", selection: $tab) {
                     Text("Блюда (\(filteredDishes.count))").tag(Tab.dishes)
                     Text("Продукты (\(filteredProducts.count))").tag(Tab.products)
+                    Text("База (\(filteredDatabase.count))").tag(Tab.database)
                 }
                 .pickerStyle(.segmented)
             }
@@ -63,6 +84,7 @@ struct MyFoodView: View {
             switch tab {
             case .dishes: dishesSection
             case .products: productsSection
+            case .database: databaseSection
             }
 
             if !trimmedQuery.isEmpty {
@@ -149,13 +171,6 @@ struct MyFoodView: View {
 
     // MARK: - Блюда
 
-    /// Только те категории, в которых что-то есть: пустые пункты в фильтре
-    /// обещают продукты, которых нет.
-    private var usedCategories: [FoodCategory] {
-        let used = Set(store.customFoods.map(\.foodCategory))
-        return FoodCategory.allCases.filter { used.contains($0) }
-    }
-
     @ViewBuilder
     private var dishesSection: some View {
         if filteredDishes.isEmpty {
@@ -201,6 +216,44 @@ struct MyFoodView: View {
     }
 
     // MARK: - Продукты
+
+    /// База разложена по категориям, как и в листе добавления еды: одним
+    /// списком из шести десятков строк она не читается.
+    @ViewBuilder
+    private var databaseSection: some View {
+        if filteredDatabase.isEmpty {
+            Section {
+                Text("Ничего не найдено")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        } else {
+            ForEach(groupedDatabase, id: \.0) { category, foods in
+                Section {
+                    ForEach(foods) { food in
+                        NavigationLink {
+                            FoodDetailView(food: food, store: store)
+                        } label: {
+                            foodRow(food)
+                        }
+                        .swipeActions(edge: .leading) {
+                            quickAddButton { target(for: food) }
+                        }
+                    }
+                } header: {
+                    Label(category.title, systemImage: category.icon)
+                }
+            }
+        }
+    }
+
+    private var groupedDatabase: [(FoodCategory, [FoodItem])] {
+        let buckets = Dictionary(grouping: filteredDatabase, by: \.foodCategory)
+        return FoodCategory.allCases.compactMap { category in
+            guard let items = buckets[category], !items.isEmpty else { return nil }
+            return (category, items)
+        }
+    }
 
     @ViewBuilder
     private var productsSection: some View {

@@ -21,23 +21,23 @@ struct FoodRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            if let icon {
-                Image(systemName: icon)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 24, alignment: .center)
-                    .accessibilityHidden(true)
-            }
             VStack(alignment: .leading, spacing: 6) {
                 Text(name)
                     .lineLimit(2)
 
+                // Та же строка подписей, что и в дневнике: ячейки продукта
+                // должны читаться одинаково, где бы они ни стояли.
                 HStack(spacing: 6) {
                     if let detail {
                         Text(verbatim: detail)
                         Text(verbatim: "·")
                     }
                     Text(verbatim: portion)
+                    if let icon {
+                        Text(verbatim: "·")
+                        Image(systemName: icon)
+                            .accessibilityHidden(true)
+                    }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

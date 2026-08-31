@@ -22,28 +22,29 @@ struct EntryRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Больше трёх не показываем: дальше значки съедают место у названия,
-            // а различать приёмы пищи по четвёртой иконке всё равно не выходит.
-            HStack(spacing: 3) {
-                ForEach(icons.prefix(3), id: \.self) { icon in
-                    Image(systemName: icon)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .frame(width: 44, height: 20, alignment: .leading)
-            .accessibilityHidden(true)
-
             VStack(alignment: .leading, spacing: 6) {
                 Text(entry.name)
                     .font(.body)
                     .lineLimit(2)
 
+                // Значки идут в одну строку со временем и граммовкой: это всё
+                // подписи к продукту, и разносить их по разным уровням незачем.
                 HStack(spacing: 6) {
                     Text(entry.date, format: .dateTime.hour().minute())
                     if let portionText {
                         Text(verbatim: "·")
                         Text(verbatim: portionText)
+                    }
+                    if !icons.isEmpty {
+                        Text(verbatim: "·")
+                        // Больше трёх не показываем: дальше они съедают строку,
+                        // а различать приёмы пищи по четвёртой иконке не выходит.
+                        HStack(spacing: 4) {
+                            ForEach(icons.prefix(3), id: \.self) { icon in
+                                Image(systemName: icon)
+                            }
+                        }
+                        .accessibilityHidden(true)
                     }
                 }
                 .font(.caption)

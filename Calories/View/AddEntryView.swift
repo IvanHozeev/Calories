@@ -91,6 +91,12 @@ struct AddEntryView: View {
         return String(joined.prefix(60)) + "…"
     }
 
+    /// Пока ищут, сегмент не участвует: искать нужно везде сразу, а не заставлять
+    /// человека перебирать вкладки, чтобы наткнуться на свой же продукт.
+    private var isSearching: Bool {
+        !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
     private var filteredCustomFoods: [FoodItem] {
         guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return store.customFoods
@@ -232,6 +238,7 @@ struct AddEntryView: View {
                     Text("Быстро — только калории")
                 }
 
+                if !isSearching {
                 Section {
                     Picker("Источник", selection: $source) {
                         ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
@@ -241,8 +248,9 @@ struct AddEntryView: View {
                     .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
                     .listRowBackground(Color.clear)
                 }
+                }
 
-                if source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
+                if isSearching || source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
                             Button {
@@ -263,7 +271,7 @@ struct AddEntryView: View {
                     }
                 }
 
-                if source == .mine, !filteredDishes.isEmpty {
+                if isSearching || source == .mine, !filteredDishes.isEmpty {
                     Section("Мои блюда") {
                         ForEach(filteredDishes) { dish in
                             Button {
@@ -280,7 +288,7 @@ struct AddEntryView: View {
                 // не меньше, чем в базе. «Недавнее» намеренно оставлено плоским —
                 // там порядок и есть смысл: сверху последнее съеденное, и
                 // группировка сломала бы именно то, ради чего туда заходят.
-                if source == .mine {
+                if isSearching || source == .mine {
                     ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
                         Section {
                             ForEach(foods) { food in
@@ -316,7 +324,7 @@ struct AddEntryView: View {
                     offSearchSection
                 }
 
-                if source == .database {
+                if isSearching || source == .database {
                     if filteredBuiltInFoods.isEmpty {
                         Section("База продуктов") {
                             Text("Ничего не найдено")
@@ -522,6 +530,11 @@ struct AddEntryView: View {
 
     /// Пусто ли в выбранном источнике при текущем запросе.
     private var currentSourceIsEmpty: Bool {
+        if isSearching {
+            return recentFoodItems.isEmpty && recentDishItems.isEmpty
+                && filteredCustomFoods.isEmpty && filteredDishes.isEmpty
+                && filteredBuiltInFoods.isEmpty
+        }
         switch source {
         case .recent:   return recentFoodItems.isEmpty && recentDishItems.isEmpty
         case .mine:     return filteredCustomFoods.isEmpty && filteredDishes.isEmpty

@@ -194,6 +194,18 @@ final class CaloriesUITests: XCTestCase {
             XCTAssertTrue(sources.buttons[name].exists, "Нет источника «\(name)»")
         }
 
+        // При поиске сегменты прячутся и ищется по всем источникам сразу
+        let search = app.searchFields.firstMatch
+        if search.exists {
+            search.tap()
+            search.typeText("Beef")
+            XCTAssertFalse(app.segmentedControls.firstMatch.exists,
+                           "Во время поиска сегменты не должны притворяться рабочими")
+            XCTAssertTrue(app.staticTexts["Beef"].waitForExistence(timeout: 5),
+                          "Поиск должен находить продукт, не переключая источник")
+            search.buttons.firstMatch.tap()   // очистить
+        }
+
         // База разложена по категориям и появляется только на своей вкладке
         XCTAssertFalse(app.staticTexts["Meat and poultry"].exists,
                        "База не должна показываться на вкладке недавнего")

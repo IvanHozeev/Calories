@@ -18,6 +18,23 @@ struct AddEntryView: View {
     @State private var isSearchingOFF = false
     @State private var noNetwork = false
     @State private var source: FoodSource = .recent
+    @State private var serving: ServingTarget?
+
+    /// Что показываем на экране порции. Раньше он вставлялся в стек навигации
+    /// внутри листа — получался лист с кнопкой «назад», два разных способа
+    /// закрыть один экран. Теперь он всегда открывается поверх, одинаково
+    /// откуда бы ни зашли.
+    enum ServingTarget: Identifiable {
+        case food(FoodItem, savable: Bool, quickSave: Bool)
+        case dish(Dish)
+
+        var id: String {
+            switch self {
+            case .food(let food, _, _): return "food-\(food.id.uuidString)"
+            case .dish(let dish):       return "dish-\(dish.id.uuidString)"
+            }
+        }
+    }
 
     /// Откуда берём продукты. Разделение не косметическое: пока источники шли
     /// сплошным списком, поиск по своим продуктам приходилось выискивать глазами
@@ -128,13 +145,12 @@ struct AddEntryView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(offResults) { food in
-                    NavigationLink {
-                        FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }) { item in
-                            draftItems.append(item)
-                        }
+                    Button {
+                        serving = .food(food, savable: true, quickSave: false)
                     } label: {
                         foodRow(food)
                     }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -229,22 +245,20 @@ struct AddEntryView: View {
                 if source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
                     Section("Недавнее") {
                         ForEach(recentFoodItems) { food in
-                            NavigationLink {
-                                FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
-                                    draftItems.append(item)
-                                }
+                            Button {
+                                serving = .food(food, savable: false, quickSave: true)
                             } label: {
                                 foodRow(food)
                             }
+                            .buttonStyle(.plain)
                         }
                         ForEach(recentDishItems) { dish in
-                            NavigationLink {
-                                DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
-                                    draftItems.append(item)
-                                }
+                            Button {
+                                serving = .dish(dish)
                             } label: {
                                 dishRow(dish)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -252,13 +266,12 @@ struct AddEntryView: View {
                 if source == .mine, !filteredDishes.isEmpty {
                     Section("Мои блюда") {
                         ForEach(filteredDishes) { dish in
-                            NavigationLink {
-                                DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
-                                    draftItems.append(item)
-                                }
+                            Button {
+                                serving = .dish(dish)
                             } label: {
                                 dishRow(dish)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -271,13 +284,12 @@ struct AddEntryView: View {
                     ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
                         Section {
                             ForEach(foods) { food in
-                                NavigationLink {
-                                    FoodQuantityView(food: food, onAddAndSave: addAndSave) { item in
-                                        draftItems.append(item)
-                                    }
+                                Button {
+                                    serving = .food(food, savable: false, quickSave: true)
                                 } label: {
                                     foodRow(food)
                                 }
+                                .buttonStyle(.plain)
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {
                                         store.deleteCustomFood(food)
@@ -317,13 +329,12 @@ struct AddEntryView: View {
                         ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
                             Section {
                                 ForEach(foods) { food in
-                                    NavigationLink {
-                                        FoodQuantityView(food: food, onSave: isSaved(food) ? nil : { saveToMyFoods(food) }, onAddAndSave: addAndSave) { item in
-                                            draftItems.append(item)
-                                        }
+                                    Button {
+                                        serving = .food(food, savable: true, quickSave: true)
                                     } label: {
                                         foodRow(food)
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             } header: {
                                 Label(category.title, systemImage: category.icon)
@@ -431,6 +442,9 @@ struct AddEntryView: View {
             }
             // Чтобы последняя строка не оставалась навсегда под кнопкой.
             .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
+            .fullScreenCover(item: $serving) { target in
+                NavigationStack { servingScreen(target) }
+            }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerSheet(store: store) { item in
                     draftItems.append(item)
@@ -450,7 +464,42 @@ struct AddEntryView: View {
     /// Пикер теперь хранит и время, поэтому подменять его текущим больше не нужно.
     private var entryDate: Date { selectedDate }
 
+    /// Вынесено из модификатора: со switch внутри ViewBuilder компилятор
+    /// не укладывается в разумное время на проверке типов.
+    @ViewBuilder
+    private func servingScreen(_ target: ServingTarget) -> some View {
+        switch target {
+        case .food(let food, let savable, let quickSave):
+            FoodQuantityView(
+                food: food,
+                onSave: saveAction(for: food, enabled: savable),
+                onAddAndSave: quickAction(enabled: quickSave)
+            ) { item in
+                draftItems.append(item)
+            }
+        case .dish(let dish):
+            DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
+                draftItems.append(item)
+            }
+        }
+    }
+
+    /// Типы у опциональных замыканий выписаны явно: в тернарнике прямо в списке
+    /// аргументов компилятор на них захлёбывается.
+    private func saveAction(for food: FoodItem, enabled: Bool) -> (() -> Void)? {
+        guard enabled, !isSaved(food) else { return nil }
+        return { saveToMyFoods(food) }
+    }
+
+    private func quickAction(enabled: Bool) -> ((MealItem) -> Void)? {
+        guard enabled else { return nil }
+        return { item in addAndSave(item) }
+    }
+
+    /// Экран порции закрываем первым: иначе лист уезжает из-под открытого поверх
+    /// него экрана, и анимация схлопывается в рывок.
     private func addAndSave(_ item: MealItem) {
+        serving = nil
         let allItems = draftItems + [item]
         let totalCalories = allItems.reduce(0) { $0 + $1.calories }
         let totalMacros = allItems.reduce(Macros.zero) { $0 + $1.macros }

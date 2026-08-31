@@ -504,7 +504,10 @@ final class CalorieStore {
                 protein: entry.protein * factor,
                 fat: entry.fat * factor,
                 carbs: entry.carbs * factor,
-                defaultGrams: grams
+                defaultGrams: grams,
+                // Недавнее пересобирается из записей дневника, а они категорию
+                // не хранят. Без этой строки весь список показывал «Другое».
+                category: foodCategories(forEntryNamed: entry.name).first ?? .other
             ))
         }
         return result

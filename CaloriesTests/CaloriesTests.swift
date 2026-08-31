@@ -300,6 +300,16 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func recentFoodsKeepTheirCategory() {
+        // Недавнее пересобирается из записей дневника: категорию оно должно
+        // восстанавливать по названию, иначе весь список показывает «Другое».
+        store.addCustomFood(name: "Мой творог", caloriesPer100g: 120, protein: 18, fat: 5, carbs: 3, category: .dairy)
+        store.add(name: "Мой творог", calories: 240, macros: Macros(protein: 36, fat: 10, carbs: 6), grams: 200)
+
+        let recent = store.recentFoods.first { $0.name == "Мой творог" }
+        #expect(recent?.foodCategory == .dairy)
+    }
+
     @Test func entryCategoriesAreRecoveredFromTheJoinedName() {
         // Запись дневника категорий не хранит: приём пищи собирается из нескольких
         // продуктов. Зато его имя склеено из названий через запятую.

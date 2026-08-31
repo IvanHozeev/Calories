@@ -7,6 +7,7 @@ struct FoodQuantityView: View {
     var onSave: (() -> Void)? = nil
     var onAddAndSave: ((MealItem) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
+    @State private var savedToMyFoods = false
 
     @State private var grams: Double
     @State private var gramsText: String
@@ -95,11 +96,17 @@ struct FoodQuantityView: View {
         .toolbar {
             // Пополнение справочника — редкое действие, поэтому оно иконкой наверху.
             // Внизу под большим пальцем то, ради чего на экран и зашли.
-            if let onSave {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Отмена") { dismiss() }
+            }
+            // Пополнение справочника не должно закрывать экран: порцию ещё
+            // не выбрали, а ради неё сюда и зашли. Кнопка просто исчезает —
+            // сохранять второй раз нечего, и это же служит подтверждением.
+            if let onSave, !savedToMyFoods {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         onSave()
-                        dismiss()
+                        savedToMyFoods = true
                     } label: {
                         Image(systemName: "bookmark")
                     }
@@ -256,6 +263,9 @@ struct DishQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Отмена") { dismiss() }
+            }
         }
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {

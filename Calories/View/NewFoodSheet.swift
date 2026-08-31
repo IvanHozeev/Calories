@@ -158,7 +158,7 @@ struct NewFoodSheet: View {
                 try? await Task.sleep(for: .milliseconds(300))
                 guard !Task.isCancelled else { return }
                 isSearchingOFF = true
-                offResults = (try? await OpenFoodService.search(query: searchQuery)) ?? []
+                offResults = (try? await FoodDataCentralService.search(query: searchQuery)) ?? []
                 isSearchingOFF = false
             }
             // Форма внутри листа по умолчанию не прячет клавиатуру при прокрутке,

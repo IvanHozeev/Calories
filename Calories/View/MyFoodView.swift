@@ -105,7 +105,7 @@ struct MyFoodView: View {
             guard text.count >= 3 else { remoteResults = []; isSearchingRemote = false; return }
             isSearchingRemote = true
             defer { isSearchingRemote = false }
-            remoteResults = (try? await OpenFoodService.search(query: text)) ?? []
+            remoteResults = (try? await FoodDataCentralService.search(query: text)) ?? []
         }
         .toolbar {
             // Фильтр — меню, а не полоса чипов: категорий девять, полосой они

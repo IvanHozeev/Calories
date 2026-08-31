@@ -243,36 +243,11 @@ struct BarcodeScannerSheet: View {
     // MARK: - Network
 
     private func lookup(barcode: String) async {
-        guard let url = URL(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,nutriments") else {
-            phase = .notFound; return
-        }
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  (json["status"] as? Int) == 1,
-                  let productDict = json["product"] as? [String: Any] else {
-                phase = .notFound; return
-            }
-            let name = (productDict["product_name"] as? String ?? "").trimmingCharacters(in: .whitespaces)
-            let nutriments = productDict["nutriments"] as? [String: Any] ?? [:]
-            let kcal = nutriments["energy-kcal_100g"] as? Double
-                    ?? nutriments["energy-kcal"] as? Double
-                    ?? 0
-            let protein = nutriments["proteins_100g"] as? Double ?? 0
-            let fat = nutriments["fat_100g"] as? Double ?? 0
-            let carbs = nutriments["carbohydrates_100g"] as? Double ?? 0
-
-            guard kcal > 0 else { phase = .notFound; return }
-
-            let product = BarcodeProduct(
-                name: name.isEmpty ? "Продукт \(barcode)" : name,
-                caloriesPer100g: Int(kcal.rounded()),
-                protein: protein,
-                fat: fat,
-                carbs: carbs
-            )
+        // Сам запрос живёт в OpenFoodService: экрану сканера незачем знать
+        // ни адрес базы, ни форму её ответа.
+        if let product = await OpenFoodService.product(barcode: barcode) {
             phase = .found(product)
-        } catch {
+        } else {
             phase = .notFound
         }
     }

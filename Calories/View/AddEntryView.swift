@@ -378,7 +378,7 @@ struct AddEntryView: View {
                 isSearchingOFF = true
                 offResults = []
                 do {
-                    let results = try await OpenFoodService.search(query: searchText)
+                    let results = try await FoodDataCentralService.search(query: searchText)
                     guard !Task.isCancelled else { isSearchingOFF = false; return }
                     offResults = results
                     noNetwork = false

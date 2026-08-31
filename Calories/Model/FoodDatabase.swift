@@ -16,6 +16,10 @@ final class FoodItem: Identifiable {
     /// Значение по умолчанию обязательно: без него SwiftData не смигрирует
     /// уже сохранённые продукты, а они у пользователя есть.
     var category: String = FoodCategory.other.rawValue
+    /// Витамины и минералы на 100 г, если источник их дал. Хранится JSON-ом:
+    /// набор веществ со временем меняется, а колонка на каждое превратила бы
+    /// любое добавление в миграцию схемы.
+    var micronutrientsData: Data?
 
     init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, defaultGrams: Double = 100, category: FoodCategory = .other) {
         self.id = id
@@ -26,6 +30,18 @@ final class FoodItem: Identifiable {
         self.carbs = carbs
         self.defaultGrams = defaultGrams
         self.category = category.rawValue
+    }
+
+    /// Пусто — значит неизвестно, а не «ноль»: на нулях день насчитал бы
+    /// дефицит там, где данных просто нет.
+    var micronutrients: Micronutrients {
+        get {
+            guard let micronutrientsData,
+                  let decoded = try? JSONDecoder().decode(Micronutrients.self, from: micronutrientsData)
+            else { return Micronutrients() }
+            return decoded
+        }
+        set { micronutrientsData = try? JSONEncoder().encode(newValue) }
     }
 
     var foodCategory: FoodCategory {

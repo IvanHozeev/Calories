@@ -1163,6 +1163,46 @@ struct BodyAnalysisTests {
         #expect(!BodyAnalysis.insights(measurement: empty, profile: p).map(\.id).contains("bodyFat"))
     }
 
+    @Test func micronutrients_treatUnknownAsUnknownNotZero() {
+        // Разница принципиальная: на нулях день насчитал бы дефицит там,
+        // где данных просто нет.
+        let empty = Micronutrients()
+        #expect(empty.isEmpty)
+        #expect(empty[.iron] == nil)
+
+        let known = Micronutrients([.iron: 2.5])
+        #expect(known[.iron] == 2.5)
+        #expect(known[.zinc] == nil, "Незаполненное вещество не ноль, а неизвестно")
+    }
+
+    @Test func micronutrients_scaleAndAddUp() {
+        let per100g = Micronutrients([.iron: 2.0, .calcium: 120])
+        let eaten = per100g.scaled(by: 250)
+        #expect(eaten[.iron] == 5.0)
+        #expect(eaten[.calcium] == 300)
+
+        let day = eaten + Micronutrients([.iron: 1.0, .zinc: 3.0])
+        #expect(day[.iron] == 6.0)
+        #expect(day[.calcium] == 300)
+        #expect(day[.zinc] == 3.0)
+    }
+
+    @Test func micronutrients_surviveStorageOnAProduct() {
+        let food = FoodItem(name: "Печень", caloriesPer100g: 135, protein: 20, fat: 4, carbs: 4, category: .meat)
+        #expect(food.micronutrients.isEmpty, "У продукта без данных микронутриентов быть не должно")
+
+        food.micronutrients = Micronutrients([.vitaminA: 4968, .iron: 6.5])
+        #expect(food.micronutrients[.vitaminA] == 4968)
+        #expect(food.micronutrients[.iron] == 6.5)
+        #expect(food.micronutrients[.vitaminC] == nil)
+    }
+
+    @Test func usdaNutrientIDsAreDistinct() {
+        // Повтор идентификатора тихо подменил бы одно вещество другим.
+        let ids = Micronutrient.allCases.map(\.usdaNutrientID)
+        #expect(Set(ids).count == ids.count)
+    }
+
     @Test func everyCategoryIconIsARealSymbol() {
         // Несуществующее имя символа рисуется пустотой, а не падает — поэтому
         // опечатку в нём замечаешь только глазами на экране. Пусть замечает тест.

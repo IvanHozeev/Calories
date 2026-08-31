@@ -300,6 +300,28 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func dishShowsCategoriesOfItsIngredients() {
+        // У блюда состав известен точно, восстанавливать его из имени не нужно.
+        store.addCustomFood(name: "Мой рис", caloriesPer100g: 130, protein: 3, fat: 0, carbs: 28, category: .grains)
+        store.addCustomFood(name: "Моя курица", caloriesPer100g: 165, protein: 31, fat: 4, carbs: 0, category: .meat)
+        store.addCustomFood(name: "Моя индейка", caloriesPer100g: 150, protein: 29, fat: 3, carbs: 0, category: .meat)
+
+        let dish = Dish(name: "Обед", ingredients: [
+            DishIngredient(foodName: "Моя курица", caloriesPer100g: 165, macrosPer100g: Macros(protein: 31, fat: 4, carbs: 0), grams: 150),
+            DishIngredient(foodName: "Мой рис", caloriesPer100g: 130, macrosPer100g: Macros(protein: 3, fat: 0, carbs: 28), grams: 200),
+            DishIngredient(foodName: "Моя индейка", caloriesPer100g: 150, macrosPer100g: Macros(protein: 29, fat: 3, carbs: 0), grams: 100),
+        ])
+
+        // Порядок как в составе, два мяса схлопываются в одно
+        #expect(store.foodCategories(of: dish) == [.meat, .grains])
+
+        // Незнакомый ингредиент просто пропускается
+        let mystery = Dish(name: "Загадка", ingredients: [
+            DishIngredient(foodName: "Неизвестно что", caloriesPer100g: 100, macrosPer100g: .zero, grams: 100)
+        ])
+        #expect(store.foodCategories(of: mystery).isEmpty)
+    }
+
     @Test func diaryRowShowsCategoryOfAFreshCustomProduct() {
         // Ровно сценарий из жизни: завёл свой хлеб, съел, посмотрел в дневник.
         store.addCustomFood(name: "Хлеб с семенами", caloriesPer100g: 280, protein: 9, fat: 6, carbs: 45, category: .grains)

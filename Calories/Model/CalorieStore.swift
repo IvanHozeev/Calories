@@ -393,6 +393,24 @@ final class CalorieStore {
     /// поэтому последний кусок может не совпасть ни с чем: тогда он просто
     /// пропускается, а не портит остальные значки.
     /// Повторы схлопываются: курица с говядиной — это одно мясо, а не две вилки.
+    /// Категории ингредиентов блюда — тем же способом, что и у приёма пищи,
+    /// только состав здесь известен точно, а не восстанавливается из имени.
+    func foodCategories(of dish: Dish) -> [FoodCategory] {
+        var seen: Set<FoodCategory> = []
+        var found: [FoodCategory] = []
+        for ingredient in dish.ingredients {
+            guard let match = category(ofProductNamed: ingredient.foodName),
+                  seen.insert(match).inserted else { continue }
+            found.append(match)
+        }
+        return found
+    }
+
+    private func category(ofProductNamed name: String) -> FoodCategory? {
+        customFoods.first { $0.name == name }?.foodCategory
+            ?? FoodDatabase.items.first { $0.name == name }?.foodCategory
+    }
+
     func foodCategories(forEntryNamed name: String) -> [FoodCategory] {
         var seen: Set<FoodCategory> = []
         var found: [FoodCategory] = []
@@ -400,9 +418,8 @@ final class CalorieStore {
             let trimmed = part.trimmingCharacters(in: .whitespacesAndNewlines)
                 .trimmingCharacters(in: CharacterSet(charactersIn: "…"))
             guard !trimmed.isEmpty else { continue }
-            let match = customFoods.first { $0.name == trimmed }?.foodCategory
-                ?? FoodDatabase.items.first { $0.name == trimmed }?.foodCategory
-            guard let match, seen.insert(match).inserted else { continue }
+            guard let match = category(ofProductNamed: trimmed),
+                  seen.insert(match).inserted else { continue }
             found.append(match)
         }
         return found

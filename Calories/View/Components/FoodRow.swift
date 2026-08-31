@@ -11,9 +11,9 @@ struct FoodRow: View {
     let macros: Macros
     /// Подпись слева от порции — например, число ингредиентов у блюда.
     var detail: String? = nil
-    /// Значок категории. Не украшение: в списке из шести десятков строк он
-    /// даёт зацепку для глаза, по которой продукт находится быстрее, чем по тексту.
-    var icon: String? = nil
+    /// Значки категорий. У продукта он один, у блюда — по одному на каждую
+    /// категорию его состава: так видно, из чего блюдо, не открывая его.
+    var icons: [String] = []
 
     private var hasMacros: Bool {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
@@ -33,10 +33,14 @@ struct FoodRow: View {
                         Text(verbatim: "·")
                     }
                     Text(verbatim: portion)
-                    if let icon {
+                    if !icons.isEmpty {
                         Text(verbatim: "·")
-                        Image(systemName: icon)
-                            .accessibilityHidden(true)
+                        HStack(spacing: 4) {
+                            ForEach(icons.prefix(3), id: \.self) { icon in
+                                Image(systemName: icon)
+                            }
+                        }
+                        .accessibilityHidden(true)
                     }
                 }
                 .font(.caption)

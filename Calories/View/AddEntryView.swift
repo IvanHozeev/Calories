@@ -563,7 +563,7 @@ struct AddEntryView: View {
             calories: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
-            icon: food.foodCategory.icon
+            icons: [food.foodCategory.icon]
         )
     }
 
@@ -573,7 +573,8 @@ struct AddEntryView: View {
             calories: dish.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: dish.macrosPer100g,
-            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))"
+            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
+            icons: store.foodCategories(of: dish).map(\.icon)
         )
     }
 }

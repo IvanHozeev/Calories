@@ -190,7 +190,8 @@ struct MyFoodView: View {
                             calories: dish.totalCalories,
                             portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                             macros: dish.totalMacros,
-                            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))"
+                            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
+                            icons: store.foodCategories(of: dish).map(\.icon)
                         )
                     }
                     .swipeActions(edge: .leading) {
@@ -340,7 +341,7 @@ struct MyFoodView: View {
             calories: kcal,
             portion: "\(Int(grams)) \(String(localized: "г"))",
             macros: food.macrosPer100g.scaled(by: grams),
-            icon: food.foodCategory.icon
+            icons: [food.foodCategory.icon]
         )
     }
 

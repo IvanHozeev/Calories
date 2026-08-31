@@ -228,7 +228,7 @@ struct MyFoodView: View {
                     .foregroundStyle(.secondary)
             }
         } else {
-            ForEach(groupedDatabase, id: \.0) { category, foods in
+            ForEach(grouped(filteredDatabase), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
                         NavigationLink {
@@ -247,8 +247,10 @@ struct MyFoodView: View {
         }
     }
 
-    private var groupedDatabase: [(FoodCategory, [FoodItem])] {
-        let buckets = Dictionary(grouping: filteredDatabase, by: \.foodCategory)
+    /// Порядок берём из самого перечисления — он осмысленный (мясо, рыба,
+    /// молочное...), в отличие от алфавитного.
+    private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
+        let buckets = Dictionary(grouping: foods, by: \.foodCategory)
         return FoodCategory.allCases.compactMap { category in
             guard let items = buckets[category], !items.isEmpty else { return nil }
             return (category, items)
@@ -264,23 +266,29 @@ struct MyFoodView: View {
                     .foregroundStyle(.secondary)
             }
         } else {
-            Section {
-                ForEach(filteredProducts) { food in
-                    NavigationLink {
-                        FoodDetailView(food: food, store: store)
-                    } label: {
-                        foodRow(food)
-                    }
-                    .swipeActions(edge: .leading) {
-                        quickAddButton { target(for: food) }
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            store.deleteCustomFood(food)
+            // Свои продукты разложены так же, как база: список копится и без
+            // заголовков читается ничуть не лучше встроенного.
+            ForEach(grouped(filteredProducts), id: \.0) { category, foods in
+                Section {
+                    ForEach(foods) { food in
+                        NavigationLink {
+                            FoodDetailView(food: food, store: store)
                         } label: {
-                            Image(systemName: "trash")
+                            foodRow(food)
+                        }
+                        .swipeActions(edge: .leading) {
+                            quickAddButton { target(for: food) }
+                        }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                store.deleteCustomFood(food)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
                         }
                     }
+                } header: {
+                    Label(category.title, systemImage: category.icon)
                 }
             }
         }

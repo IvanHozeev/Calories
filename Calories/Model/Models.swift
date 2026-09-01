@@ -120,6 +120,17 @@ final class Dish: Identifiable {
     var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
     var totalGrams: Double { ingredients.reduce(0) { $0 + $1.grams } }
 
+    /// Порция по умолчанию. Ноль означает «вся кастрюля»: столько блюдо весит
+    /// целиком. Своя порция нужна потому, что готовят обычно на несколько раз,
+    /// и каждый раз отматывать от общего веса — лишняя работа.
+    var defaultServingGrams: Double = 0
+
+    /// Сколько подставлять в поле массы при добавлении.
+    var servingGrams: Double {
+        if defaultServingGrams > 0 { return defaultServingGrams }
+        return totalGrams > 0 ? totalGrams : 100
+    }
+
     var caloriesPer100g: Int {
         guard totalGrams > 0 else { return 0 }
         return Int((Double(totalCalories) / totalGrams * 100).rounded())

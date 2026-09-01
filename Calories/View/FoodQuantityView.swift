@@ -179,7 +179,7 @@ struct DishQuantityView: View {
         self.dish = dish
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
-        let defaultGrams = dish.totalGrams > 0 ? dish.totalGrams : 100
+        let defaultGrams = dish.servingGrams
         _grams = State(initialValue: defaultGrams)
         _gramsText = State(initialValue: "\(Int(defaultGrams))")
     }

@@ -216,9 +216,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingAdd) {
+            .fullScreenCover(isPresented: $showingAdd) {
                 AddEntryView(store: store)
-                    .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)

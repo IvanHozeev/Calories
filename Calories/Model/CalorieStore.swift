@@ -457,17 +457,19 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
     }
 
-    func addDish(name: String, ingredients: [DishIngredient]) {
+    func addDish(name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {
         let dish = Dish(name: name, ingredients: ingredients)
+        dish.defaultServingGrams = servingGrams
         context.insert(dish)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes = [dish] + dishes
         rebuildCaches()
     }
 
-    func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient]) {
+    func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {
         dish.name = name
         dish.ingredients = ingredients
+        dish.defaultServingGrams = servingGrams
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         rebuildCaches()
     }

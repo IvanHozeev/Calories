@@ -300,6 +300,26 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func dishServingDefaultsToTheWholeBatch() {
+        // Без своей порции подставляется полный вес — так было и раньше.
+        let dish = Dish(name: "Борщ", ingredients: [
+            DishIngredient(foodName: "Свёкла", caloriesPer100g: 43, macrosPer100g: .zero, grams: 300),
+            DishIngredient(foodName: "Говядина", caloriesPer100g: 250, macrosPer100g: .zero, grams: 400),
+        ])
+        #expect(dish.totalGrams == 700)
+        #expect(dish.servingGrams == 700)
+
+        // А с указанной — она и подставится: готовят на несколько раз
+        dish.defaultServingGrams = 350
+        #expect(dish.servingGrams == 350)
+    }
+
+    @Test func dishWithoutIngredientsFallsBackToAHundredGrams() {
+        // Пустое блюдо не должно давать ноль в поле массы.
+        let empty = Dish(name: "Пусто")
+        #expect(empty.servingGrams == 100)
+    }
+
     @Test func dishShowsCategoriesOfItsIngredients() {
         // У блюда состав известен точно, восстанавливать его из имени не нужно.
         store.addCustomFood(name: "Мой рис", caloriesPer100g: 130, protein: 3, fat: 0, carbs: 28, category: .grains)

@@ -5371,6 +5371,52 @@
         }
       }
     },
+    "Вся кастрюля": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "القدر كامل"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der ganze Topf"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The whole batch"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toda la olla"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toute la casserole"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כל הסיר"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A panela toda"
+          }
+        }
+      }
+    },
     "Второй завтрак": {
       "extractionState": "stale",
       "localizations": {
@@ -5877,6 +5923,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pronto!"
+          }
+        }
+      }
+    },
+    "Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يُطهى الطبق عادةً لعدة وجبات. حدّد حصتك المعتادة لتُدرج بدلًا من وزن القدر كاملًا."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Gericht kocht man meist für mehrere Mahlzeiten. Gib die übliche Portion an – sie wird eingesetzt statt des Gewichts des ganzen Topfes."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A dish is usually cooked for several meals. Set the portion you normally eat and it will be filled in instead of the weight of the whole batch."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un plato suele cocinarse para varias comidas. Indica la ración habitual y será la que se rellene, en vez del peso de toda la olla."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un plat se cuisine souvent pour plusieurs repas. Indique la portion habituelle : c'est elle qui sera proposée, plutôt que le poids de toute la casserole."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מנה מבשלים בדרך כלל לכמה ארוחות. ציין את המנה הרגילה שלך והיא תוצג במקום משקל כל הסיר."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um prato costuma ser feito para várias refeições. Informe a porção habitual e será ela a ser preenchida, em vez do peso da panela toda."
           }
         }
       }
@@ -18847,6 +18939,7 @@
       }
     },
     "Поискать в интернете": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -30075,6 +30168,7 @@
         }
       }
     },
+    "мг": {},
     "ми": {
       "extractionState": "manual",
       "localizations": {

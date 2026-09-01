@@ -7,6 +7,12 @@ struct NewDishSheet: View {
     var isEmbedded: Bool = false
 
     @State private var name = ""
+    /// Пусто — значит «вся кастрюля»: подставится полный вес блюда.
+    @State private var servingGrams = ""
+
+    private var servingGramsValue: Double {
+        Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
     @State private var ingredients: [DishIngredient] = []
     @State private var showingIngredientPicker = false
     @State private var showDiscardAlert = false
@@ -43,6 +49,19 @@ struct NewDishSheet: View {
         List {
             Section("Название") {
                 TextField("Борщ, куриная грудка с рисом...", text: $name)
+            }
+
+            Section {
+                HStack {
+                    TextField("Вся кастрюля", text: $servingGrams)
+                        .keyboardType(.decimalPad)
+                    Text("г")
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Порция по умолчанию")
+            } footer: {
+                Text("Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли.")
             }
 
             Section("Состав") {
@@ -140,9 +159,10 @@ struct NewDishSheet: View {
                     let trimmed = name.trimmingCharacters(in: .whitespaces)
                     guard !trimmed.isEmpty, !ingredients.isEmpty else { return }
                     if let dish = editingDish {
-                        store.updateDish(dish, name: trimmed, ingredients: ingredients)
+                servingGrams = dish.defaultServingGrams > 0 ? String(format: "%g", dish.defaultServingGrams) : ""
+                        store.updateDish(dish, name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
                     } else {
-                        store.addDish(name: trimmed, ingredients: ingredients)
+                        store.addDish(name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
                     }
                     dismiss()
                 }

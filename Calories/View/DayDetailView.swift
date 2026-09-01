@@ -69,9 +69,8 @@ struct DayDetailView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingAdd) {
+        .fullScreenCover(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date)
-                .presentationDetents([.medium, .large])
         }
     }
 }

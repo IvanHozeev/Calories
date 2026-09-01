@@ -168,6 +168,9 @@ struct AddEntryView: View {
     var body: some View {
         NavigationStack {
             List {
+                // Пока ищут, дата и быстрые калории — мусор на экране: человек
+                // занят одним делом, а они забирают место у результатов.
+                if !isSearching {
                 Section {
                     // Время, а не только дата: поел и записал через час — приём пищи
                     // должен встать на то время, когда он был, иначе «вчерашний обед»
@@ -183,6 +186,7 @@ struct AddEntryView: View {
                     if Calendar.current.isDateInToday(newValue) {
                         quickCalories = ""
                     }
+                }
                 }
 
                 if !draftItems.isEmpty {
@@ -218,6 +222,7 @@ struct AddEntryView: View {
                     }
                 }
 
+                if !isSearching {
                 Section {
                     HStack {
                         TextField("Ккал", text: $quickCalories)
@@ -239,6 +244,7 @@ struct AddEntryView: View {
                     }
                 } header: {
                     Text("Быстро — только калории")
+                }
                 }
 
                 if !isSearching {

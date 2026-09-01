@@ -3613,52 +3613,6 @@
         }
       }
     },
-    "В выбранном источнике ничего не нашлось.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لم يُعثر على شيء في المصدر المحدد."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In der gewählten Quelle nichts gefunden."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing found in the selected source."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No se encontró nada en la fuente elegida."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien trouvé dans la source choisie."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לא נמצא דבר במקור שנבחר."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nada encontrado na fonte selecionada."
-          }
-        }
-      }
-    },
     "В диапазоне": {
       "localizations": {
         "ar": {
@@ -5043,6 +4997,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fora da faixa"
+          }
+        }
+      }
+    },
+    "Внешняя база больше и знает витамины с минералами. Запрос уходит только по этой кнопке.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "القاعدة الخارجية أكبر وتعرف الفيتامينات والمعادن. لا يُرسل الطلب إلا بهذا الزر."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die externe Datenbank ist größer und kennt Vitamine und Mineralstoffe. Die Anfrage geht nur auf diesen Knopf."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The external database is larger and knows vitamins and minerals. The request is only sent when you press this."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La base externa es mayor y conoce vitaminas y minerales. La consulta solo se envía con este botón."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La base externe est plus vaste et connaît les vitamines et minéraux. La requête n'part qu'avec ce bouton."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המאגר החיצוני גדול יותר ומכיר ויטמינים ומינרלים. הבקשה נשלחת רק בלחיצה זו."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A base externa é maior e conhece vitaminas e minerais. A consulta só é enviada por este botão."
           }
         }
       }
@@ -9635,6 +9635,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Panturrilha"
+          }
+        }
+      }
+    },
+    "Искать в базе USDA": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابحث في قاعدة USDA"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In der USDA-Datenbank suchen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search the USDA database"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar en la base del USDA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chercher dans la base USDA"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חפש במאגר USDA"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar na base do USDA"
           }
         }
       }

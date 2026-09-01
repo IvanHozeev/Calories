@@ -59,10 +59,20 @@ enum FoodDataCentralService {
         return URLSession(configuration: config)
     }()
 
+    /// Ключ ищем сначала в настройках устройства, потом в Info.plist.
+    ///
+    /// Порядок именно такой, чтобы ключ можно было держать вне репозитория:
+    /// в Info.plist он попадёт в коммит, а оттуда — ко всем, у кого есть доступ
+    /// к исходникам. В настройках он остаётся на устройстве.
     static var apiKey: String? {
-        let key = Bundle.main.object(forInfoDictionaryKey: "FDC_API_KEY") as? String
-        let trimmed = key?.trimmingCharacters(in: .whitespaces)
-        return (trimmed?.isEmpty == false) ? trimmed : nil
+        let stored = UserDefaults.standard.string(forKey: "fdc_api_key")
+        let bundled = Bundle.main.object(forInfoDictionaryKey: "FDC_API_KEY") as? String
+        for candidate in [stored, bundled] {
+            if let trimmed = candidate?.trimmingCharacters(in: .whitespaces), !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+        return nil
     }
 
     static var isConfigured: Bool { apiKey != nil }

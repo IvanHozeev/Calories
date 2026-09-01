@@ -19,6 +19,9 @@ struct AddEntryView: View {
     @State private var noNetwork = false
     @State private var source: FoodSource = .recent
     @State private var serving: ServingTarget?
+    /// Запрошен ли внешний поиск для текущего запроса. Сбрасывается при его смене:
+    /// сеть дёргаем только когда о ней попросили, а не на каждую букву.
+    @State private var wantsOnlineSearch = false
 
     /// Что показываем на экране порции. Раньше он вставлялся в стек навигации
     /// внутри листа — получался лист с кнопкой «назад», два разных способа
@@ -308,8 +311,22 @@ struct AddEntryView: View {
                     }
                 }
 
-                if source == .online {
+                if source == .online || (isSearching && wantsOnlineSearch) {
                     offSearchSection
+                }
+
+                // Пока сегменты спрятаны поиском, до внешней базы иначе не добраться,
+                // а ради неё всё и затевалось: только там есть микронутриенты.
+                if isSearching, !wantsOnlineSearch, source != .online {
+                    Section {
+                        Button {
+                            wantsOnlineSearch = true
+                        } label: {
+                            Label("Искать в базе USDA", systemImage: "globe")
+                        }
+                    } footer: {
+                        Text("Внешняя база больше и знает витамины с минералами. Запрос уходит только по этой кнопке.")
+                    }
                 }
 
                 if isSearching || source == .database {
@@ -335,19 +352,6 @@ struct AddEntryView: View {
                         }
                     }
                 }
-
-                // Пустой результат — тупик, если не подсказать, где искать дальше.
-                if source != .online, currentSourceIsEmpty, !debouncedSearch.isEmpty {
-                    Section {
-                        Button {
-                            source = .online
-                        } label: {
-                            Label("Поискать в интернете", systemImage: "globe")
-                        }
-                    } footer: {
-                        Text("В выбранном источнике ничего не нашлось.")
-                    }
-                }
             }
             .glassRow()
             // Поиск закреплён в навбаре намеренно. При размещении по умолчанию
@@ -360,9 +364,10 @@ struct AddEntryView: View {
                         prompt: "Поиск продукта")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
-            .task(id: "\(source.rawValue)|\(searchText)") {
+            .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
+            .task(id: "\(source.rawValue)|\(wantsOnlineSearch)|\(searchText)") {
                 debouncedSearch = searchText
-                guard source == .online else {
+                guard source == .online || wantsOnlineSearch else {
                     isSearchingOFF = false
                     return
                 }

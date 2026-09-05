@@ -12,6 +12,7 @@ struct AddEntryView: View {
     @State private var quickCalories = ""
     @State private var showingNewFood = false
     @State private var showingScanner = false
+    @State private var showingPhoto = false
     @State private var editingFood: FoodItem? = nil
 
     @State private var offResults: [FoodItem] = []
@@ -424,6 +425,16 @@ struct AddEntryView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 16) {
+                        // Рядом со сканером: оба про «не вводить руками».
+                        // Штрихкод — когда есть упаковка, фото — когда её нет.
+                        if GeminiVisionService.isConfigured {
+                            Button {
+                                showingPhoto = true
+                            } label: {
+                                Image(systemName: "camera")
+                            }
+                            .accessibilityIdentifier("openPhotoMeal")
+                        }
                         Button {
                             showingScanner = true
                         } label: {
@@ -458,6 +469,13 @@ struct AddEntryView: View {
             .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
             .fullScreenCover(item: $serving) { target in
                 NavigationStack { servingScreen(target) }
+            }
+            .sheet(isPresented: $showingPhoto) {
+                PhotoMealSheet { items in
+                    // Распознанное становится обычным черновиком: дальше его
+                    // правят теми же движениями, что и введённое руками.
+                    draftItems.append(contentsOf: items)
+                }
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerSheet(store: store) { item in

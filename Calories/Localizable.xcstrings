@@ -5604,6 +5604,54 @@
         }
       }
     },
+    "Выбрать другое фото": {},
+    "Выбрать из галереи": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر من المعرض"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aus der Galerie wählen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose from library"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir de la galería"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir dans la galerie"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בחר מהגלריה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher da galeria"
+          }
+        }
+      }
+    },
+    "Выбрать фото": {},
     "Выраженный V-силуэт": {
       "localizations": {
         "ar": {
@@ -9963,6 +10011,7 @@
       }
     },
     "Источник продуктов": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -13432,6 +13481,7 @@
         }
       }
     },
+    "На фото не видно еды.": {},
     "На этой неделе был перерасход — норма сегодня снижена.": {
       "localizations": {
         "ar": {
@@ -14173,6 +14223,7 @@
         }
       }
     },
+    "Не задан ключ Gemini.": {},
     "Не задан ключ USDA FoodData Central.": {
       "localizations": {
         "ar": {
@@ -14403,6 +14454,7 @@
         }
       }
     },
+    "Не удалось разобрать ответ.": {},
     "Не удалось собрать файл.": {
       "localizations": {
         "ar": {
@@ -16953,6 +17005,7 @@
       }
     },
     "Отладка": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -17322,6 +17375,7 @@
         }
       }
     },
+    "Оценка по фотографии приблизительная: вес порции и то, сколько ушло масла, по снимку не видно. Считай её черновиком, который нужно поправить, а не измерением.": {},
     "Очень высокая": {
       "extractionState": "manual",
       "localizations": {
@@ -19541,6 +19595,7 @@
       }
     },
     "Пока продукты StoreKit не грузятся, это единственный способ открыть платные экраны.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -21858,6 +21913,7 @@
         }
       }
     },
+    "Разбираем фото...": {},
     "Разброс %.1f см": {
       "localizations": {
         "ar": {
@@ -21996,6 +22052,7 @@
         }
       }
     },
+    "Разобрать": {},
     "Разовая покупка, без продления": {
       "localizations": {
         "ar": {
@@ -22226,6 +22283,7 @@
         }
       }
     },
+    "Распознавание недоступно.": {},
     "Расход с активностью (TDEE)": {
       "extractionState": "manual",
       "localizations": {
@@ -24633,6 +24691,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meça suas circunferências com fita: o app calcula simetria e proporções e mostra o que cresce e o que fica para trás."
+          }
+        }
+      }
+    },
+    "Снять": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التقط صورة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto aufnehmen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take a photo"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hacer foto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prendre une photo"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "צלם"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tirar foto"
           }
         }
       }
@@ -27942,6 +28046,7 @@
         }
       }
     },
+    "Фото еды": {},
     "Хлеб белый": {
       "localizations": {
         "ar": {

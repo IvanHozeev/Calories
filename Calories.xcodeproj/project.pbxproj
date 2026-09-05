@@ -597,7 +597,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов продуктов";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -640,7 +640,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов продуктов";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

@@ -10,9 +10,6 @@ struct SettingsView: View {
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
-#if DEBUG
-    @AppStorage("fdc_api_key") private var fdcAPIKey = ""
-#endif
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -50,39 +47,7 @@ struct SettingsView: View {
     
     var body: some View {
         List {
-#if DEBUG
-            // Ключ USDA — инструмент разработчика, а не настройка пользователя.
-            // Схема такая: у разработчика с ключом поиск идёт в USDA и приносит
-            // микронутриенты, у всех остальных — в Open Food Facts. Требовать
-            // регистрации в USDA от каждого, кто хочет найти творог, нельзя,
-            // а один общий ключ в релизе сожгли бы за минуты: лимит на ключ,
-            // а не на человека. Поэтому поле живёт только в отладочной сборке.
-            Section {
-                TextField("Ключ USDA", text: $fdcAPIKey)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .font(.caption.monospaced())
-            } header: {
-                Text("USDA (отладка)")
-            } footer: {
-                Text(fdcAPIKey.isEmpty
-                     ? "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя."
-                     : "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.")
-            }
-#endif
-
             Section("Подписка") {
-#if DEBUG
-                // Отладочный тумблер: пока продукты StoreKit не грузятся, это
-                // единственный способ проверять платные экраны. В релиз не попадает.
-                Toggle(isOn: Binding(
-                    get: { store.isPremium },
-                    set: { store.isPremium = $0 }
-                )) {
-                    Label("Premium (отладка)", systemImage: "hammer")
-                }
-#endif
-                
                 if store.isPremium {
                     Label("Premium активен", systemImage: "checkmark.seal.fill")
                         .foregroundStyle(.green)
@@ -149,6 +114,19 @@ struct SettingsView: View {
                     Label("Язык", systemImage: "character.bubble")
                 }
             }
+
+#if DEBUG
+            // Инструменты разработчика собраны на своём экране и только в
+            // отладочной сборке. Вперемешку с настройками пользователя они
+            // выглядели как возможности, которых он лишён, — а это не так.
+            Section {
+                NavigationLink {
+                    DeveloperSettingsView(store: store)
+                } label: {
+                    Label("Отладка", systemImage: "hammer")
+                }
+            }
+#endif
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -333,3 +311,47 @@ struct FontSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 }
+
+#if DEBUG
+/// Инструменты разработчика. Существует только в отладочной сборке — в релизе
+/// этого экрана нет вовсе, а не «спрятан поглубже».
+struct DeveloperSettingsView: View {
+    var store: CalorieStore
+
+    @AppStorage("fdc_api_key") private var fdcAPIKey = ""
+
+    var body: some View {
+        List {
+            Section {
+                Toggle(isOn: Binding(
+                    get: { store.isPremium },
+                    set: { store.isPremium = $0 }
+                )) {
+                    Label("Premium", systemImage: "sparkles")
+                }
+            } header: {
+                Text("Подписка")
+            } footer: {
+                Text("Пока продукты StoreKit не грузятся, это единственный способ открыть платные экраны.")
+            }
+
+            Section {
+                TextField("Ключ USDA", text: $fdcAPIKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .font(.caption.monospaced())
+            } header: {
+                Text("Источник продуктов")
+            } footer: {
+                Text(fdcAPIKey.isEmpty
+                     ? "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя."
+                     : "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.")
+            }
+        }
+        .glassRow()
+        .listStyle(.insetGrouped)
+        .navigationTitle("Отладка")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+#endif

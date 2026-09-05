@@ -1480,6 +1480,7 @@
       }
     },
     "USDA (отладка)": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -9961,6 +9962,52 @@
         }
       }
     },
+    "Источник продуктов": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مصدر الأطعمة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lebensmittelquelle"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Food source"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuente de productos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source des aliments"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מקור המזון"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte de produtos"
+          }
+        }
+      }
+    },
     "Итого": {
       "localizations": {
         "ar": {
@@ -11022,6 +11069,7 @@
       }
     },
     "Ключ USDA": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -11068,6 +11116,7 @@
       }
     },
     "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -16903,6 +16952,52 @@
         }
       }
     },
+    "Отладка": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تصحيح"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Debug"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuración"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Débogage"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ניפוי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuração"
+          }
+        }
+      }
+    },
     "Отмена": {
       "localizations": {
         "ar": {
@@ -19445,6 +19540,52 @@
         }
       }
     },
+    "Пока продукты StoreKit не грузятся, это единственный способ открыть платные экраны.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إلى أن تُحمَّل منتجات StoreKit، هذه الطريقة الوحيدة لفتح الشاشات المدفوعة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solange die StoreKit-Produkte nicht laden, ist das der einzige Weg zu den Bezahl-Screens."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until StoreKit products load, this is the only way to reach the paid screens."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hasta que carguen los productos de StoreKit, es la única forma de abrir las pantallas de pago."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tant que les produits StoreKit ne se chargent pas, c'est le seul moyen d'ouvrir les écrans payants."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עד שמוצרי StoreKit ייטענו, זו הדרך היחידה להגיע למסכים בתשלום."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Até os produtos do StoreKit carregarem, é a única forma de abrir as telas pagas."
+          }
+        }
+      }
+    },
     "Показывает, сколько мягких тканей над тазом. Когда талия близка к костяку, дальше резать нечего — силуэт растёт через дельты и широчайшие.": {
       "localizations": {
         "ar": {
@@ -21671,6 +21812,7 @@
       }
     },
     "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя.": {
+      "extractionState": "stale",
       "localizations": {
         "ar": {
           "stringUnit": {

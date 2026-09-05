@@ -17,6 +17,9 @@ struct AddEntryView: View {
     @State private var offResults: [FoodItem] = []
     @State private var isSearchingOFF = false
     @State private var noNetwork = false
+    /// Почему внешний поиск ничего не дал. Пустой список без объяснения читается
+    /// как «такого продукта нет», хотя на деле источник недоступен или не настроен.
+    @State private var searchFailure: String?
     @State private var source: FoodSource = .recent
     @State private var serving: ServingTarget?
     /// Запрошен ли внешний поиск для текущего запроса. Сбрасывается при его смене:
@@ -147,6 +150,10 @@ struct AddEntryView: View {
                 .padding(.vertical, 2)
             } else if noNetwork {
                 Label("Нет подключения к интернету", systemImage: "wifi.slash")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else if let searchFailure {
+                Label(searchFailure, systemImage: "exclamationmark.triangle")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else if offResults.isEmpty {
@@ -389,10 +396,11 @@ struct AddEntryView: View {
                 isSearchingOFF = true
                 offResults = []
                 do {
-                    let results = try await FoodDataCentralService.search(query: searchText)
+                    let results = try await FoodSearch.search(query: searchText)
                     guard !Task.isCancelled else { isSearchingOFF = false; return }
                     offResults = results
                     noNetwork = false
+                    searchFailure = nil
                 } catch let urlError as URLError where
                     urlError.code == .notConnectedToInternet ||
                     urlError.code == .networkConnectionLost ||
@@ -400,8 +408,10 @@ struct AddEntryView: View {
                     urlError.code == .cannotFindHost ||
                     urlError.code == .cannotConnectToHost {
                     noNetwork = true
+                } catch is CancellationError {
+                    // Запрос отменили новым вводом — это не ошибка
                 } catch {
-                    // CancellationError или decode error — просто сбрасываем индикатор
+                    searchFailure = error.localizedDescription
                 }
                 isSearchingOFF = false
             }

@@ -1479,6 +1479,52 @@
         }
       }
     },
+    "USDA (отладка)": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (تصحيح)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (Debug)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (debug)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (depuración)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (débogage)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (ניפוי)"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA (depuração)"
+          }
+        }
+      }
+    },
     "V-силуэт (плечи / талия)": {
       "localizations": {
         "ar": {
@@ -10971,6 +11017,98 @@
           "stringUnit": {
             "state": "translated",
             "value": "Morango"
+          }
+        }
+      }
+    },
+    "Ключ USDA": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مفتاح USDA"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA-Schlüssel"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "USDA key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave USDA"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé USDA"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מפתח USDA"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave USDA"
+          }
+        }
+      }
+    },
+    "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم ضبط المفتاح: يجري البحث في USDA ويعيد الفيتامينات والمعادن."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schlüssel gesetzt: Die Suche geht an USDA und liefert Vitamine und Mineralstoffe."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key set: search goes to USDA and brings back vitamins and minerals."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave configurada: la búsqueda va al USDA y trae vitaminas y minerales."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé définie : la recherche passe par l'USDA et rapporte vitamines et minéraux."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המפתח הוגדר: החיפוש פונה ל-USDA ומחזיר ויטמינים ומינרלים."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chave definida: a busca vai ao USDA e traz vitaminas e minerais."
           }
         }
       }
@@ -21528,6 +21666,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "Um umbigo bem mais largo que a cintura estreita é sinal típico de gordura visceral. Um indicador, não um diagnóstico."
+          }
+        }
+      }
+    },
+    "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فارغ: يجري البحث في Open Food Facts كما لدى أي مستخدم."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leer – die Suche geht an Open Food Facts, wie bei allen anderen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empty — search goes to Open Food Facts, the way it does for everyone else."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vacío: la búsqueda va a Open Food Facts, como para cualquier usuario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vide : la recherche passe par Open Food Facts, comme pour tout le monde."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ריק — החיפוש פונה ל-Open Food Facts, כמו אצל כל משתמש."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vazio: a busca vai para o Open Food Facts, como para qualquer usuário."
           }
         }
       }

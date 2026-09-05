@@ -10,6 +10,9 @@ struct SettingsView: View {
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
+#if DEBUG
+    @AppStorage("fdc_api_key") private var fdcAPIKey = ""
+#endif
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -47,6 +50,27 @@ struct SettingsView: View {
     
     var body: some View {
         List {
+#if DEBUG
+            // Ключ USDA — инструмент разработчика, а не настройка пользователя.
+            // Схема такая: у разработчика с ключом поиск идёт в USDA и приносит
+            // микронутриенты, у всех остальных — в Open Food Facts. Требовать
+            // регистрации в USDA от каждого, кто хочет найти творог, нельзя,
+            // а один общий ключ в релизе сожгли бы за минуты: лимит на ключ,
+            // а не на человека. Поэтому поле живёт только в отладочной сборке.
+            Section {
+                TextField("Ключ USDA", text: $fdcAPIKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .font(.caption.monospaced())
+            } header: {
+                Text("USDA (отладка)")
+            } footer: {
+                Text(fdcAPIKey.isEmpty
+                     ? "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя."
+                     : "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.")
+            }
+#endif
+
             Section("Подписка") {
 #if DEBUG
                 // Отладочный тумблер: пока продукты StoreKit не грузятся, это

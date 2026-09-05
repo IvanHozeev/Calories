@@ -12,7 +12,8 @@ struct BodyView: View {
     var store: CalorieStore
     
     @State private var weightTenths: Int
-    @State private var heightInt: Int
+    /// Рост в десятых долях сантиметра: 1805 — это 180.5.
+    @State private var heightTenths: Int
     @State private var ageInt: Int
     @State private var proteinTenths: Int
     @State private var showHeightPicker = false
@@ -32,12 +33,16 @@ struct BodyView: View {
         : String(format: "%.1f \(String(localized: "кг"))", kg)
     }
     
-    private func heightDisplayText(_ cm: Int) -> String {
-        guard useImperial else { return "\(cm) \(String(localized: "см"))" }
-        let totalInches = Double(cm) / 2.54
+    /// Принимает десятые доли сантиметра: 1805 — это 180.5.
+    private func heightDisplayText(_ tenths: Int) -> String {
+        let cm = Double(tenths) / 10
+        guard useImperial else {
+            return String(format: "%.1f \(String(localized: "см"))", cm)
+        }
+        let totalInches = cm / 2.54
         let feet = Int(totalInches) / 12
-        let inches = Int(totalInches.truncatingRemainder(dividingBy: 12))
-        return "\(feet)' \(inches)\""
+        let inches = totalInches.truncatingRemainder(dividingBy: 12)
+        return String(format: "%d' %.1f\"", feet, inches)
     }
     
     init(store: CalorieStore) {
@@ -45,8 +50,9 @@ struct BodyView: View {
         let profile = store.profile
         let wKg = store.latestWeight?.weightKg ?? profile?.weightKg ?? 70.0
         _weightTenths = State(initialValue: max(300, Int((wKg * 10).rounded())))
-        let hCm = Int((profile?.heightCm ?? 170).rounded())
-        _heightInt = State(initialValue: hCm > 0 ? hCm : 170)
+        // Профиль хранит сантиметры, пикер работает в десятых.
+        let hCm = Int(((profile?.heightCm ?? 170) * 10).rounded())
+        _heightTenths = State(initialValue: hCm > 0 ? hCm : 1700)
         _ageInt = State(initialValue: profile?.age ?? 25)
         let pKg = profile?.proteinPerKg ?? UserProfile.defaultProteinPerKg
         _proteinTenths = State(initialValue: max(10, Int((pKg * 10).rounded())))
@@ -84,7 +90,7 @@ struct BodyView: View {
     private var draftProfile: UserProfile? {
         UserProfile(
             weightKg: Double(weightTenths) / 10.0,
-            heightCm: Double(heightInt),
+            heightCm: Double(heightTenths) / 10,
             age: ageInt,
             sex: sex,
             activityLevel: activityLevel,
@@ -153,7 +159,7 @@ struct BodyView: View {
                 HStack {
                     Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
                     Spacer()
-                    Text(heightDisplayText(heightInt))
+                    Text(heightDisplayText(heightTenths))
                         .foregroundStyle(.secondary)
                 }
                 .contentShape(Rectangle())
@@ -164,8 +170,8 @@ struct BodyView: View {
                     }
                 }
                 if showHeightPicker {
-                    Picker("Рост", selection: $heightInt) {
-                        ForEach(100...250, id: \.self) { v in
+                    Picker("Рост", selection: $heightTenths) {
+                        ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
                             Text(heightDisplayText(v)).tag(v)
                         }
                     }

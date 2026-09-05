@@ -159,7 +159,6 @@ struct NewDishSheet: View {
                     let trimmed = name.trimmingCharacters(in: .whitespaces)
                     guard !trimmed.isEmpty, !ingredients.isEmpty else { return }
                     if let dish = editingDish {
-                servingGrams = dish.defaultServingGrams > 0 ? String(format: "%g", dish.defaultServingGrams) : ""
                         store.updateDish(dish, name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
                     } else {
                         store.addDish(name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
@@ -179,6 +178,9 @@ struct NewDishSheet: View {
             if let dish = editingDish {
                 name = dish.name
                 ingredients = dish.ingredients
+                servingGrams = dish.defaultServingGrams > 0
+                    ? String(format: "%g", dish.defaultServingGrams)
+                    : ""
             }
         }
     }

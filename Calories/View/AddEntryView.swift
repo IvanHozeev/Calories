@@ -2,6 +2,10 @@ import SwiftUI
 
 struct AddEntryView: View {
     var store: CalorieStore
+    /// Запись, которую дополняем. Приём пищи хранится одной строкой с итогами —
+    /// разобрать его обратно на продукты нельзя, поэтому он идёт первой строкой
+    /// черновика, а всё добавленное досыпается к нему.
+    private let appendingTo: FoodEntry?
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedDate: Date
@@ -69,8 +73,17 @@ struct AddEntryView: View {
     }
 
 
-    init(store: CalorieStore, initialDate: Date = Date(), initialAction: QuickAction? = nil) {
+    init(store: CalorieStore,
+         initialDate: Date = Date(),
+         initialAction: QuickAction? = nil,
+         appendingTo entry: FoodEntry? = nil) {
         self.store = store
+        self.appendingTo = entry
+        if let entry {
+            _draftItems = State(initialValue: [
+                MealItem(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
+            ])
+        }
         // Камера и сканер поднимаются начальным состоянием экрана, а не записью
         // после его появления: на холодном старте такая запись успевает прийти,
         // пока экран ещё выезжает, и система её молча теряет.
@@ -79,11 +92,13 @@ struct AddEntryView: View {
         // Открываем на дне, который просили, но со временем «сейчас»: для сегодняшней
         // записи это привычное поведение, а для прошедшего дня — разумная отправная точка.
         let calendar = Calendar.current
-        var parts = calendar.dateComponents([.year, .month, .day], from: initialDate)
+        var parts = calendar.dateComponents([.year, .month, .day], from: entry?.date ?? initialDate)
         let now = calendar.dateComponents([.hour, .minute], from: Date())
         parts.hour = now.hour
         parts.minute = now.minute
-        _selectedDate = State(initialValue: calendar.date(from: parts) ?? initialDate)
+        // У дополняемой записи время своё: обед не должен переехать на «сейчас»
+        // только потому, что к нему добавили компот.
+        _selectedDate = State(initialValue: entry?.date ?? (calendar.date(from: parts) ?? initialDate))
     }
 
     private var draftTotalCalories: Int {
@@ -464,10 +479,7 @@ struct AddEntryView: View {
                 if !draftItems.isEmpty {
                     ToolbarItem(placement: .bottomBar) {
                         Button {
-                            let grams = draftItems.count == 1 ? draftItems[0].grams : nil
-                            store.add(name: mealName, calories: draftTotalCalories, macros: draftTotalMacros, grams: grams, date: entryDate)
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            dismiss()
+                            saveDraft()
                         } label: {
                             Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
                                 .frame(maxWidth: .infinity)
@@ -566,12 +578,21 @@ struct AddEntryView: View {
     /// него экрана, и анимация схлопывается в рывок.
     private func addAndSave(_ item: MealItem) {
         serving = nil
-        let allItems = draftItems + [item]
-        let totalCalories = allItems.reduce(0) { $0 + $1.calories }
-        let totalMacros = allItems.reduce(Macros.zero) { $0 + $1.macros }
-        let name = allItems.count == 1 ? item.name : joinedName(allItems)
-        let grams = allItems.count == 1 ? item.grams : nil
-        store.add(name: name, calories: totalCalories, macros: totalMacros, grams: grams, date: entryDate)
+        draftItems.append(item)
+        saveDraft()
+    }
+
+    /// Кладём черновик в дневник: новой записью или поверх дополняемой.
+    private func saveDraft() {
+        guard !draftItems.isEmpty else { return }
+        let grams = draftItems.count == 1 ? draftItems[0].grams : nil
+        if let entry = appendingTo {
+            store.updateEntry(entry, name: mealName, calories: draftTotalCalories,
+                              macros: draftTotalMacros, grams: grams, date: entryDate)
+        } else {
+            store.add(name: mealName, calories: draftTotalCalories,
+                      macros: draftTotalMacros, grams: grams, date: entryDate)
+        }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         dismiss()
     }

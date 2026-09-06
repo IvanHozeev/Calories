@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var goalText = ""
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
+    /// Запись, к которой добавляют ещё еды.
+    @State private var appendingTo: FoodEntry?
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -181,7 +183,20 @@ struct ContentView: View {
                                 NavigationLink(value: entry) {
                                     EntryRow(entry: entry, icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon))
                                 }
+                                // Дополнение первым: к приёму пищи добавляют чаще,
+                                // чем копируют его целиком, а первая кнопка — та,
+                                // что срабатывает на полном свайпе.
                                 .swipeActions(edge: .leading) {
+                                    // Дополнить, а не переписать: приём пищи хранится
+                                    // одной строкой с итогами, разобрать его обратно
+                                    // на продукты нельзя — поэтому он становится
+                                    // первой строкой черновика, а новое досыпается.
+                                    Button {
+                                        appendingTo = entry
+                                    } label: {
+                                        Image(systemName: "plus.circle")
+                                    }
+                                    .tint(.indigo)
                                     Button {
                                         store.add(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
                                     } label: {
@@ -236,6 +251,9 @@ struct ContentView: View {
             }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction)
+            }
+            .fullScreenCover(item: $appendingTo) { entry in
+                AddEntryView(store: store, appendingTo: entry)
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)

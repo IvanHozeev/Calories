@@ -288,6 +288,21 @@ final class CalorieStore {
             .map { (date: $0.0, value: $0.1) }
     }
 
+    /// Сеанс замеров за сегодня. Если его ещё нет, заводит новый, унаследовав
+    /// обхваты прошлого: снимают обычно одно-два места, а производные величины
+    /// читаются по последнему сеансу целиком.
+    func measurementForToday() -> BodyMeasurement {
+        if let latest = latestMeasurement, Calendar.current.isDateInToday(latest.date) {
+            return latest
+        }
+        let fresh = BodyMeasurement(date: Date())
+        if let previous = latestMeasurement {
+            fresh.copyValues(from: previous)
+        }
+        addMeasurement(fresh)
+        return fresh
+    }
+
     func addMeasurement(_ measurement: BodyMeasurement) {
         context.insert(measurement)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }

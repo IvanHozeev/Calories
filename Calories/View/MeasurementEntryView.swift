@@ -34,9 +34,19 @@ struct MeasurementEntryView: View {
     /// тут два десятка, и колёсики перерисовывают экран на каждом делении прокрутки.
     /// Меняются оценки только когда меняется сохранённый замер, то есть в commit.
     @State private var estimates: [MeasurementSite: BodyAnalysis.Estimate] = [:]
+    /// Дата сеанса, из которого подставлены значения, если он не сегодняшний.
+    @State private var loadedFrom: Date?
 
     var body: some View {
         List {
+            if let loadedFrom {
+                Section {
+                    EmptyView()
+                } footer: {
+                    Text("Значения из замера от \(loadedFrom.formatted(date: .abbreviated, time: .omitted)). Поправь то, что изменилось, — остальное перенесётся.")
+                }
+            }
+
             sitesSection(torso, title: "Торс")
             sitesSection(arms, title: "Руки")
             sitesSection(legs, title: "Ноги")
@@ -203,8 +213,11 @@ struct MeasurementEntryView: View {
         guard !loaded else { return }
         loaded = true
         refreshEstimates()
-        guard let latest = store.latestMeasurement,
-              Calendar.current.isDateInToday(latest.date) else { return }
+        // Подставляем последний сеанс независимо от даты. Замеры снимают раз в
+        // несколько недель, и открывать экран пустым — значит показывать оценки
+        // там, где реальные числа уже есть.
+        guard let latest = store.latestMeasurement else { return }
+        loadedFrom = Calendar.current.isDateInToday(latest.date) ? nil : latest.date
         for site in MeasurementSite.allCases {
             for side in sides(site) {
                 values[Self.key(site, side)] = latest.value(site, side)
@@ -215,15 +228,7 @@ struct MeasurementEntryView: View {
     /// Сеанс, который правим: сегодняшний, если он есть, иначе новый.
     /// Именно функция, а не вычисляемое свойство: она создаёт запись, и прятать
     /// такой побочный эффект за обращением к свойству нельзя.
-    private func todaysMeasurement() -> BodyMeasurement {
-        if let latest = store.latestMeasurement,
-           Calendar.current.isDateInToday(latest.date) {
-            return latest
-        }
-        let fresh = BodyMeasurement(date: Date())
-        store.addMeasurement(fresh)
-        return fresh
-    }
+    private func todaysMeasurement() -> BodyMeasurement { store.measurementForToday() }
 
     /// Сохраняем сразу: экрана «Готово» нет, уход назад не должен терять набранное.
     private func commit(_ site: MeasurementSite, _ side: BodySide) {

@@ -102,6 +102,19 @@ final class BodyMeasurement: Identifiable {
         site.isPaired ? max(value(site, .left), value(site, .right)) : value(site)
     }
 
+    /// Переносит все обхваты из другого сеанса.
+    ///
+    /// Замеры снимают не все разом: сегодня бицепс, через неделю талию. Если новый
+    /// сеанс начинать с нуля, в нём окажется одно заполненное место — а по последнему
+    /// сеансу считаются и процент жира, и FFMI, и они молча уедут.
+    func copyValues(from other: BodyMeasurement) {
+        for site in MeasurementSite.allCases {
+            for side in BodySide.allCases {
+                setValue(other.value(site, side), for: site, side: side)
+            }
+        }
+    }
+
     /// Есть ли хоть один заполненный обхват.
     var hasAnyValue: Bool {
         MeasurementSite.allCases.contains { site in

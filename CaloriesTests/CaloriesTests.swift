@@ -1380,3 +1380,56 @@ struct BodyAnalysisTests {
         #expect(better?.verdict == .excellent)
     }
 }
+
+@MainActor
+@Suite(.serialized)
+struct MeasurementSessionTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext, defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    /// Замеры снимают раз в несколько недель и не все разом. Если новый сеанс
+    /// начинать пустым, запись с одним заполненным местом становится последней —
+    /// и процент жира с FFMI считаются уже по ней.
+    @Test func newSessionInheritsThePrevious() {
+        let old = BodyMeasurement(date: Date().addingTimeInterval(-7 * 86_400))
+        old.setValue(81, for: .belt)
+        old.setValue(38, for: .neck)
+        old.setValue(40, for: .biceps, side: .right)
+        store.addMeasurement(old)
+
+        let today = store.measurementForToday()
+
+        #expect(Calendar.current.isDateInToday(today.date))
+        #expect(today.value(.belt) == 81)
+        #expect(today.value(.neck) == 38)
+        #expect(today.value(.biceps, .right) == 40)
+    }
+
+    /// Правка второго места за тот же день не должна заводить вторую запись.
+    @Test func todaysSessionIsReused() {
+        let first = store.measurementForToday()
+        first.setValue(81, for: .belt)
+
+        let second = store.measurementForToday()
+
+        #expect(first === second)
+        #expect(store.measurements.count == 1)
+    }
+
+    /// Пустая база: первый сеанс заводится и не падает без предыдущего.
+    @Test func firstSessionStartsEmpty() {
+        let session = store.measurementForToday()
+        #expect(!session.hasAnyValue)
+        #expect(store.measurements.count == 1)
+    }
+}

@@ -10408,6 +10408,52 @@
         }
       }
     },
+    "Значения из замера от %@. Поправь то, что изменилось, — остальное перенесётся." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "القيم من قياس %@. عدّل ما تغيّر — والباقي سيُنقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werte aus der Messung vom %@. Ändere, was anders ist — der Rest wird übernommen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Values from the measurement on %@. Change what has changed — the rest carries over."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valores de la medición del %@. Cambia lo que cambió: el resto se conserva."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valeurs de la mesure du %@. Modifie ce qui a changé — le reste est repris."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ערכים מהמדידה מ-%@. עדכן את מה שהשתנה — השאר יועתק."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valores da medição de %@. Altere o que mudou — o resto é mantido."
+          }
+        }
+      }
+    },
     "Золотое сечение" : {
       "localizations" : {
         "ar" : {

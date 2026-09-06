@@ -6,6 +6,7 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories
 
 @main
 struct CalorieCounterApp: App {
+    @UIApplicationDelegateAdaptor(QuickActionAppDelegate.self) private var appDelegate
     private let container: ModelContainer?
     private let storageError: String?
     @State private var store: CalorieStore?

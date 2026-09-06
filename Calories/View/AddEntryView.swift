@@ -11,8 +11,8 @@ struct AddEntryView: View {
 
     @State private var quickCalories = ""
     @State private var showingNewFood = false
-    @State private var showingScanner = false
-    @State private var showingPhoto = false
+    @State private var showingScanner: Bool
+    @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
 
     @State private var offResults: [FoodItem] = []
@@ -61,8 +61,13 @@ struct AddEntryView: View {
 
     @FocusState private var quickCaloriesFocused: Bool
 
-    init(store: CalorieStore, initialDate: Date = Date()) {
+    init(store: CalorieStore, initialDate: Date = Date(), initialAction: QuickAction? = nil) {
         self.store = store
+        // Камера и сканер поднимаются начальным состоянием экрана, а не записью
+        // после его появления: на холодном старте такая запись успевает прийти,
+        // пока экран ещё выезжает, и система её молча теряет.
+        _showingPhoto = State(initialValue: initialAction == .camera)
+        _showingScanner = State(initialValue: initialAction == .scanner)
         // Открываем на дне, который просили, но со временем «сейчас»: для сегодняшней
         // записи это привычное поведение, а для прошедшего дня — разумная отправная точка.
         let calendar = Calendar.current

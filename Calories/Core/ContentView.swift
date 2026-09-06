@@ -13,6 +13,23 @@ struct ContentView: View {
     @State private var showingPaywall = false
     @State private var showingPlan = false
     @State private var goalText = ""
+    /// С чего открыть добавление, если пришли по меню на иконке.
+    @State private var entryAction: QuickAction?
+    private let quickActions = QuickActionRouter.shared
+
+    /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
+    /// экрана не открыл камеру во второй раз.
+    private func consumeQuickAction(_ action: QuickAction?) {
+        guard let action else { return }
+        quickActions.pending = nil
+        switch action {
+        case .weight:
+            showingAddWeight = true
+        case .meal, .camera, .scanner:
+            entryAction = action
+            showingAdd = true
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -216,8 +233,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .fullScreenCover(isPresented: $showingAdd) {
-                AddEntryView(store: store)
+            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
+                AddEntryView(store: store, initialAction: entryAction)
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
@@ -232,6 +249,10 @@ struct ContentView: View {
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
+            // Действие с иконки может прилететь и до появления экрана (холодный
+            // старт), и во время работы — забираем его в обоих случаях.
+            .task { consumeQuickAction(quickActions.pending) }
+            .onChange(of: quickActions.pending) { _, action in consumeQuickAction(action) }
             .onChange(of: store.consumedToday) { oldValue, newValue in
                 let goal = store.adaptedTodayGoal
                 if oldValue < goal && newValue >= goal {

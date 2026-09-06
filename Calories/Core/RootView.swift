@@ -6,6 +6,7 @@ struct RootView: View {
     var stepStore: StepStore
     var purchases: PurchaseService
     @State private var selectedTab = 0
+    private let quickActions = QuickActionRouter.shared
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
@@ -37,12 +38,26 @@ struct RootView: View {
             OnboardingView(store: store)
         }
         .environment(purchases)
+        // Меню на иконке пересобираем на каждом подъёме: камера в нём появляется
+        // только вместе с ключом, а его вводят прямо во время работы приложения.
+        .task { quickActions.refreshShortcutItems() }
+        .onChange(of: quickActions.pending) { _, action in
+            guard action != nil else { return }
+            // Онбординг висит фулскрин-кавером поверх табов. Подниматься из-под него
+            // некуда, поэтому до его конца нажатие на иконке просто теряем.
+            guard onboardingCompleted else {
+                quickActions.pending = nil
+                return
+            }
+            selectedTab = 0
+        }
         // Всё «сегодняшнее» лежит в кэшах стора и после полуночи устаревает молча.
         // Ловим оба случая: приложение подняли из фона и сутки сменились прямо на экране.
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 store.refreshIfDayChanged()
                 stepStore.fetchAll()
+                quickActions.refreshShortcutItems()
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in

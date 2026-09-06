@@ -91,7 +91,7 @@ struct MacrosCard: View {
     private func note(for kind: MacroKind) -> String {
         switch kind {
         case .protein: return String(localized: "Норма белка из профиля — от веса или от сухой массы, смотря что выбрано.")
-        case .fat: return String(localized: "≥0.8 г/кг — принятый минимум для гормонального здоровья.")
+        case .fat: return String(localized: "Норма жира из профиля. Ниже 0.5 г/кг рискуешь гормонами — жир нужен телу постоянно.")
         case .carbs: return carbsTarget == nil
             ? String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")
             : String(localized: "Остаток дневной нормы после белка и жира — то, чем управляешь ты.")

@@ -18,12 +18,14 @@ struct BodyView: View {
     @State private var proteinTenths: Int
     @State private var proteinBasis: ProteinBasis
     @State private var proteinLeanTenths: Int
+    @State private var fatTenths: Int
     /// Задавали ли норму на сухую массу руками. Пока нет — при первом переходе
     /// подгоняем её так, чтобы граммы не изменились.
     @State private var proteinLeanIsSet: Bool
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
+    @State private var showFatPicker = false
     @State private var sex: Sex
     @State private var activityLevel: ActivityLevel
     /// Выбранный, но ещё не подтверждённый уровень активности.
@@ -68,6 +70,8 @@ struct BodyView: View {
         let pLean = profile?.storedProteinPerLeanKg
         _proteinLeanTenths = State(initialValue: max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded())))
         _proteinLeanIsSet = State(initialValue: pLean != nil)
+        let fKg = profile?.fatPerKg ?? MacroTargets.fatPerKg
+        _fatTenths = State(initialValue: max(4, Int((fKg * 10).rounded())))
     }
     
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
@@ -122,7 +126,7 @@ struct BodyView: View {
     @ViewBuilder
     private func macroBudgetSection(_ profile: UserProfile) -> some View {
         let protein = profile.proteinTargetGrams(from: measurement)
-        let fat = profile.weightKg * MacroTargets.fatPerKg
+        let fat = profile.fatTargetGrams
         let goal = Double(store.adaptedTodayGoal > 0 ? store.adaptedTodayGoal : store.dailyGoal)
         let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
         let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
@@ -172,7 +176,8 @@ struct BodyView: View {
             goal: goal,
             proteinPerKg: Double(proteinTenths) / 10.0,
             proteinPerLeanKg: Double(proteinLeanTenths) / 10.0,
-            proteinBasis: proteinBasis
+            proteinBasis: proteinBasis,
+            fatPerKg: Double(fatTenths) / 10.0
         )
     }
     
@@ -338,6 +343,44 @@ struct BodyView: View {
                 Text("Норма белка")
             } footer: {
                 Text(proteinFooter)
+            }
+
+            Section {
+                HStack {
+                    Text("Жира на кг веса")
+                    Spacer()
+                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
+                        .foregroundStyle(.secondary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        showFatPicker.toggle()
+                        if showFatPicker {
+                            showProteinPicker = false; showHeightPicker = false; showAgePicker = false
+                        }
+                    }
+                }
+                if showFatPicker {
+                    Picker("Жир", selection: $fatTenths) {
+                        ForEach(4...20, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 160)
+                }
+                if let draftProfile {
+                    HStack {
+                        Text("Итого жира")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(verbatim: "\(Int(draftProfile.fatTargetGrams.rounded())) \(String(localized: "г"))")
+                            .font(.body.weight(.semibold))
+                    }
+                }
+            } header: {
+                Text("Норма жира")
+            } footer: {
+                Text("Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу.")
             }
 
             if let draftProfile, store.dailyGoal > 0 {

@@ -4,6 +4,144 @@
     "" : {
 
     },
+    "Жир" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura"
+          }
+        }
+      }
+    },
+    "Жира на кг веса" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دهون لكل كجم من الوزن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett pro kg Gewicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat per kg of bodyweight"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa por kg de peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides par kg de poids"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן לקילוגרם משקל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura por kg de peso"
+          }
+        }
+      }
+    },
+    "Итого жира" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجمالي الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett gesamt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides au total"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סה״כ שומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura no total"
+          }
+        }
+      }
+    },
     "Новый план" : {
       "localizations" : {
         "ar" : {
@@ -46,6 +184,144 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plano novo"
+          }
+        }
+      }
+    },
+    "Норма жира" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fettvorgabe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat target"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo de grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de lipides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד השומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de gordura"
+          }
+        }
+      }
+    },
+    "Норма жира из профиля. Ниже 0.5 г/кг рискуешь гормонами — жир нужен телу постоянно." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة الدهون من الملف الشخصي. أقل من 0.5 غ/كجم تخاطر بالهرمونات — الجسم يحتاج الدهون باستمرار."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Fettvorgabe aus dem Profil. Unter 0,5 g/kg riskierst du deine Hormone — Fett braucht der Körper ständig."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fat target from your profile. Below 0.5 g/kg you are gambling with your hormones — the body needs fat constantly."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo de grasa del perfil. Por debajo de 0,5 g/kg arriesgas tus hormonas: el cuerpo necesita grasa siempre."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif de lipides du profil. En dessous de 0,5 g/kg tu joues avec tes hormones — le corps a besoin de lipides en permanence."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד השומן מהפרופיל. מתחת ל-0.5 גרם לק״ג אתה מסכן את ההורמונים — הגוף זקוק לשומן כל הזמן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta de gordura do perfil. Abaixo de 0,5 g/kg você arrisca seus hormônios — o corpo precisa de gordura o tempo todo."
+          }
+        }
+      }
+    },
+    "Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً 0.8 غ لكل كجم من الوزن. أقل من 0.5 لم يعد حمية بل مقامرة بالهرمونات — الجسم يحتاج الدهون باستمرار، لا كفائض."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblich sind 0,8 g pro kg Gewicht. Unter 0,5 ist das keine Diät mehr, sondern eine Wette auf die Hormone — Fett braucht der Körper ständig, nicht als Rest."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually 0.8 g per kg of bodyweight. Below 0.5 this stops being a diet and becomes a bet on your hormones — the body needs fat constantly, not as whatever is left over."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 0,8 g por kg de peso. Por debajo de 0,5 deja de ser una dieta y pasa a ser una apuesta con tus hormonas: el cuerpo necesita grasa siempre, no como sobrante."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Généralement 0,8 g par kg de poids. En dessous de 0,5, ce n'est plus un régime mais un pari sur tes hormones — le corps a besoin de lipides en permanence, pas comme reliquat."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל 0.8 גרם לקילוגרם משקל. מתחת ל-0.5 זו כבר לא דיאטה אלא הימור על ההורמונים — הגוף זקוק לשומן כל הזמן, לא כשארית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 0,8 g por kg de peso. Abaixo de 0,5 deixa de ser dieta e vira uma aposta com seus hormônios — o corpo precisa de gordura o tempo todo, não como sobra."
           }
         }
       }

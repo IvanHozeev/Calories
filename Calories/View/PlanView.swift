@@ -5,6 +5,7 @@ struct PlanView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var targetWeightText: String
+    @FocusState private var targetWeightFocused: Bool
     @State private var durationWeeks: Int
     @State private var cyclingEnabled: Bool
     @State private var weekendStyle: WeekendStyle
@@ -79,6 +80,7 @@ struct PlanView: View {
                     HStack {
                         TextField("70.0", text: $targetWeightText)
                             .keyboardType(.decimalPad)
+                            .focused($targetWeightFocused)
                         Text("кг")
                             .foregroundStyle(.secondary)
                     }
@@ -169,6 +171,15 @@ struct PlanView: View {
             } message: {
                 Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
             }
+            // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
+            // «Готово» у decimalPad нет. Одного scrollDismissesKeyboard мало: он
+            // живёт на прокрутке, а форма короткая и двигать нечего — жест ловим сами.
+            .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 24).onEnded { drag in
+                    if drag.translation.height > 40 { targetWeightFocused = false }
+                }
+            )
             .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

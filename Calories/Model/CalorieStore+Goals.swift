@@ -155,9 +155,11 @@ extension CalorieStore {
         latestWeight?.weightKg ?? profile?.weightKg
     }
 
-    /// Минимальная дневная норма жиров исходя из веса.
+    /// Дневная норма жиров. Из профиля, если он есть: с недавних пор её задают
+    /// руками, и на глубоком дефиците её опускают.
     var fatTarget: Double? {
-        weightKg.map { $0 * MacroTargets.fatPerKg }
+        guard let weight = weightKg else { return nil }
+        return weight * (profile?.fatPerKg ?? MacroTargets.fatPerKg)
     }
 
     /// Последние семь дней в разрезе макросов.

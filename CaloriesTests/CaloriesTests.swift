@@ -1452,11 +1452,13 @@ struct MacroBudgetTests {
 
     private func profile(basis: ProteinBasis = .bodyweight,
                          proteinPerKg: Double = 2.0,
-                         proteinPerLeanKg: Double? = nil) -> UserProfile {
+                         proteinPerLeanKg: Double? = nil,
+                         fatPerKg: Double? = nil) -> UserProfile {
         UserProfile(
             weightKg: 77, heightCm: 180, age: 30, sex: .male,
             activityLevel: .moderate, goal: .maintenance,
-            proteinPerKg: proteinPerKg, proteinPerLeanKg: proteinPerLeanKg, proteinBasis: basis
+            proteinPerKg: proteinPerKg, proteinPerLeanKg: proteinPerLeanKg,
+            proteinBasis: basis, fatPerKg: fatPerKg
         )
     }
 
@@ -1569,6 +1571,26 @@ struct MacroBudgetTests {
 
         #expect(store.macroWeek.allSatisfy { !$0.hasEntries })
         #expect(store.macroWeek.allSatisfy { !$0.hitProtein })
+    }
+
+    /// Опустил жир — освободившиеся калории ушли в углеводы, а не растворились.
+    @Test func loweringFatMovesTheCaloriesIntoCarbs() {
+        store.updateProfile(profile(), syncDailyGoal: false)
+        store.dailyGoal = 2000
+        let carbsAtDefault = store.carbsTarget!
+
+        store.updateProfile(profile(fatPerKg: 0.6), syncDailyGoal: false)
+
+        #expect(store.fatTarget == 77 * 0.6)
+        // 0.2 г/кг × 77 кг × 9 ккал = 138.6 ккал, это 34.65 г углеводов
+        #expect(abs(store.carbsTarget! - (carbsAtDefault + 34.65)) < 0.01)
+    }
+
+    /// Профиль без своей нормы жира берёт общее умолчание.
+    @Test func fatFallsBackToTheSharedDefault() {
+        let p = profile(fatPerKg: nil)
+        #expect(p.fatPerKg == MacroTargets.fatPerKg)
+        #expect(p.fatTargetGrams == 77 * MacroTargets.fatPerKg)
     }
 
     /// Старый сохранённый профиль без поля основы читается как «от веса».

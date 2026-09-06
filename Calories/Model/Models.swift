@@ -334,6 +334,9 @@ struct UserProfile: Codable, Equatable {
     /// обязательное поле уронило бы декодирование целиком — то есть стёрло бы
     /// человеку профиль.
     var storedProteinBasis: ProteinBasis?
+    /// Норма жира на кг веса. Тоже опциональная: до этой настройки её не было,
+    /// и в сохранённых профилях ключа нет.
+    var storedFatPerKg: Double?
 
     init(
         weightKg: Double,
@@ -344,7 +347,8 @@ struct UserProfile: Codable, Equatable {
         goal: Goal,
         proteinPerKg: Double,
         proteinPerLeanKg: Double? = nil,
-        proteinBasis: ProteinBasis = .bodyweight
+        proteinBasis: ProteinBasis = .bodyweight,
+        fatPerKg: Double? = nil
     ) {
         self.weightKg = weightKg
         self.heightCm = heightCm
@@ -355,6 +359,7 @@ struct UserProfile: Codable, Equatable {
         self.proteinPerKg = proteinPerKg
         self.storedProteinPerLeanKg = proteinPerLeanKg
         self.storedProteinBasis = proteinBasis
+        self.storedFatPerKg = fatPerKg
     }
 
     var proteinBasis: ProteinBasis {
@@ -366,6 +371,15 @@ struct UserProfile: Codable, Equatable {
         get { storedProteinPerLeanKg ?? Self.defaultProteinPerLeanKg }
         set { storedProteinPerLeanKg = newValue }
     }
+
+    var fatPerKg: Double {
+        get { storedFatPerKg ?? MacroTargets.fatPerKg }
+        set { storedFatPerKg = newValue }
+    }
+
+    /// Целевой жир в граммах. Считается только от общего веса: гормонам нужен
+    /// абсолютный минимум жира, а не доля от сухой массы.
+    var fatTargetGrams: Double { fatPerKg * weightKg }
 
     static let defaultProteinPerKg: Double = 1.7
     /// Выше, чем от общего веса, и это не опечатка: сухой массы меньше, чем веса,

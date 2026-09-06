@@ -238,7 +238,7 @@ struct OnboardingView: View {
                             Text("Норма белка")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                            Text("\(Int(p.proteinTargetGrams.rounded()))")
+                            Text("\(Int(p.proteinTargetGrams(from: nil).rounded()))")
                                 .font(.system(size: 36, weight: .bold, design: .rounded))
                                 .foregroundStyle(.blue)
                             Text("г / день")

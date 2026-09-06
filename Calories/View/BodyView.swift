@@ -16,6 +16,7 @@ struct BodyView: View {
     @State private var heightTenths: Int
     @State private var ageInt: Int
     @State private var proteinTenths: Int
+    @State private var proteinBasis: ProteinBasis
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
@@ -59,11 +60,16 @@ struct BodyView: View {
         _sex = State(initialValue: profile?.sex ?? .male)
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
+        _proteinBasis = State(initialValue: profile?.proteinBasis ?? .bodyweight)
     }
     
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
     /// в профиль: копия рано или поздно расходится с оригиналом.
     private var measurement: BodyMeasurement? { store.latestMeasurement }
+
+    /// Сухая масса известна только по снятым замерам — без них персональный
+    /// режим предлагать нечестно, он молча посчитает то же самое от веса.
+    private var leanMassKg: Double? { draftProfile?.leanMassKg(from: measurement) }
     
     /// Показываем не «вы уверены», а во что именно обойдётся смена:
     /// новую норму калорий и разницу с текущей.
@@ -81,6 +87,49 @@ struct BodyView: View {
         )
     }
 
+    /// Разбивка дневной нормы. Белок и жир — обязательства, углеводы — остаток;
+    /// на сушке именно остаток и есть то, чем управляешь.
+    @ViewBuilder
+    private func macroBudgetSection(_ profile: UserProfile) -> some View {
+        let protein = profile.proteinTargetGrams(from: measurement)
+        let fat = profile.weightKg * MacroTargets.fatPerKg
+        let goal = Double(store.adaptedTodayGoal > 0 ? store.adaptedTodayGoal : store.dailyGoal)
+        let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
+        let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
+
+        Section {
+            macroBudgetRow("Белки", grams: protein, color: .blue)
+            macroBudgetRow("Жиры", grams: fat, color: .orange)
+            if carbs > 0 {
+                macroBudgetRow("Углеводы", grams: carbs, color: .purple)
+            } else {
+                Label(
+                    String(
+                        format: String(localized: "Белок и жир не помещаются в норму: не хватает %d ккал. Подними калораж или опусти норму белка."),
+                        Int((locked - goal).rounded())
+                    ),
+                    systemImage: "exclamationmark.triangle.fill"
+                )
+                .font(.footnote)
+                .foregroundStyle(.orange)
+            }
+        } header: {
+            Text("Дневные макросы")
+        } footer: {
+            Text("Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они.")
+        }
+    }
+
+    private func macroBudgetRow(_ title: LocalizedStringKey, grams: Double, color: Color) -> some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Text(verbatim: "\(Int(grams.rounded())) \(String(localized: "г"))")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(color)
+        }
+    }
+
     private var measurementsCaption: String {
         guard let latest = store.latestMeasurement else { return String(localized: "Нет замеров") }
         return latest.date.formatted(.dateTime.day().month(.abbreviated))
@@ -95,7 +144,9 @@ struct BodyView: View {
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
-            proteinPerKg: Double(proteinTenths) / 10.0        )
+            proteinPerKg: Double(proteinTenths) / 10.0,
+            proteinBasis: proteinBasis
+        )
     }
     
     
@@ -228,8 +279,16 @@ struct BodyView: View {
             }
             
             Section {
+                if leanMassKg != nil {
+                    Picker("Считать", selection: $proteinBasis) {
+                        ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityIdentifier("proteinBasis")
+                }
                 HStack {
-                    Text("Белка на кг веса")
+                    Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
                     Spacer()
                     Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(proteinTenths) / 10.0))
                         .foregroundStyle(.secondary)
@@ -251,7 +310,13 @@ struct BodyView: View {
             } header: {
                 Text("Норма белка")
             } footer: {
-                Text("Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц.")
+                Text(leanMassKg == nil
+                     ? "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса."
+                     : "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы.")
+            }
+
+            if let draftProfile, store.dailyGoal > 0 {
+                macroBudgetSection(draftProfile)
             }
             
             if let draftProfile {
@@ -283,7 +348,7 @@ struct BodyView: View {
                     resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
                     resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
                     resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
-                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams.rounded())) \(String(localized: "г"))", highlighted: true)
+                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))", highlighted: true)
                 } header: {
                     Text("Расчёт")
                 } footer: {

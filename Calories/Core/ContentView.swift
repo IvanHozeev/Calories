@@ -42,7 +42,7 @@ struct ContentView: View {
                             macros: store.macrosToday,
                             proteinTarget: store.proteinTarget,
                             fatTarget: store.fatTarget,
-                            carbsTarget: MacroTargets.carbsMinimum
+                            carbsTarget: store.carbsTarget ?? MacroTargets.carbsMinimum
                         )
                         .padding(.top)
                         .simultaneousGesture(
@@ -148,6 +148,7 @@ struct ContentView: View {
                             macros: store.macrosToday,
                             proteinTarget: store.proteinTarget,
                             fatTarget: store.fatTarget,
+                            carbsTarget: store.carbsTarget,
                             weightKg: store.weightKg
                         )
 

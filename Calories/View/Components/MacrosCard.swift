@@ -4,6 +4,8 @@ struct MacrosCard: View {
     let macros: Macros
     let proteinTarget: Double?
     let fatTarget: Double?
+    /// Остаток нормы после белка и жира. nil — целей ещё нет, показываем минимум.
+    var carbsTarget: Double? = nil
     let weightKg: Double?
 
     @State private var selectedMacro: MacroKind?
@@ -74,7 +76,7 @@ struct MacrosCard: View {
         switch kind {
         case .protein: return proteinTarget
         case .fat: return fatTarget
-        case .carbs: return MacroTargets.carbsMinimum
+        case .carbs: return carbsTarget ?? MacroTargets.carbsMinimum
         }
     }
 
@@ -82,7 +84,9 @@ struct MacrosCard: View {
         switch kind {
         case .protein: return String(localized: "Из профиля — норма белка на кг веса под твою цель.")
         case .fat: return String(localized: "≥0.8 г/кг — принятый минимум для гормонального здоровья.")
-        case .carbs: return String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")
+        case .carbs: return carbsTarget == nil
+            ? String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")
+            : String(localized: "Остаток дневной нормы после белка и жира — то, чем управляешь ты.")
         }
     }
 

@@ -140,7 +140,7 @@ struct UserProfileTests {
 
     @Test func proteinTarget_positive() {
         let p = profile(weightKg: 80)
-        #expect(p.proteinTargetGrams > 0)
+        #expect(p.proteinTargetGrams(from: nil) > 0)
     }
 
     @Test func bmi_correct() {
@@ -1431,5 +1431,105 @@ struct MeasurementSessionTests {
         let session = store.measurementForToday()
         #expect(!session.hasAnyValue)
         #expect(store.measurements.count == 1)
+    }
+}
+
+@MainActor
+@Suite(.serialized)
+struct MacroBudgetTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext, defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    private func profile(basis: ProteinBasis = .bodyweight, proteinPerKg: Double = 2.0) -> UserProfile {
+        UserProfile(
+            weightKg: 77, heightCm: 180, age: 30, sex: .male,
+            activityLevel: .moderate, goal: .maintenance,
+            proteinPerKg: proteinPerKg, proteinBasis: basis
+        )
+    }
+
+    /// Замер, дающий по Navy около 19% жира: пояс 81, шея 38 при росте 180.
+    private func measurement() -> BodyMeasurement {
+        let m = BodyMeasurement(date: Date())
+        m.setValue(81, for: .belt)
+        m.setValue(38, for: .neck)
+        return m
+    }
+
+    @Test func carbsAreWhatIsLeftOfTheGoal() {
+        store.updateProfile(profile(), syncDailyGoal: false)
+        store.dailyGoal = 2000
+
+        // 154 г белка (2.0 × 77) и 61.6 г жира съедают 616 + 554.4 ккал
+        let locked = 154 * 4.0 + 77 * 0.8 * 9
+        #expect(store.carbsTarget != nil)
+        #expect(abs(store.carbsTarget! - (2000 - locked) / 4) < 0.01)
+        #expect(store.macrosOverflow == nil)
+    }
+
+    /// Норма выросла — вырос только остаток, обязательства не изменились.
+    @Test func aHigherGoalGrowsOnlyTheCarbs() {
+        store.updateProfile(profile(), syncDailyGoal: false)
+        store.dailyGoal = 2000
+        let before = store.carbsTarget!
+        let protein = store.proteinTarget!
+        let fat = store.fatTarget!
+
+        store.dailyGoal = 2400
+
+        #expect(store.proteinTarget == protein)
+        #expect(store.fatTarget == fat)
+        #expect(abs(store.carbsTarget! - (before + 100)) < 0.01)
+    }
+
+    /// На глубоком дефиците обязательства перестают помещаться, и об этом
+    /// надо сказать, а не показать отрицательные углеводы.
+    @Test func overflowIsReportedInsteadOfNegativeCarbs() {
+        store.updateProfile(profile(proteinPerKg: 2.6), syncDailyGoal: false)
+        store.dailyGoal = 1000
+
+        #expect(store.carbsTarget == 0)
+        #expect(store.macrosOverflow != nil)
+        #expect(store.macrosOverflow! > 0)
+    }
+
+    /// От сухой массы белка выходит меньше, чем от общего веса, — при 19% жира
+    /// это нормально и обещать обратное нельзя.
+    @Test func leanMassBasisGivesLessThanBodyweightAtNineteenPercent() {
+        let m = measurement()
+        let byWeight = profile(basis: .bodyweight).proteinTargetGrams(from: m)
+        let byLean = profile(basis: .leanMass).proteinTargetGrams(from: m)
+
+        #expect(byWeight == 154)
+        #expect(byLean < byWeight)
+        #expect(byLean > 120)
+    }
+
+    /// Без замеров персональный режим считает от веса, а не отказывает.
+    @Test func leanMassBasisFallsBackWithoutMeasurements() {
+        let p = profile(basis: .leanMass)
+        #expect(p.leanMassKg(from: nil) == nil)
+        #expect(p.proteinTargetGrams(from: nil) == 154)
+    }
+
+    /// Старый сохранённый профиль без поля основы читается как «от веса».
+    @Test func profilesSavedBeforeTheSettingDecodeAsBodyweight() throws {
+        let json = """
+        {"weightKg":77,"heightCm":180,"age":30,"sex":"male",
+         "activityLevel":"moderate","goal":"maintenance","proteinPerKg":2.0}
+        """
+        let decoded = try JSONDecoder().decode(UserProfile.self, from: Data(json.utf8))
+        #expect(decoded.proteinBasis == .bodyweight)
+        #expect(decoded.proteinTargetGrams(from: nil) == 154)
     }
 }

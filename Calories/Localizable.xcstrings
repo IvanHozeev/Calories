@@ -3130,6 +3130,52 @@
         }
       }
     },
+    "Белка на кг сухой массы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بروتين لكل كجم كتلة صافية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein pro kg Magermasse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein per kg of lean mass"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína por kg de masa magra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines par kg de masse maigre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון לקילוגרם מסה רזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína por kg de massa magra"
+          }
+        }
+      }
+    },
     "Белки" : {
       "localizations" : {
         "ar" : {
@@ -3311,6 +3357,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteína"
+          }
+        }
+      }
+    },
+    "Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين والدهون يحددهما جسمك، والكربوهيدرات هي ما تبقّى من سقف السعرات. في يوم السقف الأعلى ترتفع هي وحدها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein und Fett gibt dein Körper vor, Kohlenhydrate sind der Rest des Kalorienziels. An einem Tag mit höherem Ziel wachsen genau sie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein and fat are set by your body; carbs are what is left of the calorie goal. On a higher-calorie day it is the carbs that grow."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proteína y la grasa las fija tu cuerpo; los carbohidratos son lo que queda del objetivo. En un día de más calorías crecen ellos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les protéines et les lipides sont fixés par ton corps, les glucides sont le reste de l'objectif. Un jour à objectif plus haut, ce sont eux qui augmentent."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון ושומן נקבעים על ידי הגוף, פחמימות הן מה שנשאר מיעד הקלוריות. ביום עם יעד גבוה יותר הן שגדלות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína e gordura são definidas pelo corpo; os carboidratos são o que sobra da meta. Num dia de meta maior, são eles que crescem."
+          }
+        }
+      }
+    },
+    "Белок и жир не помещаются в норму: не хватает %d ккал. Подними калораж или опусти норму белка." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين والدهون لا يتسعان في السقف: ينقص %d سعرة. ارفع السقف أو اخفض حصة البروتين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein und Fett passen nicht ins Ziel: %d kcal fehlen. Erhöhe das Ziel oder senke die Proteinvorgabe."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein and fat do not fit the goal: %d kcal short. Raise the goal or lower the protein target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proteína y la grasa no caben en el objetivo: faltan %d kcal. Sube el objetivo o baja la proteína."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines et lipides ne tiennent pas dans l'objectif : il manque %d kcal. Augmente l'objectif ou baisse les protéines."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון ושומן לא נכנסים ביעד: חסרות %d קלוריות. העלה את היעד או הורד את יעד החלבון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína e gordura não cabem na meta: faltam %d kcal. Aumente a meta ou reduza a proteína."
           }
         }
       }
@@ -5998,7 +6136,50 @@
       }
     },
     "Выбрать другое фото" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار صورة أخرى"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anderes Foto wählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose another photo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir otra foto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une autre photo"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בחר תמונה אחרת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher outra foto"
+          }
+        }
+      }
     },
     "Выбрать из галереи" : {
       "localizations" : {
@@ -7941,6 +8122,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diário como tabela (CSV)"
+          }
+        }
+      }
+    },
+    "Дневные макросы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الماكروز اليومية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesmakros"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daily macros"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros diarios"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros du jour"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מאקרו יומי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros diários"
           }
         }
       }
@@ -14016,7 +14243,50 @@
       }
     },
     "мг" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مغ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מ\"ג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mg"
+          }
+        }
+      }
     },
     "Мёд" : {
       "localizations" : {
@@ -15138,7 +15408,50 @@
       }
     },
     "На фото не видно еды." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يظهر طعام في الصورة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Foto ist kein Essen zu sehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No food visible in the photo."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ve comida en la foto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun aliment visible sur la photo."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נראה אוכל בתמונה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum alimento visível na foto."
+          }
+        }
+      }
     },
     "На этой неделе был перерасход — норма сегодня снижена." : {
       "localizations" : {
@@ -15929,7 +16242,50 @@
       }
     },
     "Не задан ключ Gemini." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يتم ضبط مفتاح Gemini."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Gemini-Schlüssel hinterlegt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Gemini key set."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay clave de Gemini configurada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune clé Gemini définie."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא הוגדר מפתח Gemini."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma chave do Gemini definida."
+          }
+        }
+      }
     },
     "Не задан ключ USDA FoodData Central." : {
       "localizations" : {
@@ -16162,7 +16518,50 @@
       }
     },
     "Не удалось разобрать ответ." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّر قراءة الرد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antwort konnte nicht gelesen werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not read the response."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer la respuesta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de lire la réponse."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ניתן היה לקרוא את התשובה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler a resposta."
+          }
+        }
+      }
     },
     "Не удалось собрать файл." : {
       "localizations" : {
@@ -17927,6 +18326,7 @@
       }
     },
     "Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17968,6 +18368,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geralmente 1.6–2.2 g por kg para ganho muscular ou perda de peso preservando músculos."
+          }
+        }
+      }
+    },
+    "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً 1.6–2.2 غ لكل كجم من الوزن. أدخل القياسات وسيصبح بالإمكان الحساب من الكتلة الصافية بدل الوزن الكلي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblich sind 1,6–2,2 g pro kg Gewicht. Trag die Maße ein, dann lässt sich die Vorgabe von der Magermasse statt vom Gesamtgewicht rechnen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually 1.6–2.2 g per kg of bodyweight. Fill in your measurements and the target can be based on lean mass instead of total weight."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 1,6–2,2 g por kg de peso. Rellena las medidas y el objetivo podrá calcularse por masa magra en vez de peso total."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Généralement 1,6–2,2 g par kg de poids. Renseigne tes mesures et l'objectif pourra se calculer sur la masse maigre plutôt que le poids total."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל 1.6–2.2 גרם לקילוגרם משקל. מלא את המדידות והיעד יוכל להיחשב לפי מסה רזה במקום משקל כולל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 1,6–2,2 g por kg de peso. Preencha as medições e a meta poderá ser calculada pela massa magra em vez do peso total."
+          }
+        }
+      }
+    },
+    "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً 1.6–2.2 غ لكل كجم. الحساب من الكتلة الصافية أدق: بنفس الوزن تختلف كمية العضلات بين 12% و25% دهون، وأنت تغذي العضلات."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblich sind 1,6–2,2 g pro kg. Von der Magermasse ist genauer: bei gleichem Gewicht steckt hinter 12% und 25% Fett unterschiedlich viel Muskel — und du fütterst den Muskel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually 1.6–2.2 g per kg. Lean mass is more precise: at the same weight, 12% and 25% body fat mean different amounts of muscle, and it is muscle you are feeding."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 1,6–2,2 g por kg. Por masa magra es más preciso: con el mismo peso, 12% y 25% de grasa significan músculo distinto, y alimentas músculo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Généralement 1,6–2,2 g par kg. La masse maigre est plus précise : à poids égal, 12% et 25% de gras, ce n'est pas la même quantité de muscle — et c'est le muscle que tu nourris."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל 1.6–2.2 גרם לקילוגרם. לפי מסה רזה מדויק יותר: באותו משקל, 12% ו-25% שומן הם כמות שריר שונה, ואת השריר אתה מזין."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 1,6–2,2 g por kg. Pela massa magra é mais preciso: no mesmo peso, 12% e 25% de gordura são quantidades diferentes de músculo, e é o músculo que você alimenta."
           }
         }
       }
@@ -18713,6 +19205,98 @@
         }
       }
     },
+    "Остаток дневной нормы после белка и жира — то, чем управляешь ты." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما تبقّى من السقف اليومي بعد البروتين والدهون — وهو ما تتحكم فيه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Rest des Tagesziels nach Protein und Fett — das, was du steuerst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is left of the daily goal after protein and fat — the part you control."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que queda del objetivo diario tras proteína y grasa: la parte que controlas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui reste de l'objectif après protéines et lipides — la part que tu pilotes."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה שנשאר מהיעד היומי אחרי חלבון ושומן — החלק שאתה שולט בו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que sobra da meta diária depois de proteína e gordura — a parte que você controla."
+          }
+        }
+      }
+    },
+    "От веса" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من الوزن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vom Gewicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By weight"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon le poids"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי משקל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo peso"
+          }
+        }
+      }
+    },
     "от груди" : {
       "localizations" : {
         "ar" : {
@@ -18893,6 +19477,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "do antebraço"
+          }
+        }
+      }
+    },
+    "От сухой массы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من الكتلة الصافية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von der Magermasse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By lean mass"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por masa magra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon la masse maigre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי מסה רזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pela massa magra"
           }
         }
       }
@@ -19547,7 +20177,50 @@
       }
     },
     "Оценка по фотографии приблизительная: вес порции и то, сколько ушло масла, по снимку не видно. Считай её черновиком, который нужно поправить, а не измерением." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقدير من الصورة تقريبي: وزن الحصة وكمية الزيت لا تظهران في اللقطة. اعتبره مسودة تحتاج تصحيحًا، لا قياسًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Schätzung vom Foto ist ungefähr: Portionsgewicht und verwendetes Öl sind auf dem Bild nicht zu sehen. Nimm sie als Entwurf, den du korrigierst, nicht als Messung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An estimate from a photo is approximate: the weight of the portion and how much oil went in are not visible in the shot. Treat it as a draft to correct, not a measurement."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La estimación por foto es aproximada: el peso de la ración y el aceite usado no se ven en la imagen. Tómala como un borrador a corregir, no como una medición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'estimation par photo est approximative : le poids de la portion et l'huile utilisée ne se voient pas sur l'image. Prends-la comme un brouillon à corriger, pas comme une mesure."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההערכה מהתמונה משוערת: משקל המנה וכמות השמן לא נראים בצילום. התייחס אליה כטיוטה לתיקון, לא כמדידה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A estimativa por foto é aproximada: o peso da porção e o óleo usado não aparecem na imagem. Trate-a como um rascunho a corrigir, não como uma medição."
+          }
+        }
+      }
     },
     "Очень высокая" : {
       "extractionState" : "manual",
@@ -24415,7 +25088,50 @@
       }
     },
     "Разбираем фото..." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ تحليل الصورة..."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto wird ausgewertet …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reading the photo..."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizando la foto..."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse de la photo..."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנתח את התמונה..."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analisando a foto..."
+          }
+        }
+      }
     },
     "Разброс %.1f см" : {
       "localizations" : {
@@ -24556,7 +25272,50 @@
       }
     },
     "Разобрать" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحليل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswerten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analizar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyser"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נתח"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analisar"
+          }
+        }
+      }
     },
     "Разовая покупка, без продления" : {
       "localizations" : {
@@ -24789,7 +25548,50 @@
       }
     },
     "Распознавание недоступно." : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التعرّف غير متاح."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erkennung nicht verfügbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recognition is unavailable."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El reconocimiento no está disponible."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La reconnaissance est indisponible."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הזיהוי אינו זמין."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O reconhecimento está indisponível."
+          }
+        }
+      }
     },
     "Расход с активностью (TDEE)" : {
       "extractionState" : "manual",
@@ -28729,6 +29531,52 @@
         }
       }
     },
+    "Считать" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "احسب من"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechnen nach"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Count from"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular por"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculer selon"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חשב לפי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular por"
+          }
+        }
+      }
+    },
     "Сыр твёрдый" : {
       "localizations" : {
         "ar" : {
@@ -30924,7 +31772,50 @@
       }
     },
     "Фото еды" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صورة الطعام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto des Essens"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food photo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto de la comida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo du plat"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תמונת אוכל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto da comida"
+          }
+        }
+      }
     },
     "фунт" : {
       "extractionState" : "manual",

@@ -121,7 +121,33 @@ extension CalorieStore {
 
     /// Целевой белок в граммах — nil, если профиль ещё не заполнен.
     var proteinTarget: Double? {
-        profile?.proteinTargetGrams
+        profile?.proteinTargetGrams(from: latestMeasurement)
+    }
+
+    /// Сколько калорий забирают белок и жир — то, что съесть обязан.
+    var lockedMacroCalories: Double? {
+        guard let p = proteinTarget, let f = fatTarget else { return nil }
+        return p * MacroTargets.kcalPerProteinGram + f * MacroTargets.kcalPerFatGram
+    }
+
+    /// Углеводы — остаток дневной нормы после белка и жира.
+    ///
+    /// Именно поэтому в высокий день циклирования и при возврате из банка калорий
+    /// вырастают только они: белок и жир заданы телом, углеводы — то, чем реально
+    /// управляешь. Ноль означает «не помещается», см. `macrosOverflow`.
+    var carbsTarget: Double? {
+        guard let locked = lockedMacroCalories, adaptedTodayGoal > 0 else { return nil }
+        let left = Double(adaptedTodayGoal) - locked
+        return left > 0 ? left / MacroTargets.kcalPerCarbGram : 0
+    }
+
+    /// Насколько белок с жиром не влезают в норму, в килокалориях. nil — влезают.
+    /// На глубоком дефиците это обычное дело, и молчать об этом нельзя: человек
+    /// иначе каждый день недобирает вслепую.
+    var macrosOverflow: Int? {
+        guard let locked = lockedMacroCalories, adaptedTodayGoal > 0 else { return nil }
+        let over = locked - Double(adaptedTodayGoal)
+        return over > 0 ? Int(over.rounded()) : nil
     }
 
     /// Текущий вес — из последнего взвешивания, иначе из профиля.
@@ -148,8 +174,9 @@ extension CalorieStore {
             guard canEat > 0 else { return nil }
             return "Добери ещё \(canEat) г жиров"
         }
-        if m.carbs < MacroTargets.carbsMinimum {
-            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, MacroTargets.carbsMinimum - m.carbs).rounded())
+        let carbsGoal = carbsTarget ?? MacroTargets.carbsMinimum
+        if m.carbs < carbsGoal {
+            let canEat = Int(min(Double(remaining) / MacroTargets.kcalPerCarbGram, carbsGoal - m.carbs).rounded())
             guard canEat > 0 else { return nil }
             return "Добери ещё \(canEat) г углеводов"
         }

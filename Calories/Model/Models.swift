@@ -281,6 +281,24 @@ enum Goal: String, Codable, CaseIterable, Identifiable {
 
 /// Профиль пользователя для расчёта целевых калорий и белка.
 /// Хранится как единственный объект в UserDefaults (JSON) — это одна запись, не список, SwiftData здесь избыточен.
+/// От чего считать норму белка.
+///
+/// От общего веса — годится всем и не требует ничего, кроме весов. От сухой
+/// массы — точнее: при одном весе на 12% и на 25% жира мышц разное количество,
+/// а кормить надо мышцы. Требует снятых замеров.
+enum ProteinBasis: String, Codable, CaseIterable, Identifiable {
+    case bodyweight, leanMass
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .bodyweight: return String(localized: "От веса")
+        case .leanMass:   return String(localized: "От сухой массы")
+        }
+    }
+}
+
 struct UserProfile: Codable, Equatable {
     var weightKg: Double
     var heightCm: Double
@@ -289,6 +307,35 @@ struct UserProfile: Codable, Equatable {
     var activityLevel: ActivityLevel
     var goal: Goal
     var proteinPerKg: Double
+    /// Опциональное намеренно: в уже сохранённых профилях этого ключа нет, а
+    /// обязательное поле уронило бы декодирование целиком — то есть стёрло бы
+    /// человеку профиль. Читается через `proteinBasis`.
+    var storedProteinBasis: ProteinBasis?
+
+    init(
+        weightKg: Double,
+        heightCm: Double,
+        age: Int,
+        sex: Sex,
+        activityLevel: ActivityLevel,
+        goal: Goal,
+        proteinPerKg: Double,
+        proteinBasis: ProteinBasis = .bodyweight
+    ) {
+        self.weightKg = weightKg
+        self.heightCm = heightCm
+        self.age = age
+        self.sex = sex
+        self.activityLevel = activityLevel
+        self.goal = goal
+        self.proteinPerKg = proteinPerKg
+        self.storedProteinBasis = proteinBasis
+    }
+
+    var proteinBasis: ProteinBasis {
+        get { storedProteinBasis ?? .bodyweight }
+        set { storedProteinBasis = newValue }
+    }
 
     static let defaultProteinPerKg: Double = 1.7
 
@@ -308,9 +355,25 @@ struct UserProfile: Codable, Equatable {
         Int((tdee * goal.calorieMultiplier).rounded())
     }
 
-    /// Целевой белок в граммах.
-    var proteinTargetGrams: Double {
-        proteinPerKg * weightKg
+    /// Сухая масса. Только по снятым замерам: оценка по ИМТ для этого слишком
+    /// груба — она не отличает 77 кг мышц от 77 кг с животом, а вся суть режима
+    /// именно в этом различии.
+    func leanMassKg(from measurement: BodyMeasurement?) -> Double? {
+        guard navyBodyFat(from: measurement) != nil else { return nil }
+        let fat = bodyFatPercentage(from: measurement)
+        let lean = weightKg * (1 - fat / 100)
+        return lean > 0 ? lean : nil
+    }
+
+    /// Целевой белок в граммах. Без замеров персональный режим молча падает
+    /// обратно на общий вес: лучше считать грубее, чем не считать вовсе.
+    func proteinTargetGrams(from measurement: BodyMeasurement?) -> Double {
+        switch proteinBasis {
+        case .bodyweight:
+            return proteinPerKg * weightKg
+        case .leanMass:
+            return proteinPerKg * (leanMassKg(from: measurement) ?? weightKg)
+        }
     }
 
     var bmi: Double {

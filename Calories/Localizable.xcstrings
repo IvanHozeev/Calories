@@ -4,6 +4,52 @@
     "" : {
 
     },
+    "Готовые блюда" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أطباق جاهزة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertiggerichte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepared dishes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Platos preparados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plats préparés"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנות מוכנות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pratos prontos"
+          }
+        }
+      }
+    },
     "—" : {
 
     },
@@ -3038,6 +3084,52 @@
         }
       }
     },
+    "Без алкоголя — он обезвоживает." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا كحول — فهو يسبب الجفاف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Alkohol — er entwässert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No alcohol — it dehydrates you."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada de alcohol: deshidrata."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas d'alcool — il déshydrate."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בלי אלכוהול — הוא מייבש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada de álcool — ele desidrata."
+          }
+        }
+      }
+    },
     "Без названия и макросов — в дневник уйдёт только число." : {
       "localizations" : {
         "ar" : {
@@ -3633,6 +3725,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Porcini"
+          }
+        }
+      }
+    },
+    "Беременность, диабет, лекарства по часам — это к врачу, а не к приложению. Здесь общие советы, а не медицинская рекомендация." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحمل، السكري، أدوية بمواعيد محددة — هذا شأن الطبيب لا التطبيق. ما هنا نصائح عامة وليس توصية طبية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwangerschaft, Diabetes, Medikamente nach Uhrzeit — das gehört zum Arzt, nicht in eine App. Hier stehen allgemeine Hinweise, keine medizinische Empfehlung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregnancy, diabetes, medication on a schedule — that is for a doctor, not an app. What follows is general advice, not medical guidance."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Embarazo, diabetes, medicación con horario: eso es cosa del médico, no de una app. Aquí hay consejos generales, no una recomendación médica."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grossesse, diabète, médicaments à heure fixe — cela relève du médecin, pas d'une application. Ici, des conseils généraux, pas un avis médical."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היריון, סוכרת, תרופות בשעות קבועות — זה לרופא, לא לאפליקציה. כאן עצות כלליות, לא המלצה רפואית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravidez, diabetes, remédios com horário — isso é com o médico, não com um app. Aqui há conselhos gerais, não recomendação médica."
           }
         }
       }
@@ -6596,6 +6734,52 @@
         }
       }
     },
+    "Выход" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإفطار"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fastenbrechen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breaking the fast"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Romper el ayuno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rompre le jeûne"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבירת הצום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quebrar o jejum"
+          }
+        }
+      }
+    },
     "Выше натурального потолка" : {
       "localizations" : {
         "ar" : {
@@ -7055,6 +7239,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Carne bovina"
+          }
+        }
+      }
+    },
+    "Голодание" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الصيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fasten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fasting"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayuno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeûne"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jejum"
           }
         }
       }
@@ -7566,6 +7796,52 @@
         }
       }
     },
+    "Дальше" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بعد ذلك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danach"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After that"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Después"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensuite"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחר כך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois"
+          }
+        }
+      }
+    },
     "Данные" : {
       "localizations" : {
         "ar" : {
@@ -8027,6 +8303,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dia"
+          }
+        }
+      }
+    },
+    "День отмечен" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم تعليم اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag markiert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day marked"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día marcado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour marqué"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום סומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia marcado"
           }
         }
       }
@@ -10209,6 +10531,52 @@
         }
       }
     },
+    "За 2–3 дня" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قبل يومين أو ثلاثة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2–3 Tage vorher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2–3 days before"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2–3 días antes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2–3 jours avant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יומיים־שלושה לפני"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2–3 dias antes"
+          }
+        }
+      }
+    },
     "За время плана не было взвешиваний — подвести итог не по чему." : {
       "localizations" : {
         "ar" : {
@@ -10297,6 +10665,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No período"
+          }
+        }
+      }
+    },
+    "За сутки" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قبل 24 ساعة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 Stunden vorher"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 hours before"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 horas antes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 heures avant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 שעות לפני"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "24 horas antes"
           }
         }
       }
@@ -15813,6 +16227,52 @@
         }
       }
     },
+    "Меньше соли. Соль — главный двигатель жажды, и солёный ужин накануне ощущается весь следующий день." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قلّل الملح. الملح هو المحرّك الأول للعطش، ووجبة مالحة في الليلة السابقة تُشعر بها طوال اليوم التالي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weniger Salz. Salz ist der stärkste Durstauslöser, und ein salziges Abendessen am Vortag spürt man den ganzen nächsten Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Less salt. Salt is the main driver of thirst, and a salty dinner the night before is felt all through the next day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos sal. La sal es el principal motor de la sed, y una cena salada la víspera se nota todo el día siguiente."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins de sel. Le sel est le premier moteur de la soif, et un dîner salé la veille se ressent toute la journée suivante."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחות מלח. המלח הוא המנוע העיקרי של הצמא, וארוחת ערב מלוחה בערב שלפני מורגשת לאורך כל היום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos sal. O sal é o principal motor da sede, e um jantar salgado na véspera sente-se o dia inteiro."
+          }
+        }
+      }
+    },
     "Меряй утром натощак сантиметровой лентой. Талия — на уровне пупка, шея — под кадыком." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16840,6 +17300,98 @@
         }
       }
     },
+    "На воде" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بالماء"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit Wasser"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Water fast"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con agua"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec eau"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עם מים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com água"
+          }
+        }
+      }
+    },
+    "На воде — пить можно и нужно. Это меняет половину рекомендаций." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الصيام بالماء يمكنك بل ينبغي أن تشرب. هذا يغيّر نصف النصائح."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Fasten mit Wasser darfst und sollst du trinken. Das ändert die Hälfte der Hinweise."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a water fast you can and should drink. That changes half the advice."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el ayuno con agua se puede y se debe beber. Eso cambia la mitad de los consejos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec eau, boire est permis et nécessaire. Cela change la moitié des conseils."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בצום עם מים מותר וצריך לשתות. זה משנה חצי מההמלצות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No jejum com água pode e deve beber. Isso muda metade dos conselhos."
+          }
+        }
+      }
+    },
     "На фото не видно еды." : {
       "localizations" : {
         "ar" : {
@@ -17257,6 +17809,52 @@
         }
       }
     },
+    "Накануне" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الليلة السابقة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Am Vorabend"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The night before"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La víspera"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La veille au soir"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בערב שלפני"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na véspera"
+          }
+        }
+      }
+    },
     "Напитки" : {
       "localizations" : {
         "ar" : {
@@ -17530,6 +18128,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tipografia"
+          }
+        }
+      }
+    },
+    "Начни с жидкости небольшими порциями. Литр залпом после сухого дня — самый частый способ испортить себе вечер." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابدأ بالسوائل بكميات صغيرة. لتر دفعة واحدة بعد يوم جاف هو أشهر طريقة لإفساد أمسيتك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginne mit Flüssigkeit in kleinen Portionen. Ein Liter auf einmal nach einem trockenen Tag ist der häufigste Weg, sich den Abend zu verderben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start with liquid in small portions. A litre in one go after a dry day is the most common way to ruin your evening."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza con líquido en porciones pequeñas. Un litro de golpe tras un día seco es la forma más común de arruinarte la noche."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence par du liquide, à petites gorgées. Un litre d'un coup après une journée sèche est la façon la plus courante de gâcher sa soirée."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התחל בנוזלים במנות קטנות. ליטר בבת אחת אחרי יום יבש הוא הדרך הנפוצה ביותר להרוס את הערב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comece com líquido em pequenas porções. Um litro de uma vez depois de um dia seco é o jeito mais comum de estragar a noite."
           }
         }
       }
@@ -20218,6 +20862,52 @@
         }
       }
     },
+    "Обычная еда. Не жирное и не солёное застолье сразу — разбитость после поста чаще от него, чем от самого поста." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طعام عادي. لا وليمة دسمة ومالحة فورًا — الإرهاق بعد الصيام يأتي منها أكثر مما يأتي من الصيام نفسه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normales Essen. Kein fettiges, salziges Festmahl sofort — die Erschöpfung nach dem Fasten kommt öfter davon als vom Fasten selbst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordinary food. Not a fatty, salty feast right away — the wrung-out feeling after a fast comes more often from that than from the fast itself."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida normal. No un banquete graso y salado de inmediato: el bajón después del ayuno viene más de eso que del ayuno."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un repas ordinaire. Pas un festin gras et salé tout de suite : l'abattement après le jeûne vient plus souvent de là que du jeûne lui-même."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אוכל רגיל. לא סעודה שמנה ומלוחה מיד — התשישות אחרי הצום מגיעה ממנה יותר מאשר מהצום עצמו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida comum. Não um banquete gorduroso e salgado logo de cara — o abatimento depois do jejum vem mais dele do que do jejum."
+          }
+        }
+      }
+    },
     "Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу." : {
       "localizations" : {
         "ar" : {
@@ -22073,6 +22763,98 @@
         }
       }
     },
+    "Отметить день голоданием" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعليم اليوم كصيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag als Fastentag markieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark day as a fast"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar el día como ayuno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer ce jour comme jeûne"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לסמן את היום כצום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marcar o dia como jejum"
+          }
+        }
+      }
+    },
+    "Отмеченный день не рвёт серию и входит в недельный банк калорий как есть — с нулём съеденного." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اليوم المُعلَّم لا يقطع السلسلة ويدخل بنك السعرات الأسبوعي كما هو — بصفر مأكول."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein markierter Tag unterbricht die Serie nicht und geht so, wie er ist, in die Wochenbilanz ein — mit null gegessenen Kalorien."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A marked day does not break your streak and enters the weekly calorie bank as it is — with zero eaten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un día marcado no rompe la racha y entra en el banco semanal de calorías tal cual: con cero comido."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un jour marqué ne casse pas la série et entre dans la banque hebdomadaire de calories tel quel — avec zéro consommé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום מסומן לא שובר את הרצף ונכנס לבנק הקלוריות השבועי כמו שהוא — עם אפס שנאכל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um dia marcado não quebra a sequência e entra no banco semanal de calorias como está — com zero consumido."
+          }
+        }
+      }
+    },
     "Отстаёшь от графика" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22538,6 +23320,52 @@
         }
       }
     },
+    "Пей равномерно весь день, а не литр перед началом: выпитое залпом уходит в мочевой пузырь, а не в ткани." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اشرب بانتظام طوال اليوم، لا لترًا قبل البدء مباشرة: ما يُشرب دفعة واحدة يذهب إلى المثانة لا إلى الأنسجة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trink gleichmäßig über den Tag verteilt, nicht einen Liter kurz vor dem Start: Was du auf einmal trinkst, landet in der Blase, nicht im Gewebe."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drink evenly through the day, not a litre right before the start: what you gulp down goes to your bladder, not your tissues."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bebe de forma uniforme durante el día, no un litro justo antes de empezar: lo que se traga de golpe va a la vejiga, no a los tejidos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bois régulièrement toute la journée, pas un litre juste avant de commencer : ce qu'on avale d'un trait va dans la vessie, pas dans les tissus."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שתה באופן אחיד לאורך היום, לא ליטר ממש לפני ההתחלה: מה ששותים בבת אחת הולך לשלפוחית, לא לרקמות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beba de forma uniforme ao longo do dia, não um litro antes de começar: o que se bebe de uma vez vai para a bexiga, não para os tecidos."
+          }
+        }
+      }
+    },
     "Первая неделя" : {
       "localizations" : {
         "ar" : {
@@ -22626,6 +23454,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Primeira semana grátis, depois o preço normal. Cancele quando quiser."
+          }
+        }
+      }
+    },
+    "Первые минуты" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدقائق الأولى"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erste Minuten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First minutes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeros minutos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premières minutes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדקות הראשונות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primeiros minutos"
           }
         }
       }
@@ -23965,6 +24839,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abaixo do pomo de adão, fita nivelada. Pescoço relaxado e cabeça reta."
+          }
+        }
+      }
+    },
+    "Подготовка" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التحضير"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorbereitung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הכנה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparação"
           }
         }
       }
@@ -25310,6 +26230,52 @@
         }
       }
     },
+    "После голодания на воде выход мягче: организм не обезвожен, и полноценный приём пищи переносится легче." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بعد الصيام بالماء يكون الإفطار أليَن: الجسم غير مصاب بالجفاف، ووجبة كاملة تُحتمل بسهولة أكبر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach dem Fasten mit Wasser fällt das Brechen leichter: Der Körper ist nicht dehydriert, und eine volle Mahlzeit wird besser vertragen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After a water fast, breaking it is gentler: the body is not dehydrated, and a full meal goes down more easily."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tras un ayuno con agua, la salida es más suave: el cuerpo no está deshidratado y una comida completa sienta mejor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après un jeûne avec eau, la sortie est plus douce : le corps n'est pas déshydraté et un vrai repas passe plus facilement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחרי צום עם מים היציאה עדינה יותר: הגוף לא מיובש, וארוחה מלאה נסבלת בקלות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois de um jejum com água, a saída é mais suave: o corpo não está desidratado e uma refeição completa é melhor tolerada."
+          }
+        }
+      }
+    },
     "Последнее" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25400,6 +26366,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Última medida"
+          }
+        }
+      }
+    },
+    "Последний приём" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة الأخيرة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Mahlzeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last meal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última comida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier repas"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הארוחה האחרונה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última refeição"
           }
         }
       }
@@ -29391,6 +30403,52 @@
         }
       }
     },
+    "Сегодня голодание" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اليوم صيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute wird gefastet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fasting today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy en ayuno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeûne aujourd'hui"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום צום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoje em jejum"
+          }
+        }
+      }
+    },
     "Сейчас" : {
       "localizations" : {
         "ar" : {
@@ -30547,6 +31605,52 @@
         }
       }
     },
+    "Снижай кофе постепенно. Головная боль в пост чаще от отмены кофеина, чем от голода, и резкий отказ накануне делает только хуже." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قلّل القهوة تدريجيًا. صداع الصيام سببه انسحاب الكافيين أكثر من الجوع، والامتناع المفاجئ في اليوم السابق يزيد الأمر سوءًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduziere Kaffee schrittweise. Kopfschmerzen beim Fasten kommen öfter vom Koffeinentzug als vom Hunger, und ein abrupter Verzicht am Vortag macht es nur schlimmer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cut coffee down gradually. A headache during a fast comes more often from caffeine withdrawal than from hunger, and quitting abruptly the day before only makes it worse."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduce el café poco a poco. El dolor de cabeza durante el ayuno viene más de la abstinencia de cafeína que del hambre, y dejarlo de golpe la víspera solo empeora las cosas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réduis le café progressivement. Le mal de tête pendant le jeûne vient plus souvent du manque de caféine que de la faim, et arrêter brutalement la veille ne fait qu'empirer les choses."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפחת קפה בהדרגה. כאב ראש בצום מגיע לרוב מגמילת קפאין ולא מרעב, והפסקה חדה ביום שלפני רק מחמירה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduza o café aos poucos. A dor de cabeça no jejum vem mais da abstinência de cafeína do que da fome, e parar de repente na véspera só piora."
+          }
+        }
+      }
+    },
     "Снижение веса" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30821,6 +31925,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fazer medidas"
+          }
+        }
+      }
+    },
+    "Снять отметку" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة التعليم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markierung entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove mark"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar la marca"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer la marque"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להסיר את הסימון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover a marcação"
           }
         }
       }
@@ -32120,6 +33270,98 @@
         }
       }
     },
+    "Сухое" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جاف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trocken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seco"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sec"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יבש"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seco"
+          }
+        }
+      }
+    },
+    "Сухое — без еды и без воды, как в Йом Кипур. Советы ниже под него." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجاف يعني بلا طعام وبلا ماء، كما في يوم الغفران. النصائح أدناه مكتوبة له."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trocken heißt ohne Essen und ohne Wasser, wie an Jom Kippur. Die Hinweise unten sind darauf zugeschnitten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dry means no food and no water, as on Yom Kippur. The advice below is written for it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seco significa sin comida y sin agua, como en Yom Kipur. Los consejos de abajo son para eso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sec veut dire sans nourriture ni eau, comme à Yom Kippour. Les conseils ci-dessous sont écrits pour cela."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יבש הוא בלי אוכל ובלי מים, כמו ביום כיפור. ההמלצות למטה מותאמות לו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seco significa sem comida e sem água, como no Yom Kipur. Os conselhos abaixo são para isso."
+          }
+        }
+      }
+    },
     "Сходится" : {
       "localizations" : {
         "ar" : {
@@ -32861,6 +34103,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Темп выше ~1% веса в неделю — довольно агрессивно. Можно смягчить, увеличив срок или скорректировав целевой вес."
+          }
+        }
+      }
+    },
+    "Тип" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Art"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סוג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
           }
         }
       }
@@ -33930,6 +35218,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jantar"
+          }
+        }
+      }
+    },
+    "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "باعتدال، دون حار أو شديد الملوحة. من يُفرط يبدأ الصيام عطشان لا شبعان."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maßvoll, nichts Scharfes und nichts sehr Salziges. Wer sich überisst, startet das Fasten durstig statt satt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderate, nothing spicy or very salty. Overeat and you start the fast thirsty rather than full."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con moderación, nada picante ni muy salado. Quien se pasa empieza el ayuno con sed, no saciado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modérément, rien d'épicé ni de très salé. Celui qui mange trop commence le jeûne assoiffé, pas rassasié."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במידה, בלי חריף ובלי מלוח מאוד. מי שמגזים מתחיל את הצום צמא, לא שבע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com moderação, nada picante nem muito salgado. Quem come demais começa o jejum com sede, não saciado."
           }
         }
       }
@@ -35190,6 +36524,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zinco"
+          }
+        }
+      }
+    },
+    "Через 30–60 минут" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بعد 30–60 دقيقة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach 30–60 Minuten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After 30–60 minutes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A los 30–60 minutos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après 30–60 minutes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחרי 30–60 דקות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depois de 30–60 minutos"
           }
         }
       }

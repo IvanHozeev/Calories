@@ -6,7 +6,7 @@ import Foundation
 /// Хранится строкой, а не индексом: порядок в перечислении со временем меняется,
 /// а по индексу «Рыба» однажды тихо превратилась бы в «Молочное» у всех подряд.
 enum FoodCategory: String, CaseIterable, Identifiable {
-    case meat, fish, dairy, legumes, grains, produce, mushrooms, fats, sweets, drinks, other
+    case meat, fish, dairy, legumes, grains, produce, mushrooms, fats, sweets, drinks, dishes, other
 
     var id: String { rawValue }
 
@@ -24,6 +24,9 @@ enum FoodCategory: String, CaseIterable, Identifiable {
         case .fats:    return String(localized: "Орехи и масла")
         case .sweets:  return String(localized: "Сладкое и снеки")
         case .drinks:  return String(localized: "Напитки")
+        // Борщ и омлет — не «Другое»: готовое блюдо заносят в дневник
+        // чаще сырого продукта, и искать его среди прочего неудобно.
+        case .dishes:  return String(localized: "Готовые блюда")
         case .other:   return String(localized: "Другое")
         }
     }
@@ -40,6 +43,7 @@ enum FoodCategory: String, CaseIterable, Identifiable {
         case .fats:      return "drop"
         case .sweets:    return "birthday.cake"
         case .drinks:    return "cup.and.saucer"
+        case .dishes:    return "takeoutbag.and.cup.and.straw"
         case .other:     return "square.grid.2x2"
         }
     }

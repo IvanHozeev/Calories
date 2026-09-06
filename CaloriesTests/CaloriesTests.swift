@@ -1241,24 +1241,88 @@ struct BodyAnalysisTests {
     }
 
     @Test func builtInFoodsLandInSensibleCategories() {
-        // Сверяем распределение, а не названия: тесты идут на английской локали,
-        // и сравнение с русскими строками ничего не найдёт.
+        // Раньше здесь стояли точные количества по каждой категории. Со
+        // встроенным каталогом это тест не на смысл, а на то, что каталог не
+        // пополняли: любая новая позиция красила его в красный. Проверяем то,
+        // ради чего он писался — что ни одна категория не осталась пустой и
+        // что «Другое» не стало свалкой.
         var counts: [FoodCategory: Int] = [:]
         for item in FoodDatabase.items { counts[item.foodCategory, default: 0] += 1 }
 
-        // Бобовые: чечевица, фасоль, нут и тофу — соя тоже бобовое
-        #expect(counts[.legumes] == 4)
-        #expect(counts[.meat] == 4)
-        #expect(counts[.fish] == 2)
-        #expect(counts[.dairy] == 6)
-        #expect(counts[.grains] == 7)
-        #expect(counts[.produce] == 21)
-        #expect(counts[.mushrooms] == 4)
-        // Орехи, масла и арахис: ботанически он бобовое, но искать его будут здесь
-        #expect(counts[.fats] == 5)
-        #expect(counts[.sweets] == 3)
-        #expect(counts[.drinks] == 5)
+        for category in FoodCategory.allCases where category != .other {
+            #expect((counts[category] ?? 0) > 0,
+                    "Категория «\(category.rawValue)» осталась без продуктов")
+        }
+        #expect(counts[.other] == nil)
         #expect(counts.values.reduce(0, +) == FoodDatabase.items.count)
+    }
+
+    @Test func catalogIsInTheBundle() {
+        // Каталог лежит файлом в бандле, а не в коде, и выпасть из сборки может
+        // молча: приложение просто покажет пустой раздел «База». Ловим здесь.
+        #expect(!FoodCatalog.isEmpty)
+        #expect(FoodCatalog.all.count > 200)
+    }
+
+    @Test func catalogIdentifiersAreUnique() {
+        // По идентификатору поиск достаёт готовый объект. Совпади два — часть
+        // продуктов стала бы недостижимой, и заметили бы это не сразу.
+        let identifiers = FoodCatalog.all.map(\.id)
+        #expect(Set(identifiers).count == identifiers.count)
+    }
+
+    @Test func catalogNumbersAreWithinReason() {
+        // Опечатка в разряде — самая дорогая ошибка в калорийном дневнике:
+        // она не падает, а тихо врёт человеку про его день.
+        for food in FoodCatalog.all {
+            #expect(food.kcal >= 0 && food.kcal <= 950, "\(food.en): \(food.kcal) ккал")
+            #expect(food.protein >= 0 && food.fat >= 0 && food.carbs >= 0, "\(food.en): минус в макросах")
+            #expect(food.protein + food.fat + food.carbs <= 100.5,
+                    "\(food.en): макросов больше, чем сто грамм продукта")
+        }
+    }
+
+    @Test func searchPutsTheExactMatchFirst() {
+        // По «milk» человек ждёт молоко, а не молочный коктейль, хотя формально
+        // подходят оба.
+        let found = FoodCatalog.search("milk")
+        #expect(found.first?.en == "Milk 3.2%" || found.first?.en.hasPrefix("Milk") == true,
+                "первым нашлось: \(found.first?.en ?? "ничего")")
+    }
+
+    @Test func searchIgnoresCaseAndDiacritics() {
+        // «ЙОГУРТ», «йогурт» и «Йогурт» — один продукт для человека, и должны
+        // быть одним для поиска.
+        let lower = FoodCatalog.search("йогурт").map(\.id)
+        let upper = FoodCatalog.search("ЙОГУРТ").map(\.id)
+        #expect(!lower.isEmpty)
+        #expect(lower == upper)
+    }
+
+    @Test func searchFindsFoodByEitherLanguage() {
+        // Человек с русским интерфейсом набирает «chicken» так же часто, как
+        // «курица». Каталог знает оба названия и ищет по обоим сразу.
+        #expect(!FoodCatalog.search("курица").isEmpty)
+        #expect(!FoodCatalog.search("chicken").isEmpty)
+        #expect(!FoodCatalog.search("гречка").isEmpty)
+        #expect(!FoodCatalog.search("buckwheat").isEmpty)
+    }
+
+    @Test @MainActor func searchReturnsTheSameObjectsEveryTime() {
+        // Поиск обязан отдавать те же объекты, а не свежие копии: `FoodItem`
+        // опознаётся по `id`, и на новых копиях SwiftUI перестраивал бы весь
+        // список на каждое нажатие клавиши вместо того, чтобы его отфильтровать.
+        let first = FoodDatabase.search("rice")
+        let second = FoodDatabase.search("rice")
+        #expect(!first.isEmpty)
+        #expect(first.map(\.id) == second.map(\.id))
+        #expect(first.first === second.first)
+    }
+
+    @Test func searchWithoutQueryDoesNotReturnEverythingAtOnce() {
+        // Пустой запрос — это открытый экран, а не команда выгрузить каталог:
+        // двумя тысячами строк список только зря соберётся.
+        #expect(FoodCatalog.search("", limit: 25).count == 25)
     }
 
     @Test func foodCategory_survivesReorderingOfTheEnum() {

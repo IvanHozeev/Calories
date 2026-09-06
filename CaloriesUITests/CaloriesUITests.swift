@@ -35,6 +35,26 @@ final class CaloriesUITests: XCTestCase {
         }
     }
 
+    /// Прокручивает так, чтобы по элементу можно было именно нажать.
+    ///
+    /// Ни `exists`, ни `isHittable` для этого не годятся. В дереве у списка есть
+    /// и соседние строки, а `isHittable` остаётся истинным даже когда строка
+    /// прижата к нижней кромке: тап туда уходит в индикатор домой, ничего не
+    /// открывается, и тест падает позже — на проверке, где причину уже не видно.
+    /// Поэтому доводим элемент до середины экрана, а не до его края.
+    private func scrollIntoReach(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 12) {
+        let safeBottom = app.frame.height - 140
+        var tries = 0
+        while tries < attempts {
+            if element.exists {
+                let frame = element.frame
+                if frame.minY > 100 && frame.maxY < safeBottom { return }
+            }
+            app.swipeUp()
+            tries += 1
+        }
+    }
+
     /// Строка поиска живёт под тулбаром и появляется, только когда список
     /// подтягивают вниз, — поэтому в дереве её сразу может не быть.
     ///
@@ -136,6 +156,9 @@ final class CaloriesUITests: XCTestCase {
         // в таблице обхватов на экране результатов, который остался под этим.
         let row = app.staticTexts["site-biceps"]
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Не открылся экран замеров")
+        // Руки идут после торса, а у каждого места на экране своя подсказка,
+        // как его мерить: до бицепса надо доскроллить.
+        scrollIntoReach(row, in: app)
         row.tap()
 
         // Парное место раскрывает два колеса: левое и правое
@@ -170,9 +193,18 @@ final class CaloriesUITests: XCTestCase {
 
         // База продуктов живёт на своей вкладке источника
         app.segmentedControls.firstMatch.buttons["Database"].tap()
+
+        // До продукта добираемся поиском, а не пролистыванием. Раньше во
+        // встроенной базе было шесть десятков позиций и «Миндаль» находился
+        // за десяток свайпов; теперь их почти три сотни, разложенных по
+        // категориям, и орехи лежат глубже любого разумного числа свайпов.
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5), "Не показалась строка поиска")
+        search.tap()
+        search.typeText("Almonds")
+
         let food = app.staticTexts["Almonds"]
-        scrollTo(food, in: app)
-        XCTAssertTrue(food.exists, "Не открылся лист добавления еды")
+        XCTAssertTrue(food.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
         food.tap()
 
         let addToMeal = app.buttons["addToMeal"]

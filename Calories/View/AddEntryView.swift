@@ -137,7 +137,7 @@ struct AddEntryView: View {
         guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return FoodDatabase.items
         }
-        return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
+        return FoodDatabase.search(debouncedSearch)
     }
 
     private var filteredDishes: [Dish] {

@@ -1,0 +1,322 @@
+# Курируемое ядро встроенного каталога.
+#
+# Здесь лежит то, что человек вводит каждый день. Числа сверены с USDA и
+# общепринятыми справочными значениями на 100 г съедобной части.
+#
+# Формат: ru|en|ккал|белки|жиры|углеводы|категория|порция_по_умолчанию
+# Порция необязательна: пусто значит 100 г. Она нужна там, где «100 г» —
+# бессмыслица: яйцо весит 55 г, а ложка масла — 10.
+#
+# Строки можно дописывать в любое место: идентификатор продукта считается
+# от английского названия, а не от номера строки, поэтому перестановка
+# ничего не ломает. Менять английское название у существующей позиции нельзя —
+# это создаст новый продукт вместо правки старого.
+#
+# Категории: meat fish dairy legumes grains produce mushrooms fats sweets drinks other
+
+# --- Фрукты и ягоды
+Яблоко|Apple|52|0.3|0.2|14|produce|180
+Банан|Banana|89|1.1|0.3|23|produce|120
+Апельсин|Orange|47|0.9|0.1|12|produce|130
+Мандарин|Tangerine|53|0.8|0.3|13|produce|90
+Грейпфрут|Grapefruit|42|0.8|0.1|11|produce|200
+Лимон|Lemon|29|1.1|0.3|9|produce|
+Груша|Pear|57|0.4|0.1|15|produce|170
+Виноград|Grapes|69|0.6|0.2|18|produce|
+Клубника|Strawberry|32|0.7|0.3|8|produce|
+Малина|Raspberry|52|1.2|0.7|12|produce|
+Черника|Blueberry|57|0.7|0.3|14|produce|
+Ежевика|Blackberry|43|1.4|0.5|10|produce|
+Смородина чёрная|Blackcurrant|63|1.4|0.4|15|produce|
+Крыжовник|Gooseberry|44|0.9|0.6|10|produce|
+Клюква|Cranberry|46|0.4|0.1|12|produce|
+Вишня|Sour cherry|50|1.0|0.3|12|produce|
+Черешня|Sweet cherry|63|1.1|0.2|16|produce|
+Арбуз|Watermelon|30|0.6|0.2|8|produce|
+Дыня|Melon|34|0.8|0.2|8|produce|
+Персик|Peach|39|0.9|0.3|10|produce|150
+Нектарин|Nectarine|44|1.1|0.3|11|produce|140
+Абрикос|Apricot|48|1.4|0.4|11|produce|40
+Слива|Plum|46|0.7|0.3|11|produce|60
+Манго|Mango|60|0.8|0.4|15|produce|
+Киви|Kiwi|61|1.1|0.5|15|produce|75
+Ананас|Pineapple|50|0.5|0.1|13|produce|
+Папайя|Papaya|43|0.5|0.3|11|produce|
+Гранат|Pomegranate|83|1.7|1.2|19|produce|
+Хурма|Persimmon|70|0.6|0.2|18|produce|170
+Инжир свежий|Fresh fig|74|0.8|0.3|19|produce|
+Авокадо|Avocado|160|2.0|15.0|9|produce|150
+Финики|Dates|282|2.5|0.4|75|produce|8
+Изюм|Raisins|299|3.1|0.5|79|produce|
+Курага|Dried apricots|241|3.4|0.5|63|produce|
+Чернослив|Prunes|240|2.2|0.4|64|produce|
+
+# --- Овощи и зелень
+Огурец|Cucumber|16|0.7|0.1|3.6|produce|100
+Помидор|Tomato|18|0.9|0.2|3.9|produce|120
+Помидоры черри|Cherry tomatoes|18|0.9|0.2|3.9|produce|15
+Морковь|Carrot|41|0.9|0.2|10|produce|80
+Свёкла варёная|Boiled beetroot|44|1.7|0.2|10|produce|
+Картофель варёный|Boiled potato|87|2.0|0.1|20|produce|
+Картофель печёный|Baked potato|93|2.5|0.1|21|produce|
+Пюре картофельное|Mashed potato|88|2.0|3.2|13|produce|
+Брокколи|Broccoli|34|2.8|0.4|7|produce|
+Капуста белокочанная|White cabbage|25|1.3|0.1|6|produce|
+Капуста цветная|Cauliflower|25|1.9|0.3|5|produce|
+Капуста квашеная|Sauerkraut|19|0.9|0.1|4.3|produce|
+Лук репчатый|Onion|40|1.1|0.1|9|produce|
+Лук зелёный|Green onion|32|1.8|0.2|7.3|produce|
+Чеснок|Garlic|149|6.4|0.5|33|produce|3
+Болгарский перец|Bell pepper|27|1.0|0.3|6|produce|120
+Шпинат|Spinach|23|2.9|0.4|3.6|produce|
+Салат листовой|Lettuce|15|1.4|0.2|2.9|produce|
+Руккола|Arugula|25|2.6|0.7|3.7|produce|
+Кабачок|Zucchini|17|1.2|0.3|3.1|produce|
+Баклажан|Eggplant|25|1.0|0.2|6|produce|
+Тыква|Pumpkin|26|1.0|0.1|6.5|produce|
+Редис|Radish|16|0.7|0.1|3.4|produce|
+Сельдерей|Celery|16|0.7|0.2|3|produce|
+Спаржа|Asparagus|20|2.2|0.1|3.9|produce|
+Горошек зелёный|Green peas|81|5.4|0.4|14|produce|
+Кукуруза варёная|Boiled sweet corn|96|3.4|1.5|21|produce|
+Фасоль стручковая|Green beans|31|1.8|0.1|7|produce|
+Укроп|Dill|43|3.5|1.1|7|produce|
+Петрушка|Parsley|36|3.0|0.8|6.3|produce|
+Кинза|Cilantro|23|2.1|0.5|3.7|produce|
+Имбирь|Ginger|80|1.8|0.8|18|produce|
+Оливки|Olives|115|0.8|11.0|6|produce|
+Кукуруза консервированная|Canned corn|81|2.7|0.6|17|produce|
+Горошек консервированный|Canned peas|58|3.6|0.4|9.9|produce|
+
+# --- Грибы. Значения для сырых: при жарке масло меняет калорийность в разы,
+# поэтому жареные — это отдельный продукт, а не поправка к этому.
+Шампиньоны|Champignon mushrooms|22|3.1|0.3|3.3|mushrooms|
+Вешенки|Oyster mushrooms|33|3.3|0.4|6.1|mushrooms|
+Белый гриб|Porcini|34|3.7|1.7|3.3|mushrooms|
+Лисички|Chanterelles|38|1.5|0.5|6.9|mushrooms|
+Опята|Honey mushrooms|22|2.2|1.2|0.5|mushrooms|
+Шиитаке|Shiitake|34|2.2|0.5|6.8|mushrooms|
+Грибы маринованные|Marinated mushrooms|24|2.2|0.4|1.7|mushrooms|
+
+# --- Крупы, хлеб, макароны
+Рис варёный|Boiled white rice|130|2.7|0.3|28|grains|
+Рис бурый варёный|Boiled brown rice|123|2.7|1.0|26|grains|
+Гречка варёная|Boiled buckwheat|110|4.2|1.1|21|grains|
+Овсянка на воде|Oatmeal with water|68|2.5|1.5|12|grains|
+Овсянка на молоке|Oatmeal with milk|102|3.2|4.1|14|grains|
+Овсяные хлопья сухие|Dry oat flakes|379|13.2|6.5|68|grains|
+Перловка варёная|Boiled pearl barley|123|2.3|0.4|28|grains|
+Пшено варёное|Boiled millet|119|3.5|1.0|23|grains|
+Булгур варёный|Boiled bulgur|83|3.1|0.2|19|grains|
+Кускус варёный|Boiled couscous|112|3.8|0.2|23|grains|
+Киноа варёная|Boiled quinoa|120|4.4|1.9|21|grains|
+Манная каша|Semolina porridge|98|3.0|3.2|15|grains|
+Кукурузная каша|Corn porridge|86|2.0|1.2|17|grains|
+Макароны варёные|Boiled pasta|131|5.0|1.1|25|grains|
+Хлеб белый|White bread|265|9.0|3.2|49|grains|30
+Хлеб ржаной|Rye bread|210|6.6|1.2|40|grains|30
+Хлеб цельнозерновой|Whole grain bread|247|13.0|3.4|41|grains|30
+Батон|White loaf|264|7.5|2.9|51|grains|25
+Лаваш|Lavash|236|7.9|1.0|48|grains|
+Мюсли|Muesli|352|9.7|5.9|65|grains|
+Гранола|Granola|471|10.0|20.0|62|grains|
+Хлопья кукурузные|Corn flakes|357|7.5|0.4|84|grains|
+Отруби овсяные|Oat bran|246|17.3|7.0|50|grains|
+Мука пшеничная|Wheat flour|364|10.3|1.0|76|grains|
+
+# --- Мясо и птица
+Куриная грудка варёная|Boiled chicken breast|165|31.0|3.6|0|meat|
+Куриная грудка жареная|Fried chicken breast|197|30.0|7.8|0|meat|
+Куриное бедро|Chicken thigh|209|26.0|10.9|0|meat|
+Куриная голень|Chicken drumstick|172|28.0|5.7|0|meat|
+Куриные крылья|Chicken wings|203|30.0|8.1|0|meat|
+Курица гриль|Grilled chicken|219|27.0|12.0|0|meat|
+Индейка филе|Turkey breast|135|29.0|1.7|0|meat|
+Говядина|Beef|250|26.0|15.0|0|meat|
+Говядина постная|Lean beef|187|26.0|9.0|0|meat|
+Говяжий фарш|Ground beef|254|26.0|17.0|0|meat|
+Стейк рибай|Ribeye steak|291|24.0|22.0|0|meat|
+Свинина|Pork|242|27.0|14.0|0|meat|
+Свиная вырезка|Pork tenderloin|143|26.0|3.5|0|meat|
+Баранина|Lamb|294|25.0|21.0|0|meat|
+Телятина|Veal|172|31.0|4.7|0|meat|
+Кролик|Rabbit|173|21.0|8.0|0|meat|
+Утка|Duck|337|19.0|28.0|0|meat|
+Печень куриная|Chicken liver|119|17.0|4.8|0.7|meat|
+Печень говяжья|Beef liver|135|20.0|3.6|3.9|meat|
+Сердце куриное|Chicken heart|153|15.0|9.3|0.7|meat|
+Бекон|Bacon|541|37.0|42.0|1.4|meat|
+Ветчина|Ham|145|18.0|7.7|1.5|meat|
+Колбаса варёная|Boiled sausage|257|12.0|22.0|1.5|meat|
+Колбаса копчёная|Smoked sausage|380|17.0|34.0|0.3|meat|
+Сосиски|Frankfurters|266|10.4|24.0|1.6|meat|
+Котлета куриная|Chicken cutlet|221|15.0|14.0|8|meat|
+Котлета говяжья|Beef cutlet|248|14.0|18.0|7|meat|
+Шашлык свиной|Pork shashlik|280|21.0|21.0|0|meat|
+Пельмени варёные|Boiled pelmeni|252|11.9|12.4|22|meat|
+
+# --- Рыба и морепродукты
+Лосось|Salmon|208|20.0|13.0|0|fish|
+Лосось слабосолёный|Lightly salted salmon|202|22.5|12.5|0|fish|
+Форель|Trout|141|20.0|6.2|0|fish|
+Тунец свежий|Fresh tuna|144|23.0|4.9|0|fish|
+Тунец консервированный|Canned tuna|116|26.0|0.8|0|fish|
+Треска|Cod|82|18.0|0.7|0|fish|
+Минтай|Pollock|72|16.0|0.9|0|fish|
+Хек|Hake|86|16.6|2.2|0|fish|
+Судак|Pike perch|84|18.4|1.1|0|fish|
+Карп|Carp|127|17.6|5.6|0|fish|
+Сельдь|Herring|158|18.0|9.0|0|fish|
+Скумбрия|Mackerel|205|19.0|13.9|0|fish|
+Дорадо|Sea bream|96|18.0|2.5|0|fish|
+Сибас|Sea bass|97|18.4|2.5|0|fish|
+Креветки|Shrimp|99|24.0|0.3|0.2|fish|
+Кальмар|Squid|92|15.6|1.4|3.1|fish|
+Мидии|Mussels|86|11.9|2.2|3.7|fish|
+Краб|Crab|97|19.0|1.5|0|fish|
+Икра красная|Red caviar|264|31.6|13.8|0|fish|15
+Крабовые палочки|Crab sticks|95|6.0|1.0|15|fish|
+
+# --- Молочное и яйца
+Яйцо куриное|Egg|155|13.0|11.0|1.1|dairy|55
+Яичный белок|Egg white|52|11.0|0.2|0.7|dairy|33
+Яичный желток|Egg yolk|322|16.0|27.0|3.6|dairy|17
+Творог обезжиренный|Fat-free cottage cheese|71|18.0|0.6|3.0|dairy|
+Творог 5%|Cottage cheese 5%|121|18.0|5.0|3.4|dairy|
+Творог 9%|Cottage cheese 9%|159|18.0|9.0|3.0|dairy|
+Йогурт натуральный|Plain yogurt|60|3.5|3.2|4.7|dairy|
+Йогурт греческий|Greek yogurt|97|9.0|5.0|3.6|dairy|
+Йогурт питьевой|Drinking yogurt|72|2.8|1.5|12|dairy|
+Молоко 3.2%|Milk 3.2%|60|2.9|3.2|4.7|dairy|
+Молоко 1.5%|Milk 1.5%|44|2.9|1.5|4.7|dairy|
+Молоко обезжиренное|Skim milk|31|3.0|0.1|4.8|dairy|
+Кефир 1%|Kefir 1%|40|3.0|1.0|4.0|dairy|
+Ряженка|Ryazhenka|54|2.9|2.5|4.2|dairy|
+Сметана 15%|Sour cream 15%|162|2.6|15.0|3.0|dairy|
+Сметана 20%|Sour cream 20%|206|2.8|20.0|3.2|dairy|
+Сливки 10%|Cream 10%|118|3.0|10.0|4.0|dairy|
+Сливки 33%|Cream 33%|322|2.2|33.0|3.0|dairy|
+Сыр твёрдый|Hard cheese|350|25.0|29.0|0|dairy|30
+Пармезан|Parmesan|392|36.0|26.0|3.2|dairy|
+Моцарелла|Mozzarella|280|22.0|22.0|2.2|dairy|
+Фета|Feta|264|14.0|21.0|4.1|dairy|
+Брынза|Brynza|260|17.0|20.0|0|dairy|
+Сыр плавленый|Processed cheese|290|16.0|23.0|4.0|dairy|
+Сыр творожный|Cream cheese|253|5.5|24.0|3.5|dairy|
+
+# --- Бобовые
+Чечевица варёная|Boiled lentils|116|9.0|0.4|20|legumes|
+Фасоль варёная|Boiled beans|127|8.7|0.5|23|legumes|
+Нут варёный|Boiled chickpeas|164|8.9|2.6|27|legumes|
+Горох варёный|Boiled peas|118|8.3|0.4|21|legumes|
+Маш варёный|Boiled mung beans|105|7.0|0.4|19|legumes|
+Эдамаме|Edamame|121|12.0|5.2|9|legumes|
+Тофу|Tofu|76|8.0|4.8|1.9|legumes|
+Соевый белок сухой|Dry soy protein|296|52.0|1.0|18|legumes|
+Хумус|Hummus|166|7.9|9.6|14|legumes|
+
+# --- Орехи, семена, масла. Арахис ботанически бобовое, но искать его будут
+# рядом с орехами: категории здесь для навигации, а не для таксономии.
+Миндаль|Almonds|579|21.0|50.0|22|fats|
+Грецкий орех|Walnuts|654|15.0|65.0|14|fats|
+Фундук|Hazelnuts|628|15.0|61.0|17|fats|
+Кешью|Cashews|553|18.0|44.0|30|fats|
+Фисташки|Pistachios|560|20.0|45.0|28|fats|
+Кедровые орехи|Pine nuts|673|14.0|68.0|13|fats|
+Арахис|Peanuts|567|26.0|49.0|16|fats|
+Арахисовая паста|Peanut butter|588|25.0|50.0|20|fats|20
+Кокос|Coconut|354|3.3|33.0|15|fats|
+Семечки подсолнечные|Sunflower seeds|584|21.0|51.0|20|fats|
+Семена тыквы|Pumpkin seeds|559|30.0|49.0|11|fats|
+Семена чиа|Chia seeds|486|17.0|31.0|42|fats|
+Семена льна|Flax seeds|534|18.0|42.0|29|fats|
+Кунжут|Sesame|573|18.0|50.0|23|fats|
+Оливковое масло|Olive oil|884|0|100.0|0|fats|10
+Подсолнечное масло|Sunflower oil|884|0|100.0|0|fats|10
+Кокосовое масло|Coconut oil|862|0|100.0|0|fats|10
+Масло сливочное|Butter|717|0.9|81.0|0.1|fats|10
+Майонез|Mayonnaise|680|1.0|75.0|0.6|fats|15
+Сало|Salo|797|2.4|89.0|0|fats|
+
+# --- Сладкое и снеки
+Сахар|Sugar|387|0|0|100|sweets|5
+Мёд|Honey|304|0.3|0|82|sweets|20
+Варенье|Jam|265|0.3|0.1|65|sweets|
+Сгущённое молоко|Condensed milk|321|7.2|8.5|56|sweets|
+Шоколад молочный|Milk chocolate|535|7.7|30.0|59|sweets|25
+Шоколад тёмный|Dark chocolate|546|4.9|31.0|61|sweets|25
+Шоколадно-ореховая паста|Chocolate hazelnut spread|539|6.3|31.0|57|sweets|20
+Печенье овсяное|Oatmeal cookies|437|6.5|15.0|71|sweets|
+Печенье песочное|Shortbread|502|6.5|26.0|60|sweets|
+Вафли|Waffles|425|8.2|20.0|53|sweets|
+Пряник|Gingerbread|350|4.8|2.8|76|sweets|
+Зефир|Marshmallow|326|0.8|0.1|80|sweets|
+Мармелад|Marmalade|306|0.4|0.1|76|sweets|
+Халва|Halva|523|11.6|29.7|54|sweets|
+Торт бисквитный|Sponge cake|344|4.7|14.0|50|sweets|
+Круассан|Croissant|406|8.2|21.0|45|sweets|60
+Пончик|Donut|452|4.9|25.0|51|sweets|
+Мороженое|Ice cream|227|3.5|15.0|20|sweets|
+Чипсы|Potato chips|536|7.0|35.0|53|sweets|
+Попкорн|Popcorn|387|13.0|4.5|78|sweets|
+Сухарики|Croutons|390|11.0|12.0|60|sweets|
+Батончик протеиновый|Protein bar|350|30.0|10.0|35|sweets|60
+
+# --- Напитки. Значения на 100 мл: у жидкостей граммы и миллилитры
+# расходятся незначительно, а считать в миллилитрах привычнее.
+Вода|Water|0|0|0|0|drinks|500
+Минеральная вода|Mineral water|0|0|0|0|drinks|500
+Чай без сахара|Tea|1|0|0|0.2|drinks|200
+Кофе чёрный|Black coffee|2|0.1|0|0|drinks|200
+Кофе с молоком|Coffee with milk|30|1.3|1.4|2.0|drinks|200
+Капучино|Cappuccino|41|2.1|1.6|4.4|drinks|180
+Латте|Latte|55|3.0|2.0|5.5|drinks|300
+Апельсиновый сок|Orange juice|45|0.7|0.2|10.4|drinks|200
+Яблочный сок|Apple juice|46|0.1|0.1|11|drinks|200
+Томатный сок|Tomato juice|17|0.8|0.1|3.6|drinks|200
+Компот|Compote|60|0.1|0|15|drinks|200
+Морс|Berry drink|41|0.1|0|10|drinks|200
+Квас|Kvass|27|0.2|0|5.2|drinks|
+Кола|Cola|42|0|0|10.6|drinks|330
+Энергетик|Energy drink|45|0|0|11|drinks|250
+Молочный коктейль|Milkshake|112|3.5|3.0|18|drinks|
+Протеиновый коктейль|Protein shake|84|18.0|1.5|2.0|drinks|300
+Пиво|Beer|43|0.5|0|3.6|drinks|500
+Вино красное сухое|Dry red wine|68|0.1|0|0.6|drinks|150
+Вино белое сухое|Dry white wine|66|0.1|0|0.6|drinks|150
+Водка|Vodka|231|0|0|0|drinks|50
+Виски|Whiskey|250|0|0|0|drinks|50
+
+# --- Готовые блюда. Их считают чаще, чем сырые продукты, а в базе USDA
+# их нет: там нет ни борща, ни сырников.
+Борщ|Borscht|49|1.1|2.2|6.7|dishes|300
+Щи|Shchi|32|1.0|1.6|3.4|dishes|300
+Суп куриный|Chicken soup|36|2.6|1.1|4.0|dishes|300
+Солянка|Solyanka|56|3.4|3.5|2.5|dishes|300
+Уха|Fish soup|46|4.0|2.0|2.8|dishes|300
+Оливье|Olivier salad|198|5.0|16.0|8.0|dishes|150
+Винегрет|Vinegret|130|1.5|10.0|8.0|dishes|150
+Салат греческий|Greek salad|120|2.5|10.0|4.5|dishes|150
+Салат цезарь|Caesar salad|190|9.0|14.0|6.0|dishes|200
+Плов|Plov|150|6.0|6.0|18|dishes|250
+Голубцы|Cabbage rolls|123|5.0|7.0|9.0|dishes|
+Гуляш|Goulash|148|14.0|9.0|3.0|dishes|
+Рагу овощное|Vegetable stew|85|2.0|4.5|9.0|dishes|
+Картофель жареный|Fried potato|192|2.8|9.5|23|dishes|
+Картофель фри|French fries|312|3.4|15.0|41|dishes|
+Блины|Pancakes|233|6.1|12.3|26|dishes|50
+Оладьи|Fritters|233|6.5|10.0|30|dishes|
+Сырники|Syrniki|220|17.0|9.0|18|dishes|
+Вареники с картошкой|Vareniki with potato|180|4.5|4.0|31|dishes|
+Каша рисовая молочная|Rice milk porridge|97|2.5|3.0|16|dishes|
+Омлет|Omelette|154|10.0|12.0|1.0|dishes|150
+Яичница|Fried eggs|196|13.6|15.3|0.8|dishes|110
+Бутерброд с сыром|Cheese sandwich|280|11.0|13.0|30|dishes|
+Пицца|Pizza|266|11.0|10.0|33|dishes|120
+Бургер|Burger|295|17.0|14.0|24|dishes|200
+Хот-дог|Hot dog|247|10.0|15.0|18|dishes|
+Шаурма|Shawarma|205|12.0|10.0|17|dishes|300
+Суши ролл|Sushi roll|150|5.0|4.0|23|dishes|
+Паста карбонара|Pasta carbonara|180|8.0|9.0|17|dishes|300
+Лазанья|Lasagna|165|9.0|8.0|14|dishes|300
+Протеин сывороточный|Whey protein powder|400|80.0|6.0|8.0|dairy|30

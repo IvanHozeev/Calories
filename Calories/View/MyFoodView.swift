@@ -52,12 +52,15 @@ struct MyFoodView: View {
     /// глядя на похожий из базы, и ради этого раньше приходилось уходить в
     /// лист добавления еды.
     private var filteredDatabase: [FoodItem] {
-        var items = FoodDatabase.items
+        // Сначала поиск, потом категория: поиск уже отдаёт результаты по
+        // убыванию уместности, и фильтр по категории этот порядок сохраняет.
+        var items = trimmedQuery.isEmpty
+            ? FoodDatabase.items
+            : FoodDatabase.search(trimmedQuery, limit: 200)
         if let categoryFilter {
             items = items.filter { $0.foodCategory == categoryFilter }
         }
-        guard !trimmedQuery.isEmpty else { return items }
-        return items.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+        return items
     }
 
     /// Категории берём из того раздела, который открыт: фильтровать базу по

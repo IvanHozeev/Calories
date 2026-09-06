@@ -239,7 +239,7 @@ struct IngredientPickerSheet: View {
 
     private var filteredBuiltIn: [FoodItem] {
         guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else { return FoodDatabase.items }
-        return FoodDatabase.items.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        return FoodDatabase.search(searchText)
     }
 
     var body: some View {

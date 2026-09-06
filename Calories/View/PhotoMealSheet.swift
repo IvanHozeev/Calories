@@ -59,20 +59,6 @@ struct PhotoMealSheet: View {
 
                 if imageData != nil {
                     Section {
-                        Button {
-                            Task { await recognize() }
-                        } label: {
-                            if isRecognizing {
-                                HStack(spacing: 10) {
-                                    ProgressView()
-                                    Text("Разбираем фото...")
-                                }
-                            } else {
-                                Label("Разобрать", systemImage: "sparkles")
-                            }
-                        }
-                        .disabled(isRecognizing)
-
                         Button("Выбрать другое фото") {
                             imageData = nil
                             pickerItem = nil
@@ -89,6 +75,39 @@ struct PhotoMealSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
+                }
+            }
+            // Разбор — то, ради чего на экран и зашли, поэтому он внизу под большим
+            // пальцем, как «В приём пищи» на экране порции, а не надписью в тулбаре.
+            .safeAreaInset(edge: .bottom) {
+                if imageData != nil {
+                    Button {
+                        guard !isRecognizing else { return }
+                        Task { await recognize() }
+                    } label: {
+                        Group {
+                            if isRecognizing {
+                                HStack(spacing: 10) {
+                                    ProgressView()
+                                    Text("Разбираем фото...")
+                                }
+                            } else {
+                                Label("Разобрать", systemImage: "sparkles")
+                            }
+                        }
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    // Не .disabled: он гасит заливку, и кнопка на время разбора
+                    // читается как мёртвая. Повторное нажатие отсекает сам обработчик.
+                    .allowsHitTesting(!isRecognizing)
+                    .accessibilityIdentifier("recognizePhoto")
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 10)
+                    .background(.bar)
                 }
             }
             .fullScreenCover(isPresented: $showingCamera) {

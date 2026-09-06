@@ -54,19 +54,67 @@ struct CaloriesWidgetEntryView: View {
     var body: some View {
         switch family {
         case .systemMedium: mediumView
+        case .accessoryCircular: circularView
+        case .accessoryRectangular: rectangularView
+        case .accessoryInline: inlineView
         default: smallView
         }
+    }
+
+    // MARK: - Экран блокировки
+    //
+    // Системные семейства рисуются одним цветом поверх обоев, поэтому здесь нет
+    // ни градиентов, ни заливок из большого виджета: всё, что можно, — форма,
+    // толщина и акцент. Показываем «осталось», а не «съедено»: на блокировке
+    // смотрят, чтобы решить, есть ли ещё запас или уже нет.
+
+    private var circularView: some View {
+        Gauge(value: entry.progress) {
+            Image(systemName: "flame.fill")
+        } currentValueLabel: {
+            Text(verbatim: "\(entry.remaining)")
+                .minimumScaleFactor(0.4)
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var rectangularView: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                Image(systemName: "fork.knife")
+                    .font(.caption)
+                Text(verbatim: "\(entry.remaining) \(String(localized: "ккал"))")
+                    .font(.headline)
+            }
+            .widgetAccentable()
+            Text(verbatim: "\(entry.consumed) / \(entry.goal)")
+                .font(.caption2)
+            Gauge(value: entry.progress) { EmptyView() }
+                .gaugeStyle(.accessoryLinearCapacity)
+        }
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var inlineView: some View {
+        // Одна строка и один значок — больше система здесь не покажет.
+        Label {
+            Text(verbatim: "\(entry.remaining) \(String(localized: "ккал"))")
+        } icon: {
+            Image(systemName: "flame.fill")
+        }
+        .containerBackground(.clear, for: .widget)
     }
 
     private var smallView: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.08), lineWidth: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 6)
             Circle()
                 .trim(from: 0, to: entry.progress)
                 .stroke(
                     LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .shadow(color: .orange.opacity(0.5), radius: 6)
@@ -91,12 +139,12 @@ struct CaloriesWidgetEntryView: View {
         HStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.08), lineWidth: 10)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
                         LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
                     .shadow(color: .orange.opacity(0.5), radius: 5)
@@ -172,7 +220,8 @@ struct CaloriesWidget: Widget {
         }
         .configurationDisplayName("Калории")
         .description("Прогресс по калориям за день.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium,
+                            .accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
 
@@ -228,19 +277,63 @@ struct StepsWidgetEntryView: View {
     var body: some View {
         switch family {
         case .systemMedium: mediumView
+        case .accessoryCircular: circularView
+        case .accessoryRectangular: rectangularView
+        case .accessoryInline: inlineView
         default: smallView
         }
+    }
+
+    // MARK: - Экран блокировки
+
+    private var circularView: some View {
+        Gauge(value: entry.progress) {
+            Image(systemName: "figure.walk")
+        } currentValueLabel: {
+            // Без разрядных пробелов и без сокращений: «6,5 тыс.» в круг не влезает
+            // никаким кеглем, а «6500» — те же четыре знака, что и у калорий.
+            Text(verbatim: entry.steps.formatted(.number.grouping(.never)))
+                .minimumScaleFactor(0.4)
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var rectangularView: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 4) {
+                Image(systemName: "figure.walk")
+                    .font(.caption)
+                Text(verbatim: "\(entry.steps.formatted()) \(String(localized: "шагов"))")
+                    .font(.headline)
+            }
+            .widgetAccentable()
+            Text(verbatim: "\(String(localized: "из")) \(entry.goal.formatted())")
+                .font(.caption2)
+            Gauge(value: entry.progress) { EmptyView() }
+                .gaugeStyle(.accessoryLinearCapacity)
+        }
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var inlineView: some View {
+        Label {
+            Text(verbatim: "\(entry.steps.formatted()) \(String(localized: "шагов"))")
+        } icon: {
+            Image(systemName: "figure.walk")
+        }
+        .containerBackground(.clear, for: .widget)
     }
 
     private var smallView: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.08), lineWidth: 12)
+                .stroke(Color.white.opacity(0.08), lineWidth: 6)
             Circle()
                 .trim(from: 0, to: entry.progress)
                 .stroke(
                     LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .shadow(color: .blue.opacity(0.6), radius: 6)
@@ -265,12 +358,12 @@ struct StepsWidgetEntryView: View {
         HStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.08), lineWidth: 10)
+                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
                         LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
                     .shadow(color: .blue.opacity(0.6), radius: 5)
@@ -348,6 +441,7 @@ struct StepsWidget: Widget {
         }
         .configurationDisplayName("Шаги")
         .description("Количество шагов за день.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium,
+                            .accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }

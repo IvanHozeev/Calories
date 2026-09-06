@@ -6,6 +6,10 @@ struct RingView<Label: View>: View {
     let labelID: AnyHashable
     @ViewBuilder let label: () -> Label
 
+    /// Толщина кольца одной константой: трек, дуга и её отступ обязаны совпадать,
+    /// а раньше это было три числа в разных местах, которые легко разъезжались.
+    private let lineWidth: CGFloat = 9
+
     /// Трек кольца. На iOS 26 — Liquid Glass: стеклянный диск, замаскированный в бублик,
     /// поэтому кольцо преломляет то, что под ним, вместо плоской серой обводки.
     /// На более старых системах остаётся прежняя обводка — таргет приложения iOS 17.6.
@@ -15,10 +19,10 @@ struct RingView<Label: View>: View {
             Circle()
                 .fill(.clear)
                 .glassEffect(.regular, in: .circle)
-                .mask(Circle().strokeBorder(lineWidth: 18))
+                .mask(Circle().strokeBorder(lineWidth: lineWidth))
         } else {
             Circle()
-                .stroke(Color.secondary.opacity(0.15), lineWidth: 18)
+                .stroke(Color.secondary.opacity(0.15), lineWidth: lineWidth)
         }
     }
 
@@ -26,11 +30,11 @@ struct RingView<Label: View>: View {
         ZStack {
             track
             Circle()
-                .inset(by: 9)
+                .inset(by: lineWidth / 2)
                 .trim(from: 0, to: progress)
                 .stroke(
                     LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: 18, lineCap: .round)
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)

@@ -7,32 +7,11 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories
 @main
 struct CalorieCounterApp: App {
     @UIApplicationDelegateAdaptor(QuickActionAppDelegate.self) private var appDelegate
-    private let container: ModelContainer?
-    private let storageError: String?
-    @State private var store: CalorieStore?
+    // Контейнер и стор живут в SharedStore: до них должны дотягиваться не только
+    // экраны, но и команды Сири, которые выполняются в этом же процессе без сцены.
+    private let shared = SharedStore.shared
     @State private var stepStore = StepStore()
     @State private var purchases = PurchaseService()
-
-    /// Сбой хранилища раньше был fatalError. Синхронизации нет, а резервная копия делается
-    /// вручную из настроек — то есть повреждённая база означала разом и неработающее
-    /// приложение, и невозможность добраться до своих данных. Теперь показываем экран
-    /// с объяснением вместо падения.
-    init() {
-        do {
-            let container = try ModelContainer(
-                for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
-                BodyMeasurement.self
-            )
-            self.container = container
-            self.storageError = nil
-            _store = State(initialValue: CalorieStore(context: container.mainContext))
-        } catch {
-            logger.error("Хранилище не открылось: \(error.localizedDescription)")
-            self.container = nil
-            self.storageError = error.localizedDescription
-            _store = State(initialValue: nil)
-        }
-    }
 
     /// StoreKit может выдать премиум, но не отобрать.
     ///
@@ -49,7 +28,7 @@ struct CalorieCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if let store, let container {
+            if let store = shared.store, let container = shared.container {
                 RootView(store: store, stepStore: stepStore, purchases: purchases)
                     .task {
                         await purchases.load()
@@ -60,7 +39,7 @@ struct CalorieCounterApp: App {
                     }
                     .modelContainer(container)
             } else {
-                StorageErrorView(message: storageError ?? "")
+                StorageErrorView(message: shared.storageError ?? "")
             }
         }
     }

@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var entryAction: QuickAction?
     /// Запись, к которой добавляют ещё еды.
     @State private var appendingTo: FoodEntry?
+    @State private var showingFasting = false
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -140,6 +141,35 @@ struct ContentView: View {
                         // Единственный вход в план. Раньше их было два: компактная строка
                         // здесь и карточка на «Прогрессе» — с разным видом и разным
                         // содержанием, хотя вели в одно место.
+                        // Отмеченный день голодания — не строка в настройках, а
+                        // состояние сегодняшнего дня: пустой дневник в такой день
+                        // должен читаться как «так и задумано», а не как провал.
+                        if let fast = store.fastDay(on: Date()) {
+                            Button {
+                                showingFasting = true
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "moon.stars.fill")
+                                        .foregroundStyle(.indigo)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Сегодня голодание")
+                                            .font(.subheadline.weight(.semibold))
+                                        Text(verbatim: fast.kind.title)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.tertiary)
+                                }
+                                .padding(14)
+                                .glassCard()
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("fastingCard")
+                        }
+
                         ProfilePlanCard(
                             store: store,
                             onOpenPlan: { showingPlan = true },
@@ -231,6 +261,9 @@ struct ContentView: View {
             .refreshable { store.refresh() }
             .navigationDestination(for: FoodEntry.self) { entry in
                 EditEntrySheet(store: store, entry: entry, isEmbedded: true)
+            }
+            .navigationDestination(isPresented: $showingFasting) {
+                FastingView(store: store)
             }
             .navigationDestination(isPresented: $showingPlan) {
                 PlanView(store: store)

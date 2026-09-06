@@ -109,6 +109,12 @@ struct SettingsView: View {
                     Label("Напоминания", systemImage: "bell")
                 }
                 NavigationLink {
+                    FastingView(store: store)
+                } label: {
+                    Label("Голодание", systemImage: "moon.stars")
+                }
+                .accessibilityIdentifier("openFasting")
+                NavigationLink {
                     LanguageSettingsView()
                 } label: {
                     Label("Язык", systemImage: "character.bubble")

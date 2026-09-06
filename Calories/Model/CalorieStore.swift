@@ -21,6 +21,7 @@ final class CalorieStore {
     private(set) var weightEntries: [WeightEntry] = []
     private(set) var goalRecords: [GoalRecord] = []
     private(set) var measurements: [BodyMeasurement] = []
+    private(set) var fastDays: [FastDay] = []
     var dailyGoal: Int {
         // Кэш обязателен: adaptedTodayGoal (его читает кольцо на «Сегодня») считается только
         // в rebuildCaches(). Без этого цель меняется в графиках, но не в кольце — они расходятся,
@@ -60,6 +61,8 @@ final class CalorieStore {
     /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
     /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
     @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
+    /// Дни голодания множеством — их проверяют в каждом дне серии и банка.
+    @ObservationIgnored private(set) var fastDates: Set<Date> = []
     @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
     // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
     @ObservationIgnored private var goalLockedOnDay: Date? = nil
@@ -114,6 +117,9 @@ final class CalorieStore {
         let measurementDescriptor = FetchDescriptor<BodyMeasurement>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         measurements = (try? context.fetch(measurementDescriptor)) ?? []
 
+        let fastDescriptor = FetchDescriptor<FastDay>(sortBy: [SortDescriptor(\.date, order: .reverse)])
+        fastDays = (try? context.fetch(fastDescriptor)) ?? []
+
 #if DEBUG
         // Данные симулятора переживают прогоны UI-тестов, поэтому ввод дописывался
         // к прежнему: «40» превращалось в «4040». Чистить поля клавишами нельзя —
@@ -145,6 +151,7 @@ final class CalorieStore {
         entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
         // Свой продукт идёт последним и перекрывает одноимённый встроенный:
         // так же, как в прежнем поиске, где сначала смотрели свои.
+        fastDates = Set(fastDays.map { calendar.startOfDay(for: $0.date) })
         categoryByFoodName = Dictionary(
             (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
             uniquingKeysWith: { _, own in own }
@@ -196,9 +203,7 @@ final class CalorieStore {
 
         streakHistory = (0..<14).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
-            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
+            return (date, isDayLogged(date), isDayKept(date))
         }
 
         let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
@@ -301,6 +306,41 @@ final class CalorieStore {
         }
         addMeasurement(fresh)
         return fresh
+    }
+
+    /// Отмечен ли день голоданием. Именно отметка, а не пустой день: забытый день
+    /// и намеренное голодание выглядят в базе одинаково, и различить их больше нечем.
+    func isFastDay(_ date: Date) -> Bool {
+        fastDates.contains(Calendar.current.startOfDay(for: date))
+    }
+
+    func fastDay(on date: Date) -> FastDay? {
+        let day = Calendar.current.startOfDay(for: date)
+        return fastDays.first { Calendar.current.startOfDay(for: $0.date) == day }
+    }
+
+    @discardableResult
+    func markFastDay(_ date: Date = Date(), kind: FastKind) -> FastDay {
+        if let existing = fastDay(on: date) {
+            existing.kind = kind
+            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+            rebuildCaches()
+            return existing
+        }
+        let day = FastDay(date: date, kind: kind)
+        context.insert(day)
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        fastDays = (fastDays + [day]).sorted { $0.date > $1.date }
+        rebuildCaches()
+        return day
+    }
+
+    func unmarkFastDay(_ date: Date = Date()) {
+        guard let day = fastDay(on: date) else { return }
+        context.delete(day)
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        fastDays.removeAll { $0.id == day.id }
+        rebuildCaches()
     }
 
     func addMeasurement(_ measurement: BodyMeasurement) {

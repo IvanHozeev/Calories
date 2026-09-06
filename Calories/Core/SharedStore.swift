@@ -23,7 +23,7 @@ final class SharedStore {
         do {
             let container = try ModelContainer(
                 for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
-                BodyMeasurement.self
+                BodyMeasurement.self, FastDay.self
             )
             self.container = container
             self.store = CalorieStore(context: container.mainContext)

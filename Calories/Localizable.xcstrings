@@ -11003,9 +11003,51 @@
     },
     "Записал %lld ккал. Осталось %lld." : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سجّلت %1$lld سعرة حرارية. تبقّى %2$lld."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal erfasst. Noch %2$lld übrig."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logged %1$lld kcal. %2$lld left."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registré %1$lld kcal. Quedan %2$lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal enregistrées. Il reste %2$lld."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רשמתי %1$lld קלוריות. נותרו %2$lld."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrei %1$lld kcal. Restam %2$lld."
+          }
+        },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Записал %1$lld ккал. Осталось %2$lld."
           }
         }
@@ -21150,9 +21192,51 @@
     },
     "Осталось %lld ккал из %lld." : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تبقّى %1$lld سعرة حرارية من %2$lld."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch %1$lld von %2$lld kcal übrig."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal left of %2$lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quedan %1$lld kcal de %2$lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reste %1$lld kcal sur %2$lld."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נותרו %1$lld קלוריות מתוך %2$lld."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restam %1$lld kcal de %2$lld."
+          }
+        },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
+            "state" : "translated",
             "value" : "Осталось %1$lld ккал из %2$lld."
           }
         }

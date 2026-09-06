@@ -42,21 +42,35 @@ extension CalorieStore {
         return streak
     }
 
+    /// Удержан ли день: попал в норму или был отмечен голоданием.
+    ///
+    /// Голодание засчитывается, потому что человек сделал именно то, что собирался.
+    /// Без этого один Йом Кипур обнулял серию в тридцать дней.
+    func isDayKept(_ date: Date) -> Bool {
+        if isFastDay(date) { return true }
+        let day = Calendar.current.startOfDay(for: date)
+        let total = (entriesByDay[day] ?? []).reduce(0) { $0 + $1.calories }
+        guard total > 0 else { return false }
+        return total <= (goalsByDay[day] ?? effectiveGoal(for: day))
+    }
+
+    /// Есть ли за день записи — или он отмечен голоданием, что тоже ведение дневника.
+    func isDayLogged(_ date: Date) -> Bool {
+        if isFastDay(date) { return true }
+        let day = Calendar.current.startOfDay(for: date)
+        return (entriesByDay[day] ?? []).reduce(0) { $0 + $1.calories } > 0
+    }
+
     func computeStreak() -> (current: Int, best: Int, logging: Int) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
 
         // On-goal streak (логирование + попадание в калории)
         var currentStreak = 0
-        let todayTotal = (entriesByDay[today] ?? []).reduce(0) { $0 + $1.calories }
-        if todayTotal > 0, todayTotal <= (goalsByDay[today] ?? effectiveGoal(for: today)) {
-            currentStreak += 1
-        }
+        if isDayKept(today) { currentStreak += 1 }
         var pastDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
         while true {
-            let dayTotal = (entriesByDay[pastDate] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[pastDate] ?? effectiveGoal(for: pastDate)
-            guard dayTotal > 0, dayTotal <= dayGoal else { break }
+            guard isDayKept(pastDate) else { break }
             currentStreak += 1
             guard let prev = calendar.date(byAdding: .day, value: -1, to: pastDate) else { break }
             pastDate = prev
@@ -65,10 +79,11 @@ extension CalorieStore {
         var best = 0
         var run = 0
         var prevDate: Date? = nil
-        for date in entriesByDay.keys.filter({ !calendar.isDateInToday($0) }).sorted() {
-            let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            if dayTotal > 0, dayTotal <= dayGoal {
+        let pastDays = Set(entriesByDay.keys).union(fastDates)
+            .filter { !calendar.isDateInToday($0) }
+            .sorted()
+        for date in pastDays {
+            if isDayKept(date) {
                 let consecutive = prevDate.map { calendar.date(byAdding: .day, value: 1, to: $0) == date } ?? false
                 run = consecutive ? run + 1 : 1
                 prevDate = date
@@ -81,10 +96,10 @@ extension CalorieStore {
 
         // Logging streak (просто есть записи за день)
         var loggingStreak = 0
-        if todayTotal > 0 { loggingStreak += 1 }
+        if isDayLogged(today) { loggingStreak += 1 }
         var logDate = calendar.date(byAdding: .day, value: -1, to: today) ?? today
         while true {
-            guard (entriesByDay[logDate] ?? []).reduce(0, { $0 + $1.calories }) > 0 else { break }
+            guard isDayLogged(logDate) else { break }
             loggingStreak += 1
             guard let prev = calendar.date(byAdding: .day, value: -1, to: logDate) else { break }
             logDate = prev
@@ -250,7 +265,10 @@ extension CalorieStore {
         for offset in 0..<daysFromFirst {
             guard let date = calendar.date(byAdding: .day, value: offset, to: weekStart) else { continue }
             let dayEntries = entriesByDay[date] ?? []
-            guard !dayEntries.isEmpty else { continue }
+            // Пустой день пропускаем: забытый день не должен изображать нулевую
+            // еду и раздувать банк. Отмеченное голодание — другое дело, там ноль
+            // настоящий, и в недельное среднее он входит на общих основаниях.
+            guard !dayEntries.isEmpty || isFastDay(date) else { continue }
             weeklyGoalPast += goal(for: date)
             weeklyConsumedPast += dayEntries.reduce(0) { $0 + $1.calories }
         }

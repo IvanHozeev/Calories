@@ -1768,3 +1768,87 @@ struct PlanCompletionTests {
         #expect(outcome?.reachedTarget == false)
     }
 }
+
+
+@MainActor
+@Suite(.serialized)
+struct FastDayTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.dailyGoal = 2000
+    }
+
+    private func day(_ ago: Int) -> Date {
+        Calendar.current.date(byAdding: .day, value: -ago, to: Date())!
+    }
+
+    /// Голодание не рвёт серию: человек сделал ровно то, что собирался.
+    @Test func aMarkedFastKeepsTheStreak() {
+        store.add(name: "Обед", calories: 1500, date: day(2))
+        store.markFastDay(day(1), kind: .dry)
+        store.add(name: "Обед", calories: 1500, date: day(0))
+
+        #expect(store.streak == 3)
+    }
+
+    /// Пустой день без отметки серию по-прежнему рвёт — иначе забытый день
+    /// стал бы неотличим от намеренного.
+    @Test func anUnmarkedEmptyDayStillBreaksTheStreak() {
+        store.add(name: "Обед", calories: 1500, date: day(2))
+        store.add(name: "Обед", calories: 1500, date: day(0))
+
+        #expect(store.streak == 1)
+    }
+
+    /// Отметку можно снять, и серия возвращается к прежнему поведению.
+    @Test func unmarkingRestoresTheBrokenStreak() {
+        store.add(name: "Обед", calories: 1500, date: day(2))
+        store.markFastDay(day(1), kind: .water)
+        store.add(name: "Обед", calories: 1500, date: day(0))
+        #expect(store.streak == 3)
+
+        store.unmarkFastDay(day(1))
+        #expect(store.streak == 1)
+    }
+
+    /// В банк отмеченное голодание входит целиком: ноль там настоящий.
+    ///
+    /// Дата середины недели берётся явно, а не «сегодня»: в первый день недели
+    /// банка ещё нет, и тест падал бы раз в семь дней не по делу.
+    @Test func aFastFeedsTheBank() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let daysFromFirst = (calendar.component(.weekday, from: today) - calendar.firstWeekday + 7) % 7
+        let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today)!
+        let midWeek = calendar.date(byAdding: .day, value: 3, to: weekStart)!
+        let fastDate = calendar.date(byAdding: .day, value: 1, to: weekStart)!
+
+        let withoutFast = store.adaptedGoal(for: midWeek)
+        store.markFastDay(fastDate, kind: .dry)
+
+        #expect(store.adaptedGoal(for: midWeek) > withoutFast)
+    }
+
+    /// А забытый день в банк не идёт: иначе он изображал бы нулевую еду.
+    @Test func anEmptyDayDoesNotFeedTheBank() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let daysFromFirst = (calendar.component(.weekday, from: today) - calendar.firstWeekday + 7) % 7
+        let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today)!
+        let midWeek = calendar.date(byAdding: .day, value: 3, to: weekStart)!
+
+        #expect(store.adaptedGoal(for: midWeek) == store.effectiveGoal(for: midWeek))
+    }
+}

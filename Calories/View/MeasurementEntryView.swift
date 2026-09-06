@@ -235,7 +235,13 @@ struct MeasurementEntryView: View {
     }
 
     private func refreshEstimates() {
-        estimates = store.latestMeasurement.map(BodyAnalysis.estimates(for:)) ?? [:]
+        // Через if let, а не map: ссылка на изолированный метод, отданная в map,
+        // вызывалась бы уже вне главного актора.
+        if let latest = store.latestMeasurement {
+            estimates = BodyAnalysis.estimates(for: latest)
+        } else {
+            estimates = [:]
+        }
     }
 
     // MARK: - Пояснение к подсказкам

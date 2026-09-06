@@ -20661,6 +20661,7 @@
       }
     },
     "По категории потом фильтруется список своих продуктов." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23484,6 +23485,7 @@
       }
     },
     "Проверка" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23902,6 +23904,7 @@
       }
     },
     "Продукт (на 100 г)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

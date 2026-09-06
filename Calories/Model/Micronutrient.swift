@@ -65,7 +65,10 @@ enum Micronutrient: String, CaseIterable, Identifiable, Codable {
 /// Микронутриенты на 100 г продукта. Отсутствие вещества в словаре означает
 /// «неизвестно», а не «ноль» — разница принципиальная: на нулях приложение
 /// насчитало бы дефицит там, где просто нет данных.
-struct Micronutrients: Codable, Equatable {
+/// Явно nonisolated: проект по умолчанию изолирует типы на главном акторе, а этот
+/// читается и пишется из аксессоров SwiftData-модели, которые изолированными не
+/// являются. Данных без поведения это не касается — трогать их можно откуда угодно.
+nonisolated struct Micronutrients: Codable, Equatable {
     private(set) var per100g: [String: Double]
 
     init(_ values: [Micronutrient: Double] = [:]) {

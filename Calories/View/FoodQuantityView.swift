@@ -117,6 +117,10 @@ struct FoodQuantityView: View {
         }
         // Панель действий своя, а не ToolbarItem: в тулбаре две кнопки склеиваются
         // в одну капсулу без зазора, и широкая накрывает соседнюю.
+        //
+        // Фона у панели нет: матовая полоса торчала над содержимым отдельной
+        // плашкой. Кнопки заметны сами по себе, а safeAreaInset и без неё не даёт
+        // содержимому под ними застревать.
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {
                 Button {
@@ -152,7 +156,6 @@ struct FoodQuantityView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 10)
-            .background(.bar)
         }
     }
 }
@@ -299,7 +302,6 @@ struct DishQuantityView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 10)
-            .background(.bar)
         }
     }
 }

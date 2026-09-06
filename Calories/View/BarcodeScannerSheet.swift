@@ -189,7 +189,6 @@ struct BarcodeScannerSheet: View {
         .padding(.horizontal, 16)
         .padding(.top, 12)
         .padding(.bottom, 8)
-        .background(.bar)
     }
 
     private func isSaved(_ product: BarcodeProduct) -> Bool {

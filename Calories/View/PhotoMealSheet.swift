@@ -111,7 +111,6 @@ struct PhotoMealSheet: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
                     .padding(.bottom, 10)
-                    .background(.bar)
                 }
             }
             .fullScreenCover(isPresented: $showingCamera) {

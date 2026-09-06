@@ -282,8 +282,11 @@ struct MyFoodView: View {
             ForEach(grouped(filteredProducts), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
+                        // Свой продукт открывается сразу редактируемым — как блюдо.
+                        // Отдельная кнопка-карандаш на экране-детали была лишним
+                        // шагом ровно там, куда и заходят, чтобы что-то поправить.
                         NavigationLink {
-                            FoodDetailView(food: food, store: store)
+                            NewFoodSheet(store: store, editingFood: food, isEmbedded: true)
                         } label: {
                             foodRow(food)
                         }

@@ -5,6 +5,9 @@ struct NewFoodSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var editingFood: FoodItem? = nil
+    /// Открыт как экран внутри навигации, а не как лист. Тогда «Отмена» не нужна:
+    /// назад ведёт сама навигация.
+    var isEmbedded: Bool = false
 
     @State private var name = ""
     @State private var caloriesPer100g = ""
@@ -12,6 +15,9 @@ struct NewFoodSheet: View {
     @State private var fat = ""
     @State private var carbs = ""
     @State private var category = FoodCategory.other
+    /// Пусто — значит обычные 100 г.
+    @State private var servingGrams = ""
+    @State private var showingQuickAdd = false
     private enum Field: Hashable { case search, name, calories, protein, fat, carbs }
     @FocusState private var focusedField: Field?
 
@@ -20,6 +26,12 @@ struct NewFoodSheet: View {
     @State private var isSearchingOFF = false
 
     private var isEditing: Bool { editingFood != nil }
+
+    private var servingGramsValue: Double {
+        Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
+    }
+
+    private var servingToSave: Double { servingGramsValue > 0 ? servingGramsValue : 100 }
 
     private func number(_ text: String) -> Double {
         Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0
@@ -50,8 +62,18 @@ struct NewFoodSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
+        if isEmbedded {
+            formContent
+        } else {
+            NavigationStack { formContent }
+        }
+    }
+
+    /// Порядок секций такой же, как на экране блюда: что это → сколько порция →
+    /// из чего состоит → что в итоге выходит → добавить в дневник. Экраны
+    /// открываются одним и тем же движением, и читаться должны одинаково.
+    private var formContent: some View {
+        Form {
                 if !isEditing {
                     Section {
                         HStack(spacing: 8) {
@@ -100,9 +122,30 @@ struct NewFoodSheet: View {
                     }
                 }
 
-                Section(isEditing ? "Продукт (на 100 г)" : "Данные на 100 г") {
+                Section("Название") {
                     TextField("Название", text: $name)
                         .focused($focusedField, equals: .name)
+                    Picker("Категория", selection: $category) {
+                        ForEach(FoodCategory.allCases) { item in
+                            Label(item.title, systemImage: item.icon).tag(item)
+                        }
+                    }
+                }
+
+                Section {
+                    HStack {
+                        TextField("100", text: $servingGrams)
+                            .keyboardType(.decimalPad)
+                        Text("г")
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Порция по умолчанию")
+                } footer: {
+                    Text("Это значение будет подставляться при добавлении продукта в приём пищи.")
+                }
+
+                Section("Данные на 100 г") {
                     TextField("Калории", text: $caloriesPer100g)
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .calories)
@@ -115,16 +158,6 @@ struct NewFoodSheet: View {
                     TextField("Углеводы, г", text: $carbs)
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .carbs)
-                }
-
-                Section {
-                    Picker("Категория", selection: $category) {
-                        ForEach(FoodCategory.allCases) { item in
-                            Label(item.title, systemImage: item.icon).tag(item)
-                        }
-                    }
-                } footer: {
-                    Text("По категории потом фильтруется список своих продуктов.")
                 }
 
                 if hasMacros {
@@ -148,11 +181,36 @@ struct NewFoodSheet: View {
                                 .foregroundStyle(.orange)
                         }
                     } header: {
-                        Text("Проверка")
+                        Text("Итого")
+                    }
+                }
+
+                if isEditing {
+                    Section {
+                        Button {
+                            showingQuickAdd = true
+                        } label: {
+                            Label("Добавить в дневник", systemImage: "plus.circle.fill")
+                                .font(.body.weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowBackground(Color.clear)
                     }
                 }
             }
             .glassRow()
+            .sheet(isPresented: $showingQuickAdd) {
+                QuickAddSheet(
+                    store: store,
+                    name: name.trimmingCharacters(in: .whitespaces),
+                    caloriesPer100g: Int(caloriesPer100g) ?? 0,
+                    macrosPer100g: draftMacros,
+                    defaultGrams: servingToSave
+                )
+                .presentationDetents([.medium, .large])
+            }
             .task(id: searchQuery) {
                 guard !searchQuery.isEmpty else { offResults = []; isSearchingOFF = false; return }
                 try? await Task.sleep(for: .milliseconds(300))
@@ -167,8 +225,10 @@ struct NewFoodSheet: View {
             .navigationTitle(isEditing ? "Редактировать" : "Свой продукт")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                if !isEmbedded {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Отмена") { dismiss() }
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     CheckmarkButton {
@@ -178,9 +238,9 @@ struct NewFoodSheet: View {
                         let f = Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0
                         let c = Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
                         if let food = editingFood {
-                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category)
+                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave)
                         } else {
-                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category)
+                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave)
                         }
                         dismiss()
                     }
@@ -196,12 +256,15 @@ struct NewFoodSheet: View {
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
                     fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
                     carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
-                    focusedField = .name
+                    servingGrams = food.defaultGrams > 0 && food.defaultGrams != 100
+                        ? String(format: "%g", food.defaultGrams) : ""
+                    // На экране-детали фокус не забираем: иначе клавиатура
+                    // выскакивает сразу после перехода и закрывает половину экрана.
+                    if !isEmbedded { focusedField = .name }
                 } else {
                     focusedField = .search
                 }
             }
-        }
     }
 
     private func fillFrom(_ food: FoodItem) {

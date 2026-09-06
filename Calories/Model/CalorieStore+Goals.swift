@@ -160,6 +160,27 @@ extension CalorieStore {
         weightKg.map { $0 * MacroTargets.fatPerKg }
     }
 
+    /// Последние семь дней в разрезе макросов.
+    ///
+    /// Цель по белку и жиру одна на все дни — её задаёт тело. По углеводам своя на
+    /// каждый день, потому что это остаток нормы, а норма при циклировании ходит
+    /// вверх-вниз. Ради этого разбор и нужен: видно, что в высокий день выросли
+    /// именно углеводы, а обязательства остались теми же.
+    var macroWeek: [MacroDay] {
+        guard let protein = proteinTarget, let fat = fatTarget, protein > 0 else { return [] }
+        let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
+        return lastSevenDays.map { day in
+            MacroDay(
+                date: day.date,
+                macros: day.totalMacros,
+                proteinTarget: protein,
+                fatTarget: fat,
+                carbsTarget: max(0, (Double(day.goal) - locked) / MacroTargets.kcalPerCarbGram),
+                hasEntries: !day.entries.isEmpty
+            )
+        }
+    }
+
     /// Подсказка что добрать на оставшиеся калории: белок → жиры → углеводы.
     var macroSuggestion: String? {
         guard remaining > 0, profile != nil else { return nil }

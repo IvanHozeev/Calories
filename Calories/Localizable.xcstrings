@@ -3361,6 +3361,52 @@
         }
       }
     },
+    "Белок засчитан, только когда набран целиком. Сегодня в среднее не входит — день ещё не закончен." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُحتسب البروتين فقط عند بلوغه كاملاً. اليوم الحالي لا يدخل في المتوسط — لم ينتهِ بعد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein zählt nur, wenn es voll erreicht wurde. Der heutige Tag fließt nicht in den Schnitt ein — er ist noch nicht vorbei."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein counts only when it was met in full. Today is left out of the average — the day is not over."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proteína cuenta solo si se alcanzó por completo. Hoy no entra en el promedio: el día no ha terminado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les protéines ne comptent que si l'objectif est atteint en entier. Aujourd'hui n'entre pas dans la moyenne : la journée n'est pas finie."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלבון נחשב רק כשהושג במלואו. היום הנוכחי לא נכלל בממוצע — הוא עוד לא נגמר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A proteína só conta quando foi atingida por completo. Hoje fica de fora da média — o dia não acabou."
+          }
+        }
+      }
+    },
     "Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они." : {
       "localizations" : {
         "ar" : {
@@ -3449,6 +3495,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteína e gordura não cabem na meta: faltam %d kcal. Aumente a meta ou reduza a proteína."
+          }
+        }
+      }
+    },
+    "Белок набран" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم بلوغ البروتين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein erreicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein met"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína alcanzada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines atteintes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלבון הושג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína atingida"
+          }
+        }
+      }
+    },
+    "Белок не набран" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُبلغ البروتين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein nicht erreicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein not met"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína no alcanzada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines non atteintes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלבון לא הושג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína não atingida"
           }
         }
       }
@@ -13965,6 +14103,52 @@
         }
       }
     },
+    "Макросы за неделю" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الماكروز خلال الأسبوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Makros der Woche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros this week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros de la semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros de la semaine"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מאקרו השבוע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Macros da semana"
+          }
+        }
+      }
+    },
     "Мало данных" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -17213,7 +17397,6 @@
       }
     },
     "Нет записей" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22257,6 +22440,52 @@
         }
       }
     },
+    "Пока нет законченных дней с записями" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا توجد بعد أيام منتهية بسجلات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine abgeschlossenen Tage mit Einträgen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No finished days with entries yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay días completos con registros"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de journée terminée avec des entrées"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין עדיין ימים שהסתיימו עם רישומים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há dias completos com registros"
+          }
+        }
+      }
+    },
     "Пока нет записей веса за этот период" : {
       "localizations" : {
         "ar" : {
@@ -22855,6 +23084,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tomate"
+          }
+        }
+      }
+    },
+    "Попадания по белку" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيام بلوغ البروتين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein getroffen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein hit on"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días con la proteína"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines atteintes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ימים שבהם הושג החלבון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias com a proteína"
           }
         }
       }

@@ -186,6 +186,22 @@ final class GoalRecord: Identifiable {
 }
 
 /// Сводка по одному дню — вычисляется на лету из записей, не хранится отдельно.
+/// Один день недели глазами макросов: что съедено против того, что было целью.
+struct MacroDay: Identifiable {
+    let date: Date
+    let macros: Macros
+    let proteinTarget: Double
+    let fatTarget: Double
+    let carbsTarget: Double
+    let hasEntries: Bool
+
+    var id: Date { date }
+
+    /// Белок засчитан только когда набран целиком: недобор белка на дефиците —
+    /// это съеденные мышцы, и «почти» здесь не считается.
+    var hitProtein: Bool { hasEntries && macros.protein >= proteinTarget }
+}
+
 struct DaySummary: Identifiable {
     let date: Date
     let entries: [FoodEntry]

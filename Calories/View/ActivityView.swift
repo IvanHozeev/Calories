@@ -35,6 +35,8 @@ struct ActivityView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
 
+            MacroWeekSection(days: store.macroWeek)
+
             Section("Награды") {
                 achievementsStrip
             }

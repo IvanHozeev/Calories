@@ -1522,6 +1522,43 @@ struct MacroBudgetTests {
         #expect(p.proteinTargetGrams(from: nil) == 154)
     }
 
+    /// Неделя должна отмечать день попаданием только по набранному белку.
+    @Test func theWeekMarksDaysWhereProteinWasHit() {
+        store.updateProfile(profile(), syncDailyGoal: false)   // цель по белку 154 г
+        store.dailyGoal = 2000
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        store.add(name: "Творог", calories: 800,
+                  macros: Macros(protein: 160, fat: 10, carbs: 20), date: yesterday)
+
+        let week = store.macroWeek
+        #expect(week.count == 7)
+
+        let day = week.first { Calendar.current.isDate($0.date, inSameDayAs: yesterday) }
+        #expect(day?.hasEntries == true)
+        #expect(day?.hitProtein == true)
+    }
+
+    /// Недобор — это недобор, «почти» не считается.
+    @Test func aDayJustShortOfTheTargetIsAMiss() {
+        store.updateProfile(profile(), syncDailyGoal: false)
+        store.dailyGoal = 2000
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        store.add(name: "Творог", calories: 800,
+                  macros: Macros(protein: 153, fat: 10, carbs: 20), date: yesterday)
+
+        let day = store.macroWeek.first { Calendar.current.isDate($0.date, inSameDayAs: yesterday) }
+        #expect(day?.hitProtein == false)
+    }
+
+    /// Пустой день не попадание, но и не промах — записей просто нет.
+    @Test func daysWithoutEntriesAreMarkedEmpty() {
+        store.updateProfile(profile(), syncDailyGoal: false)
+        store.dailyGoal = 2000
+
+        #expect(store.macroWeek.allSatisfy { !$0.hasEntries })
+        #expect(store.macroWeek.allSatisfy { !$0.hitProtein })
+    }
+
     /// Старый сохранённый профиль без поля основы читается как «от веса».
     @Test func profilesSavedBeforeTheSettingDecodeAsBodyweight() throws {
         let json = """

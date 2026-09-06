@@ -14,6 +14,10 @@ struct NewDishSheet: View {
         Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
     @State private var ingredients: [DishIngredient] = []
+    /// Ингредиент, которому правят вес. Одно и то же блюдо собирают из разных
+    /// количеств, и переклад ингредиента заново ради двадцати грамм — лишняя работа.
+    @State private var gramsEditTarget: DishIngredient?
+    @State private var gramsEditText = ""
     @State private var showingIngredientPicker = false
     @State private var showDiscardAlert = false
     @State private var showingQuickAdd = false
@@ -43,6 +47,15 @@ struct NewDishSheet: View {
         } else {
             NavigationStack { listContent }
         }
+    }
+
+    /// Ноль и мусор игнорируем: пустой вес превратил бы ингредиент в строку
+    /// без калорий, а удаление для этого есть отдельным свайпом.
+    private func applyGrams(to ingredient: DishIngredient) {
+        defer { gramsEditTarget = nil }
+        let value = Double(gramsEditText.replacingOccurrences(of: ",", with: ".")) ?? 0
+        guard value > 0, let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) else { return }
+        ingredients[idx].grams = value
     }
 
     private var listContent: some View {
@@ -76,6 +89,15 @@ struct NewDishSheet: View {
                         Spacer()
                         Text("\(ingredient.calories) ккал")
                             .foregroundStyle(.secondary)
+                    }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            gramsEditText = String(format: "%g", ingredient.grams)
+                            gramsEditTarget = ingredient
+                        } label: {
+                            Label("Граммы", systemImage: "scalemass")
+                        }
+                        .tint(.blue)
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
@@ -127,6 +149,19 @@ struct NewDishSheet: View {
             }
         }
         .glassRow()
+        .alert(
+            "Граммы",
+            isPresented: Binding(get: { gramsEditTarget != nil },
+                                 set: { if !$0 { gramsEditTarget = nil } }),
+            presenting: gramsEditTarget
+        ) { target in
+            TextField("Граммы", text: $gramsEditText)
+                .keyboardType(.decimalPad)
+            Button("Отмена", role: .cancel) { gramsEditTarget = nil }
+            Button("Сохранить") { applyGrams(to: target) }
+        } message: { target in
+            Text(verbatim: target.foodName)
+        }
         .sheet(isPresented: $showingQuickAdd) {
             QuickAddSheet(
                 store: store,

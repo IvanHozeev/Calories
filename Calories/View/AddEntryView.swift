@@ -507,11 +507,11 @@ struct AddEntryView: View {
                 onSave: saveAction(for: food, enabled: savable),
                 onAddAndSave: quickAction(enabled: quickSave)
             ) { item in
-                draftItems.append(item)
+                addToDraft(item)
             }
         case .dish(let dish):
             DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
-                draftItems.append(item)
+                addToDraft(item)
             }
         }
     }
@@ -526,6 +526,15 @@ struct AddEntryView: View {
     private func quickAction(enabled: Bool) -> ((MealItem) -> Void)? {
         guard enabled else { return nil }
         return { item in addAndSave(item) }
+    }
+
+    /// Запрос живёт ровно до попадания продукта в приём пищи: найденное уже
+    /// добавлено, и следующий продукт ищут с чистого листа, а не стирают чужие
+    /// буквы. Сбрасываем и debounced-копию, чтобы список вернулся сразу.
+    private func addToDraft(_ item: MealItem) {
+        draftItems.append(item)
+        searchText = ""
+        debouncedSearch = ""
     }
 
     /// Экран порции закрываем первым: иначе лист уезжает из-под открытого поверх

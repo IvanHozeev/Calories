@@ -91,6 +91,17 @@ struct FoodQuantityView: View {
             }
         }
         .glassRow()
+        // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
+        // «Готово» у numberPad нет — убрать её можно только смахиванием.
+        .scrollDismissesKeyboard(.interactively)
+        // Одного scrollDismissesKeyboard мало: он живёт на прокрутке, а здесь
+        // содержимое короткое и двигать нечего — смахивание уходило в никуда.
+        // Жест ловим сами и не мешаем прокрутке, когда она всё-таки есть.
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 24).onEnded { drag in
+                if drag.translation.height > 40 { gramsFocused = false }
+            }
+        )
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -263,6 +274,17 @@ struct DishQuantityView: View {
             }
         }
         .glassRow()
+        // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
+        // «Готово» у numberPad нет — убрать её можно только смахиванием.
+        .scrollDismissesKeyboard(.interactively)
+        // Одного scrollDismissesKeyboard мало: он живёт на прокрутке, а здесь
+        // содержимое короткое и двигать нечего — смахивание уходило в никуда.
+        // Жест ловим сами и не мешаем прокрутке, когда она всё-таки есть.
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 24).onEnded { drag in
+                if drag.translation.height > 40 { gramsFocused = false }
+            }
+        )
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

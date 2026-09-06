@@ -92,7 +92,7 @@ struct MyFoodView: View {
             }
         }
         .glassRow()
-        .navigationTitle("Моя еда")
+        .navigationTitle("Рацион")
         .scrollIndicators(.hidden)
         .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))
         .task(id: query) {
@@ -128,13 +128,15 @@ struct MyFoodView: View {
                 .accessibilityLabel("Категория")
             }
 
-            ToolbarItem(placement: .topBarTrailing) {
-                Button { showingScanner = true } label: {
-                    Image(systemName: "barcode.viewfinder")
-                }
-            }
+            // Все способы пополнить справочник — под одной кнопкой, как и на
+            // экране приёма пищи. Сверху штрихкод: он избавляет от ручного ввода,
+            // ниже — то, что придётся заполнять самому.
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    Button { showingScanner = true } label: {
+                        Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                    }
+                    Divider()
                     Button { showingNewFood = true } label: {
                         Label("Новый продукт", systemImage: "plus")
                     }
@@ -144,6 +146,7 @@ struct MyFoodView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityIdentifier("addMenu")
             }
 
         }

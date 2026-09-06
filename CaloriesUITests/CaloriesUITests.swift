@@ -35,6 +35,24 @@ final class CaloriesUITests: XCTestCase {
         }
     }
 
+    /// Строка поиска живёт под тулбаром и появляется, только когда список
+    /// подтягивают вниз, — поэтому в дереве её сразу может не быть.
+    ///
+    /// Тянем именно за список, а не за экран целиком: свайп от верхней кромки
+    /// вытягивает Центр уведомлений, и он остаётся висеть поверх приложения —
+    /// следующие тесты потом не находят даже таб-бар.
+    @discardableResult
+    private func revealSearchField(in app: XCUIApplication) -> XCUIElement {
+        let search = app.searchFields.firstMatch
+        let list = app.collectionViews.firstMatch
+        var tries = 0
+        while !search.exists && list.exists && tries < 8 {
+            list.swipeDown()
+            tries += 1
+        }
+        return search
+    }
+
     // MARK: - Навигация
 
     @MainActor
@@ -49,7 +67,7 @@ final class CaloriesUITests: XCTestCase {
                       "Вкладка «Тело» не открылась")
 
         app.tabBars.buttons["Food"].tap()
-        XCTAssertTrue(app.navigationBars["My Food"].waitForExistence(timeout: 5),
+        XCTAssertTrue(app.navigationBars["Pantry"].waitForExistence(timeout: 5),
                       "Вкладка «Еда» не открылась")
 
         app.tabBars.buttons["Today"].tap()
@@ -174,9 +192,15 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
 
+        // Время убрано с самого экрана: его меняют редко, поэтому оно живёт
+        // за кнопкой с часами в тулбаре.
+        let clock = app.buttons["mealTime"]
+        XCTAssertTrue(clock.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        clock.tap()
+
         // В пикере есть и дата, и время — иначе поправить час невозможно
         let when = app.datePickers.firstMatch
-        XCTAssertTrue(when.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        XCTAssertTrue(when.waitForExistence(timeout: 5), "Не открылся выбор времени приёма")
         XCTAssertGreaterThanOrEqual(when.buttons.count, 2,
                                     "У записи должны настраиваться и день, и время")
     }
@@ -194,18 +218,6 @@ final class CaloriesUITests: XCTestCase {
             XCTAssertTrue(sources.buttons[name].exists, "Нет источника «\(name)»")
         }
 
-        // При поиске сегменты прячутся и ищется по всем источникам сразу
-        let search = app.searchFields.firstMatch
-        if search.exists {
-            search.tap()
-            search.typeText("Beef")
-            XCTAssertFalse(app.segmentedControls.firstMatch.exists,
-                           "Во время поиска сегменты не должны притворяться рабочими")
-            XCTAssertTrue(app.staticTexts["Beef"].waitForExistence(timeout: 5),
-                          "Поиск должен находить продукт, не переключая источник")
-            search.buttons.firstMatch.tap()   // очистить
-        }
-
         // База разложена по категориям и появляется только на своей вкладке
         XCTAssertFalse(app.staticTexts["Meat and poultry"].exists,
                        "База не должна показываться на вкладке недавнего")
@@ -213,9 +225,23 @@ final class CaloriesUITests: XCTestCase {
         let header = app.staticTexts["Meat and poultry"]
         scrollTo(header, in: app)
         XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
+
         let second = app.staticTexts["Fish and seafood"]
         scrollTo(second, in: app)
         XCTAssertTrue(second.exists, "Категории должны идти отдельными секциями")
+
+        // Поиск проверяем последним: он забирает фокус, а сегменты прячутся уже
+        // по курсору в строке, и вернуть их внутри теста нечем — «Отмена» на этом
+        // экране не одна, и попасть можно не в ту.
+        let search = revealSearchField(in: app)
+        if search.exists {
+            search.tap()
+            search.typeText("Beef")
+            XCTAssertFalse(app.segmentedControls.firstMatch.exists,
+                           "Во время поиска сегменты не должны притворяться рабочими")
+            XCTAssertTrue(app.staticTexts["Beef"].waitForExistence(timeout: 5),
+                          "Поиск должен находить продукт, не переключая источник")
+        }
     }
 
     /// Выбор шрифта должен доезжать до интерфейса, а не только сохраняться.
@@ -294,8 +320,8 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
 
-        let search = app.searchFields.firstMatch
-        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.exists, "Строка поиска не вытянулась из-под тулбара")
         search.tap()
         search.typeText("Beef")
 
@@ -317,8 +343,15 @@ final class CaloriesUITests: XCTestCase {
 
         app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
 
+        // Поле «только калории» убрано с экрана: оно мешало всё остальное время,
+        // и теперь открывается из меню на плюсе.
+        let addMenu = app.buttons["addMenu"]
+        XCTAssertTrue(addMenu.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        addMenu.tap()
+        app.buttons["Calories only"].tap()
+
         let field = app.textFields["Kcal"]
-        XCTAssertTrue(field.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        XCTAssertTrue(field.waitForExistence(timeout: 5), "Не открылся ввод калорий")
         field.tap()
         field.typeText("777")
 
@@ -341,7 +374,7 @@ final class CaloriesUITests: XCTestCase {
     func testFoodTabHasSearchAndSegments() {
         let app = launchApp()
         app.tabBars.buttons["Food"].tap()
-        XCTAssertTrue(app.navigationBars["My Food"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Pantry"].waitForExistence(timeout: 5))
 
         XCTAssertTrue(app.searchFields.firstMatch.exists,
                       "На «Моей еде» должна быть поисковая строка")

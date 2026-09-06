@@ -9,8 +9,17 @@ struct AddEntryView: View {
     @State private var debouncedSearch = ""
     @State private var draftItems: [MealItem] = []
 
-    @State private var quickCalories = ""
     @State private var showingNewFood = false
+    @State private var showingQuickCalories = false
+    @State private var showingMealTime = false
+    /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
+    /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
+    /// про это надо сказать, иначе приём пищи молча уедет в чужой день.
+    @State private var timeAdjusted = false
+    /// Активна ли строка поиска — стоит ли в ней курсор. Дату убираем уже по этому,
+    /// не дожидаясь первой буквы: человек начал искать продукт, и всё остальное
+    /// на экране ему сейчас мешает.
+    @State private var searchFocused = false
     @State private var showingScanner: Bool
     @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
@@ -59,7 +68,6 @@ struct AddEntryView: View {
         }
     }
 
-    @FocusState private var quickCaloriesFocused: Bool
 
     init(store: CalorieStore, initialDate: Date = Date(), initialAction: QuickAction? = nil) {
         self.store = store
@@ -76,12 +84,6 @@ struct AddEntryView: View {
         parts.hour = now.hour
         parts.minute = now.minute
         _selectedDate = State(initialValue: calendar.date(from: parts) ?? initialDate)
-    }
-
-    /// Быстрый ввод «только калории» имеет смысл лишь для восстановления прошлых дней —
-    /// для сегодняшнего дня продукт стоит указывать явно.
-    private var isToday: Bool {
-        Calendar.current.isDateInToday(selectedDate)
     }
 
     private var draftTotalCalories: Int {
@@ -181,25 +183,25 @@ struct AddEntryView: View {
     var body: some View {
         NavigationStack {
             List {
-                // Пока ищут, дата и быстрые калории — мусор на экране: человек
-                // занят одним делом, а они забирают место у результатов.
-                if !isSearching {
-                Section {
-                    // Время, а не только дата: поел и записал через час — приём пищи
-                    // должен встать на то время, когда он был, иначе «вчерашний обед»
-                    // попадёт в дневник ночью и перепутает картину дня.
-                    DatePicker(
-                        "Когда",
-                        selection: $selectedDate,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                }
-                .onChange(of: selectedDate) { _, newValue in
-                    if Calendar.current.isDateInToday(newValue) {
-                        quickCalories = ""
+                // Появляется, только когда время сдвинули руками, и оранжевым:
+                // это не поле для заполнения, а предупреждение, что запись уйдёт
+                // не в текущий момент.
+                if timeAdjusted, !isSearching, !searchFocused {
+                    Section {
+                        Button {
+                            showingMealTime = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "clock")
+                                Text(selectedDate.formatted(date: .abbreviated, time: .shortened))
+                                Spacer()
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                        }
+                        .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
+                        .listRowBackground(Color.clear)
                     }
-                }
                 }
 
                 if !draftItems.isEmpty {
@@ -235,32 +237,7 @@ struct AddEntryView: View {
                     }
                 }
 
-                if !isSearching {
-                Section {
-                    HStack {
-                        TextField("Ккал", text: $quickCalories)
-                            .keyboardType(.numberPad)
-                            .font(.title3.weight(.semibold))
-                            .focused($quickCaloriesFocused)
-                        Button("Сохранить") {
-                            guard let calories = Int(quickCalories) else { return }
-                            let items = draftItems + [MealItem(name: String(localized: "Приём пищи"), calories: calories, macros: .zero)]
-                            let totalCalories = items.reduce(0) { $0 + $1.calories }
-                            let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
-                            let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
-                            store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            dismiss()
-                        }
-                        .disabled(Int(quickCalories) == nil)
-                        .buttonStyle(.borderedProminent)
-                    }
-                } header: {
-                    Text("Быстро — только калории")
-                }
-                }
-
-                if !isSearching {
+                if !isSearching, !searchFocused {
                 Section {
                     Picker("Источник", selection: $source) {
                         ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
@@ -372,14 +349,23 @@ struct AddEntryView: View {
                     }
                 }
             }
+            // Про курсор в системной строке поиска можно узнать только изнутри
+            // самого searchable-контейнера, поэтому состояние забирает отсюда
+            // невидимая подложка. searchFocused($:) решил бы это одной строкой,
+            // но он с iOS 18, а мы держим 17.6.
+            .background(SearchActivityReader(isActive: $searchFocused))
             .glassRow()
-            // Поиск закреплён в навбаре намеренно. При размещении по умолчанию
-            // строка поиска уходит вниз экрана — туда же, где появляется панель
-            // с кнопкой «Сохранить», как только в черновике есть хоть один продукт.
-            // Панель выигрывала это место, поиск пропадал насовсем, и добавить
-            // второй продукт становилось нечем.
+            // Своя подложка вместо системной: при раскрытии строки поиска система
+            // подкладывает под список контейнер результатов со своим фоном, и он
+            // на светлой теме просвечивает белым сквозь матовые строки.
+            .scrollContentBackground(.hidden)
+            .background(Color(.systemGroupedBackground))
+            // Строка живёт под тулбаром и вытягивается скроллом вниз — так она не
+            // занимает место постоянно. Держать её всегда видимой пришлось раньше
+            // из-за того, что при другом размещении она уезжала вниз экрана, где её
+            // накрывала панель «Сохранить»; в навбаре этого не происходит.
             .searchable(text: $searchText,
-                        placement: .navigationBarDrawer(displayMode: .always),
+                        placement: .navigationBarDrawer(displayMode: .automatic),
                         prompt: "Поиск продукта")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
@@ -430,26 +416,47 @@ struct AddEntryView: View {
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 16) {
-                        // Рядом со сканером: оба про «не вводить руками».
-                        // Штрихкод — когда есть упаковка, фото — когда её нет.
-                        if GeminiVisionService.isConfigured {
-                            Button {
-                                showingPhoto = true
-                            } label: {
-                                Image(systemName: "camera")
-                            }
-                            .accessibilityIdentifier("openPhotoMeal")
-                        }
+                        // Время приёма — само по себе, а не в меню: это не способ
+                        // что-то добавить, а свойство записи.
                         Button {
-                            showingScanner = true
+                            showingMealTime = true
                         } label: {
-                            Image(systemName: "barcode.viewfinder")
+                            Image(systemName: "clock")
                         }
-                        Button {
-                            showingNewFood = true
+                        .accessibilityLabel("Время приёма")
+                        .accessibilityIdentifier("mealTime")
+
+                        // Все способы добавить продукт — под одной кнопкой. Сверху те,
+                        // что избавляют от ручного ввода: штрихкод, когда есть упаковка,
+                        // фото — когда её нет. Ниже — ручные, для «этого нигде нет».
+                        Menu {
+                            if GeminiVisionService.isConfigured {
+                                Button {
+                                    showingPhoto = true
+                                } label: {
+                                    Label("Снять еду", systemImage: "camera")
+                                }
+                            }
+                            Button {
+                                showingScanner = true
+                            } label: {
+                                Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                            }
+                            Divider()
+                            Button {
+                                showingNewFood = true
+                            } label: {
+                                Label("Новый продукт", systemImage: "plus")
+                            }
+                            Button {
+                                showingQuickCalories = true
+                            } label: {
+                                Label("Только калории", systemImage: "number")
+                            }
                         } label: {
                             Image(systemName: "plus")
                         }
+                        .accessibilityIdentifier("addMenu")
                     }
                 }
                 // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,
@@ -486,6 +493,19 @@ struct AddEntryView: View {
                 BarcodeScannerSheet(store: store) { item in
                     draftItems.append(item)
                 }
+            }
+            .sheet(isPresented: $showingMealTime) {
+                MealTimeSheet(date: $selectedDate)
+            }
+            .onChange(of: selectedDate) { _, _ in timeAdjusted = true }
+            .sheet(isPresented: $showingQuickCalories) {
+                // Шит закрываем первым: иначе экран уезжает из-под него и анимация
+                // схлопывается в рывок — та же история, что и с экраном порции.
+                QuickCaloriesSheet { calories in
+                    showingQuickCalories = false
+                    saveQuickCalories(calories)
+                }
+                .presentationDetents([.height(260)])
             }
             .sheet(isPresented: $showingNewFood) {
                 NewFoodSheet(store: store)
@@ -556,6 +576,18 @@ struct AddEntryView: View {
         dismiss()
     }
 
+    /// Приём пищи, где известно только число калорий. Черновик, если он уже набран,
+    /// уходит в дневник вместе с ним — иначе набранное пришлось бы сохранять отдельно.
+    private func saveQuickCalories(_ calories: Int) {
+        let items = draftItems + [MealItem(name: String(localized: "Приём пищи"), calories: calories, macros: .zero)]
+        let totalCalories = items.reduce(0) { $0 + $1.calories }
+        let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
+        let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
+        store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        dismiss()
+    }
+
     /// Раскладывает продукты по категориям в порядке самого перечисления —
     /// он осмысленный (мясо, рыба, молочное...), в отличие от алфавитного.
     private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
@@ -614,5 +646,25 @@ struct AddEntryView: View {
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
             icons: store.foodCategories(of: dish).map(\.icon)
         )
+    }
+}
+
+
+/// Пробрасывает наружу `\.isSearching`: снаружи `.searchable` это окружение
+/// уже недоступно, а внутри списка — доступно.
+private struct SearchActivityReader: View {
+    @Environment(\.isSearching) private var isSearching
+    @Binding var isActive: Bool
+
+    var body: some View {
+        Color.clear
+            .onChange(of: isSearching) { _, newValue in
+                // Без анимации: список перестраивается вместе с раскрытием строки
+                // поиска, и на анимированном исчезновении секций сквозь них
+                // просвечивала светлая подложка.
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) { isActive = newValue }
+            }
     }
 }

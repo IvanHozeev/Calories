@@ -84,7 +84,7 @@ final class QuickActionSceneDelegate: NSObject, UIWindowSceneDelegate {
         guard let item = connectionOptions.shortcutItem else { return }
         // Синхронно: дерево экранов строится следом, и хоп на следующий такт
         // успевает разминуться с ним — действие тогда просто теряется.
-        MainActor.assumeIsolated { QuickActionRouter.shared.handle(item) }
+        MainActor.assumeIsolated { _ = QuickActionRouter.shared.handle(item) }
     }
 
     func windowScene(_ windowScene: UIWindowScene,

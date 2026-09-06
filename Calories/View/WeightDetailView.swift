@@ -132,27 +132,9 @@ struct WeightDetailView: View {
         }
         .navigationTitle("Вес и динамика")
         .scrollIndicators(.hidden)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingAddWeight = true
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-            // Настройки и профиль — слева, справа остаётся только действие «добавить вес».
-            // У обеих кнопок идентификаторы: UI-тесты раньше искали настройки по крайней
-            // правой кнопке и от любой перестановки ломались молча.
-            
-//            ToolbarItem(placement: .topBarLeading) {
-//                NavigationLink {
-//                    ProfileSettingsView(store: store)
-//                } label: {
-//                    Image(systemName: "person.crop.circle")
-//                }
-//                .accessibilityIdentifier("openProfile")
-//            }
-        }
+        // Плюса в тулбаре нет намеренно: на экране уже есть кнопка «Записать вес»,
+        // и делала она ровно то же самое. Две кнопки под одно действие заставляют
+        // выбирать там, где выбора нет.
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
                 .presentationDetents([.medium])

@@ -17,6 +17,10 @@ struct BodyView: View {
     @State private var ageInt: Int
     @State private var proteinTenths: Int
     @State private var proteinBasis: ProteinBasis
+    @State private var proteinLeanTenths: Int
+    /// Задавали ли норму на сухую массу руками. Пока нет — при первом переходе
+    /// подгоняем её так, чтобы граммы не изменились.
+    @State private var proteinLeanIsSet: Bool
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
@@ -61,6 +65,9 @@ struct BodyView: View {
         _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
         _goal = State(initialValue: profile?.goal ?? .maintenance)
         _proteinBasis = State(initialValue: profile?.proteinBasis ?? .bodyweight)
+        let pLean = profile?.storedProteinPerLeanKg
+        _proteinLeanTenths = State(initialValue: max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded())))
+        _proteinLeanIsSet = State(initialValue: pLean != nil)
     }
     
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
@@ -85,6 +92,29 @@ struct BodyView: View {
             format: String(localized: "Норма станет %d ккал вместо %d — это %@%d ккал в день."),
             updated.calorieTarget, current.calorieTarget, sign, delta
         )
+    }
+
+    private var activeProteinTenths: Int {
+        proteinBasis == .leanMass ? proteinLeanTenths : proteinTenths
+    }
+
+    private var proteinFooter: LocalizedStringKey {
+        if leanMassKg == nil {
+            return "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса."
+        }
+        return proteinBasis == .leanMass
+            ? "Для сухой массы диапазон другой — обычно 2.2–3.0 г на кг: сухой массы меньше, чем веса, а кормишь ты именно её."
+            : "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы."
+    }
+
+    /// Смена основы не должна менять норму: она меняет то, от чего норма считается.
+    /// Поэтому при первом переходе на сухую массу подбираем число так, чтобы
+    /// граммы остались прежними — дальше его правят руками, и оно живёт своей жизнью.
+    private func seedLeanProteinIfNeeded() {
+        guard !proteinLeanIsSet, let lean = leanMassKg, lean > 0 else { return }
+        let grams = Double(proteinTenths) / 10.0 * (Double(weightTenths) / 10.0)
+        proteinLeanTenths = min(50, max(10, Int((grams / lean * 10).rounded())))
+        proteinLeanIsSet = true
     }
 
     /// Разбивка дневной нормы. Белок и жир — обязательства, углеводы — остаток;
@@ -130,10 +160,6 @@ struct BodyView: View {
         }
     }
 
-    private var measurementsCaption: String {
-        guard let latest = store.latestMeasurement else { return String(localized: "Нет замеров") }
-        return latest.date.formatted(.dateTime.day().month(.abbreviated))
-    }
     
     
     private var draftProfile: UserProfile? {
@@ -145,6 +171,7 @@ struct BodyView: View {
             activityLevel: activityLevel,
             goal: goal,
             proteinPerKg: Double(proteinTenths) / 10.0,
+            proteinPerLeanKg: Double(proteinLeanTenths) / 10.0,
             proteinBasis: proteinBasis
         )
     }
@@ -194,18 +221,6 @@ struct BodyView: View {
                 .accessibilityIdentifier("openWeight")
                 
                 
-                NavigationLink {
-                    MeasurementsView(store: store)
-                } label: {
-                    HStack {
-                        Text("Замеры")
-                        Spacer()
-                        Text(measurementsCaption)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityIdentifier("openMeasurementsRow")
                 
                 HStack {
                     Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
@@ -286,11 +301,14 @@ struct BodyView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .accessibilityIdentifier("proteinBasis")
+                    .onChange(of: proteinBasis) { _, basis in
+                        if basis == .leanMass { seedLeanProteinIfNeeded() }
+                    }
                 }
                 HStack {
                     Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
                     Spacer()
-                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(proteinTenths) / 10.0))
+                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
                         .foregroundStyle(.secondary)
                 }
                 .contentShape(Rectangle())
@@ -301,18 +319,25 @@ struct BodyView: View {
                     }
                 }
                 if showProteinPicker {
-                    Picker("Белок", selection: $proteinTenths) {
+                    Picker("Белок", selection: proteinBasis == .leanMass ? $proteinLeanTenths : $proteinTenths) {
                         ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
                     }
                     .pickerStyle(.wheel)
                     .frame(height: 160)
                 }
+                if let draftProfile {
+                    HStack {
+                        Text("Итого белка")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(verbatim: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))")
+                            .font(.body.weight(.semibold))
+                    }
+                }
             } header: {
                 Text("Норма белка")
             } footer: {
-                Text(leanMassKg == nil
-                     ? "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса."
-                     : "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы.")
+                Text(proteinFooter)
             }
 
             if let draftProfile, store.dailyGoal > 0 {
@@ -377,12 +402,25 @@ struct BodyView: View {
         .navigationTitle("Тело")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    SettingsView(store: store)
-                } label: {
-                    Image(systemName: "gearshape")
+                HStack(spacing: 16) {
+                    // Замеры — не строка в параметрах тела: туда заходят смотреть
+                    // выводы, а не править число, и лежать это должно там же, где
+                    // остальные входы на свои экраны.
+                    NavigationLink {
+                        MeasurementsView(store: store)
+                    } label: {
+                        Image(systemName: "ruler")
+                    }
+                    .accessibilityLabel("Замеры")
+                    .accessibilityIdentifier("openMeasurementsRow")
+
+                    NavigationLink {
+                        SettingsView(store: store)
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityIdentifier("openSettings")
                 }
-                .accessibilityIdentifier("openSettings")
             }
         }
         .onChange(of: draftProfile) { _, newProfile in

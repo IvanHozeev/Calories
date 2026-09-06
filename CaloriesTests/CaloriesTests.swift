@@ -1450,11 +1450,13 @@ struct MacroBudgetTests {
         store = CalorieStore(context: container.mainContext, defaults: TestDefaults.make(), groupDefaults: nil)
     }
 
-    private func profile(basis: ProteinBasis = .bodyweight, proteinPerKg: Double = 2.0) -> UserProfile {
+    private func profile(basis: ProteinBasis = .bodyweight,
+                         proteinPerKg: Double = 2.0,
+                         proteinPerLeanKg: Double? = nil) -> UserProfile {
         UserProfile(
             weightKg: 77, heightCm: 180, age: 30, sex: .male,
             activityLevel: .moderate, goal: .maintenance,
-            proteinPerKg: proteinPerKg, proteinBasis: basis
+            proteinPerKg: proteinPerKg, proteinPerLeanKg: proteinPerLeanKg, proteinBasis: basis
         )
     }
 
@@ -1503,16 +1505,26 @@ struct MacroBudgetTests {
         #expect(store.macrosOverflow! > 0)
     }
 
-    /// От сухой массы белка выходит меньше, чем от общего веса, — при 19% жира
-    /// это нормально и обещать обратное нельзя.
-    @Test func leanMassBasisGivesLessThanBodyweightAtNineteenPercent() {
+    /// У основ разные числа и разный смысл: 2.0 на кг веса — норма, 2.0 на кг
+    /// сухой массы — недобор. Поэтому у сухой массы своё значение и свой порядок.
+    @Test func eachBasisKeepsItsOwnNumber() {
         let m = measurement()
         let byWeight = profile(basis: .bodyweight).proteinTargetGrams(from: m)
-        let byLean = profile(basis: .leanMass).proteinTargetGrams(from: m)
+        let byLean = profile(basis: .leanMass, proteinPerLeanKg: 2.5).proteinTargetGrams(from: m)
 
         #expect(byWeight == 154)
-        #expect(byLean < byWeight)
-        #expect(byLean > 120)
+        // 2.5 на кг сухой массы при ~19% жира примерно догоняет 2.0 на кг веса
+        #expect(abs(byLean - byWeight) < 10)
+    }
+
+    /// Незаданное значение для сухой массы берётся из своего умолчания, а не из
+    /// нормы на общий вес — иначе переключатель молча срезал бы четверть белка.
+    @Test func leanBasisUsesItsOwnDefaultNotTheBodyweightNumber() {
+        let m = measurement()
+        let p = profile(basis: .leanMass, proteinPerKg: 2.0, proteinPerLeanKg: nil)
+
+        #expect(p.proteinPerLeanKg == UserProfile.defaultProteinPerLeanKg)
+        #expect(p.proteinTargetGrams(from: m) > 2.0 * p.leanMassKg(from: m)!)
     }
 
     /// Без замеров персональный режим считает от веса, а не отказывает.

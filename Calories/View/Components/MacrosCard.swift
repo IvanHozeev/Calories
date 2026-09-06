@@ -61,6 +61,14 @@ struct MacrosCard: View {
                 Text(String(format: "%.0f \(String(localized: "г"))", value))
                     .font(.title3.bold())
                     .foregroundStyle(color)
+                // Съеденное без цели — просто число: непонятно, много это или мало.
+                // Цель мелким шрифтом под ним, чтобы не спорить с самим значением.
+                if let target = target(for: kind) {
+                    Text(verbatim: "/ \(Int(target.rounded()))")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .monospacedDigit()
+                }
                 Text(LocalizedStringKey(kind.title))
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -82,7 +90,7 @@ struct MacrosCard: View {
 
     private func note(for kind: MacroKind) -> String {
         switch kind {
-        case .protein: return String(localized: "Из профиля — норма белка на кг веса под твою цель.")
+        case .protein: return String(localized: "Норма белка из профиля — от веса или от сухой массы, смотря что выбрано.")
         case .fat: return String(localized: "≥0.8 г/кг — принятый минимум для гормонального здоровья.")
         case .carbs: return carbsTarget == nil
             ? String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")

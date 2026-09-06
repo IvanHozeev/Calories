@@ -169,7 +169,7 @@ struct PlanView: View {
             } message: {
                 Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
             }
-            .navigationTitle(store.plan.map(\.title) ?? "Новый план")
+            .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

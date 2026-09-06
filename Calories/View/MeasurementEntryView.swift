@@ -82,7 +82,11 @@ struct MeasurementEntryView: View {
     private func row(_ site: MeasurementSite) -> some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .leading, spacing: 2) {
+                // Идентификатор на самой подписи, а не на строке: на строке он
+                // перекрыл бы идентификаторы вложенных подсказок, а подпись места
+                // встречается и на экране результатов — по ней уже не найдёшь.
                 Text(site.title)
+                    .accessibilityIdentifier("site-\(site.rawValue)")
                 // Инструкция видна всегда: свёрнутая за кнопкой она не помогает
                 // в тот момент, когда человек стоит с лентой.
                 Text(site.howTo)

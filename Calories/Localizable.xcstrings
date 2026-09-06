@@ -4,6 +4,52 @@
     "" : {
 
     },
+    "Новый план" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطة جديدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Plan"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New plan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan nuevo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau plan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תוכנית חדשה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano novo"
+          }
+        }
+      }
+    },
     "—" : {
 
     },
@@ -4606,6 +4652,52 @@
         }
       }
     },
+    "В этом сеансе ничего не снято" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُسجَّل شيء في هذه الجلسة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In dieser Sitzung wurde nichts gemessen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing was measured in this session"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En esta sesión no se midió nada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n'a été mesuré dans cette séance"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בסשן הזה לא נמדד דבר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada foi medido nesta sessão"
+          }
+        }
+      }
+    },
     "Верхняя треть, под ягодичной складкой. Вес на обеих ногах поровну." : {
       "localizations" : {
         "ar" : {
@@ -8126,6 +8218,52 @@
         }
       }
     },
+    "Для сухой массы диапазон другой — обычно 2.2–3.0 г на кг: сухой массы меньше, чем веса, а кормишь ты именно её." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "للكتلة الصافية نطاق آخر — عادةً 2.2–3.0 غ لكل كجم: الكتلة الصافية أقل من الوزن، وهي ما تغذيه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für die Magermasse gilt ein anderer Bereich — meist 2,2–3,0 g pro kg: Magermasse ist weniger als das Gewicht, und genau sie fütterst du."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lean mass has a different range — usually 2.2–3.0 g per kg: there is less lean mass than bodyweight, and it is the lean mass you feed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masa magra tiene otro rango: normalmente 2,2–3,0 g por kg. Hay menos masa magra que peso, y es a ella a quien alimentas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masse maigre a une autre fourchette — généralement 2,2–3,0 g par kg : il y a moins de masse maigre que de poids, et c'est elle que tu nourris."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למסה רזה יש טווח אחר — בדרך כלל 2.2–3.0 גרם לק″ג: המסה הרזה קטנה מהמשקל, ואותה אתה מזין."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A massa magra tem outra faixa — normalmente 2,2–3,0 g por kg: há menos massa magra do que peso, e é ela que você alimenta."
+          }
+        }
+      }
+    },
     "Дневная цель" : {
       "localizations" : {
         "ar" : {
@@ -11239,6 +11377,98 @@
         }
       }
     },
+    "Изменение — против прошлого сеанса. Пусто означает, что место не менялось: незаполненное переносится из прошлого замера как есть." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التغيّر مقارنةً بالجلسة السابقة. الفراغ يعني أن الموضع لم يتغيّر: ما لم يُملأ يُنقل من القياس السابق كما هو."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Veränderung gegenüber der letzten Sitzung. Leer heißt, die Stelle hat sich nicht geändert: nicht Ausgefülltes wird unverändert aus der vorigen Messung übernommen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change against the previous session. Blank means the site did not change: anything left unfilled carries over from the previous measurement as it was."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El cambio respecto a la sesión anterior. En blanco significa que el punto no cambió: lo no rellenado se traslada tal cual de la medición previa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'écart par rapport à la séance précédente. Vide signifie que la zone n'a pas changé : ce qui n'est pas rempli est repris tel quel de la mesure précédente."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינוי מול הסשן הקודם. ריק פירושו שהמקום לא השתנה: מה שלא מולא מועתק כפי שהוא מהמדידה הקודמת."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A variação em relação à sessão anterior. Em branco significa que o ponto não mudou: o que não for preenchido é transferido tal como estava da medição anterior."
+          }
+        }
+      }
+    },
+    "Изменения появятся после второго замера." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستظهر التغيّرات بعد القياس الثاني."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veränderungen erscheinen nach der zweiten Messung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes appear after the second measurement."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los cambios aparecerán tras la segunda medición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les écarts apparaîtront après la deuxième mesure."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינויים יופיעו אחרי המדידה השנייה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As mudanças aparecem depois da segunda medição."
+          }
+        }
+      }
+    },
     "Икра" : {
       "localizations" : {
         "ar" : {
@@ -11469,6 +11699,52 @@
         }
       }
     },
+    "История замеров" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سجل القياسات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlauf der Messungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Measurement history"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historial de medidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Historique des mesures"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היסטוריית מדידות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Histórico de medições"
+          }
+        }
+      }
+    },
     "Источник" : {
       "localizations" : {
         "ar" : {
@@ -11654,6 +11930,52 @@
         }
       }
     },
+    "Итого белка" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجمالي البروتين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein gesamt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines au total"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סה″כ חלבון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína no total"
+          }
+        }
+      }
+    },
     "Итого сегодня" : {
       "localizations" : {
         "ar" : {
@@ -11834,6 +12156,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Iogurte natural"
+          }
+        }
+      }
+    },
+    "Каждый сеанс — полный снимок: незаполненное переносится из прошлого. Промахнулся колёсиком — удали сеанс свайпом, иначе он останется последним и по нему посчитаются выводы." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل جلسة لقطة كاملة: ما لم يُملأ يُنقل من السابقة. إن أخطأت بالعجلة، احذف الجلسة بالسحب، وإلا ستبقى الأخيرة وتُحسب النتائج عليها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jede Sitzung ist eine vollständige Momentaufnahme: nicht Ausgefülltes kommt aus der vorigen. Beim Verdrehen des Rads die Sitzung wegwischen — sonst bleibt sie die letzte und die Auswertung rechnet mit ihr."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every session is a full snapshot: anything left unfilled comes from the previous one. Slip on the wheel and swipe the session away — otherwise it stays the latest and the results are computed from it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada sesión es una instantánea completa: lo no rellenado viene de la anterior. Si te equivocas con la rueda, borra la sesión deslizando; si no, quedará como la última y de ella saldrán los resultados."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque séance est un instantané complet : ce qui n'est pas rempli vient de la précédente. En cas de fausse manœuvre, supprime la séance d'un balayage — sinon elle reste la dernière et les résultats sont calculés dessus."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל סשן הוא תמונת מצב מלאה: מה שלא מולא מגיע מהקודם. פספסת בגלגלת — מחק את הסשן בהחלקה, אחרת הוא יישאר האחרון והמסקנות יחושבו לפיו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada sessão é um retrato completo: o que não for preenchido vem da anterior. Se errar na roda, apague a sessão com um deslize — senão ela fica sendo a última e é dela que saem os resultados."
           }
         }
       }
@@ -17351,6 +17719,7 @@
       }
     },
     "Нет замеров" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17998,6 +18367,52 @@
         }
       }
     },
+    "Норма белка из профиля — от веса или от сухой массы, смотря что выбрано." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة البروتين من الملف الشخصي — من الوزن أو من الكتلة الصافية، حسب ما اخترته."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteinvorgabe aus dem Profil — vom Gewicht oder von der Magermasse, je nach Einstellung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The protein target from your profile — by bodyweight or by lean mass, whichever you chose."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo de proteína del perfil: por peso o por masa magra, según lo que hayas elegido."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif de protéines du profil — selon le poids ou la masse maigre, au choix."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד החלבון מהפרופיל — לפי משקל או לפי מסה רזה, לפי מה שבחרת."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta de proteína do perfil — pelo peso ou pela massa magra, conforme o escolhido."
+          }
+        }
+      }
+    },
     "Норма калорий" : {
       "localizations" : {
         "ar" : {
@@ -18457,6 +18872,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A circunferência dos glúteos sozinha diz pouco: uma pelve larga a infla. A diferença com o osso separa músculo de esqueleto."
+          }
+        }
+      }
+    },
+    "Обхваты" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المحيطات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umfänge"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Girths"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perímetros"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circonférences"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היקפים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perímetros"
           }
         }
       }

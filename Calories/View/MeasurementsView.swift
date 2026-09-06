@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Замеры: экран показывает, что из снятых обхватов следует, а сам ввод живёт
-/// за линейкой в тулбаре. Пропорция обращений именно такая — мерить садишься
+/// за плюсом в тулбаре. Пропорция обращений именно такая — мерить садишься
 /// раз в неделю-две, а смотреть на выводы хочется каждый раз.
 struct MeasurementsView: View {
     var store: CalorieStore
@@ -17,8 +17,26 @@ struct MeasurementsView: View {
                 } else {
                     resultsSection(insights, measuredOn: latest.date)
                 }
+                girthsSection(latest)
             } else {
                 Section { emptyState } .listRowBackground(Color.clear).listRowSeparator(.hidden)
+            }
+
+            if store.measurements.count > 1 {
+                Section {
+                    NavigationLink {
+                        MeasurementHistoryView(store: store)
+                    } label: {
+                        HStack {
+                            Text("История замеров")
+                            Spacer()
+                            Text(verbatim: "\(store.measurements.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("openMeasurementHistory")
+                }
+                .glassRow()
             }
         }
         .listStyle(.insetGrouped)
@@ -30,7 +48,7 @@ struct MeasurementsView: View {
                 Button {
                     showingEntry = true
                 } label: {
-                    Image(systemName: "ruler")
+                    Image(systemName: "plus")
                 }
                 .accessibilityIdentifier("openMeasurementEntry")
             }
@@ -45,6 +63,53 @@ struct MeasurementsView: View {
                         }
                     }
             }
+        }
+    }
+
+    /// Обхваты и что с ними стало с прошлого раза.
+    ///
+    /// Не график: мерят раз в одну-две недели, и на трёх точках линия врёт больше,
+    /// чем говорит. Столбик «изменение» на тех же трёх точках честен и читается
+    /// сразу — он и отвечает на единственный вопрос, ради которого мерят.
+    @ViewBuilder
+    private func girthsSection(_ latest: BodyMeasurement) -> some View {
+        let previous = store.previousMeasurement
+        let rows = MeasurementSite.allCases.compactMap { site -> (MeasurementSite, Double, Double?)? in
+            let now = latest.best(site)
+            guard now > 0 else { return nil }
+            let was = previous?.best(site) ?? 0
+            return (site, now, was > 0 ? now - was : nil)
+        }
+
+        if !rows.isEmpty {
+            Section {
+                ForEach(rows, id: \.0) { site, now, delta in
+                    HStack {
+                        Text(site.title)
+                        Spacer()
+                        if let delta, abs(delta) >= 0.05 {
+                            Text(verbatim: String(format: "%+.1f", delta))
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(delta > 0 ? .green : .orange)
+                                .monospacedDigit()
+                        }
+                        Text(verbatim: String(format: "%g \(String(localized: "см"))", now))
+                            .font(.body.weight(.medium))
+                            .monospacedDigit()
+                    }
+                    // Строка целиком — один элемент: и для голосового доступа
+                    // осмысленнее, и подпись места перестаёт быть отдельным
+                    // текстом, который спорит с такой же подписью на вводе.
+                    .accessibilityElement(children: .combine)
+                }
+            } header: {
+                Text("Обхваты")
+            } footer: {
+                Text(previous == nil
+                     ? "Изменения появятся после второго замера."
+                     : "Изменение — против прошлого сеанса. Пусто означает, что место не менялось: незаполненное переносится из прошлого замера как есть.")
+            }
+            .glassRow()
         }
     }
 

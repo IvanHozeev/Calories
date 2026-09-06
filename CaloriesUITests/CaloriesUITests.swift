@@ -95,12 +95,13 @@ final class CaloriesUITests: XCTestCase {
                       "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
         XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
+        // Замеры — линейка в тулбаре «Тела», а не строка в параметрах
         app.buttons["openMeasurementsRow"].tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
-                      "Ячейка «Замеры» не открылась")
-        // Сам экран показывает выводы, а ввод живёт за линейкой в его тулбаре
+                      "Линейка в тулбаре не открыла «Замеры»")
+        // Сам экран показывает выводы, а ввод живёт за плюсом в его тулбаре
         XCTAssertTrue(app.buttons["openMeasurementEntry"].exists,
-                      "Ввод замеров должен открываться линейкой в тулбаре")
+                      "Ввод замеров должен открываться плюсом в тулбаре")
     }
 
     @MainActor
@@ -130,10 +131,10 @@ final class CaloriesUITests: XCTestCase {
         app.buttons["openMeasurementsRow"].tap()
         app.buttons["openMeasurementEntry"].tap()
 
-        // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40
-        // Идентификатор на строке перекрыл бы идентификаторы вложенных подсказок,
-        // поэтому строку ищем по подписи.
-        let row = app.staticTexts["Biceps"]
+        // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40.
+        // Ищем по идентификатору подписи: сама подпись «Бицепс» встречается ещё и
+        // в таблице обхватов на экране результатов, который остался под этим.
+        let row = app.staticTexts["site-biceps"]
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Не открылся экран замеров")
         row.tap()
 

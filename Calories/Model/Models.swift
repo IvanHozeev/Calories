@@ -323,9 +323,16 @@ struct UserProfile: Codable, Equatable {
     var activityLevel: ActivityLevel
     var goal: Goal
     var proteinPerKg: Double
-    /// Опциональное намеренно: в уже сохранённых профилях этого ключа нет, а
+    /// Своё число для сухой массы.
+    ///
+    /// Отдельное, а не общее с `proteinPerKg`, потому что смысл у них разный:
+    /// 2.0 г на кг веса — обычная норма, 2.0 г на кг сухой массы — уже недобор.
+    /// Одно число на две основы означало бы, что переключатель молча меняет
+    /// норму на четверть.
+    var storedProteinPerLeanKg: Double?
+    /// Опциональные намеренно: в уже сохранённых профилях этих ключей нет, а
     /// обязательное поле уронило бы декодирование целиком — то есть стёрло бы
-    /// человеку профиль. Читается через `proteinBasis`.
+    /// человеку профиль.
     var storedProteinBasis: ProteinBasis?
 
     init(
@@ -336,6 +343,7 @@ struct UserProfile: Codable, Equatable {
         activityLevel: ActivityLevel,
         goal: Goal,
         proteinPerKg: Double,
+        proteinPerLeanKg: Double? = nil,
         proteinBasis: ProteinBasis = .bodyweight
     ) {
         self.weightKg = weightKg
@@ -345,6 +353,7 @@ struct UserProfile: Codable, Equatable {
         self.activityLevel = activityLevel
         self.goal = goal
         self.proteinPerKg = proteinPerKg
+        self.storedProteinPerLeanKg = proteinPerLeanKg
         self.storedProteinBasis = proteinBasis
     }
 
@@ -353,7 +362,15 @@ struct UserProfile: Codable, Equatable {
         set { storedProteinBasis = newValue }
     }
 
+    var proteinPerLeanKg: Double {
+        get { storedProteinPerLeanKg ?? Self.defaultProteinPerLeanKg }
+        set { storedProteinPerLeanKg = newValue }
+    }
+
     static let defaultProteinPerKg: Double = 1.7
+    /// Выше, чем от общего веса, и это не опечатка: сухой массы меньше, чем веса,
+    /// а кормить надо именно её. Диапазон по Хелмсу для сухих атлетов — 2.3–3.1.
+    static let defaultProteinPerLeanKg: Double = 2.4
 
     /// Базовый метаболизм — формула Миффлина-Сан Жеора.
     var bmr: Double {
@@ -388,7 +405,8 @@ struct UserProfile: Codable, Equatable {
         case .bodyweight:
             return proteinPerKg * weightKg
         case .leanMass:
-            return proteinPerKg * (leanMassKg(from: measurement) ?? weightKg)
+            guard let lean = leanMassKg(from: measurement) else { return proteinPerKg * weightKg }
+            return proteinPerLeanKg * lean
         }
     }
 

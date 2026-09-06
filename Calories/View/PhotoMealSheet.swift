@@ -25,11 +25,15 @@ struct PhotoMealSheet: View {
             List {
                 Section {
                     if let imageData, let image = UIImage(data: imageData) {
+                        // Снимок занимает всю ширину секции и подрезается по высоте.
+                        // Вписанный по высоте он оставлял справа пустую серую полосу
+                        // на всём, что не шире тарелки в альбомной ориентации.
                         Image(uiImage: image)
                             .resizable()
-                            .scaledToFit()
-                            .frame(maxHeight: 260)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .scaledToFill()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 240)
+                            .clipped()
                             .listRowInsets(EdgeInsets())
                     } else {
                         // Съёмка первой: за столом снимают здесь и сейчас,

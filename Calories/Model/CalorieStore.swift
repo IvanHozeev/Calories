@@ -331,7 +331,15 @@ final class CalorieStore {
         if let data = try? JSONEncoder().encode(newProfile) {
             defaults.set(data, forKey: Keys.profile)
         }
-        if syncDailyGoal, plan == nil {
+        if syncDailyGoal, let plan {
+            // Норма плана — производная от TDEE, а он падает вместе с весом.
+            // Раньше при выключенном цикле она замерзала на дате старта, и к середине
+            // сушки дефицит незаметно съёживался до нуля. С включённым циклом такого
+            // не было: там цель считалась заново на каждый день. Один и тот же план
+            // вёл себя по-разному в зависимости от тумблера, который по смыслу
+            // отвечает только за распределение калорий по дням недели.
+            dailyGoal = plan.dailyCalorieTarget(tdee: newProfile.tdee)
+        } else if syncDailyGoal {
             dailyGoal = newProfile.calorieTarget
         } else {
             // Профиль участвует в adherence через tdee — пересчитать надо в любом случае.

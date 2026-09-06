@@ -16,6 +16,9 @@ struct ProfilePlanCard: View {
         if !store.isPremium {
             Button(action: onShowPaywall) { promo }
                 .buttonStyle(.plain)
+        } else if let outcome = store.planOutcome {
+            Button(action: onOpenPlan) { finishedPlan(outcome) }
+                .buttonStyle(.plain)
         } else if let plan = store.plan {
             Button(action: onOpenPlan) { activePlan(plan) }
                 .buttonStyle(.plain)
@@ -77,6 +80,39 @@ struct ProfilePlanCard: View {
                 Spacer()
             }
             Text("Заполни параметры тела ниже — план считается по твоим BMR и TDEE.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .glassCard()
+    }
+
+    /// План дошёл до финиша. Карточка меняется целиком, а не дорисовывает подпись:
+    /// «неделя 8 из 8» на закончившемся плане читается как «всё идёт по расписанию»,
+    /// хотя расписание уже кончилось.
+    private func finishedPlan(_ outcome: PlanOutcome) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "flag.checkered")
+                    .foregroundStyle(outcome.reachedTarget ? .green : .orange)
+                Text("План завершён")
+                    .font(.headline)
+                Spacer()
+                chevron
+            }
+
+            if let final = outcome.finalWeightKg, let change = outcome.changeKg {
+                Text(verbatim: String(
+                    format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
+                    outcome.plan.startWeightKg, final, change
+                ))
+                .font(.subheadline.weight(.semibold))
+                .monospacedDigit()
+            }
+
+            Text(outcome.reachedTarget
+                 ? "Цель взята. Заверши план, чтобы норма вернулась к расчёту по профилю."
+                 : "Норма всё ещё держит дефицит плана — открой и заверши его.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

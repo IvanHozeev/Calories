@@ -1,199 +1,291 @@
 import SwiftUI
 
+/// План: как он идёт и чем закончился.
+///
+/// Настройка живёт отдельно, в `PlanEditorView`. Разделены они потому, что это
+/// работы разной частоты: план настраивают один раз, а смотрят на него каждую
+/// неделю — и раньше единственное, ради чего сюда заходят, было зажато между
+/// полем целевого веса и степпером недель.
 struct PlanView: View {
     var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
-
-    @State private var targetWeightText: String
-    @FocusState private var targetWeightFocused: Bool
-    @State private var durationWeeks: Int
-    @State private var cyclingEnabled: Bool
-    @State private var weekendStyle: WeekendStyle
     @State private var confirmingCancel = false
-
-    init(store: CalorieStore) {
-        self.store = store
-        let fallbackStart = store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 70
-        _targetWeightText = State(initialValue: String(format: "%.1f", store.plan?.targetWeightKg ?? fallbackStart))
-        _durationWeeks = State(initialValue: store.plan?.durationWeeks ?? 8)
-        _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
-        _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
-    }
-
-    private var currentWeight: Double {
-        store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 0
-    }
-
-    private var startWeight: Double {
-        store.plan?.startWeightKg ?? currentWeight
-    }
-
-    private var targetWeight: Double? {
-        Double(targetWeightText.replacingOccurrences(of: ",", with: "."))
-    }
 
     private var tdee: Double {
         store.profile?.tdee ?? Double(store.dailyGoal)
     }
 
-    private var draftPlan: Plan? {
-        guard let targetWeight, targetWeight > 0, durationWeeks > 0, startWeight > 0 else { return nil }
-        return Plan(
-            startDate: store.plan?.startDate ?? Date(),
-            durationWeeks: durationWeeks,
-            startWeightKg: startWeight,
-            targetWeightKg: targetWeight,
-            cyclingEnabled: cyclingEnabled,
-            weekendStyle: weekendStyle
-        )
+    // Своего NavigationStack тут нет намеренно: экран не показывается листом,
+    // а пушится с «Сегодня». Обёртка давала второй навбар — стрелку назад снаружи
+    // и «Готово» внутри, два способа уйти с одного экрана.
+    @ViewBuilder
+    var body: some View {
+        // Плана нет — показывать нечего, сразу настройка.
+        if store.plan == nil {
+            PlanEditorView(store: store)
+        } else {
+            dashboard
+        }
     }
 
-    var body: some View {
-        NavigationStack {
-            Form {
+    @ViewBuilder
+    private var dashboard: some View {
+        List {
+            if let plan = store.plan {
                 Section {
-                    HStack {
-                        Text("Текущий вес")
-                        Spacer()
-                        Text(String(format: "%.1f \(String(localized: "кг"))", currentWeight))
-                            .foregroundStyle(.secondary)
-                    }
-                    if let plan = store.plan, plan.startWeightKg != currentWeight {
-                        HStack {
-                            Text("Старт плана")
-                            Spacer()
-                            Text(String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                } footer: {
-                    Text(store.latestWeight != nil
-                         ? "Взято из последнего взвешивания."
-                         : "Взято из профиля — стоит записать актуальный вес на экране «Вес».")
+                    hero(plan)
                 }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
 
-                if let plan = store.plan, let adherence = store.planAdherence() {
-                    adherenceSection(plan: plan, adherence: adherence)
+            if let outcome = store.planOutcome {
+                outcomeSection(outcome)
+            } else if let plan = store.plan, let adherence = store.planAdherence() {
+                adherenceSection(plan: plan, adherence: adherence)
+            }
+
+            if let composition = store.planCompositionChange {
+                compositionSection(composition)
+            }
+
+            Section {
+                NavigationLink {
+                    PlanEditorView(store: store)
+                } label: {
+                    Label("Изменить план", systemImage: "slider.horizontal.3")
                 }
+                .accessibilityIdentifier("editPlan")
+            }
 
-                Section("Целевой вес") {
-                    HStack {
-                        TextField("70.0", text: $targetWeightText)
-                            .keyboardType(.decimalPad)
-                            .focused($targetWeightFocused)
-                        Text("кг")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("Срок") {
-                    Stepper("Недель: \(durationWeeks)", value: $durationWeeks, in: 1...52)
-                }
-
+            if store.planOutcome == nil {
                 Section {
-                    Toggle("Недельный цикл калорий", isOn: $cyclingEnabled)
-                    if cyclingEnabled {
-                        Picker("Рефид-дни", selection: $weekendStyle) {
-                            ForEach(WeekendStyle.allCases) { style in
-                                VStack(alignment: .leading) {
-                                    Text(style.title)
-                                    Text(style.subtitle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                .tag(style)
-                            }
-                        }
-                        .pickerStyle(.navigationLink)
-                    }
-                } footer: {
-                    if cyclingEnabled {
-                        Text("В \(weekendStyle.title) калорий больше, в остальные дни — меньше. Среднее за неделю остаётся тем же.")
-                    } else {
-                        Text("Одинаковая норма каждый день. Включи цикл, если хочешь распределить калории по дням недели с рефид-днями.")
-                    }
-                }
-
-                if cyclingEnabled, let draftPlan {
-                    Section("Раскладка по дням") {
-                        ForEach(draftPlan.weeklyCalorieBreakdown(tdee: tdee), id: \.label) { day in
-                            HStack {
-                                Text(day.label)
-                                Spacer()
-                                Text("\(day.calories) ккал")
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                }
-
-                if let draftPlan {
-                    Section("Расчёт") {
-                        resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
-                        resultRow("Темп", String(format: "%+.2f \(String(localized: "кг/нед"))", draftPlan.weeklyRateKg))
-                        if draftPlan.cyclingEnabled {
-                            resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))")
-                            resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
-                        } else {
-                            resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
-                        }
-
-                        if draftPlan.isAggressivePace(relativeToWeightKg: startWeight) {
-                            Label(
-                                "Темп выше ~1% веса в неделю — довольно агрессивно. Можно смягчить, увеличив срок или скорректировав целевой вес.",
-                                systemImage: "exclamationmark.triangle.fill"
-                            )
-                            .font(.caption)
-                            .foregroundStyle(.orange)
-                        }
-                    }
-                }
-
-                if store.plan != nil {
-                    Section {
-                        Button("Завершить текущий план", role: .destructive) {
-                            confirmingCancel = true
-                        }
+                    Button("Завершить текущий план", role: .destructive) {
+                        confirmingCancel = true
                     }
                 }
             }
-            .glassRow()
-            .confirmationDialog(
-                "Завершить план?",
-                isPresented: $confirmingCancel,
-                titleVisibility: .visible
-            ) {
-                Button("Завершить план", role: .destructive) {
-                    store.cancelPlan()
-                    dismiss()
-                }
-                Button("Отмена", role: .cancel) {}
-            } message: {
-                Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
+        }
+        .glassRow()
+        .listStyle(.insetGrouped)
+        .scrollIndicators(.hidden)
+        .confirmationDialog(
+            "Завершить план?",
+            isPresented: $confirmingCancel,
+            titleVisibility: .visible
+        ) {
+            Button("Завершить план", role: .destructive) {
+                store.cancelPlan()
+                dismiss()
             }
-            // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
-            // «Готово» у decimalPad нет. Одного scrollDismissesKeyboard мало: он
-            // живёт на прокрутке, а форма короткая и двигать нечего — жест ловим сами.
-            .scrollDismissesKeyboard(.interactively)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 24).onEnded { drag in
-                    if drag.translation.height > 40 { targetWeightFocused = false }
+            Button("Отмена", role: .cancel) {}
+        } message: {
+            Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
+        }
+        .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// Шапка: где мы на дистанции и сколько есть сегодня. Два числа, ради которых
+    /// экран открывают, — остальное ниже и мельче.
+    private func hero(_ plan: Plan) -> some View {
+        let status = store.planAdherence()?.status
+        let finished = plan.isFinished
+
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Image(systemName: finished ? "flag.checkered" : "target")
+                    .foregroundStyle(finished ? Color.secondary : Color.yellow)
+                Text(plan.title)
+                    .font(.headline)
+                    .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                if let status, !finished {
+                    // Компактный значок вместо подписи: полная подпись статуса
+                    // ломалась на две строки и утаскивала за собой название плана.
+                    // Словами статус всё равно назван ниже, в разборе.
+                    Image(systemName: status.icon)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(status.color)
+                        .padding(6)
+                        .background(status.color.opacity(0.12), in: Circle())
+                        .accessibilityLabel(Text(verbatim: status.title))
                 }
-            )
-            .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    CheckmarkButton {
-                        guard let draftPlan else { return }
-                        store.startPlan(draftPlan)
-                        dismiss()
-                    }
-                    .disabled(draftPlan == nil)
+            }
+
+            if !finished {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(verbatim: "\(store.adaptedTodayGoal)")
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .monospacedDigit()
+                    Text("ккал сегодня")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                weightTrack(plan, tint: status?.color ?? .accentColor)
+
+                HStack(spacing: 6) {
+                    Text(String(format: String(localized: "Неделя %d из %d"),
+                                plan.currentWeek, plan.durationWeeks))
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .glassCard()
+    }
+
+    /// Полоса пройденного пути — по весу, а не по времени.
+    ///
+    /// Раньше тут был прогресс по календарю: на третьей неделе из восьми он честно
+    /// показывал 37%, даже если вес не сдвинулся ни на грамм. Рядом с целевым весом
+    /// это читалось как «идём по плану», хотя план как раз проваливался.
+    /// Без взвешиваний считать нечего — тогда полоса остаётся по времени и подписана
+    /// соответственно.
+    private func weightTrack(_ plan: Plan, tint: Color) -> some View {
+        let current = store.latestWeight?.weightKg
+        let total = plan.targetWeightKg - plan.startWeightKg
+        let byWeight = current != nil && abs(total) > 0.05
+        let progress: Double = byWeight
+            ? min(max((current! - plan.startWeightKg) / total, 0), 1)
+            : plan.progress
+
+        return VStack(alignment: .leading, spacing: 6) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.secondary.opacity(0.18))
+                    Capsule()
+                        .fill(tint)
+                        .frame(width: max(3, geo.size.width * progress))
+                }
+            }
+            .frame(height: 8)
+
+            HStack {
+                Text(String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg))
+                Spacer()
+                if byWeight, let current {
+                    let left = abs(plan.targetWeightKg - current)
+                    Text(String(format: String(localized: "осталось %.1f кг"), left))
+                        .foregroundStyle(left <= 0.1 ? Color.green : Color.secondary)
+                } else {
+                    Text("нет взвешиваний")
+                }
+                Spacer()
+                Text(String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg))
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
+        }
+    }
+
+    /// Из чего уходит вес.
+    ///
+    /// Главный вопрос натурала на сушке, на который весы одни ответить не могут:
+    /// «минус 6 кг» — это успех или съеденные мышцы. Показываем обе части и прямо
+    /// говорим, где заканчивается точность метода.
+    private func compositionSection(_ change: CompositionChange) -> some View {
+        Section {
+            resultRow("Вес", String(format: "%.1f → %.1f \(String(localized: "кг"))", change.startWeightKg, change.endWeightKg))
+            resultRow("Жир", String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
+                                    change.startFatKg, change.endFatKg, change.fatDeltaKg))
+            resultRow("Сухая масса", String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
+                                            change.startLeanKg, change.endLeanKg, change.leanDeltaKg),
+                      highlighted: change.verdict != .leanLoss)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Label(change.verdict.title, systemImage: verdictIcon(change.verdict))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(verdictColor(change.verdict))
+                Text(verbatim: change.verdict.explanation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Из чего уходит вес")
+        } footer: {
+            Text(String(
+                format: String(localized: "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя."),
+                change.fromDate.formatted(.dateTime.day().month(.abbreviated)),
+                change.toDate.formatted(.dateTime.day().month(.abbreviated)),
+                change.noiseKg
+            ))
+        }
+    }
+
+    private func verdictIcon(_ verdict: CompositionVerdict) -> String {
+        switch verdict {
+        case .leanLoss:    return "exclamationmark.triangle.fill"
+        case .leanGain:    return "arrow.up.circle.fill"
+        case .withinNoise: return "checkmark.circle.fill"
+        }
+    }
+
+    private func verdictColor(_ verdict: CompositionVerdict) -> Color {
+        switch verdict {
+        case .leanLoss:    return .orange
+        case .leanGain:    return .green
+        case .withinNoise: return .green
+        }
+    }
+
+    /// Итог вместо слежения: план дошёл до финиша, и дальше он не «идёт», а ждёт,
+    /// пока его закроют. Пока не закрыт, дневная норма продолжает держать дефицит —
+    /// поэтому кнопка тут заметная, а не спрятана внизу вместе с отменой.
+    @ViewBuilder
+    private func outcomeSection(_ outcome: PlanOutcome) -> some View {
+        Section {
+            resultRow("Старт плана", String(format: "%.1f \(String(localized: "кг"))", outcome.plan.startWeightKg))
+            if let final = outcome.finalWeightKg {
+                resultRow("Финиш", String(format: "%.1f \(String(localized: "кг"))", final))
+            }
+            resultRow("Цель", String(format: "%.1f \(String(localized: "кг"))", outcome.plan.targetWeightKg))
+
+            if let shortfall = outcome.shortfallKg {
+                if outcome.reachedTarget {
+                    Label("Цель взята", systemImage: "checkmark.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.green)
+                } else {
+                    Label(
+                        String(format: String(localized: "Не хватило %.1f кг"), shortfall),
+                        systemImage: "flag.checkered"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.orange)
+                }
+            } else {
+                Text("За время плана не было взвешиваний — подвести итог не по чему.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Button {
+                store.cancelPlan()
+                dismiss()
+            } label: {
+                Text("Завершить план")
                     .fontWeight(.semibold)
-              
-                }
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            .listRowBackground(Color.clear)
+        } header: {
+            Text("План завершён")
+        } footer: {
+            Text("Пока план не закрыт, дневная норма продолжает держать его дефицит. Заверши — она вернётся к расчёту по профилю, или увеличь срок ниже, чтобы продолжить.")
         }
     }
 
@@ -291,7 +383,6 @@ struct PlanView: View {
                         weekendStyle: plan.weekendStyle
                     )
                     store.startPlan(updated)
-                    targetWeightText = String(format: "%.1f", rounded)
                 }
                 .buttonStyle(.bordered)
             }

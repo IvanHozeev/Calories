@@ -95,6 +95,16 @@ extension CalorieStore {
 
     /// Эффективная цель на конкретную дату: если активен план с недельным циклом — берём
     /// цифру из цикла на этот день недели, иначе — обычный dailyGoal.
+    /// Норма на дату.
+    ///
+    /// При включённом цикле считается по формуле плана: она зависит от дня недели,
+    /// хранить её числом негде. Без цикла норма зависит только от TDEE, поэтому
+    /// берётся из `dailyGoal` — но он теперь пересчитывается на каждое изменение
+    /// профиля, так что за падающим весом следуют оба пути одинаково.
+    ///
+    /// Из `dailyGoal`, а не из формулы, ещё по одной причине: кнопка «замедлить»
+    /// в разборе плана пишет туда пересчитанное число, и живая формула молча
+    /// затирала бы её на следующем же чтении.
     func effectiveGoal(for date: Date) -> Int {
         if let plan, plan.cyclingEnabled, let profile {
             return plan.calorieTarget(for: date, tdee: profile.tdee)
@@ -273,6 +283,60 @@ extension CalorieStore {
 
     /// Сверяет факт с линейным прогнозом плана. Возвращает кэшированный результат из adherence.
     func planAdherence() -> PlanAdherence? { adherence }
+
+    /// Из чего складывалось изменение веса за время плана.
+    ///
+    /// Нужны два сеанса замеров с поясом и шеей: без них процент жира считается
+    /// по ИМТ, а он не отличает 77 кг мышц от 77 кг с животом — то есть ровно то,
+    /// ради чего этот расчёт и делается.
+    var planCompositionChange: CompositionChange? {
+        guard let plan, let profile else { return nil }
+        let usable = measurements
+            .filter { $0.date >= plan.startDate && profile.navyBodyFat(from: $0) != nil }
+            .sorted { $0.date < $1.date }
+        guard let first = usable.first, let last = usable.last, first.id != last.id else { return nil }
+
+        guard let startWeight = weight(nearest: first.date),
+              let endWeight = weight(nearest: last.date) else { return nil }
+
+        // Процент жира считаем от веса на ту дату, а не от текущего: профиль
+        // хранит один вес, и без подмены оба замера получили бы сегодняшний.
+        var atStart = profile
+        atStart.weightKg = startWeight
+        var atEnd = profile
+        atEnd.weightKg = endWeight
+
+        guard let startFat = atStart.navyBodyFat(from: first),
+              let endFat = atEnd.navyBodyFat(from: last) else { return nil }
+
+        return CompositionChange(
+            fromDate: first.date,
+            toDate: last.date,
+            startWeightKg: startWeight,
+            endWeightKg: endWeight,
+            startFatPercent: startFat,
+            endFatPercent: endFat
+        )
+    }
+
+    /// Взвешивание, ближайшее к дате. Замеры и весы живут по своим расписаниям,
+    /// и требовать, чтобы они совпали день в день, значит не показать ничего.
+    func weight(nearest date: Date) -> Double? {
+        weightEntries.min { a, b in
+            abs(a.date.timeIntervalSince(date)) < abs(b.date.timeIntervalSince(date))
+        }?.weightKg
+    }
+
+    /// Итог дошедшего до финиша плана. nil, пока план идёт.
+    var planOutcome: PlanOutcome? {
+        guard let plan, plan.isFinished else { return nil }
+        let duringPlan = weightEntries.filter { $0.date >= plan.startDate }
+        let window = duringPlan.suffix(7)
+        let final = window.isEmpty
+            ? nil
+            : window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
+        return PlanOutcome(plan: plan, finalWeightKg: final)
+    }
 
     func computePlanAdherence() -> PlanAdherence? {
         guard let plan, let profile else { return nil }

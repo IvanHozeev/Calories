@@ -644,6 +644,103 @@ struct Plan: Codable, Equatable {
     var daysRemaining: Int {
         max(0, Calendar.current.dateComponents([.day], from: Date(), to: endDate).day ?? 0)
     }
+
+    /// План дошёл до даты финиша.
+    ///
+    /// До появления этого признака план не заканчивался никогда: неделя упиралась
+    /// в потолок, дней оставалось ноль, а дефицит продолжал держаться — восьминедельная
+    /// сушка молча превращалась в полугодовую.
+    var isFinished: Bool { Date() >= endDate }
+}
+
+/// Из чего состояло изменение веса между двумя сеансами замеров.
+///
+/// Смысл всей затеи: «минус 6 кг» ничего не говорит натуралу на сушке. Говорит
+/// «минус 6 кг, из них жира 5.4, сухой массы 0.6» — то есть работает диета или
+/// ты ешь собственные мышцы.
+struct CompositionChange {
+    let fromDate: Date
+    let toDate: Date
+    let startWeightKg: Double
+    let endWeightKg: Double
+    let startFatPercent: Double
+    let endFatPercent: Double
+
+    var startFatKg: Double { startWeightKg * startFatPercent / 100 }
+    var endFatKg: Double { endWeightKg * endFatPercent / 100 }
+    var startLeanKg: Double { startWeightKg - startFatKg }
+    var endLeanKg: Double { endWeightKg - endFatKg }
+
+    var weightDeltaKg: Double { endWeightKg - startWeightKg }
+    var fatDeltaKg: Double { endFatKg - startFatKg }
+    var leanDeltaKg: Double { endLeanKg - startLeanKg }
+
+    /// Насколько метод вообще способен различить.
+    ///
+    /// У Navy погрешность около ±3% жира, что на 77 кг даёт ±2.3 кг сухой массы.
+    /// Объявлять «ты потерял 400 г мышц» внутри этого коридора — врать точностью,
+    /// которой нет, поэтому всё, что меньше, честно называется погрешностью.
+    var noiseKg: Double { endWeightKg * 0.03 }
+
+    var verdict: CompositionVerdict {
+        if abs(leanDeltaKg) <= noiseKg { return .withinNoise }
+        return leanDeltaKg < 0 ? .leanLoss : .leanGain
+    }
+}
+
+enum CompositionVerdict {
+    /// Сухая масса просела заметнее погрешности метода.
+    case leanLoss
+    /// Сухая масса выросла заметнее погрешности.
+    case leanGain
+    /// Разница меньше того, что метод различает.
+    case withinNoise
+
+    var title: String {
+        switch self {
+        case .leanLoss:    return String(localized: "Сухая масса просела")
+        case .leanGain:    return String(localized: "Сухая масса выросла")
+        case .withinNoise: return String(localized: "Сухая масса держится")
+        }
+    }
+
+    var explanation: String {
+        switch self {
+        case .leanLoss:
+            return String(localized: "Вес уходит не только за счёт жира. Стоит смягчить дефицит или поднять норму белка — на сушке это первое, что чинят.")
+        case .leanGain:
+            return String(localized: "Редкий и хороший случай: жир уходит, а сухая масса прибавляет. Так бывает у новичков и после долгого перерыва.")
+        case .withinNoise:
+            return String(localized: "Изменение сухой массы меньше погрешности метода — считай, что она на месте, а вес уходит жиром.")
+        }
+    }
+}
+
+/// С чем план пришёл к финишу.
+struct PlanOutcome {
+    let plan: Plan
+    /// Тренд последних взвешиваний, а не последнее число: вес скачет на килограмм
+    /// от воды, и подводить итог по одному утру нечестно.
+    let finalWeightKg: Double?
+
+    var changeKg: Double? {
+        finalWeightKg.map { $0 - plan.startWeightKg }
+    }
+
+    /// Сколько не дошли до цели. Ноль и меньше — цель взята.
+    var shortfallKg: Double? {
+        guard let finalWeightKg else { return nil }
+        let planned = plan.totalWeightChangeKg
+        if planned < 0 { return finalWeightKg - plan.targetWeightKg }
+        if planned > 0 { return plan.targetWeightKg - finalWeightKg }
+        return abs(finalWeightKg - plan.targetWeightKg)
+    }
+
+    /// Для поддержания цель считается взятой, если удержались в полукилограмме.
+    var reachedTarget: Bool {
+        guard let shortfallKg else { return false }
+        return plan.totalWeightChangeKg == 0 ? shortfallKg <= 0.5 : shortfallKg <= 0
+    }
 }
 
 enum PlanStatus {

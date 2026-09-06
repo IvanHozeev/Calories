@@ -4,324 +4,94 @@
     "" : {
 
     },
-    "Жир" : {
+    "нет взвешиваний" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الدهون"
+            "value" : "لا توجد أوزان"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fett"
+            "value" : "keine Wiegungen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fat"
+            "value" : "no weigh-ins"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grasa"
+            "value" : "sin pesajes"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lipides"
+            "value" : "aucune pesée"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שומן"
+            "value" : "אין שקילות"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gordura"
+            "value" : "sem pesagens"
           }
         }
       }
     },
-    "Жира на кг веса" : {
+    "осталось %.1f кг" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "دهون لكل كجم من الوزن"
+            "value" : "بقي %.1f كجم"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fett pro kg Gewicht"
+            "value" : "noch %.1f kg"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fat per kg of bodyweight"
+            "value" : "%.1f kg to go"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Grasa por kg de peso"
+            "value" : "faltan %.1f kg"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lipides par kg de poids"
+            "value" : "encore %.1f kg"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "שומן לקילוגרם משקל"
+            "value" : "נותרו %.1f ק\"ג"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gordura por kg de peso"
-          }
-        }
-      }
-    },
-    "Итого жира" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إجمالي الدهون"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fett gesamt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fat total"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grasa total"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lipides au total"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סה״כ שומן"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gordura no total"
-          }
-        }
-      }
-    },
-    "Новый план" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطة جديدة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neuer Plan"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New plan"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan nuevo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouveau plan"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תוכנית חדשה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plano novo"
-          }
-        }
-      }
-    },
-    "Норма жира" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حصة الدهون"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fettvorgabe"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fat target"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objetivo de grasa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objectif de lipides"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יעד השומן"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meta de gordura"
-          }
-        }
-      }
-    },
-    "Норма жира из профиля. Ниже 0.5 г/кг рискуешь гормонами — жир нужен телу постоянно." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حصة الدهون من الملف الشخصي. أقل من 0.5 غ/كجم تخاطر بالهرمونات — الجسم يحتاج الدهون باستمرار."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Fettvorgabe aus dem Profil. Unter 0,5 g/kg riskierst du deine Hormone — Fett braucht der Körper ständig."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The fat target from your profile. Below 0.5 g/kg you are gambling with your hormones — the body needs fat constantly."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El objetivo de grasa del perfil. Por debajo de 0,5 g/kg arriesgas tus hormonas: el cuerpo necesita grasa siempre."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L'objectif de lipides du profil. En dessous de 0,5 g/kg tu joues avec tes hormones — le corps a besoin de lipides en permanence."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יעד השומן מהפרופיל. מתחת ל-0.5 גרם לק״ג אתה מסכן את ההורמונים — הגוף זקוק לשומן כל הזמן."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A meta de gordura do perfil. Abaixo de 0,5 g/kg você arrisca seus hormônios — o corpo precisa de gordura o tempo todo."
-          }
-        }
-      }
-    },
-    "Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عادةً 0.8 غ لكل كجم من الوزن. أقل من 0.5 لم يعد حمية بل مقامرة بالهرمونات — الجسم يحتاج الدهون باستمرار، لا كفائض."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Üblich sind 0,8 g pro kg Gewicht. Unter 0,5 ist das keine Diät mehr, sondern eine Wette auf die Hormone — Fett braucht der Körper ständig, nicht als Rest."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usually 0.8 g per kg of bodyweight. Below 0.5 this stops being a diet and becomes a bet on your hormones — the body needs fat constantly, not as whatever is left over."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Normalmente 0,8 g por kg de peso. Por debajo de 0,5 deja de ser una dieta y pasa a ser una apuesta con tus hormonas: el cuerpo necesita grasa siempre, no como sobrante."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Généralement 0,8 g par kg de poids. En dessous de 0,5, ce n'est plus un régime mais un pari sur tes hormones — le corps a besoin de lipides en permanence, pas comme reliquat."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בדרך כלל 0.8 גרם לקילוגרם משקל. מתחת ל-0.5 זו כבר לא דיאטה אלא הימור על ההורמונים — הגוף זקוק לשומן כל הזמן, לא כשארית."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Normalmente 0,8 g por kg de peso. Abaixo de 0,5 deixa de ser dieta e vira uma aposta com seus hormônios — o corpo precisa de gordura o tempo todo, não como sobra."
+            "value" : "faltam %.1f kg"
           }
         }
       }
@@ -5112,6 +4882,52 @@
         }
       }
     },
+    "Вес уходит не только за счёт жира. Стоит смягчить дефицит или поднять норму белка — на сушке это первое, что чинят." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النقص لا يأتي من الدهون وحدها. خفّف العجز أو ارفع حصة البروتين — هذا أول ما يُصلَح في التنشيف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht geht nicht nur über Fett. Mildere das Defizit oder erhöhe die Proteinvorgabe — beim Cut repariert man zuerst das."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight is not coming off fat alone. Ease the deficit or raise the protein target — on a cut that is the first thing to fix."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso no sale solo de la grasa. Suaviza el déficit o sube la proteína: en una definición es lo primero que se corrige."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids ne part pas que du gras. Adoucis le déficit ou augmente les protéines — en sèche, c'est la première chose à corriger."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל לא יורד רק מהשומן. הקל על הגירעון או העלה את יעד החלבון — בחיטוב זה הדבר הראשון שמתקנים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso não está saindo só de gordura. Suavize o déficit ou aumente a proteína — num cutting é a primeira coisa a corrigir."
+          }
+        }
+      }
+    },
     "Вес, г" : {
       "comment" : "A label for the weight of a food item in grams.",
       "isCommentAutoGenerated" : true,
@@ -9792,6 +9608,52 @@
         }
       }
     },
+    "Жир" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura"
+          }
+        }
+      }
+    },
     "Жир %" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -10023,6 +9885,52 @@
         }
       }
     },
+    "Жира на кг веса" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دهون لكل كجم من الوزن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett pro kg Gewicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat per kg of bodyweight"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa por kg de peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides par kg de poids"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן לקילוגרם משקל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura por kg de peso"
+          }
+        }
+      }
+    },
     "Жиры" : {
       "localizations" : {
         "ar" : {
@@ -10205,6 +10113,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diário"
+          }
+        }
+      }
+    },
+    "За время плана не было взвешиваний — подвести итог не по чему." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُسجَّل أوزان خلال الخطة — لا شيء يُبنى عليه الملخص."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Während des Plans gab es keine Wiegungen — es gibt nichts, worauf sich ein Fazit stützen ließe."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There were no weigh-ins during the plan, so there is nothing to draw a conclusion from."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hubo pesajes durante el plan, así que no hay de dónde sacar un balance."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune pesée pendant le plan : il n'y a rien sur quoi fonder un bilan."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא היו שקילות במהלך התוכנית — אין ממה להסיק מסקנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não houve pesagens durante o plano, então não há de onde tirar um balanço."
           }
         }
       }
@@ -11606,6 +11560,52 @@
         }
       }
     },
+    "Из чего уходит вес" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مِمّ يتكوّن النقص"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woraus das Gewicht schwindet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What the weight is coming off"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De dónde sale el peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'où part le poids"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממה יורד המשקל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De onde sai o peso"
+          }
+        }
+      }
+    },
     "Избыточный" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11699,6 +11699,52 @@
         }
       }
     },
+    "Изменение сухой массы меньше погрешности метода — считай, что она на месте, а вес уходит жиром." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تغيّر الكتلة الصافية أصغر من خطأ الطريقة — اعتبرها ثابتة، والوزن ينزل دهونًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Veränderung der Magermasse liegt unter der Messfehlerspanne — nimm sie als unverändert an, das Gewicht geht über Fett."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change in lean mass is smaller than the method's error — treat it as unchanged; the weight is coming off fat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El cambio de masa magra es menor que el error del método: considérala igual, el peso sale de la grasa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La variation de masse maigre est inférieure à l'erreur de la méthode — considère-la stable, le poids part du gras."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינוי במסה הרזה קטן משגיאת השיטה — התייחס אליה כקבועה, המשקל יורד משומן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A variação da massa magra é menor que o erro do método — considere-a estável; o peso sai de gordura."
+          }
+        }
+      }
+    },
     "Изменения появятся после второго замера." : {
       "localizations" : {
         "ar" : {
@@ -11741,6 +11787,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As mudanças aparecem depois da segunda medição."
+          }
+        }
+      }
+    },
+    "Изменить план" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعديل الخطة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan ändern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit plan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar plan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier le plan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עריכת התוכנית"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar plano"
           }
         }
       }
@@ -12248,6 +12340,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteína no total"
+          }
+        }
+      }
+    },
+    "Итого жира" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجمالي الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett gesamt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides au total"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סה״כ שומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura no total"
           }
         }
       }
@@ -13541,6 +13679,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kcal por dia"
+          }
+        }
+      }
+    },
+    "ккал сегодня" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سعرة اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal aujourd'hui"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קלוריות היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal hoje"
           }
         }
       }
@@ -17483,6 +17667,52 @@
         }
       }
     },
+    "Не хватило %.1f кг" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقص %.1f كجم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f kg gefehlt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%.1f kg short"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltaron %.1f kg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il a manqué %.1f kg"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חסרו %.1f ק\"ג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltaram %.1f kg"
+          }
+        }
+      }
+    },
     "Недавнее" : {
       "localizations" : {
         "ar" : {
@@ -18456,6 +18686,52 @@
         }
       }
     },
+    "Новый план" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطة جديدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neuer Plan"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New plan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan nuevo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau plan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תוכנית חדשה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano novo"
+          }
+        }
+      }
+    },
     "Новый продукт" : {
       "comment" : "A label for a button that presents a sheet to add a new food item.",
       "isCommentAutoGenerated" : true,
@@ -18685,6 +18961,144 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta de proteína do perfil — pelo peso ou pela massa magra, conforme o escolhido."
+          }
+        }
+      }
+    },
+    "Норма всё ещё держит дефицит плана — открой и заверши его." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السقف اليومي ما زال يحمل عجز الخطة — افتحها وأنهِها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tagesziel hält weiterhin das Defizit des Plans — öffne ihn und schließe ihn ab."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The daily goal is still holding the plan's deficit — open it and finish it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo diario sigue manteniendo el déficit del plan: ábrelo y termínalo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif quotidien conserve encore le déficit du plan — ouvre-le et termine-le."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד היומי עדיין מחזיק את הגירעון של התוכנית — פתח וסיים אותה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta diária ainda mantém o déficit do plano — abra e conclua."
+          }
+        }
+      }
+    },
+    "Норма жира" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fettvorgabe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat target"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo de grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de lipides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד השומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de gordura"
+          }
+        }
+      }
+    },
+    "Норма жира из профиля. Ниже 0.5 г/кг рискуешь гормонами — жир нужен телу постоянно." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة الدهون من الملف الشخصي. أقل من 0.5 غ/كجم تخاطر بالهرمونات — الجسم يحتاج الدهون باستمرار."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Fettvorgabe aus dem Profil. Unter 0,5 g/kg riskierst du deine Hormone — Fett braucht der Körper ständig."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fat target from your profile. Below 0.5 g/kg you are gambling with your hormones — the body needs fat constantly."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo de grasa del perfil. Por debajo de 0,5 g/kg arriesgas tus hormonas: el cuerpo necesita grasa siempre."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif de lipides du profil. En dessous de 0,5 g/kg tu joues avec tes hormones — le corps a besoin de lipides en permanence."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד השומן מהפרופיל. מתחת ל-0.5 גרם לק״ג אתה מסכן את ההורמונים — הגוף זקוק לשומן כל הזמן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta de gordura do perfil. Abaixo de 0,5 g/kg você arrisca seus hormônios — o corpo precisa de gordura o tempo todo."
           }
         }
       }
@@ -19241,6 +19655,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As circunferências são medidas a cada uma ou duas semanas; o peso, todo dia. Por isso ficam em telas separadas."
+          }
+        }
+      }
+    },
+    "Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً 0.8 غ لكل كجم من الوزن. أقل من 0.5 لم يعد حمية بل مقامرة بالهرمونات — الجسم يحتاج الدهون باستمرار، لا كفائض."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Üblich sind 0,8 g pro kg Gewicht. Unter 0,5 ist das keine Diät mehr, sondern eine Wette auf die Hormone — Fett braucht der Körper ständig, nicht als Rest."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually 0.8 g per kg of bodyweight. Below 0.5 this stops being a diet and becomes a bet on your hormones — the body needs fat constantly, not as whatever is left over."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 0,8 g por kg de peso. Por debajo de 0,5 deja de ser una dieta y pasa a ser una apuesta con tus hormonas: el cuerpo necesita grasa siempre, no como sobrante."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Généralement 0,8 g par kg de poids. En dessous de 0,5, ce n'est plus un régime mais un pari sur tes hormones — le corps a besoin de lipides en permanence, pas comme reliquat."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל 0.8 גרם לקילוגרם משקל. מתחת ל-0.5 זו כבר לא דיאטה אלא הימור על ההורמונים — הגוף זקוק לשומן כל הזמן, לא כשארית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente 0,8 g por kg de peso. Abaixo de 0,5 deixa de ser dieta e vira uma aposta com seus hormônios — o corpo precisa de gordura o tempo todo, não como sobra."
           }
         }
       }
@@ -22067,6 +22527,52 @@
         }
       }
     },
+    "План завершён" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهت الخطة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan abgeschlossen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan finished"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan terminado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan terminé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התוכנית הסתיימה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano concluído"
+          }
+        }
+      }
+    },
     "Плечи" : {
       "localizations" : {
         "ar" : {
@@ -22295,6 +22801,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No ritmo"
+          }
+        }
+      }
+    },
+    "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسب قياسَي %1$@ و%2$@. نسبة الدهون تُحسب بالشريط، وخطأ الطريقة نحو ±3%% — على وزنك هذا ±%3$.1f كجم من الكتلة الصافية، وما دون ذلك لا يُعتد به."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach den Messungen vom %1$@ und %2$@. Der Fettanteil wird per Maßband bestimmt, die Methode irrt um etwa ±3%% — bei deinem Gewicht sind das ±%3$.1f kg Magermasse, und kleinere Änderungen zählen nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From the measurements on %1$@ and %2$@. Body fat is worked out with a tape and the method is off by about ±3%% — at your weight that is ±%3$.1f kg of lean mass, and smaller changes cannot be counted."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según las medidas del %1$@ y del %2$@. El porcentaje de grasa se calcula con cinta y el método falla en torno a ±3%%: en tu peso son ±%3$.1f kg de masa magra, y menos que eso no cuenta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'après les mesures du %1$@ et du %2$@. Le taux de gras est calculé au mètre ruban, avec une erreur d'environ ±3%% — à ton poids cela fait ±%3$.1f kg de masse maigre, et en dessous cela ne compte pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי המדידות מ-%1$@ ומ-%2$@. אחוז השומן מחושב בסרט מדידה, ולשיטה יש שגיאה של כ-±3%% — במשקל שלך זה ±%3$.1f ק\"ג מסה רזה, ושינויים קטנים מכך לא נחשבים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelas medições de %1$@ e %2$@. O percentual de gordura é calculado com fita e o método erra cerca de ±3%% — no seu peso são ±%3$.1f kg de massa magra, e mudanças menores não contam."
           }
         }
       }
@@ -23449,6 +24001,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda nada adicionado"
+          }
+        }
+      }
+    },
+    "Пока план не закрыт, дневная норма продолжает держать его дефицит. Заверши — она вернётся к расчёту по профилю, или увеличь срок ниже, чтобы продолжить." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما دامت الخطة مفتوحة، يبقى السقف اليومي على عجزها. أنهِها ليعود الحساب إلى الملف الشخصي، أو زد المدة أدناه للمتابعة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solange der Plan nicht abgeschlossen ist, hält das Tagesziel sein Defizit. Schließe ihn ab, dann rechnet es wieder nach Profil — oder verlängere unten die Dauer, um weiterzumachen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "While the plan stays open, the daily goal keeps holding its deficit. Finish it and the goal goes back to the profile calculation, or extend the duration below to carry on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mientras el plan siga abierto, el objetivo diario mantiene su déficit. Termínalo y volverá al cálculo por perfil, o amplía la duración abajo para continuar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tant que le plan reste ouvert, l'objectif quotidien conserve son déficit. Termine-le et il repassera au calcul du profil, ou allonge la durée ci-dessous pour continuer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל עוד התוכנית פתוחה, היעד היומי ממשיך להחזיק את הגירעון שלה. סיים אותה והיעד יחזור לחישוב לפי הפרופיל, או הארך את המשך למטה כדי להמשיך."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enquanto o plano ficar aberto, a meta diária mantém o déficit dele. Conclua e ela volta ao cálculo pelo perfil, ou aumente a duração abaixo para continuar."
           }
         }
       }
@@ -26878,6 +27476,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Editar prato"
+          }
+        }
+      }
+    },
+    "Редкий и хороший случай: жир уходит, а сухая масса прибавляет. Так бывает у новичков и после долгого перерыва." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حالة نادرة وجيدة: الدهون تنقص والكتلة الصافية تزيد. يحدث ذلك للمبتدئين وبعد انقطاع طويل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein seltener und guter Fall: Fett geht, Magermasse kommt. Das passiert Anfängern und nach langer Pause."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The rare good case: fat is going and lean mass is coming. It happens to beginners and after a long break."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El caso raro y bueno: la grasa baja y la masa magra sube. Ocurre en principiantes y tras un parón largo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le cas rare et favorable : le gras part, la masse maigre monte. Cela arrive aux débutants et après une longue pause."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המקרה הנדיר והטוב: השומן יורד והמסה הרזה עולה. קורה למתחילים ואחרי הפסקה ארוכה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O caso raro e bom: a gordura sai e a massa magra sobe. Acontece com iniciantes e depois de uma pausa longa."
           }
         }
       }
@@ -30405,6 +31049,144 @@
         }
       }
     },
+    "Сухая масса" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الكتلة الصافية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magermasse"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lean mass"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masa magra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masse maigre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מסה רזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Massa magra"
+          }
+        }
+      }
+    },
+    "Сухая масса выросла" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زادت الكتلة الصافية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magermasse gewachsen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lean mass has grown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masa magra ha subido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masse maigre a augmenté"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המסה הרזה עלתה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A massa magra subiu"
+          }
+        }
+      }
+    },
+    "Сухая масса держится" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الكتلة الصافية ثابتة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magermasse hält"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lean mass is holding"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masa magra se mantiene"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masse maigre tient"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המסה הרזה נשמרת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A massa magra se mantém"
+          }
+        }
+      }
+    },
     "Сухая масса на рост². Не растёт от жира, поэтому на массе показывает реальный прогресс. Натуральный потолок около 25." : {
       "localizations" : {
         "ar" : {
@@ -30447,6 +31229,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Massa magra sobre altura². A gordura não o eleva, então no bulk mostra o progresso real. O teto natural fica perto de 25."
+          }
+        }
+      }
+    },
+    "Сухая масса просела" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تراجعت الكتلة الصافية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magermasse gesunken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lean mass has dropped"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masa magra ha bajado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La masse maigre a baissé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המסה הרזה ירדה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A massa magra caiu"
           }
         }
       }
@@ -32543,6 +33371,52 @@
         }
       }
     },
+    "Финиш" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النهاية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finish"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Final"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrivée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Final"
+          }
+        }
+      }
+    },
     "Финиш %@" : {
       "localizations" : {
         "ar" : {
@@ -33197,6 +34071,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meta (mínimo)"
+          }
+        }
+      }
+    },
+    "Цель взята" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحقق الهدف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel erreicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target reached"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo alcanzado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif atteint"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד הושג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta atingida"
+          }
+        }
+      }
+    },
+    "Цель взята. Заверши план, чтобы норма вернулась к расчёту по профилю." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحقق الهدف. أنهِ الخطة ليعود السقف إلى الحساب حسب الملف الشخصي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel erreicht. Schließe den Plan ab, damit das Ziel wieder nach Profil gerechnet wird."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Target reached. Finish the plan so the goal goes back to the profile calculation."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objetivo alcanzado. Termina el plan para que la meta vuelva al cálculo por perfil."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif atteint. Termine le plan pour que l'objectif repasse au calcul du profil."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד הושג. סיים את התוכנית כדי שהיעד יחזור לחישוב לפי הפרופיל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta atingida. Conclua o plano para que a meta volte ao cálculo pelo perfil."
           }
         }
       }

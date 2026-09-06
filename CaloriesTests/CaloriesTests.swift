@@ -1604,3 +1604,167 @@ struct MacroBudgetTests {
         #expect(decoded.proteinTargetGrams(from: nil) == 154)
     }
 }
+
+
+@MainActor
+@Suite(.serialized)
+struct PlanCompletionTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(
+            UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0)
+        )
+    }
+
+    private func startedPlan(weeksAgo: Int, weeks: Int, target: Double) -> Plan {
+        Plan(startDate: Date().addingTimeInterval(-Double(weeksAgo) * 7 * 86_400),
+             durationWeeks: weeks, startWeightKg: 77, targetWeightKg: target)
+    }
+
+    /// Идущий план итога не имеет — иначе финиш показался бы на середине.
+    @Test func aRunningPlanHasNoOutcome() {
+        store.startPlan(startedPlan(weeksAgo: 2, weeks: 8, target: 71))
+        #expect(store.plan?.isFinished == false)
+        #expect(store.planOutcome == nil)
+    }
+
+    /// Дошедший до даты финиша план становится итогом.
+    @Test func aPlanPastItsEndDateIsFinished() {
+        store.startPlan(startedPlan(weeksAgo: 9, weeks: 8, target: 71))
+        #expect(store.plan?.isFinished == true)
+        #expect(store.planOutcome != nil)
+    }
+
+    /// Цель взята, когда пришли к целевому весу или ниже.
+    @Test func hittingTheTargetCountsAsReached() {
+        store.startPlan(startedPlan(weeksAgo: 9, weeks: 8, target: 71))
+        store.addWeight(70.8, date: Date().addingTimeInterval(-86_400))
+
+        let outcome = store.planOutcome
+        #expect(outcome?.reachedTarget == true)
+        #expect(abs((outcome?.changeKg ?? 0) - (70.8 - 77)) < 0.01)
+    }
+
+    /// Недошёл — итог говорит, на сколько именно, а не молчит.
+    @Test func fallingShortReportsTheGap() {
+        store.startPlan(startedPlan(weeksAgo: 9, weeks: 8, target: 71))
+        store.addWeight(73.0, date: Date().addingTimeInterval(-86_400))
+
+        let outcome = store.planOutcome
+        #expect(outcome?.reachedTarget == false)
+        #expect(abs((outcome?.shortfallKg ?? 0) - 2.0) < 0.01)
+    }
+
+    /// Вес упал — TDEE упал, и норма плана должна пойти за ним, а не замереть
+    /// на числе, посчитанном в день старта.
+    @Test func theGoalFollowsAFallingWeight() {
+        store.startPlan(startedPlan(weeksAgo: 1, weeks: 8, target: 71))
+        let goalAtStart = store.dailyGoal
+
+        var lighter = store.profile!
+        lighter.weightKg = 74
+        store.updateProfile(lighter)
+
+        #expect(store.dailyGoal < goalAtStart)
+        #expect(store.dailyGoal == store.plan!.dailyCalorieTarget(tdee: lighter.tdee))
+    }
+
+    /// Тумблер цикла отвечает только за распределение по дням: следование за весом
+    /// должно быть одинаковым и с ним, и без него.
+    @Test func cyclingDoesNotChangeWhetherTheGoalFollowsWeight() {
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-7 * 86_400),
+                             durationWeeks: 8, startWeightKg: 77, targetWeightKg: 71,
+                             cyclingEnabled: true))
+        var lighter = store.profile!
+        lighter.weightKg = 74
+        store.updateProfile(lighter)
+        let withCycling = store.dailyGoal
+
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-7 * 86_400),
+                             durationWeeks: 8, startWeightKg: 77, targetWeightKg: 71,
+                             cyclingEnabled: false))
+        store.updateProfile(lighter)
+
+        #expect(store.dailyGoal == withCycling)
+    }
+
+    private func session(_ daysAgo: Int, belt: Double, neck: Double) -> BodyMeasurement {
+        let m = BodyMeasurement(date: Date().addingTimeInterval(-Double(daysAgo) * 86_400))
+        m.setValue(belt, for: .belt)
+        m.setValue(neck, for: .neck)
+        return m
+    }
+
+    /// Один сеанс замеров сравнивать не с чем.
+    @Test func compositionNeedsTwoSessions() {
+        store.startPlan(startedPlan(weeksAgo: 4, weeks: 8, target: 71))
+        store.addMeasurement(session(20, belt: 86, neck: 38))
+        store.addWeight(77, date: Date().addingTimeInterval(-20 * 86_400))
+
+        #expect(store.planCompositionChange == nil)
+    }
+
+    /// Жир ушёл, сухая масса на месте — вес уходит правильно.
+    @Test func fatComingOffLeavesLeanMassAlone() {
+        store.startPlan(startedPlan(weeksAgo: 8, weeks: 12, target: 70))
+        store.addMeasurement(session(50, belt: 88, neck: 38))
+        store.addWeight(77, date: Date().addingTimeInterval(-50 * 86_400))
+        store.addMeasurement(session(2, belt: 81, neck: 38))
+        store.addWeight(72, date: Date().addingTimeInterval(-2 * 86_400))
+
+        let change = store.planCompositionChange
+        #expect(change != nil)
+        #expect((change?.fatDeltaKg ?? 0) < -1)
+        #expect(change?.verdict == .withinNoise)
+    }
+
+    /// Пояс не изменился, а вес упал — значит ушла сухая масса, и об этом надо
+    /// сказать, а не порадоваться минусу на весах.
+    @Test func losingWeightWithoutLosingGirthReadsAsLeanLoss() {
+        store.startPlan(startedPlan(weeksAgo: 8, weeks: 12, target: 70))
+        store.addMeasurement(session(50, belt: 88, neck: 38))
+        store.addWeight(85, date: Date().addingTimeInterval(-50 * 86_400))
+        store.addMeasurement(session(2, belt: 88, neck: 38))
+        store.addWeight(77, date: Date().addingTimeInterval(-2 * 86_400))
+
+        #expect(store.planCompositionChange?.verdict == .leanLoss)
+    }
+
+    /// Меньше погрешности метода — это не результат, и выдавать его за результат
+    /// нельзя: у Navy около ±3% жира.
+    @Test func changesSmallerThanTheMethodsErrorAreCalledNoise() {
+        store.startPlan(startedPlan(weeksAgo: 8, weeks: 12, target: 70))
+        store.addMeasurement(session(50, belt: 84.0, neck: 38))
+        store.addWeight(77.0, date: Date().addingTimeInterval(-50 * 86_400))
+        store.addMeasurement(session(2, belt: 83.6, neck: 38))
+        store.addWeight(76.6, date: Date().addingTimeInterval(-2 * 86_400))
+
+        let change = store.planCompositionChange
+        #expect(change != nil)
+        #expect(abs(change!.leanDeltaKg) <= change!.noiseKg)
+        #expect(change?.verdict == .withinNoise)
+    }
+
+    /// Без взвешиваний подводить итог не по чему, и выдумывать его нельзя.
+    @Test func withoutWeighInsThereIsNoVerdict() {
+        store.startPlan(startedPlan(weeksAgo: 9, weeks: 8, target: 71))
+
+        let outcome = store.planOutcome
+        #expect(outcome != nil)
+        #expect(outcome?.finalWeightKg == nil)
+        #expect(outcome?.reachedTarget == false)
+    }
+}

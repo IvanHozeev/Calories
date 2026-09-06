@@ -28,10 +28,12 @@ struct MeasurementEntryView: View {
         site.isPaired ? BodySide.allCases : [.right]
     }
 
-    private var estimates: [MeasurementSite: BodyAnalysis.Estimate] {
-        guard let latest = store.latestMeasurement else { return [:] }
-        return BodyAnalysis.estimates(for: latest)
-    }
+    /// Оценки пересчитываются на каждое сохранённое значение, а не на каждое чтение.
+    ///
+    /// Раньше это было вычисляемое свойство, и его читала каждая строка — а строк
+    /// тут два десятка, и колёсики перерисовывают экран на каждом делении прокрутки.
+    /// Меняются оценки только когда меняется сохранённый замер, то есть в commit.
+    @State private var estimates: [MeasurementSite: BodyAnalysis.Estimate] = [:]
 
     var body: some View {
         List {
@@ -200,6 +202,7 @@ struct MeasurementEntryView: View {
     private func loadOnce() {
         guard !loaded else { return }
         loaded = true
+        refreshEstimates()
         guard let latest = store.latestMeasurement,
               Calendar.current.isDateInToday(latest.date) else { return }
         for site in MeasurementSite.allCases {
@@ -226,6 +229,13 @@ struct MeasurementEntryView: View {
     private func commit(_ site: MeasurementSite, _ side: BodySide) {
         todaysMeasurement().setValue(values[Self.key(site, side)] ?? 0, for: site, side: side)
         store.saveMeasurementEdits()
+        // Снятый замер меняет оценки для остальных мест: бицепс подсказывает
+        // предплечье, талия — пояс. Пересчитываем здесь, а не при каждом чтении.
+        refreshEstimates()
+    }
+
+    private func refreshEstimates() {
+        estimates = store.latestMeasurement.map(BodyAnalysis.estimates(for:)) ?? [:]
     }
 
     // MARK: - Пояснение к подсказкам

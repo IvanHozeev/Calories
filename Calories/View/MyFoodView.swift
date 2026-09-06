@@ -69,12 +69,19 @@ struct MyFoodView: View {
     }
 
     var body: some View {
-        List {
+        // Отборы считаем по разу за перерисовку и передаём дальше: они нужны и
+        // в подписях сегментов, и в самой секции, а каждый — это проход
+        // с локале-зависимым сравнением по всей базе.
+        let dishes = filteredDishes
+        let products = filteredProducts
+        let database = filteredDatabase
+
+        return List {
             Section {
                 Picker("Раздел", selection: $tab) {
-                    Text("Блюда (\(filteredDishes.count))").tag(Tab.dishes)
-                    Text("Продукты (\(filteredProducts.count))").tag(Tab.products)
-                    Text("База (\(filteredDatabase.count))").tag(Tab.database)
+                    Text("Блюда (\(dishes.count))").tag(Tab.dishes)
+                    Text("Продукты (\(products.count))").tag(Tab.products)
+                    Text("База (\(database.count))").tag(Tab.database)
                 }
                 .pickerStyle(.segmented)
             }
@@ -82,9 +89,9 @@ struct MyFoodView: View {
             .listRowSeparator(.hidden)
 
             switch tab {
-            case .dishes: dishesSection
-            case .products: productsSection
-            case .database: databaseSection
+            case .dishes: dishesSection(dishes)
+            case .products: productsSection(products)
+            case .database: databaseSection(database)
             }
 
             if !trimmedQuery.isEmpty {
@@ -175,7 +182,7 @@ struct MyFoodView: View {
     // MARK: - Блюда
 
     @ViewBuilder
-    private var dishesSection: some View {
+    private func dishesSection(_ filteredDishes: [Dish]) -> some View {
         if filteredDishes.isEmpty {
             Section {
                 Text(trimmedQuery.isEmpty ? "Пока нет своих блюд" : "Ничего не найдено")
@@ -224,7 +231,7 @@ struct MyFoodView: View {
     /// База разложена по категориям, как и в листе добавления еды: одним
     /// списком из шести десятков строк она не читается.
     @ViewBuilder
-    private var databaseSection: some View {
+    private func databaseSection(_ filteredDatabase: [FoodItem]) -> some View {
         if filteredDatabase.isEmpty {
             Section {
                 Text("Ничего не найдено")
@@ -262,7 +269,7 @@ struct MyFoodView: View {
     }
 
     @ViewBuilder
-    private var productsSection: some View {
+    private func productsSection(_ filteredProducts: [FoodItem]) -> some View {
         if filteredProducts.isEmpty {
             Section {
                 Text(trimmedQuery.isEmpty ? "Пока нет своих продуктов" : "Ничего не найдено")

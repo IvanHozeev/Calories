@@ -56,6 +56,10 @@ final class CalorieStore {
 
     // O(1) словари для быстрого поиска
     @ObservationIgnored private(set) var entriesByDay: [Date: [FoodEntry]] = [:]
+    /// Категория по имени продукта. Строится один раз на обновление, потому что
+    /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
+    /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
+    @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
     @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
     // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
     @ObservationIgnored private var goalLockedOnDay: Date? = nil
@@ -139,6 +143,12 @@ final class CalorieStore {
 
         // Строим O(1)-словари один раз
         entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
+        // Свой продукт идёт последним и перекрывает одноимённый встроенный:
+        // так же, как в прежнем поиске, где сначала смотрели свои.
+        categoryByFoodName = Dictionary(
+            (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
+            uniquingKeysWith: { _, own in own }
+        )
         // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном
         // ключе. Две записи могут схлопнуться в один локальный день после смены часового пояса,
         // и это был бы краш на каждом запуске без возможности выбраться.
@@ -407,8 +417,7 @@ final class CalorieStore {
     }
 
     private func category(ofProductNamed name: String) -> FoodCategory? {
-        customFoods.first { $0.name == name }?.foodCategory
-            ?? FoodDatabase.items.first { $0.name == name }?.foodCategory
+        categoryByFoodName[name]
     }
 
     func foodCategories(forEntryNamed name: String) -> [FoodCategory] {

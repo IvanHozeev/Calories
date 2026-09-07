@@ -4,6 +4,52 @@
     "" : {
 
     },
+    "Название совпало с продуктом базы — состав показан оттуда, дневник считает его так же. Доля суточной нормы в порции." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاسم يطابق منتجًا في القاعدة، لذا يُعرض تركيبه هنا — واليوميات تحسبه بالطريقة نفسها. نسبة من القيمة اليومية في الحصة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Name stimmt mit einem Produkt der Basis überein, deshalb wird dessen Zusammensetzung gezeigt — das Tagebuch rechnet genauso. Anteil am Tagesbedarf in der Portion."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The name matches a product in the base, so its composition is shown here — the diary counts it the same way. Share of the daily value in the serving."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre coincide con un producto de la base, así que se muestra su composición: el diario la cuenta igual. Porcentaje del valor diario en la porción."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom correspond à un produit de la base : sa composition est affichée ici, et le journal la compte de la même façon. Part de l'apport quotidien dans la portion."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השם תואם למוצר בבסיס, ולכן ההרכב שלו מוצג כאן — היומן סופר אותו באותה דרך. אחוז מהערך היומי במנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome coincide com um produto da base, então a composição dele é exibida — o diário conta da mesma forma. Percentual do valor diário na porção."
+          }
+        }
+      }
+    },
     "—" : {
 
     },

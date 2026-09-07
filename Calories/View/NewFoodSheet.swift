@@ -35,7 +35,27 @@ struct NewFoodSheet: View {
     /// у продуктов базы бывают. Вводить их руками негде и незачем.
     private var micronutrients: Micronutrients {
         if !linkedMicronutrients.isEmpty { return linkedMicronutrients }
-        return editingFood?.micronutrients ?? Micronutrients()
+        if let own = editingFood?.micronutrients, !own.isEmpty { return own }
+        return matchedInCatalog ?? Micronutrients()
+    }
+
+    /// Состав продукта базы, чьё название совпало с введённым.
+    ///
+    /// Показываем, а не подставляем: своих витаминов у продукта нет, но дневник
+    /// и так берёт их по названию — значками у записи. Скрывать это на экране,
+    /// где человек смотрит на состав, было бы странно: цифры уже участвуют
+    /// в расчёте дня, просто он их не видел.
+    private var matchedInCatalog: Micronutrients? {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+        return FoodCatalog.micronutrientsByName[trimmed]
+    }
+
+    /// Витамины показаны от совпадения по названию, а не сохранены у продукта.
+    private var showsMatchedVitamins: Bool {
+        linkedMicronutrients.isEmpty
+            && (editingFood?.micronutrients.isEmpty ?? true)
+            && matchedInCatalog != nil
     }
 
     /// Подходящие строки каталога — по названию, которое человек уже написал.
@@ -305,6 +325,8 @@ struct NewFoodSheet: View {
                     } footer: {
                         if let linkedSourceName {
                             Text(String(format: String(localized: "Взяты из «%@». Доля суточной нормы в порции."), linkedSourceName))
+                        } else if showsMatchedVitamins {
+                            Text("Название совпало с продуктом базы — состав показан оттуда, дневник считает его так же. Доля суточной нормы в порции.")
                         } else {
                             Text("Доля суточной нормы в порции. У натрия это доля потолка, а не цели.")
                         }

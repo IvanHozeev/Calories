@@ -2127,3 +2127,102 @@ struct BackupScheduleTests {
         #expect(BackupService.obsoleteBackups(among: names, keepLast: 0) == ["calories-backup-2026-09-01-1000.json"])
     }
 }
+
+// MARK: - Микронутриенты за день
+
+/// Главное здесь — не арифметика, а честность про то, на какой части дня
+/// число посчитано. Витаминов не будет ни у своей еды, ни у товаров из
+/// Open Food Facts, и «железо 8 мг» при половине дня без данных читается как
+/// дефицит, которого может не быть.
+@MainActor
+@Suite(.serialized)
+struct MicronutrientDayTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+        store.dailyGoal = 2000
+    }
+
+    /// Продукт из встроенной базы, у которого точно есть состав.
+    private func spinach() -> FoodItem {
+        FoodDatabase.items.first { !$0.micronutrients.isEmpty && $0.name == "Spinach" }
+            ?? FoodDatabase.items.first { !$0.micronutrients.isEmpty }!
+    }
+
+    @Test func anEmptyDayHasNothingAndNoCoverage() {
+        let day = store.micronutrients(on: Date())
+        #expect(day.totals.isEmpty)
+        #expect(day.coverage == 0)
+        #expect(!day.isTrustworthy)
+    }
+
+    @Test func aKnownProductContributesItsNutrientsScaledByWeight() {
+        let food = spinach()
+        let ironPer100g = food.micronutrients[.iron]
+        store.add(name: food.name, calories: 46, macros: food.macrosPer100g, grams: 200)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.coverage == 1)
+        if let ironPer100g {
+            // Двести грамм — двойная порция состава.
+            #expect(abs((day.totals[.iron] ?? 0) - ironPer100g * 2) < 0.001)
+        }
+    }
+
+    @Test func foodWeKnowNothingAboutLowersCoverageInsteadOfCountingAsZero() {
+        // Своя еда состава не несёт. Прибавить ноль означало бы объявить
+        // дефицит там, где данных просто нет.
+        let food = spinach()
+        store.add(name: food.name, calories: 100, macros: food.macrosPer100g, grams: 100)
+        store.add(name: "Шаурма у дома", calories: 900, macros: .zero, grams: 400)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.totalCalories == 1000)
+        #expect(day.coveredCalories == 100)
+        #expect(abs(day.coverage - 0.1) < 0.001)
+        #expect(!day.isTrustworthy, "На десятой части дня показывать число нельзя")
+    }
+
+    @Test func anEntryWithoutWeightCannotBeCounted() {
+        // «Просто 300 ккал» — состав задан на сто грамм, а граммов нет.
+        store.add(name: "Быстрая запись", calories: 300)
+        let day = store.micronutrients(on: Date())
+        #expect(day.coveredCalories == 0)
+        #expect(day.totalCalories == 300)
+    }
+
+    @Test func theShareOfTheNormIsHiddenUntilTheDayIsCoveredEnough() {
+        let food = spinach()
+        store.add(name: food.name, calories: 50, macros: food.macrosPer100g, grams: 100)
+        store.add(name: "Неизвестное", calories: 950, macros: .zero, grams: 300)
+        #expect(store.shareOfDailyValue(.iron, on: Date()) == nil,
+                "При покрытии 5% доля нормы — выдумка")
+
+        store.add(name: food.name, calories: 2000, macros: food.macrosPer100g, grams: 100)
+        let share = store.shareOfDailyValue(.iron, on: Date())
+        #expect(share != nil, "Когда день покрыт, долю показывать можно")
+    }
+
+    @Test func sodiumIsACeilingAndNotAGoal() {
+        // Единственный нутриент в списке, который не надо «набирать». Если
+        // показать его как недовыполненную норму, человек начнёт досаливать.
+        #expect(Micronutrient.sodium.isCeiling)
+        for nutrient in Micronutrient.allCases where nutrient != .sodium {
+            #expect(!nutrient.isCeiling, "\(nutrient.rawValue) целью быть должен")
+        }
+    }
+
+    @Test func everyNutrientHasANormToCompareWith() {
+        for nutrient in Micronutrient.allCases {
+            #expect(nutrient.dailyValue > 0, "\(nutrient.rawValue) не с чем сравнивать")
+        }
+    }
+}

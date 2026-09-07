@@ -61,6 +61,10 @@ final class CalorieStore {
     /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
     /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
     @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
+    /// Микронутриенты на 100 г по названию продукта. Записи дневника их не
+    /// хранят — только калории и макросы, — поэтому за витаминами приходится
+    /// возвращаться к продукту, из которого запись сделана.
+    @ObservationIgnored private(set) var micronutrientsByFoodName: [String: Micronutrients] = [:]
     /// Дни голодания множеством — их проверяют в каждом дне серии и банка.
     @ObservationIgnored private(set) var fastDates: Set<Date> = []
     @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
@@ -154,6 +158,12 @@ final class CalorieStore {
         fastDates = Set(fastDays.map { calendar.startOfDay(for: $0.date) })
         categoryByFoodName = Dictionary(
             (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
+            uniquingKeysWith: { _, own in own }
+        )
+        micronutrientsByFoodName = Dictionary(
+            (FoodDatabase.items + customFoods)
+                .filter { !$0.micronutrients.isEmpty }
+                .map { ($0.name, $0.micronutrients) },
             uniquingKeysWith: { _, own in own }
         )
         // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном

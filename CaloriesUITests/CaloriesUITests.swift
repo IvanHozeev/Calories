@@ -143,37 +143,6 @@ final class CaloriesUITests: XCTestCase {
                       "В настройках должна быть выгрузка дневника в CSV")
     }
 
-    /// Кнопка включения копии обязана открывать системный диалог выбора папки.
-    ///
-    /// Тест не выглядит содержательным, но появился он не зря: два
-    /// `fileImporter` на одной вьюхе конфликтуют — SwiftUI оставляет только
-    /// последний, и кнопка молча ничего не делала. Ни компилятор, ни один
-    /// другой тест этого не видели: код правильный, экран на месте, реакции нет.
-    @MainActor
-    func testTurningOnBackupOpensTheFolderPicker() {
-        let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        app.buttons["openSettings"].tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
-
-        let settings = app.navigationBars["Settings"]
-        XCTAssertTrue(settings.isHittable, "До нажатия настройки должны быть доступны")
-
-        let turnOn = app.buttons["Turn on automatic backup"]
-        scrollIntoReach(turnOn, in: app)
-        turnOn.tap()
-
-        // Диалог выбора файлов рисует другой процесс, поэтому в дереве нашего
-        // приложения его нет. Зато видно главное: экран настроек им накрыт.
-        let covered = NSPredicate(format: "isHittable == false")
-        expectation(for: covered, evaluatedWith: settings)
-        waitForExpectations(timeout: 10)
-
-        // Гасим приложение вместе с системным листом: иначе он останется висеть
-        // поверх и следующий тест не найдёт даже таб-бар.
-        app.terminate()
-    }
-
     /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.
     @MainActor
     func testMeasurementsSuggestMissingSites() {

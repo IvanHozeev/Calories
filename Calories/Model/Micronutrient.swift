@@ -40,6 +40,36 @@ enum Micronutrient: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// Суточный ориентир для взрослого — привычные Daily Values.
+    ///
+    /// Единицы те же, что у `unit`. Точности до возраста и пола здесь
+    /// намеренно нет: приложение не диетолог, а разброс между «мужчина 30» и
+    /// «женщина 30» меньше, чем разброс между тем, что человек съел и что
+    /// записал.
+    var dailyValue: Double {
+        switch self {
+        case .vitaminA:   return 900
+        case .vitaminC:   return 90
+        case .vitaminD:   return 20
+        case .vitaminE:   return 15
+        case .vitaminB6:  return 1.7
+        case .vitaminB12: return 2.4
+        case .folate:     return 400
+        case .calcium:    return 1300
+        case .iron:       return 18
+        case .magnesium:  return 420
+        case .zinc:       return 11
+        case .potassium:  return 4700
+        case .sodium:     return 2300
+        case .selenium:   return 55
+        }
+    }
+
+    /// Для натрия это потолок, а не цель. «Недобрал натрия» — бессмыслица, и
+    /// показывать его вместе с остальными как недовыполненную норму нельзя:
+    /// человек начнёт досаливать еду, чтобы закрыть шкалу.
+    var isCeiling: Bool { self == .sodium }
+
     /// Идентификатор нутриента в базе USDA FoodData Central.
     /// Единицы там совпадают с нашими, поэтому пересчёт не нужен.
     var usdaNutrientID: Int {

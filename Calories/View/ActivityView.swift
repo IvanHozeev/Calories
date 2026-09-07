@@ -273,7 +273,11 @@ private struct MonthGrid: View {
                         .frame(maxWidth: .infinity)
                 }
 
-                ForEach(0..<leadingBlanks, id: \.self) { _ in
+                // Идентификаторы обязаны различаться по всей сетке, а не внутри
+                // своего ForEach: у подписей колонок это были 0…6, у пустых
+                // ячеек — те же 0…N, и SwiftUI считал их одной ячейкой.
+                // Строка вместо числа разводит их гарантированно.
+                ForEach((0..<leadingBlanks).map { "blank-\($0)" }, id: \.self) { _ in
                     Color.clear.frame(height: 34)
                 }
 

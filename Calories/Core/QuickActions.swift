@@ -66,10 +66,12 @@ final class QuickActionRouter {
     @discardableResult
     func takePendingFromControl() -> Bool {
         let defaults = UserDefaults(suiteName: CalorieStore.appGroup)
-        let raw = defaults?.string(forKey: Self.controlActionKey)
+        // Пишем только когда что-то нашли: чтение случается на каждом подъёме
+        // приложения, и лог из него получился бы сплошным «пусто».
+        guard let raw = defaults?.string(forKey: Self.controlActionKey),
+              let action = QuickAction(rawValue: raw) else { return false }
         Logger(subsystem: "ivankhozeyev.team.Calories", category: "control")
-            .notice("приложение читает намерение контрола: \(raw ?? "пусто")")
-        guard let raw, let action = QuickAction(rawValue: raw) else { return false }
+            .notice("приложение приняло намерение контрола: \(raw)")
         defaults?.removeObject(forKey: Self.controlActionKey)
         pending = action
         return true

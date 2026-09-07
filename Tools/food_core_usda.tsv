@@ -1,0 +1,219 @@
+# en	fdcId	usda_description	name_score	macro_distance
+Apple	171688	Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)	1.00	0.01
+Banana	173944	Bananas, raw	1.00	0.01
+Orange	169097	Oranges, raw, all commercial varieties	1.00	0.01
+Tangerine	169105	Tangerines, (mandarin oranges), raw	1.00	0.01
+Grapefruit	174673	Grapefruit, raw, pink and red, all areas	1.00	0.01
+Lemon	167746	Lemons, raw, without peel	1.00	0.01
+Pear	173027	Fruit cocktail, (peach and pineapple and pear and grape and cherry), canned, light syrup, solids and liquids	1.00	0.00
+Grapes	174683	Grapes, red or green (European type, such as Thompson seedless), raw	1.00	0.01
+Strawberry	167762	Strawberries, raw	1.00	0.01
+Raspberry	167755	Raspberries, raw	1.00	0.00
+Blueberry	171711	Blueberries, raw	1.00	0.02
+Blackberry	173946	Blackberries, raw	1.00	0.01
+Blackcurrant	173963	Currants, european black, raw	1.00	0.01
+Gooseberry	173030	Gooseberries, raw	1.00	0.01
+Cranberry	171722	Cranberries, raw	1.00	0.00
+Sour cherry	173954	Cherries, sour, red, raw	1.00	0.00
+Sweet cherry	171719	Cherries, sweet, raw	1.00	0.00
+Watermelon	167765	Watermelon, raw	1.00	0.01
+Melon	169092	Melons, cantaloupe, raw	1.00	0.01
+Peach	169928	Peaches, yellow, raw	1.00	0.01
+Nectarine	169914	Nectarines, raw	1.00	0.01
+Apricot	171697	Apricots, raw	1.00	0.00
+Plum	169949	Plums, raw	1.00	0.01
+Mango	169910	Mangos, raw	1.00	0.00
+Kiwi	168153	Kiwifruit, green, raw	1.00	0.01
+Pineapple	174670	Fruit salad, (peach and pear and apricot and pineapple and cherry), canned, juice pack, solids and liquids	1.00	0.00
+Papaya	169926	Papayas, raw	1.00	0.01
+Pomegranate	169134	Pomegranates, raw	1.00	0.01
+Persimmon	169941	Persimmons, japanese, raw	1.00	0.02
+Fresh fig	173021	Figs, raw	1.00	0.01
+Avocado	171705	Avocados, raw, all commercial varieties	1.00	0.02
+Dates	171726	Dates, deglet noor	1.00	0.00
+Raisins	168165	Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program)	1.00	0.03
+Dried apricots	173941	Apricots, dried, sulfured, uncooked	1.00	0.01
+Prunes	168162	Plums, dried (prunes), uncooked	1.00	0.00
+Cucumber	168409	Cucumber, with peel, raw	1.00	0.03
+Tomato	170458	Tomato juice, canned, with salt added	1.00	0.04
+Cherry tomatoes	170457	Tomatoes, red, ripe, raw, year round average	1.00	0.00
+Carrot	170393	Carrots, raw	1.00	0.01
+Boiled beetroot	168506	Beets, cooked, boiled. drained, with salt	1.00	0.00
+Boiled potato	168483	Sweet potato, cooked, baked in skin, flesh, without salt	1.00	0.05
+Baked potato	168483	Sweet potato, cooked, baked in skin, flesh, without salt	1.00	0.06
+Mashed potato	169305	Sweet potato, canned, mashed	1.00	0.52
+Broccoli	170379	Broccoli, raw	1.00	0.01
+White cabbage	169975	Cabbage, raw	1.00	0.01
+Cauliflower	169986	Cauliflower, raw	1.00	0.00
+Sauerkraut	169279	Sauerkraut, canned, solids and liquids	1.00	0.00
+Onion	170000	Onions, raw	1.00	0.01
+Green onion	170006	Onions, young green, tops only	1.00	0.21
+Garlic	169230	Garlic, raw	1.00	0.00
+Bell pepper	170108	Peppers, sweet, red, raw	1.00	0.03
+Spinach	168462	Spinach, raw	1.00	0.00
+Lettuce	169249	Lettuce, green leaf, raw	1.00	0.00
+Arugula	169387	Arugula, raw	1.00	0.00
+Zucchini	169291	Squash, summer, zucchini, includes skin, raw	1.00	0.00
+Eggplant	169228	Eggplant, raw	1.00	0.00
+Pumpkin	168448	Pumpkin, raw	1.00	0.00
+Radish	169276	Radishes, raw	1.00	0.00
+Celery	169988	Celery, raw	1.00	0.05
+Asparagus	168389	Asparagus, raw	1.00	0.00
+Green peas	170419	Peas, green, raw	1.00	0.01
+Boiled sweet corn	168525	Corn, sweet, yellow, cooked, boiled, drained, with salt	1.00	0.00
+Green beans	169961	Beans, snap, green, raw	1.00	0.01
+Dill	172233	Dill weed, fresh	1.00	0.00
+Parsley	170416	Parsley, fresh	1.00	0.00
+Cilantro	169997	Coriander (cilantro) leaves, raw	1.00	0.00
+Ginger	169231	Ginger root, raw	1.00	0.01
+Olives	169094	Olives, ripe, canned (small-extra large)	1.00	0.02
+Canned corn	168542	Corn, sweet, white, canned, vacuum pack, regular pack	1.00	0.10
+Canned peas	170421	Peas, green, canned, regular pack, solids and liquids	1.00	0.04
+Champignon mushrooms	169251	Mushrooms, white, raw	1.00	0.00
+Oyster mushrooms	168580	Mushrooms, oyster, raw	1.00	0.00
+Porcini	168582	Mushrooms, straw, canned, drained solids	1.00	0.13
+Chanterelles	168422	Mushrooms, Chanterelle, raw	1.00	0.15
+Shiitake	169242	Mushrooms, shiitake, raw	1.00	0.00
+Boiled white rice	168878	Rice, white, long-grain, regular, enriched, cooked	1.00	0.01
+Boiled brown rice	169704	Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)	1.00	0.01
+Boiled buckwheat	170686	Buckwheat groats, roasted, cooked	1.00	0.24
+Oatmeal with water	172979	Cereals, QUAKER, QUAKER MultiGrain Oatmeal, prepared with water, no salt	1.00	0.20
+Dry oat flakes	173904	Cereals, oats, regular and quick, not fortified, dry	0.67	0.01
+Boiled pearl barley	170285	Barley, pearled, cooked	0.67	0.01
+Boiled millet	168871	Millet, cooked	1.00	0.02
+Boiled bulgur	170287	Bulgur, cooked	1.00	0.01
+Boiled couscous	169700	Couscous, cooked	1.00	0.01
+Boiled quinoa	168917	Quinoa, cooked	1.00	0.01
+Boiled pasta	169728	Pasta, fresh-refrigerated, plain, cooked	1.00	0.01
+White bread	174924	Bread, white, commercially prepared (includes soft bread crumbs)	1.00	0.02
+Rye bread	174920	Bread, reduced-calorie, rye	1.00	0.21
+Whole grain bread	168013	Bread, multi-grain (includes whole-grain)	1.00	0.18
+White loaf	172818	Bread, white, commercially prepared, low sodium, no salt	1.00	0.10
+Granola	167542	Snacks, granola bars, hard, plain	1.00	0.07
+Corn flakes	174648	Cereals ready-to-eat, RALSTON Corn Flakes	1.00	0.26
+Oat bran	168872	Oat bran, raw	1.00	0.41
+Wheat flour	169761	Wheat flour, white, all-purpose, unenriched	1.00	0.01
+Boiled chicken breast	171477	Chicken, broilers or fryers, breast, meat only, cooked, roasted	1.00	0.00
+Fried chicken breast	171476	Chicken, broilers or fryers, breast, meat and skin, cooked, fried, flour	1.00	0.28
+Chicken thigh	171120	Chicken, broilers or fryers, rotisserie, original seasoning, thigh, meat only, cooked	1.00	0.15
+Chicken drumstick	172377	Chicken, broilers or fryers, drumstick, meat only, cooked, stewed	1.00	0.04
+Chicken wings	172392	Chicken, broilers or fryers, wing, meat only, cooked, roasted	1.00	0.02
+Grilled chicken	172407	Chicken, capons, meat and skin and giblets and neck, cooked, roasted	1.00	0.10
+Turkey breast	174516	Turkey, retail parts, breast, meat only, cooked, roasted	1.00	0.04
+Beef	174032	Beef, ground, 85% lean meat / 15% fat, patty, cooked, broiled	1.00	0.02
+Lean beef	174752	Beef, ground, 93% lean meat / 7% fat, patty, cooked, broiled	1.00	0.04
+Ground beef	171800	Beef, ground, 80% lean meat / 20% fat, loaf, cooked, baked	1.00	0.06
+Ribeye steak	173055	Beef, ribeye cap steak, boneless, separable lean only, trimmed to 0" fat, choice, cooked, grilled	1.00	0.36
+Pork	167820	Pork, fresh, loin, whole, separable lean and fat, cooked, broiled	1.00	0.02
+Pork tenderloin	168250	Pork, fresh, loin, tenderloin, separable lean only, cooked, roasted	1.00	0.01
+Lamb	172480	Lamb, composite of trimmed retail cuts, separable lean and fat, trimmed to 1/4" fat, choice, cooked	1.00	0.02
+Veal	172571	Veal, shank (fore and hind), separable lean only, cooked, braised	1.00	0.09
+Rabbit	172521	Game meat, rabbit, domesticated, composite of cuts, raw	1.00	0.35
+Duck	172409	Duck, domesticated, meat and skin, cooked, roasted	1.00	0.02
+Chicken liver	171060	Chicken, liver, all classes, raw	1.00	0.01
+Beef liver	169451	Beef, variety meats and by-products, liver, raw	1.00	0.02
+Chicken heart	171458	Chicken, heart, all classes, raw	1.00	0.03
+Bacon	167712	Pork, cured, bacon, cooked, broiled, pan-fried or roasted, reduced sodium	1.00	0.01
+Ham	167885	Pork, cured, ham, extra lean and regular, canned, unheated	1.00	0.05
+Boiled sausage	173882	Pork sausage, reduced sodium, cooked	1.00	0.34
+Smoked sausage	174577	Polish sausage, pork	1.00	0.50
+Frankfurters	172964	Frankfurter, pork	1.00	0.15
+Salmon	175167	Fish, salmon, Atlantic, farmed, raw	1.00	0.03
+Trout	173717	Fish, trout, rainbow, farmed, raw	1.00	0.00
+Fresh tuna	173706	Fish, tuna, fresh, bluefin, raw	1.00	0.01
+Canned tuna	171986	Fish, tuna, light, canned in water, without salt, drained solids	1.00	0.02
+Cod	171955	Fish, cod, Atlantic, raw	1.00	0.01
+Pollock	173725	Fish, pollock, Alaska, raw	1.00	0.11
+Hake	173713	Fish, whiting, mixed species, raw	1.00	0.15
+Carp	171952	Fish, carp, raw	1.00	0.01
+Herring	175116	Fish, herring, Atlantic, raw	1.00	0.00
+Mackerel	175119	Fish, mackerel, Atlantic, raw	1.00	0.02
+Sea bream	173698	Fish, snapper, mixed species, raw	1.00	0.19
+Sea bass	175142	Fish, sea bass, mixed species, raw	1.00	0.02
+Shrimp	175180	Crustaceans, shrimp, cooked	1.00	0.00
+Squid	174223	Mollusks, squid, mixed species, raw	1.00	0.00
+Mussels	174216	Mollusks, mussel, blue, raw	1.00	0.00
+Crab	174202	Crustaceans, crab, alaska king, cooked, moist heat	1.00	0.02
+Red caviar	174188	Fish, caviar, black and red, granular	1.00	0.54
+Egg	173424	Egg, whole, cooked, hard-boiled	1.00	0.03
+Egg white	172183	Egg, white, raw, fresh	1.00	0.01
+Egg yolk	172184	Egg, yolk, raw, fresh	1.00	0.02
+Fat-free cottage cheese	172181	Cheese, cottage, nonfat, uncreamed, dry, large or small curd	1.00	0.43
+Cottage cheese 5%	172179	Cheese, cottage, creamed, large or small curd	0.67	0.49
+Plain yogurt	171284	Yogurt, plain, whole milk	1.00	0.02
+Greek yogurt	171304	Yogurt, Greek, plain, whole milk	1.00	0.01
+Milk 3.2%	171265	Milk, whole, 3.25% milkfat, with added vitamin D	0.67	0.03
+Milk 1.5%	170873	Milk, lowfat, fluid, 1% milkfat, with added nonfat milk solids, vitamin A and vitamin D	1.00	0.07
+Skim milk	171269	Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)	1.00	0.09
+Sour cream 15%	171259	Sour dressing, non-butterfat, cultured, filled cream-type	0.67	0.23
+Sour cream 20%	171257	Cream, sour, cultured	0.67	0.11
+Cream 33%	170859	Cream, fluid, heavy whipping	1.00	0.21
+Hard cheese	168089	Imitation cheese, american or cheddar, low cholesterol	1.00	0.26
+Parmesan	170848	Cheese, parmesan, hard	1.00	0.05
+Mozzarella	170845	Cheese, mozzarella, whole milk	1.00	0.08
+Feta	173420	Cheese, feta	1.00	0.04
+Processed cheese	171289	Cheese product, pasteurized process, American, vitamin D fortified	1.00	0.19
+Cream cheese	169081	Cheese spread, cream cheese base	1.00	0.41
+Boiled lentils	172421	Lentils, mature seeds, cooked, boiled, without salt	1.00	0.00
+Boiled beans	173740	Beans, kidney, all types, mature seeds, cooked, boiled, without salt	1.00	0.01
+Boiled chickpeas	173757	Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt	1.00	0.01
+Boiled peas	172429	Peas, split, mature seeds, cooked, boiled, without salt	1.00	0.00
+Boiled mung beans	174257	Mung beans, mature seeds, cooked, boiled, without salt	1.00	0.01
+Edamame	168411	Edamame, frozen, prepared	1.00	0.01
+Tofu	172476	Tofu, raw, regular, prepared with calcium sulfate	1.00	0.00
+Hummus	172454	Hummus, home prepared	1.00	0.38
+Almonds	170567	Nuts, almonds	1.00	0.02
+Walnuts	170187	Nuts, walnuts, english	1.00	0.02
+Hazelnuts	170581	Nuts, hazelnuts or filberts	1.00	0.02
+Cashews	170162	Nuts, cashew nuts, raw	1.00	0.02
+Pistachios	170184	Nuts, pistachio nuts, raw	1.00	0.04
+Pine nuts	170591	Nuts, pine nuts, dried	1.00	0.03
+Peanuts	172430	Peanuts, all types, raw	1.00	0.02
+Peanut butter	172469	Peanut butter, chunk style, without salt	1.00	0.08
+Coconut	170169	Nuts, coconut meat, raw	1.00	0.03
+Sunflower seeds	170562	Seeds, sunflower seed kernels, dried	1.00	0.03
+Pumpkin seeds	170556	Seeds, pumpkin and squash seed kernels, dried	1.00	0.02
+Chia seeds	170554	Seeds, chia seeds, dried	1.00	0.03
+Flax seeds	169414	Seeds, flaxseed	1.00	0.02
+Sesame	170150	Seeds, sesame seeds, whole, dried	1.00	0.03
+Olive oil	171413	Oil, olive, salad or cooking	1.00	0.00
+Sunflower oil	171017	Oil, sunflower, linoleic (less than 60%)	1.00	0.00
+Coconut oil	172365	Oil, industrial, coconut, confection fat, typical basis for ice cream coatings	1.00	0.03
+Butter	173410	Butter, salted	1.00	0.01
+Mayonnaise	171009	Salad dressing, mayonnaise, regular	1.00	0.01
+Sugar	169655	Sugars, granulated	1.00	0.00
+Honey	169640	Honey	1.00	0.01
+Jam	170645	Jams and preserves, apricot	1.00	0.12
+Condensed milk	171275	Milk, canned, condensed, sweetened	1.00	0.08
+Milk chocolate	167587	Candies, milk chocolate	1.00	0.02
+Dark chocolate	170271	Chocolate, dark, 45- 59% cacao solids	1.00	0.02
+Chocolate hazelnut spread	168000	Chocolate-flavored hazelnut spread	1.00	0.22
+Oatmeal cookies	174963	Cookies, oatmeal, with raisins	1.00	0.12
+Shortbread	174967	Cookies, shortbread, commercially prepared, plain	1.00	0.17
+Marshmallow	167995	Candies, marshmallows	1.00	0.10
+Marmalade	168819	Marmalade, orange	1.00	0.45
+Sponge cake	174943	Cake, snack cakes, creme-filled, sponge	1.00	0.59
+Croissant	174987	Croissants, butter	1.00	0.02
+Donut	174992	Doughnuts, cake-type, plain, sugared or glazed	1.00	0.16
+Ice cream	167981	Ice creams, french vanilla, soft-serve	1.00	0.18
+Potato chips	170649	Snacks, potato chips, plain, unsalted	1.00	0.02
+Popcorn	167959	Snacks, popcorn, air-popped	1.00	0.01
+Croutons	172752	Croutons, seasoned	1.00	0.54
+Protein bar	173158	Formulated Bar, SOUTH BEACH protein bar	1.00	0.48
+Water	174158	Water, bottled, generic	1.00	0.00
+Mineral water	173183	Beverages, GEROLSTEINER BRUNNEN GmbH & Co. KG (Gerolsteiner), naturally sparkling, mineral bottled water	1.00	0.00
+Tea	173232	Beverages, tea, herb, other than chamomile, brewed	1.00	0.00
+Black coffee	171890	Beverages, coffee, brewed, prepared with tap water	1.00	0.03
+Coffee with milk	171877	Beverages, coffee, ready to drink, vanilla, light, milk based, sweetened	1.00	0.25
+Orange juice	169098	Orange juice, raw (Includes foods for USDA's Food Distribution Program)	1.00	0.00
+Apple juice	167771	Apple juice, canned or bottled, unsweetened, with added ascorbic acid	1.00	0.01
+Tomato juice	170458	Tomato juice, canned, with salt added	1.00	0.01
+Berry drink	171928	Beverages, V8 SPLASH Juice Drinks, Berry Blend	1.00	0.36
+Cola	174852	Beverages, carbonated, cola, regular	1.00	0.01
+Energy drink	174108	Beverages,  Energy drink, Citrus	1.00	0.01
+Milkshake	170884	Milk shakes, thick vanilla	1.00	0.02
+Beer	168746	Alcoholic beverage, beer, regular, all	1.00	0.00
+Dry red wine	174840	Alcoholic Beverage, wine, table, red, Carignane	0.67	0.13
+Dry white wine	173198	Alcoholic beverage, wine, table, white, Muller Thurgau	0.67	0.22
+Vodka	174818	Alcoholic beverage, distilled, vodka, 80 proof	1.00	0.00
+Whiskey	174819	Alcoholic beverage, distilled, whiskey, 86 proof	1.00	0.00

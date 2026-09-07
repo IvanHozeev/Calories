@@ -38,6 +38,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CORE = os.path.join(ROOT, "Tools", "food_core.txt")
 TERMS = os.path.join(ROOT, "Tools", "food_terms_ru.json")
 OUT = os.path.join(ROOT, "Calories", "Resources", "FoodCatalog.json")
+LINKS = os.path.join(ROOT, "Tools", "food_core_usda.tsv")
 
 CATEGORIES = {"meat", "fish", "dairy", "legumes", "grains", "dishes",
               "produce", "mushrooms", "fats", "sweets", "drinks", "other"}
@@ -72,6 +73,18 @@ SKIP = re.compile(
     r"babyfood|infant formula|school lunch|usda commodity|puerto rican|"
     r"formulated bar|meal replacement, |restaurant, |fast foods, .*, from",
     re.IGNORECASE)
+
+# Категории, которых в дневнике быть не должно. «Коренные народы Аляски» — это
+# лось, морж и морской огурец: прекрасные данные, но не еда этого приложения.
+JUNK_CATEGORIES = (
+    "Baby Foods", "Fast Foods", "Restaurant Foods", "American Indian",
+    "Meals, Entrees, and Side Dishes",
+)
+
+# Марки в SR Legacy пишутся заглавными или несут название фирмы. Человеку,
+# который ищет «хлеб», «George Weston Bakeries, Thomas English Muffins»
+# бесполезен — он только оттесняет вниз настоящий хлеб.
+BRAND = re.compile(r"\b[A-Z]{3,}\b|Inc\.|Bakeries|Company|Brands|®|™")
 
 
 def stable_id(name):
@@ -174,22 +187,58 @@ def translate(description, terms):
     return ", ".join([head[0].upper() + head[1:]] + pieces[1:])
 
 
-def read_usda(path, terms, limit, taken_names):
+def read_links():
+    """Связь позиций ядра со строками USDA — её находит match_usda.py.
+    Ради витаминов: свои калории и макросы у ядра есть, а микронутриенты
+    взять неоткуда."""
+    links = {}
+    if not os.path.exists(LINKS):
+        return links
+    with open(LINKS, encoding="utf-8") as handle:
+        for line in handle:
+            if line.startswith("#") or not line.strip():
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) >= 2:
+                links[parts[0]] = int(parts[1])
+    return links
+
+
+def load_usda(path):
     with open(path, encoding="utf-8") as handle:
         payload = json.load(handle)
-    rows = payload.get("SRLegacyFoods", payload if isinstance(payload, list) else [])
+    return payload.get("SRLegacyFoods", payload if isinstance(payload, list) else [])
+
+
+def amounts_of(row):
+    result = {}
+    for entry in row.get("foodNutrients", []):
+        nutrient = entry.get("nutrient") or {}
+        amount = entry.get("amount")
+        if amount is not None:
+            result[nutrient.get("id")] = amount
+    return result
+
+
+def micro_of(amounts):
+    return {key: round(amounts[usda_id], 3)
+            for usda_id, key in MICRO.items() if usda_id in amounts}
+
+
+def read_usda(rows, terms, limit, taken_names, taken_ids):
 
     candidates = []
     for row in rows:
         description = (row.get("description") or "").strip()
-        if not description or SKIP.search(description):
+        if not description or SKIP.search(description) or BRAND.search(description):
             continue
-        amounts = {}
-        for entry in row.get("foodNutrients", []):
-            nutrient = entry.get("nutrient") or {}
-            amount = entry.get("amount")
-            if amount is not None:
-                amounts[nutrient.get("id")] = amount
+        if (row.get("foodCategory") or {}).get("description", "").startswith(JUNK_CATEGORIES):
+            continue
+        # Строки, уже отданные ядру, второй раз не берём: иначе рядом с
+        # «Куриная грудка варёная» встанет её же английский двойник.
+        if int(row["fdcId"]) in taken_ids:
+            continue
+        amounts = amounts_of(row)
         if ENERGY not in amounts or PROTEIN not in amounts:
             continue
         if FAT not in amounts or CARBS not in amounts:
@@ -206,10 +255,7 @@ def read_usda(path, terms, limit, taken_names):
 
     foods = []
     for _, description, row, amounts in candidates[:limit]:
-        micro = {}
-        for usda_id, key in MICRO.items():
-            if usda_id in amounts:
-                micro[key] = round(amounts[usda_id], 3)
+        micro = micro_of(amounts)
         food = {
             "i": int(row["fdcId"]),
             "en": description,
@@ -238,6 +284,9 @@ def main():
     parser.add_argument("--usda", help="путь к JSON-выгрузке USDA SR Legacy")
     parser.add_argument("--limit", type=int, default=2000,
                         help="сколько позиций в каталоге всего (по умолчанию 2000)")
+    parser.add_argument("--core-only", action="store_true",
+                        help="взять из USDA только микронутриенты для ядра, "
+                             "не досыпая длинный хвост")
     parser.add_argument("--out", default=OUT)
     parser.add_argument("--check", action="store_true",
                         help="только проверить исходные файлы, ничего не писать")
@@ -257,12 +306,37 @@ def main():
             # Ключи с подчёркиванием — пояснения для человека, а не термины.
             terms = {k: v for k, v in json.load(handle).items()
                      if not k.startswith("_")}
+        rows = load_usda(args.usda)
+        by_id = {int(r["fdcId"]): r for r in rows}
+
+        # Сначала витамины в ядро: это главное, ради чего сюда ходят.
+        links = read_links()
+        linked = 0
+        for item in foods:
+            usda_id = links.get(item["en"])
+            row = by_id.get(usda_id) if usda_id else None
+            if row is None:
+                continue
+            micro = micro_of(amounts_of(row))
+            if micro:
+                item["m"] = micro
+                linked += 1
+        covered = len(foods) and linked * 100 // len(foods)
+        print(f"Ядро: микронутриенты получили {linked} из {len(foods)} позиций ({covered}%)")
+
+        if args.core_only:
+            print("Хвост не добавляем: в SR Legacy это справочник мясника — "
+                  "восемьсот вариантов говядины и фазан, а не еда для дневника.")
+            room = 0
+        else:
+            room = max(0, args.limit - len(core))
         taken = {FoodNameKey(item["en"]) for item in core}
-        room = max(0, args.limit - len(core))
-        added = read_usda(args.usda, terms, room, taken)
+        taken_ids = {links[item["en"]] for item in core if item["en"] in links}
+        added = read_usda(rows, terms, room, taken, taken_ids) if room else []
         foods.extend(added)
-        translated = sum(1 for item in added if "ru" in item)
-        print(f"USDA: добавлено {len(added)}, из них с русским названием {translated}")
+        if added:
+            translated = sum(1 for item in added if "ru" in item)
+            print(f"USDA: добавлено {len(added)}, из них с русским названием {translated}")
 
     identifiers = [item["i"] for item in foods]
     duplicates = len(identifiers) - len(set(identifiers))

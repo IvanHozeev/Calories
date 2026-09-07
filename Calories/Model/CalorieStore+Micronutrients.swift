@@ -56,6 +56,15 @@ extension CalorieStore {
         return MicronutrientDay(totals: totals, coveredCalories: covered, totalCalories: total)
     }
 
+    /// Чем богата эта запись дневника. Пусто, если состав неизвестен или у
+    /// записи нет веса — тогда и считать нечего.
+    func notableMicronutrients(for entry: FoodEntry) -> [Micronutrient] {
+        guard let grams = entry.grams, grams > 0,
+              let per100g = micronutrientsByFoodName[entry.name]
+        else { return [] }
+        return per100g.notable(inGrams: grams)
+    }
+
     /// Доля суточной нормы по нутриенту — то, что показывают шкалой.
     ///
     /// Для натрия это доля потолка, а не выполнение цели: у него `isCeiling`,

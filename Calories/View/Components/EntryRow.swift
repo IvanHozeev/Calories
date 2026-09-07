@@ -8,6 +8,8 @@ struct EntryRow: View {
     /// Значки категорий всех продуктов приёма пищи. Место под них занято всегда,
     /// даже когда значков нет: иначе названия строк поедут по левому краю.
     var icons: [String] = []
+    /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
+    var micros: [Micronutrient] = []
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -50,8 +52,15 @@ struct EntryRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-                if hasMacros {
-                    MacroTags(macros: entry.macros, compact: true)
+                if hasMacros || !micros.isEmpty {
+                    HStack(spacing: 8) {
+                        if hasMacros {
+                            MacroTags(macros: entry.macros, compact: true)
+                        }
+                        if !micros.isEmpty {
+                            MicroTags(nutrients: micros)
+                        }
+                    }
                 }
             }
 

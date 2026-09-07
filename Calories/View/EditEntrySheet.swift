@@ -57,6 +57,20 @@ struct EditEntrySheet: View {
         originalGrams = entry.grams
     }
 
+    /// Поле макроса с постоянной подписью «г». Три поля в одну строку, поэтому
+    /// подпись мелкая: она нужна, чтобы число не читалось как что попало,
+    /// а не чтобы спорить с самим числом.
+    private func unitField(_ title: LocalizedStringKey, text: Binding<String>, field: Field) -> some View {
+        HStack(spacing: 2) {
+            TextField(title, text: text)
+                .keyboardType(.decimalPad)
+                .focused($focusedField, equals: field)
+            Text("г")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+    }
+
     var body: some View {
         if isEmbedded {
             formContent
@@ -90,12 +104,19 @@ struct EditEntrySheet: View {
             Section {
                 TextField("Название", text: $name)
                     .focused($focusedField, equals: .name)
+                // Единицы подписями справа от каждого поля, а не в подсказке:
+                // подсказка исчезает на первом символе, и в строке остаются
+                // голые числа — какое из них граммы, а какое килокалории,
+                // приходится вспоминать.
                 HStack {
                     TextField("Калории", text: $calories)
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .calories)
+                    Text("ккал")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     Divider()
-                    TextField("Вес, г", text: $grams)
+                    TextField("Вес", text: $grams)
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .grams)
                         .foregroundStyle(.secondary)
@@ -103,17 +124,14 @@ struct EditEntrySheet: View {
                             guard focusedField == .grams else { return }
                             rescale(to: number(newValue))
                         }
+                    Text("г")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
-                HStack {
-                    TextField("Белки, г", text: $protein)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .protein)
-                    TextField("Жиры, г", text: $fat)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .fat)
-                    TextField("Углеводы, г", text: $carbs)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .carbs)
+                HStack(spacing: 10) {
+                    unitField("Белки", text: $protein, field: .protein)
+                    unitField("Жиры", text: $fat, field: .fat)
+                    unitField("Углеводы", text: $carbs, field: .carbs)
                 }
                 DatePicker(
                     "Дата и время",

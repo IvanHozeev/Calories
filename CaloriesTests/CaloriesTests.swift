@@ -935,12 +935,17 @@ struct LocalizationTests {
     }
 
     private static func specifiers(in text: String) -> [String] {
-        let pattern = #"%(?:\d+\$)?[-+ 0#]*[\d.]*(?:lld|ld|@|d|f|s)"#
+        // «%%» — это экранированный процент, и его надо съесть целиком, иначе
+        // второй знак начинает новый разбор: в «%% de» класс флагов проглатывает
+        // пробел, и появляется несуществующий «%d». Ловилось это только в тех
+        // языках, где после процента идёт слово на d, f или s.
+        let pattern = #"%%|%(?:\d+\$)?[-+ 0#]*[\d.]*(?:lld|ld|@|d|f|s)"#
         let regex = try! NSRegularExpression(pattern: pattern)
         let range = NSRange(text.startIndex..., in: text)
         return regex.matches(in: text, range: range).compactMap {
             Range($0.range, in: text).map { String(text[$0]) }
         }
+        .filter { $0 != "%%" }
         // Сравниваем только типы подстановок. Порядок в переводе меняется, и тогда
         // появляется позиционная форма «%1$lld» — это тот же аргумент, что и «%lld».
         .map { $0.replacingOccurrences(of: #"^%(\d+\$)?[-+ 0#]*[\d.]*"#,
@@ -2211,6 +2216,47 @@ struct MicronutrientDayTests {
         #expect(share != nil, "Когда день покрыт, долю показывать можно")
     }
 
+    @Test func aPortionIsMarkedOnlyForWhatItIsGenuinelyRichIn() {
+        // Порог — пятая часть суточной нормы, привычная граница «хороший
+        // источник». Ниже неё значки были бы на каждой строке: следовые
+        // количества почти всего есть почти во всём.
+        let nutrients = Micronutrients([.iron: 3.6, .zinc: 0.1])
+        let marked = nutrients.notable(inGrams: 100)
+        #expect(marked == [.iron], "3.6 мг железа — это 20% нормы, 0.1 мг цинка — меньше процента")
+    }
+
+    @Test func aBiggerPortionCrossesTheThresholdWhereASmallOneDoesNot() {
+        // Значок относится к съеденному, а не к ста граммам: полбанки тунца и
+        // ложка тунца — разные вещи.
+        let nutrients = Micronutrients([.iron: 1.8])
+        #expect(nutrients.notable(inGrams: 100).isEmpty)
+        #expect(nutrients.notable(inGrams: 300) == [.iron])
+    }
+
+    @Test func theHeaviestContributionComesFirst() {
+        // Показываем не больше трёх значков, поэтому порядок решает, какие
+        // именно человек увидит.
+        let nutrients = Micronutrients([.iron: 5.4, .calcium: 1300, .zinc: 2.2])
+        let marked = nutrients.notable(inGrams: 100)
+        #expect(marked.first == .calcium, "Кальций на сто процентов нормы, железо на тридцать")
+        #expect(marked.count == 3)
+    }
+
+    @Test func nothingIsMarkedWhenCompositionIsUnknown() {
+        #expect(Micronutrients().notable(inGrams: 200).isEmpty)
+    }
+
+    @Test func everyNutrientHasASymbolForTheBadge() {
+        // Значок подписан символом, а не названием: «Ca» помещается в строку,
+        // «Кальций» нет. Пустой символ оставил бы пустую капсулу.
+        var seen = Set<String>()
+        for nutrient in Micronutrient.allCases {
+            #expect(!nutrient.symbol.isEmpty)
+            #expect(nutrient.symbol.count <= 3)
+            #expect(seen.insert(nutrient.symbol).inserted, "\(nutrient.symbol) повторяется")
+        }
+    }
+
     @Test func sodiumIsACeilingAndNotAGoal() {
         // Единственный нутриент в списке, который не надо «набирать». Если
         // показать его как недовыполненную норму, человек начнёт досаливать.
@@ -2224,5 +2270,71 @@ struct MicronutrientDayTests {
         for nutrient in Micronutrient.allCases {
             #expect(nutrient.dailyValue > 0, "\(nutrient.rawValue) не с чем сравнивать")
         }
+    }
+}
+
+// MARK: - Связь своего продукта с каталогом
+
+/// Свой продукт может занять витамины у строки каталога: с упаковки человек
+/// переписывает калории и БЖУ, а витаминов там не бывает. Значения при этом
+/// копируются, а не читаются по ссылке — иначе правка каталога молча меняла бы
+/// историю дневника задним числом.
+@MainActor
+@Suite(.serialized)
+struct CatalogLinkTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    @Test func ownNumbersSurviveTakingVitaminsFromTheCatalog() {
+        let source = FoodCatalog.all.first { !$0.micronutrients.isEmpty }!
+        store.addCustomFood(name: "Творог мой", caloriesPer100g: 90,
+                            protein: 17, fat: 1, carbs: 3, category: .dairy,
+                            micronutrients: source.micronutrients, catalogID: source.id)
+
+        let saved = store.customFoods.first!
+        // Числа с упаковки точнее любого справочника — их не трогаем.
+        #expect(saved.caloriesPer100g == 90)
+        #expect(saved.protein == 17)
+        #expect(!saved.micronutrients.isEmpty)
+        #expect(saved.catalogID == source.id)
+    }
+
+    @Test func theLinkIsRememberedSoItCanBeShownAndUndone() {
+        let source = FoodCatalog.all.first { !$0.micronutrients.isEmpty }!
+        store.addCustomFood(name: "Своё", caloriesPer100g: 100, protein: 5, fat: 5, carbs: 5,
+                            micronutrients: source.micronutrients, catalogID: source.id)
+        let food = store.customFoods.first!
+
+        store.updateCustomFood(food, name: "Своё", caloriesPer100g: 100,
+                               protein: 5, fat: 5, carbs: 5,
+                               micronutrients: Micronutrients(), catalogID: nil)
+        #expect(store.customFoods.first?.micronutrients.isEmpty == true)
+        #expect(store.customFoods.first?.catalogID == nil)
+    }
+
+    @Test func theLinkSurvivesABackupAndRestore() throws {
+        let source = FoodCatalog.all.first { !$0.micronutrients.isEmpty }!
+        store.addCustomFood(name: "Творог мой", caloriesPer100g: 90,
+                            protein: 17, fat: 1, carbs: 3, category: .dairy,
+                            micronutrients: source.micronutrients, catalogID: source.id)
+
+        let backup = store.makeBackup()
+        store.addCustomFood(name: "Лишний", caloriesPer100g: 1, protein: 0, fat: 0, carbs: 0)
+        store.restore(from: backup)
+
+        let restored = store.customFoods.first { $0.name == "Творог мой" }
+        #expect(store.customFoods.count == 1)
+        #expect(restored?.catalogID == source.id)
+        #expect(restored?.micronutrients.isEmpty == false)
     }
 }

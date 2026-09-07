@@ -82,9 +82,11 @@ struct MyFoodView: View {
         return List {
             Section {
                 Picker("Раздел", selection: $tab) {
-                    Text("Блюда (\(dishes.count))").tag(Tab.dishes)
-                    Text("Продукты (\(products.count))").tag(Tab.products)
-                    Text("База (\(database.count))").tag(Tab.database)
+                    // Без счётчиков: «Мои продукты (128)» не влезает в сегмент и
+                    // обрезается многоточием, а количество и так видно в списке.
+                    Text("Мои блюда").tag(Tab.dishes)
+                    Text("Мои продукты").tag(Tab.products)
+                    Text("База").tag(Tab.database)
                 }
                 .pickerStyle(.segmented)
             }
@@ -245,8 +247,11 @@ struct MyFoodView: View {
             ForEach(grouped(filteredDatabase), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
+                        // Строку каталога изменить нельзя — она лежит файлом в
+                        // бандле, — поэтому экран только показывает. Структура
+                        // у него та же, что у своего продукта.
                         NavigationLink {
-                            FoodDetailView(food: food, store: store)
+                            CatalogFoodView(food: food)
                         } label: {
                             foodRow(food)
                         }
@@ -357,7 +362,8 @@ struct MyFoodView: View {
             calories: kcal,
             portion: "\(Int(grams)) \(String(localized: "г"))",
             macros: food.macrosPer100g.scaled(by: grams),
-            icons: [food.foodCategory.icon]
+            icons: [food.foodCategory.icon],
+            micros: food.micronutrients.notable(inGrams: grams)
         )
     }
 

@@ -486,6 +486,7 @@ struct AddEntryView: View {
                                 .fontWeight(.semibold)
                         }
                         .buttonStyle(.borderedProminent)
+                        .accessibilityIdentifier("saveMeal")
                     }
                 }
             }
@@ -654,7 +655,8 @@ struct AddEntryView: View {
             calories: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
-            icons: [food.foodCategory.icon]
+            icons: [food.foodCategory.icon],
+            micros: food.micronutrients.notable(inGrams: 100)
         )
     }
 

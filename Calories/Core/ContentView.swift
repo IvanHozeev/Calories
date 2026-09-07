@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var showingAddWeight = false
     @State private var showingGoalEditor = false
     @State private var showingActivity = false
+    @State private var showingDayNutrition = false
     @State private var showingSteps = false
     @State private var showingBankInfo = false
     @State private var showingPaywall = false
@@ -181,7 +182,8 @@ struct ContentView: View {
                             proteinTarget: store.proteinTarget,
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
-                            weightKg: store.weightKg
+                            weightKg: store.weightKg,
+                            onOpen: { showingDayNutrition = true }
                         )
 
                         StepsCard(store: stepStore) { showingSteps = true }
@@ -211,7 +213,9 @@ struct ContentView: View {
                         Section {
                             ForEach(group.entries) { entry in
                                 NavigationLink(value: entry) {
-                                    EntryRow(entry: entry, icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon))
+                                    EntryRow(entry: entry,
+                                             icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
+                                             micros: store.notableMicronutrients(for: entry))
                                 }
                                 // Дополнение первым: к приёму пищи добавляют чаще,
                                 // чем копируют его целиком, а первая кнопка — та,
@@ -228,7 +232,16 @@ struct ContentView: View {
                                     }
                                     .tint(.indigo)
                                     Button {
-                                        store.add(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
+                                        // Копия получает время «сейчас», а секции
+                                        // отсортированы по последней записи — значит
+                                        // приём пищи переезжает в начало списка.
+                                        // Без явной анимации это происходит рывком:
+                                        // половина экрана переставляется за кадр,
+                                        // и понять, что произошло, невозможно.
+                                        withAnimation(.snappy) {
+                                            store.add(name: entry.name, calories: entry.calories,
+                                                      macros: entry.macros, grams: entry.grams)
+                                        }
                                     } label: {
                                         Image(systemName: "plus.square.on.square")
                                     }
@@ -291,6 +304,9 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
                     .presentationDetents([.height(320)])
+            }
+            .navigationDestination(isPresented: $showingDayNutrition) {
+                DayNutritionView(store: store)
             }
             .navigationDestination(isPresented: $showingActivity) {
                 ActivityView(store: store)

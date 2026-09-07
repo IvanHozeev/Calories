@@ -4,696 +4,6 @@
     "" : {
 
     },
-    "Автоматическая копия" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نسخة احتياطية تلقائية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatische Sicherung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatic backup"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copia automática"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sauvegarde automatique"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "גיבוי אוטומטי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cópia automática"
-          }
-        }
-      }
-    },
-    "Включить автоматическую копию" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تفعيل النسخ الاحتياطي التلقائي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatische Sicherung einschalten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn on automatic backup"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activar la copia automática"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activer la sauvegarde automatique"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "להפעיל גיבוי אוטומטי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ativar a cópia automática"
-          }
-        }
-      }
-    },
-    "Восстановить из копии" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الاستعادة من نسخة احتياطية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aus einer Sicherung wiederherstellen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore from a backup"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurar desde una copia"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurer depuis une sauvegarde"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לשחזר מגיבוי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restaurar de uma cópia"
-          }
-        }
-      }
-    },
-    "Выбрать другую папку" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اختيار مجلد آخر"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anderen Ordner wählen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose another folder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elegir otra carpeta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir un autre dossier"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לבחור תיקייה אחרת"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolher outra pasta"
-          }
-        }
-      }
-    },
-    "Данные восстановлены из копии." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تمت استعادة البيانات من النسخة الاحتياطية."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Daten wurden aus der Sicherung wiederhergestellt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your data has been restored from the backup."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los datos se han restaurado desde la copia."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les données ont été restaurées depuis la sauvegarde."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הנתונים שוחזרו מהגיבוי."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Os dados foram restaurados da cópia."
-          }
-        }
-      }
-    },
-    "Заменить все данные?" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استبدال كل البيانات؟"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle Daten ersetzen?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Replace all data?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Reemplazar todos los datos?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remplacer toutes les données ?"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "להחליף את כל הנתונים?"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Substituir todos os dados?"
-          }
-        }
-      }
-    },
-    "Копия от %@: записей %lld, взвешиваний %lld. Нынешний дневник будет полностью заменён." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نسخة بتاريخ %1$@: %2$lld سجلًا و%3$lld عملية وزن. سيُستبدل دفتر اليوميات الحالي بالكامل."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sicherung vom %1$@: %2$lld Einträge, %3$lld Wiegungen. Das aktuelle Tagebuch wird vollständig ersetzt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Backup from %1$@: %2$lld entries, %3$lld weigh-ins. Your current diary will be replaced entirely."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copia del %1$@: %2$lld registros, %3$lld pesajes. El diario actual se reemplazará por completo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sauvegarde du %1$@ : %2$lld entrées, %3$lld pesées. Le journal actuel sera entièrement remplacé."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "גיבוי מ־%1$@: %2$lld רשומות, %3$lld שקילות. היומן הנוכחי יוחלף לגמרי."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cópia de %1$@: %2$lld registros, %3$lld pesagens. O diário atual será totalmente substituído."
-          }
-        }
-      }
-    },
-    "Не удалось прочитать копию" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تعذّرت قراءة النسخة الاحتياطية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sicherung konnte nicht gelesen werden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not read the backup"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo leer la copia"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de lire la sauvegarde"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לא ניתן לקרוא את הגיבוי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível ler a cópia"
-          }
-        }
-      }
-    },
-    "Папка" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المجلد"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ordner"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Folder"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carpeta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dossier"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תיקייה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pasta"
-          }
-        }
-      }
-    },
-    "Папка для копий недоступна — выбери её заново." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مجلد النسخ الاحتياطي غير متاح — اخترْه من جديد."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Sicherungsordner ist nicht verfügbar — wähle ihn erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The backup folder is not available — choose it again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La carpeta de copias no está disponible: elígela de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le dossier de sauvegarde n'est pas accessible — choisis-le à nouveau."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תיקיית הגיבוי אינה זמינה — בחר אותה מחדש."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A pasta de cópias não está disponível — escolha-a novamente."
-          }
-        }
-      }
-    },
-    "Последняя копия" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "آخر نسخة احتياطية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Letzte Sicherung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last backup"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Última copia"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dernière sauvegarde"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הגיבוי האחרון"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Última cópia"
-          }
-        }
-      }
-    },
-    "Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مرة كل يوم يضع التطبيق نسخة من دفتر اليوميات في المجلد الذي اخترته. اختر مجلدًا في iCloud Drive: فهو منفصل عن التطبيق ويبقى بعد حذفه، بينما المجلد داخل التطبيق يُحذف معه."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einmal am Tag legt die App eine Kopie des Tagebuchs in den gewählten Ordner. Wähle einen Ordner in iCloud Drive: Er liegt außerhalb der App und übersteht deren Löschung, während ein Ordner in der App mit ihr verschwindet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Once a day the app puts a copy of your diary into the folder you chose. Pick a folder in iCloud Drive: it lives apart from the app and survives deleting it, while a folder inside the app is deleted along with it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una vez al día la app deja una copia del diario en la carpeta que elijas. Elige una carpeta en iCloud Drive: vive aparte de la app y sobrevive a su eliminación, mientras que una carpeta dentro de la app se borra con ella."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une fois par jour, l'app dépose une copie du journal dans le dossier choisi. Choisis un dossier dans iCloud Drive : il vit à part de l'app et survit à sa suppression, alors qu'un dossier interne disparaît avec elle."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "פעם ביום האפליקציה שומרת עותק של היומן בתיקייה שבחרת. בחר תיקייה ב־iCloud Drive: היא נמצאת מחוץ לאפליקציה ושורדת את מחיקתה, בעוד תיקייה בתוך האפליקציה נמחקת יחד איתה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma vez por dia o app coloca uma cópia do diário na pasta escolhida. Escolha uma pasta no iCloud Drive: ela fica separada do app e sobrevive à sua remoção, enquanto uma pasta dentro do app é apagada junto com ele."
-          }
-        }
-      }
-    },
-    "Сделать копию сейчас" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إنشاء نسخة الآن"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jetzt sichern"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Back up now"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hacer una copia ahora"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sauvegarder maintenant"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לגבות עכשיו"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fazer cópia agora"
-          }
-        }
-      }
-    },
-    "Это не похоже на копию Calories." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "هذا لا يبدو نسخة احتياطية من Calories."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das sieht nicht nach einer Calories-Sicherung aus."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This does not look like a Calories backup."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esto no parece una copia de Calories."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cela ne ressemble pas à une sauvegarde Calories."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "זה לא נראה כמו גיבוי של Calories."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Isto não parece uma cópia do Calories."
-          }
-        }
-      }
-    },
-    "ещё не было" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لم تُنشأ بعد"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "noch keine"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "not yet"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "todavía no"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pas encore"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עדיין לא"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ainda não"
-          }
-        }
-      }
-    },
     "—" : {
 
     },
@@ -796,6 +106,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%.0f g com peso de %.1f kg"
+          }
+        }
+      }
+    },
+    "%.2f г/кг при весе %.1f кг" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f غ/كغ عند وزن %2$.1f كغ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f g/kg bei %2$.1f kg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f g/kg at %2$.1f kg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f g/kg con %2$.1f kg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f g/kg pour %2$.1f kg"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f ג׳/ק״ג במשקל %2$.1f ק״ג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$.2f g/kg com %2$.1f kg"
           }
         }
       }
@@ -2705,6 +2061,52 @@
         }
       }
     },
+    "Автоматическая копия" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخة احتياطية تلقائية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatische Sicherung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia automática"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarde automatique"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גיבוי אוטומטי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cópia automática"
+          }
+        }
+      }
+    },
     "Автоматический пересчёт темпа и предупреждение, если он слишком агрессивный" : {
       "localizations" : {
         "ar" : {
@@ -3272,6 +2674,7 @@
       }
     },
     "База (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4013,6 +3416,7 @@
       }
     },
     "Белки, г" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4054,6 +3458,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteínas, g"
+          }
+        }
+      }
+    },
+    "Белки, жиры, углеводы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين والدهون والكربوهيدرات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eiweiß, Fett, Kohlenhydrate"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein, fat, carbs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteínas, grasas, carbohidratos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines, lipides, glucides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון, שומן, פחמימות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteínas, gorduras, carboidratos"
           }
         }
       }
@@ -4567,6 +4017,7 @@
       }
     },
     "Блюда (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5117,6 +4568,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O fisiculturismo clássico mantém as três iguais. A atrasada costuma ser a panturrilha."
+          }
+        }
+      }
+    },
+    "В порции" : {
+
+    },
+    "В порции %.0f г" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في حصة %.0f غرام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In einer Portion von %.0f g"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In a %.0f g serving"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En una porción de %.0f g"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans une portion de %.0f g"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במנה של %.0f גרם"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Numa porção de %.0f g"
           }
         }
       }
@@ -5676,6 +5177,7 @@
     },
     "Вес, г" : {
       "comment" : "A label for the weight of a food item in grams.",
+      "extractionState" : "stale",
       "isCommentAutoGenerated" : true,
       "localizations" : {
         "ar" : {
@@ -6142,6 +5644,52 @@
         }
       }
     },
+    "Взяты из «%@». Доля суточной нормы в порции." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مأخوذة من «%@». نسبة من القيمة اليومية في الحصة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernommen aus „%@“. Anteil am Tagesbedarf in der Portion."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken from “%@”. Share of the daily value in the serving."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomados de «%@». Porcentaje del valor diario en la porción."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repris de « %@ ». Part de l'apport quotidien dans la portion."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נלקחו מ־«%@». אחוז מהערך היומי במנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirados de “%@”. Percentual do valor diário na porção."
+          }
+        }
+      }
+    },
     "Вид" : {
       "localizations" : {
         "ar" : {
@@ -6511,6 +6059,98 @@
         }
       }
     },
+    "Витамины и минералы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفيتامينات والمعادن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamine und Mineralstoffe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamins and minerals"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitaminas y minerales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamines et minéraux"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ויטמינים ומינרלים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitaminas e minerais"
+          }
+        }
+      }
+    },
+    "Витамины из базы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فيتامينات من القاعدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamine aus der Basis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamins from the base"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitaminas de la base"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitamines depuis la base"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ויטמינים מהבסיס"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vitaminas da base"
+          }
+        }
+      }
+    },
     "Включи, чтобы получать напоминания записывать приёмы пищи." : {
       "localizations" : {
         "ar" : {
@@ -6553,6 +6193,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ative para receber lembretes para registrar suas refeições."
+          }
+        }
+      }
+    },
+    "Включить автоматическую копию" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تفعيل النسخ الاحتياطي التلقائي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatische Sicherung einschalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on automatic backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar la copia automática"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer la sauvegarde automatique"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להפעיל גיבוי אוטומטי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar a cópia automática"
           }
         }
       }
@@ -6742,6 +6428,52 @@
         }
       }
     },
+    "Возьмём только витамины и минералы. Калории и БЖУ останутся твои." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُؤخذ الفيتامينات والمعادن فقط. سعراتك ومغذياتك الكبرى تبقى كما هي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übernommen werden nur Vitamine und Mineralstoffe. Deine Kalorien und Makros bleiben, wie sie sind."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only vitamins and minerals are taken. Your calories and macros stay as they are."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo se toman vitaminas y minerales. Tus calorías y macros se quedan como están."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuls les vitamines et minéraux sont repris. Tes calories et macros restent inchangées."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נלקחים רק ויטמינים ומינרלים. הקלוריות והמאקרו שלך נשארים כפי שהם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apenas vitaminas e minerais são retirados. Suas calorias e macros ficam como estão."
+          }
+        }
+      }
+    },
     "Восстановить" : {
       "localizations" : {
         "ar" : {
@@ -6784,6 +6516,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restaurar"
+          }
+        }
+      }
+    },
+    "Восстановить из копии" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاستعادة من نسخة احتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus einer Sicherung wiederherstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from a backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar desde una copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer depuis une sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לשחזר מגיבוי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar de uma cópia"
           }
         }
       }
@@ -7251,6 +7029,52 @@
         }
       }
     },
+    "Выбрать другую папку" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار مجلد آخر"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anderen Ordner wählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose another folder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir otra carpeta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un autre dossier"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לבחור תיקייה אחרת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher outra pasta"
+          }
+        }
+      }
+    },
     "Выбрать из галереи" : {
       "localizations" : {
         "ar" : {
@@ -7664,6 +7488,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "g / dia"
+          }
+        }
+      }
+    },
+    "г в порции" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غرام للحصة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g pro Portion"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g per serving"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g por porción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g par portion"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גרם למנה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "g por porção"
           }
         }
       }
@@ -8085,6 +7956,7 @@
       }
     },
     "Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -8129,6 +8001,56 @@
           }
         }
       }
+    },
+    "Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа выше посчитаны на неё." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُطبخ الأطباق عادة لعدة وجبات. حدّد حصتك المعتادة — ستُستخدم عند الإضافة، والأرقام أعلاه محسوبة لها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekocht wird meist für mehrere Mahlzeiten. Gib deine übliche Portion an — sie wird beim Hinzufügen übernommen, und die Zahlen oben gelten für sie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dishes are usually cooked for several meals. Set your usual serving — it fills in when adding, and the numbers above are counted for it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los platos suelen cocinarse para varias comidas. Indica tu ración habitual: se usará al añadir, y los números de arriba están calculados para ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On cuisine en général pour plusieurs repas. Indique ta portion habituelle : elle sera reprise à l'ajout, et les chiffres ci-dessus sont calculés pour elle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל מבשלים לכמה ארוחות. ציין את המנה הרגילה שלך — היא תיכנס בהוספה, והמספרים למעלה מחושבים לפיה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pratos costumam render várias refeições. Indique a porção habitual — ela é usada ao adicionar, e os números acima são calculados para ela."
+          }
+        }
+      }
+    },
+    "Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа ниже посчитаны на неё." : {
+
     },
     "Граммы" : {
       "localizations" : {
@@ -8590,6 +8512,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dados"
+          }
+        }
+      }
+    },
+    "Данные восстановлены из копии." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت استعادة البيانات من النسخة الاحتياطية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Daten wurden aus der Sicherung wiederhergestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data has been restored from the backup."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos se han restaurado desde la copia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données ont été restaurées depuis la sauvegarde."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הנתונים שוחזרו מהגיבוי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados foram restaurados da cópia."
           }
         }
       }
@@ -10266,6 +10234,99 @@
         }
       }
     },
+    "Доля суточной нормы в порции. У натрия это доля потолка, а не цели." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسبة من القيمة اليومية في الحصة. أما الصوديوم فهي نسبة من الحد الأعلى لا من هدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anteil am Tagesbedarf in der Portion. Bei Natrium ist das ein Anteil der Obergrenze, nicht eines Ziels."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share of the daily value in the serving. For sodium that is a share of the ceiling, not of a goal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porcentaje del valor diario en la porción. En el sodio es parte del límite, no de una meta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part de l'apport quotidien dans la portion. Pour le sodium, c'est une part du plafond, pas d'un objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחוז מהערך היומי במנה. בנתרן זה אחוז מהתקרה, לא מיעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percentual do valor diário na porção. No sódio é parte do limite, não de uma meta."
+          }
+        }
+      }
+    },
+    "Доля суточной нормы на 100 г. У натрия это доля потолка, а не цели." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسبة من القيمة اليومية لكل 100 غرام. أما الصوديوم فهي نسبة من الحد الأعلى لا من هدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anteil am Tagesbedarf je 100 g. Bei Natrium ist das ein Anteil der Obergrenze, nicht eines Ziels."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share of the daily value per 100 g. For sodium that is a share of the ceiling, not of a goal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porcentaje del valor diario por 100 g. En el sodio es parte del límite, no de una meta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part de l'apport quotidien pour 100 g. Pour le sodium, c'est une part du plafond, pas d'un objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אחוז מהערך היומי ל־100 גרם. בנתרן זה אחוז מהתקרה, לא מיעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percentual do valor diário por 100 g. No sódio é parte do limite, não de uma meta."
+          }
+        }
+      }
+    },
     "Доступ к шагам" : {
       "localizations" : {
         "ar" : {
@@ -10492,6 +10553,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Há margem"
+          }
+        }
+      }
+    },
+    "Ещё" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المزيد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עוד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais"
+          }
+        }
+      }
+    },
+    "ещё не было" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُنشأ بعد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "noch keine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "todavía no"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas encore"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדיין לא"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ainda não"
           }
         }
       }
@@ -11145,6 +11298,7 @@
       }
     },
     "Жиры, г" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11417,6 +11571,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "24 horas antes"
+          }
+        }
+      }
+    },
+    "За этот день ещё ничего не записано." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُسجَّل شيء لهذا اليوم بعد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für diesen Tag ist noch nichts erfasst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing has been logged for this day yet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía no hay nada registrado para este día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien n'a encore été enregistré pour ce jour."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדיין לא נרשם דבר ליום הזה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há nada registrado para este dia."
           }
         }
       }
@@ -11748,6 +11948,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Замедлить: при %1$lld ккал/день придёшь к %2$@ кг к %3$@."
+          }
+        }
+      }
+    },
+    "Заменить все данные?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استبدال كل البيانات؟"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Daten ersetzen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace all data?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Reemplazar todos los datos?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer toutes les données ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להחליף את כל הנתונים?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Substituir todos os dados?"
           }
         }
       }
@@ -15602,6 +15848,52 @@
         }
       }
     },
+    "Копия от %@: записей %lld, взвешиваний %lld. Нынешний дневник будет полностью заменён." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخة بتاريخ %1$@: %2$lld سجلًا و%3$lld عملية وزن. سيُستبدل دفتر اليوميات الحالي بالكامل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherung vom %1$@: %2$lld Einträge, %3$lld Wiegungen. Das aktuelle Tagebuch wird vollständig ersetzt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup from %1$@: %2$lld entries, %3$lld weigh-ins. Your current diary will be replaced entirely."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia del %1$@: %2$lld registros, %3$lld pesajes. El diario actual se reemplazará por completo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarde du %1$@ : %2$lld entrées, %3$lld pesées. Le journal actuel sera entièrement remplacé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גיבוי מ־%1$@: %2$lld רשומות, %3$lld שקילות. היומן הנוכחי יוחלף לגמרי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cópia de %1$@: %2$lld registros, %3$lld pesagens. O diário atual será totalmente substituído."
+          }
+        }
+      }
+    },
     "Костяк (запястье)" : {
       "localizations" : {
         "ar" : {
@@ -17562,6 +17854,53 @@
         }
       }
     },
+    "Мои блюда (%lld)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أطباقي (%lld)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Gerichte (%lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My dishes (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis platos (%lld)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes plats (%lld)"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המנות שלי (%lld)"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meus pratos (%lld)"
+          }
+        }
+      }
+    },
     "Мои продукты" : {
       "localizations" : {
         "ar" : {
@@ -17604,6 +17943,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meus alimentos"
+          }
+        }
+      }
+    },
+    "Мои продукты (%lld)" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أطعمتي (%lld)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Lebensmittel (%lld)"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My foods (%lld)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis alimentos (%lld)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes aliments (%lld)"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המזון שלי (%lld)"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meus alimentos (%lld)"
           }
         }
       }
@@ -19363,6 +19749,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não foi possível abrir o diário."
+          }
+        }
+      }
+    },
+    "Не удалось прочитать копию" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّرت قراءة النسخة الاحتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherung konnte nicht gelesen werden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not read the backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer la copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de lire la sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ניתן לקרוא את הגיבוי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler a cópia"
           }
         }
       }
@@ -23170,6 +23602,52 @@
         }
       }
     },
+    "Отвязать от базы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إلغاء الربط بالقاعدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von der Basis trennen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlink from the base"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desvincular de la base"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dissocier de la base"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לנתק מהבסיס"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desvincular da base"
+          }
+        }
+      }
+    },
     "Отклонение" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23954,6 +24432,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "D"
+          }
+        }
+      }
+    },
+    "Папка" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المجلد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossier"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיקייה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta"
+          }
+        }
+      }
+    },
+    "Папка для копий недоступна — выбери её заново." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجلد النسخ الاحتياطي غير متاح — اخترْه من جديد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Sicherungsordner ist nicht verfügbar — wähle ihn erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup folder is not available — choose it again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de copias no está disponible: elígela de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dossier de sauvegarde n'est pas accessible — choisis-le à nouveau."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיקיית הגיבוי אינה זמינה — בחר אותה מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pasta de cópias não está disponível — escolha-a novamente."
           }
         }
       }
@@ -24746,6 +25316,7 @@
       }
     },
     "Пищевая ценность" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -25023,6 +25594,7 @@
       }
     },
     "По БЖУ выходит" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -25064,6 +25636,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pelos macros dá"
+          }
+        }
+      }
+    },
+    "По БЖУ выходит другое число калорий — проверь данные с упаковки." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المغذيات الكبرى تعطي عدد سعرات مختلفًا — راجع بيانات العبوة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus den Makros ergibt sich eine andere Kalorienzahl — prüfe die Angaben auf der Packung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The macros add up to a different calorie count — check the numbers on the package."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los macros dan otra cifra de calorías: revisa los datos del envase."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les macros donnent un autre nombre de calories — vérifie les données de l'emballage."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מהמאקרו יוצא מספר קלוריות אחר — בדוק את הנתונים על האריזה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os macros dão outro número de calorias — confira os dados da embalagem."
           }
         }
       }
@@ -27150,6 +27768,52 @@
         }
       }
     },
+    "Последняя копия" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آخر نسخة احتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Sicherung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגיבוי האחרון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última cópia"
+          }
+        }
+      }
+    },
     "последняя неделя" : {
       "localizations" : {
         "ar" : {
@@ -27284,6 +27948,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Defina um peso-alvo e um prazo — sua meta diária será recalculada de acordo."
+          }
+        }
+      }
+    },
+    "Посчитано по %lld%% съеденного за день." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "محسوب على %lld%% مما أُكل اليوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berechnet aus %lld%% des heute Gegessenen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Based on %lld%% of what was eaten today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculado sobre el %lld%% de lo comido hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculé sur %lld%% de ce qui a été mangé aujourd'hui."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחושב על %lld%% ממה שנאכל היום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculado sobre %lld%% do que foi comido hoje."
           }
         }
       }
@@ -28868,6 +29578,7 @@
       }
     },
     "Продукты (%lld)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29146,6 +29857,52 @@
         }
       }
     },
+    "Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرة كل يوم يضع التطبيق نسخة من دفتر اليوميات في المجلد الذي اخترته. اختر مجلدًا في iCloud Drive: فهو منفصل عن التطبيق ويبقى بعد حذفه، بينما المجلد داخل التطبيق يُحذف معه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal am Tag legt die App eine Kopie des Tagebuchs in den gewählten Ordner. Wähle einen Ordner in iCloud Drive: Er liegt außerhalb der App und übersteht deren Löschung, während ein Ordner in der App mit ihr verschwindet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a day the app puts a copy of your diary into the folder you chose. Pick a folder in iCloud Drive: it lives apart from the app and survives deleting it, while a folder inside the app is deleted along with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vez al día la app deja una copia del diario en la carpeta que elijas. Elige una carpeta en iCloud Drive: vive aparte de la app y sobrevive a su eliminación, mientras que una carpeta dentro de la app se borra con ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fois par jour, l'app dépose une copie du journal dans le dossier choisi. Choisis un dossier dans iCloud Drive : il vit à part de l'app et survit à sa suppression, alors qu'un dossier interne disparaît avec elle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעם ביום האפליקציה שומרת עותק של היומן בתיקייה שבחרת. בחר תיקייה ב־iCloud Drive: היא נמצאת מחוץ לאפליקציה ושורדת את מחיקתה, בעוד תיקייה בתוך האפליקציה נמחקת יחד איתה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma vez por dia o app coloca uma cópia do diário na pasta escolhida. Escolha uma pasta no iCloud Drive: ela fica separada do app e sobrevive à sua remoção, enquanto uma pasta dentro do app é apagada junto com ele."
+          }
+        }
+      }
+    },
     "Разбираем фото..." : {
       "localizations" : {
         "ar" : {
@@ -29188,6 +29945,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Analisando a foto..."
+          }
+        }
+      }
+    },
+    "Разбор дня" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تفصيل اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesübersicht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day breakdown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desglose del día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détail de la journée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פירוט היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhes do dia"
           }
         }
       }
@@ -29700,6 +30503,7 @@
       }
     },
     "Расходится с введёнными калориями — проверь данные с упаковки." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31094,6 +31898,52 @@
         }
       }
     },
+    "Сделать копию сейчас" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنشاء نسخة الآن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt sichern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back up now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer una copia ahora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarder maintenant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לגבות עכשיו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer cópia agora"
+          }
+        }
+      }
+    },
     "Сегодня" : {
       "localizations" : {
         "ar" : {
@@ -32153,6 +33003,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esquerda/direita e a diferença. Menos de 1 cm é erro da fita; mais de 2 cm merece atenção."
+          }
+        }
+      }
+    },
+    "Слишком мало известно о составе съеденного, чтобы считать. Витамины есть у продуктов встроенной базы; у своей еды и товаров из Open Food Facts их нет." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المعروف عمّا أُكل أقل من أن يُحسب. منتجات القاعدة المدمجة تحمل الفيتامينات، أما أطعمتك الخاصة وأصناف Open Food Facts فلا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über das Gegessene ist zu wenig bekannt, um zu rechnen. Produkte der eingebauten Basis führen Vitamine; eigene Lebensmittel und Artikel aus Open Food Facts nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too little is known about what was eaten to count. Products from the built-in base carry vitamins; your own foods and items from Open Food Facts do not."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se sabe muy poco sobre lo comido como para calcularlo. Los productos de la base integrada traen vitaminas; tus propios alimentos y los de Open Food Facts no."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On en sait trop peu sur ce qui a été mangé pour calculer. Les produits de la base intégrée portent des vitamines ; tes propres aliments et ceux d'Open Food Facts, non."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ידוע מעט מדי על מה שנאכל מכדי לחשב. מוצרים מהבסיס המובנה נושאים ויטמינים; המזון שלך ופריטים מ־Open Food Facts לא."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sabe-se pouco demais sobre o que foi comido para calcular. Os produtos da base integrada trazem vitaminas; os seus próprios alimentos e os do Open Food Facts não."
           }
         }
       }
@@ -35590,6 +36486,7 @@
       }
     },
     "Углеводы, г" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37367,6 +38264,7 @@
       }
     },
     "Чтобы увидеть цель, заполни профиль." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37413,6 +38311,7 @@
       }
     },
     "Чтобы увидеть цель, укажи вес — в профиле или на экране «Вес»." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38245,6 +39144,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este valor será usado ao adicionar este alimento a uma refeição."
+          }
+        }
+      }
+    },
+    "Это не похоже на копию Calories." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا لا يبدو نسخة احتياطية من Calories."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das sieht nicht nach einer Calories-Sicherung aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This does not look like a Calories backup."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto no parece una copia de Calories."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela ne ressemble pas à une sauvegarde Calories."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זה לא נראה כמו גיבוי של Calories."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isto não parece uma cópia do Calories."
           }
         }
       }

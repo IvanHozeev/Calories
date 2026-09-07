@@ -10,6 +10,21 @@ struct NewDishSheet: View {
     /// Пусто — значит «вся кастрюля»: подставится полный вес блюда.
     @State private var servingGrams = ""
 
+    /// Порция, на которую считаем. Пустое поле означает «вся кастрюля».
+    private var portionGrams: Double {
+        servingGramsValue > 0 ? servingGramsValue : totalGrams
+    }
+
+    private var portionCalories: Int {
+        guard totalGrams > 0 else { return 0 }
+        return Int((Double(totalCalories) * portionGrams / totalGrams).rounded())
+    }
+
+    private var portionMacros: Macros {
+        guard totalGrams > 0 else { return .zero }
+        return totalMacros.scaled(by: portionGrams / totalGrams * 100)
+    }
+
     private var servingGramsValue: Double {
         Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
@@ -64,17 +79,39 @@ struct NewDishSheet: View {
                 TextField("Борщ, куриная грудка с рисом...", text: $name)
             }
 
-            Section {
-                HStack {
-                    TextField("Вся кастрюля", text: $servingGrams)
-                        .keyboardType(.decimalPad)
-                    Text("г")
-                        .foregroundStyle(.secondary)
+            // Порция и итог — одно и то же, разнесённое по двум карточкам:
+            // число калорий имеет смысл только применительно к порции. Готовят
+            // на несколько раз, а едят один, поэтому и считаем на порцию, а не
+            // на всю кастрюлю.
+            if !ingredients.isEmpty {
+                Section {
+                    HStack {
+                        TextField("Вся кастрюля", text: $servingGrams)
+                            .keyboardType(.decimalPad)
+                        Text("г")
+                            .foregroundStyle(.secondary)
+                    }
+                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(verbatim: "\(portionCalories) \(String(localized: "ккал"))")
+                                .font(.title3.weight(.semibold))
+                                .contentTransition(.numericText())
+                            Spacer()
+                            Text(verbatim: "\(Int(totalGrams)) \(String(localized: "г всего"))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        MacroTags(macros: portionMacros)
+                        MacroSplitBar(macros: portionMacros)
+                    }
+                    .padding(.vertical, 4)
+                } header: {
+                    Text("Порция по умолчанию")
+                } footer: {
+                    Text("Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа ниже посчитаны на неё.")
                 }
-            } header: {
-                Text("Порция по умолчанию")
-            } footer: {
-                Text("Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли.")
             }
 
             Section("Состав") {
@@ -117,36 +154,6 @@ struct NewDishSheet: View {
                 }
             }
 
-            if !ingredients.isEmpty {
-                Section("Итого") {
-                    VStack(alignment: .leading, spacing: 10) {
-                        HStack(alignment: .firstTextBaseline) {
-                            Text(verbatim: "\(totalCalories) \(String(localized: "ккал"))")
-                                .font(.title3.weight(.semibold))
-                            Spacer()
-                            Text(verbatim: "\(Int(ingredients.reduce(0) { $0 + $1.grams })) \(String(localized: "г всего"))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        MacroTags(macros: totalMacros)
-                        MacroSplitBar(macros: totalMacros)
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Section {
-                    Button {
-                        showingQuickAdd = true
-                    } label: {
-                        Label("Добавить в дневник", systemImage: "plus.circle.fill")
-                            .font(.body.weight(.semibold))
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
-                }
-            }
         }
         .glassRow()
         .alert(

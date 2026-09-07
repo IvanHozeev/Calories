@@ -33,6 +33,10 @@ struct CaloriesBackup: Codable {
         /// их нет, и старый файл обязан читаться дальше.
         let category: String?
         let micronutrients: Micronutrients?
+        /// Строка каталога, из которой взяты витамины. Без неё после
+        /// восстановления пропадала бы подпись «взяты из „Творог 5%“» и
+        /// возможность отвязать.
+        let catalogID: Int?
     }
 
     /// Сеанс замеров. Поля перечислены плоско, а не словарём: набор мест меняется
@@ -101,7 +105,8 @@ extension CalorieStore {
                 .init(name: $0.name, caloriesPer100g: $0.caloriesPer100g, protein: $0.protein,
                       fat: $0.fat, carbs: $0.carbs, defaultGrams: $0.defaultGrams,
                       category: $0.category,
-                      micronutrients: $0.micronutrients.isEmpty ? nil : $0.micronutrients)
+                      micronutrients: $0.micronutrients.isEmpty ? nil : $0.micronutrients,
+                      catalogID: $0.catalogID)
             },
             dishes: dishes.map { .init(name: $0.name, createdAt: $0.createdAt, ingredients: $0.ingredients) },
             goalHistory: goalRecords.map { .init(date: $0.date, goal: $0.goal) },

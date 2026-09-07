@@ -143,6 +143,59 @@ final class CaloriesUITests: XCTestCase {
                       "В настройках должна быть выгрузка дневника в CSV")
     }
 
+    /// Карточка макросов — вход в разбор дня. Раньше на ней жили три
+    /// всплывающих окошка, и сравнить макросы между собой было нельзя.
+    @MainActor
+    func testMacrosCardOpensTheDayBreakdown() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+
+        let card = app.buttons["openDayNutrition"]
+        scrollIntoReach(card, in: app)
+        XCTAssertTrue(card.exists, "Карточка макросов должна быть на «Сегодня»")
+        card.tap()
+
+        XCTAssertTrue(app.navigationBars["Day breakdown"].waitForExistence(timeout: 5),
+                      "Карточка не открыла разбор дня")
+        XCTAssertTrue(app.staticTexts["Vitamins and minerals"].waitForExistence(timeout: 5),
+                      "В разборе дня должны быть витамины и минералы")
+    }
+
+    /// Сквозная проверка микронутриентов: продукт встроенной базы приносит
+    /// состав, и в дневнике у записи появляется значок того, чем она богата.
+    ///
+    /// Проверять есть что: состав живёт в файле каталога, подтягивается по
+    /// названию продукта и пересчитывается на съеденные граммы. Любое звено
+    /// этой цепочки можно порвать так, что приложение соберётся и промолчит.
+    @MainActor
+    func testDiaryShowsWhatAFoodIsRichIn() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+
+        app.segmentedControls.firstMatch.buttons["Database"].tap()
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("Spinach")
+
+        let food = app.staticTexts["Spinach"]
+        XCTAssertTrue(food.waitForExistence(timeout: 5), "Шпината нет во встроенной базе")
+        food.tap()
+
+        let addToMeal = app.buttons["addToMeal"]
+        XCTAssertTrue(addToMeal.waitForExistence(timeout: 5))
+        addToMeal.tap()
+
+        let save = app.buttons["saveMeal"]
+        if save.waitForExistence(timeout: 3) { save.tap() }
+
+        // Шпинат богат фолатом: 194 мкг на сто грамм при норме 400.
+        let badge = app.staticTexts["microTag-folate"]
+        XCTAssertTrue(badge.waitForExistence(timeout: 10),
+                      "У записи должен появиться значок нутриента, которым продукт богат")
+    }
+
     /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.
     @MainActor
     func testMeasurementsSuggestMissingSites() {
@@ -356,6 +409,11 @@ final class CaloriesUITests: XCTestCase {
         let search = revealSearchField(in: app)
         XCTAssertTrue(search.exists, "Строка поиска не вытянулась из-под тулбара")
         search.tap()
+        // Ввод идёт только когда фокус реально дошёл до поля: тап возвращается
+        // раньше, чем поднимается клавиатура, и печать в этот зазор падает с
+        // «Neither element nor any descendant has keyboard focus».
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5),
+                      "Клавиатура не поднялась после тапа по поиску")
         search.typeText("Beef")
 
         // Поиск идёт по всем источникам, поэтому совпадений может быть несколько
@@ -411,9 +469,13 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.searchFields.firstMatch.exists,
                       "На «Моей еде» должна быть поисковая строка")
-        XCTAssertTrue(app.buttons["Dishes (0)"].exists || app.buttons.containing(
-            NSPredicate(format: "label BEGINSWITH 'Dishes'")).count > 0,
-                      "Должен быть сегмент «Блюда» со счётчиком")
+        // Счётчиков в подписях больше нет: «Мои продукты (128)» не влезало в
+        // сегмент и обрезалось, а количество и так видно в самом списке.
+        let sources = app.segmentedControls.firstMatch
+        XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя разделов")
+        for name in ["My Dishes", "My Foods", "Database"] {
+            XCTAssertTrue(sources.buttons[name].exists, "Нет раздела «\(name)»")
+        }
     }
 
     // MARK: - Покупки

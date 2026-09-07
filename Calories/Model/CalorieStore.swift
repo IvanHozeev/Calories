@@ -457,6 +457,7 @@ final class CalorieStore {
                 defaultGrams: item.defaultGrams,
                 category: item.category.flatMap(FoodCategory.init(rawValue:)) ?? .other)
             if let micronutrients = item.micronutrients { food.micronutrients = micronutrients }
+            food.catalogID = item.catalogID
             context.insert(food)
         }
         for item in backup.dishes {
@@ -592,8 +593,10 @@ final class CalorieStore {
         return found
     }
 
-    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100) {
+    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, defaultGrams: defaultGrams, category: category)
+        if !micronutrients.isEmpty { food.micronutrients = micronutrients }
+        food.catalogID = catalogID
         context.insert(food)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
@@ -607,7 +610,9 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100) {
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil) {
+        food.micronutrients = micronutrients
+        food.catalogID = catalogID
         food.defaultGrams = defaultGrams
         food.foodCategory = category
         food.name = name

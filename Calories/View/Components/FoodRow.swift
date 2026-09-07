@@ -14,6 +14,8 @@ struct FoodRow: View {
     /// Значки категорий. У продукта он один, у блюда — по одному на каждую
     /// категорию его состава: так видно, из чего блюдо, не открывая его.
     var icons: [String] = []
+    /// Чем продукт богат в показанной порции.
+    var micros: [Micronutrient] = []
 
     private var hasMacros: Bool {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
@@ -46,8 +48,15 @@ struct FoodRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-                if hasMacros {
-                    MacroTags(macros: macros, compact: true)
+                if hasMacros || !micros.isEmpty {
+                    HStack(spacing: 8) {
+                        if hasMacros {
+                            MacroTags(macros: macros, compact: true)
+                        }
+                        if !micros.isEmpty {
+                            MicroTags(nutrients: micros)
+                        }
+                    }
                 }
             }
 

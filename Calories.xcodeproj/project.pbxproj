@@ -596,6 +596,7 @@
 				DEVELOPMENT_TEAM = 8M6PB5S8BZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";
@@ -639,6 +640,7 @@
 				DEVELOPMENT_TEAM = 8M6PB5S8BZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";

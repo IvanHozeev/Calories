@@ -5,7 +5,10 @@ import Foundation
 /// Список намеренно короткий. Считать имеет смысл только то, по чему у продуктов
 /// реально бывают данные и по чему есть общепринятая суточная норма: остальное
 /// превратится в колонку прочерков, которая создаёт видимость учёта.
-enum Micronutrient: String, CaseIterable, Identifiable, Codable {
+/// Явно nonisolated: проект по умолчанию изолирует типы на главном акторе, а это
+/// перечисление без поведения — его читают и из `Micronutrients`, который живёт
+/// вне актора, и из фоновых разборов. Данных без состояния изоляция не касается.
+nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
     case vitaminA, vitaminC, vitaminD, vitaminE, vitaminB6, vitaminB12, folate
     case calcium, iron, magnesium, zinc, potassium, sodium, selenium
 
@@ -37,6 +40,28 @@ enum Micronutrient: String, CaseIterable, Identifiable, Codable {
             return String(localized: "мкг")
         case .vitaminC, .vitaminE, .vitaminB6, .calcium, .iron, .magnesium, .zinc, .potassium, .sodium:
             return String(localized: "мг")
+        }
+    }
+
+    /// Обозначение для значка в строке продукта. У минералов химический символ,
+    /// у витаминов буква: и то и другое читается на любом языке, поэтому
+    /// переводить тут нечего.
+    var symbol: String {
+        switch self {
+        case .vitaminA:   return "A"
+        case .vitaminC:   return "C"
+        case .vitaminD:   return "D"
+        case .vitaminE:   return "E"
+        case .vitaminB6:  return "B6"
+        case .vitaminB12: return "B12"
+        case .folate:     return "B9"
+        case .calcium:    return "Ca"
+        case .iron:       return "Fe"
+        case .magnesium:  return "Mg"
+        case .zinc:       return "Zn"
+        case .potassium:  return "K"
+        case .sodium:     return "Na"
+        case .selenium:   return "Se"
         }
     }
 
@@ -116,6 +141,25 @@ nonisolated struct Micronutrients: Codable, Equatable {
         var result = Micronutrients()
         result.per100g = per100g.mapValues { $0 * grams / 100 }
         return result
+    }
+
+    /// Чем эта порция богата — по убыванию весомости.
+    ///
+    /// Порог не выдуман: пятая часть суточной нормы на порцию — привычная
+    /// граница «хороший источник» на этикетках. Ниже неё отмечать нечего,
+    /// потому что следовые количества почти всего есть почти во всём, и значки
+    /// превратились бы в шум на каждой строке.
+    func notable(inGrams grams: Double, threshold: Double = 0.2) -> [Micronutrient] {
+        guard grams > 0, !isEmpty else { return [] }
+        let portion = scaled(by: grams)
+        return Micronutrient.allCases
+            .compactMap { nutrient -> (nutrient: Micronutrient, share: Double)? in
+                guard let amount = portion[nutrient] else { return nil }
+                let share = amount / nutrient.dailyValue
+                return share >= threshold ? (nutrient, share) : nil
+            }
+            .sorted { $0.share > $1.share }
+            .map(\.nutrient)
     }
 
     static func + (lhs: Micronutrients, rhs: Micronutrients) -> Micronutrients {

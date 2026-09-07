@@ -18,6 +18,10 @@ struct NewFoodSheet: View {
     /// Пусто — значит обычные 100 г.
     @State private var servingGrams = ""
     @State private var showingQuickAdd = false
+    /// Витамины, взятые из каталога, и строка, из которой они взяты.
+    @State private var linkedMicronutrients = Micronutrients()
+    @State private var linkedCatalogID: Int?
+    @State private var linkedSourceName: String?
     private enum Field: Hashable { case search, name, calories, protein, fat, carbs }
     @FocusState private var focusedField: Field?
 
@@ -26,6 +30,26 @@ struct NewFoodSheet: View {
     @State private var isSearchingOFF = false
 
     private var isEditing: Bool { editingFood != nil }
+
+    /// Витамины и минералы показываем от источника: у своих продуктов их нет,
+    /// у продуктов базы бывают. Вводить их руками негде и незачем.
+    private var micronutrients: Micronutrients {
+        if !linkedMicronutrients.isEmpty { return linkedMicronutrients }
+        return editingFood?.micronutrients ?? Micronutrients()
+    }
+
+    /// Подходящие строки каталога — по названию, которое человек уже написал.
+    ///
+    /// Связывать молча нельзя: «Творог мой» похож на «Творог 5%», но витамины
+    /// приедут чужие, и человек об этом не узнает. Поэтому предлагаем, а
+    /// подставляем только по нажатию.
+    private var micronutrientSuggestions: [CatalogFood] {
+        let query = name.trimmingCharacters(in: .whitespaces)
+        // Только при создании: в редакторе уже сохранённого продукта эта
+        // секция лезет туда, куда зашли поправить одно число.
+        guard !isEditing, query.count >= 3, linkedCatalogID == nil, micronutrients.isEmpty else { return [] }
+        return FoodCatalog.search(query, limit: 3).filter { !$0.micronutrients.isEmpty }
+    }
 
     private var servingGramsValue: Double {
         Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
@@ -51,6 +75,18 @@ struct NewFoodSheet: View {
 
     private var enteredCalories: Int { Int(number(caloriesPer100g)) }
 
+    private var portionCalories: Int {
+        Int((number(caloriesPer100g) * servingToSave / 100).rounded())
+    }
+
+    /// Микронутриенты различаются на три порядка: B12 в твороге — 0.4 мкг,
+    /// калий в шпинате — 558 мг. Один формат на оба даёт либо «0 мкг», либо
+    /// «558.0 мг».
+    private func formatted(_ amount: Double, _ nutrient: Micronutrient) -> String {
+        let digits = amount < 10 ? 1 : 0
+        return String(format: "%.\(digits)f \(nutrient.unit)", amount)
+    }
+
     private var hasMacros: Bool {
         draftMacros.protein > 0 || draftMacros.fat > 0 || draftMacros.carbs > 0
     }
@@ -59,6 +95,22 @@ struct NewFoodSheet: View {
     private var caloriesMismatch: Bool {
         guard hasMacros, enteredCalories > 0, impliedCalories > 0 else { return false }
         return abs(Double(enteredCalories - impliedCalories)) / Double(impliedCalories) > 0.15
+    }
+
+    private func macroField(_ title: LocalizedStringKey, text: Binding<String>,
+                            unit: LocalizedStringKey, keyboard: UIKeyboardType,
+                            field: Field) -> some View {
+        HStack {
+            TextField(title, text: text)
+                .keyboardType(keyboard)
+                .focused($focusedField, equals: field)
+            Text(unit)
+                .foregroundStyle(.secondary)
+        }
+        // Без этого разделитель начинается от подписи с единицей, а не от края
+        // строки: у поля ввода нет своей направляющей, и её берут от текста.
+        // На экране это выглядело обрывком линии под «ккал г г г».
+        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
     }
 
     var body: some View {
@@ -132,6 +184,38 @@ struct NewFoodSheet: View {
                     }
                 }
 
+                // Единица стоит подписью справа, а не в подсказке поля: подсказка
+                // исчезает на первом же символе, и человек остаётся с четырьмя
+                // одинаковыми числами без единиц. У калорий её не было вовсе.
+                // Поля и полоска БЖУ — одно и то же, разнесённое по двум карточкам:
+                // полоска показывает ровно то, что вводится выше, и проверка на
+                // расхождение относится к тем же четырём числам. Сведено вместе,
+                // чтобы результат было видно, не отрывая глаз от полей.
+                Section("Данные на 100 г") {
+                    macroField("Калории", text: $caloriesPer100g, unit: "ккал",
+                               keyboard: .numberPad, field: .calories)
+                    macroField("Белки", text: $protein, unit: "г",
+                               keyboard: .decimalPad, field: .protein)
+                    macroField("Жиры", text: $fat, unit: "г",
+                               keyboard: .decimalPad, field: .fat)
+                    macroField("Углеводы", text: $carbs, unit: "г",
+                               keyboard: .decimalPad, field: .carbs)
+
+                    // Полоска рисует ровно те четыре числа, что введены выше,
+                    // поэтому стоит сразу за ними.
+                    if hasMacros {
+                        MacroSplitBar(macros: draftMacros)
+                            .padding(.vertical, 4)
+
+                        if caloriesMismatch {
+                            Label("По БЖУ выходит другое число калорий — проверь данные с упаковки.",
+                                  systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                    }
+                }
+
                 Section {
                     HStack {
                         TextField("100", text: $servingGrams)
@@ -139,66 +223,94 @@ struct NewFoodSheet: View {
                         Text("г")
                             .foregroundStyle(.secondary)
                     }
+                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+
+                    // Пересчёт на порцию — здесь, а не в данных на сто грамм:
+                    // вводят с упаковки, а едят порцию, и это единственное место,
+                    // где порция уже известна.
+                    if hasMacros || enteredCalories > 0 {
+                        LabeledContent("В порции") {
+                            Text(verbatim: "\(portionCalories) \(String(localized: "ккал"))")
+                                .font(.body.weight(.medium))
+                                .monospacedDigit()
+                        }
+                        MacroTags(macros: draftMacros.scaled(by: servingToSave))
+                    }
                 } header: {
                     Text("Порция по умолчанию")
                 } footer: {
                     Text("Это значение будет подставляться при добавлении продукта в приём пищи.")
                 }
 
-                Section("Данные на 100 г") {
-                    TextField("Калории", text: $caloriesPer100g)
-                        .keyboardType(.numberPad)
-                        .focused($focusedField, equals: .calories)
-                    TextField("Белки, г", text: $protein)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .protein)
-                    TextField("Жиры, г", text: $fat)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .fat)
-                    TextField("Углеводы, г", text: $carbs)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .carbs)
-                }
-
-                if hasMacros {
+                if !micronutrientSuggestions.isEmpty {
                     Section {
-                        MacroSplitBar(macros: draftMacros)
-                            .padding(.vertical, 4)
-
-                        HStack {
-                            Text("По БЖУ выходит")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(verbatim: "\(impliedCalories) \(String(localized: "ккал"))")
-                                .font(.body.weight(.medium))
-                                .foregroundStyle(caloriesMismatch ? .orange : .primary)
-                        }
-
-                        if caloriesMismatch {
-                            Label("Расходится с введёнными калориями — проверь данные с упаковки.",
-                                  systemImage: "exclamationmark.triangle.fill")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
+                        ForEach(micronutrientSuggestions) { candidate in
+                            Button {
+                                linkedMicronutrients = candidate.micronutrients
+                                linkedCatalogID = candidate.id
+                                linkedSourceName = candidate.localizedName
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(verbatim: candidate.localizedName)
+                                        MicroTags(nutrients: candidate.micronutrients.notable(inGrams: 100))
+                                    }
+                                    Spacer()
+                                    Image(systemName: "plus.circle")
+                                        .foregroundStyle(.blue)
+                                }
+                            }
+                            .buttonStyle(.plain)
                         }
                     } header: {
-                        Text("Итого")
+                        Text("Витамины из базы")
+                    } footer: {
+                        // Прямо говорим, что именно возьмётся: калории и БЖУ с
+                        // упаковки трогать нельзя, они точнее любого справочника.
+                        Text("Возьмём только витамины и минералы. Калории и БЖУ останутся твои.")
                     }
                 }
 
-                if isEditing {
+                if !micronutrients.isEmpty {
                     Section {
-                        Button {
-                            showingQuickAdd = true
-                        } label: {
-                            Label("Добавить в дневник", systemImage: "plus.circle.fill")
-                                .font(.body.weight(.semibold))
-                                .frame(maxWidth: .infinity)
+                        ForEach(Micronutrient.allCases) { nutrient in
+                            // Ноль показывать нечего: он означает «в продукте
+                            // этого нет», и строка с прочерком только удлиняет
+                            // список, ничего не сообщая.
+                            if let amount = micronutrients[nutrient], amount > 0 {
+                                HStack {
+                                    Text(nutrient.title)
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Text(verbatim: formatted(amount * servingToSave / 100, nutrient))
+                                        .monospacedDigit()
+                                    Text(verbatim: "· \(Int((amount * servingToSave / 100 / nutrient.dailyValue * 100).rounded()))%")
+                                        .font(.caption)
+                                        .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
+                                        .monospacedDigit()
+                                }
+                            }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        .listRowBackground(Color.clear)
+                        if let linkedSourceName {
+                            Button(role: .destructive) {
+                                linkedMicronutrients = Micronutrients()
+                                linkedCatalogID = nil
+                                self.linkedSourceName = nil
+                            } label: {
+                                Label("Отвязать от базы", systemImage: "link.badge.plus")
+                            }
+                        }
+                    } header: {
+                        Text("Витамины и минералы")
+                    } footer: {
+                        if let linkedSourceName {
+                            Text(String(format: String(localized: "Взяты из «%@». Доля суточной нормы в порции."), linkedSourceName))
+                        } else {
+                            Text("Доля суточной нормы в порции. У натрия это доля потолка, а не цели.")
+                        }
                     }
                 }
+
             }
             .glassRow()
             .sheet(isPresented: $showingQuickAdd) {
@@ -238,9 +350,9 @@ struct NewFoodSheet: View {
                         let f = Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0
                         let c = Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
                         if let food = editingFood {
-                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave)
+                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID)
                         } else {
-                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave)
+                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID)
                         }
                         dismiss()
                     }
@@ -249,6 +361,8 @@ struct NewFoodSheet: View {
                 }
             }
             .onAppear {
+                // Продукт базы заполняет поля так же, как свой, — разница только
+                // в том, что сохранение заведёт новый, а не изменит старый.
                 if let food = editingFood {
                     category = food.foodCategory
                     name = food.name
@@ -260,6 +374,11 @@ struct NewFoodSheet: View {
                         ? String(format: "%g", food.defaultGrams) : ""
                     // На экране-детали фокус не забираем: иначе клавиатура
                     // выскакивает сразу после перехода и закрывает половину экрана.
+                    linkedCatalogID = food.catalogID
+                    if let id = food.catalogID,
+                       let source = FoodCatalog.all.first(where: { $0.id == id }) {
+                        linkedSourceName = source.localizedName
+                    }
                     if !isEmbedded { focusedField = .name }
                 } else {
                     focusedField = .search

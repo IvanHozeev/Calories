@@ -4,48 +4,692 @@
     "" : {
 
     },
-    "Готовые блюда" : {
+    "Автоматическая копия" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "أطباق جاهزة"
+            "value" : "نسخة احتياطية تلقائية"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fertiggerichte"
+            "value" : "Automatische Sicherung"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prepared dishes"
+            "value" : "Automatic backup"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Platos preparados"
+            "value" : "Copia automática"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plats préparés"
+            "value" : "Sauvegarde automatique"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "מנות מוכנות"
+            "value" : "גיבוי אוטומטי"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pratos prontos"
+            "value" : "Cópia automática"
+          }
+        }
+      }
+    },
+    "Включить автоматическую копию" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تفعيل النسخ الاحتياطي التلقائي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatische Sicherung einschalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn on automatic backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activar la copia automática"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activer la sauvegarde automatique"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להפעיל גיבוי אוטומטי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar a cópia automática"
+          }
+        }
+      }
+    },
+    "Восстановить из копии" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاستعادة من نسخة احتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus einer Sicherung wiederherstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore from a backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar desde una copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer depuis une sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לשחזר מגיבוי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar de uma cópia"
+          }
+        }
+      }
+    },
+    "Выбрать другую папку" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختيار مجلد آخر"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anderen Ordner wählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose another folder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elegir otra carpeta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un autre dossier"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לבחור תיקייה אחרת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolher outra pasta"
+          }
+        }
+      }
+    },
+    "Данные восстановлены из копии." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت استعادة البيانات من النسخة الاحتياطية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Daten wurden aus der Sicherung wiederhergestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data has been restored from the backup."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos se han restaurado desde la copia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données ont été restaurées depuis la sauvegarde."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הנתונים שוחזרו מהגיבוי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados foram restaurados da cópia."
+          }
+        }
+      }
+    },
+    "Заменить все данные?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استبدال كل البيانات؟"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Daten ersetzen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace all data?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Reemplazar todos los datos?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplacer toutes les données ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להחליף את כל הנתונים?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Substituir todos os dados?"
+          }
+        }
+      }
+    },
+    "Копия от %@: записей %lld, взвешиваний %lld. Нынешний дневник будет полностью заменён." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخة بتاريخ %1$@: %2$lld سجلًا و%3$lld عملية وزن. سيُستبدل دفتر اليوميات الحالي بالكامل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherung vom %1$@: %2$lld Einträge, %3$lld Wiegungen. Das aktuelle Tagebuch wird vollständig ersetzt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup from %1$@: %2$lld entries, %3$lld weigh-ins. Your current diary will be replaced entirely."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia del %1$@: %2$lld registros, %3$lld pesajes. El diario actual se reemplazará por completo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarde du %1$@ : %2$lld entrées, %3$lld pesées. Le journal actuel sera entièrement remplacé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גיבוי מ־%1$@: %2$lld רשומות, %3$lld שקילות. היומן הנוכחי יוחלף לגמרי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cópia de %1$@: %2$lld registros, %3$lld pesagens. O diário atual será totalmente substituído."
+          }
+        }
+      }
+    },
+    "Не удалось прочитать копию" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّرت قراءة النسخة الاحتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherung konnte nicht gelesen werden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not read the backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer la copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de lire la sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ניתן לקרוא את הגיבוי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler a cópia"
+          }
+        }
+      }
+    },
+    "Папка" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المجلد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordner"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carpeta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dossier"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיקייה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasta"
+          }
+        }
+      }
+    },
+    "Папка для копий недоступна — выбери её заново." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجلد النسخ الاحتياطي غير متاح — اخترْه من جديد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Sicherungsordner ist nicht verfügbar — wähle ihn erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup folder is not available — choose it again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carpeta de copias no está disponible: elígela de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le dossier de sauvegarde n'est pas accessible — choisis-le à nouveau."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיקיית הגיבוי אינה זמינה — בחר אותה מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pasta de cópias não está disponível — escolha-a novamente."
+          }
+        }
+      }
+    },
+    "Последняя копия" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "آخر نسخة احتياطية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Sicherung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last backup"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última copia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière sauvegarde"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגיבוי האחרון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última cópia"
+          }
+        }
+      }
+    },
+    "Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرة كل يوم يضع التطبيق نسخة من دفتر اليوميات في المجلد الذي اخترته. اختر مجلدًا في iCloud Drive: فهو منفصل عن التطبيق ويبقى بعد حذفه، بينما المجلد داخل التطبيق يُحذف معه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal am Tag legt die App eine Kopie des Tagebuchs in den gewählten Ordner. Wähle einen Ordner in iCloud Drive: Er liegt außerhalb der App und übersteht deren Löschung, während ein Ordner in der App mit ihr verschwindet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a day the app puts a copy of your diary into the folder you chose. Pick a folder in iCloud Drive: it lives apart from the app and survives deleting it, while a folder inside the app is deleted along with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vez al día la app deja una copia del diario en la carpeta que elijas. Elige una carpeta en iCloud Drive: vive aparte de la app y sobrevive a su eliminación, mientras que una carpeta dentro de la app se borra con ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fois par jour, l'app dépose une copie du journal dans le dossier choisi. Choisis un dossier dans iCloud Drive : il vit à part de l'app et survit à sa suppression, alors qu'un dossier interne disparaît avec elle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעם ביום האפליקציה שומרת עותק של היומן בתיקייה שבחרת. בחר תיקייה ב־iCloud Drive: היא נמצאת מחוץ לאפליקציה ושורדת את מחיקתה, בעוד תיקייה בתוך האפליקציה נמחקת יחד איתה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma vez por dia o app coloca uma cópia do diário na pasta escolhida. Escolha uma pasta no iCloud Drive: ela fica separada do app e sobrevive à sua remoção, enquanto uma pasta dentro do app é apagada junto com ele."
+          }
+        }
+      }
+    },
+    "Сделать копию сейчас" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إنشاء نسخة الآن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt sichern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back up now"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer una copia ahora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarder maintenant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לגבות עכשיו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer cópia agora"
+          }
+        }
+      }
+    },
+    "Это не похоже на копию Calories." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا لا يبدو نسخة احتياطية من Calories."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das sieht nicht nach einer Calories-Sicherung aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This does not look like a Calories backup."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto no parece una copia de Calories."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela ne ressemble pas à une sauvegarde Calories."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זה לא נראה כמו גיבוי של Calories."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isto não parece uma cópia do Calories."
+          }
+        }
+      }
+    },
+    "ещё не было" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُنشأ بعد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "noch keine"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "not yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "todavía no"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pas encore"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עדיין לא"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ainda não"
           }
         }
       }
@@ -1968,6 +2612,7 @@
       }
     },
     "Абрикос" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2014,6 +2659,7 @@
       }
     },
     "Авокадо" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2246,6 +2892,7 @@
       }
     },
     "Апельсин" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2292,6 +2939,7 @@
       }
     },
     "Апельсиновый сок" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2338,6 +2986,7 @@
       }
     },
     "Арахис" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2384,6 +3033,7 @@
       }
     },
     "Арбуз" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2853,6 +3503,7 @@
       }
     },
     "Банан" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3684,6 +4335,7 @@
       }
     },
     "Белый гриб" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4007,6 +4659,7 @@
       }
     },
     "Болгарский перец" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4145,6 +4798,7 @@
       }
     },
     "Брокколи" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5163,6 +5817,7 @@
       }
     },
     "Вешенки" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5534,6 +6189,7 @@
       }
     },
     "Виноград" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7198,6 +7854,7 @@
       }
     },
     "Говядина" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7381,6 +8038,52 @@
         }
       }
     },
+    "Готовые блюда" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أطباق جاهزة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fertiggerichte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepared dishes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Platos preparados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plats préparés"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנות מוכנות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pratos prontos"
+          }
+        }
+      }
+    },
     "Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли." : {
       "localizations" : {
         "ar" : {
@@ -7474,6 +8177,7 @@
       }
     },
     "Грецкий орех" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7520,6 +8224,7 @@
       }
     },
     "Гречка варёная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7658,6 +8363,7 @@
       }
     },
     "Груша" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13272,6 +13978,7 @@
       }
     },
     "Йогурт натуральный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13918,6 +14625,7 @@
       }
     },
     "Капуста белокочанная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13964,6 +14672,7 @@
       }
     },
     "Картофель варёный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14195,6 +14904,7 @@
       }
     },
     "Киви" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14241,6 +14951,7 @@
       }
     },
     "Киноа варёная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14565,6 +15276,7 @@
       }
     },
     "Клубника" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14798,6 +15510,7 @@
       }
     },
     "Кола" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14936,6 +15649,7 @@
       }
     },
     "Кофе с молоком" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14982,6 +15696,7 @@
       }
     },
     "Кофе чёрный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15120,6 +15835,7 @@
       }
     },
     "Куриная грудка варёная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15166,6 +15882,7 @@
       }
     },
     "Куриное бедро" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15537,6 +16254,7 @@
       }
     },
     "Лисички" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15583,6 +16301,7 @@
       }
     },
     "Лосось" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15629,6 +16348,7 @@
       }
     },
     "Лук репчатый" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15721,6 +16441,7 @@
       }
     },
     "Макароны варёные" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15860,6 +16581,7 @@
       }
     },
     "Манго" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15906,6 +16628,7 @@
       }
     },
     "Масло сливочное" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16136,6 +16859,7 @@
       }
     },
     "Мёд" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16607,6 +17331,7 @@
       }
     },
     "Миндаль" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16884,6 +17609,7 @@
       }
     },
     "Молоко 3.2%" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17022,6 +17748,7 @@
       }
     },
     "Морковь" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20539,6 +21266,7 @@
       }
     },
     "Нут варёный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21186,6 +21914,7 @@
       }
     },
     "Овсянка на воде" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21232,6 +21961,7 @@
       }
     },
     "Огурец" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21465,6 +22195,7 @@
       }
     },
     "Оливковое масло" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23783,6 +24514,7 @@
       }
     },
     "Персик" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23967,6 +24699,7 @@
       }
     },
     "Пиво" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -26001,6 +26734,7 @@
       }
     },
     "Помидор" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29664,6 +30398,7 @@
       }
     },
     "Рис варёный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30081,6 +30816,7 @@
       }
     },
     "Сахар" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30220,6 +30956,7 @@
       }
     },
     "Свинина" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33455,6 +34192,7 @@
       }
     },
     "Сыр твёрдый" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33778,6 +34516,7 @@
       }
     },
     "Творог 5%" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33824,6 +34563,7 @@
       }
     },
     "Творог обезжиренный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34338,6 +35078,7 @@
       }
     },
     "Тофу" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34476,6 +35217,7 @@
       }
     },
     "Тунец консервированный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35408,6 +36150,7 @@
       }
     },
     "Фасоль варёная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35880,6 +36623,7 @@
       }
     },
     "Хлеб белый" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35926,6 +36670,7 @@
       }
     },
     "Хлеб ржаной" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36575,6 +37320,7 @@
       }
     },
     "Чечевица варёная" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36945,6 +37691,7 @@
       }
     },
     "Шампиньоны" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37130,6 +37877,7 @@
       }
     },
     "Шоколад молочный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37176,6 +37924,7 @@
       }
     },
     "Шпинат" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37547,6 +38296,7 @@
       }
     },
     "Яблоко" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37731,6 +38481,7 @@
       }
     },
     "Яйцо куриное" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

@@ -15,6 +15,18 @@ struct SettingsView: View {
     @State private var exportFilename = ""
     @State private var showingExporter = false
     @State private var exportError: String?
+
+    /// Вычисляемым, а не хранимым: хранимое свойство попадает в почленный
+    /// инициализатор, а `SettingsView` создаётся внутри и без того тяжёлого
+    /// `body` вкладки «Тело» — от лишнего параметра тот перестаёт выводиться
+    /// по типам за отведённое время. Наблюдение при этом не теряется:
+    /// `@Observable` отслеживает чтение свойств в `body`, а не место хранения.
+    private var backups: BackupService { .shared }
+    @State private var showingFolderPicker = false
+    @State private var showingRestorePicker = false
+    @State private var pendingRestore: CaloriesBackup?
+    @State private var restoreError: String?
+    @State private var restoreDone = false
     
     
     
@@ -45,6 +57,23 @@ struct SettingsView: View {
     }
     
     
+    private func loadRestoreFile(_ url: URL) {
+        let accessed = url.startAccessingSecurityScopedResource()
+        defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            pendingRestore = try decoder.decode(CaloriesBackup.self, from: Data(contentsOf: url))
+        } catch {
+            restoreError = String(localized: "Это не похоже на копию Calories.")
+        }
+    }
+
+    private var lastBackupText: String {
+        guard let date = backups.lastBackupDate else { return String(localized: "ещё не было") }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+
     var body: some View {
         List {
             Section("Подписка") {
@@ -75,6 +104,35 @@ struct SettingsView: View {
                 Text("Данные")
             } footer: {
                 Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
+            }
+
+            Section {
+                if backups.isConfigured {
+                    LabeledContent("Папка", value: backups.folderName ?? "—")
+                    LabeledContent("Последняя копия", value: lastBackupText)
+                    Button("Сделать копию сейчас") { backups.backupNow(store) }
+                    Button("Выбрать другую папку") { showingFolderPicker = true }
+                } else {
+                    Button {
+                        showingFolderPicker = true
+                    } label: {
+                        Label("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
+                    }
+                }
+                Button {
+                    showingRestorePicker = true
+                } label: {
+                    Label("Восстановить из копии", systemImage: "arrow.up.doc")
+                }
+                if let error = backups.lastError {
+                    Text(verbatim: error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Автоматическая копия")
+            } footer: {
+                Text("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.")
             }
             
             Section("Системное") {
@@ -148,6 +206,46 @@ struct SettingsView: View {
             if case .failure(let error) = result {
                 exportError = error.localizedDescription
             }
+        }
+        .fileImporter(isPresented: $showingFolderPicker, allowedContentTypes: [.folder]) { result in
+            switch result {
+            case .success(let url): backups.useFolder(url)
+            case .failure(let error): exportError = error.localizedDescription
+            }
+        }
+        .fileImporter(isPresented: $showingRestorePicker, allowedContentTypes: [.json]) { result in
+            switch result {
+            case .success(let url): loadRestoreFile(url)
+            case .failure(let error): restoreError = error.localizedDescription
+            }
+        }
+        // Спрашиваем прямо, что произойдёт, и показываем дату копии: восстановление
+        // заменяет всё, и человек должен видеть, на что именно меняет.
+        .alert("Заменить все данные?", isPresented: Binding(
+            get: { pendingRestore != nil },
+            set: { if !$0 { pendingRestore = nil } }
+        ), presenting: pendingRestore) { backup in
+            Button("Отмена", role: .cancel) { pendingRestore = nil }
+            Button("Восстановить", role: .destructive) {
+                store.restore(from: backup)
+                pendingRestore = nil
+                restoreDone = true
+            }
+        } message: { backup in
+            Text("Копия от \(backup.exportedAt.formatted(date: .abbreviated, time: .shortened)): записей \(backup.entries.count), взвешиваний \(backup.weights.count). Нынешний дневник будет полностью заменён.")
+        }
+        .alert("Готово", isPresented: $restoreDone) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Данные восстановлены из копии.")
+        }
+        .alert("Не удалось прочитать копию", isPresented: Binding(
+            get: { restoreError != nil },
+            set: { if !$0 { restoreError = nil } }
+        )) {
+            Button("OK", role: .cancel) { restoreError = nil }
+        } message: {
+            Text(restoreError ?? "")
         }
         .alert("Не удалось сохранить", isPresented: Binding(
             get: { exportError != nil },

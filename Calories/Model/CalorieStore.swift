@@ -408,6 +408,91 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Восстанавливает дневник из копии, полностью заменяя нынешние данные.
+    ///
+    /// Именно заменяя, а не сливая. Слияние звучит безопаснее, но у него нет
+    /// определённого ответа на простой вопрос: что делать с записью, которая
+    /// есть и там и там, но отличается. Замена предсказуема, а подтверждение
+    /// спрашивается на экране — там же, где человек видит, за какое число копия.
+    ///
+    /// План кладём в обход `startPlan`: тот закрыт премиумом, а после переустановки
+    /// флаг премиума ещё не поднят, и настроенный план молча пропал бы.
+    /// Восстановление возвращает то, что у человека было, а не то, на что он
+    /// имеет право прямо сейчас.
+    func restore(from backup: CaloriesBackup) {
+        for entry in entries { context.delete(entry) }
+        for food in customFoods { context.delete(food) }
+        for dish in dishes { context.delete(dish) }
+        for weight in weightEntries { context.delete(weight) }
+        for record in goalRecords { context.delete(record) }
+        for measurement in measurements { context.delete(measurement) }
+        for day in fastDays { context.delete(day) }
+
+        for item in backup.entries {
+            context.insert(FoodEntry(
+                name: item.name, calories: item.calories,
+                macros: Macros(protein: item.protein, fat: item.fat, carbs: item.carbs),
+                grams: item.grams, date: item.date))
+        }
+        for item in backup.weights {
+            context.insert(WeightEntry(weightKg: item.weightKg, date: item.date))
+        }
+        for item in backup.goalHistory {
+            context.insert(GoalRecord(date: item.date, goal: item.goal))
+        }
+        for item in backup.products {
+            let food = FoodItem(
+                name: item.name, caloriesPer100g: item.caloriesPer100g,
+                protein: item.protein, fat: item.fat, carbs: item.carbs,
+                defaultGrams: item.defaultGrams,
+                category: item.category.flatMap(FoodCategory.init(rawValue:)) ?? .other)
+            if let micronutrients = item.micronutrients { food.micronutrients = micronutrients }
+            context.insert(food)
+        }
+        for item in backup.dishes {
+            context.insert(Dish(name: item.name, ingredients: item.ingredients, createdAt: item.createdAt))
+        }
+        for item in backup.measurements ?? [] {
+            context.insert(BodyMeasurement(
+                date: item.date,
+                neckCm: item.neck, chestCm: item.chest, shouldersCm: item.shoulders,
+                waistCm: item.waist, beltCm: item.belt, pelvisCm: item.pelvis, glutesCm: item.glutes,
+                bicepsLeftCm: item.bicepsLeft, bicepsRightCm: item.bicepsRight,
+                forearmLeftCm: item.forearmLeft, forearmRightCm: item.forearmRight,
+                wristLeftCm: item.wristLeft, wristRightCm: item.wristRight,
+                thighLeftCm: item.thighLeft, thighRightCm: item.thighRight,
+                quadLeftCm: item.quadLeft, quadRightCm: item.quadRight,
+                calfLeftCm: item.calfLeft, calfRightCm: item.calfRight))
+        }
+        for item in backup.fastDays ?? [] {
+            context.insert(FastDay(
+                date: item.date,
+                kind: FastKind(rawValue: item.kind) ?? .dry,
+                startedAt: item.startedAt, endedAt: item.endedAt))
+        }
+
+        do { try context.save() } catch { logger.error("restore save failed: \(error)") }
+
+        if let restoredProfile = backup.profile {
+            profile = restoredProfile
+            if let data = try? JSONEncoder().encode(restoredProfile) {
+                defaults.set(data, forKey: Keys.profile)
+            }
+        }
+        if let restoredPlan = backup.plan {
+            plan = restoredPlan
+            if let data = try? JSONEncoder().encode(restoredPlan) {
+                defaults.set(data, forKey: Keys.plan)
+            }
+        } else {
+            plan = nil
+            defaults.removeObject(forKey: Keys.plan)
+        }
+        dailyGoal = backup.dailyGoal
+
+        refresh()
+    }
+
     /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
     func cancelPlan() {
         plan = nil

@@ -29,6 +29,30 @@ struct CaloriesBackup: Codable {
         let fat: Double
         let carbs: Double
         let defaultGrams: Double
+        /// Необязательные — в копиях, снятых до того, как они здесь появились,
+        /// их нет, и старый файл обязан читаться дальше.
+        let category: String?
+        let micronutrients: Micronutrients?
+    }
+
+    /// Сеанс замеров. Поля перечислены плоско, а не словарём: набор мест меняется
+    /// редко, зато плоский файл читается глазами и чем угодно ещё.
+    struct Measurement: Codable {
+        let date: Date
+        let neck, chest, shoulders, waist, belt, pelvis, glutes: Double
+        let bicepsLeft, bicepsRight: Double
+        let forearmLeft, forearmRight: Double
+        let wristLeft, wristRight: Double
+        let thighLeft, thighRight: Double
+        let quadLeft, quadRight: Double
+        let calfLeft, calfRight: Double
+    }
+
+    struct Fast: Codable {
+        let date: Date
+        let kind: String
+        let startedAt: Date?
+        let endedAt: Date?
     }
 
     struct DishExport: Codable {
@@ -52,6 +76,10 @@ struct CaloriesBackup: Codable {
     let products: [Product]
     let dishes: [DishExport]
     let goalHistory: [Goal]
+    /// Необязательные по той же причине, что и поля продукта: копия, снятая
+    /// раньше, должна восстанавливаться, а не отвергаться целиком.
+    let measurements: [Measurement]?
+    let fastDays: [Fast]?
 }
 
 extension CalorieStore {
@@ -71,10 +99,26 @@ extension CalorieStore {
             weights: weightEntries.map { .init(weightKg: $0.weightKg, date: $0.date) },
             products: customFoods.map {
                 .init(name: $0.name, caloriesPer100g: $0.caloriesPer100g, protein: $0.protein,
-                      fat: $0.fat, carbs: $0.carbs, defaultGrams: $0.defaultGrams)
+                      fat: $0.fat, carbs: $0.carbs, defaultGrams: $0.defaultGrams,
+                      category: $0.category,
+                      micronutrients: $0.micronutrients.isEmpty ? nil : $0.micronutrients)
             },
             dishes: dishes.map { .init(name: $0.name, createdAt: $0.createdAt, ingredients: $0.ingredients) },
-            goalHistory: goalRecords.map { .init(date: $0.date, goal: $0.goal) }
+            goalHistory: goalRecords.map { .init(date: $0.date, goal: $0.goal) },
+            measurements: measurements.map {
+                .init(date: $0.date,
+                      neck: $0.neckCm, chest: $0.chestCm, shoulders: $0.shouldersCm,
+                      waist: $0.waistCm, belt: $0.beltCm, pelvis: $0.pelvisCm, glutes: $0.glutesCm,
+                      bicepsLeft: $0.bicepsLeftCm, bicepsRight: $0.bicepsRightCm,
+                      forearmLeft: $0.forearmLeftCm, forearmRight: $0.forearmRightCm,
+                      wristLeft: $0.wristLeftCm, wristRight: $0.wristRightCm,
+                      thighLeft: $0.thighLeftCm, thighRight: $0.thighRightCm,
+                      quadLeft: $0.quadLeftCm, quadRight: $0.quadRightCm,
+                      calfLeft: $0.calfLeftCm, calfRight: $0.calfRightCm)
+            },
+            fastDays: fastDays.map {
+                .init(date: $0.date, kind: $0.kindRaw, startedAt: $0.startedAt, endedAt: $0.endedAt)
+            }
         )
     }
 

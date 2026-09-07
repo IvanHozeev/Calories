@@ -1968,3 +1968,162 @@ struct StepWidgetRefreshTests {
             now: date(7, 12).addingTimeInterval(900), calendar: calendar))
     }
 }
+
+// MARK: - Резервная копия
+
+/// Копия, из которой нельзя восстановиться, — не копия. И копия, в которой не
+/// всё, тем более: замеры и дни голодания раньше в неё не попадали, то есть
+/// человек считал бы себя защищённым, а часть истории всё равно потерял.
+@MainActor
+@Suite(.serialized)
+struct BackupTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+        store.dailyGoal = 2100
+    }
+
+    private func fillDiary() {
+        store.add(name: "Овсянка", calories: 300, macros: Macros(protein: 10, fat: 5, carbs: 50), grams: 250)
+        store.addWeight(77.4)
+        store.addCustomFood(name: "Творог мой", caloriesPer100g: 90,
+                            protein: 17, fat: 1, carbs: 3, category: .dairy, defaultGrams: 200)
+        store.addMeasurement(BodyMeasurement(date: Date(), neckCm: 39, bicepsLeftCm: 38, bicepsRightCm: 39))
+        _ = store.markFastDay(Date(), kind: .dry)
+    }
+
+    @Test func aBackupCarriesEverythingIncludingMeasurementsAndFasts() {
+        fillDiary()
+        let backup = store.makeBackup()
+
+        #expect(backup.entries.count == 1)
+        #expect(backup.weights.count == 1)
+        #expect(backup.products.count == 1)
+        // Категория раньше в копию не попадала, и после восстановления свой
+        // продукт оказывался в «Другом».
+        #expect(backup.products.first?.category == FoodCategory.dairy.rawValue)
+        #expect(backup.measurements?.count == 1)
+        #expect(backup.fastDays?.count == 1)
+        #expect(backup.fastDays?.first?.kind == FastKind.dry.rawValue)
+    }
+
+    @Test func restoringReplacesWhateverIsThereNow() {
+        fillDiary()
+        let backup = store.makeBackup()
+
+        // После снимка человек наел лишнего и записал не тот вес — ровно та
+        // ситуация, ради которой восстановление и существует.
+        store.add(name: "Ошибка", calories: 5000)
+        store.addWeight(99)
+        #expect(store.entries.count == 2)
+
+        store.restore(from: backup)
+
+        #expect(store.entries.count == 1)
+        #expect(store.entries.first?.name == "Овсянка")
+        #expect(store.weightEntries.count == 1)
+        #expect(abs((store.weightEntries.first?.weightKg ?? 0) - 77.4) < 0.01)
+        #expect(store.measurements.count == 1)
+        #expect(store.fastDays.count == 1)
+        #expect(store.customFoods.first?.foodCategory == .dairy)
+        #expect(store.dailyGoal == 2100)
+    }
+
+    @Test func restoringSurvivesAFullEncodeAndDecode() throws {
+        fillDiary()
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        let data = try encoder.encode(store.makeBackup())
+        let decoded = try decoder.decode(CaloriesBackup.self, from: data)
+        store.add(name: "Мусор", calories: 1)
+        store.restore(from: decoded)
+
+        #expect(store.entries.count == 1)
+        #expect(store.measurements.count == 1)
+        #expect(store.fastDays.count == 1)
+    }
+
+    @Test func anOlderBackupWithoutTheNewFieldsStillLoads() throws {
+        // Копия, снятая до того, как в файл добавили замеры и голодания. Отказать
+        // в ней — значит выбросить всю историю человека из-за пары новых полей.
+        let json = """
+        {
+          "exportedAt": "2026-01-15T10:00:00Z",
+          "appVersion": "1.0",
+          "profile": null,
+          "plan": null,
+          "dailyGoal": 1900,
+          "entries": [{"name":"Каша","calories":250,"protein":8,"fat":4,"carbs":45,"grams":200,
+                       "date":"2026-01-15T07:30:00Z"}],
+          "weights": [{"weightKg":76.2,"date":"2026-01-15T07:00:00Z"}],
+          "products": [{"name":"Свой сыр","caloriesPer100g":300,"protein":25,"fat":22,
+                        "carbs":1,"defaultGrams":30}],
+          "dishes": [],
+          "goalHistory": []
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let backup = try decoder.decode(CaloriesBackup.self, from: Data(json.utf8))
+
+        #expect(backup.measurements == nil)
+        #expect(backup.fastDays == nil)
+        #expect(backup.products.first?.category == nil)
+
+        store.restore(from: backup)
+        #expect(store.entries.count == 1)
+        #expect(store.customFoods.count == 1)
+        // Категории в старом файле не было — продукт честно ложится в «Другое»,
+        // а не роняет восстановление.
+        #expect(store.customFoods.first?.foodCategory == .other)
+        #expect(store.dailyGoal == 1900)
+    }
+}
+
+/// Расписание и уборка старых копий — без файловой системы: обе функции чистые
+/// именно ради этого.
+struct BackupScheduleTests {
+    @Test func theFirstBackupHappensImmediately() {
+        #expect(BackupService.shouldBackup(last: nil, now: Date()))
+    }
+
+    @Test func aBackupMadeAnHourAgoWaits() {
+        let now = Date()
+        #expect(!BackupService.shouldBackup(last: now.addingTimeInterval(-3600), now: now))
+    }
+
+    @Test func aBackupOlderThanADayHappens() {
+        let now = Date()
+        #expect(BackupService.shouldBackup(last: now.addingTimeInterval(-25 * 3600), now: now))
+    }
+
+    @Test func nothingIsDeletedWhileThereIsRoom() {
+        let names = (1...5).map { "calories-backup-2026-09-0\($0)-1000.json" }
+        #expect(BackupService.obsoleteBackups(among: names, keepLast: 14).isEmpty)
+    }
+
+    @Test func theOldestGoFirstWhenThereAreTooMany() {
+        let names = (1...9).map { "calories-backup-2026-09-0\($0)-1000.json" }
+        let obsolete = BackupService.obsoleteBackups(among: names, keepLast: 3)
+        #expect(obsolete.count == 6)
+        #expect(obsolete.first == "calories-backup-2026-09-01-1000.json")
+        #expect(!obsolete.contains("calories-backup-2026-09-09-1000.json"))
+    }
+
+    @Test func otherFilesInTheFolderAreLeftAlone() {
+        // Папку человек выбирает сам, и в ней вполне может лежать его собственное.
+        let names = ["заметки.txt", "фото.jpg", "calories-backup-2026-09-01-1000.json"]
+        #expect(BackupService.obsoleteBackups(among: names, keepLast: 0) == ["calories-backup-2026-09-01-1000.json"])
+    }
+}

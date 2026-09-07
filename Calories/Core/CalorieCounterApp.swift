@@ -12,6 +12,7 @@ struct CalorieCounterApp: App {
     private let shared = SharedStore.shared
     @State private var stepStore = StepStore()
     @State private var purchases = PurchaseService()
+    @Environment(\.scenePhase) private var scenePhase
 
     /// StoreKit может выдать премиум, но не отобрать.
     ///
@@ -34,6 +35,14 @@ struct CalorieCounterApp: App {
                         await purchases.load()
                         applyEntitlements(store: store)
                     }
+                    // Копию делаем при возвращении в приложение, а не по таймеру:
+                    // фоновых запусков у нас нет, и это единственный надёжный
+                    // момент, когда приложение точно живо и данные свежие.
+                    .onChange(of: scenePhase) { _, phase in
+                        guard phase == .active else { return }
+                        BackupService.shared.backupIfNeeded(store)
+                    }
+                    .task { BackupService.shared.backupIfNeeded(store) }
                     .onChange(of: purchases.isPremium) { _, _ in
                         applyEntitlements(store: store)
                     }

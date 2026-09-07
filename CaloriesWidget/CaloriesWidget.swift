@@ -445,3 +445,189 @@ struct StepsWidget: Widget {
                             .accessoryCircular, .accessoryRectangular, .accessoryInline])
     }
 }
+
+// MARK: - Macros Widget
+
+/// Белки, жиры и углеводы за день.
+///
+/// Отдельный виджет, а не строка в калорийном: кольцо калорий отвечает на
+/// «сколько ещё можно», а макросы — на «чем именно добирать». Для того, кто
+/// держит белок, второй вопрос важнее первого, и держать его за одним нажатием
+/// от экрана — смысл виджета.
+struct MacrosEntry: TimelineEntry {
+    let date: Date
+    let protein: Double
+    let fat: Double
+    let carbs: Double
+    let proteinTarget: Double
+    let fatTarget: Double
+    let carbsTarget: Double
+}
+
+struct MacrosProvider: TimelineProvider {
+    func placeholder(in context: Context) -> MacrosEntry {
+        MacrosEntry(date: Date(), protein: 120, fat: 40, carbs: 250,
+                    proteinTarget: 160, fatTarget: 60, carbsTarget: 300)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (MacrosEntry) -> Void) {
+        completion(loadEntry())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<MacrosEntry>) -> Void) {
+        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
+        completion(Timeline(entries: [loadEntry()], policy: .after(next)))
+    }
+
+    private func loadEntry() -> MacrosEntry {
+        let defaults = UserDefaults(suiteName: appGroup)
+        return MacrosEntry(
+            date: Date(),
+            protein: defaults?.double(forKey: "widget_protein") ?? 0,
+            fat: defaults?.double(forKey: "widget_fat") ?? 0,
+            carbs: defaults?.double(forKey: "widget_carbs") ?? 0,
+            proteinTarget: defaults?.double(forKey: "widget_protein_target") ?? 0,
+            fatTarget: defaults?.double(forKey: "widget_fat_target") ?? 0,
+            carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0
+        )
+    }
+}
+
+struct MacrosWidgetEntryView: View {
+    var entry: MacrosEntry
+    @Environment(\.widgetFamily) var family
+
+    private let bg = LinearGradient(
+        colors: [Color(red: 0.06, green: 0.09, blue: 0.18), Color(red: 0.03, green: 0.05, blue: 0.10)],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+
+    private struct Macro {
+        let letter: String
+        let value: Double
+        let target: Double
+        let color: Color
+        /// Ноль означает «цели нет»: показываем факт, но не рисуем шкалу, чтобы
+        /// пустая полоска не читалась как полный недобор.
+        var hasTarget: Bool { target > 0 }
+        var share: Double { target > 0 ? min(value / target, 1) : 0 }
+    }
+
+    private var macros: [Macro] {
+        [
+            Macro(letter: "Б", value: entry.protein, target: entry.proteinTarget, color: .blue),
+            Macro(letter: "Ж", value: entry.fat, target: entry.fatTarget, color: .orange),
+            Macro(letter: "У", value: entry.carbs, target: entry.carbsTarget, color: .purple)
+        ]
+    }
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular: circularView
+        case .accessoryRectangular: rectangularView
+        case .accessoryInline: inlineView
+        default: homeView
+        }
+    }
+
+    // MARK: Домашний экран
+
+    private var homeView: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(macros, id: \.letter) { macro in
+                row(macro)
+            }
+        }
+        .padding(.vertical, 2)
+        .containerBackground(for: .widget) { bg }
+    }
+
+    private func row(_ macro: Macro) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(verbatim: macro.letter)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(macro.color)
+                Text(verbatim: "\(Int(macro.value.rounded()))")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .monospacedDigit()
+                if macro.hasTarget {
+                    Text(verbatim: "/ \(Int(macro.target.rounded()))")
+                        .font(.caption2)
+                        .foregroundStyle(.white.opacity(0.5))
+                        .monospacedDigit()
+                }
+                Spacer(minLength: 0)
+            }
+            if macro.hasTarget {
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(.white.opacity(0.15))
+                        Capsule()
+                            .fill(macro.color)
+                            .frame(width: geometry.size.width * macro.share)
+                    }
+                }
+                .frame(height: 5)
+            }
+        }
+    }
+
+    // MARK: Экран блокировки
+
+    /// Белок: у того, кто следит за макросами, это обязательство, а углеводы —
+    /// остаток. На круге помещается одно число, и это оно.
+    private var circularView: some View {
+        Gauge(value: macros[0].share) {
+            Text(verbatim: "Б")
+        } currentValueLabel: {
+            Text(verbatim: "\(Int(entry.protein.rounded()))")
+                .minimumScaleFactor(0.6)
+        }
+        .gaugeStyle(.accessoryCircularCapacity)
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var rectangularView: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            ForEach(macros, id: \.letter) { macro in
+                HStack(spacing: 4) {
+                    Text(verbatim: macro.letter)
+                        .font(.caption2.weight(.bold))
+                    Text(verbatim: "\(Int(macro.value.rounded()))")
+                        .font(.caption2)
+                        .monospacedDigit()
+                    if macro.hasTarget {
+                        Text(verbatim: "/ \(Int(macro.target.rounded()))")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .widgetAccentable()
+        .containerBackground(.clear, for: .widget)
+    }
+
+    private var inlineView: some View {
+        Text(verbatim: "Б \(Int(entry.protein.rounded())) · Ж \(Int(entry.fat.rounded())) · У \(Int(entry.carbs.rounded()))")
+            .containerBackground(.clear, for: .widget)
+    }
+}
+
+struct MacrosWidget: Widget {
+    let kind = "MacrosWidget"
+
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: kind, provider: MacrosProvider()) { entry in
+            MacrosWidgetEntryView(entry: entry)
+        }
+        .configurationDisplayName("Белки, жиры, углеводы")
+        .description("Макросы за день и насколько закрыты нормы.")
+        .supportedFamilies([.systemSmall, .systemMedium,
+                            .accessoryCircular, .accessoryRectangular, .accessoryInline])
+    }
+}

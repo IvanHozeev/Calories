@@ -251,6 +251,14 @@ final class CalorieStore {
 
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
         groupDefaults?.set(adaptedTodayGoal, forKey: "widget_goal_today")
+        // Макросы виджету: съеденное и цели. Углеводы без цели — это минимум
+        // RDA, а не «сколько влезет», поэтому подставляем его, а не ноль.
+        groupDefaults?.set(macrosToday.protein, forKey: "widget_protein")
+        groupDefaults?.set(macrosToday.fat, forKey: "widget_fat")
+        groupDefaults?.set(macrosToday.carbs, forKey: "widget_carbs")
+        groupDefaults?.set(proteinTarget ?? 0, forKey: "widget_protein_target")
+        groupDefaults?.set(fatTarget ?? 0, forKey: "widget_fat_target")
+        groupDefaults?.set(carbsTarget ?? MacroTargets.carbsMinimum, forKey: "widget_carbs_target")
     }
 
     /// Пересобирает кэши, если с момента последнего пересчёта сменились сутки.

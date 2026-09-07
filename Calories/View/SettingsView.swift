@@ -22,8 +22,14 @@ struct SettingsView: View {
     /// по типам за отведённое время. Наблюдение при этом не теряется:
     /// `@Observable` отслеживает чтение свойств в `body`, а не место хранения.
     private var backups: BackupService { .shared }
-    @State private var showingFolderPicker = false
-    @State private var showingRestorePicker = false
+    /// Что выбираем в системном диалоге. Один `fileImporter` на экран, а не два:
+    /// два на одной вьюхе конфликтуют — работает только последний, и кнопка
+    /// выбора папки не отвечала вовсе. Цель держим отдельным состоянием, а не
+    /// внутри опционала-признака показа: закрытие диалога сбрасывает признак,
+    /// и к моменту обработки результата цель была бы уже потеряна.
+    private enum FilePick { case backupFolder, backupFile }
+    @State private var pickTarget: FilePick = .backupFolder
+    @State private var showingPicker = false
     @State private var pendingRestore: CaloriesBackup?
     @State private var restoreError: String?
     @State private var restoreDone = false
@@ -57,6 +63,11 @@ struct SettingsView: View {
     }
     
     
+    private func pick(_ target: FilePick) {
+        pickTarget = target
+        showingPicker = true
+    }
+
     private func loadRestoreFile(_ url: URL) {
         let accessed = url.startAccessingSecurityScopedResource()
         defer { if accessed { url.stopAccessingSecurityScopedResource() } }
@@ -111,16 +122,16 @@ struct SettingsView: View {
                     LabeledContent("Папка", value: backups.folderName ?? "—")
                     LabeledContent("Последняя копия", value: lastBackupText)
                     Button("Сделать копию сейчас") { backups.backupNow(store) }
-                    Button("Выбрать другую папку") { showingFolderPicker = true }
+                    Button("Выбрать другую папку") { pick(.backupFolder) }
                 } else {
                     Button {
-                        showingFolderPicker = true
+                        pick(.backupFolder)
                     } label: {
                         Label("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
                     }
                 }
                 Button {
-                    showingRestorePicker = true
+                    pick(.backupFile)
                 } label: {
                     Label("Восстановить из копии", systemImage: "arrow.up.doc")
                 }
@@ -207,16 +218,14 @@ struct SettingsView: View {
                 exportError = error.localizedDescription
             }
         }
-        .fileImporter(isPresented: $showingFolderPicker, allowedContentTypes: [.folder]) { result in
-            switch result {
-            case .success(let url): backups.useFolder(url)
-            case .failure(let error): exportError = error.localizedDescription
-            }
-        }
-        .fileImporter(isPresented: $showingRestorePicker, allowedContentTypes: [.json]) { result in
-            switch result {
-            case .success(let url): loadRestoreFile(url)
-            case .failure(let error): restoreError = error.localizedDescription
+        .fileImporter(
+            isPresented: $showingPicker,
+            allowedContentTypes: pickTarget == .backupFile ? [.json] : [.folder]
+        ) { result in
+            switch (pickTarget, result) {
+            case (.backupFolder, .success(let url)): backups.useFolder(url)
+            case (.backupFile, .success(let url)): loadRestoreFile(url)
+            case (_, .failure(let error)): restoreError = error.localizedDescription
             }
         }
         // Спрашиваем прямо, что произойдёт, и показываем дату копии: восстановление

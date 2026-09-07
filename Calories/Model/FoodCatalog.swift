@@ -182,6 +182,21 @@ nonisolated enum FoodCatalog {
         return ranked.prefix(limit).map(\.food)
     }
 
+    /// Что из каталога похоже на продукт с таким названием.
+    ///
+    /// Ищем по самому длинному слову, а не по строке целиком: своё название
+    /// почти всегда шире каталожного — «Творог мой», «Spinach mine», — и поиск
+    /// по всей строке не находит ничего. Длинное слово выбрано потому, что оно
+    /// и есть сам продукт, а короткое — уточнение вроде «мой» или «дома».
+    static func candidates(forName name: String, limit: Int = 3) -> [CatalogFood] {
+        let words = normalize(name)
+            .split(separator: " ")
+            .map(String.init)
+            .filter { $0.count >= 3 }
+        guard let key = words.max(by: { $0.count < $1.count }) else { return [] }
+        return search(key, limit: limit).filter { !$0.micronutrients.isEmpty }
+    }
+
     private static func rank(entry: Entry, needle: String) -> Int? {
         if entry.names.contains(needle) { return 0 }
         if entry.names.contains(where: { $0.hasPrefix(needle) }) { return 1 }

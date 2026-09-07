@@ -55,6 +55,12 @@ final class CalorieStore {
     /// Недавнее — съеденное и заведённое вперемешку, по давности.
     private(set) var recentFoods: [FoodItem] = []
     private(set) var recentDishes: [Dish] = []
+    /// Свои продукты, которым каталог может дать витамины, а они ещё не взяты.
+    ///
+    /// Считается здесь, а не в строке списка: поиск по каталогу на каждую
+    /// перерисовку — тот же капкан, что уже подтормаживал ввод в поиске.
+    /// Своих продуктов немного, поэтому раз на изменение данных это дёшево.
+    @ObservationIgnored private(set) var foodsOfferedVitamins: Set<UUID> = []
     private(set) var adaptedTodayGoal: Int = 0
     private(set) var calorieBankBonus: Int = 0
 
@@ -239,6 +245,7 @@ final class CalorieStore {
 
         // После словарей: «Недавнее» берёт из них категорию продукта.
         rebuildRecent()
+        rebuildVitaminOffers()
 
         cachesBuiltForDay = calendar.startOfDay(for: Date())
 
@@ -759,6 +766,23 @@ final class CalorieStore {
             .sorted { $0.date > $1.date }
             .prefix(Self.recentLimit)
             .map(\.dish)
+    }
+
+    /// Кому из своих продуктов каталог может одолжить витамины.
+    ///
+    /// Точное совпадение по названию не считаем: там состав и так подтягивается
+    /// сам, и предлагать нечего. Смысл только в непохожих названиях — «Творог
+    /// мой» против «Творог 5%», — где связь может найти только поиск.
+    private func rebuildVitaminOffers() {
+        var offered: Set<UUID> = []
+        for food in customFoods {
+            guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
+            guard micronutrientsByFoodName[food.name] == nil else { continue }
+            if !FoodCatalog.candidates(forName: food.name, limit: 1).isEmpty {
+                offered.insert(food.id)
+            }
+        }
+        foodsOfferedVitamins = offered
     }
 
     /// Сколько строк держим в «Недавнем». Больше — это уже не «недавнее»,

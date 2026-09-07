@@ -16,9 +16,33 @@ struct FoodRow: View {
     var icons: [String] = []
     /// Чем продукт богат в показанной порции.
     var micros: [Micronutrient] = []
+    /// У продукта нет витаминов, но каталог может их дать — зайди и возьми.
+    /// Метка, а не автоматическая подстановка: «Творог мой» похож на «Творог 5%»,
+    /// и приписать чужой состав молча — то же враньё, только незаметное.
+    var offersVitamins: Bool = false
 
     private var hasMacros: Bool {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
+    }
+
+    /// Метка «здесь есть что взять».
+    ///
+    /// Мягкая и без цифр: это приглашение зайти, а не ошибка и не недостача.
+    /// Искры, потому что значок должен читаться как находка, а не как
+    /// предупреждение — предупреждающий цвет в этом приложении уже занят
+    /// натрием и перебором калорий.
+    private var vitaminOffer: some View {
+        HStack(spacing: 3) {
+            Image(systemName: "sparkles")
+            Text("витамины")
+        }
+        .font(.caption2.weight(.semibold))
+        .foregroundStyle(.teal)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(Color.teal.opacity(0.14), in: Capsule())
+        .accessibilityLabel(Text("Можно взять витамины из базы"))
+        .accessibilityIdentifier("vitaminOffer")
     }
 
     var body: some View {
@@ -48,13 +72,16 @@ struct FoodRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-                if hasMacros || !micros.isEmpty {
+                if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {
                         if hasMacros {
                             MacroTags(macros: macros, compact: true)
                         }
                         if !micros.isEmpty {
                             MicroTags(nutrients: micros)
+                        }
+                        if offersVitamins {
+                            vitaminOffer
                         }
                     }
                 }

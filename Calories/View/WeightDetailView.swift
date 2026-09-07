@@ -18,10 +18,20 @@ struct WeightDetailView: View {
         store.lastDays(rangeDays)
     }
 
+    /// Изменение за период — по тренду на краях, а не по двум сырым числам:
+    /// иначе солёный ужин в последний день превращается в «набрал килограмм».
     private var weightChange: Double? {
         guard let first = recentWeightEntries.first, let last = recentWeightEntries.last,
-              recentWeightEntries.count > 1 else { return nil }
-        return last.weightKg - first.weightKg
+              recentWeightEntries.count > 1,
+              let start = store.weightTrend(on: first.date),
+              let end = store.weightTrend(on: last.date) else { return nil }
+        return end - start
+    }
+
+    private var trendPoints: [WeightTrendPoint] {
+        recentWeightEntries.map {
+            WeightTrendPoint(date: $0.date, weightKg: store.weightTrend(on: $0.date) ?? $0.weightKg)
+        }
     }
 
     var body: some View {
@@ -33,12 +43,17 @@ struct WeightDetailView: View {
                         Text("Текущий вес")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        if let latest = store.latestWeight {
-                            Text(String(format: "%.1f \(String(localized: "кг"))", latest.weightKg))
+                        // Крупно — трендовый вес, потому что именно он показывает,
+                        // куда человек идёт. Последнее взвешивание мельче под ним:
+                        // видеть его надо, верить ему как направлению — нет.
+                        if let trend = store.weightKg, let latest = store.latestWeight {
+                            Text(String(format: "%.1f \(String(localized: "кг"))", trend))
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
                                 .minimumScaleFactor(0.6)
                                 .lineLimit(1)
-                            Text(verbatim: String(format: String(localized: "на %@"), latest.date.formatted(.dateTime.day().month(.wide))))
+                            Text(verbatim: String(format: String(localized: "тренд · последнее %.1f кг, %@"),
+                                                  latest.weightKg,
+                                                  latest.date.formatted(.dateTime.day().month(.wide))))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         } else {
@@ -86,7 +101,7 @@ struct WeightDetailView: View {
 
             if !recentWeightEntries.isEmpty {
                 Section {
-                    WeightChartView(entries: recentWeightEntries)
+                    WeightChartView(entries: recentWeightEntries, trend: trendPoints)
                         .listRowInsets(EdgeInsets())
                         .listRowBackground(Color.clear)
                 }

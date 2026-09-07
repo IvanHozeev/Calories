@@ -55,15 +55,23 @@ final class CaloriesUITests: XCTestCase {
     /// открывается, и тест падает позже — на проверке, где причину уже не видно.
     /// Поэтому доводим элемент до середины экрана, а не до его края.
     private func scrollIntoReach(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 12) {
-        let safeBottom = app.frame.height - 140
-        var tries = 0
-        while tries < attempts {
+        // Смотрим на середину элемента, а не на его края. По краям высокая
+        // карточка не влезает в «безопасную» полосу, даже когда видна целиком,
+        // — и тест листал дальше, пока не уносил её за верх экрана, где строки
+        // списка выгружаются и элемент перестаёт существовать вовсе.
+        let top = 80.0
+        let bottom = app.frame.height - 120
+        for _ in 0..<attempts {
             if element.exists {
-                let frame = element.frame
-                if frame.minY > 100 && frame.maxY < safeBottom { return }
+                let middle = element.frame.midY
+                if middle > top && middle < bottom { return }
+                // Уехал выше видимого — возвращаемся, а не листаем дальше.
+                if middle <= top {
+                    app.swipeDown()
+                    continue
+                }
             }
             app.swipeUp()
-            tries += 1
         }
     }
 

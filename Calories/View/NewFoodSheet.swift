@@ -65,10 +65,10 @@ struct NewFoodSheet: View {
     /// подставляем только по нажатию.
     private var micronutrientSuggestions: [CatalogFood] {
         let query = name.trimmingCharacters(in: .whitespaces)
-        // Только при создании: в редакторе уже сохранённого продукта эта
-        // секция лезет туда, куда зашли поправить одно число.
-        guard !isEditing, query.count >= 3, linkedCatalogID == nil, micronutrients.isEmpty else { return [] }
-        return FoodCatalog.search(query, limit: 3).filter { !$0.micronutrients.isEmpty }
+        // И при создании, и при правке: в списке такой продукт помечен «здесь
+        // есть что взять», и метка обязана вести туда, где это можно сделать.
+        guard query.count >= 3, linkedCatalogID == nil, micronutrients.isEmpty else { return [] }
+        return FoodCatalog.candidates(forName: query, limit: 3)
     }
 
     private var servingGramsValue: Double {

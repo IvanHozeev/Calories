@@ -175,9 +175,14 @@ extension CalorieStore {
         return over > 0 ? Int(over.rounded()) : nil
     }
 
-    /// Текущий вес — из последнего взвешивания, иначе из профиля.
+    /// Текущий вес — трендовый, а не последнее взвешивание.
+    ///
+    /// Дневной вес почти целиком шум: соль, углеводы, гликоген и вода дают
+    /// колебания больше килограмма, а натурал в дефиците теряет граммов
+    /// семьдесят в день. Норма плана, цели по макросам и вердикт по составу
+    /// тела шли за последним числом на весах — то есть за водой.
     var weightKg: Double? {
-        latestWeight?.weightKg ?? profile?.weightKg
+        weightTrend(on: Date()) ?? profile?.weightKg
     }
 
     /// Дневная норма жиров. Из профиля, если он есть: с недавних пор её задают
@@ -314,8 +319,10 @@ extension CalorieStore {
             .sorted { $0.date < $1.date }
         guard let first = usable.first, let last = usable.last, first.id != last.id else { return nil }
 
-        guard let startWeight = weight(nearest: first.date),
-              let endWeight = weight(nearest: last.date) else { return nil }
+        // По тренду, а не по одному взвешиванию: вердикт «ушла сухая масса»
+        // на разнице двух случайных дней — это вердикт по воде.
+        guard let startWeight = weightTrend(on: first.date),
+              let endWeight = weightTrend(on: last.date) else { return nil }
 
         // Процент жира считаем от веса на ту дату, а не от текущего: профиль
         // хранит один вес, и без подмены оба замера получили бы сегодняшний.
@@ -337,6 +344,23 @@ extension CalorieStore {
         )
     }
 
+    /// Трендовый вес на дату — среднее взвешиваний в окне вокруг неё.
+    ///
+    /// Окно по времени, а не по числу взвешиваний: человек встаёт на весы не
+    /// каждый день, и «последние семь записей» у него могут растянуться на
+    /// месяц, а у соседа уложиться в неделю. Семь дней — привычный для этой
+    /// аудитории размер: короче не гасит недельный цикл соли и углеводов,
+    /// длиннее начинает запаздывать за настоящим изменением.
+    ///
+    /// Если в окне пусто, отдаём ближайшее взвешивание — это не хуже того,
+    /// что было до тренда, и лучше, чем не показать ничего.
+    func weightTrend(on date: Date, days: Int = 7) -> Double? {
+        let half = Double(days) / 2 * 86_400
+        let window = weightEntries.filter { abs($0.date.timeIntervalSince(date)) <= half }
+        guard !window.isEmpty else { return weight(nearest: date) }
+        return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
+    }
+
     /// Взвешивание, ближайшее к дате. Замеры и весы живут по своим расписаниям,
     /// и требовать, чтобы они совпали день в день, значит не показать ничего.
     func weight(nearest date: Date) -> Double? {
@@ -348,12 +372,9 @@ extension CalorieStore {
     /// Итог дошедшего до финиша плана. nil, пока план идёт.
     var planOutcome: PlanOutcome? {
         guard let plan, plan.isFinished else { return nil }
-        let duringPlan = weightEntries.filter { $0.date >= plan.startDate }
-        let window = duringPlan.suffix(7)
-        let final = window.isEmpty
-            ? nil
-            : window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
-        return PlanOutcome(plan: plan, finalWeightKg: final)
+        // Тот же тренд, что и везде: раньше здесь было своё сглаживание по
+        // семи последним записям, и итог плана считался иначе, чем прогресс.
+        return PlanOutcome(plan: plan, finalWeightKg: weightTrend(on: plan.endDate))
     }
 
     func computePlanAdherence() -> PlanAdherence? {

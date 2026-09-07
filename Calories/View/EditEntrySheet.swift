@@ -31,6 +31,13 @@ struct EditEntrySheet: View {
 
     private var draftCalories: Int { Int(number(calories)) }
 
+    /// Пусто вместо нуля: подсказка «0» понятнее введённого нуля, который не
+    /// отличить от намеренно указанного.
+    private static func tenths(_ value: Double) -> String {
+        guard value > 0 else { return "" }
+        return String(format: "%g", (value * 10).rounded() / 10)
+    }
+
     /// Пересчитывает калории и БЖУ пропорционально новому весу.
     /// Самая частая правка записи — «съел больше, чем записал», и вручную пересчитывать
     /// четыре числа никто не станет.
@@ -49,20 +56,29 @@ struct EditEntrySheet: View {
         self.isEmbedded = isEmbedded
         _name = State(initialValue: entry.name)
         _calories = State(initialValue: "\(entry.calories)")
-        _protein = State(initialValue: entry.protein > 0 ? String(format: "%g", entry.protein) : "")
-        _fat = State(initialValue: entry.fat > 0 ? String(format: "%g", entry.fat) : "")
-        _carbs = State(initialValue: entry.carbs > 0 ? String(format: "%g", entry.carbs) : "")
+        // До десятых: в базе лежат значения с плавающей запятой, и «%g» без
+        // округления показывал «3.5999999999999996» вместо «3.6».
+        _protein = State(initialValue: Self.tenths(entry.protein))
+        _fat = State(initialValue: Self.tenths(entry.fat))
+        _carbs = State(initialValue: Self.tenths(entry.carbs))
         _grams = State(initialValue: entry.grams.map { String(format: "%g", $0) } ?? "")
         _date = State(initialValue: entry.date)
         originalGrams = entry.grams
     }
 
-    /// Поле макроса с постоянной подписью «г». Три поля в одну строку, поэтому
-    /// подпись мелкая: она нужна, чтобы число не читалось как что попало,
-    /// а не чтобы спорить с самим числом.
-    private func unitField(_ title: LocalizedStringKey, text: Binding<String>, field: Field) -> some View {
-        HStack(spacing: 2) {
-            TextField(title, text: text)
+    /// Поле макроса с постоянными подписями: какой это макрос и в чём измеряется.
+    ///
+    /// Раньше название стояло подсказкой поля и исчезало на первом же символе —
+    /// в строке оставались три голых числа. Буква вместо слова, потому что полей
+    /// три в ряд, и теми же цветами, что макросы везде в приложении: перекос
+    /// тогда считывается глазом, а не прочтением.
+    private func unitField(_ short: LocalizedStringKey, color: Color,
+                           text: Binding<String>, field: Field) -> some View {
+        HStack(spacing: 3) {
+            Text(short)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(color)
+            TextField("0", text: text)
                 .keyboardType(.decimalPad)
                 .focused($focusedField, equals: field)
             Text("г")
@@ -132,9 +148,9 @@ struct EditEntrySheet: View {
                 // ввода нет своей направляющей, и её берут от первого текста.
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 HStack(spacing: 10) {
-                    unitField("Белки", text: $protein, field: .protein)
-                    unitField("Жиры", text: $fat, field: .fat)
-                    unitField("Углеводы", text: $carbs, field: .carbs)
+                    unitField("Б", color: .blue, text: $protein, field: .protein)
+                    unitField("Ж", color: .orange, text: $fat, field: .fat)
+                    unitField("У", color: .purple, text: $carbs, field: .carbs)
                 }
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 DatePicker(

@@ -1,6 +1,9 @@
 import AppIntents
+import OSLog
 import SwiftUI
 import WidgetKit
+
+private let controlLogger = Logger(subsystem: "ivankhozeyev.team.Calories", category: "control")
 
 /// Кнопки в Пункте управления: снять еду и отсканировать штрихкод.
 ///
@@ -29,7 +32,9 @@ struct PhotographFoodIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        UserDefaults(suiteName: appGroup)?.set("camera", forKey: pendingActionKey)
+        let defaults = UserDefaults(suiteName: appGroup)
+        defaults?.set("camera", forKey: pendingActionKey)
+        controlLogger.notice("контрол камеры: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
         return .result()
     }
 }
@@ -41,7 +46,9 @@ struct ScanBarcodeIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        UserDefaults(suiteName: appGroup)?.set("scanner", forKey: pendingActionKey)
+        let defaults = UserDefaults(suiteName: appGroup)
+        defaults?.set("scanner", forKey: pendingActionKey)
+        controlLogger.notice("контрол сканера: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
         return .result()
     }
 }
@@ -53,7 +60,9 @@ struct AddMealIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        UserDefaults(suiteName: appGroup)?.set("meal", forKey: pendingActionKey)
+        let defaults = UserDefaults(suiteName: appGroup)
+        defaults?.set("meal", forKey: pendingActionKey)
+        controlLogger.notice("контрол приёма пищи: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
         return .result()
     }
 }

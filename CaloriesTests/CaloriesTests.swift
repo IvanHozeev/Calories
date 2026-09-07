@@ -2394,3 +2394,133 @@ struct RecentFoodTests {
         #expect(store.recentFoods.first?.name == "Заведённое сейчас")
     }
 }
+
+// MARK: - Предложение витаминов
+
+/// Метка «здесь есть что взять» на своём продукте. Важно не то, что она
+/// появляется, а то, что она не появляется зря: позвать зайти туда, где брать
+/// нечего или уже взято, — хуже, чем не звать вовсе.
+@MainActor
+@Suite(.serialized)
+struct VitaminOfferTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    @Test func aProductThatCouldBorrowVitaminsIsMarked() {
+        // Название не совпадает с каталогом дословно, но поиск его находит.
+        store.addCustomFood(name: "Spinach mine", caloriesPer100g: 23,
+                            protein: 2.9, fat: 0.4, carbs: 3.6, category: .produce)
+        let food = store.customFoods.first!
+        #expect(store.foodsOfferedVitamins.contains(food.id))
+    }
+
+    @Test func aProductThatAlreadyHasVitaminsIsNotMarked() {
+        let source = FoodCatalog.all.first { !$0.micronutrients.isEmpty }!
+        store.addCustomFood(name: "Spinach mine", caloriesPer100g: 23,
+                            protein: 2.9, fat: 0.4, carbs: 3.6, category: .produce,
+                            micronutrients: source.micronutrients, catalogID: source.id)
+        let food = store.customFoods.first!
+        #expect(!store.foodsOfferedVitamins.contains(food.id))
+    }
+
+    @Test func aProductNamedExactlyLikeACatalogueRowIsNotMarked() {
+        // Точное совпадение и так подтягивает состав по названию — звать
+        // никуда не надо, брать уже нечего.
+        let source = FoodCatalog.all.first { !$0.micronutrients.isEmpty }!
+        store.addCustomFood(name: source.localizedName, caloriesPer100g: 50,
+                            protein: 1, fat: 1, carbs: 1)
+        let food = store.customFoods.first!
+        #expect(!store.foodsOfferedVitamins.contains(food.id))
+    }
+
+    @Test func somethingWithNoCounterpartIsNotMarked() {
+        store.addCustomFood(name: "Шаурма у Ашота", caloriesPer100g: 210,
+                            protein: 12, fat: 10, carbs: 17)
+        let food = store.customFoods.first!
+        #expect(!store.foodsOfferedVitamins.contains(food.id))
+    }
+}
+
+// MARK: - Трендовый вес
+
+/// Дневной вес почти целиком шум: соль, углеводы, гликоген и вода дают
+/// колебания больше килограмма, а натурал в дефиците теряет граммов семьдесят
+/// в день. На этом шуме приложение раньше строило норму плана, цели по макросам
+/// и вердикт по составу тела.
+@MainActor
+@Suite(.serialized)
+struct WeightTrendTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    private func weigh(_ kg: Double, daysAgo: Int) {
+        store.addWeight(kg, date: Date().addingTimeInterval(-Double(daysAgo) * 86_400))
+    }
+
+    @Test func oneSaltyDayDoesNotMoveTheCurrentWeight() {
+        weigh(77.0, daysAgo: 3)
+        weigh(77.2, daysAgo: 2)
+        weigh(77.1, daysAgo: 1)
+        // Солёный ужин — плюс килограмм воды наутро.
+        weigh(78.2, daysAgo: 0)
+
+        let trend = store.weightKg ?? 0
+        #expect(abs(trend - 77.375) < 0.01)
+        #expect(trend < 78.0, "Последнее взвешивание не должно тянуть текущий вес за собой")
+    }
+
+    @Test func theWindowIsMeasuredInDaysNotInWeighIns() {
+        // Человек встаёт на весы нерегулярно: «последние семь записей» у одного
+        // укладываются в неделю, у другого растягиваются на месяц.
+        weigh(85, daysAgo: 60)
+        weigh(84, daysAgo: 45)
+        weigh(83, daysAgo: 30)
+        weigh(77, daysAgo: 1)
+
+        let trend = store.weightKg ?? 0
+        #expect(abs(trend - 77) < 0.01, "Старые взвешивания не должны участвовать в сегодняшнем тренде")
+    }
+
+    @Test func anOldWeighInIsStillBetterThanNothing() {
+        // Окно пустое — отдаём ближайшее взвешивание: это не хуже того, что
+        // было до тренда.
+        weigh(80, daysAgo: 40)
+        #expect(abs((store.weightKg ?? 0) - 80) < 0.01)
+    }
+
+    @Test func withoutAnyWeighInsTheProfileStillAnswers() {
+        store.updateProfile(UserProfile(weightKg: 75, heightCm: 180, age: 30, sex: .male,
+                                        activityLevel: .moderate, goal: .maintenance,
+                                        proteinPerKg: 2))
+        #expect(abs((store.weightKg ?? 0) - 75) < 0.01)
+    }
+
+    @Test func aTrendCanBeAskedForAnyDayNotJustToday() {
+        // Разбор состава тела сравнивает две даты, и обе должны быть трендовыми.
+        weigh(80.0, daysAgo: 31)
+        weigh(80.4, daysAgo: 30)
+        weigh(79.8, daysAgo: 29)
+        let month = Date().addingTimeInterval(-30 * 86_400)
+        #expect(abs((store.weightTrend(on: month) ?? 0) - 80.066) < 0.01)
+    }
+}

@@ -1,3 +1,4 @@
+import OSLog
 import SwiftUI
 import UIKit
 
@@ -65,8 +66,10 @@ final class QuickActionRouter {
     @discardableResult
     func takePendingFromControl() -> Bool {
         let defaults = UserDefaults(suiteName: CalorieStore.appGroup)
-        guard let raw = defaults?.string(forKey: Self.controlActionKey),
-              let action = QuickAction(rawValue: raw) else { return false }
+        let raw = defaults?.string(forKey: Self.controlActionKey)
+        Logger(subsystem: "ivankhozeyev.team.Calories", category: "control")
+            .notice("приложение читает намерение контрола: \(raw ?? "пусто")")
+        guard let raw, let action = QuickAction(rawValue: raw) else { return false }
         defaults?.removeObject(forKey: Self.controlActionKey)
         pending = action
         return true

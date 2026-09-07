@@ -4,48 +4,140 @@
     "" : {
 
     },
-    "Название совпало с продуктом базы — состав показан оттуда, дневник считает его так же. Доля суточной нормы в порции." : {
+    "Динамика веса — линия тренда" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الاسم يطابق منتجًا في القاعدة، لذا يُعرض تركيبه هنا — واليوميات تحسبه بالطريقة نفسها. نسبة من القيمة اليومية في الحصة."
+            "value" : "تغير الوزن — خط الاتجاه"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Name stimmt mit einem Produkt der Basis überein, deshalb wird dessen Zusammensetzung gezeigt — das Tagebuch rechnet genauso. Anteil am Tagesbedarf in der Portion."
+            "value" : "Gewichtsverlauf — Trendlinie"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The name matches a product in the base, so its composition is shown here — the diary counts it the same way. Share of the daily value in the serving."
+            "value" : "Weight over time — trend line"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El nombre coincide con un producto de la base, así que se muestra su composición: el diario la cuenta igual. Porcentaje del valor diario en la porción."
+            "value" : "Evolución del peso — línea de tendencia"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le nom correspond à un produit de la base : sa composition est affichée ici, et le journal la compte de la même façon. Part de l'apport quotidien dans la portion."
+            "value" : "Évolution du poids — ligne de tendance"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "השם תואם למוצר בבסיס, ולכן ההרכב שלו מוצג כאן — היומן סופר אותו באותה דרך. אחוז מהערך היומי במנה."
+            "value" : "מגמת משקל — קו מגמה"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O nome coincide com um produto da base, então a composição dele é exibida — o diário conta da mesma forma. Percentual do valor diário na porção."
+            "value" : "Evolução do peso — linha de tendência"
+          }
+        }
+      }
+    },
+    "Тренд" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاتجاه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendance"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מגמה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendência"
+          }
+        }
+      }
+    },
+    "тренд · последнее %.1f кг, %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاتجاه · آخر قياس %1$.1f كغ، %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend · letzte %1$.1f kg, %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "trend · last %1$.1f kg, %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendencia · última %1$.1f kg, %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendance · dernière %1$.1f kg, %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מגמה · אחרון %1$.1f ק״ג, %2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tendência · última %1$.1f kg, %2$@"
           }
         }
       }
@@ -1132,6 +1224,9 @@
     "🔥" : {
       "comment" : "An emoji displayed in the welcome step of the onboarding flow.",
       "isCommentAutoGenerated" : true
+    },
+    "0" : {
+
     },
     "1–3 тренировки в неделю" : {
       "extractionState" : "manual",
@@ -6104,6 +6199,9 @@
           }
         }
       }
+    },
+    "витамины" : {
+
     },
     "Витамины и минералы" : {
       "localizations" : {
@@ -17854,6 +17952,9 @@
         }
       }
     },
+    "Можно взять витамины из базы" : {
+
+    },
     "Мои" : {
       "localizations" : {
         "ar" : {
@@ -18962,6 +19063,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nome"
+          }
+        }
+      }
+    },
+    "Название совпало с продуктом базы — состав показан оттуда, дневник считает его так же. Доля суточной нормы в порции." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاسم يطابق منتجًا في القاعدة، لذا يُعرض تركيبه هنا — واليوميات تحسبه بالطريقة نفسها. نسبة من القيمة اليومية في الحصة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Name stimmt mit einem Produkt der Basis überein, deshalb wird dessen Zusammensetzung gezeigt — das Tagebuch rechnet genauso. Anteil am Tagesbedarf in der Portion."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The name matches a product in the base, so its composition is shown here — the diary counts it the same way. Share of the daily value in the serving."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre coincide con un producto de la base, así que se muestra su composición: el diario la cuenta igual. Porcentaje del valor diario en la porción."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom correspond à un produit de la base : sa composition est affichée ici, et le journal la compte de la même façon. Part de l'apport quotidien dans la portion."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השם תואם למוצר בבסיס, ולכן ההרכב שלו מוצג כאן — היומן סופר אותו באותה דרך. אחוז מהערך היומי במנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome coincide com um produto da base, então a composição dele é exibida — o diário conta da mesma forma. Percentual do valor diário na porção."
           }
         }
       }

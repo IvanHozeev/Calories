@@ -26,6 +26,18 @@ final class CaloriesUITests: XCTestCase {
         return app
     }
 
+    /// Открывает лист добавления еды.
+    ///
+    /// Плюс на «Сегодня» теперь открывает меню — сканер, камера, ручное
+    /// добавление, — потому что выбирать способ логичнее до входа, а не внутри
+    /// уже открытого экрана. Поэтому тапов два, а не один.
+    private func openAddEntry(in app: XCUIApplication) {
+        app.navigationBars["Today"].buttons["addMenu"].tap()
+        let add = app.buttons["Add food"]
+        XCTAssertTrue(add.waitForExistence(timeout: 5), "В меню плюса нет ручного добавления")
+        add.tap()
+    }
+
     /// Список ленивый: то, что ниже экрана, в дереве элементов отсутствует.
     private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 16) {
         var tries = 0
@@ -171,7 +183,7 @@ final class CaloriesUITests: XCTestCase {
     func testDiaryShowsWhatAFoodIsRichIn() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         app.segmentedControls.firstMatch.buttons["Database"].tap()
         let search = revealSearchField(in: app)
@@ -242,7 +254,7 @@ final class CaloriesUITests: XCTestCase {
     func testServingScreenPutsActionsWithinReach() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         // База продуктов живёт на своей вкладке источника
         app.segmentedControls.firstMatch.buttons["Database"].tap()
@@ -276,7 +288,7 @@ final class CaloriesUITests: XCTestCase {
     func testMealCarriesTheTimeItWasEaten() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         // Время убрано с самого экрана: его меняют редко, поэтому оно живёт
         // за кнопкой с часами в тулбаре.
@@ -296,7 +308,7 @@ final class CaloriesUITests: XCTestCase {
     func testFoodSourcesAreSeparated() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         let sources = app.segmentedControls.firstMatch
         XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя источника")
@@ -404,7 +416,7 @@ final class CaloriesUITests: XCTestCase {
     func testFoodRowOpensOnTheFirstTapWhileSearching() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         let search = revealSearchField(in: app)
         XCTAssertTrue(search.exists, "Строка поиска не вытянулась из-под тулбара")
@@ -432,11 +444,11 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        app.navigationBars["Today"].buttons.element(boundBy: app.navigationBars["Today"].buttons.count - 1).tap()
+        openAddEntry(in: app)
 
         // Поле «только калории» убрано с экрана: оно мешало всё остальное время,
         // и теперь открывается из меню на плюсе.
-        let addMenu = app.buttons["addMenu"]
+        let addMenu = app.buttons["addMoreMenu"]
         XCTAssertTrue(addMenu.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
         addMenu.tap()
         app.buttons["Calories only"].tap()

@@ -103,6 +103,9 @@ final class Dish: Identifiable {
     var name: String
     var ingredientsData: Data
     var createdAt: Date
+    /// Когда блюдо последний раз правили. Необязательное: у блюд, заведённых
+    /// до появления «Недавнего», его нет, и там сойдёт дата создания.
+    var updatedAt: Date?
 
     init(id: UUID = UUID(), name: String, ingredients: [DishIngredient] = [], createdAt: Date = Date()) {
         self.id = id

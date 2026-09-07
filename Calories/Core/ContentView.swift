@@ -290,9 +290,38 @@ struct ContentView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showingAdd = true } label: {
+                    // Способы добавить еду выбираются здесь, до входа в лист.
+                    // Раньше это меню жило внутри самого листа: чтобы отсканировать
+                    // штрихкод, надо было сперва открыть экран добавления, а потом
+                    // искать там ещё один плюс — два шага там, где нужен один.
+                    // Сверху то, что избавляет от ручного ввода: штрихкод, когда
+                    // есть упаковка, фото — когда её нет.
+                    Menu {
+                        if GeminiVisionService.isConfigured {
+                            Button {
+                                entryAction = .camera
+                                showingAdd = true
+                            } label: {
+                                Label("Снять еду", systemImage: "camera")
+                            }
+                        }
+                        Button {
+                            entryAction = .scanner
+                            showingAdd = true
+                        } label: {
+                            Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                        }
+                        Divider()
+                        Button {
+                            entryAction = nil
+                            showingAdd = true
+                        } label: {
+                            Label("Добавить еду", systemImage: "fork.knife")
+                        }
+                    } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityIdentifier("addMenu")
                 }
             }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {

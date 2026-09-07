@@ -471,7 +471,9 @@ struct AddEntryView: View {
                         } label: {
                             Image(systemName: "plus")
                         }
-                        .accessibilityIdentifier("addMenu")
+                        // Не «addMenu»: так называется меню плюса на «Сегодня»,
+                        // а это — «добавить ещё» к уже открытому приёму пищи.
+                        .accessibilityIdentifier("addMoreMenu")
                     }
                 }
                 // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,

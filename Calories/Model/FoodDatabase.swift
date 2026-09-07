@@ -27,6 +27,10 @@ final class FoodItem: Identifiable {
     /// нужен для другого — показать, откуда цифры, дать их отвязать и однажды
     /// пересчитать связанные продукты, когда каталог станет точнее.
     var catalogID: Int?
+    /// Когда продукт завели или последний раз правили. Нужно для «Недавнего»:
+    /// только что созданный продукт ищут сразу, а в общем списке по категориям
+    /// он теряется среди тех, что завели полгода назад.
+    var updatedAt: Date?
 
     init(id: UUID = UUID(), name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, defaultGrams: Double = 100, category: FoodCategory = .other) {
         self.id = id

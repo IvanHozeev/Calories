@@ -458,6 +458,7 @@ final class CalorieStore {
                 category: item.category.flatMap(FoodCategory.init(rawValue:)) ?? .other)
             if let micronutrients = item.micronutrients { food.micronutrients = micronutrients }
             food.catalogID = item.catalogID
+            food.updatedAt = item.updatedAt
             context.insert(food)
         }
         for item in backup.dishes {
@@ -597,6 +598,7 @@ final class CalorieStore {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, defaultGrams: defaultGrams, category: category)
         if !micronutrients.isEmpty { food.micronutrients = micronutrients }
         food.catalogID = catalogID
+        food.updatedAt = Date()
         context.insert(food)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
@@ -613,6 +615,7 @@ final class CalorieStore {
     func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil) {
         food.micronutrients = micronutrients
         food.catalogID = catalogID
+        food.updatedAt = Date()
         food.defaultGrams = defaultGrams
         food.foodCategory = category
         food.name = name
@@ -633,6 +636,7 @@ final class CalorieStore {
     func addDish(name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {
         let dish = Dish(name: name, ingredients: ingredients)
         dish.defaultServingGrams = servingGrams
+        dish.updatedAt = Date()
         context.insert(dish)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes = [dish] + dishes
@@ -643,6 +647,7 @@ final class CalorieStore {
         dish.name = name
         dish.ingredients = ingredients
         dish.defaultServingGrams = servingGrams
+        dish.updatedAt = Date()
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         rebuildCaches()
     }
@@ -680,17 +685,23 @@ final class CalorieStore {
     ///
     /// Берём только записи с указанным весом: без него пересчитать на 100 г нельзя,
     /// а быстрые записи «столько-то калорий» переиспользовать всё равно нечего.
+    /// Недавнее — это и съеденное, и заведённое.
+    ///
+    /// Раньше сюда попадало только съеденное из дневника, и свежесозданный
+    /// продукт было не найти: в списке по категориям он лежит среди тех, что
+    /// завели полгода назад. Но заводят продукт ровно тогда, когда собираются
+    /// им пользоваться, — значит он такой же недавний, как только что съеденный.
     var recentFoods: [FoodItem] {
         let dishNames = Set(dishes.map(\.name))
         var seen = Set<String>()
-        var result: [FoodItem] = []
+        var dated: [(date: Date, food: FoodItem)] = []
+
         for entry in entries {
-            guard result.count < 8 else { break }
             guard let grams = entry.grams, grams > 0 else { continue }
             guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
             seen.insert(entry.name)
             let factor = 100 / grams
-            result.append(FoodItem(
+            dated.append((entry.date, FoodItem(
                 name: entry.name,
                 caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
                 protein: entry.protein * factor,
@@ -700,24 +711,41 @@ final class CalorieStore {
                 // Недавнее пересобирается из записей дневника, а они категорию
                 // не хранят. Без этой строки весь список показывал «Другое».
                 category: foodCategories(forEntryNamed: entry.name).first ?? .other
-            ))
+            )))
         }
-        return result
+
+        for food in customFoods {
+            guard let updatedAt = food.updatedAt, !seen.contains(food.name) else { continue }
+            seen.insert(food.name)
+            dated.append((updatedAt, food))
+        }
+
+        return dated.sorted { $0.date > $1.date }.prefix(Self.recentLimit).map(\.food)
     }
 
-    /// Недавно съеденные блюда — по тем же записям дневника.
+    /// Недавние блюда — так же: и съеденные, и только что собранные.
     var recentDishes: [Dish] {
         var seen = Set<String>()
-        var result: [Dish] = []
+        var dated: [(date: Date, dish: Dish)] = []
+
         for entry in entries {
-            guard result.count < 8 else { break }
             guard !seen.contains(entry.name) else { continue }
             guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
             seen.insert(entry.name)
-            result.append(dish)
+            dated.append((entry.date, dish))
         }
-        return result
+
+        for dish in dishes where !seen.contains(dish.name) {
+            seen.insert(dish.name)
+            dated.append((dish.updatedAt ?? dish.createdAt, dish))
+        }
+
+        return dated.sorted { $0.date > $1.date }.prefix(Self.recentLimit).map(\.dish)
     }
+
+    /// Сколько строк держим в «Недавнем». Больше — это уже не «недавнее»,
+    /// а второй список всего подряд, по которому снова надо искать глазами.
+    static let recentLimit = 8
 
     /// Последняя по дате запись веса.
     var latestWeight: WeightEntry? {

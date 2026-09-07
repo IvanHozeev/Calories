@@ -128,11 +128,15 @@ struct EditEntrySheet: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                // Разделитель без этого начинается от подписи с единицей: у поля
+                // ввода нет своей направляющей, и её берут от первого текста.
+                .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 HStack(spacing: 10) {
                     unitField("Белки", text: $protein, field: .protein)
                     unitField("Жиры", text: $fat, field: .fat)
                     unitField("Углеводы", text: $carbs, field: .carbs)
                 }
+                .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 DatePicker(
                     "Дата и время",
                     selection: $date,

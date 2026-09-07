@@ -93,6 +93,13 @@ struct MyFoodView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
 
+            // Недавнее показываем только на нетронутом экране: когда человек
+            // уже ищет или отфильтровал категорию, он знает, что ему нужно, и
+            // повторный список сверху только мешает.
+            if trimmedQuery.isEmpty, categoryFilter == nil {
+                recentSection
+            }
+
             switch tab {
             case .dishes: dishesSection(dishes)
             case .products: productsSection(products)
@@ -185,6 +192,57 @@ struct MyFoodView: View {
     }
 
     // MARK: - Блюда
+
+    /// Недавно заведённое и поправленное — сверху, до общего списка.
+    ///
+    /// Продукт заводят ровно тогда, когда собираются им пользоваться, а в
+    /// списке по категориям он лежит вперемешку с теми, что завели полгода
+    /// назад, и его приходится искать глазами сразу после создания.
+    @ViewBuilder
+    private var recentSection: some View {
+        switch tab {
+        case .dishes:
+            let recent = store.dishes
+                .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
+                .prefix(3)
+            if recent.count > 1 {
+                Section("Недавнее") {
+                    ForEach(recent) { dish in
+                        NavigationLink {
+                            NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
+                        } label: {
+                            FoodRow(
+                                name: dish.name,
+                                calories: dish.totalCalories,
+                                portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
+                                macros: dish.totalMacros,
+                                detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
+                                icons: store.foodCategories(of: dish).map(\.icon)
+                            )
+                        }
+                    }
+                }
+            }
+        case .products:
+            let recent = store.customFoods
+                .filter { $0.updatedAt != nil }
+                .sorted { ($0.updatedAt ?? .distantPast) > ($1.updatedAt ?? .distantPast) }
+                .prefix(3)
+            if recent.count > 1 {
+                Section("Недавнее") {
+                    ForEach(recent) { food in
+                        NavigationLink {
+                            NewFoodSheet(store: store, editingFood: food, isEmbedded: true)
+                        } label: {
+                            foodRow(food)
+                        }
+                    }
+                }
+            }
+        case .database:
+            EmptyView()
+        }
+    }
 
     @ViewBuilder
     private func dishesSection(_ filteredDishes: [Dish]) -> some View {

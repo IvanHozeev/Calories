@@ -25,8 +25,17 @@ struct CatalogFoodView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Категория") {
-                    Label(food.foodCategory.title, systemImage: food.foodCategory.icon)
+                // Обычная строка, а не LabeledContent с Label внутри: там иконка
+                // растягивалась во всю доступную ширину и выглядела как пустой
+                // белый квадрат в половину экрана.
+                HStack {
+                    Text("Категория")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Image(systemName: food.foodCategory.icon)
+                        .imageScale(.medium)
+                        .foregroundStyle(.secondary)
+                    Text(food.foodCategory.title)
                 }
             }
 

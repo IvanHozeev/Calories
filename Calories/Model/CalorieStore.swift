@@ -52,6 +52,9 @@ final class CalorieStore {
     private(set) var proteinStreak: Int = 0
     private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
     private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
+    /// Недавнее — съеденное и заведённое вперемешку, по давности.
+    private(set) var recentFoods: [FoodItem] = []
+    private(set) var recentDishes: [Dish] = []
     private(set) var adaptedTodayGoal: Int = 0
     private(set) var calorieBankBonus: Int = 0
 
@@ -160,12 +163,14 @@ final class CalorieStore {
             (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
             uniquingKeysWith: { _, own in own }
         )
-        micronutrientsByFoodName = Dictionary(
-            (FoodDatabase.items + customFoods)
-                .filter { !$0.micronutrients.isEmpty }
-                .map { ($0.name, $0.micronutrients) },
-            uniquingKeysWith: { _, own in own }
-        )
+        // Каталог отдаёт состав уже разобранным и не меняется, поэтому его
+        // словарь строится один раз; поверх кладём свои продукты — они как раз
+        // меняются, но их немного.
+        var micronutrients = FoodCatalog.micronutrientsByName
+        for food in customFoods where !food.micronutrients.isEmpty {
+            micronutrients[food.name] = food.micronutrients
+        }
+        micronutrientsByFoodName = micronutrients
         // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном
         // ключе. Две записи могут схлопнуться в один локальный день после смены часового пояса,
         // и это был бы краш на каждом запуске без возможности выбраться.
@@ -231,6 +236,9 @@ final class CalorieStore {
         let adapted = computeAdaptedTodayGoal()
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
+
+        // После словарей: «Недавнее» берёт из них категорию продукта.
+        rebuildRecent()
 
         cachesBuiltForDay = calendar.startOfDay(for: Date())
 
@@ -691,56 +699,66 @@ final class CalorieStore {
     /// продукт было не найти: в списке по категориям он лежит среди тех, что
     /// завели полгода назад. Но заводят продукт ровно тогда, когда собираются
     /// им пользоваться, — значит он такой же недавний, как только что съеденный.
-    var recentFoods: [FoodItem] {
+    ///
+    /// Считается в `rebuildCaches`, а не в геттере. Вычисляемым оно пробегало всю
+    /// историю дневника и создавало объекты SwiftData на каждую перерисовку —
+    /// то есть на каждое нажатие клавиши в поиске, и экран добавления заметно
+    /// подтормаживал на вводе.
+    private func rebuildRecent() {
         let dishNames = Set(dishes.map(\.name))
         var seen = Set<String>()
-        var dated: [(date: Date, food: FoodItem)] = []
 
+        // Сперва только даты и ссылки: объекты дорого создавать, а нужны они
+        // лишь для верхушки списка.
+        var candidates: [(date: Date, entry: FoodEntry?, food: FoodItem?)] = []
         for entry in entries {
             guard let grams = entry.grams, grams > 0 else { continue }
             guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
             seen.insert(entry.name)
-            let factor = 100 / grams
-            dated.append((entry.date, FoodItem(
-                name: entry.name,
-                caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
-                protein: entry.protein * factor,
-                fat: entry.fat * factor,
-                carbs: entry.carbs * factor,
-                defaultGrams: grams,
-                // Недавнее пересобирается из записей дневника, а они категорию
-                // не хранят. Без этой строки весь список показывал «Другое».
-                category: foodCategories(forEntryNamed: entry.name).first ?? .other
-            )))
+            candidates.append((entry.date, entry, nil))
         }
-
         for food in customFoods {
             guard let updatedAt = food.updatedAt, !seen.contains(food.name) else { continue }
             seen.insert(food.name)
-            dated.append((updatedAt, food))
+            candidates.append((updatedAt, nil, food))
         }
 
-        return dated.sorted { $0.date > $1.date }.prefix(Self.recentLimit).map(\.food)
-    }
+        recentFoods = candidates
+            .sorted { $0.date > $1.date }
+            .prefix(Self.recentLimit)
+            .map { candidate in
+                if let food = candidate.food { return food }
+                let entry = candidate.entry!
+                let factor = 100 / (entry.grams ?? 100)
+                return FoodItem(
+                    name: entry.name,
+                    caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
+                    protein: entry.protein * factor,
+                    fat: entry.fat * factor,
+                    carbs: entry.carbs * factor,
+                    defaultGrams: entry.grams ?? 100,
+                    // Недавнее пересобирается из записей дневника, а они категорию
+                    // не хранят. Без этой строки весь список показывал «Другое».
+                    category: categoryByFoodName[entry.name] ?? .other
+                )
+            }
 
-    /// Недавние блюда — так же: и съеденные, и только что собранные.
-    var recentDishes: [Dish] {
-        var seen = Set<String>()
-        var dated: [(date: Date, dish: Dish)] = []
-
+        var seenDishes = Set<String>()
+        var dishCandidates: [(date: Date, dish: Dish)] = []
         for entry in entries {
-            guard !seen.contains(entry.name) else { continue }
+            guard !seenDishes.contains(entry.name) else { continue }
             guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
-            seen.insert(entry.name)
-            dated.append((entry.date, dish))
+            seenDishes.insert(entry.name)
+            dishCandidates.append((entry.date, dish))
         }
-
-        for dish in dishes where !seen.contains(dish.name) {
-            seen.insert(dish.name)
-            dated.append((dish.updatedAt ?? dish.createdAt, dish))
+        for dish in dishes where !seenDishes.contains(dish.name) {
+            seenDishes.insert(dish.name)
+            dishCandidates.append((dish.updatedAt ?? dish.createdAt, dish))
         }
-
-        return dated.sorted { $0.date > $1.date }.prefix(Self.recentLimit).map(\.dish)
+        recentDishes = dishCandidates
+            .sorted { $0.date > $1.date }
+            .prefix(Self.recentLimit)
+            .map(\.dish)
     }
 
     /// Сколько строк держим в «Недавнем». Больше — это уже не «недавнее»,

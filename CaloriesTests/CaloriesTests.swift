@@ -2338,3 +2338,59 @@ struct CatalogLinkTests {
         #expect(restored?.micronutrients.isEmpty == false)
     }
 }
+
+// MARK: - Недавнее
+
+/// «Недавнее» — это и съеденное, и заведённое. И считается оно один раз на
+/// изменение данных: вычисляемым свойством оно пробегало всю историю дневника
+/// и создавало объекты SwiftData на каждую перерисовку, то есть на каждое
+/// нажатие клавиши в поиске.
+@MainActor
+@Suite(.serialized)
+struct RecentFoodTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    @Test func itIsCachedRatherThanRebuiltOnEveryRead() {
+        store.add(name: "Овсянка", calories: 300, grams: 250)
+        let first = store.recentFoods.first
+        let second = store.recentFoods.first
+        #expect(first != nil)
+        #expect(first === second,
+                "Недавнее обязано быть кэшем: пересобираясь на каждое чтение, оно тормозит ввод")
+    }
+
+    @Test func aLongHistoryDoesNotProduceALongList() {
+        // Раньше объект создавался на каждое уникальное название за всю историю.
+        for index in 0..<200 {
+            store.add(name: "Продукт \(index)", calories: 100, grams: 100,
+                      date: Date().addingTimeInterval(-Double(index) * 3600))
+        }
+        #expect(store.recentFoods.count == CalorieStore.recentLimit)
+    }
+
+    @Test func aJustCreatedProductCountsAsRecent() {
+        // Продукт заводят ровно тогда, когда собираются им пользоваться.
+        store.addCustomFood(name: "Мой творог", caloriesPer100g: 90,
+                            protein: 17, fat: 1, carbs: 3, category: .dairy)
+        #expect(store.recentFoods.contains { $0.name == "Мой творог" })
+    }
+
+    @Test func eatenAndCreatedAreOrderedTogetherByRecency() {
+        store.add(name: "Съеденное давно", calories: 200, grams: 100,
+                  date: Date().addingTimeInterval(-86_400))
+        store.addCustomFood(name: "Заведённое сейчас", caloriesPer100g: 100,
+                            protein: 1, fat: 1, carbs: 1)
+        #expect(store.recentFoods.first?.name == "Заведённое сейчас")
+    }
+}

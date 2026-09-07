@@ -93,6 +93,19 @@ nonisolated enum FoodCatalog {
 
     static var isEmpty: Bool { index.isEmpty }
 
+    /// Микронутриенты по отображаемому названию — собираются один раз.
+    ///
+    /// У `FoodItem` то же свойство разбирает JSON при каждом обращении, а
+    /// каталог держит их уже разобранными. Через этот словарь строки списков
+    /// получают состав, не платя разбором за каждую перерисовку.
+    static let micronutrientsByName: [String: Micronutrients] = Dictionary(
+        index.compactMap { entry in
+            let micronutrients = entry.food.micronutrients
+            return micronutrients.isEmpty ? nil : (entry.food.localizedName, micronutrients)
+        },
+        uniquingKeysWith: { first, _ in first }
+    )
+
     private static let index: [Entry] = load()
 
     private static func load() -> [Entry] {

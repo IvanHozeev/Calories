@@ -421,7 +421,7 @@ struct MyFoodView: View {
             portion: "\(Int(grams)) \(String(localized: "г"))",
             macros: food.macrosPer100g.scaled(by: grams),
             icons: [food.foodCategory.icon],
-            micros: food.micronutrients.notable(inGrams: grams)
+            micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams)
         )
     }
 

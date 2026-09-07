@@ -646,7 +646,7 @@ struct AddEntryView: View {
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
             icons: [food.foodCategory.icon],
-            micros: food.micronutrients.notable(inGrams: 100)
+            micros: store.notableMicronutrients(forFoodNamed: food.name, grams: 100)
         )
     }
 

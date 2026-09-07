@@ -65,6 +65,17 @@ extension CalorieStore {
         return per100g.notable(inGrams: grams)
     }
 
+    /// Чем богат продукт в такой порции.
+    ///
+    /// Берём из словаря, а не у самого `FoodItem`: его свойство `micronutrients`
+    /// разбирает JSON при каждом обращении, а строки списка перерисовываются на
+    /// каждое нажатие клавиши в поиске — в базе это под три сотни разборов на
+    /// один символ.
+    func notableMicronutrients(forFoodNamed name: String, grams: Double) -> [Micronutrient] {
+        guard let per100g = micronutrientsByFoodName[name] else { return [] }
+        return per100g.notable(inGrams: grams)
+    }
+
     /// Доля суточной нормы по нутриенту — то, что показывают шкалой.
     ///
     /// Для натрия это доля потолка, а не выполнение цели: у него `isCeiling`,

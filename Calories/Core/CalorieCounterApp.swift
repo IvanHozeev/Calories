@@ -41,8 +41,12 @@ struct CalorieCounterApp: App {
                     .onChange(of: scenePhase) { _, phase in
                         guard phase == .active else { return }
                         BackupService.shared.backupIfNeeded(store)
+                        QuickActionRouter.shared.takePendingFromControl()
                     }
-                    .task { BackupService.shared.backupIfNeeded(store) }
+                    .task {
+                        BackupService.shared.backupIfNeeded(store)
+                        QuickActionRouter.shared.takePendingFromControl()
+                    }
                     .onChange(of: purchases.isPremium) { _, _ in
                         applyEntitlements(store: store)
                     }

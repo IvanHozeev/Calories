@@ -56,6 +56,27 @@ final class QuickActionRouter {
 
     private init() {}
 
+    /// Забирает намерение, оставленное контролом из Пункта управления.
+    ///
+    /// Расширение и приложение — разные процессы, позвать экран напрямую оттуда
+    /// нельзя, поэтому контрол кладёт намерение в общий контейнер. Стираем сразу
+    /// после чтения: иначе один нажатый контрол открывал бы камеру при каждом
+    /// следующем запуске.
+    @discardableResult
+    func takePendingFromControl() -> Bool {
+        let defaults = UserDefaults(suiteName: CalorieStore.appGroup)
+        guard let raw = defaults?.string(forKey: Self.controlActionKey),
+              let action = QuickAction(rawValue: raw) else { return false }
+        defaults?.removeObject(forKey: Self.controlActionKey)
+        pending = action
+        return true
+    }
+
+    /// Тот же ключ, что в расширении. Он там продублирован строкой: файлы
+    /// приложения в таргет виджета не входят, а тащить их туда ради одной
+    /// константы дороже, чем держать её в двух местах.
+    static let controlActionKey = "pending_quick_action"
+
     @discardableResult
     func handle(_ item: UIApplicationShortcutItem) -> Bool {
         guard let action = QuickAction(rawValue: item.type) else { return false }

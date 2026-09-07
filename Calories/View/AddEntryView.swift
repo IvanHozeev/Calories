@@ -441,23 +441,11 @@ struct AddEntryView: View {
                         .accessibilityLabel("Время приёма")
                         .accessibilityIdentifier("mealTime")
 
-                        // Все способы добавить продукт — под одной кнопкой. Сверху те,
-                        // что избавляют от ручного ввода: штрихкод, когда есть упаковка,
-                        // фото — когда её нет. Ниже — ручные, для «этого нигде нет».
+                        // Только ручные способы. Камера и сканер переехали на
+                        // «Сегодня» и в Пункт управления: способ добавления
+                        // выбирают до входа, а не внутри уже открытого экрана.
+                        // Здесь остаётся то, что нужно, когда продукта нет нигде.
                         Menu {
-                            if GeminiVisionService.isConfigured {
-                                Button {
-                                    showingPhoto = true
-                                } label: {
-                                    Label("Снять еду", systemImage: "camera")
-                                }
-                            }
-                            Button {
-                                showingScanner = true
-                            } label: {
-                                Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
-                            }
-                            Divider()
                             Button {
                                 showingNewFood = true
                             } label: {

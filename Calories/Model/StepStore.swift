@@ -28,6 +28,16 @@ final class StepStore {
     private(set) var weeklyTotal: Int = 0
     private(set) var prevWeekAverage: Int = 0
 
+    /// Что и когда мы в последний раз отдали виджету. Нужно, чтобы не дёргать
+    /// его на каждое обновление HealthKit: у виджетов системный бюджет
+    /// перестроений, и, потратив его на переход с 6540 шагов на 6547,
+    /// приложение получает троттлинг — виджет начинает обновляться реже, чем
+    /// нужно. То есть мы платим батареей за то, чтобы он работал хуже.
+    @ObservationIgnored private var lastPushedSteps = 0
+    @ObservationIgnored private var lastPushedGoalReached = false
+    @ObservationIgnored private var lastPushedAt = Date.distantPast
+    @ObservationIgnored private var lastPushedDay = Date.distantPast
+
     var stepGoal: Int {
         didSet {
             defaults.set(stepGoal, forKey: "step_goal")
@@ -75,7 +85,10 @@ final class StepStore {
             }
         }
         healthStore.execute(query)
-        healthStore.enableBackgroundDelivery(for: type, frequency: .immediate) { _, _ in }
+        // Часовая, а не `.immediate`. Шагам секундная точность не нужна, и для
+        // накопительных типов система всё равно режет частоту до часа — просить
+        // большего значит заявлять намерение, которого у нас нет.
+        healthStore.enableBackgroundDelivery(for: type, frequency: .hourly) { _, _ in }
     }
 
     func fetchAll() {
@@ -127,11 +140,60 @@ final class StepStore {
             Task { @MainActor [weak self] in
                 self?.stepsToday = steps
                 self?.updateGoalStreak()
+                // Число отдаём всегда — запись в общий контейнер ничего не стоит,
+                // и когда система обновит виджет сама, она возьмёт свежее.
+                // Дорого стоит только просьба перестроиться, её и экономим.
                 self?.groupDefaults?.set(steps, forKey: "widget_steps_today")
-                WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
+                self?.refreshStepsWidgetIfWorthIt(steps: steps)
             }
         }
         healthStore.execute(query)
+    }
+
+    /// Стоит ли просить виджет перестроиться.
+    ///
+    /// Вынесено отдельной функцией без побочных эффектов, потому что вся суть
+    /// здесь — в том, «когда именно», а проверить это иначе нечем.
+    ///
+    /// Достигнутая цель показывается сразу: ради неё на виджет и смотрят.
+    /// В остальном ждём и заметного изменения, и паузы — сотня шагов это
+    /// примерно минута ходьбы, и обновлять экран блокировки каждую минуту
+    /// незачем.
+    nonisolated static func shouldRefreshWidget(
+        steps: Int,
+        goal: Int,
+        lastSteps: Int,
+        lastGoalReached: Bool,
+        lastPushedAt: Date,
+        lastPushedDay: Date,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> Bool {
+        // Новый день — на виджете обязан появиться ноль, иначе он до первой
+        // сотни шагов будет показывать вчерашний итог.
+        if !calendar.isDate(lastPushedDay, inSameDayAs: now) { return true }
+        if (steps >= goal) != lastGoalReached { return true }
+        let movedEnough = abs(steps - lastSteps) >= 100
+        let waitedEnough = now.timeIntervalSince(lastPushedAt) >= 600
+        return movedEnough && waitedEnough
+    }
+
+    private func refreshStepsWidgetIfWorthIt(steps: Int) {
+        let now = Date()
+        guard Self.shouldRefreshWidget(
+            steps: steps,
+            goal: stepGoal,
+            lastSteps: lastPushedSteps,
+            lastGoalReached: lastPushedGoalReached,
+            lastPushedAt: lastPushedAt,
+            lastPushedDay: lastPushedDay,
+            now: now
+        ) else { return }
+        lastPushedSteps = steps
+        lastPushedGoalReached = steps >= stepGoal
+        lastPushedAt = now
+        lastPushedDay = now
+        WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
     }
 
     private func fetchActiveCaloriesToday() {

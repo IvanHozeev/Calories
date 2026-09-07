@@ -1916,3 +1916,55 @@ struct FastDayTests {
         #expect(store.adaptedGoal(for: midWeek) == store.effectiveGoal(for: midWeek))
     }
 }
+
+// MARK: - Обновление виджета шагов
+
+/// У виджетов системный бюджет перестроений. Раньше приложение просило
+/// обновиться на каждое сообщение HealthKit — то есть тратило батарею на то,
+/// чтобы виджет из-за троттлинга обновлялся реже. Здесь проверяется, что
+/// теперь оно просит только там, где человек увидит разницу.
+struct StepWidgetRefreshTests {
+    private let calendar = Calendar(identifier: .gregorian)
+    private func date(_ day: Int, _ hour: Int) -> Date {
+        calendar.date(from: DateComponents(year: 2026, month: 9, day: day, hour: hour))!
+    }
+
+    @Test func newDayAlwaysRefreshes() {
+        // Иначе виджет до первой сотни шагов показывал бы вчерашний итог.
+        #expect(StepStore.shouldRefreshWidget(
+            steps: 0, goal: 10_000, lastSteps: 12_000, lastGoalReached: true,
+            lastPushedAt: date(6, 23), lastPushedDay: date(6, 23),
+            now: date(7, 1), calendar: calendar))
+    }
+
+    @Test func reachingTheGoalRefreshesImmediately() {
+        // Ради этого момента на виджет и смотрят — ждать десять минут нельзя.
+        #expect(StepStore.shouldRefreshWidget(
+            steps: 10_001, goal: 10_000, lastSteps: 9_990, lastGoalReached: false,
+            lastPushedAt: date(7, 12), lastPushedDay: date(7, 12),
+            now: date(7, 12).addingTimeInterval(30), calendar: calendar))
+    }
+
+    @Test func aFewStepsDoNotRefresh() {
+        #expect(!StepStore.shouldRefreshWidget(
+            steps: 6_547, goal: 10_000, lastSteps: 6_540, lastGoalReached: false,
+            lastPushedAt: date(7, 12), lastPushedDay: date(7, 12),
+            now: date(7, 13), calendar: calendar))
+    }
+
+    @Test func aLongWalkTooSoonAfterTheLastRefreshWaits() {
+        // Прошли достаточно, но виджет обновляли минуту назад: экран блокировки
+        // не обязан пересчитываться каждую минуту прогулки.
+        #expect(!StepStore.shouldRefreshWidget(
+            steps: 6_900, goal: 10_000, lastSteps: 6_500, lastGoalReached: false,
+            lastPushedAt: date(7, 12), lastPushedDay: date(7, 12),
+            now: date(7, 12).addingTimeInterval(60), calendar: calendar))
+    }
+
+    @Test func aLongWalkAfterAPauseRefreshes() {
+        #expect(StepStore.shouldRefreshWidget(
+            steps: 6_900, goal: 10_000, lastSteps: 6_500, lastGoalReached: false,
+            lastPushedAt: date(7, 12), lastPushedDay: date(7, 12),
+            now: date(7, 12).addingTimeInterval(900), calendar: calendar))
+    }
+}

@@ -80,6 +80,21 @@ ALIASES = {
     "Smoked sausage": "sausage polish pork",
     "Hake": "fish whiting mixed species raw",
     "Sea bream": "fish snapper mixed species raw",
+    # сухие крупы и бобовые — в USDA это «raw», а слово «dry» там значит другое
+    "Dry white rice": "rice white long-grain regular unenriched",
+    "Dry brown rice": "rice brown long-grain",
+    "Dry buckwheat": "buckwheat groats roasted",
+    "Dry pearl barley": "barley pearled",
+    "Dry millet": "millet",
+    "Dry bulgur": "bulgur",
+    "Dry couscous": "couscous",
+    "Dry quinoa": "quinoa uncooked",
+    "Dry pasta": "pasta dry enriched",
+    "Dry lentils": "lentils",
+    "Dry beans": "beans kidney red mature seeds",
+    "Dry chickpeas": "chickpeas garbanzo beans bengal gram mature seeds",
+    "Dry split peas": "peas split mature seeds",
+    "Dry mung beans": "mung beans mature seeds",
 }
 
 # Слова, которые ничего не сообщают: они есть почти в каждом описании и только

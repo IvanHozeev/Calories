@@ -101,6 +101,9 @@
 # --- Крупы, хлеб, макароны
 Рис варёный|Boiled white rice|130|2.7|0.3|28|grains|
 Рис бурый варёный|Boiled brown rice|123|2.7|1.0|26|grains|
+Рис сухой|Dry white rice|365|7.1|0.7|80|grains|80
+Рис бурый сухой|Dry brown rice|370|7.9|2.9|77|grains|80
+Гречка сухая|Dry buckwheat|343|13.3|3.4|72|grains|80
 Гречка варёная|Boiled buckwheat|110|4.2|1.1|21|grains|
 Овсянка на воде|Oatmeal with water|68|2.5|1.5|12|grains|
 Овсянка на молоке|Oatmeal with milk|102|3.2|4.1|14|grains|
@@ -110,9 +113,15 @@
 Булгур варёный|Boiled bulgur|83|3.1|0.2|19|grains|
 Кускус варёный|Boiled couscous|112|3.8|0.2|23|grains|
 Киноа варёная|Boiled quinoa|120|4.4|1.9|21|grains|
+Перловка сухая|Dry pearl barley|352|9.9|1.2|78|grains|80
+Пшено сухое|Dry millet|378|11.0|4.2|73|grains|80
+Булгур сухой|Dry bulgur|342|12.3|1.3|76|grains|80
+Кускус сухой|Dry couscous|376|12.8|0.6|77|grains|80
+Киноа сухая|Dry quinoa|368|14.1|6.1|64|grains|80
 Манная каша|Semolina porridge|98|3.0|3.2|15|grains|
 Кукурузная каша|Corn porridge|86|2.0|1.2|17|grains|
 Макароны варёные|Boiled pasta|131|5.0|1.1|25|grains|
+Макароны сухие|Dry pasta|371|13.0|1.5|75|grains|80
 Хлеб белый|White bread|265|9.0|3.2|49|grains|30
 Хлеб ржаной|Rye bread|210|6.6|1.2|40|grains|30
 Хлеб цельнозерновой|Whole grain bread|247|13.0|3.4|41|grains|30
@@ -210,6 +219,11 @@
 Нут варёный|Boiled chickpeas|164|8.9|2.6|27|legumes|
 Горох варёный|Boiled peas|118|8.3|0.4|21|legumes|
 Маш варёный|Boiled mung beans|105|7.0|0.4|19|legumes|
+Чечевица сухая|Dry lentils|352|24.6|1.1|63|legumes|80
+Фасоль сухая|Dry beans|333|23.6|0.8|60|legumes|80
+Нут сухой|Dry chickpeas|378|20.5|6.0|63|legumes|80
+Горох сухой|Dry split peas|341|24.6|1.2|60|legumes|80
+Маш сухой|Dry mung beans|347|23.9|1.2|63|legumes|80
 Эдамаме|Edamame|121|12.0|5.2|9|legumes|
 Тофу|Tofu|76|8.0|4.8|1.9|legumes|
 Соевый белок сухой|Dry soy protein|296|52.0|1.0|18|legumes|

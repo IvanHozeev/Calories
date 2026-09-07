@@ -76,6 +76,9 @@ Chanterelles	168422	Mushrooms, Chanterelle, raw	1.00	0.15
 Shiitake	169242	Mushrooms, shiitake, raw	1.00	0.00
 Boiled white rice	168878	Rice, white, long-grain, regular, enriched, cooked	1.00	0.01
 Boiled brown rice	169704	Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)	1.00	0.01
+Dry white rice	169756	Rice, white, long-grain, regular, raw, unenriched	1.00	0.00
+Dry brown rice	169703	Rice, brown, long-grain, raw (Includes foods for USDA's Food Distribution Program)	1.00	0.05
+Dry buckwheat	170685	Buckwheat groats, roasted, dry	1.00	0.18
 Boiled buckwheat	170686	Buckwheat groats, roasted, cooked	1.00	0.24
 Oatmeal with water	172979	Cereals, QUAKER, QUAKER MultiGrain Oatmeal, prepared with water, no salt	1.00	0.20
 Dry oat flakes	173904	Cereals, oats, regular and quick, not fortified, dry	0.67	0.01
@@ -84,7 +87,13 @@ Boiled millet	168871	Millet, cooked	1.00	0.02
 Boiled bulgur	170287	Bulgur, cooked	1.00	0.01
 Boiled couscous	169700	Couscous, cooked	1.00	0.01
 Boiled quinoa	168917	Quinoa, cooked	1.00	0.01
+Dry pearl barley	170284	Barley, pearled, raw	1.00	0.01
+Dry millet	169702	Millet, raw	1.00	0.01
+Dry bulgur	170688	Bulgur, dry	1.00	0.00
+Dry couscous	169699	Couscous, dry	1.00	0.01
+Dry quinoa	168874	Quinoa, uncooked	1.00	0.01
 Boiled pasta	169728	Pasta, fresh-refrigerated, plain, cooked	1.00	0.01
+Dry pasta	169736	Pasta, dry, enriched	1.00	0.01
 White bread	174924	Bread, white, commercially prepared (includes soft bread crumbs)	1.00	0.02
 Rye bread	174920	Bread, reduced-calorie, rye	1.00	0.21
 Whole grain bread	168013	Bread, multi-grain (includes whole-grain)	1.00	0.18
@@ -159,6 +168,11 @@ Boiled beans	173740	Beans, kidney, all types, mature seeds, cooked, boiled, with
 Boiled chickpeas	173757	Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt	1.00	0.01
 Boiled peas	172429	Peas, split, mature seeds, cooked, boiled, without salt	1.00	0.00
 Boiled mung beans	174257	Mung beans, mature seeds, cooked, boiled, without salt	1.00	0.01
+Dry lentils	172420	Lentils, raw	1.00	0.01
+Dry beans	173742	Beans, kidney, california red, mature seeds, raw	1.00	0.07
+Dry chickpeas	173756	Chickpeas (garbanzo beans, bengal gram), mature seeds, raw	1.00	0.00
+Dry split peas	172428	Peas, green, split, mature seeds, raw	1.00	0.28
+Dry mung beans	174256	Mung beans, mature seeds, raw	1.00	0.01
 Edamame	168411	Edamame, frozen, prepared	1.00	0.01
 Tofu	172476	Tofu, raw, regular, prepared with calcium sulfate	1.00	0.00
 Hummus	172454	Hummus, home prepared	1.00	0.38

@@ -47,7 +47,7 @@ struct PlanView: View {
             }
 
             if let composition = store.planCompositionChange {
-                compositionSection(composition)
+                compositionSection(composition, intent: store.plan?.currentPhase?.intent)
             }
 
             Section {
@@ -205,7 +205,7 @@ struct PlanView: View {
     /// Главный вопрос натурала на сушке, на который весы одни ответить не могут:
     /// «минус 6 кг» — это успех или съеденные мышцы. Показываем обе части и прямо
     /// говорим, где заканчивается точность метода.
-    private func compositionSection(_ change: CompositionChange) -> some View {
+    private func compositionSection(_ change: CompositionChange, intent: PlanIntent?) -> some View {
         Section {
             resultRow("Вес", String(format: "%.1f → %.1f \(String(localized: "кг"))", change.startWeightKg, change.endWeightKg))
             resultRow("Жир", String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
@@ -214,18 +214,45 @@ struct PlanView: View {
                                             change.startLeanKg, change.endLeanKg, change.leanDeltaKg),
                       highlighted: change.verdict != .leanLoss)
 
+            // Вердикт с оглядкой на то, зачем идёт фаза: «сухая держится» —
+            // успех на сушке и провал на наборе. Без плана остаётся прежний,
+            // намерения не знающий.
             VStack(alignment: .leading, spacing: 6) {
-                Label(change.verdict.title, systemImage: verdictIcon(change.verdict))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(verdictColor(change.verdict))
-                Text(verbatim: change.verdict.explanation)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let intent {
+                    let verdict = change.verdict(for: intent)
+                    Label(verdict.title, systemImage: verdict.icon)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(phaseVerdictColor(verdict))
+                    Text(verbatim: change.advice(for: intent))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    if let share = change.fatShareOfChange {
+                        Text(String(format: String(localized: "Жиром — %d%% изменения веса."),
+                                    Int((share * 100).rounded())))
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .monospacedDigit()
+                    }
+                } else {
+                    Label(change.verdict.title, systemImage: verdictIcon(change.verdict))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(verdictColor(change.verdict))
+                    Text(verbatim: change.verdict.explanation)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(.vertical, 4)
         } header: {
-            Text("Из чего уходит вес")
+            // Заголовок по намерению: на наборе вес не уходит, и спрашивать
+            // «из чего уходит» там нечего.
+            switch intent {
+            case .bulk:        Text("Из чего набирается вес")
+            case .maintenance: Text("Из чего состоит вес")
+            default:           Text("Из чего уходит вес")
+            }
         } footer: {
             Text(String(
                 format: String(localized: "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя."),
@@ -233,6 +260,14 @@ struct PlanView: View {
                 change.toDate.formatted(.dateTime.day().month(.abbreviated)),
                 change.noiseKg
             ))
+        }
+    }
+
+    private func phaseVerdictColor(_ verdict: PhaseCompositionVerdict) -> Color {
+        switch verdict {
+        case .worked:  return .green
+        case .costly:  return .orange
+        case .stalled: return .secondary
         }
     }
 
@@ -306,6 +341,17 @@ struct PlanView: View {
             PlanProgressChart(plan: plan, entries: store.weightEntries)
 
             statusRow(adherence.status)
+
+            // Пока вес устаканивается после подъёма калорий, об этом надо
+            // сказать прямо. Иначе человек видит плюс полтора килограмма
+            // и делает вывод про жир, которого там нет.
+            if adherence.isSettlingAfterIncrease {
+                Label("Калории только что подняли — вернувшиеся гликоген и вода дают на весах пару килограммов. Пока это идёт, вес о плане не говорит.",
+                      systemImage: "drop.fill")
+                    .font(.caption)
+                    .foregroundStyle(.blue)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             resultRow("Ожидаемый вес сегодня", String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
             if let actual = adherence.actualWeightToday {

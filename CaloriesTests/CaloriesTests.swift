@@ -217,6 +217,121 @@ struct PlanTests {
         )
     }
 
+    // MARK: - Переход между фазами
+
+    @Test func aRampMovesTheTargetGraduallyInsteadOfInOneStep() {
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.7),
+            PlanPhase(intent: .maintenance, durationWeeks: 4, rampWeeks: 2)
+        ])
+        let cal = Calendar.current
+        let deficitTarget = plan.calorieTarget(for: cal.date(byAdding: .day, value: 3, to: plan.startDate)!, tdee: 2500)
+        let firstDayOfRamp = plan.calorieTarget(for: cal.date(byAdding: .day, value: 28, to: plan.startDate)!, tdee: 2500)
+        let middleOfRamp = plan.calorieTarget(for: cal.date(byAdding: .day, value: 35, to: plan.startDate)!, tdee: 2500)
+        let afterRamp = plan.calorieTarget(for: cal.date(byAdding: .day, value: 45, to: plan.startDate)!, tdee: 2500)
+
+        #expect(firstDayOfRamp == deficitTarget, "Первый день перехода — ещё прежняя норма")
+        #expect(middleOfRamp > deficitTarget && middleOfRamp < afterRamp, "Середина перехода — между двумя нормами")
+        #expect(afterRamp == 2500, "После перехода — норма поддержания")
+    }
+
+    @Test func withoutARampTheTargetJumpsOnTheFirstDay() {
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.7),
+            PlanPhase(intent: .maintenance, durationWeeks: 4)
+        ])
+        let firstDay = Calendar.current.date(byAdding: .day, value: 28, to: plan.startDate)!
+        #expect(plan.calorieTarget(for: firstDay, tdee: 2500) == 2500)
+    }
+
+    @Test func onlyAnIncreaseInCaloriesCountsAsSettling() {
+        let cal = Calendar.current
+        let up = chained([
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.7),
+            PlanPhase(intent: .maintenance, durationWeeks: 4)
+        ])
+        let down = chained([
+            PlanPhase(intent: .maintenance, durationWeeks: 4),
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.7)
+        ])
+        let justAfter = { (p: Plan) in cal.date(byAdding: .day, value: 29, to: p.startDate)! }
+        #expect(up.isSettling(on: justAfter(up)), "После подъёма калорий возвращается вода")
+        #expect(!down.isSettling(on: justAfter(down)), "Уход в дефицит воду не возвращает")
+        // Через три недели после перехода вода уже не оправдание.
+        #expect(!up.isSettling(on: cal.date(byAdding: .day, value: 28 + 21, to: up.startDate)!))
+    }
+
+    @Test func aPhaseFromBeforeRampsDecodesWithoutOne() throws {
+        let legacy = """
+        {"intent": "cut", "durationWeeks": 8, "weeklyRatePercent": 0.7}
+        """
+        let phase = try JSONDecoder().decode(PlanPhase.self, from: Data(legacy.utf8))
+        #expect(phase.rampWeeks == 0)
+        #expect(phase.durationWeeks == 8)
+    }
+
+    @Test func aRampCannotOutlastItsOwnPhase() {
+        let phase = PlanPhase(intent: .maintenance, durationWeeks: 2, rampWeeks: 8)
+        #expect(phase.rampWeeks == 2)
+    }
+
+    // MARK: - Состав за фазу
+
+    /// 77 кг, потеряно `lostKg`, из них жира `fatOfItKg`.
+    private func composition(startKg: Double, deltaKg: Double, fatDeltaKg: Double) -> CompositionChange {
+        let endKg = startKg + deltaKg
+        let startFatKg = startKg * 0.20
+        let endFatKg = startFatKg + fatDeltaKg
+        return CompositionChange(
+            fromDate: Date().addingTimeInterval(-60 * 86_400),
+            toDate: Date(),
+            startWeightKg: startKg,
+            endWeightKg: endKg,
+            startFatPercent: startFatKg / startKg * 100,
+            endFatPercent: endFatKg / endKg * 100
+        )
+    }
+
+    @Test func aBulkThatWentToFatIsNotCalledFine() {
+        // Плюс три килограмма, и почти всё это жир. Прежний вердикт, не знавший
+        // намерения, докладывал «сухая масса держится» — то есть что всё хорошо.
+        let change = composition(startKg: 77, deltaKg: 3, fatDeltaKg: 2.8)
+        #expect(change.verdict == .withinNoise, "Сама по себе сухая укладывается в погрешность")
+        #expect(change.verdict(for: .bulk) == .costly, "Но для набора это провал")
+        #expect(change.verdict(for: .cut) != .costly, "А тот же состав на сушке — другой разговор")
+    }
+
+    @Test func aCutThatKeptMuscleWorked() {
+        let change = composition(startKg: 77, deltaKg: -4, fatDeltaKg: -3.8)
+        #expect(change.verdict(for: .cut) == .worked)
+    }
+
+    @Test func aCutThatAteMuscleIsCostly() {
+        // Сухой массы минус 3 кг при погрешности метода около 2.3 — это больше
+        // того, что метод способен наврать.
+        let change = composition(startKg: 77, deltaKg: -6, fatDeltaKg: -3)
+        #expect(change.verdict(for: .cut) == .costly)
+    }
+
+    @Test func aWeightThatDidNotMoveIsStalledOnEitherSide() {
+        let change = composition(startKg: 77, deltaKg: 0.2, fatDeltaKg: 0.1)
+        #expect(change.verdict(for: .cut) == .stalled)
+        #expect(change.verdict(for: .bulk) == .stalled)
+        // На поддержании неподвижный вес — это и есть успех.
+        #expect(change.verdict(for: .maintenance) == .worked)
+    }
+
+    @Test func maintenanceThatDriftedIsNotFine() {
+        let change = composition(startKg: 77, deltaKg: 2.5, fatDeltaKg: 2.0)
+        #expect(change.verdict(for: .maintenance) == .costly)
+    }
+
+    @Test func theShareGoingToFatIsUnknownWhileTheWeightStands() {
+        #expect(composition(startKg: 77, deltaKg: 0.2, fatDeltaKg: 0.1).fatShareOfChange == nil)
+        let moved = composition(startKg: 77, deltaKg: -4, fatDeltaKg: -3)
+        #expect(abs((moved.fatShareOfChange ?? 0) - 0.75) < 0.001)
+    }
+
     // MARK: - Фазы
 
     private func chained(_ phases: [PlanPhase], startWeightKg: Double = 80,
@@ -1851,6 +1966,21 @@ struct PlanCompletionTests {
         #expect(abs(adherence.expectedWeightToday - afterCut) < 0.05,
                 "На поддержании ждут тот же вес, а не продолжение снижения")
         #expect(adherence.status == .onTrack)
+    }
+
+    @Test func waterComingBackAfterADeficitIsNotCalledFallingBehind() {
+        // Пятая неделя: дефицит кончился на четвёртой, калории подняли.
+        // Вес прыгнул на полтора килограмма гликогена и воды.
+        let plan = chainedPlan(weeksAgo: 5)
+        store.startPlan(plan)
+        let afterCut = 77 - 77 * 0.005 * 4
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-8 * 86_400))
+        store.addWeight(afterCut + 1.4, date: Date())
+
+        let adherence = try! #require(store.planAdherence())
+        #expect(adherence.isSettlingAfterIncrease, "После подъёма калорий вес ещё устаканивается")
+        #expect(adherence.status == .onTrack,
+                "Полтора килограмма воды — это не отставание, а то, что сам переход и означает")
     }
 
     @Test func theRateIsMeasuredWithinTheRunningPhaseNotTheWholePlan() {

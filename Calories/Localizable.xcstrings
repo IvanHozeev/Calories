@@ -5320,6 +5320,53 @@
         }
       }
     },
+    "Вес держится — поддержание делает ровно то, зачем нужно." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن ثابت — الثبات يفعل تماماً ما هو مطلوب منه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht hält — Erhaltung tut genau das, wofür sie da ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight is holding — maintenance is doing exactly what it is for."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso se mantiene: el mantenimiento hace justo lo que debe."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids tient — l'entretien fait exactement ce pour quoi il est là."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל נשמר — תחזוקה עושה בדיוק את מה שנועדה לו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso se mantém — a manutenção faz exatamente o que deve."
+          }
+        }
+      }
+    },
     "Вес должен быть больше нуля." : {
       "localizations" : {
         "ar" : {
@@ -5502,6 +5549,241 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peso ao terminar"
+          }
+        }
+      }
+    },
+    "Вес не сдвинулся" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن لم يتحرك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht hat sich nicht bewegt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight did not move"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso no se movió"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids n'a pas bougé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל לא זז"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso não se moveu"
+          }
+        }
+      }
+    },
+    "Вес поехал. На поддержании это значит, что норма разошлась с фактическим расходом." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن انزاح. في الثبات يعني ذلك أن الهدف ابتعد عن الصرف الفعلي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht ist gewandert. In der Erhaltung heißt das: Das Ziel hat sich vom tatsächlichen Verbrauch entfernt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight has drifted. In maintenance that means the target has parted ways with actual expenditure."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso se ha desviado. En mantenimiento eso significa que la meta se separó del gasto real."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids a dérivé. En entretien, cela veut dire que l'objectif s'est écarté de la dépense réelle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל זז. בתחזוקה זה אומר שהיעד התרחק מההוצאה בפועל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso desviou. Na manutenção isso significa que a meta se afastou do gasto real."
+          }
+        }
+      }
+    },
+    "Вес стоит. Либо дефицита нет на самом деле, либо считается не всё съеденное." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن ثابت. إمّا لا يوجد عجز فعلياً، وإمّا لا يُسجَّل كل ما يُؤكل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht steht. Entweder gibt es tatsächlich kein Defizit, oder nicht alles Gegessene wird erfasst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight is standing still. Either there is no deficit in fact, or not everything eaten is being logged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso está parado. O no hay déficit real, o no se registra todo lo que se come."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids stagne. Soit il n'y a pas vraiment de déficit, soit tout ce qui est mangé n'est pas noté."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל עומד. או שאין באמת גירעון, או שלא כל מה שנאכל נרשם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso está parado. Ou não há déficit de fato, ou nem tudo que se come é registrado."
+          }
+        }
+      }
+    },
+    "Вес стоит. Профицита нет — либо норма занижена, либо съедается не столько, сколько записано." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن ثابت. لا يوجد فائض — إمّا الهدف منخفض، وإمّا يُؤكل أقل مما يُسجَّل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht steht. Es gibt keinen Überschuss — entweder ist das Ziel zu niedrig, oder es wird weniger gegessen als erfasst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight is standing still. There is no surplus — either the target is too low, or less is eaten than is logged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso está parado. No hay superávit: o la meta es baja, o se come menos de lo registrado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids stagne. Il n'y a pas d'excédent — soit l'objectif est trop bas, soit on mange moins que ce qui est noté."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל עומד. אין עודף — או שהיעד נמוך, או שנאכל פחות ממה שנרשם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso está parado. Não há superávit — ou a meta é baixa, ou come-se menos do que se registra."
+          }
+        }
+      }
+    },
+    "Вес уходит жиром, сухая масса на месте — так дефицит и должен выглядеть." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن ينزل دهناً والكتلة الصافية ثابتة — هكذا يجب أن يبدو العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht geht als Fett und die Magermasse hält — so soll ein Defizit aussehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The weight is coming off as fat and lean mass is holding — that is what a deficit should look like."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso se va como grasa y la masa magra se mantiene: así debe verse un déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids part en gras et la masse maigre tient — c'est à ça qu'un déficit doit ressembler."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל יורד משומן ומסת הרזה נשמרת — כך גירעון אמור להיראות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso sai como gordura e a massa magra se mantém — é assim que um déficit deve parecer."
           }
         }
       }
@@ -7727,6 +8009,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quebrar o jejum"
+          }
+        }
+      }
+    },
+    "Выход из дефицита прыжком возвращает гликоген и воду: весы за три дня показывают плюс пару килограммов, к жиру не имеющих отношения. Пока норма поднимается плавно, приложение и не считает этот скачок отставанием." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج من العجز دفعة واحدة يعيد الغلايكوجين والماء: يُظهر الميزان خلال ثلاثة أيام كيلوغرامين لا علاقة لهما بالدهن. وما دام الهدف يرتفع تدريجياً، لا يَعُدّ التطبيق هذه القفزة تأخّراً."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Defizit auf einen Schlag zu verlassen bringt Glykogen und Wasser zurück: Die Waage zeigt in drei Tagen ein paar Kilogramm, die nichts mit Fett zu tun haben. Solange das Ziel allmählich steigt, wertet die App diesen Sprung nicht als Rückstand."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaving a deficit in one jump brings back glycogen and water: the scale shows a couple of kilograms in three days that have nothing to do with fat. While the target rises gradually, the app does not count that jump as falling behind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salir del déficit de golpe devuelve glucógeno y agua: la báscula muestra un par de kilos en tres días que nada tienen que ver con la grasa. Mientras la meta sube gradualmente, la app no cuenta ese salto como retraso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sortir d'un déficit d'un coup fait revenir le glycogène et l'eau : la balance affiche deux kilos en trois jours qui n'ont rien à voir avec le gras. Tant que l'objectif monte progressivement, l'app ne compte pas ce saut comme un retard."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יציאה מגירעון בבת אחת מחזירה גליקוגן ומים: המשקל מראה תוך שלושה ימים כמה קילוגרמים שאין להם קשר לשומן. כל עוד היעד עולה בהדרגה, האפליקציה לא סופרת את הקפיצה הזו כפיגור."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do déficit de uma vez traz de volta glicogênio e água: a balança mostra alguns quilos em três dias que nada têm a ver com gordura. Enquanto a meta sobe gradualmente, o app não conta esse salto como atraso."
           }
         }
       }
@@ -11952,6 +12281,53 @@
         }
       }
     },
+    "Жиром — %d%% изменения веса." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهن يشكّل %d%% من التغيّر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf Fett entfallen %d%% der Veränderung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat accounts for %d%% of the change."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grasa representa el %d%% del cambio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le gras représente %d%% du changement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן מהווה %d%% מהשינוי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gordura responde por %d%% da mudança."
+          }
+        }
+      }
+    },
     "Жиры" : {
       "localizations" : {
         "ar" : {
@@ -14050,6 +14426,100 @@
         }
       }
     },
+    "Из чего набирается вес" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ممّ تتكوّن الزيادة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woraus das Gewicht zunimmt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What the weight is gained from"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De qué se gana el peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quoi le poids se compose"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממה המשקל עולה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De que o peso é ganho"
+          }
+        }
+      }
+    },
+    "Из чего состоит вес" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ممّ يتكوّن الوزن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woraus das Gewicht besteht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What the weight is made of"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De qué se compone el peso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quoi le poids est fait"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממה המשקל מורכב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De que o peso é feito"
+          }
+        }
+      }
+    },
     "Из чего уходит вес" : {
       "localizations" : {
         "ar" : {
@@ -15569,6 +16039,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calorias por 100 g"
+          }
+        }
+      }
+    },
+    "Калории только что подняли — вернувшиеся гликоген и вода дают на весах пару килограммов. Пока это идёт, вес о плане не говорит." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رُفعت السعرات للتو — عودة الغلايكوجين والماء تضع كيلوغرامين على الميزان. وما دام ذلك يجري، فالوزن لا يقول شيئاً عن الخطة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Kalorien wurden gerade erhöht — zurückkehrendes Glykogen und Wasser legen ein paar Kilogramm auf die Waage. Solange das läuft, sagt das Gewicht nichts über den Plan."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories have just gone up — returning glycogen and water put a couple of kilograms on the scale. While that is happening, weight says nothing about the plan."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las calorías acaban de subir: el glucógeno y el agua que vuelven ponen un par de kilos en la báscula. Mientras eso ocurre, el peso no dice nada del plan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les calories viennent de monter — le glycogène et l'eau qui reviennent ajoutent deux kilos sur la balance. Pendant ce temps, le poids ne dit rien du plan."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקלוריות הועלו זה עתה — גליקוגן ומים שחוזרים מוסיפים כמה קילוגרמים על המשקל. כל עוד זה קורה, המשקל לא מספר דבר על התוכנית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As calorias acabaram de subir — o glicogênio e a água que voltam colocam alguns quilos na balança. Enquanto isso acontece, o peso não diz nada sobre o plano."
           }
         }
       }
@@ -25372,6 +25889,53 @@
         }
       }
     },
+    "Отработала дорого" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نجحت لكن بثمن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie hat funktioniert — teuer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It worked, at a cost"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funcionó, pero caro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elle a fonctionné, mais cher"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עבד, אבל ביוקר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funcionou, mas caro"
+          }
+        }
+      }
+    },
     "Отстаёшь от графика" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -26393,6 +26957,53 @@
         }
       }
     },
+    "Переход" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الانتقال"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Übergang"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transition"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transición"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transition"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מעבר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transição"
+          }
+        }
+      }
+    },
     "Период" : {
       "localizations" : {
         "ar" : {
@@ -26714,6 +27325,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Valor nutricional"
+          }
+        }
+      }
+    },
+    "Плавно, %lld нед." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تدريجياً، %lld أسبوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allmählich, %lld Wo."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gradually, %lld wk"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gradual, %lld sem"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progressif, %lld sem"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בהדרגה, %lld שב'"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gradual, %lld sem"
           }
         }
       }
@@ -30090,6 +30748,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No ritmo atual, meta — para"
+          }
+        }
+      }
+    },
+    "Прибавка идёт в основном жиром. Сбавь темп: набирать быстрее пола процента в неделю натуралу почти нечем." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الزيادة معظمها دهن. خفّف الوتيرة: الطبيعي لا يملك ما يزيد به أسرع من نصف بالمئة أسبوعياً."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Zuwachs ist überwiegend Fett. Drossle das Tempo: mehr als ein halbes Prozent pro Woche hat ein Naturalathlet kaum womit zuzulegen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gain is mostly fat. Slow the pace: a natural has little to gain faster than half a percent a week with."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ganancia es sobre todo grasa. Baja el ritmo: un natural no tiene con qué ganar más rápido de medio por ciento a la semana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prise est surtout du gras. Ralentis : un naturel n'a pas de quoi prendre plus vite qu'un demi pour cent par semaine."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "העלייה היא בעיקר שומן. הורד קצב: לטבעי אין ממה לעלות מהר מחצי אחוז בשבוע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ganho é sobretudo gordura. Reduza o ritmo: um natural não tem com o que ganhar mais rápido que meio por cento por semana."
+          }
+        }
+      }
+    },
+    "Прибавка идёт сухой массой — темп можно не трогать." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الزيادة تذهب إلى الكتلة الصافية — يمكن ترك الوتيرة كما هي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Zuwachs geht in Magermasse — das Tempo kann bleiben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The gain is going to lean mass — the pace can stay as it is."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ganancia va a masa magra: se puede dejar el ritmo como está."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La prise part en masse maigre — le rythme peut rester tel quel."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "העלייה הולכת למסת רזה — אפשר להשאיר את הקצב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ganho vai para massa magra — o ritmo pode ficar como está."
           }
         }
       }
@@ -35612,6 +36364,53 @@
         }
       }
     },
+    "Сразу" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دفعة واحدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf einmal"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At once"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De golpe"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'un coup"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בבת אחת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De uma vez"
+          }
+        }
+      }
+    },
     "Среднее" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -38633,6 +39432,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nível de atividade"
+          }
+        }
+      }
+    },
+    "Уходит не только жир. Смягчи дефицит или подними норму белка — на сушке чинят это в первую очередь." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس الدهن وحده ما ينزل. خفّف العجز أو ارفع هدف البروتين — في التنشيف هذا أول ما يُصلَح."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es geht nicht nur Fett verloren. Mildere das Defizit oder erhöhe das Proteinziel — beim Cut repariert man das zuerst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "It is not only fat coming off. Ease the deficit or raise the protein target — on a cut that is what gets fixed first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No solo se va grasa. Suaviza el déficit o sube la meta de proteína: en definición eso es lo primero que se corrige."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce n'est pas que du gras qui part. Adoucis le déficit ou augmente l'objectif de protéines — en sèche, c'est ce qu'on corrige d'abord."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא רק שומן יורד. הקל את הגירעון או העלה את יעד החלבון — בחיטוב זה מה שמתקנים ראשון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não é só gordura que sai. Suavize o déficit ou aumente a meta de proteína — na definição é o primeiro ajuste."
+          }
+        }
+      }
+    },
+    "Фаза отработала" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المرحلة نجحت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Phase hat funktioniert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The phase worked"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fase funcionó"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La phase a fonctionné"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השלב עבד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fase funcionou"
           }
         }
       }

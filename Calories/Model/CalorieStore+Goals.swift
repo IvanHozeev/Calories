@@ -314,8 +314,13 @@ extension CalorieStore {
     /// ради чего этот расчёт и делается.
     var planCompositionChange: CompositionChange? {
         guard let plan, let profile else { return nil }
+        // Считаем от начала идущей фазы, а не всего плана. У цепочки
+        // «сушка — набор» состав за план целиком складывает противоположные
+        // куски: потерянный жир гасится набранным, и вердикт выходит про
+        // ничто. У плана из одной фазы это ровно то же самое, что было.
+        let phaseStart = plan.startDate(ofPhaseAt: plan.phaseIndex(on: Date()) ?? 0)
         let usable = measurements
-            .filter { $0.date >= plan.startDate && profile.navyBodyFat(from: $0) != nil }
+            .filter { $0.date >= phaseStart && profile.navyBodyFat(from: $0) != nil }
             .sorted { $0.date < $1.date }
         guard let first = usable.first, let last = usable.last, first.id != last.id else { return nil }
 
@@ -475,7 +480,13 @@ extension CalorieStore {
         // Допуск от того, сколько фаза вообще собиралась сдвинуть. У поддержания
         // это ноль, и остаётся нижняя граница в 300 г — то есть шум весов.
         let phasePlannedChange = phaseTargetWeight - plan.weight(atStartOfPhaseAt: phaseIndex)
-        let threshold = max(0.3, abs(phasePlannedChange) * 0.05)
+        let settling = plan.isSettling(on: today)
+        // Пока после подъёма калорий возвращаются гликоген и вода, допуск шире
+        // на эти самые пару килограммов. Иначе приложение объявит провалом
+        // ровно то, что само же и назначило переходом.
+        let threshold = settling
+            ? max(Plan.settlingToleranceKg, abs(phasePlannedChange) * 0.05)
+            : max(0.3, abs(phasePlannedChange) * 0.05)
         let direction = phase.intent.direction
         let status: PlanStatus
         if abs(deviation) <= threshold {
@@ -497,7 +508,8 @@ extension CalorieStore {
             projectedWeightAtPlanEnd: projectedWeightAtPlanEnd,
             recalibratedDailyCalories: recalibratedDailyCalories,
             status: status,
-            dataGap: nil
+            dataGap: nil,
+            isSettlingAfterIncrease: settling
         )
     }
 }

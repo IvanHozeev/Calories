@@ -595,12 +595,34 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     var durationWeeks: Int
     /// Модуль темпа. Знак берётся у намерения.
     var weeklyRatePercent: Double
+    /// Сколько недель калории добираются до нормы этой фазы от нормы прошлой.
+    ///
+    /// Ноль — прыжком в первый же день. Так делать можно, но выход из дефицита
+    /// прыжком на пятьсот калорий возвращает гликоген и воду, и весы за три дня
+    /// показывают плюс два килограмма, которые к жиру отношения не имеют.
+    var rampWeeks: Int = 0
 
-    init(id: UUID = UUID(), intent: PlanIntent, durationWeeks: Int, weeklyRatePercent: Double? = nil) {
+    init(id: UUID = UUID(), intent: PlanIntent, durationWeeks: Int,
+         weeklyRatePercent: Double? = nil, rampWeeks: Int = 0) {
         self.id = id
         self.intent = intent
         self.durationWeeks = max(1, durationWeeks)
         self.weeklyRatePercent = abs(weeklyRatePercent ?? intent.defaultWeeklyRatePercent)
+        self.rampWeeks = max(0, min(rampWeeks, self.durationWeeks))
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, intent, durationWeeks, weeklyRatePercent, rampWeeks
+    }
+
+    // Явный init(from:): фазы, сохранённые до появления рампы, её не несут.
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        intent = try container.decode(PlanIntent.self, forKey: .intent)
+        durationWeeks = max(1, try container.decode(Int.self, forKey: .durationWeeks))
+        weeklyRatePercent = abs(try container.decode(Double.self, forKey: .weeklyRatePercent))
+        rampWeeks = max(0, min(try container.decodeIfPresent(Int.self, forKey: .rampWeeks) ?? 0, durationWeeks))
     }
 
     /// Темп со знаком, в долях массы за неделю.
@@ -827,8 +849,48 @@ struct Plan: Codable, Equatable {
     var dailyCalorieDelta: Double { dailyCalorieDelta(on: Date()) }
 
     func dailyCalorieDelta(on date: Date) -> Double {
-        weeklyRateKg(on: date) * Self.kcalPerKg / 7
+        let target = weeklyRateKg(on: date) * Self.kcalPerKg / 7
+        guard let index = phaseIndex(on: date), index > 0 else { return target }
+        let phase = phases[index]
+        guard phase.rampWeeks > 0 else { return target }
+
+        let phaseStart = startDate(ofPhaseAt: index)
+        let daysIn = Calendar.current.dateComponents([.day], from: phaseStart, to: date).day ?? 0
+        let rampDays = Double(phase.rampWeeks * 7)
+        guard Double(daysIn) < rampDays else { return target }
+
+        // Линейно от нормы прошлой фазы к норме этой. Дельта прошлой берётся
+        // на её последнем дне: у неё самой могла быть рампа, и начинать
+        // переход от её начальной нормы значило бы переходить не оттуда,
+        // где человек на самом деле оказался.
+        let previousEnd = Calendar.current.date(byAdding: .day, value: -1, to: phaseStart) ?? phaseStart
+        let from = weeklyRateKg(on: previousEnd) * Self.kcalPerKg / 7
+        let progress = rampDays > 0 ? Double(daysIn) / rampDays : 1
+        return from + (target - from) * progress
     }
+
+    /// Устаканивается ли вес после того, как калории подняли.
+    ///
+    /// После дефицита возвращаются гликоген и вода — это килограмм-другой за
+    /// несколько дней, и к жиру он отношения не имеет. Пока это происходит,
+    /// судить о плане по весам нельзя: любой вердикт будет про воду.
+    func isSettling(on date: Date) -> Bool {
+        guard let index = phaseIndex(on: date), index > 0 else { return false }
+        let phaseStart = startDate(ofPhaseAt: index)
+        let previousEnd = Calendar.current.date(byAdding: .day, value: -1, to: phaseStart) ?? phaseStart
+        // Только вверх: переход в дефицит воду не возвращает.
+        guard weeklyRateKg(on: date) > weeklyRateKg(on: previousEnd) else { return false }
+        let weeks = max(phases[index].rampWeeks, Self.settlingWeeks)
+        let daysIn = Calendar.current.dateComponents([.day], from: phaseStart, to: date).day ?? 0
+        return daysIn < weeks * 7
+    }
+
+    /// Сколько недель весам не верят после подъёма калорий, если рампы нет.
+    static let settlingWeeks = 2
+
+    /// Насколько шире допуск по весу, пока он устаканивается.
+    /// Полтора килограмма — обычный возврат гликогена и воды после дефицита.
+    static let settlingToleranceKg = 1.5
 
     /// Дневная норма на сегодня — без учёта цикла.
     func dailyCalorieTarget(tdee: Double) -> Int {
@@ -956,6 +1018,95 @@ struct CompositionChange {
     }
 }
 
+/// Что фаза сделала с составом тела — с оглядкой на то, зачем она шла.
+///
+/// Без намерения вердикт по составу не полон. «Сухая масса держится» на сушке —
+/// это успех, а на наборе — провал: набирали как раз её. Прежний вердикт
+/// намерения не знал и на неудавшемся наборе честно докладывал, что всё в
+/// порядке.
+enum PhaseCompositionVerdict {
+    /// Фаза сделала то, зачем была.
+    case worked
+    /// Сделала, но дорого: сушка за счёт мышц, набор в жир.
+    case costly
+    /// Не сделала ничего — вес не сдвинулся дальше погрешности весов.
+    case stalled
+
+    var title: String {
+        switch self {
+        case .worked:  return String(localized: "Фаза отработала")
+        case .costly:  return String(localized: "Отработала дорого")
+        case .stalled: return String(localized: "Вес не сдвинулся")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .worked:  return "checkmark.circle.fill"
+        case .costly:  return "exclamationmark.triangle.fill"
+        case .stalled: return "pause.circle.fill"
+        }
+    }
+}
+
+extension CompositionChange {
+    /// Насколько весы вообще различают изменение трендового веса.
+    /// Это не погрешность процента жира — она на порядок больше и живёт
+    /// в `noiseKg`, — а просто цена дня на весах.
+    static let scaleNoiseKg = 0.5
+
+    /// Какая часть изменения веса пришлась на жир. Ничего, если вес стоит.
+    var fatShareOfChange: Double? {
+        guard abs(weightDeltaKg) > Self.scaleNoiseKg else { return nil }
+        return fatDeltaKg / weightDeltaKg
+    }
+
+    func verdict(for intent: PlanIntent) -> PhaseCompositionVerdict {
+        let moved = abs(weightDeltaKg) > Self.scaleNoiseKg
+        switch intent {
+        case .cut:
+            if !moved { return .stalled }
+            // Мышцы уходят заметнее, чем метод способен наврать, — значит
+            // уходят на самом деле.
+            return leanDeltaKg < -noiseKg ? .costly : .worked
+        case .bulk:
+            if !moved { return .stalled }
+            if leanDeltaKg > noiseKg { return .worked }
+            // Вес вырос, а сухая масса — нет. Это набранный жир, даже если
+            // формально изменение сухой укладывается в погрешность.
+            return weightDeltaKg > 0 ? .costly : .stalled
+        case .maintenance:
+            // На поддержании успех — это когда ничего не произошло.
+            return moved ? .costly : .worked
+        }
+    }
+
+    /// Что с этим делать. Текст зависит и от вердикта, и от намерения: «ешь
+    /// больше» на сушке и на наборе — противоположные советы.
+    func advice(for intent: PlanIntent) -> String {
+        switch (intent, verdict(for: intent)) {
+        case (.cut, .worked):
+            return String(localized: "Вес уходит жиром, сухая масса на месте — так дефицит и должен выглядеть.")
+        case (.cut, .costly):
+            return String(localized: "Уходит не только жир. Смягчи дефицит или подними норму белка — на сушке чинят это в первую очередь.")
+        case (.cut, .stalled):
+            return String(localized: "Вес стоит. Либо дефицита нет на самом деле, либо считается не всё съеденное.")
+        case (.bulk, .worked):
+            return String(localized: "Прибавка идёт сухой массой — темп можно не трогать.")
+        case (.bulk, .costly):
+            return String(localized: "Прибавка идёт в основном жиром. Сбавь темп: набирать быстрее пола процента в неделю натуралу почти нечем.")
+        case (.bulk, .stalled):
+            return String(localized: "Вес стоит. Профицита нет — либо норма занижена, либо съедается не столько, сколько записано.")
+        case (.maintenance, .worked):
+            return String(localized: "Вес держится — поддержание делает ровно то, зачем нужно.")
+        case (.maintenance, .costly):
+            return String(localized: "Вес поехал. На поддержании это значит, что норма разошлась с фактическим расходом.")
+        case (.maintenance, .stalled):
+            return String(localized: "Вес держится — поддержание делает ровно то, зачем нужно.")
+        }
+    }
+}
+
 enum CompositionVerdict {
     /// Сухая масса просела заметнее погрешности метода.
     case leanLoss
@@ -1046,6 +1197,8 @@ struct PlanAdherence {
     let recalibratedDailyCalories: Int?
     let status: PlanStatus
     let dataGap: AdherenceDataGap?
+    /// Вес ещё устаканивается после подъёма калорий — судить по нему рано.
+    var isSettlingAfterIncrease: Bool = false
 
     var deviationKg: Double? {
         guard let actualWeightToday else { return nil }

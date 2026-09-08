@@ -11,6 +11,8 @@ struct PlanPhaseEditorView: View {
     /// в килограммах: «0.7% в неделю» ничего не говорит, пока не видно,
     /// что это 560 граммов.
     let startWeightKg: Double
+    /// Первая фаза переходить не от чего — у неё рампы нет.
+    var isFirst: Bool = false
 
     private var weeklyKg: Double { phase.weeklyRateKg(fromWeightKg: startWeightKg) }
 
@@ -64,6 +66,22 @@ struct PlanPhaseEditorView: View {
                     Text("Темп")
                 } footer: {
                     Text("В процентах массы тела за неделю, а не в килограммах: одно и то же число подходит и лёгкому, и тяжёлому.")
+                }
+            }
+
+            if !isFirst {
+                Section {
+                    Stepper(value: $phase.rampWeeks, in: 0...min(8, phase.durationWeeks)) {
+                        if phase.rampWeeks == 0 {
+                            Text("Сразу")
+                        } else {
+                            Text(String(format: String(localized: "Плавно, %lld нед."), phase.rampWeeks))
+                        }
+                    }
+                } header: {
+                    Text("Переход")
+                } footer: {
+                    Text("Выход из дефицита прыжком возвращает гликоген и воду: весы за три дня показывают плюс пару килограммов, к жиру не имеющих отношения. Пока норма поднимается плавно, приложение и не считает этот скачок отставанием.")
                 }
             }
 

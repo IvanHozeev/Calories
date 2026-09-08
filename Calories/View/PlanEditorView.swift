@@ -73,7 +73,8 @@ struct PlanEditorView: View {
                     ForEach($phases) { $phase in
                         NavigationLink {
                             PlanPhaseEditorView(phase: $phase,
-                                                startWeightKg: weight(atStartOf: phase))
+                                                startWeightKg: weight(atStartOf: phase),
+                                                isFirst: phases.first?.id == phase.id)
                         } label: {
                             phaseRow(phase)
                         }
@@ -204,6 +205,10 @@ struct PlanEditorView: View {
                     if phase.intent != .maintenance {
                         Text(verbatim: "·")
                         Text(String(format: "%.2f%%", phase.weeklyRatePercent))
+                    }
+                    if phase.rampWeeks > 0 {
+                        Text(verbatim: "·")
+                        Image(systemName: "arrow.turn.right.up")
                     }
                 }
                 .font(.caption)

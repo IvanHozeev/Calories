@@ -253,13 +253,20 @@ enum ActivityLevel: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Подпись называет обе оси — работу и зал.
+    ///
+    /// Раньше три средних уровня говорили только про тренировки, а крайние —
+    /// про работу, и человек, который стоит девять часов в пекарне и ходит
+    /// в зал шесть раз в неделю, не был описан нигде. Он выбирал наугад,
+    /// а от этого выбора зависит норма на весь план: между соседними
+    /// уровнями сотни калорий.
     var subtitle: String {
         switch self {
-        case .sedentary: return String(localized: "Сидячая работа, почти нет тренировок")
-        case .light: return String(localized: "1–3 тренировки в неделю")
-        case .moderate: return String(localized: "3–5 тренировок в неделю")
-        case .active: return String(localized: "6–7 тренировок в неделю")
-        case .veryActive: return String(localized: "Физическая работа + тренировки")
+        case .sedentary: return String(localized: "Сидячая работа, зала почти нет")
+        case .light: return String(localized: "Сидячая работа + 1–3 тренировки")
+        case .moderate: return String(localized: "Сидячая работа + 3–5 тренировок")
+        case .active: return String(localized: "На ногах весь день + 3–5 тренировок, или сидячая + 6–7")
+        case .veryActive: return String(localized: "Физическая работа + 6–7 тренировок")
         }
     }
 

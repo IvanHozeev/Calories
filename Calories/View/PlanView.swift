@@ -161,10 +161,11 @@ struct PlanView: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color.secondary.opacity(0.18))
+                        .fill(.channel(thickness: 8))
                     Capsule()
                         .fill(tint)
                         .frame(width: max(3, geo.size.width * progress))
+                        .glowingFill(tint, thickness: 8)
                 }
             }
             .frame(height: 8)
@@ -307,7 +308,7 @@ struct PlanView: View {
                 if let gap = adherence.dataGap {
                     VStack(alignment: .leading, spacing: 6) {
                         ProgressView(value: gap.progress)
-                            .tint(.blue)
+                            .progressViewStyle(.engraved(.blue))
                         if gap.weighInsLogged < gap.weighInsRequired {
                             Text("Взвешиваний: \(gap.weighInsLogged) из \(gap.weighInsRequired)")
                                 .font(.caption)

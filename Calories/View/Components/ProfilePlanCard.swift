@@ -163,7 +163,7 @@ struct ProfilePlanCard: View {
             }
 
             ProgressView(value: plan.progress)
-                .tint(store.planAdherence()?.status.color ?? .accentColor)
+                .progressViewStyle(.engraved(store.planAdherence()?.status.color ?? .accentColor))
 
             HStack {
                 if let status = store.planAdherence()?.status {

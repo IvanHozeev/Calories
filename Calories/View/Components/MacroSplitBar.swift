@@ -31,6 +31,12 @@ struct MacroSplitBar: View {
             }
             .frame(height: 8)
             .clipShape(Capsule())
+            // Полоса — та же канавка, что кольцо, только прямая: цвет налит
+            // в углубление, а не наклеен на карточку. Канавка видна и пустой,
+            // когда макросов ещё нет, — и это честнее пустого места.
+            .background {
+                Capsule().fill(.channel(thickness: 8))
+            }
 
             if showsLabels {
                 HStack(spacing: 12) {

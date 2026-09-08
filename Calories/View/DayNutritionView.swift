@@ -142,7 +142,7 @@ struct DayNutritionView: View {
                     .monospacedDigit()
             }
             ProgressView(value: min(share, 1))
-                .tint(color)
+                .progressViewStyle(.engraved(color))
         }
         .padding(.vertical, 2)
     }

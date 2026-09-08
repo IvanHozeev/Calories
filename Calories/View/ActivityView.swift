@@ -361,10 +361,11 @@ private struct HistoryDayCard: View {
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(Color(.systemGray5))
+                        .fill(.channel(thickness: 6))
                     Capsule()
                         .fill(overGoal ? Color.red : Color.green)
                         .frame(width: max(4, geo.size.width * fill))
+                        .glowingFill(overGoal ? Color.red : Color.green, thickness: 6)
                 }
             }
             .frame(height: 6)
@@ -402,7 +403,7 @@ private struct AchievementCard: View {
             } else {
                 VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: achievement.progress)
-                        .tint(achievement.tint)
+                        .progressViewStyle(.engraved(achievement.tint, thickness: 5))
                     Text(verbatim: "\(achievement.current)/\(achievement.target)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
@@ -443,7 +444,7 @@ private struct AchievementSheet: View {
             } else {
                 VStack(spacing: 6) {
                     ProgressView(value: achievement.progress)
-                        .tint(achievement.tint)
+                        .progressViewStyle(.engraved(achievement.tint))
                     Text(verbatim: "\(achievement.current)/\(achievement.target)")
                         .font(.caption)
                         .foregroundStyle(.secondary)

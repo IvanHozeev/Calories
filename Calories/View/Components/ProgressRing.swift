@@ -10,34 +10,39 @@ struct RingView<Label: View>: View {
     /// а раньше это было три числа в разных местах, которые легко разъезжались.
     private let lineWidth: CGFloat = 9
 
-    /// Трек кольца. На iOS 26 — Liquid Glass: стеклянный диск, замаскированный в бублик,
-    /// поэтому кольцо преломляет то, что под ним, вместо плоской серой обводки.
-    /// На более старых системах остаётся прежняя обводка — таргет приложения iOS 17.6.
-    @ViewBuilder
-    private var track: some View {
-        if #available(iOS 26.0, *) {
-            Circle()
-                .fill(.clear)
-                .glassEffect(.regular, in: .circle)
-                .mask(Circle().strokeBorder(lineWidth: lineWidth))
-        } else {
-            Circle()
-                .stroke(Color.secondary.opacity(0.15), lineWidth: lineWidth)
-        }
+    /// Канавка, прорезанная в карточке. Раньше здесь была плоская серая обводка,
+    /// а на iOS 26 — стеклянный бублик; стекло убрано намеренно. Стекло лежит
+    /// поверх поверхности и преломляет то, что под ним, гравировка уходит внутрь
+    /// неё — две противоположные метафоры на одном элементе спорят друг с другом,
+    /// и кольцо переставало читаться как одна вещь.
+    private var channel: some View {
+        Circle()
+            .inset(by: lineWidth / 2)
+            .stroke(.channel(thickness: lineWidth), style: StrokeStyle(lineWidth: lineWidth))
+    }
+
+    /// Цвет, налитый в канавку. Дуга уже канавки на пол-пункта с каждой стороны:
+    /// остаётся видна стенка, и цвет не выглядит наклеенным вровень с краями.
+    ///
+    /// Заливка светится, а не повторяет рельеф стенок. Рельеф физически честнее,
+    /// но гасит цвет — а светящаяся заливка в прорезанной канавке живее.
+    private var filling: some View {
+        Circle()
+            .inset(by: lineWidth / 2)
+            .trim(from: 0, to: progress)
+            .stroke(
+                LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round)
+            )
+            .glowingFill(colors.first ?? .clear, thickness: lineWidth)
+            .rotationEffect(.degrees(-90))
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
     }
 
     var body: some View {
         ZStack {
-            track
-            Circle()
-                .inset(by: lineWidth / 2)
-                .trim(from: 0, to: progress)
-                .stroke(
-                    LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
+            channel
+            filling
             label()
                 .id(labelID)
                 .transition(.opacity.combined(with: .scale(scale: 0.85)))

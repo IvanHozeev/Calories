@@ -67,8 +67,10 @@ struct OnboardingView: View {
             HStack(spacing: 6) {
                 ForEach(1...7, id: \.self) { i in
                     Capsule()
-                        .fill(i < step ? Color.green : i == step ? Color.green : Color(.systemGray5))
+                        .fill(i <= step ? AnyShapeStyle(Color.green)
+                                        : AnyShapeStyle(.channel(thickness: 6)))
                         .frame(width: i == step ? 22 : 8, height: 6)
+                        .glowingFill(i <= step ? .green : .clear, thickness: 6)
                         .animation(.spring(duration: 0.3), value: step)
                 }
             }

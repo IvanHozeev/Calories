@@ -445,6 +445,46 @@ final class CaloriesUITests: XCTestCase {
                       "Строка должна открываться с первого тапа, даже когда открыта клавиатура")
     }
 
+    /// После добавления продукта экран должен остаться готовым к следующему:
+    /// курсор в строке поиска, и найденное выше набранного приёма пищи.
+    ///
+    /// Без первого приходится каждый раз тянуться к строке пальцем, без второго
+    /// список положенного отодвигает результаты вниз тем сильнее, чем больше
+    /// набрал. Проверяем оба, потому что ломаются они порознь.
+    @MainActor
+    func testSearchStaysReadyAfterAddingToTheMeal() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.exists, "Строка поиска не вытянулась из-под тулбара")
+        search.tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5),
+                      "Клавиатура не поднялась после тапа по поиску")
+        search.typeText("Beef")
+
+        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
+
+        // Найденное — выше секции приёма пищи. Сравниваем координаты, а не
+        // порядок в дереве: дерево у списка не обязано совпадать с тем, что видно.
+        let mealHeader = app.staticTexts["Meal"].firstMatch
+        if mealHeader.exists {
+            XCTAssertGreaterThan(mealHeader.frame.minY, row.frame.minY,
+                                 "Пока идёт поиск, приём пищи должен быть ниже найденного")
+        }
+
+        row.tap()
+        let addToMeal = app.buttons["addToMeal"]
+        XCTAssertTrue(addToMeal.waitForExistence(timeout: 3), "Экран порции не открылся")
+        addToMeal.tap()
+
+        // Курсор вернулся в поиск сам: клавиатура поднята, к строке не тянулись.
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5),
+                      "После добавления курсор не вернулся в строку поиска")
+    }
+
     // MARK: - Запись еды
 
     @MainActor

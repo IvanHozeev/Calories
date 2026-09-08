@@ -24,6 +24,20 @@ struct AddEntryView: View {
     /// не дожидаясь первой буквы: человек начал искать продукт, и всё остальное
     /// на экране ему сейчас мешает.
     @State private var searchFocused = false
+    /// Раскрыта ли строка поиска. Отдельно от `searchFocused`: то читает состояние
+    /// у системы, а этим мы им управляем — возвращаем курсор после добавления.
+    @State private var searchPresented = false
+    /// Продукт ушёл в приём пищи — вернуть курсор в поиск и список наверх.
+    ///
+    /// Флагом, а не действием на месте: пока экран порции закрывается, фокус
+    /// принадлежит ему, и запрошенный раньше времени курсор просто теряется.
+    /// Поэтому дожидаемся закрытия и делаем всё в `onDismiss`.
+    @State private var resumeSearchAfterAdd = false
+    /// Счётчик запросов «прокрутить наверх». Прокрутка живёт внутри
+    /// `ScrollViewReader`, а решение о ней принимается снаружи — счётчик их
+    /// связывает. Именно счётчик, а не флаг: два добавления подряд должны
+    /// сработать оба, а `false → true` во второй раз уже не случится.
+    @State private var scrollToTopTicket = 0
     @State private var showingScanner: Bool
     @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
@@ -195,8 +209,17 @@ struct AddEntryView: View {
         }
     }
 
+    /// Якорь для прокрутки: секция набранного приёма пищи. После добавления она
+    /// заведомо непустая и стоит первой — секция со сдвинутым временем в это
+    /// время спрятана раскрытым поиском.
+    private static let draftAnchor = "draft"
+
     var body: some View {
         NavigationStack {
+            // Список внутри не сдвинут на уровень вложенности намеренно: обёртка
+            // добавлена ради одной прокрутки, и переливать из-за неё сто семьдесят
+            // строк в диф — хуже, чем этот отступ.
+            ScrollViewReader { scroll in
             List {
                 // Появляется, только когда время сдвинули руками, и оранжевым:
                 // это не поле для заполнения, а предупреждение, что запись уйдёт
@@ -219,150 +242,20 @@ struct AddEntryView: View {
                     }
                 }
 
-                if !draftItems.isEmpty {
-                    Section("Приём пищи") {
-                        ForEach(draftItems) { item in
-                            FoodRow(
-                                name: item.name,
-                                calories: item.calories,
-                                portion: item.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
-                                    ?? String(localized: "порция"),
-                                macros: item.macros
-                            )
-                        }
-                        .onDelete { offsets in
-                            draftItems.remove(atOffsets: offsets)
-                        }
-
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Итого")
-                                    .font(.subheadline.weight(.semibold))
-                                Spacer()
-                                Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
-                                    .font(.title3.weight(.bold))
-                                    .monospacedDigit()
-                                    .foregroundStyle(.green)
-                                    .contentTransition(.numericText())
-                            }
-                            MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros })
-                        }
-                        .padding(.vertical, 4)
-                        .animation(.easeInOut(duration: 0.2), value: draftTotalCalories)
-                    }
+                // Пока в строке поиска что-то есть, найденное идёт выше набранного:
+                // смотрят сейчас на результаты, а список уже положенного только
+                // отодвигал бы их вниз. Пустой поиск возвращает приём пищи наверх —
+                // тогда главное на экране он.
+                if searchText.isEmpty {
+                    draftSection
+                    browseSections
+                } else {
+                    browseSections
+                    draftSection
                 }
-
-                if !isSearching, !searchFocused {
-                Section {
-                    Picker("Источник", selection: $source) {
-                        ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
-                    .listRowBackground(Color.clear)
-                }
-                }
-
-                if isSearching || source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
-                    Section("Недавнее") {
-                        ForEach(recentFoodItems) { food in
-                            foodRow(food)
-                                .contentShape(Rectangle())
-                                .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
-                        }
-                        ForEach(recentDishItems) { dish in
-                            dishRow(dish)
-                                .contentShape(Rectangle())
-                                .onTapGesture { serving = .dish(dish) }
-                        }
-                    }
-                }
-
-                if isSearching || source == .mine, !filteredDishes.isEmpty {
-                    Section("Мои блюда") {
-                        ForEach(filteredDishes) { dish in
-                            dishRow(dish)
-                                .contentShape(Rectangle())
-                                .onTapGesture { serving = .dish(dish) }
-                        }
-                    }
-                }
-
-                // Свои продукты тоже разложены по категориям: их накапливается
-                // не меньше, чем в базе. «Недавнее» намеренно оставлено плоским —
-                // там порядок и есть смысл: сверху последнее съеденное, и
-                // группировка сломала бы именно то, ради чего туда заходят.
-                if isSearching || source == .mine {
-                    ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
-                        Section {
-                            ForEach(foods) { food in
-                                foodRow(food)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        store.deleteCustomFood(food)
-                                    } label: {
-                                        Image(systemName: "trash")
-                                    }
-                                }
-                                .swipeActions(edge: .leading) {
-                                    Button {
-                                        editingFood = food
-                                    } label: {
-                                        Image(systemName: "pencil")
-                                    }
-                                    .tint(.blue)
-                                }
-                            }
-                        } header: {
-                            Label(category.title, systemImage: category.icon)
-                        }
-                    }
-                }
-
-                if source == .online || (isSearching && wantsOnlineSearch) {
-                    offSearchSection
-                }
-
-                // Пока сегменты спрятаны поиском, до внешней базы иначе не добраться,
-                // а ради неё всё и затевалось: только там есть микронутриенты.
-                if isSearching, !wantsOnlineSearch, source != .online {
-                    Section {
-                        Button {
-                            wantsOnlineSearch = true
-                        } label: {
-                            Label("Искать в базе USDA", systemImage: "globe")
-                        }
-                    } footer: {
-                        Text("Внешняя база больше и знает витамины с минералами. Запрос уходит только по этой кнопке.")
-                    }
-                }
-
-                if isSearching || source == .database {
-                    if filteredBuiltInFoods.isEmpty {
-                        Section("База продуктов") {
-                            Text("Ничего не найдено")
-                                .foregroundStyle(.secondary)
-                        }
-                    } else {
-                        // База разложена по категориям, а не идёт одним списком из
-                        // шести десятков строк. Отдельного контрола для этого не нужно:
-                        // заголовки секций сами работают навигацией.
-                        ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
-                            Section {
-                                ForEach(foods) { food in
-                                    foodRow(food)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture { serving = .food(food, savable: true, quickSave: true) }
-                                }
-                            } header: {
-                                Label(category.title, systemImage: category.icon)
-                            }
-                        }
-                    }
-                }
+            }
+            .onChange(of: scrollToTopTicket) { _, _ in
+                withAnimation { scroll.scrollTo(Self.draftAnchor, anchor: .top) }
             }
             // Про курсор в системной строке поиска можно узнать только изнутри
             // самого searchable-контейнера, поэтому состояние забирает отсюда
@@ -380,6 +273,7 @@ struct AddEntryView: View {
             // из-за того, что при другом размещении она уезжала вниз экрана, где её
             // накрывала панель «Сохранить»; в навбаре этого не происходит.
             .searchable(text: $searchText,
+                        isPresented: $searchPresented,
                         placement: .navigationBarDrawer(displayMode: .automatic),
                         prompt: "Поиск продукта")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
@@ -482,7 +376,7 @@ struct AddEntryView: View {
             }
             // Чтобы последняя строка не оставалась навсегда под кнопкой.
             .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
-            .fullScreenCover(item: $serving) { target in
+            .fullScreenCover(item: $serving, onDismiss: resumeSearchIfNeeded) { target in
                 NavigationStack { servingScreen(target) }
             }
             .sheet(isPresented: $showingPhoto) {
@@ -517,6 +411,173 @@ struct AddEntryView: View {
             .sheet(item: $editingFood) { food in
                 NewFoodSheet(store: store, editingFood: food)
                     .presentationDetents([.medium])
+            }
+            } // ScrollViewReader
+        }
+    }
+
+    /// После добавления продукта возвращаем экран в то состояние, из которого
+    /// ищут следующий: курсор в строке поиска, список наверху.
+    ///
+    /// Иначе после каждого продукта приходится тянуться к строке пальцем, а
+    /// список остаётся там, где его пролистали, — то есть на чужой категории.
+    private func resumeSearchIfNeeded() {
+        guard resumeSearchAfterAdd else { return }
+        resumeSearchAfterAdd = false
+        searchPresented = true
+        scrollToTopTicket += 1
+    }
+
+    /// Набранный приём пищи.
+    @ViewBuilder
+    private var draftSection: some View {
+        if !draftItems.isEmpty {
+            Section("Приём пищи") {
+                ForEach(draftItems) { item in
+                    FoodRow(
+                        name: item.name,
+                        calories: item.calories,
+                        portion: item.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+                            ?? String(localized: "порция"),
+                        macros: item.macros
+                    )
+                }
+                .onDelete { offsets in
+                    draftItems.remove(atOffsets: offsets)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Итого")
+                            .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
+                            .font(.title3.weight(.bold))
+                            .monospacedDigit()
+                            .foregroundStyle(.green)
+                            .contentTransition(.numericText())
+                    }
+                    MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros })
+                }
+                .padding(.vertical, 4)
+                .animation(.easeInOut(duration: 0.2), value: draftTotalCalories)
+            }
+            .id(Self.draftAnchor)
+        }
+    }
+
+    /// Всё, из чего выбирают продукт: переключатель источника и секции с ними.
+    @ViewBuilder
+    private var browseSections: some View {
+        if !isSearching, !searchFocused {
+        Section {
+            Picker("Источник", selection: $source) {
+                ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
+            .listRowBackground(Color.clear)
+        }
+        }
+
+        if isSearching || source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
+            Section("Недавнее") {
+                ForEach(recentFoodItems) { food in
+                    foodRow(food)
+                        .contentShape(Rectangle())
+                        .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
+                }
+                ForEach(recentDishItems) { dish in
+                    dishRow(dish)
+                        .contentShape(Rectangle())
+                        .onTapGesture { serving = .dish(dish) }
+                }
+            }
+        }
+
+        if isSearching || source == .mine, !filteredDishes.isEmpty {
+            Section("Мои блюда") {
+                ForEach(filteredDishes) { dish in
+                    dishRow(dish)
+                        .contentShape(Rectangle())
+                        .onTapGesture { serving = .dish(dish) }
+                }
+            }
+        }
+
+        // Свои продукты тоже разложены по категориям: их накапливается
+        // не меньше, чем в базе. «Недавнее» намеренно оставлено плоским —
+        // там порядок и есть смысл: сверху последнее съеденное, и
+        // группировка сломала бы именно то, ради чего туда заходят.
+        if isSearching || source == .mine {
+            ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
+                Section {
+                    ForEach(foods) { food in
+                        foodRow(food)
+                            .contentShape(Rectangle())
+                            .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                store.deleteCustomFood(food)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                editingFood = food
+                            } label: {
+                                Image(systemName: "pencil")
+                            }
+                            .tint(.blue)
+                        }
+                    }
+                } header: {
+                    Label(category.title, systemImage: category.icon)
+                }
+            }
+        }
+
+        if source == .online || (isSearching && wantsOnlineSearch) {
+            offSearchSection
+        }
+
+        // Пока сегменты спрятаны поиском, до внешней базы иначе не добраться,
+        // а ради неё всё и затевалось: только там есть микронутриенты.
+        if isSearching, !wantsOnlineSearch, source != .online {
+            Section {
+                Button {
+                    wantsOnlineSearch = true
+                } label: {
+                    Label("Искать в базе USDA", systemImage: "globe")
+                }
+            } footer: {
+                Text("Внешняя база больше и знает витамины с минералами. Запрос уходит только по этой кнопке.")
+            }
+        }
+
+        if isSearching || source == .database {
+            if filteredBuiltInFoods.isEmpty {
+                Section("База продуктов") {
+                    Text("Ничего не найдено")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                // База разложена по категориям, а не идёт одним списком из
+                // шести десятков строк. Отдельного контрола для этого не нужно:
+                // заголовки секций сами работают навигацией.
+                ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
+                    Section {
+                        ForEach(foods) { food in
+                            foodRow(food)
+                                .contentShape(Rectangle())
+                                .onTapGesture { serving = .food(food, savable: true, quickSave: true) }
+                        }
+                    } header: {
+                        Label(category.title, systemImage: category.icon)
+                    }
+                }
             }
         }
     }
@@ -563,6 +624,7 @@ struct AddEntryView: View {
         draftItems.append(item)
         searchText = ""
         debouncedSearch = ""
+        resumeSearchAfterAdd = true
     }
 
     /// Экран порции закрываем первым: иначе лист уезжает из-под открытого поверх

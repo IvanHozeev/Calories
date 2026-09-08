@@ -70,10 +70,10 @@ final class CalorieStore {
     /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
     /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
     @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
-    /// Микронутриенты на 100 г по названию продукта. Записи дневника их не
+    /// Состав на 100 г по названию продукта или блюда. Записи дневника его не
     /// хранят — только калории и макросы, — поэтому за витаминами приходится
-    /// возвращаться к продукту, из которого запись сделана.
-    @ObservationIgnored private(set) var micronutrientsByFoodName: [String: Micronutrients] = [:]
+    /// возвращаться к тому, из чего запись сделана.
+    @ObservationIgnored private(set) var nutrientProfilesByName: [String: NutrientProfile] = [:]
     /// Дни голодания множеством — их проверяют в каждом дне серии и банка.
     @ObservationIgnored private(set) var fastDates: Set<Date> = []
     @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
@@ -172,11 +172,19 @@ final class CalorieStore {
         // Каталог отдаёт состав уже разобранным и не меняется, поэтому его
         // словарь строится один раз; поверх кладём свои продукты — они как раз
         // меняются, но их немного.
-        var micronutrients = FoodCatalog.micronutrientsByName
+        var profiles = FoodCatalog.micronutrientsByName.mapValues { NutrientProfile(per100g: $0) }
         for food in customFoods where !food.micronutrients.isEmpty {
-            micronutrients[food.name] = food.micronutrients
+            profiles[food.name] = NutrientProfile(per100g: food.micronutrients)
         }
-        micronutrientsByFoodName = micronutrients
+        // Блюда после продуктов: их состав считается по ингредиентам, а значит
+        // словарь продуктов к этому моменту должен быть уже собран.
+        for dish in dishes {
+            guard let profile = DishNutrients.profile(of: dish.ingredients,
+                                                      composition: { profiles[$0]?.per100g })
+            else { continue }
+            profiles[dish.name] = profile
+        }
+        nutrientProfilesByName = profiles
         // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном
         // ключе. Две записи могут схлопнуться в один локальный день после смены часового пояса,
         // и это был бы краш на каждом запуске без возможности выбраться.
@@ -785,7 +793,7 @@ final class CalorieStore {
         var offered: Set<UUID> = []
         for food in customFoods {
             guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
-            guard micronutrientsByFoodName[food.name] == nil else { continue }
+            guard nutrientProfilesByName[food.name] == nil else { continue }
             if !FoodCatalog.candidates(forName: food.name, limit: 1).isEmpty {
                 offered.insert(food.id)
             }

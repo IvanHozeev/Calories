@@ -53,6 +53,15 @@ struct NewDishSheet: View {
         )
     }
     private var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
+
+    /// Витамины и минералы блюда — из состава его ингредиентов.
+    ///
+    /// Считается на лету, а не берётся у сохранённого блюда: ингредиенты правят
+    /// прямо здесь, и показывать состав, собранный до правки, значит показывать
+    /// чужое блюдо.
+    private var nutrientProfile: NutrientProfile? {
+        DishNutrients.profile(of: ingredients) { store.nutrientProfilesByName[$0]?.per100g }
+    }
     private var canSave: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty && !ingredients.isEmpty }
     private var hasChanges: Bool { !name.trimmingCharacters(in: .whitespaces).isEmpty || !ingredients.isEmpty }
 
@@ -66,6 +75,29 @@ struct NewDishSheet: View {
 
     /// Ноль и мусор игнорируем: пустой вес превратил бы ингредиент в строку
     /// без калорий, а удаление для этого есть отдельным свайпом.
+    private func nutrientRow(_ nutrient: Micronutrient, per100g: Double) -> some View {
+        let amount = per100g * portionGrams / 100
+        let share = amount / nutrient.dailyValue
+        return HStack {
+            Text(nutrient.title)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(verbatim: formatted(amount, nutrient))
+                .monospacedDigit()
+            Text(verbatim: "· \(Int((share * 100).rounded()))%")
+                .font(.caption)
+                .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
+                .monospacedDigit()
+        }
+    }
+
+    /// Микронутриенты различаются на три порядка: B12 — микрограммы, калий —
+    /// сотни миллиграмм. Один формат на оба даёт либо «0 мкг», либо «558.0 мг».
+    private func formatted(_ amount: Double, _ nutrient: Micronutrient) -> String {
+        let digits = amount < 10 ? 1 : 0
+        return String(format: "%.\(digits)f \(nutrient.unit)", amount)
+    }
+
     private func applyGrams(to ingredient: DishIngredient) {
         defer { gramsEditTarget = nil }
         let value = Double(gramsEditText.replacingOccurrences(of: ",", with: ".")) ?? 0
@@ -111,6 +143,29 @@ struct NewDishSheet: View {
                     Text("Размер порции")
                 } footer: {
                     Text("Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа ниже посчитаны на неё.")
+                }
+            }
+
+            if let profile = nutrientProfile, !profile.per100g.isEmpty {
+                Section {
+                    ForEach(Micronutrient.allCases) { nutrient in
+                        // Ноль означает «этого здесь нет»: строка с нулём ничего
+                        // не сообщает и только удлиняет список.
+                        if let per100g = profile.per100g[nutrient], per100g > 0 {
+                            nutrientRow(nutrient, per100g: per100g)
+                        }
+                    }
+                } header: {
+                    Text("Витамины и минералы")
+                } footer: {
+                    if profile.coverage < 1 {
+                        // Доля названа вслух: недобор, которого нет, оспорить
+                        // нечем, если про пробел в составе промолчать.
+                        Text(String(format: String(localized: "Посчитано по %d%% массы блюда — у остальных ингредиентов состава нет. Значит это нижняя граница, а не итог."),
+                                    Int((profile.coverage * 100).rounded())))
+                    } else {
+                        Text("Доля суточной нормы в порции. У натрия это доля потолка, а не цели.")
+                    }
                 }
             }
 

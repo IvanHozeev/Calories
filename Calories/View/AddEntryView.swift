@@ -720,7 +720,8 @@ struct AddEntryView: View {
             portion: "100 \(String(localized: "г"))",
             macros: dish.macrosPer100g,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-            icons: store.foodCategories(of: dish).map(\.icon)
+            icons: store.foodCategories(of: dish).map(\.icon),
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: 100)
         )
     }
 }

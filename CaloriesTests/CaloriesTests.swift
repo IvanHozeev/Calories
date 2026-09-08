@@ -2196,6 +2196,68 @@ struct MicronutrientDayTests {
         #expect(!day.isTrustworthy, "На десятой части дня показывать число нельзя")
     }
 
+    // MARK: - Блюда
+
+    @Test func aDishTakesItsCompositionFromIngredients() {
+        let food = spinach()
+        let ironPer100g = food.micronutrients[.iron] ?? 0
+        // Двести грамм известного и ничего больше: состав блюда на сто грамм
+        // обязан совпасть с составом продукта на сто грамм.
+        let profile = DishNutrients.profile(
+            of: [DishIngredient(foodName: food.name,
+                                caloriesPer100g: 23, macrosPer100g: .zero, grams: 200)],
+            composition: { _ in food.micronutrients }
+        )
+        #expect(profile?.coverage == 1)
+        #expect(abs((profile?.per100g[.iron] ?? 0) - ironPer100g) < 0.001)
+    }
+
+    @Test func anUnknownIngredientLowersDishCoverageWithoutInflatingIt() {
+        let food = spinach()
+        let ironPer100g = food.micronutrients[.iron] ?? 0
+        let profile = DishNutrients.profile(
+            of: [
+                DishIngredient(foodName: food.name,
+                               caloriesPer100g: 23, macrosPer100g: .zero, grams: 100),
+                DishIngredient(foodName: "Бабушкин соус",
+                               caloriesPer100g: 300, macrosPer100g: .zero, grams: 100)
+            ],
+            composition: { name in name == food.name ? food.micronutrients : nil }
+        )
+        #expect(abs((profile?.coverage ?? 0) - 0.5) < 0.001)
+        // Половина блюда без состава не получает состав второй половины:
+        // на сто грамм блюда железа ровно половина от продукта.
+        #expect(abs((profile?.per100g[.iron] ?? 0) - ironPer100g / 2) < 0.001)
+    }
+
+    @Test func aDishOfOnlyUnknownFoodHasNoProfileAtAll() {
+        let profile = DishNutrients.profile(
+            of: [DishIngredient(foodName: "Соус", caloriesPer100g: 300,
+                                macrosPer100g: .zero, grams: 100)],
+            composition: { _ in nil }
+        )
+        #expect(profile == nil, "Пустой состав — это отсутствие данных, а не нули")
+    }
+
+    @Test func aHalfKnownDishCoversOnlyHalfOfItsCaloriesInTheDay() {
+        let food = spinach()
+        let dish = Dish(name: "Салат из непонятного", ingredients: [
+            DishIngredient(foodName: food.name, caloriesPer100g: 23,
+                           macrosPer100g: .zero, grams: 100),
+            DishIngredient(foodName: "Бабушкин соус", caloriesPer100g: 300,
+                           macrosPer100g: .zero, grams: 100)
+        ])
+        container.mainContext.insert(dish)
+        store.refresh()
+
+        store.add(name: dish.name, calories: 400, macros: .zero, grams: 200)
+        let day = store.micronutrients(on: Date())
+        #expect(day.totalCalories == 400)
+        // Половина ингредиентов без состава — половина калорий записи остаётся
+        // непокрытой, иначе день объявлен изученным сильнее, чем он изучен.
+        #expect(day.coveredCalories == 200)
+    }
+
     @Test func anEntryWithoutWeightCannotBeCounted() {
         // «Просто 300 ккал» — состав задан на сто грамм, а граммов нет.
         store.add(name: "Быстрая запись", calories: 300)

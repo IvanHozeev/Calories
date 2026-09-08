@@ -111,17 +111,27 @@ struct ProgressRing: View {
     private var centerLabel: some View {
         switch mode {
         case .calories:
+            // Крупным идёт остаток, а не съеденное, и так же, как у макросов:
+            // подпись, число, «из чего». Смотрят на кольцо ради одного вопроса —
+            // сколько ещё можно, — и раньше ответ на него был самой мелкой
+            // строкой из трёх. Съеденное осталось, но ушло вниз: это справка,
+            // а не то, ради чего сюда смотрят.
             let remaining = goal - consumed
+            let overGoal = remaining < 0
             VStack(spacing: 2) {
-                Text("\(consumed)")
+                Text(overGoal ? "Перебор" : "Остаток")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(overGoal ? .red : .green)
+                Text("\(abs(remaining))")
                     .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .foregroundStyle(overGoal ? Color.red : Color.primary)
                     .contentTransition(.numericText())
                 Text("из \(goal) ккал")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text(remaining >= 0 ? "\(remaining) осталось" : "перебор \(-remaining)")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(remaining >= 0 ? .green : .red)
+                Text("съедено \(consumed)")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
                     .contentTransition(.numericText())
             }
         case .protein:

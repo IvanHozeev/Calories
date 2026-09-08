@@ -12,6 +12,7 @@ enum QuickAction: String, CaseIterable, Identifiable {
     case camera
     case scanner
     case weight
+    case measurements
 
     var id: String { rawValue }
 
@@ -21,6 +22,7 @@ enum QuickAction: String, CaseIterable, Identifiable {
         case .camera:  String(localized: "Снять еду")
         case .scanner: String(localized: "Сканировать штрихкод")
         case .weight:  String(localized: "Взвеситься")
+        case .measurements: String(localized: "Снять замеры")
         }
     }
 
@@ -30,6 +32,7 @@ enum QuickAction: String, CaseIterable, Identifiable {
         case .camera:  "camera.fill"
         case .scanner: "barcode.viewfinder"
         case .weight:  "scalemass"
+        case .measurements: "ruler"
         }
     }
 
@@ -89,11 +92,19 @@ final class QuickActionRouter {
         return true
     }
 
+    /// Что попадает в меню длинного нажатия на иконку.
+    ///
+    /// Список перечислен, а не взят из `allCases`, потому что система показывает
+    /// в этом меню не больше четырёх пунктов и лишние молча отбрасывает. Замеры
+    /// сюда не добавлены сознательно: их снимают раз в неделю-две, а еду — по
+    /// нескольку раз в день, и вытеснить ими сканер было бы плохой сделкой.
+    /// В Пункте управления такого потолка нет, и контрол на замеры есть.
+    ///
     /// Меню собирается в коде, а не в Info.plist, по двум причинам. Камера ходит в
     /// Gemini и есть не у всех — статический пункт открывал бы пустоту. И заголовки
     /// так берутся из общего файла переводов, а не из отдельного InfoPlist.xcstrings.
     func refreshShortcutItems() {
-        let available = QuickAction.allCases.filter { action in
+        let available: [QuickAction] = [.meal, .camera, .scanner, .weight].filter { action in
             action != .camera || GeminiVisionService.isConfigured
         }
         UIApplication.shared.shortcutItems = available.map(\.shortcutItem)

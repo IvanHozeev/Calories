@@ -1,16 +1,19 @@
 import AppIntents
-import OSLog
 import SwiftUI
 import WidgetKit
 
-private let controlLogger = Logger(subsystem: "ivankhozeyev.team.Calories", category: "control")
-
-/// Кнопки в Пункте управления: снять еду и отсканировать штрихкод.
+/// Кнопки в Пункте управления: добавить еду, снять её, отсканировать штрихкод
+/// и записать замеры.
 ///
 /// Смысл тот же, что у длинного нажатия на иконку, но короче на один шаг:
 /// контрол вешается на кнопку действия или лежит в Пункте управления, и до
-/// камеры получается один жест с любого экрана. Оба способа — про то, чтобы
-/// не вводить руками: штрихкод, когда есть упаковка, фото — когда её нет.
+/// камеры получается один жест с любого экрана. Еда — про то, чтобы не вводить
+/// руками: штрихкод, когда есть упаковка, фото — когда её нет. Замеры про
+/// другое: там ровно наоборот, руки заняты лентой, и лишний путь через «Тело»
+/// и экран замеров стоит дороже, чем сам ввод.
+///
+/// Здесь замеры есть, а в меню на иконке их нет: система показывает там не
+/// больше четырёх пунктов, а в Пункте управления такого потолка нет.
 ///
 /// Контролы появились в iOS 18, а приложение живёт с 17.6, поэтому всё здесь
 /// под проверкой доступности.
@@ -32,9 +35,7 @@ struct PhotographFoodIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        let defaults = UserDefaults(suiteName: appGroup)
-        defaults?.set("camera", forKey: pendingActionKey)
-        controlLogger.notice("контрол камеры: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
+        UserDefaults(suiteName: appGroup)?.set("camera", forKey: pendingActionKey)
         return .result()
     }
 }
@@ -46,9 +47,7 @@ struct ScanBarcodeIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        let defaults = UserDefaults(suiteName: appGroup)
-        defaults?.set("scanner", forKey: pendingActionKey)
-        controlLogger.notice("контрол сканера: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
+        UserDefaults(suiteName: appGroup)?.set("scanner", forKey: pendingActionKey)
         return .result()
     }
 }
@@ -60,9 +59,7 @@ struct AddMealIntent: AppIntent {
     static let openAppWhenRun = true
 
     func perform() async throws -> some IntentResult {
-        let defaults = UserDefaults(suiteName: appGroup)
-        defaults?.set("meal", forKey: pendingActionKey)
-        controlLogger.notice("контрол приёма пищи: контейнер \(defaults != nil ? "есть" : "НЕДОСТУПЕН")")
+        UserDefaults(suiteName: appGroup)?.set("meal", forKey: pendingActionKey)
         return .result()
     }
 }
@@ -103,5 +100,30 @@ struct ScanBarcodeControl: ControlWidget {
         }
         .displayName("Сканировать штрихкод")
         .description("Открывает сканер штрихкода в Calories.")
+    }
+}
+
+@available(iOS 18.0, *)
+struct TakeMeasurementsIntent: AppIntent {
+    static let title: LocalizedStringResource = "Снять замеры"
+    static let description = IntentDescription("Открывает ввод замеров.")
+    static let openAppWhenRun = true
+
+    func perform() async throws -> some IntentResult {
+        UserDefaults(suiteName: appGroup)?.set("measurements", forKey: pendingActionKey)
+        return .result()
+    }
+}
+
+@available(iOS 18.0, *)
+struct TakeMeasurementsControl: ControlWidget {
+    var body: some ControlWidgetConfiguration {
+        StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.measurements") {
+            ControlWidgetButton(action: TakeMeasurementsIntent()) {
+                Label("Снять замеры", systemImage: "ruler")
+            }
+        }
+        .displayName("Снять замеры")
+        .description("Открывает ввод замеров в Calories.")
     }
 }

@@ -6,6 +6,7 @@ struct ContentView: View {
     var stepStore: StepStore
     @State private var showingAdd = false
     @State private var showingAddWeight = false
+    @State private var showingMeasurements = false
     @State private var showingGoalEditor = false
     @State private var showingActivity = false
     @State private var showingDayNutrition = false
@@ -29,6 +30,8 @@ struct ContentView: View {
         switch action {
         case .weight:
             showingAddWeight = true
+        case .measurements:
+            showingMeasurements = true
         case .meal, .camera, .scanner:
             entryAction = action
             showingAdd = true
@@ -333,6 +336,12 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)
                     .presentationDetents([.height(320)])
+            }
+            // Замеры открываются прямо здесь, а не переходом на экран замеров:
+            // по контролу приходят с лентой в руках, чтобы вбить числа, а не
+            // смотреть выводы. Выводы — там, где им и место, на «Теле».
+            .fullScreenCover(isPresented: $showingMeasurements) {
+                MeasurementEntrySheet(store: store, isPresented: $showingMeasurements)
             }
             .navigationDestination(isPresented: $showingDayNutrition) {
                 DayNutritionView(store: store)

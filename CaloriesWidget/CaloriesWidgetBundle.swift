@@ -12,6 +12,7 @@ struct CaloriesWidgetBundle: WidgetBundle {
             AddMealControl()
             PhotographFoodControl()
             ScanBarcodeControl()
+            TakeMeasurementsControl()
         }
     }
 }

@@ -64,3 +64,16 @@ struct ScanBarcodeIntent: AppIntent {
         return .result()
     }
 }
+
+@available(iOS 18.0, *)
+struct TakeMeasurementsIntent: AppIntent {
+    static let title: LocalizedStringResource = "Снять замеры"
+    static let description = IntentDescription("Открывает ввод замеров.")
+    static let openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        handleControlAction(.measurements)
+        return .result()
+    }
+}

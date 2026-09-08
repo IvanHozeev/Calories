@@ -54,15 +54,7 @@ struct MeasurementsView: View {
             }
         }
         .fullScreenCover(isPresented: $showingEntry) {
-            NavigationStack {
-                MeasurementEntryView(store: store)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) {
-                            Button("Готово") { showingEntry = false }
-                                .fontWeight(.semibold)
-                        }
-                    }
-            }
+            MeasurementEntrySheet(store: store, isPresented: $showingEntry)
         }
     }
 
@@ -194,5 +186,27 @@ struct MeasurementsView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)
         .padding(.horizontal, 16)
+    }
+}
+
+/// Ввод замеров листом на весь экран.
+///
+/// Отдельный тип, потому что открывают его из двух мест: с экрана замеров и
+/// прямо с «Сегодня», когда пришли по контролу из Пункта управления. Раньше
+/// обвязка с «Готово» жила внутри экрана замеров, и второй вход её бы повторил.
+struct MeasurementEntrySheet: View {
+    var store: CalorieStore
+    @Binding var isPresented: Bool
+
+    var body: some View {
+        NavigationStack {
+            MeasurementEntryView(store: store)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Готово") { isPresented = false }
+                            .fontWeight(.semibold)
+                    }
+                }
+        }
     }
 }

@@ -199,7 +199,11 @@ final class CaloriesUITests: XCTestCase {
         search.tap()
         search.typeText("Spinach")
 
-        let food = app.staticTexts["Spinach"]
+        // firstMatch обязателен: после первого же прогона шпинат оседает
+        // в «Недавнем», и на следующем запуске строк с этим названием две —
+        // в недавнем и в базе. Без него тест зелёный ровно один раз на
+        // чистом симуляторе, а дальше падает на «multiple matching elements».
+        let food = app.staticTexts["Spinach"].firstMatch
         XCTAssertTrue(food.waitForExistence(timeout: 5), "Шпината нет во встроенной базе")
         food.tap()
 
@@ -207,11 +211,20 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(addToMeal.waitForExistence(timeout: 5))
         addToMeal.tap()
 
+        // Именно проверка, а не «если появилась»: без сохранения записи в дневнике
+        // не будет, и падать тест станет на значке — там, где причину уже не видно.
         let save = app.buttons["saveMeal"]
-        if save.waitForExistence(timeout: 3) { save.tap() }
+        XCTAssertTrue(save.waitForExistence(timeout: 5), "Кнопка сохранения приёма пищи не появилась")
+        save.tap()
 
         // Шпинат богат фолатом: 194 мкг на сто грамм при норме 400.
-        let badge = app.staticTexts["microTag-folate"]
+        //
+        // До строки надо доскроллить, и это не перестраховка: на незаполненном
+        // профиле сверху висит баннер «заполни профиль», и дневник уезжает под
+        // нижнюю кромку. Список ленивый — то, что ниже экрана, в дереве
+        // отсутствует, и тест падал на «значка нет», хотя значок был.
+        let badge = app.descendants(matching: .any)["microTag-folate"]
+        scrollTo(badge, in: app)
         XCTAssertTrue(badge.waitForExistence(timeout: 10),
                       "У записи должен появиться значок нутриента, которым продукт богат")
     }

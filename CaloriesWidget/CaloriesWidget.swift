@@ -44,6 +44,7 @@ struct CaloriesProvider: TimelineProvider {
 struct CaloriesWidgetEntryView: View {
     var entry: CaloriesEntry
     @Environment(\.widgetFamily) var family
+    @Environment(\.widgetRenderingMode) var renderingMode
 
     private let ringColors: [Color] = [.orange, Color(red: 1, green: 0.75, blue: 0)]
     private let bg = LinearGradient(
@@ -109,7 +110,8 @@ struct CaloriesWidgetEntryView: View {
     private var smallView: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.08), lineWidth: 6)
+                .stroke(WidgetEngraving.channel(thickness: 6, mode: renderingMode),
+                        style: StrokeStyle(lineWidth: 6))
             Circle()
                 .trim(from: 0, to: entry.progress)
                 .stroke(
@@ -139,7 +141,8 @@ struct CaloriesWidgetEntryView: View {
         HStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
+                    .stroke(WidgetEngraving.channel(thickness: 5, mode: renderingMode),
+                            style: StrokeStyle(lineWidth: 5))
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
@@ -170,20 +173,21 @@ struct CaloriesWidgetEntryView: View {
                     .foregroundStyle(.white)
                     .padding(.bottom, 8)
 
-                statRow(label: "Съедено", value: "\(entry.consumed) ккал")
+                statRow(label: "Съедено", value: "\(entry.consumed) \(String(localized: "ккал"))")
                 Spacer().frame(height: 5)
-                statRow(label: "Цель", value: "\(entry.goal) ккал")
+                statRow(label: "Цель", value: "\(entry.goal) \(String(localized: "ккал"))")
                 Spacer().frame(height: 5)
-                statRow(label: "Остаток", value: "\(entry.remaining) ккал")
+                statRow(label: "Остаток", value: "\(entry.remaining) \(String(localized: "ккал"))")
 
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color.white.opacity(0.1))
+                            .fill(WidgetEngraving.channel(thickness: 4, mode: renderingMode))
                             .frame(height: 4)
                         Capsule()
                             .fill(LinearGradient(colors: ringColors, startPoint: .leading, endPoint: .trailing))
                             .frame(width: geo.size.width * entry.progress, height: 4)
+                            .shadow(color: ringColors[0].opacity(0.5), radius: 3)
                     }
                 }
                 .frame(height: 4)
@@ -197,7 +201,11 @@ struct CaloriesWidgetEntryView: View {
         .containerBackground(for: .widget) { bg }
     }
 
-    private func statRow(label: String, value: String) -> some View {
+    /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
+    /// со строкой ничего не локализует, и «Съедено» показывалось по-русски
+    /// на любом языке системы. Заметно это только на неродном языке, поэтому
+    /// и прожило так долго.
+    private func statRow(label: LocalizedStringKey, value: String) -> some View {
         HStack {
             Text(label)
                 .font(.system(size: 11))
@@ -267,6 +275,7 @@ struct StepsProvider: TimelineProvider {
 struct StepsWidgetEntryView: View {
     var entry: StepsEntry
     @Environment(\.widgetFamily) var family
+    @Environment(\.widgetRenderingMode) var renderingMode
 
     private let ringColors: [Color] = [Color(red: 0.2, green: 0.6, blue: 1.0), .cyan]
     private let bg = LinearGradient(
@@ -328,7 +337,8 @@ struct StepsWidgetEntryView: View {
     private var smallView: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.08), lineWidth: 6)
+                .stroke(WidgetEngraving.channel(thickness: 6, mode: renderingMode),
+                        style: StrokeStyle(lineWidth: 6))
             Circle()
                 .trim(from: 0, to: entry.progress)
                 .stroke(
@@ -358,7 +368,8 @@ struct StepsWidgetEntryView: View {
         HStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
+                    .stroke(WidgetEngraving.channel(thickness: 5, mode: renderingMode),
+                            style: StrokeStyle(lineWidth: 5))
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
@@ -394,17 +405,18 @@ struct StepsWidgetEntryView: View {
                 statRow(label: "Цель", value: entry.goal.formatted())
                 if entry.distanceKm > 0 {
                     Spacer().frame(height: 5)
-                    statRow(label: "Дистанция", value: String(format: "%.1f км", entry.distanceKm))
+                    statRow(label: "Дистанция", value: String(format: "%.1f \(String(localized: "км"))", entry.distanceKm))
                 }
 
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         Capsule()
-                            .fill(Color.white.opacity(0.1))
+                            .fill(WidgetEngraving.channel(thickness: 4, mode: renderingMode))
                             .frame(height: 4)
                         Capsule()
                             .fill(LinearGradient(colors: ringColors, startPoint: .leading, endPoint: .trailing))
                             .frame(width: geo.size.width * entry.progress, height: 4)
+                            .shadow(color: ringColors[0].opacity(0.5), radius: 3)
                     }
                 }
                 .frame(height: 4)
@@ -418,7 +430,11 @@ struct StepsWidgetEntryView: View {
         .containerBackground(for: .widget) { bg }
     }
 
-    private func statRow(label: String, value: String) -> some View {
+    /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
+    /// со строкой ничего не локализует, и «Съедено» показывалось по-русски
+    /// на любом языке системы. Заметно это только на неродном языке, поэтому
+    /// и прожило так долго.
+    private func statRow(label: LocalizedStringKey, value: String) -> some View {
         HStack {
             Text(label)
                 .font(.system(size: 11))
@@ -496,6 +512,7 @@ struct MacrosProvider: TimelineProvider {
 struct MacrosWidgetEntryView: View {
     var entry: MacrosEntry
     @Environment(\.widgetFamily) var family
+    @Environment(\.widgetRenderingMode) var renderingMode
 
     private let bg = LinearGradient(
         colors: [Color(red: 0.06, green: 0.09, blue: 0.18), Color(red: 0.03, green: 0.05, blue: 0.10)],
@@ -503,7 +520,14 @@ struct MacrosWidgetEntryView: View {
     )
 
     private struct Macro {
-        let letter: String
+        /// Ключ для `ForEach` — русская буква как она записана в коде.
+        /// Отдельно от подписи: подпись переводится, а идентификатор строки
+        /// списка меняться от языка не должен.
+        let id: String
+        /// Подпись — ключ локализации: на английском это P/F/C, на иврите свои
+        /// буквы. Раньше здесь была голая строка, и виджет показывал БЖУ
+        /// на любом языке системы.
+        let letter: LocalizedStringKey
         let value: Double
         let target: Double
         let color: Color
@@ -515,9 +539,9 @@ struct MacrosWidgetEntryView: View {
 
     private var macros: [Macro] {
         [
-            Macro(letter: "Б", value: entry.protein, target: entry.proteinTarget, color: .blue),
-            Macro(letter: "Ж", value: entry.fat, target: entry.fatTarget, color: .orange),
-            Macro(letter: "У", value: entry.carbs, target: entry.carbsTarget, color: .purple)
+            Macro(id: "Б", letter: "Б", value: entry.protein, target: entry.proteinTarget, color: .blue),
+            Macro(id: "Ж", letter: "Ж", value: entry.fat, target: entry.fatTarget, color: .orange),
+            Macro(id: "У", letter: "У", value: entry.carbs, target: entry.carbsTarget, color: .purple)
         ]
     }
 
@@ -534,7 +558,7 @@ struct MacrosWidgetEntryView: View {
 
     private var homeView: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ForEach(macros, id: \.letter) { macro in
+            ForEach(macros, id: \.id) { macro in
                 row(macro)
             }
         }
@@ -545,7 +569,7 @@ struct MacrosWidgetEntryView: View {
     private func row(_ macro: Macro) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(verbatim: macro.letter)
+                Text(macro.letter)
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(macro.color)
                 Text(verbatim: "\(Int(macro.value.rounded()))")
@@ -563,10 +587,11 @@ struct MacrosWidgetEntryView: View {
             if macro.hasTarget {
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
-                        Capsule().fill(.white.opacity(0.15))
+                        Capsule().fill(WidgetEngraving.channel(thickness: 5, mode: renderingMode))
                         Capsule()
                             .fill(macro.color)
                             .frame(width: geometry.size.width * macro.share)
+                            .shadow(color: macro.color.opacity(0.5), radius: 3)
                     }
                 }
                 .frame(height: 5)
@@ -580,7 +605,7 @@ struct MacrosWidgetEntryView: View {
     /// остаток. На круге помещается одно число, и это оно.
     private var circularView: some View {
         Gauge(value: macros[0].share) {
-            Text(verbatim: "Б")
+            Text("Б")
         } currentValueLabel: {
             Text(verbatim: "\(Int(entry.protein.rounded()))")
                 .minimumScaleFactor(0.6)
@@ -591,9 +616,9 @@ struct MacrosWidgetEntryView: View {
 
     private var rectangularView: some View {
         VStack(alignment: .leading, spacing: 2) {
-            ForEach(macros, id: \.letter) { macro in
+            ForEach(macros, id: \.id) { macro in
                 HStack(spacing: 4) {
-                    Text(verbatim: macro.letter)
+                    Text(macro.letter)
                         .font(.caption2.weight(.bold))
                     Text(verbatim: "\(Int(macro.value.rounded()))")
                         .font(.caption2)
@@ -613,7 +638,7 @@ struct MacrosWidgetEntryView: View {
     }
 
     private var inlineView: some View {
-        Text(verbatim: "Б \(Int(entry.protein.rounded())) · Ж \(Int(entry.fat.rounded())) · У \(Int(entry.carbs.rounded()))")
+        Text(verbatim: "\(String(localized: "Б")) \(Int(entry.protein.rounded())) · \(String(localized: "Ж")) \(Int(entry.fat.rounded())) · \(String(localized: "У")) \(Int(entry.carbs.rounded()))")
             .containerBackground(.clear, for: .widget)
     }
 }

@@ -217,6 +217,127 @@ struct PlanTests {
         )
     }
 
+    // MARK: - Фазы
+
+    private func chained(_ phases: [PlanPhase], startWeightKg: Double = 80,
+                         startingDaysAgo: Int = 0) -> Plan {
+        let start = Calendar.current.date(byAdding: .day, value: -startingDaysAgo, to: Date())!
+        return Plan(startDate: start, startWeightKg: startWeightKg, phases: phases)
+    }
+
+    @Test func aPlanFromBeforePhasesBecomesOnePhaseWithTheSameNumbers() throws {
+        // План хранится в UserDefaults как JSON. Если он перестанет
+        // декодироваться, у человека с активной сушкой она просто исчезнет.
+        let legacy = """
+        {"startDate": 760000000, "durationWeeks": 10, "startWeightKg": 80,
+         "targetWeightKg": 75, "cyclingEnabled": false, "weekendStyle": "satSun"}
+        """
+        let plan = try JSONDecoder().decode(Plan.self, from: Data(legacy.utf8))
+        #expect(plan.phases.count == 1)
+        #expect(plan.phases[0].intent == .cut)
+        #expect(plan.durationWeeks == 10)
+        // Целевой вес теперь выводится из темпа, а не хранится, — и обязан
+        // совпасть со старым до килограмма, иначе цель у человека «поедет».
+        #expect(abs(plan.targetWeightKg - 75) < 0.001)
+        #expect(abs(plan.weeklyRateKg - (-0.5)) < 0.001)
+    }
+
+    @Test func encodingKeepsTheOldFieldsReadable() throws {
+        let plan = chained([PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 0.625)])
+        let json = try JSONSerialization.jsonObject(with: try JSONEncoder().encode(plan)) as! [String: Any]
+        #expect(json["phases"] != nil)
+        // Старые поля остаются в файле ради глазами читаемой резервной копии.
+        #expect(json["durationWeeks"] as? Int == 10)
+        #expect(abs((json["targetWeightKg"] as? Double ?? 0) - 75) < 0.01)
+    }
+
+    @Test func theChainDecidesWhereTheWeightEndsUp() {
+        // Сушка, выход в поддержание, набор: поддержание вес не двигает,
+        // а набор считается уже от того, сколько осталось после сушки.
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 0.5),
+            PlanPhase(intent: .maintenance, durationWeeks: 4),
+            PlanPhase(intent: .bulk, durationWeeks: 10, weeklyRatePercent: 0.3)
+        ])
+        let afterCut = 80 - 80 * 0.005 * 10
+        #expect(abs(plan.weight(atStartOfPhaseAt: 1) - afterCut) < 0.001)
+        #expect(abs(plan.weight(atStartOfPhaseAt: 2) - afterCut) < 0.001)
+        #expect(abs(plan.targetWeightKg - (afterCut + afterCut * 0.003 * 10)) < 0.001)
+        #expect(plan.durationWeeks == 24)
+    }
+
+    @Test func theRateIsAShareOfTheWeightAtThePhaseStartNotThePlanStart() {
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 1.0),
+            PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 1.0)
+        ])
+        let afterFirst = 80 - 80 * 0.01 * 10  // 72
+        // Тот же процент даёт меньше килограммов, когда человек стал легче, —
+        // ради этого темп и задан процентом, а не килограммами.
+        let secondPhaseWeekly = plan.weeklyRateKg(on: Calendar.current.date(byAdding: .day, value: 11 * 7, to: plan.startDate)!)
+        #expect(abs(secondPhaseWeekly - (-afterFirst * 0.01)) < 0.001)
+    }
+
+    @Test func theDayTakesItsTargetFromThePhaseItFallsIn() {
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.7),
+            PlanPhase(intent: .maintenance, durationWeeks: 4)
+        ])
+        let cal = Calendar.current
+        let inCut = cal.date(byAdding: .day, value: 3, to: plan.startDate)!
+        let inMaintenance = cal.date(byAdding: .day, value: 5 * 7, to: plan.startDate)!
+        #expect(plan.calorieTarget(for: inCut, tdee: 2500) < 2500)
+        // Поддержание — это ровно TDEE, а не «дефицит поменьше».
+        #expect(plan.calorieTarget(for: inMaintenance, tdee: 2500) == 2500)
+    }
+
+    @Test func aDateOutsideThePlanBelongsToNoPhase() {
+        let plan = chained([PlanPhase(intent: .cut, durationWeeks: 2, weeklyRatePercent: 0.5)])
+        let after = Calendar.current.date(byAdding: .day, value: 30, to: plan.startDate)!
+        #expect(plan.phaseIndex(on: after) == nil)
+        #expect(plan.phaseIndex(on: Calendar.current.date(byAdding: .day, value: -1, to: plan.startDate)!) == nil)
+    }
+
+    @Test func retargetingChangesTheRateOfTheLastPhaseAndNothingElse() {
+        let plan = chained([
+            PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 0.5),
+            PlanPhase(intent: .cut, durationWeeks: 10, weeklyRatePercent: 0.5)
+        ])
+        let updated = plan.retargeted(to: 70)
+        #expect(updated.phases[0] == plan.phases[0], "Прошедшие фазы трогать нельзя")
+        #expect(updated.durationWeeks == plan.durationWeeks, "Срок не менялся — менялась цель")
+        #expect(abs(updated.targetWeightKg - 70) < 0.001)
+    }
+
+    @Test func aChainOfDifferentIntentsIsNotCalledLossOrGain() {
+        let mixed = chained([
+            PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.7),
+            PlanPhase(intent: .bulk, durationWeeks: 8, weeklyRatePercent: 0.3)
+        ])
+        let onlyCut = chained([PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.7)])
+        let onlyBulk = chained([PlanPhase(intent: .bulk, durationWeeks: 8, weeklyRatePercent: 0.3)])
+        // Сравниваем строки между собой, а не с русским текстом: тесты идут
+        // на английской локали, и литерал здесь проверял бы перевод, а не логику.
+        #expect(mixed.title != onlyCut.title)
+        #expect(mixed.title != onlyBulk.title)
+        #expect(onlyCut.title != onlyBulk.title)
+    }
+
+    @Test func anAggressivePhaseIsJudgedByItsOwnIntent() {
+        // 0.8% в неделю — рабочий дефицит и набор, где большая часть прибавки
+        // будет жиром. Один порог на оба был бы невнимательностью.
+        let cut = PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.8)
+        let bulk = PlanPhase(intent: .bulk, durationWeeks: 8, weeklyRatePercent: 0.8)
+        #expect(!cut.isAggressive)
+        #expect(bulk.isAggressive)
+    }
+
+    @Test func anIntentDecidesTheSignSoARateCannotContradictIt() {
+        let phase = PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: -0.7)
+        #expect(phase.weeklyRatePercent == 0.7)
+        #expect(phase.weeklyRateKg(fromWeightKg: 80) < 0)
+    }
+
     @Test func weeklyRate_loss() {
         let p = plan(startWeightKg: 80, targetWeightKg: 75, durationWeeks: 10)
         #expect(abs(p.weeklyRateKg - (-0.5)) < 0.01)
@@ -1701,6 +1822,50 @@ struct PlanCompletionTests {
     private func startedPlan(weeksAgo: Int, weeks: Int, target: Double) -> Plan {
         Plan(startDate: Date().addingTimeInterval(-Double(weeksAgo) * 7 * 86_400),
              durationWeeks: weeks, startWeightKg: 77, targetWeightKg: target)
+    }
+
+    /// Цепочка фаз: план на поддержании не должен требовать снижения.
+    ///
+    /// Самая опасная ошибка соответствия: тянуть прямую от старта к финишу.
+    /// На такой прямой поддержание посреди плана выглядит как продолжающийся
+    /// дефицит, и приложение обвиняет человека в том, что само же и назначило.
+    private func chainedPlan(weeksAgo: Int) -> Plan {
+        Plan(startDate: Date().addingTimeInterval(-Double(weeksAgo) * 7 * 86_400),
+             startWeightKg: 77,
+             phases: [
+                PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.5),
+                PlanPhase(intent: .maintenance, durationWeeks: 4)
+             ])
+    }
+
+    @Test func maintenanceIsNotExpectedToKeepLosing() {
+        // Шестая неделя: дефицит кончился на четвёртой, идёт поддержание.
+        let plan = chainedPlan(weeksAgo: 6)
+        store.startPlan(plan)
+        let afterCut = 77 - 77 * 0.005 * 4
+        // Вес держится на том, к чему пришли после дефицита.
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-3 * 86_400))
+        store.addWeight(afterCut, date: Date())
+
+        let adherence = try! #require(store.planAdherence())
+        #expect(abs(adherence.expectedWeightToday - afterCut) < 0.05,
+                "На поддержании ждут тот же вес, а не продолжение снижения")
+        #expect(adherence.status == .onTrack)
+    }
+
+    @Test func theRateIsMeasuredWithinTheRunningPhaseNotTheWholePlan() {
+        let plan = chainedPlan(weeksAgo: 6)
+        store.startPlan(plan)
+        let afterCut = 77 - 77 * 0.005 * 4
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-14 * 86_400))
+        store.addWeight(afterCut, date: Date())
+
+        let adherence = try! #require(store.planAdherence())
+        // За план целиком темп был бы заметно отрицательным из-за прошедшей
+        // сушки. Внутри идущего поддержания он около нуля — и это ответ
+        // на вопрос, который задают: как идёт сейчас.
+        let rate = try! #require(adherence.observedWeeklyRateKg)
+        #expect(abs(rate) < 0.2, "Темп меряется по идущей фазе, а не по всему плану")
     }
 
     /// Идущий план итога не имеет — иначе финиш показался бы на середине.

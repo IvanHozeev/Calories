@@ -380,9 +380,25 @@ extension CalorieStore {
     func computePlanAdherence() -> PlanAdherence? {
         guard let plan, let profile else { return nil }
 
+        let today = Date()
         let totalDays = Double(plan.durationWeeks * 7)
-        let elapsedDays = min(max(Date().timeIntervalSince(plan.startDate) / 86400, 0), totalDays)
-        let expectedWeightToday = plan.startWeightKg + plan.totalWeightChangeKg * (totalDays > 0 ? elapsedDays / totalDays : 0)
+        let elapsedDays = min(max(today.timeIntervalSince(plan.startDate) / 86400, 0), totalDays)
+        // Прогноз берётся у цепочки, а не тянется прямой от старта к финишу.
+        // На прямой поддержание посреди плана выглядит как продолжающийся
+        // дефицит, и приложение обвиняло бы человека в том, что само же
+        // и запланировало.
+        let expectedWeightToday = plan.projectedWeight(on: today)
+
+        // Дальше всё меряется по идущей фазе, а не по плану целиком. Средний
+        // темп цепочки «сушка — поддержание — набор» близок к нулю и не
+        // отвечает ни на один вопрос, который здесь задают.
+        let phaseIndex = plan.phaseIndex(on: today) ?? max(0, plan.phases.count - 1)
+        let phase = plan.phases[phaseIndex]
+        let phaseStart = plan.startDate(ofPhaseAt: phaseIndex)
+        let phaseEnd = Calendar.current.date(byAdding: .day,
+                                             value: phase.durationWeeks * 7,
+                                             to: phaseStart) ?? plan.endDate
+        let phaseTargetWeight = plan.weight(atStartOfPhaseAt: phaseIndex + 1)
 
         let relevantEntries = weightEntries.filter { $0.date >= plan.startDate }
         guard relevantEntries.last != nil else {
@@ -422,36 +438,52 @@ extension CalorieStore {
             )
         }
 
-        let observedWeeklyRate = (actualWeightToday - plan.startWeightKg) / elapsedWeeks
+        // Темп считается от веса на старте идущей фазы, а не всего плана.
+        // Вес на её старте берём у тренда — реальный, а не запланированный:
+        // сравнивать факт с фактом. До первой фазы тренда нет, тогда сойдёт
+        // и стартовый вес плана.
+        let phaseStartWeight = weightTrend(on: phaseStart) ?? plan.startWeightKg
+        let daysInPhase = max(0, today.timeIntervalSince(phaseStart) / 86400)
+        let weeksInPhase = max(daysInPhase / 7, 1.0 / 7)
+        let observedWeeklyRate = (actualWeightToday - phaseStartWeight) / weeksInPhase
 
         var projectedEndDate: Date?
         if observedWeeklyRate != 0 {
-            let remainingChange = plan.targetWeightKg - actualWeightToday
+            let remainingChange = phaseTargetWeight - actualWeightToday
             let weeksNeeded = remainingChange / observedWeeklyRate
             if weeksNeeded.isFinite, weeksNeeded > 0 {
-                projectedEndDate = Calendar.current.date(byAdding: .day, value: Int((weeksNeeded * 7).rounded()), to: Date())
+                projectedEndDate = Calendar.current.date(byAdding: .day, value: Int((weeksNeeded * 7).rounded()), to: today)
             }
         }
 
-        let remainingDays = totalDays - elapsedDays
+        // Пересчёт нормы — до конца фазы, а не до конца плана. Иначе он размажет
+        // оставшийся дефицит по месяцам поддержания, которые идут следом.
+        let remainingDaysInPhase = max(0, phaseEnd.timeIntervalSince(today) / 86400)
         var recalibratedDailyCalories: Int?
-        if remainingDays > 0 {
-            let remainingChangeNeeded = plan.targetWeightKg - actualWeightToday
-            let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDays
+        if remainingDaysInPhase > 0 {
+            let remainingChangeNeeded = phaseTargetWeight - actualWeightToday
+            let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDaysInPhase
             recalibratedDailyCalories = Int((profile.tdee + dailyDelta).rounded())
         }
 
-        let remainingWeeks = remainingDays / 7
-        let projectedWeightAtPlanEnd = remainingWeeks > 0
-            ? actualWeightToday + observedWeeklyRate * remainingWeeks
+        let remainingWeeksInPhase = remainingDaysInPhase / 7
+        let projectedWeightAtPlanEnd = remainingWeeksInPhase > 0
+            ? actualWeightToday + observedWeeklyRate * remainingWeeksInPhase
             : nil as Double?
 
         let deviation = actualWeightToday - expectedWeightToday
-        let threshold = max(0.3, abs(plan.totalWeightChangeKg) * 0.05)
+        // Допуск от того, сколько фаза вообще собиралась сдвинуть. У поддержания
+        // это ноль, и остаётся нижняя граница в 300 г — то есть шум весов.
+        let phasePlannedChange = phaseTargetWeight - plan.weight(atStartOfPhaseAt: phaseIndex)
+        let threshold = max(0.3, abs(phasePlannedChange) * 0.05)
+        let direction = phase.intent.direction
         let status: PlanStatus
         if abs(deviation) <= threshold {
             status = .onTrack
-        } else if (plan.totalWeightChangeKg < 0 && deviation > 0) || (plan.totalWeightChangeKg > 0 && deviation < 0) {
+        } else if direction == 0 {
+            // Поддержание не бывает «впереди»: любой уход от нуля — уход в сторону.
+            status = .behind
+        } else if (direction < 0 && deviation > 0) || (direction > 0 && deviation < 0) {
             status = .behind
         } else {
             status = .ahead

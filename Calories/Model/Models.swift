@@ -524,14 +524,110 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// Зачем идёт фаза плана. Знак темпа задаётся отсюда, а не хранится вместе
+/// с числом: «сушка с плюс полпроцента» — противоречие, которое незачем уметь
+/// записывать.
+enum PlanIntent: String, Codable, CaseIterable, Identifiable {
+    case cut
+    case maintenance
+    case bulk
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .cut:         return String(localized: "Дефицит")
+        case .maintenance: return String(localized: "Поддержание")
+        case .bulk:        return String(localized: "Набор")
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .cut:         return "arrow.down.right"
+        case .maintenance: return "equal"
+        case .bulk:        return "arrow.up.right"
+        }
+    }
+
+    /// Куда фаза ведёт вес: −1, 0 или +1.
+    var direction: Double {
+        switch self {
+        case .cut:         return -1
+        case .maintenance: return 0
+        case .bulk:        return 1
+        }
+    }
+
+    /// Разумный темп по умолчанию, в процентах массы за неделю.
+    ///
+    /// У дефицита и набора он разный не для красоты: на сушке 0.7% в неделю —
+    /// рабочая середина, а на наборе столько же означает, что большая часть
+    /// прибавки будет жиром. Натурал со стажем набирает медленно.
+    var defaultWeeklyRatePercent: Double {
+        switch self {
+        case .cut:         return 0.7
+        case .maintenance: return 0
+        case .bulk:        return 0.3
+        }
+    }
+
+    /// Выше этого темпа предупреждаем. Границы разные по той же причине.
+    var aggressiveRatePercent: Double {
+        switch self {
+        case .cut:         return 1.0
+        case .maintenance: return 0
+        case .bulk:        return 0.5
+        }
+    }
+}
+
+/// Одна фаза плана.
+///
+/// Темп задаётся в процентах массы за неделю, а не в килограммах. «0.7% в неделю» —
+/// одно и то же утверждение и для 70 кг, и для 95, а «0.5 кг в неделю» — два разных.
+/// Внутри фазы процент один раз превращается в килограммы по весу на её старте
+/// и дальше держится: так фаза остаётся линейной, а пересчёт «от текущего веса»
+/// происходит на границе фаз, где ему и место.
+struct PlanPhase: Codable, Equatable, Identifiable {
+    var id: UUID = UUID()
+    var intent: PlanIntent
+    var durationWeeks: Int
+    /// Модуль темпа. Знак берётся у намерения.
+    var weeklyRatePercent: Double
+
+    init(id: UUID = UUID(), intent: PlanIntent, durationWeeks: Int, weeklyRatePercent: Double? = nil) {
+        self.id = id
+        self.intent = intent
+        self.durationWeeks = max(1, durationWeeks)
+        self.weeklyRatePercent = abs(weeklyRatePercent ?? intent.defaultWeeklyRatePercent)
+    }
+
+    /// Темп со знаком, в долях массы за неделю.
+    var signedWeeklyRate: Double { intent.direction * weeklyRatePercent / 100 }
+
+    /// Сколько килограммов в неделю при таком весе на старте фазы.
+    func weeklyRateKg(fromWeightKg weightKg: Double) -> Double {
+        weightKg * signedWeeklyRate
+    }
+
+    var isAggressive: Bool {
+        intent != .maintenance && weeklyRatePercent > intent.aggressiveRatePercent
+    }
+}
+
 /// Персональный план: срок в неделях и целевой вес, с точным расчётом дневной нормы калорий
 /// (в отличие от фиксированного множителя calorieMultiplier у Goal). Одна активная запись —
 /// хранится в UserDefaults (JSON), как и профиль.
 struct Plan: Codable, Equatable {
     var startDate: Date
-    var durationWeeks: Int
     var startWeightKg: Double
-    var targetWeightKg: Double
+    /// Цепочка фаз. Ради неё всё и затевалось: сушка, выход в поддержание,
+    /// набор — это не три отдельных плана, а один, и самое интересное в нём
+    /// происходит на стыках.
+    ///
+    /// Пустой она не бывает: инициализаторы подставляют хотя бы одну фазу.
+    var phases: [PlanPhase]
     /// Автоматический недельный цикл калорий вокруг среднего плана — типичная практика
     /// бодибилдеров (меньше калорий в будни, рефид на выходных). Среднее за неделю
     /// остаётся точно равно dailyCalorieTarget — меняется только распределение по дням.
@@ -548,29 +644,77 @@ struct Plan: Codable, Equatable {
     /// Сколько полных недель осталось после идущей.
     var weeksRemaining: Int { max(durationWeeks - currentWeek, 0) }
 
-    init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double, cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
+    init(startDate: Date, startWeightKg: Double, phases: [PlanPhase],
+         cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
         self.startDate = startDate
-        self.durationWeeks = durationWeeks
         self.startWeightKg = startWeightKg
-        self.targetWeightKg = targetWeightKg
+        self.phases = phases.isEmpty ? [PlanPhase(intent: .maintenance, durationWeeks: 8)] : phases
         self.cyclingEnabled = cyclingEnabled
         self.weekendStyle = weekendStyle
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled, weekendStyle
+    /// План из одной фазы, заданной целевым весом.
+    ///
+    /// Осталась ради экранов, которые пока думают в терминах «из А в Б за N недель»,
+    /// и ради старых сохранённых планов. Темп выводится из веса и срока — то есть
+    /// ровно обратно тому, как считает цепочка.
+    init(startDate: Date, durationWeeks: Int, startWeightKg: Double, targetWeightKg: Double,
+         cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
+        let weeks = max(1, durationWeeks)
+        let change = targetWeightKg - startWeightKg
+        let intent: PlanIntent = change < 0 ? .cut : (change > 0 ? .bulk : .maintenance)
+        // Процент от стартового веса: внутри фазы темп в килограммах постоянен,
+        // поэтому обратный пересчёт точен и старый план не «поедет».
+        let ratePercent = startWeightKg > 0
+            ? abs(change) / Double(weeks) / startWeightKg * 100
+            : 0
+        self.init(startDate: startDate,
+                  startWeightKg: startWeightKg,
+                  phases: [PlanPhase(intent: intent, durationWeeks: weeks, weeklyRatePercent: ratePercent)],
+                  cyclingEnabled: cyclingEnabled,
+                  weekendStyle: weekendStyle)
     }
 
-    // Явный init(from:), чтобы уже сохранённые планы не переставали декодироваться —
-    // отсутствующие поля трактуются как дефолтные значения.
+    private enum CodingKeys: String, CodingKey {
+        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled, weekendStyle, phases
+    }
+
+    // Явный init(from:), чтобы уже сохранённые планы не переставали декодироваться.
+    // План до фаз хранил срок и целевой вес — из них собирается фаза из одной
+    // штуки, и человек с активной сушкой не обнаружит, что она исчезла.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         startDate = try container.decode(Date.self, forKey: .startDate)
-        durationWeeks = try container.decode(Int.self, forKey: .durationWeeks)
         startWeightKg = try container.decode(Double.self, forKey: .startWeightKg)
-        targetWeightKg = try container.decode(Double.self, forKey: .targetWeightKg)
         cyclingEnabled = try container.decodeIfPresent(Bool.self, forKey: .cyclingEnabled) ?? false
         weekendStyle = try container.decodeIfPresent(WeekendStyle.self, forKey: .weekendStyle) ?? .satSun
+
+        if let stored = try container.decodeIfPresent([PlanPhase].self, forKey: .phases), !stored.isEmpty {
+            phases = stored
+        } else {
+            let weeks = max(1, try container.decodeIfPresent(Int.self, forKey: .durationWeeks) ?? 8)
+            let target = try container.decodeIfPresent(Double.self, forKey: .targetWeightKg) ?? startWeightKg
+            let change = target - startWeightKg
+            let intent: PlanIntent = change < 0 ? .cut : (change > 0 ? .bulk : .maintenance)
+            let ratePercent = startWeightKg > 0
+                ? abs(change) / Double(weeks) / startWeightKg * 100
+                : 0
+            phases = [PlanPhase(intent: intent, durationWeeks: weeks, weeklyRatePercent: ratePercent)]
+        }
+    }
+
+    // Пишем и фазы, и старые поля. Старые — не про совместимость назад, её здесь
+    // нет: они нужны, чтобы файл резервной копии и экспорт остались читаемыми
+    // глазами, где «цель 75 кг» понятнее, чем «дефицит 0.6% двенадцать недель».
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(startDate, forKey: .startDate)
+        try container.encode(startWeightKg, forKey: .startWeightKg)
+        try container.encode(phases, forKey: .phases)
+        try container.encode(cyclingEnabled, forKey: .cyclingEnabled)
+        try container.encode(weekendStyle, forKey: .weekendStyle)
+        try container.encode(durationWeeks, forKey: .durationWeeks)
+        try container.encode(targetWeightKg, forKey: .targetWeightKg)
     }
 
     /// Грубое общепринятое приближение: ~7700 ккал на 1 кг жировой массы.
@@ -583,40 +727,121 @@ struct Plan: Codable, Equatable {
     }
 
     var title: String {
-        if targetWeightKg < startWeightKg { return String(localized: "Снижение веса") }
-        if targetWeightKg > startWeightKg { return String(localized: "Набор веса") }
-        return String(localized: "Поддержание веса")
+        // Название по тому, чем план занят большую часть времени: цепочка
+        // «сушка — поддержание — набор» не «снижение» и не «набор», и врать
+        // одним из них хуже, чем назвать её планом.
+        let byIntent = Dictionary(grouping: phases, by: \.intent)
+            .mapValues { $0.reduce(0) { $0 + $1.durationWeeks } }
+        guard byIntent.count == 1, let only = byIntent.first?.key else {
+            return String(localized: "План")
+        }
+        switch only {
+        case .cut:         return String(localized: "Снижение веса")
+        case .bulk:        return String(localized: "Набор веса")
+        case .maintenance: return String(localized: "Поддержание веса")
+        }
     }
+
+    var durationWeeks: Int { phases.reduce(0) { $0 + $1.durationWeeks } }
 
     var endDate: Date {
         Calendar.current.date(byAdding: .day, value: durationWeeks * 7, to: startDate) ?? startDate
+    }
+
+    /// Дата начала фазы по её индексу.
+    func startDate(ofPhaseAt index: Int) -> Date {
+        let weeksBefore = phases.prefix(max(0, index)).reduce(0) { $0 + $1.durationWeeks }
+        return Calendar.current.date(byAdding: .day, value: weeksBefore * 7, to: startDate) ?? startDate
+    }
+
+    /// Вес, с которого фаза стартует. Он же база для её темпа: процент считается
+    /// от того, сколько человек весит к началу фазы, а не к началу всего плана.
+    func weight(atStartOfPhaseAt index: Int) -> Double {
+        var weight = startWeightKg
+        for phase in phases.prefix(max(0, index)) {
+            weight += phase.weeklyRateKg(fromWeightKg: weight) * Double(phase.durationWeeks)
+        }
+        return weight
+    }
+
+    /// Какая фаза идёт на эту дату. Ничего — если дата вне плана.
+    func phaseIndex(on date: Date) -> Int? {
+        let days = Calendar.current.dateComponents([.day], from: startDate, to: date).day ?? 0
+        guard days >= 0 else { return nil }
+        var weeksPassed = 0
+        for (index, phase) in phases.enumerated() {
+            weeksPassed += phase.durationWeeks
+            if days < weeksPassed * 7 { return index }
+        }
+        return nil
+    }
+
+    func phase(on date: Date) -> PlanPhase? {
+        phaseIndex(on: date).map { phases[$0] }
+    }
+
+    /// Фаза, которая идёт сейчас, — или последняя, если план уже закончился.
+    var currentPhase: PlanPhase? {
+        phase(on: Date()) ?? phases.last
+    }
+
+    /// Куда план приводит вес: считается по цепочке, а не задаётся числом.
+    ///
+    /// Спрашивать целевой вес у цепочки нельзя: за тридцать недель вперёд его
+    /// никто не знает. Знают темп, который готовы держать, — из него и выходит
+    /// прогноз, и он честно называется прогнозом.
+    var targetWeightKg: Double { weight(atStartOfPhaseAt: phases.count) }
+
+    /// Прогноз веса на дату — по фазам, которые до неё успели пройти.
+    func projectedWeight(on date: Date) -> Double {
+        let days = Calendar.current.dateComponents([.day], from: startDate, to: date).day ?? 0
+        guard days > 0 else { return startWeightKg }
+        var weight = startWeightKg
+        var daysLeft = Double(days)
+        for phase in phases {
+            let phaseDays = Double(phase.durationWeeks * 7)
+            let used = min(daysLeft, phaseDays)
+            weight += phase.weeklyRateKg(fromWeightKg: weight) * used / 7
+            daysLeft -= used
+            if daysLeft <= 0 { return weight }
+        }
+        return weight
     }
 
     var totalWeightChangeKg: Double {
         targetWeightKg - startWeightKg
     }
 
+    /// Темп идущей фазы в килограммах за неделю. Не средний по плану: средний
+    /// у цепочки «сушка — поддержание — набор» близок к нулю и не говорит ничего.
     var weeklyRateKg: Double {
-        guard durationWeeks > 0 else { return 0 }
-        return totalWeightChangeKg / Double(durationWeeks)
+        weeklyRateKg(on: Date())
+    }
+
+    func weeklyRateKg(on date: Date) -> Double {
+        guard let index = phaseIndex(on: date) ?? (phases.isEmpty ? nil : phases.count - 1) else { return 0 }
+        return phases[index].weeklyRateKg(fromWeightKg: weight(atStartOfPhaseAt: index))
     }
 
     /// Суточная поправка к TDEE (отрицательная — дефицит, положительная — профицит).
-    var dailyCalorieDelta: Double {
-        let totalDays = Double(durationWeeks * 7)
-        guard totalDays > 0 else { return 0 }
-        return (totalWeightChangeKg * Self.kcalPerKg) / totalDays
+    var dailyCalorieDelta: Double { dailyCalorieDelta(on: Date()) }
+
+    func dailyCalorieDelta(on date: Date) -> Double {
+        weeklyRateKg(on: date) * Self.kcalPerKg / 7
     }
 
-    /// Средняя дневная норма — без учёта цикла.
+    /// Дневная норма на сегодня — без учёта цикла.
     func dailyCalorieTarget(tdee: Double) -> Int {
-        Int((tdee + dailyCalorieDelta).rounded())
+        dailyCalorieTarget(for: Date(), tdee: tdee)
     }
 
-    /// Норма на конкретную дату — с учётом недельного цикла, если он включён.
+    func dailyCalorieTarget(for date: Date, tdee: Double) -> Int {
+        Int((tdee + dailyCalorieDelta(on: date)).rounded())
+    }
+
+    /// Норма на конкретную дату — с учётом фазы и недельного цикла, если он включён.
     func calorieTarget(for date: Date, tdee: Double) -> Int {
-        let base = Double(dailyCalorieTarget(tdee: tdee))
-        
+        let base = Double(dailyCalorieTarget(for: date, tdee: tdee))
         guard cyclingEnabled else { return Int(base.rounded()) }
         let offset = weekendStyle.cycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
         return Int((base * (1 + offset)).rounded())
@@ -632,10 +857,17 @@ struct Plan: Codable, Equatable {
         }
     }
 
-    /// Свыше ~1% веса в неделю большинство источников считает агрессивным темпом.
+    /// Есть ли в плане фаза со слишком резким темпом.
+    ///
+    /// Порог берётся у намерения: процент, рабочий на сушке, на наборе означает,
+    /// что большая часть прибавки уйдёт в жир. Один порог на оба был бы не
+    /// строгостью, а невнимательностью.
+    var hasAggressivePhase: Bool { phases.contains { $0.isAggressive } }
+
+    /// Оставлено ради экранов, считающих в килограммах от веса. Аргумент больше
+    /// ни на что не влияет: темп фазы и так задан в процентах массы.
     func isAggressivePace(relativeToWeightKg weightKg: Double) -> Bool {
-        guard weightKg > 0 else { return false }
-        return abs(weeklyRateKg) / weightKg * 100 > 1.0
+        hasAggressivePhase
     }
 
     var progress: Double {
@@ -654,6 +886,39 @@ struct Plan: Codable, Equatable {
     /// в потолок, дней оставалось ноль, а дефицит продолжал держаться — восьминедельная
     /// сушка молча превращалась в полугодовую.
     var isFinished: Bool { Date() >= endDate }
+
+    /// План с другой датой финиша.
+    ///
+    /// Двигается последняя фаза: конец плана — это её конец, и растягивать ради
+    /// него сушку в середине цепочки было бы не тем, о чём просили.
+    func rescheduled(toEnd newEndDate: Date) -> Plan {
+        guard !phases.isEmpty else { return self }
+        let days = Calendar.current.dateComponents([.day], from: startDate, to: newEndDate).day ?? 0
+        let totalWeeks = max(1, Int((Double(days) / 7).rounded(.up)))
+        let weeksBefore = phases.dropLast().reduce(0) { $0 + $1.durationWeeks }
+        var updated = self
+        updated.phases[phases.count - 1].durationWeeks = max(1, totalWeeks - weeksBefore)
+        return updated
+    }
+
+    /// План, приводящий к другому весу к той же дате.
+    ///
+    /// Меняется темп последней фазы, а не срок: просьба «дойти до 74» — это про
+    /// то, как быстро идти, а не про то, когда закончить.
+    func retargeted(to weightKg: Double) -> Plan {
+        guard let last = phases.last else { return self }
+        let base = weight(atStartOfPhaseAt: phases.count - 1)
+        guard base > 0, last.durationWeeks > 0 else { return self }
+        let change = weightKg - base
+        let intent: PlanIntent = change < 0 ? .cut : (change > 0 ? .bulk : .maintenance)
+        let ratePercent = abs(change) / Double(last.durationWeeks) / base * 100
+        var updated = self
+        updated.phases[phases.count - 1] = PlanPhase(id: last.id,
+                                                     intent: intent,
+                                                     durationWeeks: last.durationWeeks,
+                                                     weeklyRatePercent: ratePercent)
+        return updated
+    }
 }
 
 /// Из чего состояло изменение веса между двумя сеансами замеров.

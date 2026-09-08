@@ -548,10 +548,8 @@ final class CalorieStore {
 
     /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
     func reschedulePlan(to newEndDate: Date) {
-        guard var updated = plan else { return }
-        let daysCount = Calendar.current.dateComponents([.day], from: updated.startDate, to: newEndDate).day ?? updated.durationWeeks * 7
-        updated.durationWeeks = max(1, Int((Double(daysCount) / 7).rounded(.up)))
-        startPlan(updated)
+        guard let plan else { return }
+        startPlan(plan.rescheduled(toEnd: newEndDate))
     }
 
     func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil, date: Date = Date()) {

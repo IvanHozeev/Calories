@@ -126,9 +126,20 @@ struct PlanView: View {
 
                 weightTrack(plan, tint: status?.color ?? .accentColor)
 
+                // Полоса фаз только когда их несколько: у плана из одной фазы
+                // она повторяла бы то, что уже сказано неделей и темпом.
+                if plan.phases.count > 1 {
+                    PlanTimeline(plan: plan)
+                }
+
                 HStack(spacing: 6) {
                     Text(String(format: String(localized: "Неделя %d из %d"),
                                 plan.currentWeek, plan.durationWeeks))
+                    if let phase = plan.currentPhase, plan.phases.count > 1 {
+                        Text("·")
+                            .foregroundStyle(.tertiary)
+                        Text(phase.intent.title)
+                    }
                     Text("·")
                         .foregroundStyle(.tertiary)
                     Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
@@ -374,16 +385,9 @@ struct PlanView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Button("Поставить цель \(String(format: "%.1f", rounded)) кг") {
-                    guard var updated = store.plan else { return }
-                    updated = Plan(
-                        startDate: plan.startDate,
-                        durationWeeks: plan.durationWeeks,
-                        startWeightKg: plan.startWeightKg,
-                        targetWeightKg: rounded,
-                        cyclingEnabled: plan.cyclingEnabled,
-                        weekendStyle: plan.weekendStyle
-                    )
-                    store.startPlan(updated)
+                    // Меняется темп последней фазы, а не срок: просьба дойти до
+                    // другого веса — про то, как быстро идти, а не когда кончить.
+                    store.startPlan(plan.retargeted(to: rounded))
                 }
                 .buttonStyle(.bordered)
             }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Настройка плана: целевой вес, срок, недельный цикл и расчёт под них.
+/// Настройка плана: цепочка фаз, недельный цикл и расчёт под них.
 ///
 /// Отдельно от экрана плана намеренно. Настраивают план один раз, а следят за ним
 /// каждую неделю — это две разные работы с разной частотой, и на одном экране
@@ -9,17 +9,16 @@ struct PlanEditorView: View {
     var store: CalorieStore
     @Environment(\.dismiss) private var dismiss
 
-    @State private var targetWeightText: String
-    @FocusState private var targetWeightFocused: Bool
-    @State private var durationWeeks: Int
+    @State private var phases: [PlanPhase]
     @State private var cyclingEnabled: Bool
     @State private var weekendStyle: WeekendStyle
 
     init(store: CalorieStore) {
         self.store = store
-        let fallbackStart = store.latestWeight?.weightKg ?? store.profile?.weightKg ?? 70
-        _targetWeightText = State(initialValue: String(format: "%.1f", store.plan?.targetWeightKg ?? fallbackStart))
-        _durationWeeks = State(initialValue: store.plan?.durationWeeks ?? 8)
+        // Новый план начинается с одной фазы дефицита: это то, зачем сюда
+        // заходят чаще всего, и пустой список нечем показать.
+        _phases = State(initialValue: store.plan?.phases
+                        ?? [PlanPhase(intent: .cut, durationWeeks: 8)])
         _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
         _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
     }
@@ -32,21 +31,16 @@ struct PlanEditorView: View {
         store.plan?.startWeightKg ?? currentWeight
     }
 
-    private var targetWeight: Double? {
-        Double(targetWeightText.replacingOccurrences(of: ",", with: "."))
-    }
-
     private var tdee: Double {
         store.profile?.tdee ?? Double(store.dailyGoal)
     }
 
     private var draftPlan: Plan? {
-        guard let targetWeight, targetWeight > 0, durationWeeks > 0, startWeight > 0 else { return nil }
+        guard startWeight > 0, !phases.isEmpty else { return nil }
         return Plan(
             startDate: store.plan?.startDate ?? Date(),
-            durationWeeks: durationWeeks,
             startWeightKg: startWeight,
-            targetWeightKg: targetWeight,
+            phases: phases,
             cyclingEnabled: cyclingEnabled,
             weekendStyle: weekendStyle
         )
@@ -75,18 +69,37 @@ struct PlanEditorView: View {
                          : "Взято из профиля — стоит записать актуальный вес на экране «Вес».")
                 }
 
-                Section("Целевой вес") {
-                    HStack {
-                        TextField("70.0", text: $targetWeightText)
-                            .keyboardType(.decimalPad)
-                            .focused($targetWeightFocused)
-                        Text("кг")
-                            .foregroundStyle(.secondary)
+                Section {
+                    ForEach($phases) { $phase in
+                        NavigationLink {
+                            PlanPhaseEditorView(phase: $phase,
+                                                startWeightKg: weight(atStartOf: phase))
+                        } label: {
+                            phaseRow(phase)
+                        }
                     }
-                }
+                    .onDelete { offsets in
+                        // Последнюю не отдаём: план без единой фазы — это не план.
+                        guard phases.count > offsets.count else { return }
+                        phases.remove(atOffsets: offsets)
+                    }
+                    .onMove { phases.move(fromOffsets: $0, toOffset: $1) }
 
-                Section("Срок") {
-                    Stepper("Недель: \(durationWeeks)", value: $durationWeeks, in: 1...52)
+                    Menu {
+                        ForEach(PlanIntent.allCases) { intent in
+                            Button {
+                                phases.append(PlanPhase(intent: intent, durationWeeks: 8))
+                            } label: {
+                                Label(intent.title, systemImage: intent.symbol)
+                            }
+                        }
+                    } label: {
+                        Label("Добавить фазу", systemImage: "plus")
+                    }
+                } header: {
+                    Text("Фазы")
+                } footer: {
+                    Text("Сушка, выход в поддержание, набор — это один план, а не три. Порядок фаз меняется перетаскиванием, темп каждой считается от веса, с которым она начинается.")
                 }
 
                 Section {
@@ -129,7 +142,10 @@ struct PlanEditorView: View {
                 if let draftPlan {
                     Section("Расчёт") {
                         resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
-                        resultRow("Темп", String(format: "%+.2f \(String(localized: "кг/нед"))", draftPlan.weeklyRateKg))
+                        resultRow("Всего недель", "\(draftPlan.durationWeeks)")
+                        // Прогноз, а не цель: целевой вес у цепочки не задают,
+                        // его считают по темпам, которые готов держать.
+                        resultRow("Вес к финишу", String(format: "%.1f \(String(localized: "кг"))", draftPlan.targetWeightKg))
                         if draftPlan.cyclingEnabled {
                             resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))")
                             resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
@@ -137,9 +153,9 @@ struct PlanEditorView: View {
                             resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
                         }
 
-                        if draftPlan.isAggressivePace(relativeToWeightKg: startWeight) {
+                        if draftPlan.hasAggressivePhase {
                             Label(
-                                "Темп выше ~1% веса в неделю — довольно агрессивно. Можно смягчить, увеличив срок или скорректировав целевой вес.",
+                                "В плане есть фаза со слишком резким темпом — она отмечена внутри.",
                                 systemImage: "exclamationmark.triangle.fill"
                             )
                             .font(.caption)
@@ -149,15 +165,6 @@ struct PlanEditorView: View {
                 }
         }
         .glassRow()
-        // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
-        // «Готово» у decimalPad нет. Одного scrollDismissesKeyboard мало: он
-        // живёт на прокрутке, а форма короткая и двигать нечего — жест ловим сами.
-        .scrollDismissesKeyboard(.interactively)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 24).onEnded { drag in
-                if drag.translation.height > 40 { targetWeightFocused = false }
-            }
-        )
         .navigationTitle(store.plan == nil ? String(localized: "Новый план") : String(localized: "Изменить план"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -170,6 +177,43 @@ struct PlanEditorView: View {
                 .disabled(draftPlan == nil)
                 .fontWeight(.semibold)
             }
+        }
+    }
+
+    /// Вес, с которым фаза начинается, — по фазам до неё.
+    private func weight(atStartOf phase: PlanPhase) -> Double {
+        guard let index = phases.firstIndex(where: { $0.id == phase.id }) else { return startWeight }
+        var weight = startWeight
+        for earlier in phases.prefix(index) {
+            weight += earlier.weeklyRateKg(fromWeightKg: weight) * Double(earlier.durationWeeks)
+        }
+        return weight
+    }
+
+    private func phaseRow(_ phase: PlanPhase) -> some View {
+        let start = weight(atStartOf: phase)
+        let end = start + phase.weeklyRateKg(fromWeightKg: start) * Double(phase.durationWeeks)
+        return HStack(spacing: 10) {
+            Image(systemName: phase.intent.symbol)
+                .foregroundStyle(phase.isAggressive ? .orange : .secondary)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(phase.intent.title)
+                HStack(spacing: 6) {
+                    Text(String(format: String(localized: "%lld нед."), phase.durationWeeks))
+                    if phase.intent != .maintenance {
+                        Text(verbatim: "·")
+                        Text(String(format: "%.2f%%", phase.weeklyRatePercent))
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+            }
+            Spacer()
+            Text(String(format: "%.1f \(String(localized: "кг"))", end))
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
         }
     }
 

@@ -50,15 +50,6 @@ struct PlanView: View {
                 compositionSection(composition, intent: store.plan?.currentPhase?.intent)
             }
 
-            Section {
-                NavigationLink {
-                    PlanEditorView(store: store)
-                } label: {
-                    Label("Изменить план", systemImage: "slider.horizontal.3")
-                }
-                .accessibilityIdentifier("editPlan")
-            }
-
             if store.planOutcome == nil {
                 Section {
                     Button("Завершить текущий план", role: .destructive) {
@@ -85,6 +76,20 @@ struct PlanView: View {
         }
         .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
         .navigationBarTitleDisplayMode(.inline)
+        // Правка в тулбаре, а не строкой списка: настраивают план один раз,
+        // а смотрят на него каждую неделю, и строка занимала место в самом
+        // низу, куда ради неё приходилось долистывать весь разбор.
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    PlanEditorView(store: store)
+                } label: {
+                    Image(systemName: "slider.horizontal.3")
+                }
+                .accessibilityLabel("Изменить план")
+                .accessibilityIdentifier("editPlan")
+            }
+        }
     }
 
     /// Шапка: где мы на дистанции и сколько есть сегодня. Два числа, ради которых

@@ -23,6 +23,15 @@ final class CaloriesUITests: XCTestCase {
             "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO"
         ]
         app.launch()
+        // Ждём, пока интерфейс действительно встанет, и только потом отдаём
+        // приложение тесту.
+        //
+        // Дальше каждый тест проверяет свой навбар с ожиданием в пять секунд,
+        // и на загруженной машине они кончались раньше, чем приложение
+        // успевало показать хоть что-то. Флак ловился в разных тестах и каждый
+        // раз выглядел по-новому — то «нет карточки», то «нет вкладки», — то
+        // есть указывал куда угодно, кроме настоящей причины.
+        _ = app.tabBars.firstMatch.waitForExistence(timeout: 30)
         return app
     }
 
@@ -227,6 +236,23 @@ final class CaloriesUITests: XCTestCase {
         scrollTo(badge, in: app)
         XCTAssertTrue(badge.waitForExistence(timeout: 10),
                       "У записи должен появиться значок нутриента, которым продукт богат")
+    }
+
+    /// Правка плана живёт в тулбаре, а не строкой в самом низу списка.
+    @MainActor
+    func testPlanEditorOpensFromTheToolbar() {
+        let app = launchApp(premium: true)
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+
+        let planCard = app.buttons["openPlan"]
+        scrollIntoReach(planCard, in: app)
+        if planCard.exists { planCard.tap() }
+
+        let edit = app.buttons["editPlan"]
+        XCTAssertTrue(edit.waitForExistence(timeout: 5), "В тулбаре плана нет кнопки правки")
+        edit.tap()
+        XCTAssertTrue(app.staticTexts["Phases"].waitForExistence(timeout: 5),
+                      "Кнопка тулбара не открыла редактор плана")
     }
 
     /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.

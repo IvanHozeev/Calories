@@ -19,14 +19,17 @@ struct ProfilePlanCard: View {
         } else if let outcome = store.planOutcome {
             Button(action: onOpenPlan) { finishedPlan(outcome) }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("openPlan")
         } else if let plan = store.plan {
             Button(action: onOpenPlan) { activePlan(plan) }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("openPlan")
         } else if store.profile == nil {
             needsProfile
         } else {
             Button(action: onOpenPlan) { emptyState }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier("openPlan")
         }
     }
 

@@ -22,6 +22,8 @@ struct BodyView: View {
     /// Задавали ли норму на сухую массу руками. Пока нет — при первом переходе
     /// подгоняем её так, чтобы граммы не изменились.
     @State private var proteinLeanIsSet: Bool
+    @State private var showingGoalEditor = false
+    @State private var goalText = ""
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
@@ -419,11 +421,49 @@ struct BodyView: View {
                     }
                     resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
                     resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
-                    resultRow(title: "Целевые калории", value: "\(draftProfile.calorieTarget) \(String(localized: "ккал"))", highlighted: true)
+                    // Цель редактируется здесь, а не долгим нажатием на кольцо.
+                    // Жест был невидимый и позволял вписать число, спорящее
+                    // с планом: план цель считает, и правка руками потом молча
+                    // отменялась на первой же смене профиля.
+                    if store.plan != nil {
+                        HStack {
+                            Text("Целевые калории")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.green)
+                            Image(systemName: "target")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
+                        }
+                        .accessibilityIdentifier("calorieTargetRow")
+                    } else {
+                        Button {
+                            goalText = String(store.dailyGoal)
+                            showingGoalEditor = true
+                        } label: {
+                            HStack {
+                                Text("Целевые калории")
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.green)
+                                Image(systemName: "pencil")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .accessibilityIdentifier("calorieTargetRow")
+                    }
                     resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))", highlighted: true)
                 } header: {
                     Text("Расчёт")
                 } footer: {
+                    if store.plan != nil {
+                        Text("Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план.")
+                    }
                     Text(draftProfile.isNavyMethod(from: measurement)
                          ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
                          : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
@@ -432,6 +472,18 @@ struct BodyView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
+        .alert("Дневная цель", isPresented: $showingGoalEditor) {
+            TextField("Ккал в день", text: $goalText)
+                .keyboardType(.numberPad)
+            Button("Отмена", role: .cancel) { }
+            Button("Сохранить") {
+                if let value = Int(goalText), value > 0 {
+                    store.dailyGoal = value
+                }
+            }
+        } message: {
+            Text("Своё число вместо расчётного. Правка профиля пересчитает цель заново.")
+        }
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .alert("Сменить уровень активности?", isPresented: Binding(

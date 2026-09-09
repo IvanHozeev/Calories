@@ -4392,6 +4392,53 @@
         }
       }
     },
+    "Быстрое добавление" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إضافة سريعة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schnell hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir rápido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajout rapide"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוספה מהירה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adição rápida"
+          }
+        }
+      }
+    },
     "В %@ калорий больше, в остальные дни — меньше. Среднее за неделю остаётся тем же." : {
       "localizations" : {
         "ar" : {
@@ -13543,6 +13590,7 @@
       }
     },
     "Заполни параметры тела ниже — план считается по твоим BMR и TDEE." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14099,6 +14147,7 @@
       }
     },
     "из %lld г" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22038,6 +22087,7 @@
       }
     },
     "нет цели" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22640,6 +22690,7 @@
       }
     },
     "Норма всё ещё держит дефицит плана — открой и заверши его." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -22957,6 +23008,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta passa a %d kcal em vez de %d: são %@%d kcal por dia."
+          }
+        }
+      }
+    },
+    "Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطة تحدّد الهدف وتعيد حسابه لكل يوم من المرحلة. لتغييره، عدّل الخطة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan setzt das Ziel und berechnet es für jeden Tag der Phase neu. Zum Ändern bearbeite den Plan."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The plan sets the target and recalculates it for every day of the phase. To change it, edit the plan."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plan fija la meta y la recalcula cada día de la fase. Para cambiarla, edita el plan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plan fixe l'objectif et le recalcule chaque jour de la phase. Pour le changer, modifie le plan."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התוכנית קובעת את היעד ומחשבת אותו מחדש לכל יום בשלב. כדי לשנות, ערוך את התוכנית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O plano define a meta e a recalcula a cada dia da fase. Para mudá-la, edite o plano."
           }
         }
       }
@@ -24356,6 +24454,7 @@
       }
     },
     "осталось %d нед." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -25147,6 +25246,53 @@
         }
       }
     },
+    "Открывает выбранный экран добавления." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يفتح شاشة الإضافة المختارة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öffnet den gewählten Hinzufügen-Bildschirm."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens the chosen add screen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre la pantalla de añadir elegida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre l'écran d'ajout choisi."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פותח את מסך ההוספה שנבחר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre a tela de adição escolhida."
+          }
+        }
+      }
+    },
     "Открывает добавление приёма пищи в Calories." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -25381,6 +25527,7 @@
       }
     },
     "Открывает экран добавления приёма пищи." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27370,6 +27517,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plano concluído"
+          }
+        }
+      }
+    },
+    "План завершён — посмотри итог" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهت الخطة — اطّلع على النتيجة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan ist beendet — sieh dir das Ergebnis an"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The plan has finished — see how it went"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plan terminó: mira el resultado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plan est terminé — voyez le bilan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התוכנית הסתיימה — ראה את התוצאה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O plano terminou — veja o resultado"
           }
         }
       }
@@ -29735,6 +29929,7 @@
       }
     },
     "последняя неделя" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29827,6 +30022,7 @@
       }
     },
     "Поставь целевой вес и срок — дневная норма пересчитается под них." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34006,6 +34202,53 @@
         }
       }
     },
+    "Своё число вместо расчётного. Правка профиля пересчитает цель заново." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رقمك الخاص بدل المحسوب. تعديل الملف الشخصي يعيد حساب الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine eigene Zahl statt der berechneten. Eine Profiländerung berechnet das Ziel neu."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your own number instead of the calculated one. Editing the profile works the target out again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu propio número en lugar del calculado. Editar el perfil vuelve a calcular la meta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton propre chiffre à la place du calcul. Modifier le profil recalcule l'objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המספר שלך במקום המחושב. עריכת הפרופיל תחשב את היעד מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu próprio número em vez do calculado. Editar o perfil recalcula a meta."
+          }
+        }
+      }
+    },
     "Сдвинуть финиш на %@" : {
       "localizations" : {
         "ar" : {
@@ -36272,7 +36515,55 @@
         }
       }
     },
+    "Спланировать сушку или набор" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطّط للتنشيف أو الزيادة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cut oder Aufbau planen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan a cut or a bulk"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planear definición o volumen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planifier une sèche ou une prise"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תכנן חיטוב או עלייה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planejar definição ou ganho"
+          }
+        }
+      }
+    },
     "Спланируй сушку или набор: приложение само посчитает дневную норму калорий под целевой вес и срок." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39858,6 +40149,7 @@
       }
     },
     "Финиш %@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40565,6 +40857,7 @@
       }
     },
     "Цель взята. Заверши план, чтобы норма вернулась к расчёту по профилю." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40931,6 +41224,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lentilhas cozidas"
+          }
+        }
+      }
+    },
+    "Что открывать" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الذي يفتحه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was es öffnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What it opens"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué abre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qu'il ouvre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה זה פותח"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que abre"
           }
         }
       }

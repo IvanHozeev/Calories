@@ -7,14 +7,12 @@ struct ContentView: View {
     @State private var showingAdd = false
     @State private var showingAddWeight = false
     @State private var showingMeasurements = false
-    @State private var showingGoalEditor = false
     @State private var showingActivity = false
     @State private var showingDayNutrition = false
     @State private var showingSteps = false
     @State private var showingBankInfo = false
     @State private var showingPaywall = false
     @State private var showingPlan = false
-    @State private var goalText = ""
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
     /// Запись, к которой добавляют ещё еды.
@@ -46,18 +44,20 @@ struct ContentView: View {
                         ProgressRing(
                             consumed: store.consumedToday,
                             goal: store.adaptedTodayGoal,
-                            macros: store.macrosToday,
-                            proteinTarget: store.proteinTarget,
-                            fatTarget: store.fatTarget,
-                            carbsTarget: store.carbsTarget ?? MacroTargets.carbsMinimum
+                            onOpen: {
+                                entryAction = nil
+                                showingAdd = true
+                            }
                         )
                         .padding(.top)
-                        .simultaneousGesture(
-                            LongPressGesture(minimumDuration: 0.5).onEnded { _ in
-                                guard store.plan?.cyclingEnabled != true else { return }
-                                goalText = String(store.dailyGoal)
-                                showingGoalEditor = true
-                            }
+
+                        // Строка вместо карточки: план виден и открывается,
+                        // но не занимает полэкрана. Подробности — на его
+                        // собственном экране, куда ведёт и она, и кольцо.
+                        PlanStrip(
+                            store: store,
+                            onOpenPlan: { showingPlan = true },
+                            onShowPaywall: { showingPaywall = true }
                         )
 
                         if store.calorieBankBonus != 0 {
@@ -174,11 +174,6 @@ struct ContentView: View {
                             .accessibilityIdentifier("fastingCard")
                         }
 
-                        ProfilePlanCard(
-                            store: store,
-                            onOpenPlan: { showingPlan = true },
-                            onShowPaywall: { showingPaywall = true }
-                        )
 
                         MacrosCard(
                             macros: store.macrosToday,
@@ -321,6 +316,14 @@ struct ContentView: View {
                         } label: {
                             Label("Добавить еду", systemImage: "fork.knife")
                         }
+                        // Взвешивание тут же: плюс на «Сегодня» отвечает на вопрос
+                        // «записать сегодняшнее», а вес — такая же сегодняшняя запись,
+                        // как еда. Раньше за ним шли на «Вес» отдельным путём.
+                        Button {
+                            showingAddWeight = true
+                        } label: {
+                            Label("Взвеситься", systemImage: "scalemass")
+                        }
                     } label: {
                         Image(systemName: "plus")
                     }
@@ -363,16 +366,6 @@ struct ContentView: View {
                 let goal = store.adaptedTodayGoal
                 if oldValue < goal && newValue >= goal {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
-                }
-            }
-            .alert("Дневная цель", isPresented: $showingGoalEditor) {
-                TextField("Ккал в день", text: $goalText)
-                    .keyboardType(.numberPad)
-                Button("Отмена", role: .cancel) { }
-                Button("Сохранить") {
-                    if let value = Int(goalText), value > 0 {
-                        store.dailyGoal = value
-                    }
                 }
             }
         }

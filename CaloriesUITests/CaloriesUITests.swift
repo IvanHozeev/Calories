@@ -250,9 +250,9 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp(premium: true)
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        let planCard = app.buttons["openPlan"]
-        scrollIntoReach(planCard, in: app)
-        if planCard.exists { planCard.tap() }
+        let strip = app.buttons["planStrip"]
+        scrollIntoReach(strip, in: app)
+        if strip.exists { strip.tap() }
 
         let edit = app.buttons["editPlan"]
         XCTAssertTrue(edit.waitForExistence(timeout: 5), "В тулбаре плана нет кнопки правки")
@@ -608,13 +608,35 @@ final class CaloriesUITests: XCTestCase {
     // MARK: - Премиум-гейт
 
     @MainActor
-    func testPlanCardShowsPaywallWithoutPremium() {
+    func testPlanStripShowsPaywallWithoutPremium() {
         let app = launchApp(premium: false)
-        // Карточка плана теперь единственный вход — она на «Сегодня».
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        app.staticTexts["Personal plan"].tap()
+        // Строка под кольцом — видимая дверь в план. Нажатие на само кольцо
+        // ведёт туда же, но о нём ничто не сообщает: платную функцию нельзя
+        // прятать за жест, которого не видно.
+        let strip = app.buttons["planStrip"]
+        scrollIntoReach(strip, in: app)
+        XCTAssertTrue(strip.exists, "Под кольцом должна быть строка плана")
+        strip.tap()
         XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5),
-                      "Без премиума карточка плана должна открывать пейволл")
+                      "Без премиума строка плана должна открывать пейволл")
+    }
+
+    /// Кольцо ведёт в добавление еды — самое частое действие на экране.
+    /// План открывается строкой под ним, у которой есть подпись.
+    @MainActor
+    func testRingOpensMealEntry() {
+        let app = launchApp(premium: true)
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+
+        // Ищем среди всех потомков: кольцо — не кнопка и не текст, а вьюха
+        // с признаком кнопки, и в какой именно коллекции она окажется,
+        // зависит от того, как SwiftUI её свернул.
+        let ring = app.descendants(matching: .any)["addFromRing"].firstMatch
+        XCTAssertTrue(ring.waitForExistence(timeout: 5), "Кольцо не нашлось")
+        ring.tap()
+        XCTAssertTrue(app.navigationBars["Meal"].waitForExistence(timeout: 5),
+                      "Нажатие на кольцо должно открывать приём пищи")
     }
 }

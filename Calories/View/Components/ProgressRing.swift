@@ -54,106 +54,71 @@ struct RingView<Label: View>: View {
     }
 }
 
+/// Кольцо калорий за день. Нажатие открывает добавление приёма пищи.
+///
+/// Раньше кольцо переключалось по нажатию между калориями и тремя макросами.
+/// Пользы в этом не было: те же белки, жиры и углеводы стоят на карточке прямо
+/// под кольцом, с целями и без единого нажатия, — а кольцо тем временем занимало
+/// собой самый заметный жест экрана под то, что и так на виду.
+///
+/// Теперь оно ведёт туда, куда чаще всего и надо. Еду записывают по нескольку
+/// раз в день, а на план смотрят раз в неделю: самая крупная мишень экрана
+/// должна обслуживать частое действие, а не редкое. И на «остаток 2183»
+/// естественный ответ — записать съеденное, а не открыть план; план открывается
+/// строкой под кольцом, где он и подписан.
+///
+/// Ведёт сразу в добавление, а не в меню: меню со сканером и камерой живёт
+/// на плюсе в тулбаре, а кольцо даёт самый короткий путь к самому частому.
 struct ProgressRing: View {
     let consumed: Int
     let goal: Int
-    let macros: Macros
-    let proteinTarget: Double?
-    let fatTarget: Double?
-    let carbsTarget: Double
+    /// Что делать по нажатию — записать еду.
+    let onOpen: () -> Void
 
-    @State private var mode: Mode = .calories
-
-    private enum Mode: CaseIterable {
-        case calories, protein, fat, carbs
+    private var progress: Double {
+        guard goal > 0 else { return 0 }
+        return min(Double(consumed) / Double(goal), 1.0)
     }
 
-    private var ringProgress: Double {
-        switch mode {
-        case .calories:
-            guard goal > 0 else { return 0 }
-            return min(Double(consumed) / Double(goal), 1.0)
-        case .protein:
-            guard let t = proteinTarget, t > 0 else { return 0 }
-            return min(macros.protein / t, 1.0)
-        case .fat:
-            guard let t = fatTarget, t > 0 else { return 0 }
-            return min(macros.fat / t, 1.0)
-        case .carbs:
-            guard carbsTarget > 0 else { return 0 }
-            return min(macros.carbs / carbsTarget, 1.0)
-        }
-    }
-
-    private var ringColors: [Color] {
-        switch mode {
-        case .calories: return consumed > goal ? [.orange, .red] : [.green, .mint]
-        case .protein:  return [.blue, .blue.opacity(0.6)]
-        case .fat:      return [.orange, .orange.opacity(0.6)]
-        case .carbs:    return [.purple, .purple.opacity(0.6)]
-        }
+    private var colors: [Color] {
+        consumed > goal ? [.orange, .red] : [.green, .mint]
     }
 
     var body: some View {
-        RingView(progress: ringProgress, colors: ringColors, labelID: mode) {
+        RingView(progress: progress, colors: colors, labelID: consumed) {
             centerLabel
         }
-        .onTapGesture {
-            let all = Mode.allCases
-            let next = all[(all.firstIndex(of: mode)! + 1) % all.count]
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.82)) {
-                mode = next
-            }
-        }
+        .contentShape(Circle())
+        .onTapGesture(perform: onOpen)
+        // Своей подписи нет намеренно: VoiceOver читает содержимое кольца
+        // («Остаток 2183 из 2582 ккал»), и это точнее любой общей фразы.
+        // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе —
+        // и то, и другое стало бы не найти по имени.
+        .accessibilityIdentifier("addFromRing")
+        .accessibilityAddTraits(.isButton)
     }
 
-    @ViewBuilder
     private var centerLabel: some View {
-        switch mode {
-        case .calories:
-            // Крупным идёт остаток, а не съеденное, и так же, как у макросов:
-            // подпись, число, «из чего». Смотрят на кольцо ради одного вопроса —
-            // сколько ещё можно, — и раньше ответ на него был самой мелкой
-            // строкой из трёх. Съеденное осталось, но ушло вниз: это справка,
-            // а не то, ради чего сюда смотрят.
-            let remaining = goal - consumed
-            let overGoal = remaining < 0
-            VStack(spacing: 2) {
-                Text(overGoal ? "Перебор" : "Остаток")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(overGoal ? .red : .green)
-                Text("\(abs(remaining))")
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
-                    .foregroundStyle(overGoal ? Color.red : Color.primary)
-                    .contentTransition(.numericText())
-                Text("из \(goal) ккал")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                Text("съедено \(consumed)")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .contentTransition(.numericText())
-            }
-        case .protein:
-            macroCenter("Белок", value: macros.protein, target: proteinTarget, color: .blue)
-        case .fat:
-            macroCenter("Жиры", value: macros.fat, target: fatTarget, color: .orange)
-        case .carbs:
-            macroCenter("Углеводы", value: macros.carbs, target: carbsTarget > 0 ? carbsTarget : nil, color: .purple)
-        }
-    }
-
-    private func macroCenter(_ name: String, value: Double, target: Double?, color: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(LocalizedStringKey(name))
+        // Крупным идёт остаток, а не съеденное: смотрят на кольцо ради одного
+        // вопроса — сколько ещё можно. Съеденное осталось, но ушло вниз: это
+        // справка, а не то, ради чего сюда смотрят.
+        let remaining = goal - consumed
+        let overGoal = remaining < 0
+        return VStack(spacing: 2) {
+            Text(overGoal ? "Перебор" : "Остаток")
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(color)
-            Text("\(Int(value)) г")
-                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundStyle(overGoal ? .red : .green)
+            Text("\(abs(remaining))")
+                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .foregroundStyle(overGoal ? Color.red : Color.primary)
                 .contentTransition(.numericText())
-            Text(target.map { "из \(Int($0)) г" } ?? "нет цели")
+            Text("из \(goal) ккал")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Text("съедено \(consumed)")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .contentTransition(.numericText())
         }
     }
 }

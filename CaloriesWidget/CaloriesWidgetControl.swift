@@ -53,27 +53,109 @@ struct ScanBarcodeIntent: AppIntent {
 }
 
 @available(iOS 18.0, *)
-struct AddMealIntent: AppIntent {
-    static let title: LocalizedStringResource = "Добавить еду"
-    static let description = IntentDescription("Открывает экран добавления приёма пищи.")
+struct QuickAddIntent: AppIntent {
+    static let title: LocalizedStringResource = "Быстрое добавление"
+    static let description = IntentDescription("Открывает выбранный экран добавления.")
     static let openAppWhenRun = true
 
+    @Parameter(title: "Что открывать", default: .meal)
+    var option: QuickAddOption
+
+    init() {}
+    init(option: QuickAddOption) { self.option = option }
+
     func perform() async throws -> some IntentResult {
-        UserDefaults(suiteName: appGroup)?.set("meal", forKey: pendingActionKey)
+        UserDefaults(suiteName: appGroup)?.set(option.rawValue, forKey: pendingActionKey)
         return .result()
     }
 }
 
+/// Что делает настраиваемый контрол-плюс.
+///
+/// Значения совпадают с `QuickAction` в приложении: расширение кладёт в общий
+/// контейнер именно `rawValue`, и приложение разбирает его тем же перечислением.
+/// Разъедутся — контрол будет открывать не то, и молча.
 @available(iOS 18.0, *)
-struct AddMealControl: ControlWidget {
+enum QuickAddOption: String, AppEnum {
+    case meal
+    case camera
+    case scanner
+    case measurements
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Что открывать")
+
+    static let caseDisplayRepresentations: [QuickAddOption: DisplayRepresentation] = [
+        .meal: DisplayRepresentation(title: "Добавить еду", image: DisplayRepresentation.Image(systemName: "fork.knife")),
+        .camera: DisplayRepresentation(title: "Снять еду", image: DisplayRepresentation.Image(systemName: "camera.fill")),
+        .scanner: DisplayRepresentation(title: "Сканировать штрихкод",
+                                        image: DisplayRepresentation.Image(systemName: "barcode.viewfinder")),
+        .measurements: DisplayRepresentation(title: "Снять замеры", image: DisplayRepresentation.Image(systemName: "ruler"))
+    ]
+
+    var symbol: String {
+        switch self {
+        case .meal:         return "fork.knife"
+        case .camera:       return "camera.fill"
+        case .scanner:      return "barcode.viewfinder"
+        case .measurements: return "ruler"
+        }
+    }
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .meal:         return "Добавить еду"
+        case .camera:       return "Снять еду"
+        case .scanner:      return "Сканировать штрихкод"
+        case .measurements: return "Снять замеры"
+        }
+    }
+}
+
+/// Настройка контрола: что он делает.
+///
+/// Меню по долгому нажатию сделать нельзя, и это не недоделка: в SDK есть ровно
+/// два вида контрола — кнопка и переключатель, и ни один из них меню не умеет.
+/// Долгое нажатие на контроле просто срабатывает как обычное.
+///
+/// Выбор из этих четырёх живёт в правке Пункта управления: долгое нажатие
+/// по пустому месту, потом тап по самому контролу. Выбор не разовый — он
+/// переключает то, что кнопка делает дальше. Для одной кнопки на все случаи
+/// это и нужно, а кому нужны несколько сразу — рядом лежат отдельные контролы
+/// на камеру, сканер и замеры.
+@available(iOS 18.0, *)
+struct QuickAddConfiguration: ControlConfigurationIntent {
+    static let title: LocalizedStringResource = "Быстрое добавление"
+    static let description = IntentDescription("Что открывать нажатием на контрол.")
+
+    @Parameter(title: "Что открывать", default: .meal)
+    var option: QuickAddOption
+
+    init() {}
+    init(option: QuickAddOption) { self.option = option }
+}
+
+@available(iOS 18.0, *)
+struct QuickAddValueProvider: AppIntentControlValueProvider {
+    func previewValue(configuration: QuickAddConfiguration) -> QuickAddOption {
+        configuration.option
+    }
+
+    func currentValue(configuration: QuickAddConfiguration) async throws -> QuickAddOption {
+        configuration.option
+    }
+}
+
+@available(iOS 18.0, *)
+struct QuickAddControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.meal") {
-            ControlWidgetButton(action: AddMealIntent()) {
-                Label("Добавить еду", systemImage: "plus")
+        AppIntentControlConfiguration(kind: "ivankhozeyev.team.Calories.control.meal",
+                                      provider: QuickAddValueProvider()) { option in
+            ControlWidgetButton(action: QuickAddIntent(option: option)) {
+                Label(option.title, systemImage: option.symbol)
             }
         }
-        .displayName("Добавить еду")
-        .description("Открывает добавление приёма пищи в Calories.")
+        .displayName("Быстрое добавление")
+        .description("Один жест до еды, камеры, сканера или замеров. Что именно — выбирается в правке Пункта управления.")
     }
 }
 

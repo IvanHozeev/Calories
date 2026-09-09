@@ -98,6 +98,53 @@
         }
       }
     },
+    "Быстрое добавление": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إضافة سريعة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schnell hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick add"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir rápido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajout rapide"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הוספה מהירה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adição rápida"
+          }
+        }
+      }
+    },
     "Дистанция": {
       "extractionState": "manual",
       "localizations": {
@@ -380,6 +427,53 @@
         }
       }
     },
+    "Один жест до еды, камеры, сканера или замеров. Что именно — выбирается в правке Пункта управления.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لمسة واحدة إلى الطعام أو الكاميرا أو الماسح أو القياسات. وأيّها يُختار أثناء تحرير مركز التحكم."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Geste bis zum Essen, zur Kamera, zum Scanner oder zu den Maßen. Welche davon, wird beim Bearbeiten des Kontrollzentrums gewählt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One gesture to food, the camera, the scanner or measurements. Which one is chosen while editing Control Centre."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un gesto hasta la comida, la cámara, el escáner o las medidas. Cuál se elige al editar el Centro de control."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un geste jusqu'à la nourriture, l'appareil photo, le scanner ou les mesures. Lequel se choisit en modifiant le centre de contrôle."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחווה אחת עד לאוכל, למצלמה, לסורק או למדידות. מה בדיוק — נבחר בעריכת מרכז הבקרה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um gesto até a comida, a câmera, o scanner ou as medidas. Qual delas se escolhe ao editar a Central de Controle."
+          }
+        }
+      }
+    },
     "Остаток": {
       "extractionState": "manual",
       "localizations": {
@@ -517,6 +611,53 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abre a entrada de medidas."
+          }
+        }
+      }
+    },
+    "Открывает выбранный экран добавления.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يفتح شاشة الإضافة المختارة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Öffnet den gewählten Hinzufügen-Bildschirm."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the chosen add screen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre la pantalla de añadir elegida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvre l'écran d'ajout choisi."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פותח את מסך ההוספה שנבחר."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre a tela de adição escolhida."
           }
         }
       }
@@ -1175,6 +1316,100 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meta"
+          }
+        }
+      }
+    },
+    "Что открывать": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما الذي يفتحه"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was es öffnet"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What it opens"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué abre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qu'il ouvre"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מה זה פותח"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que abre"
+          }
+        }
+      }
+    },
+    "Что открывать нажатием на контрол.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما يفتحه الضغط على عنصر التحكم."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was ein Druck auf das Control öffnet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What pressing the control opens."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qué abre al pulsar el control."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce qu'ouvre l'appui sur le contrôle."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מה נפתח בלחיצה על הפקד."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que abre ao pressionar o controle."
           }
         }
       }

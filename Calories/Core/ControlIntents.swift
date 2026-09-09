@@ -26,15 +26,53 @@ private func handleControlAction(_ action: QuickAction) {
     QuickActionRouter.shared.pending = action
 }
 
+/// Копия перечисления из расширения: параметр намерения — часть его подписи,
+/// и без одинакового типа в обоих бандлах идентификаторы не совпадут.
 @available(iOS 18.0, *)
-struct AddMealIntent: AppIntent {
-    static let title: LocalizedStringResource = "Добавить еду"
-    static let description = IntentDescription("Открывает экран добавления приёма пищи.")
+enum QuickAddOption: String, AppEnum {
+    case meal
+    case camera
+    case scanner
+    case measurements
+
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Что открывать")
+
+    static let caseDisplayRepresentations: [QuickAddOption: DisplayRepresentation] = [
+        .meal: DisplayRepresentation(title: "Добавить еду", image: DisplayRepresentation.Image(systemName: "fork.knife")),
+        .camera: DisplayRepresentation(title: "Снять еду", image: DisplayRepresentation.Image(systemName: "camera.fill")),
+        .scanner: DisplayRepresentation(title: "Сканировать штрихкод",
+                                        image: DisplayRepresentation.Image(systemName: "barcode.viewfinder")),
+        .measurements: DisplayRepresentation(title: "Снять замеры", image: DisplayRepresentation.Image(systemName: "ruler"))
+    ]
+
+    /// В действие приложения. Оба перечисления держатся на одних и тех же
+    /// строках, но переводим явно: молчаливое совпадение `rawValue` — не то,
+    /// на что стоит опираться, когда одно из них живёт в другом таргете.
+    var action: QuickAction {
+        switch self {
+        case .meal:         return .meal
+        case .camera:       return .camera
+        case .scanner:      return .scanner
+        case .measurements: return .measurements
+        }
+    }
+}
+
+@available(iOS 18.0, *)
+struct QuickAddIntent: AppIntent {
+    static let title: LocalizedStringResource = "Быстрое добавление"
+    static let description = IntentDescription("Открывает выбранный экран добавления.")
     static let openAppWhenRun = true
+
+    @Parameter(title: "Что открывать", default: .meal)
+    var option: QuickAddOption
+
+    init() {}
+    init(option: QuickAddOption) { self.option = option }
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        handleControlAction(.meal)
+        handleControlAction(option.action)
         return .result()
     }
 }

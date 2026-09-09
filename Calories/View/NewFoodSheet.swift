@@ -48,7 +48,7 @@ struct NewFoodSheet: View {
     private var matchedInCatalog: Micronutrients? {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return nil }
-        return FoodCatalog.micronutrientsByName[trimmed]
+        return FoodCatalog.nutrientProfilesByName[trimmed]?.per100g
     }
 
     /// Витамины показаны от совпадения по названию, а не сохранены у продукта.

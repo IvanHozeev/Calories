@@ -128,7 +128,11 @@ final class CaloriesUITests: XCTestCase {
     func testSettingsReachableFromBody() {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
-        app.buttons["openSettings"].tap()
+        // Ждём тулбар, а не жмём вслепую: переключение вкладки возвращается
+        // раньше, чем экран собран, и тап уходил в пустоту.
+        let settings = app.buttons["openSettings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
+        settings.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
                       "Шестерёнка на «Теле» должна вести в настройки")
     }
@@ -157,7 +161,9 @@ final class CaloriesUITests: XCTestCase {
     func testSettingsOffersDataExport() {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
-        app.buttons["openSettings"].tap()
+        let gear = app.buttons["openSettings"]
+        XCTAssertTrue(gear.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
+        gear.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let backup = app.buttons["Backup (JSON)"]
@@ -394,7 +400,9 @@ final class CaloriesUITests: XCTestCase {
     func testFontChoiceIsOfferedAndPersists() {
         let app = launchApp()
         app.tabBars.buttons["Body"].tap()
-        app.buttons["openSettings"].tap()
+        let gear = app.buttons["openSettings"]
+        XCTAssertTrue(gear.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
+        gear.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let entry = app.buttons["openFontSettings"]

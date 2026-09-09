@@ -27,12 +27,16 @@ nonisolated struct CatalogFood: Codable, Identifiable, Hashable, Sendable {
     /// Микронутриенты на 100 г. Необязательны: у части продуктов их в источнике
     /// просто нет, и нули там означали бы «померили и получили ноль».
     let micro: [String: Double]?
+    /// Какая доля веса имеет известный состав. Есть только у блюд: их состав
+    /// считается по рецепту из продуктов каталога, и часть ингредиентов может
+    /// быть без данных. У продукта состав либо есть целиком, либо его нет.
+    let microCoverage: Double?
 
     /// Ключи короткие: на двух тысячах позиций разница в размере файла
     /// заметная, а читают его не глазами.
     private enum CodingKeys: String, CodingKey {
         case id = "i", ru, en, kcal = "k", protein = "p", fat = "f", carbs = "c"
-        case category = "cat", grams = "g", micro = "m"
+        case category = "cat", grams = "g", micro = "m", microCoverage = "mc"
     }
 
     var foodCategory: FoodCategory { FoodCategory(rawValue: category) ?? .other }
@@ -93,15 +97,18 @@ nonisolated enum FoodCatalog {
 
     static var isEmpty: Bool { index.isEmpty }
 
-    /// Микронутриенты по отображаемому названию — собираются один раз.
+    /// Состав по отображаемому названию — собирается один раз.
     ///
     /// У `FoodItem` то же свойство разбирает JSON при каждом обращении, а
-    /// каталог держит их уже разобранными. Через этот словарь строки списков
+    /// каталог держит его уже разобранным. Через этот словарь строки списков
     /// получают состав, не платя разбором за каждую перерисовку.
-    static let micronutrientsByName: [String: Micronutrients] = Dictionary(
-        index.compactMap { entry in
+    static let nutrientProfilesByName: [String: NutrientProfile] = Dictionary(
+        index.compactMap { entry -> (String, NutrientProfile)? in
             let micronutrients = entry.food.micronutrients
-            return micronutrients.isEmpty ? nil : (entry.food.localizedName, micronutrients)
+            guard !micronutrients.isEmpty else { return nil }
+            return (entry.food.localizedName,
+                    NutrientProfile(per100g: micronutrients,
+                                    coverage: entry.food.microCoverage ?? 1))
         },
         uniquingKeysWith: { first, _ in first }
     )

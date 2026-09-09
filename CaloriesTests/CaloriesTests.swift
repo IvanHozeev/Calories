@@ -2801,10 +2801,52 @@ struct VitaminOfferTests {
     }
 
     @Test func somethingWithNoCounterpartIsNotMarked() {
-        store.addCustomFood(name: "Шаурма у Ашота", caloriesPer100g: 210,
+        // Раньше здесь была «Шаурма у Ашота»: у блюд каталога состава не было,
+        // и предлагать им было нечего. Теперь он есть — считается по рецепту, —
+        // и своя шаурма честно находит себе пару. Нужен пример, которого
+        // в каталоге нет вовсе.
+        store.addCustomFood(name: "Соус бабушкин", caloriesPer100g: 210,
                             protein: 12, fat: 10, carbs: 17)
         let food = store.customFoods.first!
         #expect(!store.foodsOfferedVitamins.contains(food.id))
+    }
+
+    @Test func everyDishInTheCatalogueKnowsItsComposition() {
+        // Тридцать блюд каталога жили с макросами и без единого витамина, и день
+        // из домашней еды показывал низкое покрытие, хотя ел человек ровно то,
+        // про что каталог всё знает. Состав им считает сборщик по рецептам.
+        let dishes = FoodCatalog.all.filter { $0.foodCategory == .dishes }
+        #expect(dishes.count >= 25, "Блюда из каталога пропали")
+        let without = dishes.filter { $0.micronutrients.isEmpty }
+        #expect(without.isEmpty, "Без состава остались: \(without.map(\.en))")
+    }
+
+    @Test func aPartlyKnownDishSaysSoInsteadOfClaimingFullCoverage() {
+        // У блюда, собранного из ингредиентов, часть которых без данных,
+        // покрытие меньше единицы — и приложение по нему решает, показывать ли
+        // значки. Заявить полное покрытие значило бы соврать умолчанием.
+        let profiles = FoodCatalog.nutrientProfilesByName
+        let partial = profiles.values.filter { $0.coverage < 0.999 }
+        #expect(!partial.isEmpty, "Хотя бы у одного блюда покрытие неполное")
+        #expect(profiles.values.allSatisfy { $0.coverage > 0 && $0.coverage <= 1 })
+    }
+
+    @Test func boiledPotatoIsNotASourceOfVitaminA() {
+        // Автоподбор привязал картофель к сладкому картофелю, и варёная
+        // картошка числилась с 961 мкг витамина A — то есть получала значок «A»
+        // ни за что, а блюда с картошкой раздувались следом.
+        let potato = FoodCatalog.all.first { $0.ru == "Картофель варёный" }
+        let vitaminA = try! #require(potato).micronutrients[.vitaminA] ?? 0
+        #expect(vitaminA < 10, "Витамина A в варёной картошке практически нет")
+    }
+
+    @Test func aDishFromTheCatalogueCanNowLendItsVitamins() {
+        // Обратная сторона той же правки, и ради неё всё затевалось: домашняя
+        // шаурма подтягивает состав у каталожной.
+        store.addCustomFood(name: "Шаурма у Ашота", caloriesPer100g: 210,
+                            protein: 12, fat: 10, carbs: 17)
+        let food = store.customFoods.first!
+        #expect(store.foodsOfferedVitamins.contains(food.id))
     }
 }
 

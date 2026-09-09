@@ -39,6 +39,7 @@ CORE = os.path.join(ROOT, "Tools", "food_core.txt")
 TERMS = os.path.join(ROOT, "Tools", "food_terms_ru.json")
 OUT = os.path.join(ROOT, "Calories", "Resources", "FoodCatalog.json")
 LINKS = os.path.join(ROOT, "Tools", "food_core_usda.tsv")
+RECIPES = os.path.join(ROOT, "Tools", "dish_recipes.txt")
 
 CATEGORIES = {"meat", "fish", "dairy", "legumes", "grains", "dishes",
               "produce", "mushrooms", "fats", "sweets", "drinks", "other"}
@@ -274,6 +275,85 @@ def read_usda(rows, terms, limit, taken_names, taken_ids):
     return foods
 
 
+def read_recipes():
+    """Рецепты готовых блюд: {название: [(ингредиент, граммы), ...]}."""
+    recipes, problems = {}, []
+    if not os.path.exists(RECIPES):
+        return recipes, problems
+    with open(RECIPES, encoding="utf-8") as handle:
+        for number, line in enumerate(handle, 1):
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split("|")
+            if len(parts) < 2:
+                problems.append(f"строка {number}: нет ни одного ингредиента")
+                continue
+            items = []
+            for chunk in parts[1:]:
+                name, _, grams = chunk.rpartition(":")
+                try:
+                    items.append((name.strip(), float(grams)))
+                except ValueError:
+                    problems.append(f"строка {number}: не разобрал {chunk!r}")
+            recipes[parts[0].strip()] = items
+    return recipes, problems
+
+
+def apply_recipes(foods, recipes):
+    """Считает блюдам состав по рецептам из продуктов того же каталога.
+
+    Занижение честнее завышения: состав делится на полный вес блюда, а не на
+    вес известной части. Иначе неизвестный ингредиент молча получил бы состав
+    известных, и блюдо вышло бы богаче, чем оно есть. Доля известного веса
+    пишется рядом полем `mc`, и приложение по ней решает, доверять ли числу.
+    """
+    by_ru = {item["ru"]: item for item in foods if item.get("ru")}
+    problems, done = [], 0
+    for dish_name, items in recipes.items():
+        dish = by_ru.get(dish_name)
+        if dish is None:
+            problems.append(f"{dish_name!r}: такого блюда нет в ядре")
+            continue
+        total = sum(grams for _, grams in items)
+        if not total:
+            problems.append(f"{dish_name!r}: суммарный вес нулевой")
+            continue
+        if abs(total - 100) > 5:
+            problems.append(f"{dish_name!r}: сумма граммов {total:.0f}, "
+                            f"а рецепт пишется на сто грамм готового блюда")
+
+        totals, known, kcal = {}, 0.0, 0.0
+        for name, grams in items:
+            source = by_ru.get(name)
+            if source is None:
+                problems.append(f"{dish_name!r}: нет ингредиента {name!r}")
+                continue
+            kcal += source["k"] * grams / 100
+            # Вода честно весит и честно ничего не содержит: считать её
+            # неизвестной значило бы занижать покрытие супа втрое.
+            if source.get("m") or source["k"] == 0:
+                known += grams
+            for key, value in (source.get("m") or {}).items():
+                totals[key] = totals.get(key, 0) + value * grams / 100
+
+        # Калории по рецепту против курируемых: разошлись сильно — значит
+        # рецепт описывает не то блюдо, и витамины из него будут не те.
+        per100 = kcal * 100 / total
+        if dish["k"] and abs(per100 - dish["k"]) / dish["k"] > 0.2:
+            problems.append(f"{dish_name!r}: по рецепту {per100:.0f} ккал, "
+                            f"в ядре {dish['k']} — расхождение больше пятой части")
+
+        if not totals:
+            continue
+        dish["m"] = {key: round(value * 100 / total, 4) for key, value in totals.items()}
+        coverage = known / total
+        if coverage < 0.999:
+            dish["mc"] = round(coverage, 3)
+        done += 1
+    return done, problems
+
+
 def FoodNameKey(name):
     return re.sub(r"[^a-z0-9]+", " ", name.lower()).strip()
 
@@ -323,6 +403,16 @@ def main():
                 linked += 1
         covered = len(foods) and linked * 100 // len(foods)
         print(f"Ядро: микронутриенты получили {linked} из {len(foods)} позиций ({covered}%)")
+
+        # Блюда — после ядра: их состав считается из продуктов, которым
+        # витамины только что проставили.
+        recipes, recipe_problems = read_recipes()
+        if recipes:
+            done, more = apply_recipes(foods, recipes)
+            problems.extend(recipe_problems + more)
+            print(f"Блюда: состав посчитан по рецептам для {done} из {len(recipes)}")
+            for problem in more + recipe_problems:
+                print("  •", problem, file=sys.stderr)
 
         if args.core_only:
             print("Хвост не добавляем: в SR Legacy это справочник мясника — "

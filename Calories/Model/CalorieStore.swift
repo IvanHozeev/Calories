@@ -172,7 +172,7 @@ final class CalorieStore {
         // Каталог отдаёт состав уже разобранным и не меняется, поэтому его
         // словарь строится один раз; поверх кладём свои продукты — они как раз
         // меняются, но их немного.
-        var profiles = FoodCatalog.micronutrientsByName.mapValues { NutrientProfile(per100g: $0) }
+        var profiles = FoodCatalog.nutrientProfilesByName
         for food in customFoods where !food.micronutrients.isEmpty {
             profiles[food.name] = NutrientProfile(per100g: food.micronutrients)
         }

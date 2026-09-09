@@ -1,11 +1,16 @@
 # en	fdcId	usda_description	name_score	macro_distance
+# Последняя колонка — расстояние по макросам от автоподбора; «manual» значит,
+# что строку выбрали руками. Автоподбор путает похожие названия: картофель
+# он привязал к сладкому картофелю, грушу — к консервированному фруктовому
+# коктейлю, а белый гриб — к соломенному. Проверять надо по голове описания
+# USDA, а не по вхождению слова: «Sweet potato» содержит «potato».
 Apple	171688	Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)	1.00	0.01
 Banana	173944	Bananas, raw	1.00	0.01
 Orange	169097	Oranges, raw, all commercial varieties	1.00	0.01
 Tangerine	169105	Tangerines, (mandarin oranges), raw	1.00	0.01
 Grapefruit	174673	Grapefruit, raw, pink and red, all areas	1.00	0.01
 Lemon	167746	Lemons, raw, without peel	1.00	0.01
-Pear	173027	Fruit cocktail, (peach and pineapple and pear and grape and cherry), canned, light syrup, solids and liquids	1.00	0.00
+Pear	167776	Pears, raw, bartlett (Includes foods for USDA's Food Distribution Program)	1.00	manual
 Grapes	174683	Grapes, red or green (European type, such as Thompson seedless), raw	1.00	0.01
 Strawberry	167762	Strawberries, raw	1.00	0.01
 Raspberry	167755	Raspberries, raw	1.00	0.00
@@ -24,7 +29,7 @@ Apricot	171697	Apricots, raw	1.00	0.00
 Plum	169949	Plums, raw	1.00	0.01
 Mango	169910	Mangos, raw	1.00	0.00
 Kiwi	168153	Kiwifruit, green, raw	1.00	0.01
-Pineapple	174670	Fruit salad, (peach and pear and apricot and pineapple and cherry), canned, juice pack, solids and liquids	1.00	0.00
+Pineapple	169124	Pineapple, raw, all varieties	1.00	manual
 Papaya	169926	Papayas, raw	1.00	0.01
 Pomegranate	169134	Pomegranates, raw	1.00	0.01
 Persimmon	169941	Persimmons, japanese, raw	1.00	0.02
@@ -39,9 +44,9 @@ Tomato	170458	Tomato juice, canned, with salt added	1.00	0.04
 Cherry tomatoes	170457	Tomatoes, red, ripe, raw, year round average	1.00	0.00
 Carrot	170393	Carrots, raw	1.00	0.01
 Boiled beetroot	168506	Beets, cooked, boiled. drained, with salt	1.00	0.00
-Boiled potato	168483	Sweet potato, cooked, baked in skin, flesh, without salt	1.00	0.05
-Baked potato	168483	Sweet potato, cooked, baked in skin, flesh, without salt	1.00	0.06
-Mashed potato	169305	Sweet potato, canned, mashed	1.00	0.52
+Boiled potato	170440	Potatoes, boiled, cooked without skin, flesh, without salt	1.00	manual
+Baked potato	170033	Potatoes, baked, flesh, without salt	1.00	manual
+Mashed potato	168555	Potatoes, mashed, home-prepared, whole milk and butter added	1.00	manual
 Broccoli	170379	Broccoli, raw	1.00	0.01
 White cabbage	169975	Cabbage, raw	1.00	0.01
 Cauliflower	169986	Cauliflower, raw	1.00	0.00
@@ -71,7 +76,7 @@ Canned corn	168542	Corn, sweet, white, canned, vacuum pack, regular pack	1.00	0.
 Canned peas	170421	Peas, green, canned, regular pack, solids and liquids	1.00	0.04
 Champignon mushrooms	169251	Mushrooms, white, raw	1.00	0.00
 Oyster mushrooms	168580	Mushrooms, oyster, raw	1.00	0.00
-Porcini	168582	Mushrooms, straw, canned, drained solids	1.00	0.13
+Porcini	168434	Mushrooms, brown, italian, or crimini, raw	1.00	manual
 Chanterelles	168422	Mushrooms, Chanterelle, raw	1.00	0.15
 Shiitake	169242	Mushrooms, shiitake, raw	1.00	0.00
 Boiled white rice	168878	Rice, white, long-grain, regular, enriched, cooked	1.00	0.01

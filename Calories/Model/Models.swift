@@ -498,6 +498,10 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
     case satSun   // стандартный мир: Сб+Вс
     case friSat   // Израиль: Пт+Сб
     case sunMon   // Израиль: Вс+Пн
+    case wedSat   // рефид в среду и субботу
+    case wedFri   // рефид в среду и пятницу
+    // Фиксированные пары — временное решение: жизнь сдвигает рефид на праздник,
+    // а не на заранее выбранный день недели. Потом — плавающие рефиды.
 
     var id: String { rawValue }
 
@@ -507,6 +511,8 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
         case .satSun: return String(localized: "Сб — Вс")
         case .friSat: return String(localized: "Пт — Сб")
         case .sunMon: return String(localized: "Вс — Пн")
+        case .wedSat: return String(localized: "Ср — Сб")
+        case .wedFri: return String(localized: "Ср — Пт")
         }
     }
 
@@ -516,6 +522,8 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
         case .satSun: return String(localized: "Рефид на выходных")
         case .friSat: return String(localized: "Рефид на выходных (Израиль)")
         case .sunMon: return String(localized: "Рефид в начале недели (Израиль)")
+        case .wedSat: return String(localized: "Рефид в середине недели и в субботу")
+        case .wedFri: return String(localized: "Рефид в середине недели и в пятницу")
         }
     }
 
@@ -527,6 +535,8 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
         case .satSun: return [-0.08, -0.08, -0.12, -0.08, -0.08, 0.14, 0.30]
         case .friSat: return [-0.08, -0.08, -0.12, -0.08, 0.30, 0.14, -0.08]
         case .sunMon: return [0.14, -0.08, -0.12, -0.08, -0.08, -0.08, 0.30]
+        case .wedSat: return [-0.08, -0.08, 0.30, -0.08, -0.08, 0.14, -0.12]
+        case .wedFri: return [-0.08, -0.08, 0.30, -0.08, 0.14, -0.08, -0.12]
         }
     }
 }

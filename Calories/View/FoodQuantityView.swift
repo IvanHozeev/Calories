@@ -17,14 +17,20 @@ struct FoodQuantityView: View {
     /// назад ведёт системная стрелка, и две кнопки закрытия спорили бы.
     var isPushed: Bool = false
 
-    init(food: FoodItem, onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
+    /// Подпись основной кнопки. При правке уже добавленного продукта это не
+    /// «в приём пищи» — он уже там, — а подтверждение нового веса.
+    private let addTitle: LocalizedStringKey
+
+    init(food: FoodItem, grams initialGrams: Double? = nil, addTitle: LocalizedStringKey = "В приём пищи",
+         onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
          isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
         self.food = food
+        self.addTitle = addTitle
         self.onSave = onSave
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
-        let g = food.defaultGrams > 0 ? food.defaultGrams : 100
+        let g = initialGrams ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
         _grams = State(initialValue: g)
         _gramsText = State(initialValue: "\(Int(g))")
     }
@@ -135,7 +141,7 @@ struct FoodQuantityView: View {
                 } label: {
                     // По размеру подписи, а не во всю ширину: широкая плашка
                     // спорила с соседней кнопкой и выглядела тяжело.
-                    Text("В приём пищи")
+                    Text(addTitle)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 6)
                 }

@@ -27,12 +27,16 @@ struct AddEntryView: View {
     /// Раскрыта ли строка поиска. Отдельно от `searchFocused`: то читает состояние
     /// у системы, а этим мы им управляем — возвращаем курсор после добавления.
     @State private var searchPresented = false
-    /// Продукт ушёл в приём пищи — вернуть курсор в поиск и список наверх.
+    /// Продукт ушёл в приём пищи — список наверх, а курсор в поиск, если он там был.
     ///
     /// Флагом, а не действием на месте: пока экран порции закрывается, фокус
     /// принадлежит ему, и запрошенный раньше времени курсор просто теряется.
     /// Поэтому дожидаемся закрытия и делаем всё в `onDismiss`.
     @State private var resumeSearchAfterAdd = false
+    /// Стоял ли курсор в поиске, когда открыли порцию. Возвращаем его только
+    /// тогда: если продукт выбрали из списка, не трогая поиск, выскочившая
+    /// после добавления клавиатура — чужое решение за человека.
+    @State private var searchWasFocused = false
     /// Счётчик запросов «прокрутить наверх». Прокрутка живёт внутри
     /// `ScrollViewReader`, а решение о ней принимается снаружи — счётчик их
     /// связывает. Именно счётчик, а не флаг: два добавления подряд должны
@@ -63,11 +67,14 @@ struct AddEntryView: View {
     enum ServingTarget: Identifiable, Hashable {
         case food(FoodItem, savable: Bool, quickSave: Bool)
         case dish(Dish)
+        /// Уже добавленный продукт — поправить вес, если ошиблись.
+        case edit(itemID: UUID)
 
         var id: String {
             switch self {
             case .food(let food, _, _): return "food-\(food.id.uuidString)"
             case .dish(let dish):       return "dish-\(dish.id.uuidString)"
+            case .edit(let itemID):     return "edit-\(itemID.uuidString)"
             }
         }
     }
@@ -212,7 +219,7 @@ struct AddEntryView: View {
                     // по пустому месту строки пропадает впустую.
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { serving = .food(food, savable: true, quickSave: false) }
+                        .onTapGesture { openServing(.food(food, savable: true, quickSave: false)) }
                 }
             }
         }
@@ -329,8 +336,13 @@ struct AddEntryView: View {
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                // С набранным приёмом пищи «Отмена» уезжает вниз, к «Сохранить»:
+                // наверху её прячет раскрытая строка поиска, а решают «сохранить
+                // или бросить» в одном месте.
+                if draftItems.isEmpty {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Отмена") { dismiss() }
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 16) {
@@ -370,6 +382,10 @@ struct AddEntryView: View {
                 // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,
                 // она не нужна — показываем её только при непустом черновике.
                 if !draftItems.isEmpty {
+                    ToolbarItem(placement: .bottomBar) {
+                        Button("Отмена") { dismiss() }
+                            .accessibilityIdentifier("cancelMeal")
+                    }
                     ToolbarItem(placement: .bottomBar) {
                         Button {
                             saveDraft()
@@ -436,7 +452,13 @@ struct AddEntryView: View {
     private func resumeSearchIfNeeded() {
         guard resumeSearchAfterAdd else { return }
         resumeSearchAfterAdd = false
-        searchPresented = true
+        if searchWasFocused {
+            // Строка поиска за время порции могла остаться «раскрытой» и без
+            // курсора — тогда повторное true ничего не меняет. Сбрасываем и
+            // раскрываем заново, чтобы клавиатура действительно поднялась.
+            searchPresented = false
+            Task { @MainActor in searchPresented = true }
+        }
         scrollToTopTicket += 1
     }
 
@@ -453,9 +475,24 @@ struct AddEntryView: View {
                             ?? String(localized: "порция"),
                         macros: item.macros
                     )
-                }
-                .onDelete { offsets in
-                    draftItems.remove(atOffsets: offsets)
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            draftItems.removeAll { $0.id == item.id }
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        // Вес без граммов не поправить: у распознанного по фото
+                        // или записанного порцией менять нечего.
+                        if item.grams != nil {
+                            Button {
+                                serving = .edit(itemID: item.id)
+                            } label: {
+                                Image(systemName: "pencil")
+                            }
+                            .tint(.blue)
+                            .accessibilityLabel("Изменить")
+                        }
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -498,12 +535,12 @@ struct AddEntryView: View {
                 ForEach(recentFoodItems) { food in
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
+                        .onTapGesture { openServing(.food(food, savable: false, quickSave: true)) }
                 }
                 ForEach(recentDishItems) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())
-                        .onTapGesture { serving = .dish(dish) }
+                        .onTapGesture { openServing(.dish(dish)) }
                 }
             }
         }
@@ -513,7 +550,7 @@ struct AddEntryView: View {
                 ForEach(filteredDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())
-                        .onTapGesture { serving = .dish(dish) }
+                        .onTapGesture { openServing(.dish(dish)) }
                 }
             }
         }
@@ -528,7 +565,7 @@ struct AddEntryView: View {
                     ForEach(foods) { food in
                         foodRow(food)
                             .contentShape(Rectangle())
-                            .onTapGesture { serving = .food(food, savable: false, quickSave: true) }
+                            .onTapGesture { openServing(.food(food, savable: false, quickSave: true)) }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
                                 store.deleteCustomFood(food)
@@ -584,7 +621,7 @@ struct AddEntryView: View {
                         ForEach(foods) { food in
                             foodRow(food)
                                 .contentShape(Rectangle())
-                                .onTapGesture { serving = .food(food, savable: true, quickSave: true) }
+                                .onTapGesture { openServing(.food(food, savable: true, quickSave: true)) }
                         }
                     } header: {
                         Label(category.title, systemImage: category.icon)
@@ -615,7 +652,27 @@ struct AddEntryView: View {
             DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true) { item in
                 addToDraft(item)
             }
+        case .edit(let itemID):
+            if let item = draftItems.first(where: { $0.id == itemID }), let grams = item.grams, grams > 0 {
+                FoodQuantityView(food: per100g(item, grams: grams), grams: grams,
+                                 addTitle: "Готово", isPushed: true) { edited in
+                    if let index = draftItems.firstIndex(where: { $0.id == itemID }) {
+                        draftItems[index] = edited
+                    }
+                }
+            }
         }
+    }
+
+    /// Добавленный продукт обратно в «на 100 г», чтобы править вес тем же экраном
+    /// порции. Сам продукт в приёме пищи не хранится — там уже посчитанное.
+    private func per100g(_ item: MealItem, grams: Double) -> FoodItem {
+        let factor = 100 / grams
+        return FoodItem(name: item.name,
+                        caloriesPer100g: Int((Double(item.calories) * factor).rounded()),
+                        protein: item.macros.protein * factor,
+                        fat: item.macros.fat * factor,
+                        carbs: item.macros.carbs * factor)
     }
 
     /// Типы у опциональных замыканий выписаны явно: в тернарнике прямо в списке
@@ -628,6 +685,11 @@ struct AddEntryView: View {
     private func quickAction(enabled: Bool) -> ((MealItem) -> Void)? {
         guard enabled else { return nil }
         return { item in addAndSave(item) }
+    }
+
+    private func openServing(_ target: ServingTarget) {
+        searchWasFocused = searchFocused
+        serving = target
     }
 
     /// Запрос живёт ровно до попадания продукта в приём пищи: найденное уже

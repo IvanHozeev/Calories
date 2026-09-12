@@ -4486,6 +4486,7 @@
       }
     },
     "В базе продуктов ничего не найдено" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4619,6 +4620,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O fisiculturismo clássico mantém as três iguais. A atrasada costuma ser a panturrilha."
+          }
+        }
+      }
+    },
+    "В мои продукты" : {
+
+    },
+    "В мои продукты" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إلى منتجاتي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu meinen Lebensmitteln"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add to My Foods"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mis alimentos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans mes aliments"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למוצרים שלי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para meus alimentos"
           }
         }
       }

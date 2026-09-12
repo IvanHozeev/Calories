@@ -10,9 +10,6 @@ struct EntryRow: View {
     var icons: [String] = []
     /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
     var micros: [Micronutrient] = []
-    /// Время записи в подписи. На «Сегодня» оно уже стоит в заголовке секции,
-    /// и повторять его в каждой строке — шум.
-    var showsTime: Bool = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -35,15 +32,13 @@ struct EntryRow: View {
                 // Значки идут в одну строку со временем и граммовкой: это всё
                 // подписи к продукту, и разносить их по разным уровням незачем.
                 HStack(spacing: 6) {
-                    if showsTime {
-                        Text(entry.date, format: .dateTime.hour().minute())
-                    }
+                    Text(entry.date, format: .dateTime.hour().minute())
                     if let portionText {
-                        if showsTime { Text(verbatim: "·") }
+                        Text(verbatim: "·")
                         Text(verbatim: portionText)
                     }
                     if !icons.isEmpty {
-                        if showsTime || portionText != nil { Text(verbatim: "·") }
+                        Text(verbatim: "·")
                         // Больше трёх не показываем: дальше они съедают строку,
                         // а различать приёмы пищи по четвёртой иконке не выходит.
                         HStack(spacing: 4) {

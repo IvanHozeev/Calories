@@ -67,10 +67,11 @@ struct GlassRow: ViewModifier {
     }
 }
 
-/// Подложка строки продукта с меткой её ведущего макроса.
+/// Подложка строки продукта с дымкой цвета её ведущего макроса.
 ///
-/// Узкая цветная полоска у левого края и под ней едва заметная дымка того же
-/// цвета. Первая версия заливала строку градиентом, и в тёмной теме это
+/// Сама полоска живёт в `FoodRow`, а не здесь: из фона не видно, где текст,
+/// а её высота должна совпадать с блоком от названия до чипов. Здесь — только
+/// едва заметная дымка того же цвета. Первая версия заливала строку градиентом, и в тёмной теме это
 /// выглядело плохо: оранжевый поверх серого становится коричневым, а подряд
 /// идущие строки одного цвета слипаются в сплошной блок. Полоска читается при
 /// пролистывании («вот белковое, вот углеводное») и не красит текст под собой.
@@ -93,19 +94,30 @@ struct LeadingMacroRow: ViewModifier {
                 .overlay(alignment: .leading) {
                     if let kind {
                         ZStack(alignment: .leading) {
+                            // Дымка растворяется во все стороны, кроме левой: вправо —
+                            // к середине строки, вверх и вниз — не доходя до краёв
+                            // ячейки. Иначе у неё видна граница по разделителю, и
+                            // подсветка читается как закрашенная полоса, а не свечение.
                             LinearGradient(
                                 stops: [
-                                    .init(color: kind.color.opacity(colorScheme == .dark ? 0.10 : 0.06), location: 0),
-                                    .init(color: kind.color.opacity(0), location: 0.4)
+                                    .init(color: kind.color.opacity(colorScheme == .dark ? 0.16 : 0.10), location: 0),
+                                    .init(color: kind.color.opacity(0), location: 0.45)
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
-                            Capsule()
-                                .fill(kind.color)
-                                .frame(width: 3)
-                                .padding(.vertical, 12)
-                                .padding(.leading, 6)
+                            .mask(
+                                LinearGradient(
+                                    stops: [
+                                        .init(color: .clear, location: 0),
+                                        .init(color: .black, location: 0.35),
+                                        .init(color: .black, location: 0.65),
+                                        .init(color: .clear, location: 1)
+                                    ],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
                         }
                     }
                 }

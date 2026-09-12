@@ -20,6 +20,12 @@ struct FoodRow: View {
     /// Метка, а не автоматическая подстановка: «Творог мой» похож на «Творог 5%»,
     /// и приписать чужой состав молча — то же враньё, только незаметное.
     var offersVitamins: Bool = false
+    /// По чему судить о ведущем макросе, если показанная порция не сто грамм.
+    /// «Богат белком» — свойство продукта, а не порции: иначе один и тот же
+    /// творог в разных списках то подсвечен, то нет.
+    var leadingMacros: Macros? = nil
+
+    private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
 
     private var hasMacros: Bool {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
@@ -86,6 +92,17 @@ struct FoodRow: View {
                     }
                 }
             }
+            // Полоска ведущего макроса — ровно от названия до чипов: по высоте
+            // блока текста, а не всей ячейки, и чуть левее букв, в поле строки.
+            .overlay(alignment: .leading) {
+                if let leadingKind {
+                    Capsule()
+                        .fill(leadingKind.color)
+                        .frame(width: 3)
+                        .offset(x: -11)
+                        .accessibilityHidden(true)
+                }
+            }
 
             Spacer(minLength: 0)
 
@@ -99,6 +116,9 @@ struct FoodRow: View {
             }
         }
         .padding(.vertical, 4)
-        .leadingMacroRow(macros)
+        // Сработает там, где строка сама стоит в списке. Если её обернули
+        // в NavigationLink, фон строки из-под обёртки до списка не доходит —
+        // такие места вешают `.leadingMacroRow` на саму ссылку.
+        .leadingMacroRow(leadingMacros ?? macros)
     }
 }

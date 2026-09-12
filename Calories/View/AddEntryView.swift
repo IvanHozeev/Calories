@@ -54,11 +54,13 @@ struct AddEntryView: View {
     /// сеть дёргаем только когда о ней попросили, а не на каждую букву.
     @State private var wantsOnlineSearch = false
 
-    /// Что показываем на экране порции. Раньше он вставлялся в стек навигации
-    /// внутри листа — получался лист с кнопкой «назад», два разных способа
-    /// закрыть один экран. Теперь он всегда открывается поверх, одинаково
-    /// откуда бы ни зашли.
-    enum ServingTarget: Identifiable {
+    /// Что показываем на экране порции.
+    ///
+    /// Порция — деталь этого экрана, а не отдельный лист поверх него. Пока она
+    /// открывалась листом, на сохранении листы уезжали по очереди — сначала
+    /// порция, потом сам экран добавления, — и запись еды выглядела медленной.
+    /// Переходом внутри одного стека закрывать нечего, кроме самого экрана.
+    enum ServingTarget: Identifiable, Hashable {
         case food(FoodItem, savable: Bool, quickSave: Bool)
         case dish(Dish)
 
@@ -87,12 +89,19 @@ struct AddEntryView: View {
     }
 
 
+    /// Как закрыть экран после сохранения. Передаёт тот, кто его открыл:
+    /// снять лист без анимации можно только через его собственный флаг,
+    /// `dismiss()` анимирует всегда.
+    private let onFinish: (() -> Void)?
+
     init(store: CalorieStore,
          initialDate: Date = Date(),
          initialAction: QuickAction? = nil,
-         appendingTo entry: FoodEntry? = nil) {
+         appendingTo entry: FoodEntry? = nil,
+         onFinish: (() -> Void)? = nil) {
         self.store = store
         self.appendingTo = entry
+        self.onFinish = onFinish
         if let entry {
             _draftItems = State(initialValue: [
                 MealItem(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
@@ -376,8 +385,12 @@ struct AddEntryView: View {
             }
             // Чтобы последняя строка не оставалась навсегда под кнопкой.
             .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
-            .fullScreenCover(item: $serving, onDismiss: resumeSearchIfNeeded) { target in
-                NavigationStack { servingScreen(target) }
+            .navigationDestination(item: $serving) { target in
+                servingScreen(target)
+            }
+            // Возврат из порции — это и есть момент «ищем следующий продукт».
+            .onChange(of: serving) { old, new in
+                if old != nil, new == nil { resumeSearchIfNeeded() }
             }
             .sheet(isPresented: $showingPhoto) {
                 PhotoMealSheet { items in
@@ -399,7 +412,6 @@ struct AddEntryView: View {
                 // Шит закрываем первым: иначе экран уезжает из-под него и анимация
                 // схлопывается в рывок — та же история, что и с экраном порции.
                 QuickCaloriesSheet { calories in
-                    showingQuickCalories = false
                     saveQuickCalories(calories)
                 }
                 .presentationDetents([.height(260)])
@@ -594,12 +606,13 @@ struct AddEntryView: View {
             FoodQuantityView(
                 food: food,
                 onSave: saveAction(for: food, enabled: savable),
-                onAddAndSave: quickAction(enabled: quickSave)
+                onAddAndSave: quickAction(enabled: quickSave),
+                isPushed: true
             ) { item in
                 addToDraft(item)
             }
         case .dish(let dish):
-            DishQuantityView(dish: dish, onAddAndSave: addAndSave) { item in
+            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true) { item in
                 addToDraft(item)
             }
         }
@@ -630,7 +643,6 @@ struct AddEntryView: View {
     /// Экран порции закрываем первым: иначе лист уезжает из-под открытого поверх
     /// него экрана, и анимация схлопывается в рывок.
     private func addAndSave(_ item: MealItem) {
-        serving = nil
         draftItems.append(item)
         saveDraft()
     }
@@ -647,7 +659,7 @@ struct AddEntryView: View {
                       macros: draftTotalMacros, grams: grams, date: entryDate)
         }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        dismiss()
+        finish()
     }
 
     /// Приём пищи, где известно только число калорий. Черновик, если он уже набран,
@@ -659,7 +671,7 @@ struct AddEntryView: View {
         let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
         store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        dismiss()
+        finish()
     }
 
     /// Раскладывает продукты по категориям в порядке самого перечисления —
@@ -688,17 +700,32 @@ struct AddEntryView: View {
     }
 
     private func isSaved(_ food: FoodItem) -> Bool {
-        store.customFoods.contains { $0.name == food.name }
+        store.isInMyFoods(food)
     }
 
     private func saveToMyFoods(_ food: FoodItem) {
-        store.addCustomFood(
-            name: food.name,
-            caloriesPer100g: food.caloriesPer100g,
-            protein: food.protein,
-            fat: food.fat,
-            carbs: food.carbs
-        )
+        store.saveToMyFoods(food)
+    }
+
+    /// Закрывает экран после сохранения — мгновенно, без анимации.
+    ///
+    /// Экран добавления открыт поверх «Сегодня», а экран порции — поверх него.
+    /// Раньше на сохранении они уезжали по очереди: сначала порция, потом сам
+    /// лист, две анимации подряд, и запись еды выглядела медленной. Теперь
+    /// оба снимаются одной транзакцией без анимации, и человек сразу видит
+    /// «Сегодня» с уже обновлённым кольцом.
+    private func finish() {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            serving = nil
+            showingQuickCalories = false
+            if let onFinish {
+                onFinish()
+            } else {
+                dismiss()
+            }
+        }
     }
 
     private func foodRow(_ food: FoodItem) -> some View {

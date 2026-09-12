@@ -20,21 +20,6 @@ struct ContentView: View {
     @State private var showingFasting = false
     private let quickActions = QuickActionRouter.shared
 
-    /// Время приёма пищи для заголовка секции.
-    ///
-    /// Одно время, если записи легли рядом, и промежуток, если растянулись:
-    /// обед, дописанный через два часа, — это уже не «13:40», и скрывать это
-    /// за временем первой записи было бы неправдой.
-    private func mealTime(of entries: [FoodEntry]) -> String {
-        let dates = entries.map(\.date)
-        guard let first = dates.min(), let last = dates.max() else { return "" }
-        let style = Date.FormatStyle.dateTime.hour().minute()
-        if last.timeIntervalSince(first) < 15 * 60 {
-            return first.formatted(style)
-        }
-        return "\(first.formatted(style))–\(last.formatted(style))"
-    }
-
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
     /// экрана не открыл камеру во второй раз.
     private func consumeQuickAction(_ action: QuickAction?) {
@@ -228,8 +213,7 @@ struct ContentView: View {
                                 NavigationLink(value: entry) {
                                     EntryRow(entry: entry,
                                              icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
-                                             micros: store.notableMicronutrients(for: entry),
-                                             showsTime: false)
+                                             micros: store.notableMicronutrients(for: entry))
                                 }
                                 // Дополнение первым: к приёму пищи добавляют чаще,
                                 // чем копируют его целиком, а первая кнопка — та,
@@ -272,14 +256,8 @@ struct ContentView: View {
                         } header: {
                             // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
                             // во сколько обошёлся обед, приходится складывать строки глазами.
-                            // Время тоже здесь, а не в каждой строке: у приёма пищи
-                            // оно одно, и повторять его под каждым продуктом — шум.
-                            HStack(spacing: 6) {
+                            HStack {
                                 Text(LocalizedStringKey(group.period.rawValue))
-                                Text(verbatim: "·")
-                                    .foregroundStyle(.tertiary)
-                                Text(verbatim: mealTime(of: group.entries))
-                                    .monospacedDigit()
                                 Spacer()
                                 Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
                                     .monospacedDigit()
@@ -353,10 +331,12 @@ struct ContentView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
-                AddEntryView(store: store, initialAction: entryAction)
+                AddEntryView(store: store, initialAction: entryAction,
+                             onFinish: { showingAdd = false })
             }
             .fullScreenCover(item: $appendingTo) { entry in
-                AddEntryView(store: store, appendingTo: entry)
+                AddEntryView(store: store, appendingTo: entry,
+                             onFinish: { appendingTo = nil })
             }
             .sheet(isPresented: $showingAddWeight) {
                 AddWeightView(store: store)

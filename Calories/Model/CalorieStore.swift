@@ -634,6 +634,29 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Есть ли уже такой продукт среди своих. По названию: у продукта из базы
+    /// и у своей копии разные идентификаторы, а человек различает их по имени.
+    func isInMyFoods(_ food: FoodItem) -> Bool {
+        customFoods.contains { $0.name == food.name }
+    }
+
+    /// Кладёт продукт из базы в свои — целиком, с категорией, порцией
+    /// и витаминами.
+    ///
+    /// Прежняя копия переносила только калории и БЖУ: продукт из базы с
+    /// витаминами превращался в свой без единого витамина и в категории
+    /// «прочее» — то есть сохранение отнимало ровно то, ради чего его брали.
+    func saveToMyFoods(_ food: FoodItem) {
+        guard !isInMyFoods(food) else { return }
+        addCustomFood(name: food.name,
+                      caloriesPer100g: food.caloriesPer100g,
+                      protein: food.protein, fat: food.fat, carbs: food.carbs,
+                      category: food.foodCategory,
+                      defaultGrams: food.defaultGrams > 0 ? food.defaultGrams : 100,
+                      micronutrients: food.micronutrients,
+                      catalogID: food.catalogID)
+    }
+
     func deleteCustomFood(_ food: FoodItem) {
         context.delete(food)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }

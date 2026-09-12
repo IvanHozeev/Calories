@@ -13,7 +13,13 @@ struct FoodQuantityView: View {
     @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
 
-    init(food: FoodItem, onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
+    /// Открыт переходом внутри стека, а не листом. Тогда «Отмена» не нужна:
+    /// назад ведёт системная стрелка, и две кнопки закрытия спорили бы.
+    var isPushed: Bool = false
+
+    init(food: FoodItem, onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
+         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
+        self.isPushed = isPushed
         self.food = food
         self.onSave = onSave
         self.onAddAndSave = onAddAndSave
@@ -107,8 +113,10 @@ struct FoodQuantityView: View {
         .toolbar {
             // Пополнение справочника — редкое действие, поэтому оно иконкой наверху.
             // Внизу под большим пальцем то, ради чего на экран и зашли.
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Отмена") { dismiss() }
+            if !isPushed {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") { dismiss() }
+                }
             }
             // Пополнение справочника не должно закрывать экран: порцию ещё
             // не выбрали, а ради неё сюда и зашли. Кнопка просто исчезает —
@@ -189,7 +197,11 @@ struct DishQuantityView: View {
     @State private var gramsText: String
     @FocusState private var gramsFocused: Bool
 
-    init(dish: Dish, onAddAndSave: ((MealItem) -> Void)? = nil, onAdd: @escaping (MealItem) -> Void) {
+    var isPushed: Bool = false
+
+    init(dish: Dish, onAddAndSave: ((MealItem) -> Void)? = nil,
+         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
+        self.isPushed = isPushed
         self.dish = dish
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
@@ -288,8 +300,10 @@ struct DishQuantityView: View {
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Отмена") { dismiss() }
+            if !isPushed {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Отмена") { dismiss() }
+                }
             }
         }
         .safeAreaInset(edge: .bottom) {

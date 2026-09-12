@@ -72,7 +72,8 @@ struct DayDetailView: View {
             }
         }
         .fullScreenCover(isPresented: $showingAdd) {
-            AddEntryView(store: store, initialDate: date)
+            AddEntryView(store: store, initialDate: date,
+                         onFinish: { showingAdd = false })
         }
     }
 }

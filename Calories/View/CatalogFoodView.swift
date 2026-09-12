@@ -8,11 +8,14 @@ import SwiftUI
 /// не должен выглядеть по-разному в зависимости от того, чей он.
 struct CatalogFoodView: View {
     let food: FoodItem
+    /// Нужен, чтобы положить продукт в свои. Без него экран только показывает.
+    var store: CalorieStore? = nil
 
     @State private var grams: Double
 
-    init(food: FoodItem) {
+    init(food: FoodItem, store: CalorieStore? = nil) {
         self.food = food
+        self.store = store
         _grams = State(initialValue: food.defaultGrams > 0 ? food.defaultGrams : 100)
     }
 
@@ -92,6 +95,23 @@ struct CatalogFoodView: View {
         .scrollIndicators(.hidden)
         .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)
+        // Та же закладка, что на экране порции: один значок значит одно
+        // действие везде — «положить в мои продукты».
+        .toolbar {
+            if let store {
+                ToolbarItem(placement: .topBarTrailing) {
+                    let saved = store.isInMyFoods(food)
+                    Button {
+                        store.saveToMyFoods(food)
+                    } label: {
+                        Image(systemName: saved ? "bookmark.fill" : "bookmark")
+                    }
+                    .disabled(saved)
+                    .accessibilityLabel(saved ? Text("Уже в моих продуктах") : Text("В мои продукты"))
+                    .accessibilityIdentifier("saveToMyFoods")
+                }
+            }
+        }
     }
 
     private func row(_ title: LocalizedStringKey, value: String, unit: LocalizedStringKey) -> some View {

@@ -13,21 +13,34 @@ struct MyFoodView: View {
     @State private var debouncedQuery = ""
     @State private var remoteResults: [FoodItem] = []
     @State private var isSearchingRemote = false
-    @State private var quickAdd: QuickAddTarget?
+    @State private var serving: ServingTarget?
 
     enum Tab: String, CaseIterable, Identifiable {
         case dishes, products, database
         var id: String { rawValue }
     }
 
-    /// Что именно кладём в дневник. Блюда и продукты хранятся разными типами,
-    /// поэтому шит принимает уже приведённые к «на 100 г» значения.
-    struct QuickAddTarget: Identifiable {
-        let id = UUID()
-        let name: String
-        let caloriesPer100g: Int
-        let macrosPer100g: Macros
-        let defaultGrams: Double
+    /// Что записываем в дневник прямо отсюда — продукт или блюдо.
+    ///
+    /// Открывается тот же экран порции, что и в листе добавления еды. Раньше
+    /// здесь был свой лист «Добавить в дневник» с выбором приёма пищи и полем
+    /// веса — второй, непохожий способ сделать то же самое.
+    enum ServingTarget: Identifiable {
+        case food(FoodItem)
+        case dish(Dish)
+
+        var id: String {
+            switch self {
+            case .food(let food): return "food-\(food.id.uuidString)"
+            case .dish(let dish): return "dish-\(dish.id.uuidString)"
+            }
+        }
+    }
+
+    /// Есть ли что показать из внешней базы — или она ещё ищет.
+    /// Пока так, «Ничего не найдено» над её результатами было бы враньём.
+    private var remoteHasOrMayHaveResults: Bool {
+        !trimmedQuery.isEmpty && (isSearchingRemote || !remoteResults.isEmpty)
     }
 
     private var trimmedQuery: String {
@@ -114,6 +127,8 @@ struct MyFoodView: View {
         .navigationTitle("Рацион")
         .scrollIndicators(.hidden)
         .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))
+        // Клавиатура уходит протягиванием списка вниз, как в остальных списках.
+        .scrollDismissesKeyboard(.interactively)
         .task(id: query) {
             // Свои списки фильтруются мгновенно, а сеть дёргаем только после паузы.
             try? await Task.sleep(for: .milliseconds(350))
@@ -179,15 +194,22 @@ struct MyFoodView: View {
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerSheet(store: store)
         }
-        .sheet(item: $quickAdd) { target in
-            QuickAddSheet(
-                store: store,
-                name: target.name,
-                caloriesPer100g: target.caloriesPer100g,
-                macrosPer100g: target.macrosPer100g,
-                defaultGrams: target.defaultGrams
-            )
-            .presentationDetents([.medium, .large])
+        .sheet(item: $serving) { target in
+            NavigationStack {
+                switch target {
+                case .food(let food):
+                    FoodQuantityView(
+                        food: food,
+                        onSave: store.isInMyFoods(food) ? nil : { store.saveToMyFoods(food) }
+                    ) { item in
+                        record(item)
+                    }
+                case .dish(let dish):
+                    DishQuantityView(dish: dish) { item in
+                        record(item)
+                    }
+                }
+            }
         }
     }
 
@@ -217,9 +239,11 @@ struct MyFoodView: View {
                                 portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                                 macros: dish.totalMacros,
                                 detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                                icons: store.foodCategories(of: dish).map(\.icon)
+                                icons: store.foodCategories(of: dish).map(\.icon),
+                                leadingMacros: dish.macrosPer100g
                             )
                         }
+                        .leadingMacroRow(dish.macrosPer100g)
                     }
                 }
             }
@@ -236,6 +260,7 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
+                        .leadingMacroRow(food.macrosPer100g)
                     }
                 }
             }
@@ -247,10 +272,12 @@ struct MyFoodView: View {
     @ViewBuilder
     private func dishesSection(_ filteredDishes: [Dish]) -> some View {
         if filteredDishes.isEmpty {
+            if trimmedQuery.isEmpty || !remoteHasOrMayHaveResults {
             Section {
                 Text(trimmedQuery.isEmpty ? "Пока нет своих блюд" : "Ничего не найдено")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
             }
         } else {
             Section {
@@ -264,18 +291,13 @@ struct MyFoodView: View {
                             portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                             macros: dish.totalMacros,
                             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                            icons: store.foodCategories(of: dish).map(\.icon)
+                            icons: store.foodCategories(of: dish).map(\.icon),
+                            leadingMacros: dish.macrosPer100g
                         )
                     }
+                    .leadingMacroRow(dish.macrosPer100g)
                     .swipeActions(edge: .leading) {
-                        quickAddButton {
-                            QuickAddTarget(
-                                name: dish.name,
-                                caloriesPer100g: dish.caloriesPer100g,
-                                macrosPer100g: dish.macrosPer100g,
-                                defaultGrams: dish.totalGrams > 0 ? dish.totalGrams : 100
-                            )
-                        }
+                        recordButton { serving = .dish(dish) }
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
@@ -296,10 +318,12 @@ struct MyFoodView: View {
     @ViewBuilder
     private func databaseSection(_ filteredDatabase: [FoodItem]) -> some View {
         if filteredDatabase.isEmpty {
-            Section {
-                Text("Ничего не найдено")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            if !remoteHasOrMayHaveResults {
+                Section {
+                    Text("Ничего не найдено")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
         } else {
             ForEach(grouped(filteredDatabase), id: \.0) { category, foods in
@@ -309,12 +333,14 @@ struct MyFoodView: View {
                         // бандле, — поэтому экран только показывает. Структура
                         // у него та же, что у своего продукта.
                         NavigationLink {
-                            CatalogFoodView(food: food)
+                            CatalogFoodView(food: food, store: store)
                         } label: {
                             foodRow(food)
                         }
+                        .leadingMacroRow(food.macrosPer100g)
                         .swipeActions(edge: .leading) {
-                            quickAddButton { target(for: food) }
+                            recordButton { serving = .food(food) }
+                            saveToMyFoodsButton(food)
                         }
                     }
                 } header: {
@@ -337,10 +363,12 @@ struct MyFoodView: View {
     @ViewBuilder
     private func productsSection(_ filteredProducts: [FoodItem]) -> some View {
         if filteredProducts.isEmpty {
+            if trimmedQuery.isEmpty || !remoteHasOrMayHaveResults {
             Section {
                 Text(trimmedQuery.isEmpty ? "Пока нет своих продуктов" : "Ничего не найдено")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
             }
         } else {
             // Свои продукты разложены так же, как база: список копится и без
@@ -356,8 +384,9 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
+                        .leadingMacroRow(food.macrosPer100g)
                         .swipeActions(edge: .leading) {
-                            quickAddButton { target(for: food) }
+                            recordButton { serving = .food(food) }
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
@@ -378,35 +407,35 @@ struct MyFoodView: View {
 
     @ViewBuilder
     private var remoteSection: some View {
-        Section {
-            if isSearchingRemote {
-                HStack(spacing: 8) {
-                    ProgressView()
-                    Text("Ищем…")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            } else if remoteResults.isEmpty {
-                Text("В базе продуктов ничего не найдено")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            } else {
-                ForEach(remoteResults) { food in
-                    Button {
-                        quickAdd = target(for: food)
-                    } label: {
-                        HStack {
+        if isSearchingRemote || !remoteResults.isEmpty {
+            Section {
+                if isSearchingRemote && remoteResults.isEmpty {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                        Text("Ищем…")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    // Строка как в базе: тап открывает тот же экран продукта,
+                    // свайп — записать или положить в свои. Отдельный синий плюс
+                    // в строке был единственной такой кнопкой во всём приложении.
+                    ForEach(remoteResults) { food in
+                        NavigationLink {
+                            CatalogFoodView(food: food, store: store)
+                        } label: {
                             foodRow(food)
-                            Spacer()
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(.blue)
+                        }
+                        .leadingMacroRow(food.macrosPer100g)
+                        .swipeActions(edge: .leading) {
+                            recordButton { serving = .food(food) }
+                            saveToMyFoodsButton(food)
                         }
                     }
-                    .buttonStyle(.plain)
                 }
+            } header: {
+                Text("Открытая база продуктов")
             }
-        } header: {
-            Text("Открытая база продуктов")
         }
     }
 
@@ -422,25 +451,36 @@ struct MyFoodView: View {
             macros: food.macrosPer100g.scaled(by: grams),
             icons: [food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
-            offersVitamins: store.foodsOfferedVitamins.contains(food.id)
+            offersVitamins: store.foodsOfferedVitamins.contains(food.id),
+            leadingMacros: food.macrosPer100g
         )
     }
 
-    private func target(for food: FoodItem) -> QuickAddTarget {
-        QuickAddTarget(
-            name: food.name,
-            caloriesPer100g: food.caloriesPer100g,
-            macrosPer100g: food.macrosPer100g,
-            defaultGrams: food.defaultGrams > 0 ? food.defaultGrams : 100
-        )
-    }
-
-    private func quickAddButton(_ make: @escaping () -> QuickAddTarget) -> some View {
-        Button {
-            quickAdd = make()
-        } label: {
-            Image(systemName: "plus.circle.fill")
+    /// Записать в дневник: открывает экран порции.
+    private func recordButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "fork.knife")
         }
         .tint(.blue)
+        .accessibilityLabel("В приём пищи")
+    }
+
+    /// Положить продукт из базы в свои — одним свайпом, не открывая его.
+    @ViewBuilder
+    private func saveToMyFoodsButton(_ food: FoodItem) -> some View {
+        if !store.isInMyFoods(food) {
+            Button {
+                store.saveToMyFoods(food)
+            } label: {
+                Image(systemName: "bookmark")
+            }
+            .tint(.indigo)
+            .accessibilityLabel("В мои продукты")
+        }
+    }
+
+    /// Запись с экрана порции прямо в дневник.
+    private func record(_ item: MealItem) {
+        store.add(name: item.name, calories: item.calories, macros: item.macros, grams: item.grams)
     }
 }

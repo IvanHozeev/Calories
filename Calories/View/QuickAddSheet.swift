@@ -63,13 +63,6 @@ struct QuickAddSheet: View {
                         Text("г")
                             .foregroundStyle(.secondary)
                     }
-                    HStack(spacing: 8) {
-                        ForEach([50, 100, 150, 200], id: \.self) { preset in
-                            Button("\(preset)") { gramsText = "\(preset)" }
-                                .buttonStyle(.bordered)
-                                .font(.footnote)
-                        }
-                    }
                 }
 
                 Section("Будет записано") {

@@ -243,7 +243,6 @@ struct MyFoodView: View {
                                 leadingMacros: dish.macrosPer100g
                             )
                         }
-                        .leadingMacroRow(dish.macrosPer100g)
                     }
                 }
             }
@@ -260,7 +259,6 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
-                        .leadingMacroRow(food.macrosPer100g)
                     }
                 }
             }
@@ -295,7 +293,6 @@ struct MyFoodView: View {
                             leadingMacros: dish.macrosPer100g
                         )
                     }
-                    .leadingMacroRow(dish.macrosPer100g)
                     .swipeActions(edge: .leading) {
                         recordButton { serving = .dish(dish) }
                     }
@@ -337,7 +334,6 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
-                        .leadingMacroRow(food.macrosPer100g)
                         .swipeActions(edge: .leading) {
                             recordButton { serving = .food(food) }
                             saveToMyFoodsButton(food)
@@ -384,7 +380,6 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
-                        .leadingMacroRow(food.macrosPer100g)
                         .swipeActions(edge: .leading) {
                             recordButton { serving = .food(food) }
                         }
@@ -426,7 +421,6 @@ struct MyFoodView: View {
                         } label: {
                             foodRow(food)
                         }
-                        .leadingMacroRow(food.macrosPer100g)
                         .swipeActions(edge: .leading) {
                             recordButton { serving = .food(food) }
                             saveToMyFoodsButton(food)

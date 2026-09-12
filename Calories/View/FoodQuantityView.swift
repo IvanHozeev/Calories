@@ -80,20 +80,6 @@ struct FoodQuantityView: View {
                             }
                         }
                 }
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
-                            Button("\(value) г") {
-                                grams = Double(value)
-                                gramsText = "\(value)"
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
         }
         .glassRow()
@@ -142,15 +128,16 @@ struct FoodQuantityView: View {
         // содержимому под ними застревать.
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {
+                Spacer(minLength: 0)
                 Button {
                     onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
                     dismiss()
                 } label: {
-                    // Растягивается подпись внутри кнопки, а не сама кнопка:
-                    // иначе её фон занимает всю строку и съедает соседнюю.
+                    // По размеру подписи, а не во всю ширину: широкая плашка
+                    // спорила с соседней кнопкой и выглядела тяжело.
                     Text("В приём пищи")
                         .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 6)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
@@ -161,9 +148,9 @@ struct FoodQuantityView: View {
                     Button {
                         onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
                     } label: {
-                        Image(systemName: "checkmark")
+                        Text("Сохранить")
                             .fontWeight(.semibold)
-                            .frame(width: 24)
+                            .padding(.horizontal, 6)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
@@ -171,6 +158,7 @@ struct FoodQuantityView: View {
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -256,20 +244,6 @@ struct DishQuantityView: View {
                             }
                         }
                 }
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach([50, 100, 150, 200, 350, 500], id: \.self) { value in
-                            Button("\(value) г") {
-                                grams = Double(value)
-                                gramsText = "\(value)"
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                    .padding(.vertical, 2)
-                }
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
 
             if !dish.ingredients.isEmpty {
@@ -308,13 +282,14 @@ struct DishQuantityView: View {
         }
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {
+                Spacer(minLength: 0)
                 Button {
                     onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
                     dismiss()
                 } label: {
                     Text("В приём пищи")
                         .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 6)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
@@ -324,9 +299,9 @@ struct DishQuantityView: View {
                     Button {
                         onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
                     } label: {
-                        Image(systemName: "checkmark")
+                        Text("Сохранить")
                             .fontWeight(.semibold)
-                            .frame(width: 24)
+                            .padding(.horizontal, 6)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
@@ -334,6 +309,7 @@ struct DishQuantityView: View {
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)

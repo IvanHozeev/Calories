@@ -67,73 +67,10 @@ struct GlassRow: ViewModifier {
     }
 }
 
-/// Подложка строки продукта с дымкой цвета её ведущего макроса.
-///
-/// Сама полоска живёт в `FoodRow`, а не здесь: из фона не видно, где текст,
-/// а её высота должна совпадать с блоком от названия до чипов. Здесь — только
-/// едва заметная дымка того же цвета. Первая версия заливала строку градиентом, и в тёмной теме это
-/// выглядело плохо: оранжевый поверх серого становится коричневым, а подряд
-/// идущие строки одного цвета слипаются в сплошной блок. Полоска читается при
-/// пролистывании («вот белковое, вот углеводное») и не красит текст под собой.
-///
-/// Только для строк выбора — продуктов и блюд. Записи дневника не красятся:
-/// приём пищи почти всегда смешанный, и в цвете оказались бы случайные строки.
-struct LeadingMacroRow: ViewModifier {
-    let kind: MacroKind?
-    @Environment(\.colorScheme) private var colorScheme
-
-    private var base: Color {
-        colorScheme == .dark ? .white.opacity(0.08) : .white.opacity(0.92)
-    }
-
-    func body(content: Content) -> some View {
-        content.listRowBackground(
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .overlay(Rectangle().fill(base))
-                .overlay(alignment: .leading) {
-                    if let kind {
-                        ZStack(alignment: .leading) {
-                            // Дымка растворяется во все стороны, кроме левой: вправо —
-                            // к середине строки, вверх и вниз — не доходя до краёв
-                            // ячейки. Иначе у неё видна граница по разделителю, и
-                            // подсветка читается как закрашенная полоса, а не свечение.
-                            LinearGradient(
-                                stops: [
-                                    .init(color: kind.color.opacity(colorScheme == .dark ? 0.16 : 0.10), location: 0),
-                                    .init(color: kind.color.opacity(0), location: 0.45)
-                                ],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                            .mask(
-                                LinearGradient(
-                                    stops: [
-                                        .init(color: .clear, location: 0),
-                                        .init(color: .black, location: 0.35),
-                                        .init(color: .black, location: 0.65),
-                                        .init(color: .clear, location: 1)
-                                    ],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                        }
-                    }
-                }
-        )
-    }
-}
-
 extension View {
     /// Строки секции на матовом стекле — как карточки на «Сегодня».
     func glassRow() -> some View {
         modifier(GlassRow())
-    }
-
-    /// Строка продукта в цвете его ведущего макроса.
-    func leadingMacroRow(_ macros: Macros) -> some View {
-        modifier(LeadingMacroRow(kind: macros.leadingKind))
     }
 }
 

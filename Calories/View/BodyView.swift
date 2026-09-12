@@ -73,7 +73,9 @@ struct BodyView: View {
         _proteinLeanTenths = State(initialValue: max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded())))
         _proteinLeanIsSet = State(initialValue: pLean != nil)
         let fKg = profile?.fatPerKg ?? MacroTargets.fatPerKg
-        _fatTenths = State(initialValue: max(4, Int((fKg * 10).rounded())))
+        _fatTenths = State(initialValue: min(max(Int((fKg * 10).rounded()),
+                                                 Int(MacroTargets.fatFloorPerKg * 10)),
+                                             Int(MacroTargets.fatCeilingPerKg * 10)))
     }
     
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
@@ -102,6 +104,18 @@ struct BodyView: View {
 
     private var activeProteinTenths: Int {
         proteinBasis == .leanMass ? proteinLeanTenths : proteinTenths
+    }
+
+    /// Что сказать, если жир вне рабочего коридора.
+    private var fatWarning: String? {
+        let perKg = Double(fatTenths) / 10
+        if perKg < MacroTargets.fatComfortRange.lowerBound {
+            return String(localized: "У нижней границы. Держать так можно недолго — в пике сушки, а не всю фазу.")
+        }
+        if perKg > MacroTargets.fatComfortRange.upperBound {
+            return String(localized: "Много: каждый лишний грамм жира — это два с лишним грамма углеводов, которых не будет на тренировке.")
+        }
+        return nil
     }
 
     private var proteinFooter: LocalizedStringKey {
@@ -369,7 +383,10 @@ struct BodyView: View {
                 }
                 if showFatPicker {
                     Picker("Жир", selection: $fatTenths) {
-                        ForEach(4...20, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+                        // Колесо ограничено жёсткими границами: за ними не бывает
+                        // осознанного выбора, только промах пальцем.
+                        ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),
+                                id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
                     }
                     .pickerStyle(.wheel)
                     .frame(height: 160)
@@ -383,10 +400,16 @@ struct BodyView: View {
                             .font(.body.weight(.semibold))
                     }
                 }
+                // Вне рабочего коридора число разрешено, но о нём сказано вслух.
+                if let warning = fatWarning {
+                    Label(warning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
             } header: {
                 Text("Норма жира")
             } footer: {
-                Text("Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу.")
+                Text("Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки.")
             }
 
             if let draftProfile, store.dailyGoal > 0 {

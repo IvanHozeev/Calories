@@ -99,5 +99,6 @@ struct FoodRow: View {
             }
         }
         .padding(.vertical, 4)
+        .leadingMacroRow(macros)
     }
 }

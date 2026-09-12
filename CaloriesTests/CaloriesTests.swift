@@ -7,6 +7,59 @@ import SwiftData
 // MARK: - Macros
 
 struct MacrosTests {
+    // MARK: - Ведущий макрос
+
+    @Test func chickenBreastLeadsWithProtein() {
+        #expect(Macros(protein: 31, fat: 3.6, carbs: 0).leadingKind == .protein)
+    }
+
+    @Test func riceLeadsWithCarbs() {
+        #expect(Macros(protein: 2.7, fat: 0.3, carbs: 28).leadingKind == .carbs)
+    }
+
+    @Test func leadershipIsCountedInCaloriesNotGrams() {
+        // Яйцо: белка в граммах больше, чем жира, но жир даёт почти вдвое
+        // больше калорий. Продукт жировой, и красить его в белковый цвет — врать.
+        #expect(Macros(protein: 13, fat: 11, carbs: 1.1).leadingKind == .fat)
+    }
+
+    @Test func aMixedFoodHasNoLeader() {
+        // Ни один макрос не даёт больше половины калорий.
+        #expect(Macros(protein: 20, fat: 9, carbs: 20).leadingKind == nil)
+    }
+
+    @Test func aTraceOfOneMacroDoesNotMakeAFoodRichInIt() {
+        // Огурец почти весь из углеводов по калориям, но их там три грамма.
+        #expect(Macros(protein: 0.7, fat: 0.1, carbs: 3.6).leadingKind == nil)
+    }
+
+    @Test func nothingHasNoLeader() {
+        #expect(Macros.zero.leadingKind == nil)
+    }
+
+    // MARK: - Границы жира
+
+    @Test func fatBelowTheFloorIsRaisedToIt() {
+        var profile = UserProfile(weightKg: 80, heightCm: 180, age: 30, sex: .male,
+                                  activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0)
+        profile.fatPerKg = 0.3
+        #expect(profile.fatPerKg == MacroTargets.fatFloorPerKg)
+    }
+
+    @Test func fatAboveTheCeilingIsCappedAtIt() {
+        var profile = UserProfile(weightKg: 80, heightCm: 180, age: 30, sex: .male,
+                                  activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0)
+        profile.fatPerKg = 2.0
+        #expect(profile.fatPerKg == MacroTargets.fatCeilingPerKg)
+    }
+
+    @Test func aValueInsideTheBoundsIsKeptAsIs() {
+        var profile = UserProfile(weightKg: 80, heightCm: 180, age: 30, sex: .male,
+                                  activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0)
+        profile.fatPerKg = 0.9
+        #expect(abs(profile.fatPerKg - 0.9) < 0.0001)
+    }
+
 
     @Test func addition() {
         let a = Macros(protein: 10, fat: 5, carbs: 20)

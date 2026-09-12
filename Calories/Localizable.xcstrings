@@ -18982,6 +18982,53 @@
         }
       }
     },
+    "Много: каждый лишний грамм жира — это два с лишним грамма углеводов, которых не будет на тренировке." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كثير: كل غرام دهون زائد يعني أكثر من غرامين من الكربوهيدرات لن تكون متاحة في التمرين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viel: Jedes zusätzliche Gramm Fett sind über zwei Gramm Kohlenhydrate, die beim Training fehlen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A lot: every extra gram of fat is over two grams of carbs that won't be there for training."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mucho: cada gramo extra de grasa son más de dos gramos de carbohidratos que faltarán en el entrenamiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beaucoup : chaque gramme de gras en trop, ce sont plus de deux grammes de glucides absents à l'entraînement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרבה: כל גרם שומן עודף הוא יותר משני גרם פחמימות שלא יהיו באימון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muito: cada grama extra de gordura são mais de dois gramas de carboidrato a menos no treino."
+          }
+        }
+      }
+    },
     "Можно взять витамины из базы" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23520,52 +23567,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comida comum. Não um banquete gorduroso e salgado logo de cara — o abatimento depois do jejum vem mais dele do que do jejum."
-          }
-        }
-      }
-    },
-    "Обычно 0.8 г на кг веса. Ниже 0.5 это уже не диета, а ставка на гормоны — жир нужен телу постоянно, а не по остаточному принципу." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عادةً 0.8 غ لكل كجم من الوزن. أقل من 0.5 لم يعد حمية بل مقامرة بالهرمونات — الجسم يحتاج الدهون باستمرار، لا كفائض."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Üblich sind 0,8 g pro kg Gewicht. Unter 0,5 ist das keine Diät mehr, sondern eine Wette auf die Hormone — Fett braucht der Körper ständig, nicht als Rest."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usually 0.8 g per kg of bodyweight. Below 0.5 this stops being a diet and becomes a bet on your hormones — the body needs fat constantly, not as whatever is left over."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Normalmente 0,8 g por kg de peso. Por debajo de 0,5 deja de ser una dieta y pasa a ser una apuesta con tus hormonas: el cuerpo necesita grasa siempre, no como sobrante."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Généralement 0,8 g par kg de poids. En dessous de 0,5, ce n'est plus un régime mais un pari sur tes hormones — le corps a besoin de lipides en permanence, pas comme reliquat."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בדרך כלל 0.8 גרם לקילוגרם משקל. מתחת ל-0.5 זו כבר לא דיאטה אלא הימור על ההורמונים — הגוף זקוק לשומן כל הזמן, לא כשארית."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Normalmente 0,8 g por kg de peso. Abaixo de 0,5 deixa de ser dieta e vira uma aposta com seus hormônios — o corpo precisa de gordura o tempo todo, não como sobra."
           }
         }
       }
@@ -32161,6 +32162,53 @@
         }
       }
     },
+    "Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النطاق العملي 0.6–1.2 غ لكل كغ من الوزن، وعادةً 0.8. لا يمكن ضبط أقل من 0.5 أو أكثر من 1.5: الأقل مجازفة بالهرمونات، والأكثر يزاحم فيه الدهن الكربوهيدرات التي يعتمد عليها التمرين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Arbeitsbereich liegt bei 0,6–1,2 g pro kg Körpergewicht, meist 0,8. Unter 0,5 und über 1,5 lässt sich nichts einstellen: darunter riskiert man die Hormone, darüber verdrängt Fett die Kohlenhydrate fürs Training."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The working range is 0.6–1.2 g per kg of body weight, usually 0.8. Below 0.5 or above 1.5 can't be set: lower is a gamble with hormones, higher and fat crowds out the carbs training runs on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El rango de trabajo es 0,6–1,2 g por kg de peso, normalmente 0,8. No se puede poner menos de 0,5 ni más de 1,5: por debajo se arriesgan las hormonas, por encima la grasa desplaza los carbohidratos del entrenamiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La plage de travail est de 0,6 à 1,2 g par kg de poids, en général 0,8. Impossible de régler moins de 0,5 ou plus de 1,5 : en dessous on joue avec les hormones, au-dessus le gras chasse les glucides de l'entraînement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הטווח העבודה הוא 0.6–1.2 גרם לק\"ג משקל, בדרך כלל 0.8. אי אפשר לקבוע פחות מ־0.5 או יותר מ־1.5: מתחת זה הימור על ההורמונים, מעל השומן דוחק את הפחמימות שהאימון רץ עליהן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A faixa de trabalho é 0,6–1,2 g por kg de peso, normalmente 0,8. Não é possível definir menos de 0,5 nem mais de 1,5: abaixo é apostar com os hormônios, acima a gordura desloca os carboidratos do treino."
+          }
+        }
+      }
+    },
     "Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним." : {
       "localizations" : {
         "ar" : {
@@ -39305,6 +39353,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "C"
+          }
+        }
+      }
+    },
+    "У нижней границы. Держать так можно недолго — в пике сушки, а не всю фазу." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قريب من الحد الأدنى. مقبول لفترة قصيرة — في ذروة التنشيف، لا طوال المرحلة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nahe der Untergrenze. Nur kurz vertretbar — auf dem Höhepunkt des Cuts, nicht die ganze Phase."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Near the floor. Fine for a short while — at the peak of a cut, not for a whole phase."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca del mínimo. Sirve por poco tiempo: en el pico de la definición, no toda la fase."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proche du plancher. Tenable peu de temps — au pic de la sèche, pas toute la phase."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קרוב לרצפה. אפשר לזמן קצר — בשיא החיטוב, לא לכל השלב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perto do mínimo. Serve por pouco tempo — no pico da definição, não a fase toda."
           }
         }
       }

@@ -24,11 +24,45 @@ struct Macros: Codable, Hashable {
             carbs: carbs * grams / 100
         )
     }
+
+    /// Макрос, которым продукт богат, — если такой есть.
+    ///
+    /// Считается по доле калорий, а не граммов: 31 г жира и 58 г углеводов на
+    /// граммах выглядят сопоставимо, хотя жир даёт вдвое больше энергии. Порог —
+    /// больше половины калорий: ниже продукт смешанный, и красить его в чей-то
+    /// цвет значит соврать.
+    ///
+    /// И второе условие — самого макроса должно быть хотя бы пять граммов. Иначе
+    /// огурец выходит «углеводным»: девять десятых его шестнадцати калорий и
+    /// правда углеводы, но богатым ими его не назовёшь.
+    var leadingKind: MacroKind? {
+        let kcal = [
+            (MacroKind.protein, protein * MacroTargets.kcalPerProteinGram, protein),
+            (MacroKind.fat, fat * MacroTargets.kcalPerFatGram, fat),
+            (MacroKind.carbs, carbs * MacroTargets.kcalPerCarbGram, carbs)
+        ]
+        let total = kcal.reduce(0) { $0 + $1.1 }
+        guard total > 0, let top = kcal.max(by: { $0.1 < $1.1 }) else { return nil }
+        guard top.1 / total > Self.leadingShare, top.2 >= Self.leadingMinimumGrams else { return nil }
+        return top.0
+    }
+
+    static let leadingShare = 0.5
+    static let leadingMinimumGrams = 5.0
 }
 
 /// Единая точка для всех констант макронутриентов — расчётов и UI.
 enum MacroTargets {
     static let fatPerKg: Double = 0.8
+    /// Ниже — уже не диета, а ставка на гормоны. Жёсткая граница: меньше
+    /// выставить нельзя.
+    static let fatFloorPerKg: Double = 0.5
+    /// Выше — жир вытесняет углеводы, а на них работают тренировки. Тоже
+    /// жёсткая: для этой аудитории больше полутора граммов на кило не бывает
+    /// осознанным выбором.
+    static let fatCeilingPerKg: Double = 1.5
+    /// Рабочий коридор. Вне его число не запрещено, но о нём говорится вслух.
+    static let fatComfortRange: ClosedRange<Double> = 0.6...1.2
     static let carbsMinimum: Double = 130
     static let kcalPerProteinGram: Double = 4
     static let kcalPerFatGram: Double = 9
@@ -46,6 +80,15 @@ enum MacroKind: String, Identifiable {
         case .protein: return String(localized: "Белки")
         case .fat: return String(localized: "Жиры")
         case .carbs: return String(localized: "Углеводы")
+        }
+    }
+
+    /// Те же цвета, что у тегов и полосы БЖУ по всему приложению.
+    var color: Color {
+        switch self {
+        case .protein: return .blue
+        case .fat: return .orange
+        case .carbs: return .purple
         }
     }
 }
@@ -382,9 +425,16 @@ struct UserProfile: Codable, Equatable {
         set { storedProteinPerLeanKg = newValue }
     }
 
+    /// Всегда в пределах жёстких границ. Сохранённое раньше 0.4 — колесо
+    /// начиналось с него — читается как нижняя граница, а не как есть.
     var fatPerKg: Double {
-        get { storedFatPerKg ?? MacroTargets.fatPerKg }
-        set { storedFatPerKg = newValue }
+        get {
+            min(max(storedFatPerKg ?? MacroTargets.fatPerKg, MacroTargets.fatFloorPerKg),
+                MacroTargets.fatCeilingPerKg)
+        }
+        set {
+            storedFatPerKg = min(max(newValue, MacroTargets.fatFloorPerKg), MacroTargets.fatCeilingPerKg)
+        }
     }
 
     /// Целевой жир в граммах. Считается только от общего веса: гормонам нужен

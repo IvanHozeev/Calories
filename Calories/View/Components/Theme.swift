@@ -67,10 +67,61 @@ struct GlassRow: ViewModifier {
     }
 }
 
+/// Подложка строки продукта с меткой её ведущего макроса.
+///
+/// Узкая цветная полоска у левого края и под ней едва заметная дымка того же
+/// цвета. Первая версия заливала строку градиентом, и в тёмной теме это
+/// выглядело плохо: оранжевый поверх серого становится коричневым, а подряд
+/// идущие строки одного цвета слипаются в сплошной блок. Полоска читается при
+/// пролистывании («вот белковое, вот углеводное») и не красит текст под собой.
+///
+/// Только для строк выбора — продуктов и блюд. Записи дневника не красятся:
+/// приём пищи почти всегда смешанный, и в цвете оказались бы случайные строки.
+struct LeadingMacroRow: ViewModifier {
+    let kind: MacroKind?
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var base: Color {
+        colorScheme == .dark ? .white.opacity(0.08) : .white.opacity(0.92)
+    }
+
+    func body(content: Content) -> some View {
+        content.listRowBackground(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .overlay(Rectangle().fill(base))
+                .overlay(alignment: .leading) {
+                    if let kind {
+                        ZStack(alignment: .leading) {
+                            LinearGradient(
+                                stops: [
+                                    .init(color: kind.color.opacity(colorScheme == .dark ? 0.10 : 0.06), location: 0),
+                                    .init(color: kind.color.opacity(0), location: 0.4)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            Capsule()
+                                .fill(kind.color)
+                                .frame(width: 3)
+                                .padding(.vertical, 12)
+                                .padding(.leading, 6)
+                        }
+                    }
+                }
+        )
+    }
+}
+
 extension View {
     /// Строки секции на матовом стекле — как карточки на «Сегодня».
     func glassRow() -> some View {
         modifier(GlassRow())
+    }
+
+    /// Строка продукта в цвете его ведущего макроса.
+    func leadingMacroRow(_ macros: Macros) -> some View {
+        modifier(LeadingMacroRow(kind: macros.leadingKind))
     }
 }
 

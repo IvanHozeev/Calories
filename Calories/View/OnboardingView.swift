@@ -382,7 +382,7 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             Spacer()
             VStack(spacing: 24) {
-                Text("Твоё кольцо")
+                Text("Готов?")
                     .font(.system(size: 30, weight: .bold, design: .rounded))
 
                 // Кольцо с «Сегодня», заполненное нормой: сразу видно, на что

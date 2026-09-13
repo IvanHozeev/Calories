@@ -21,6 +21,29 @@ struct PlanPhaseEditorView: View {
     }
 
     var body: some View {
+        if phase.isDietBreak {
+            dietBreakForm
+        } else {
+            phaseForm
+        }
+    }
+
+    /// Брейк — это не фаза с выбором цели и темпа: он всегда поддержание.
+    /// Настраивать в нём можно только длину.
+    private var dietBreakForm: some View {
+        Form {
+            Section {
+                Stepper("Недель: \(phase.durationWeeks)", value: $phase.durationWeeks, in: 1...2)
+            } footer: {
+                Text("Неделя-две на поддержании посреди дефицита. Убрать брейк — смахни его в списке фаз.")
+            }
+        }
+        .glassRow()
+        .navigationTitle(phase.title)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var phaseForm: some View {
         Form {
             Section {
                 Picker("Зачем", selection: $phase.intent) {

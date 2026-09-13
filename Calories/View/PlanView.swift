@@ -350,37 +350,46 @@ struct PlanView: View {
     }
 
     /// Диет-брейк: идёт ли он, когда следующий и кнопка поставить его руками.
+    ///
+    /// Даты справа коротко, «пн, 14 сент.», и без предлогов: «с понедельник,
+    /// 14 сентября» склонять форматтер не умеет, а подпись слева и так говорит,
+    /// что это за дата.
     @ViewBuilder
     private func dietBreakSection(_ plan: Plan) -> some View {
         let today = Date()
-        let dateStyle = Date.FormatStyle.dateTime.weekday(.wide).day().month(.wide)
+        let short = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
         Section {
             if plan.isDietBreak(on: today) {
                 let end = plan.firstNonBreakDay(from: today)
-                resultRow("Идёт диет-брейк", String(format: String(localized: "до %@"),
-                                                   end.formatted(.dateTime.day().month(.wide))))
+                breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: .green,
+                         detail: "Дефицит вернётся", date: end.formatted(short))
             } else if plan.pendingManualDietBreak(on: today) != nil,
                       let start = plan.nextDietBreakStart(after: today) {
-                resultRow("Брейк", String(format: String(localized: "с %@"), start.formatted(dateStyle)))
+                breakRow("Брейк запланирован", icon: "cup.and.saucer", tint: .green,
+                         detail: "Начнётся", date: start.formatted(short))
                 Button("Убрать брейк", role: .destructive) {
                     store.cancelPendingDietBreak()
                 }
                 .accessibilityIdentifier("cancelDietBreak")
             } else {
                 if let next = plan.nextDietBreakStart(after: today) {
-                    resultRow("Следующий по плану", next.formatted(dateStyle))
+                    breakRow("Следующий по плану", icon: "calendar", tint: .secondary,
+                             detail: nil, date: next.formatted(short))
                 }
                 if plan.canStartDietBreak(from: today) {
                     let start = plan.startDate(ofWeek: plan.dietBreakStartWeek(from: today))
                     Menu {
-                        Button("На 1 неделю") { store.startDietBreak(weeks: 1) }
-                        Button("На 2 недели") { store.startDietBreak(weeks: 2) }
+                        Section(String(format: String(localized: "Начнётся %@"), start.formatted(short))) {
+                            Button("На 1 неделю") { store.startDietBreak(weeks: 1) }
+                            Button("На 2 недели") { store.startDietBreak(weeks: 2) }
+                        }
                     } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Label("Диет-брейк", systemImage: "cup.and.saucer")
-                            Text(String(format: String(localized: "с %@"), start.formatted(dateStyle)))
-                                .font(.caption)
+                        HStack {
+                            Label("Взять брейк", systemImage: "plus.circle.fill")
+                            Spacer()
+                            Text(start.formatted(short))
                                 .foregroundStyle(.secondary)
+                                .monospacedDigit()
                         }
                     }
                     .accessibilityIdentifier("startDietBreak")
@@ -390,6 +399,27 @@ struct PlanView: View {
             Text("Диет-брейк")
         } footer: {
             Text("Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется.")
+        }
+    }
+
+    private func breakRow(_ title: LocalizedStringKey, icon: String, tint: Color,
+                          detail: LocalizedStringKey?, date: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(tint)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                if let detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Text(date)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
         }
     }
 
@@ -464,6 +494,20 @@ struct PlanView: View {
         Section {
             PlanProgressChart(plan: plan, entries: store.weightEntries)
 
+            // Во время брейка вес о плане не говорит: калории подняли, вернулись
+            // вода и гликоген. Сравнение с ожидаемым, отклонение, прогноз финиша
+            // и советы «замедлить/ускорить» здесь врали бы — а совет ещё и
+            // переписал бы норму под неделю поддержания. Оставляем только тренд.
+            if plan.isDietBreak(on: Date()) {
+                Label("Идёт диет-брейк. Плюс на весах сейчас — вода и гликоген, а не жир; план по весу оценим, когда вернётся дефицит.",
+                      systemImage: "cup.and.saucer.fill")
+                    .font(.caption)
+                    .foregroundStyle(.green)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let actual = adherence.actualWeightToday {
+                    resultRow("Фактический вес (тренд)", String(format: "%.1f \(String(localized: "кг"))", actual))
+                }
+            } else {
             statusRow(adherence.status)
 
             // Пока вес устаканивается после подъёма калорий, об этом надо
@@ -514,6 +558,7 @@ struct PlanView: View {
                 } else {
                     behindOrOnTrackActions(plan: plan, adherence: adherence)
                 }
+            }
             }
         } header: {
             Text("Как идёт план")

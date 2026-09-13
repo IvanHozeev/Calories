@@ -50,48 +50,48 @@
         }
       }
     },
-    "Без брейков" : {
+    "«Вручную» — брейк берёшь сам, когда нужен, на экране плана. «4 : 1» — неделя поддержания после каждых четырёх недель дефицита, приложение ставит её само; взять внеплановый брейк можно и так. Срок фазы — недели дефицита, брейки добавляются к нему." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "بدون استراحات"
+            "value" : "«يدويًا» — تأخذ الاستراحة بنفسك عند الحاجة من شاشة الخطة. «4 : 1» — أسبوع صيانة بعد كل أربعة أسابيع عجز، يضعه التطبيق تلقائيًا؛ ويمكنك مع ذلك أخذ استراحة إضافية. مدة المرحلة هي أسابيع العجز، والاستراحات تُضاف إليها."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ohne Pausen"
+            "value" : "„Manuell“ – du nimmst die Pause selbst, wenn du sie brauchst, auf dem Planbildschirm. „4 : 1“ – eine Woche Erhaltung nach je vier Wochen Defizit, die App plant sie selbst ein; eine außerplanmäßige Pause geht trotzdem. Die Phasendauer zählt Defizitwochen, Pausen kommen hinzu."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No breaks"
+            "value" : "“Manual” — you take a break yourself when you need one, on the plan screen. “4 : 1” — a maintenance week after every four weeks of deficit, placed by the app; you can still take an extra break. The phase length counts deficit weeks; breaks are added on top."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin descansos"
+            "value" : "«Manual»: tomas el descanso tú mismo cuando lo necesitas, en la pantalla del plan. «4 : 1»: una semana de mantenimiento cada cuatro semanas de déficit, la app la coloca sola; aun así puedes tomar un descanso extra. La duración de la fase son semanas de déficit; los descansos se suman."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sans pause"
+            "value" : "« Manuel » : tu prends la pause toi-même quand il faut, sur l’écran du plan. « 4 : 1 » : une semaine de maintien après chaque quatre semaines de déficit, placée par l’app ; tu peux quand même prendre une pause en plus. La durée de la phase compte les semaines de déficit, les pauses s’y ajoutent."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ללא הפסקות"
+            "value" : "„ידני“ — אתה לוקח הפסקה בעצמך כשצריך, במסך התוכנית. „4 : 1“ — שבוע תחזוקה אחרי כל ארבעה שבועות גירעון, האפליקציה קובעת אותו לבד; אפשר עדיין לקחת הפסקה נוספת. אורך השלב נספר בשבועות גירעון, וההפסקות מתווספות אליו."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sem pausas"
+            "value" : "«Manual» — você faz a pausa quando precisar, na tela do plano. «4 : 1» — uma semana de manutenção a cada quatro semanas de déficit, colocada pelo app; ainda dá para fazer uma pausa extra. A duração da fase conta semanas de déficit; as pausas são somadas."
           }
         }
       }
@@ -230,6 +230,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fazer uma pausa"
+          }
+        }
+      }
+    },
+    "Вручную" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يدويًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuell"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuel"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ידני"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
           }
         }
       }
@@ -644,52 +690,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Começa %@"
-          }
-        }
-      }
-    },
-    "Неделя поддержания после каждых N недель дефицита. Жир уходит так же, как без брейков, а голод и тяга сорваться заметно меньше. Срок фазы — недели дефицита, брейки добавляются к нему." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أسبوع صيانة بعد كل N أسابيع من العجز. تُفقد الدهون كما بدون استراحات، لكن الجوع والرغبة في الانهيار أقل بكثير. مدة المرحلة هي أسابيع العجز، والاستراحات تُضاف إليها."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Woche Erhaltung nach je N Wochen Defizit. Fett geht genauso verloren wie ohne Pausen, Hunger und Rückfallgefahr sind aber deutlich geringer. Die Phasendauer zählt Defizitwochen, Pausen kommen hinzu."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A maintenance week after every N weeks of deficit. Fat comes off just as it would without breaks, with noticeably less hunger and urge to cave. The phase length counts deficit weeks; breaks are added on top."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una semana de mantenimiento cada N semanas de déficit. La grasa se pierde igual que sin descansos, pero con mucha menos hambre y ganas de romper la dieta. La duración de la fase son semanas de déficit; los descansos se suman."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une semaine de maintien après chaque N semaines de déficit. La graisse part comme sans pause, avec nettement moins de faim et d’envie de craquer. La durée de la phase compte les semaines de déficit, les pauses s’y ajoutent."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שבוע תחזוקה אחרי כל N שבועות גירעון. השומן יורד כמו בלי הפסקות, אבל הרעב והדחף להישבר נמוכים בהרבה. אורך השלב נספר בשבועות גירעון, וההפסקות מתווספות אליו."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma semana de manutenção a cada N semanas de déficit. A gordura sai igual sem pausas, mas com bem menos fome e vontade de chutar o balde. A duração da fase conta semanas de déficit; as pausas são somadas."
           }
         }
       }

@@ -83,7 +83,7 @@ struct PlanPhaseEditorView: View {
             if phase.intent == .cut {
                 Section {
                     Picker("Диет-брейки", selection: $phase.dietBreakEvery) {
-                        Text("Без брейков").tag(Int?.none)
+                        Text("Вручную").tag(Int?.none)
                         ForEach(PlanPhase.dietBreakOptions, id: \.self) { every in
                             Text(String(format: String(localized: "%lld : 1"), every)).tag(Int?.some(every))
                         }
@@ -92,7 +92,7 @@ struct PlanPhaseEditorView: View {
                 } header: {
                     Text("Диет-брейки")
                 } footer: {
-                    Text("Неделя поддержания после каждых N недель дефицита. Жир уходит так же, как без брейков, а голод и тяга сорваться заметно меньше. Срок фазы — недели дефицита, брейки добавляются к нему.")
+                    Text("«Вручную» — брейк берёшь сам, когда нужен, на экране плана. «4 : 1» — неделя поддержания после каждых четырёх недель дефицита, приложение ставит её само; взять внеплановый брейк можно и так. Срок фазы — недели дефицита, брейки добавляются к нему.")
                 }
             }
 

@@ -14,6 +14,12 @@ struct CalorieCounterApp: App {
     @State private var purchases = PurchaseService()
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        // Системный спиннер обновления не показываем: на «Сегодня» и в «Шагах»
+        // потягивание крутит само кольцо, и второй индикатор того же был лишним.
+        UIRefreshControl.appearance().tintColor = .clear
+    }
+
     /// StoreKit может выдать премиум, но не отобрать.
     ///
     /// Первая версия просто присваивала `store.isPremium = purchases.isPremium`, и это

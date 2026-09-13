@@ -67,8 +67,14 @@ final class StepsViewModel {
         store.goalStreak == 1 ? String(localized: "день") : String(localized: "дней")
     }
 
+    /// Растёт на каждое обновление — кольцо шагов делает оборот.
+    var refreshTicket = 0
+
     func refresh() async {
         store.fetchAll()
+        refreshTicket += 1
+        // Ждём оборот: без спиннера конец обновления виден только по кольцу.
+        try? await Task.sleep(for: .seconds(1.2))
     }
 }
 
@@ -280,7 +286,8 @@ private struct StepsContentView: View {
     /// а под ним лежала отдельная серая плашка: получалась карточка внутри карточки.
     private var todayCard: some View {
         VStack(spacing: 24) {
-            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday) {
+            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday,
+                     spinTicket: viewModel.refreshTicket) {
                 ringLabel
             }
 

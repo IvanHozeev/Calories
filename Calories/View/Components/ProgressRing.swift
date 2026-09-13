@@ -4,6 +4,8 @@ struct RingView<Label: View>: View {
     let progress: Double
     let colors: [Color]
     let labelID: AnyHashable
+    /// Растёт с каждым обновлением — кольцо делает оборот вместо спиннера.
+    var spinTicket: Int = 0
     @ViewBuilder let label: () -> Label
 
     /// Толщина кольца одной константой: трек, дуга и её отступ обязаны совпадать,
@@ -39,10 +41,25 @@ struct RingView<Label: View>: View {
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
     }
 
+    @State private var turn: Double = 0
+
     var body: some View {
         ZStack {
-            channel
-            filling
+            ZStack {
+                channel
+                filling
+            }
+            .compositingGroup()
+            .rotationEffect(.degrees(turn))
+            .onChange(of: spinTicket) { _, _ in
+                withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: 1.2)) {
+                    turn += 360
+                } completion: {
+                    var instant = Transaction()
+                    instant.disablesAnimations = true
+                    withTransaction(instant) { turn = 0 }
+                }
+            }
             label()
                 .id(labelID)
                 .transition(.opacity.combined(with: .scale(scale: 0.85)))
@@ -75,6 +92,9 @@ struct ProgressRing: View {
     /// Растёт с каждым обновлением «Сегодня» — кольцо делает оборот, как знак
     /// на запуске. Счётчик, а не флаг: два обновления подряд должны дать два оборота.
     var spinTicket: Int = 0
+    /// Насколько кольцо уже повернули, потянув список вниз, в градусах.
+    /// Пока тянут, оно идёт за пальцем — вместо системного спиннера.
+    var pullAngle: Double = 0
     /// Показ нормы, а не дня: все дуги полные, в центре дневная норма. Для
     /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
     /// на что делится день.
@@ -83,6 +103,7 @@ struct ProgressRing: View {
     let onOpen: () -> Void
 
     @State private var turn: Double = 0
+    @State private var spinning = false
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -108,6 +129,28 @@ struct ProgressRing: View {
     private static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
     private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
     private static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
+
+    /// Оборот на обновление: с того угла, где кольцо оставил палец, вперёд
+    /// до полного оборота и ещё один. Назад оно не крутится никогда — поэтому
+    /// угол от пальца сначала переносится в оборот, а список возвращается на
+    /// место уже без влияния на кольцо.
+    private func spin() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) {
+            turn += pullAngle
+            spinning = true
+        }
+        let target = (ceil(turn / 360) + 1) * 360
+        withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: 1.2)) {
+            turn = target
+        } completion: {
+            withTransaction(instant) {
+                turn = 0
+                spinning = false
+            }
+        }
+    }
 
     /// Точка на окружности в долях рамки — для градиента вдоль дуги.
     private static func point(at degrees: Double) -> UnitPoint {
@@ -171,10 +214,12 @@ struct ProgressRing: View {
                 }
             }
             .padding(lineWidth / 2)
-            .rotationEffect(.degrees(Self.rotation + turn))
-            .onChange(of: spinTicket) { _, _ in
-                withAnimation(.timingCurve(0.55, 0, 0.35, 1, duration: 1.1)) { turn += 360 }
-            }
+            // Одним слоем: каждая дуга со своим свечением крутилась отдельно,
+            // и на обороте цвета размазывались друг по другу. Склеенное кольцо
+            // поворачивается как цельная картинка.
+            .compositingGroup()
+            .rotationEffect(.degrees(Self.rotation + turn + (spinning ? 0 : pullAngle)))
+            .onChange(of: spinTicket) { _, _ in spin() }
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 

@@ -9,6 +9,9 @@ struct ContentView: View {
     /// на одной вьюхе спорят, и срабатывает только последний.
     @State private var todaySheet: TodaySheet?
     @State private var ringSpinTicket = 0
+    /// Где кольцо стоит, когда список в покое, и насколько его сейчас стянули вниз.
+    @State private var ringRestingY: CGFloat?
+    @State private var ringPull: CGFloat = 0
 
     enum TodaySheet: String, Identifiable {
         case weight, quickCalories, newFood
@@ -57,12 +60,27 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
                             spinTicket: ringSpinTicket,
+                            pullAngle: Double(ringPull) * 1.4,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true
                             }
                         )
                         .padding(.top)
+                        // Следим, насколько список стянут вниз: кольцо поворачивается
+                        // за пальцем. Покой — первое положение, которое увидели.
+                        .background {
+                            GeometryReader { geometry in
+                                Color.clear
+                                    .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                                        guard let resting = ringRestingY else {
+                                            ringRestingY = y
+                                            return
+                                        }
+                                        ringPull = max(0, y - resting)
+                                    }
+                            }
+                        }
 
                         // Строка вместо карточки: план виден и открывается,
                         // но не занимает полэкрана. Подробности — на его
@@ -288,7 +306,7 @@ struct ContentView: View {
             .refreshable {
                 store.refresh()
                 ringSpinTicket += 1
-                try? await Task.sleep(for: .seconds(1.1))
+                try? await Task.sleep(for: .seconds(1.2))
             }
             .navigationDestination(for: FoodEntry.self) { entry in
                 EditEntrySheet(store: store, entry: entry, isEmbedded: true)

@@ -589,6 +589,34 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    @Test func trialGivesPremiumForTwoWeeks() {
+        #expect(!store.isPremium)
+        store.startTrialIfNeeded()
+        #expect(store.isPremium)
+        #expect(store.trialDaysLeft == CalorieStore.trialDays)
+        #expect(!store.hasPurchasedPremium)
+    }
+
+    @Test func expiredTrialTakesPremiumAway() {
+        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
+        #expect(!store.isPremium)
+        #expect(store.trialDaysLeft == nil)
+    }
+
+    @Test func trialStartsOnlyOnce() {
+        let old = Date().addingTimeInterval(-20 * 86_400)
+        store.startTrialIfNeeded(now: old)
+        store.startTrialIfNeeded()
+        #expect(!store.isTrialActive)
+    }
+
+    @Test func purchaseOutlivesTheTrial() {
+        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
+        store.isPremium = true
+        #expect(store.isPremium)
+        #expect(store.hasPurchasedPremium)
+    }
+
     @Test func dishServingDefaultsToTheWholeBatch() {
         // Без своей порции подставляется полный вес — так было и раньше.
         let dish = Dish(name: "Борщ", ingredients: [

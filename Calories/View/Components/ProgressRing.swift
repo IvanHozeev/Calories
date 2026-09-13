@@ -72,8 +72,21 @@ struct ProgressRing: View {
     var proteinTarget: Double? = nil
     var fatTarget: Double? = nil
     var carbsTarget: Double? = nil
+    /// Растёт с каждым обновлением «Сегодня» — кольцо делает оборот, как знак
+    /// на запуске. Счётчик, а не флаг: два обновления подряд должны дать два оборота.
+    var spinTicket: Int = 0
+    /// Показ нормы, а не дня: все дуги полные, в центре дневная норма. Для
+    /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
+    /// на что делится день.
+    var showsTargets = false
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
+
+    @State private var turn: Double = 0
+
+    /// Поворот как у знака на иконке: разрыв между концом калорий и началом
+    /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
+    private static let rotation: Double = -40
 
     private let lineWidth: CGFloat = 18
     private let size: CGFloat = 230
@@ -108,7 +121,7 @@ struct ProgressRing: View {
     }
 
     private var segments: [Segment] {
-        let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
+        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0)
         let calorieColors: [Color] = consumed > goal ? [.orange, .red] : Self.kcalColors
 
         // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
@@ -122,9 +135,9 @@ struct ProgressRing: View {
         var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
                               progress: calorieProgress, colors: calorieColors)]
         let macroParts: [(String, Double, [Color])] = [
-            ("protein", Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
-            ("fat", Self.ratio(macros.fat, fatTarget), Self.fatColors),
-            ("carbs", Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
+            ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
+            ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
+            ("carbs", showsTargets ? 1 : Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
         ]
         var cursor = 180.0
         for (index, part) in macroParts.enumerated() {
@@ -158,6 +171,10 @@ struct ProgressRing: View {
                 }
             }
             .padding(lineWidth / 2)
+            .rotationEffect(.degrees(Self.rotation + turn))
+            .onChange(of: spinTicket) { _, _ in
+                withAnimation(.timingCurve(0.55, 0, 0.35, 1, duration: 1.1)) { turn += 360 }
+            }
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 
@@ -183,7 +200,19 @@ struct ProgressRing: View {
         // справка, а не то, ради чего сюда смотрят.
         let remaining = goal - consumed
         let overGoal = remaining < 0
-        return VStack(spacing: 2) {
+        if showsTargets {
+            return AnyView(VStack(spacing: 2) {
+                Text("Норма")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.green)
+                Text(verbatim: "\(goal)")
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                Text("ккал в день")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            })
+        }
+        return AnyView(VStack(spacing: 2) {
             Text(overGoal ? "Перебор" : "Остаток")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(overGoal ? .red : .green)
@@ -198,7 +227,7 @@ struct ProgressRing: View {
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .contentTransition(.numericText())
-        }
+        })
     }
 }
 

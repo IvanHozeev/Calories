@@ -1,44 +1,112 @@
 import SwiftUI
 
+/// Первый запуск: тело, активность, цель с планом и итог в виде кольца.
+///
+/// Раньше онбординг заканчивался двумя числами — калориями и белком, — а
+/// план, цикл калорий, диет-брейки и нормы макросов человек находил потом
+/// сам, если находил. Теперь всё, от чего зависит норма, настраивается здесь,
+/// с разумными значениями по умолчанию: пропустить можно любой шаг кнопкой
+/// «Далее», ничего не трогая.
+///
+/// План сразу запускает двухнедельный пробный период — за две недели появится
+/// первый вердикт «как идёт план», и будет видно, за что платить.
 struct OnboardingView: View {
     var store: CalorieStore
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
 
-    @State private var step = 0
-    @State private var goal: Goal = .fatLoss
+    @State private var step: Step = .welcome
+
     @State private var sex: Sex = .male
     @State private var age = 25
-    @State private var heightInt = 170
-    @State private var weightTenths = 750  // 75.0 kg
+    @State private var heightInt = 175
+    @State private var weightTenths = 800
     @State private var activityLevel: ActivityLevel = .moderate
+
+    @State private var intent: PlanIntent = .cut
+    @State private var ratePercent = PlanIntent.cut.defaultWeeklyRatePercent
+    @State private var durationWeeks = 12
+
+    @State private var dietBreakEvery: Int? = 4
+    @State private var cyclingEnabled = false
+    @State private var weekendStyle: WeekendStyle = .satSun
+
+    @State private var proteinTenths = Int(UserProfile.defaultProteinPerKg * 10)
+    @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
+
+    enum Step: Int, CaseIterable {
+        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, result
+    }
+
+    /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
+    private var steps: [Step] {
+        Step.allCases.filter { $0 != .cutOptions || intent == .cut }
+    }
+
+    private var weightKg: Double { Double(weightTenths) / 10 }
+
+    private var goal: Goal {
+        switch intent {
+        case .cut:         return .fatLoss
+        case .maintenance: return .maintenance
+        case .bulk:        return .muscleGain
+        }
+    }
 
     private var draftProfile: UserProfile {
         UserProfile(
-            weightKg: Double(weightTenths) / 10.0,
+            weightKg: weightKg,
             heightCm: Double(heightInt),
             age: age,
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
-            proteinPerKg: UserProfile.defaultProteinPerKg
+            proteinPerKg: Double(proteinTenths) / 10,
+            fatPerKg: Double(fatTenths) / 10
         )
+    }
+
+    /// План только для дефицита и набора: у поддержания нет ни темпа, ни финиша.
+    private var draftPlan: Plan? {
+        guard intent != .maintenance else { return nil }
+        return Plan(
+            startDate: Date(),
+            startWeightKg: weightKg,
+            phases: [PlanPhase(intent: intent, durationWeeks: durationWeeks, weeklyRatePercent: ratePercent,
+                               dietBreakEvery: intent == .cut ? dietBreakEvery : nil)],
+            cyclingEnabled: intent == .cut && cyclingEnabled,
+            weekendStyle: weekendStyle
+        )
+    }
+
+    private var dailyCalories: Int {
+        let profile = draftProfile
+        return draftPlan?.dailyCalorieTarget(tdee: profile.tdee) ?? profile.calorieTarget
+    }
+
+    private var proteinGrams: Double { draftProfile.proteinTargetGrams(from: nil) }
+    private var fatGrams: Double { draftProfile.fatTargetGrams }
+    private var carbGrams: Double {
+        let left = Double(dailyCalories) - proteinGrams * MacroTargets.kcalPerProteinGram
+            - fatGrams * MacroTargets.kcalPerFatGram
+        return max(left, 0) / MacroTargets.kcalPerCarbGram
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            if step > 0 { topBar }
+            if step != .welcome { topBar }
 
             Group {
                 switch step {
-                case 0: welcomeStep
-                case 1: goalStep
-                case 2: sexStep
-                case 3: ageStep
-                case 4: heightStep
-                case 5: weightStep
-                case 6: activityStep
-                case 7: resultStep
-                default: EmptyView()
+                case .welcome:    welcomeStep
+                case .sex:        sexStep
+                case .age:        ageStep
+                case .height:     heightStep
+                case .weight:     weightStep
+                case .activity:   activityStep
+                case .goal:       goalStep
+                case .cutOptions: cutOptionsStep
+                case .macros:     macrosStep
+                case .result:     resultStep
                 }
             }
             .id(step)
@@ -49,28 +117,36 @@ struct OnboardingView: View {
         }
     }
 
+    private func go(_ offset: Int) {
+        guard let index = steps.firstIndex(of: step) else { return }
+        let target = min(max(index + offset, 0), steps.count - 1)
+        withAnimation(.easeInOut(duration: 0.25)) { step = steps[target] }
+    }
+
     // MARK: - Top bar
 
     private var topBar: some View {
         ZStack {
             HStack {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.25)) { step -= 1 }
+                    go(-1)
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
+                .accessibilityLabel("Назад")
                 Spacer()
             }
 
+            let visible = Array(steps.dropFirst())
+            let current = visible.firstIndex(of: step) ?? 0
             HStack(spacing: 6) {
-                ForEach(1...7, id: \.self) { i in
+                ForEach(visible.indices, id: \.self) { i in
                     Capsule()
-                        .fill(i <= step ? AnyShapeStyle(Color.green)
-                                        : AnyShapeStyle(.channel(thickness: 6)))
-                        .frame(width: i == step ? 22 : 8, height: 6)
-                        .glowingFill(i <= step ? .green : .clear, thickness: 6)
+                        .fill(i <= current ? AnyShapeStyle(Color.green)
+                                           : AnyShapeStyle(.channel(thickness: 6)))
+                        .frame(width: i == current ? 22 : 8, height: 6)
                         .animation(.spring(duration: 0.3), value: step)
                 }
             }
@@ -85,35 +161,23 @@ struct OnboardingView: View {
     private var welcomeStep: some View {
         VStack(spacing: 0) {
             Spacer()
-            VStack(spacing: 20) {
-                Text("🔥")
-                    .font(.system(size: 80))
-                Text("Привет!")
-                    .font(.system(size: 38, weight: .bold, design: .rounded))
-                Text("Давай настроим твою персональную норму калорий — займёт меньше минуты.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
-            }
-            Spacer()
-            primaryButton(title: "Начать") {
-                withAnimation(.easeInOut(duration: 0.25)) { step = 1 }
-            }
-        }
-    }
-
-    private var goalStep: some View {
-        stepShell(title: "Какая цель?", subtitle: "Это влияет на твою дневную норму калорий") {
-            VStack(spacing: 12) {
-                ForEach(Goal.allCases) { g in
-                    rowCard(icon: goalIcon(g), title: g.title, selected: goal == g) {
-                        goal = g
-                    }
+            VStack(spacing: 28) {
+                // Тот же знак, что на лаунч-скрине, только живой: запуск
+                // перетекает в приветствие, а не сменяется им.
+                BrandMark(animated: true)
+                    .frame(width: 150)
+                VStack(spacing: 12) {
+                    Text(verbatim: "Calories")
+                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                    Text("Настроим норму калорий и макросов под тебя и твою цель — пара минут.")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
                 }
             }
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
+            Spacer()
+            primaryButton(title: "Начать") { go(1) }
         }
     }
 
@@ -126,140 +190,258 @@ struct OnboardingView: View {
                     }
                 }
             }
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         }
     }
 
     private var ageStep: some View {
         stepShell(title: "Сколько лет?", subtitle: "Возраст влияет на базовый обмен") {
             Picker("Возраст", selection: $age) {
-                ForEach(10...100, id: \.self) { Text("\($0) лет").tag($0) }
+                ForEach(14...90, id: \.self) { Text("\($0) лет").tag($0) }
             }
             .pickerStyle(.wheel)
             .frame(maxWidth: 240)
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         }
     }
 
     private var heightStep: some View {
         stepShell(title: "Рост, см", subtitle: "Нужен для расчёта базового обмена") {
             Picker("Рост", selection: $heightInt) {
-                ForEach(100...220, id: \.self) { Text("\($0) см").tag($0) }
+                ForEach(130...220, id: \.self) { Text("\($0) см").tag($0) }
             }
             .pickerStyle(.wheel)
             .frame(maxWidth: 240)
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         }
     }
 
     private var weightStep: some View {
-        stepShell(title: "Вес, кг", subtitle: "Нужен для расчёта нормы калорий и белка") {
+        stepShell(title: "Вес, кг", subtitle: "От него считаются калории, белок и жир") {
             Picker("Вес", selection: $weightTenths) {
-                ForEach(300...2000, id: \.self) { v in
-                    Text(String(format: "%.1f кг", Double(v) / 10.0)).tag(v)
+                ForEach(350...2000, id: \.self) { v in
+                    Text(verbatim: String(format: "%.1f \(String(localized: "кг"))", Double(v) / 10.0)).tag(v)
                 }
             }
             .pickerStyle(.wheel)
             .frame(maxWidth: 240)
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
         }
     }
 
     private var activityStep: some View {
-        stepShell(title: "Активность", subtitle: "Средняя нагрузка за типичную неделю") {
+        stepShell(title: "Активность", subtitle: "Работа и зал за типичную неделю") {
             VStack(spacing: 8) {
                 ForEach(ActivityLevel.allCases) { level in
-                    Button {
+                    selectableRow(title: level.title, subtitle: level.subtitle, selected: activityLevel == level) {
                         activityLevel = level
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(level.title)
-                                    .font(.body.weight(.medium))
-                                    .foregroundStyle(.primary)
-                                Text(level.subtitle)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if activityLevel == level {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
-                            }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(activityLevel == level ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(activityLevel == level ? Color.green : Color.clear, lineWidth: 1.5)
-                        )
                     }
                 }
             }
-        } next: {
-            withAnimation(.easeInOut(duration: 0.25)) { step += 1 }
+        }
+    }
+
+    private var goalStep: some View {
+        stepShell(title: "Цель", subtitle: "Из неё приложение соберёт план с темпом и сроком") {
+            VStack(spacing: 16) {
+                Picker("Цель", selection: $intent) {
+                    ForEach(PlanIntent.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: intent) { _, newIntent in
+                    ratePercent = newIntent.defaultWeeklyRatePercent
+                    durationWeeks = newIntent == .bulk ? 16 : 12
+                }
+
+                if intent != .maintenance {
+                    VStack(spacing: 0) {
+                        Stepper(value: $ratePercent, in: 0.1...1.5, step: 0.05) {
+                            HStack {
+                                Text("Темп")
+                                Spacer()
+                                Text(verbatim: String(format: "%.2f%% · %+.2f \(String(localized: "кг/нед"))",
+                                                      ratePercent,
+                                                      intent.direction * ratePercent / 100 * weightKg))
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                        .padding(.vertical, 10)
+                        Divider()
+                        Stepper(value: $durationWeeks, in: 4...52) {
+                            HStack {
+                                Text("Срок")
+                                Spacer()
+                                Text(String(format: String(localized: "%lld нед."), durationWeeks))
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                        .padding(.vertical, 10)
+                    }
+                    .padding(.horizontal, 16)
+                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+
+                    if ratePercent > intent.aggressiveRatePercent {
+                        Label(intent == .cut
+                              ? "Быстрее процента веса в неделю — на сушке это уже за счёт мышц."
+                              : "Быстрее половины процента в неделю — на наборе большая часть прибавки будет жиром.",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+
+                    Text(String(format: String(localized: "План бесплатно %lld дней — за это время появится первый вердикт, как он идёт."),
+                                CalorieStore.trialDays))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("На поддержании план не нужен: норма — твой расход, без темпа и финиша.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+            }
+        }
+    }
+
+    private var cutOptionsStep: some View {
+        stepShell(title: "Как держать дефицит", subtitle: "Можно не трогать и настроить потом в плане") {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Диет-брейки")
+                        .font(.headline)
+                    Picker("Диет-брейки", selection: $dietBreakEvery) {
+                        Text("Вручную").tag(Int?.none)
+                        ForEach(PlanPhase.dietBreakOptions, id: \.self) { every in
+                            Text(String(format: String(localized: "%lld : 1"), every)).tag(Int?.some(every))
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    Text("Неделя поддержания после каждых N недель дефицита. Жир уходит так же, а голод и тяга сорваться заметно меньше.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Недельный цикл калорий", isOn: $cyclingEnabled.animation())
+                        .font(.headline)
+                    if cyclingEnabled {
+                        Picker("Рефид-дни", selection: $weekendStyle) {
+                            ForEach(WeekendStyle.allCases) { Text($0.title).tag($0) }
+                        }
+                        .pickerStyle(.menu)
+                    }
+                    Text("В будни чуть меньше, в рефид-дни больше. Среднее за неделю то же, а рефид переносится на праздник одной кнопкой.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var macrosStep: some View {
+        stepShell(title: "Белок и жир", subtitle: "Углеводы — всё, что останется от нормы калорий") {
+            VStack(spacing: 0) {
+                Stepper(value: $proteinTenths, in: 10...30) {
+                    macroLine(title: "Белок", perKg: Double(proteinTenths) / 10, grams: proteinGrams, color: MacroKind.protein.color)
+                }
+                .padding(.vertical, 10)
+                Divider()
+                Stepper(value: $fatTenths,
+                        in: Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10)) {
+                    macroLine(title: "Жир", perKg: Double(fatTenths) / 10, grams: fatGrams, color: MacroKind.fat.color)
+                }
+                .padding(.vertical, 10)
+                Divider()
+                HStack {
+                    Text("Углеводы")
+                        .foregroundStyle(MacroKind.carbs.color)
+                    Spacer()
+                    Text(verbatim: "\(Int(carbGrams.rounded())) \(String(localized: "г"))")
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                .padding(.vertical, 12)
+            }
+            .padding(.horizontal, 16)
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        }
+    }
+
+    private func macroLine(title: LocalizedStringKey, perKg: Double, grams: Double, color: Color) -> some View {
+        HStack {
+            Text(title)
+                .foregroundStyle(color)
+            Spacer()
+            Text(verbatim: String(format: "%.1f \(String(localized: "г/кг")) · %d \(String(localized: "г"))",
+                                  perKg, Int(grams.rounded())))
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
         }
     }
 
     private var resultStep: some View {
-        let p = draftProfile
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             Spacer()
             VStack(spacing: 24) {
-                Text("🎯")
-                    .font(.system(size: 64))
-                Text("Готово!")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                Text("Твоё кольцо")
+                    .font(.system(size: 30, weight: .bold, design: .rounded))
 
-                VStack(spacing: 10) {
-                    statRow(title: "Базовый обмен (BMR)", value: "\(Int(p.bmr.rounded())) ккал")
-                    statRow(title: "С активностью (TDEE)", value: "\(Int(p.tdee.rounded())) ккал")
+                // Кольцо с «Сегодня», заполненное нормой: сразу видно, на что
+                // делится день — половина калорий и дуги макросов по их граммам.
+                ProgressRing(consumed: 0, goal: dailyCalories, macros: .zero,
+                             proteinTarget: proteinGrams, fatTarget: fatGrams, carbsTarget: carbGrams,
+                             showsTargets: true, onOpen: {})
+                    .allowsHitTesting(false)
 
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Норма калорий")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text("\(p.calorieTarget)")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundStyle(.green)
-                            Text("ккал / день")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text("Норма белка")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text("\(Int(p.proteinTargetGrams(from: nil).rounded()))")
-                                .font(.system(size: 36, weight: .bold, design: .rounded))
-                                .foregroundStyle(.blue)
-                            Text("г / день")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                HStack(spacing: 0) {
+                    resultNumber(Int(proteinGrams.rounded()), unit: "г", title: "Белки", color: MacroKind.protein.color)
+                    resultNumber(Int(fatGrams.rounded()), unit: "г", title: "Жиры", color: MacroKind.fat.color)
+                    resultNumber(Int(carbGrams.rounded()), unit: "г", title: "Углеводы", color: MacroKind.carbs.color)
                 }
                 .padding(.horizontal, 24)
+
+                if let plan = draftPlan {
+                    Text(String(format: String(localized: "%@ к %@ · план бесплатно %lld дней"),
+                                String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg),
+                                plan.endDate.formatted(.dateTime.day().month(.wide)),
+                                CalorieStore.trialDays))
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                }
             }
             Spacer()
-            primaryButton(title: "Начать") {
-                store.updateProfile(draftProfile)
-                onboardingCompleted = true
-            }
+            primaryButton(title: "Начать") { finish() }
         }
+    }
+
+    private func resultNumber(_ value: Int, unit: LocalizedStringKey, title: LocalizedStringKey, color: Color) -> some View {
+        VStack(spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(verbatim: "\(value)")
+                    .font(.title2.weight(.bold))
+                    .monospacedDigit()
+                    .foregroundStyle(color)
+                Text(unit)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// Профиль, план и пробный период — в таком порядке: `startPlan` закрыт
+    /// премиумом, и без пробного периода план молча не сохранился бы.
+    private func finish() {
+        store.updateProfile(draftProfile)
+        if let plan = draftPlan {
+            store.startTrialIfNeeded()
+            store.startPlan(plan)
+        }
+        onboardingCompleted = true
     }
 
     // MARK: - Layout helpers
@@ -268,8 +450,7 @@ struct OnboardingView: View {
     private func stepShell<Content: View>(
         title: LocalizedStringKey,
         subtitle: LocalizedStringKey,
-        @ViewBuilder content: () -> Content,
-        next: @escaping () -> Void
+        @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
@@ -290,7 +471,7 @@ struct OnboardingView: View {
 
             Spacer()
 
-            primaryButton(title: "Далее", action: next)
+            primaryButton(title: "Далее") { go(1) }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -309,36 +490,44 @@ struct OnboardingView: View {
         .padding(.bottom, 44)
     }
 
-    private func rowCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+    private func selectableRow(title: String, subtitle: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                Text(icon).font(.title2)
-                Text(title)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: title)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(.primary)
+                    Text(verbatim: subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
                 Spacer()
                 if selected {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 12)
                     .fill(selected ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: 12)
                     .stroke(selected ? Color.green : Color.clear, lineWidth: 1.5)
             )
         }
+        // Без плоского стиля кнопка красит текст карточки в синий.
+        .buttonStyle(.plain)
     }
 
     private func tileCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 10) {
-                Text(icon).font(.system(size: 36))
-                Text(title)
+                Text(verbatim: icon).font(.system(size: 36))
+                Text(verbatim: title)
                     .font(.body.weight(.medium))
                     .foregroundStyle(.primary)
                 if selected {
@@ -358,28 +547,6 @@ struct OnboardingView: View {
                     .stroke(selected ? Color.green : Color.clear, lineWidth: 1.5)
             )
         }
-    }
-
-    private func statRow(title: String, value: String) -> some View {
-        HStack {
-            Text(title)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Text(value)
-                .font(.subheadline.weight(.medium))
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func goalIcon(_ g: Goal) -> String {
-        switch g {
-        case .fatLoss: return "🔻"
-        case .maintenance: return "⚖️"
-        case .muscleGain: return "💪"
-        }
+        .buttonStyle(.plain)
     }
 }

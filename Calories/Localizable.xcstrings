@@ -4,48 +4,48 @@
     "" : {
       "shouldTranslate" : false
     },
-    "Распознавание фото" : {
+    "ккал в день" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "التعرّف على الصور"
+            "value" : "سعرة في اليوم"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fotoerkennung"
+            "value" : "kcal pro Tag"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Photo recognition"
+            "value" : "kcal a day"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reconocimiento de fotos"
+            "value" : "kcal al día"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reconnaissance photo"
+            "value" : "kcal par jour"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "זיהוי תמונות"
+            "value" : "קק״ל ביום"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reconhecimento de fotos"
+            "value" : "kcal por dia"
           }
         }
       }
@@ -244,6 +244,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$.2f g/kg com %2$.1f kg"
+          }
+        }
+      }
+    },
+    "%@ к %@ · план бесплатно %lld дней" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ к %2$@ · план бесплатно %3$lld дней"
           }
         }
       }
@@ -1265,12 +1275,6 @@
           }
         }
       }
-    },
-    "🎯" : {
-      "shouldTranslate" : false
-    },
-    "🔥" : {
-      "shouldTranslate" : false
     },
     "0" : {
       "shouldTranslate" : false
@@ -3648,6 +3652,52 @@
         }
       }
     },
+    "Белок и жир" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين والدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein und Fett"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein and fat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína y grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines et lipides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון ושומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteína e gordura"
+          }
+        }
+      }
+    },
     "Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они." : {
       "localizations" : {
         "ar" : {
@@ -4804,6 +4854,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada encontrado na base de alimentos"
+          }
+        }
+      }
+    },
+    "В будни чуть меньше, в рефид-дни больше. Среднее за неделю то же, а рефид переносится на праздник одной кнопкой." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أقل قليلًا في أيام الأسبوع وأكثر في أيام التحميل. المتوسط الأسبوعي نفسه، ويمكن نقل يوم التحميل إلى عطلة بزر واحد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Werktags etwas weniger, an Refeed-Tagen mehr. Der Wochenschnitt bleibt gleich, und der Refeed lässt sich mit einem Tipp auf einen Feiertag legen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little less on weekdays, more on refeed days. The weekly average stays the same, and a refeed moves to a holiday with one tap."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un poco menos entre semana y más en los días de refeed. La media semanal es la misma y el refeed se pasa a un festivo con un toque."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un peu moins en semaine, plus les jours de refeed. La moyenne hebdo reste la même, et le refeed se déplace sur un jour férié d’un geste."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קצת פחות באמצע השבוע ויותר בימי ריפיד. הממוצע השבועי זהה, ואת הריפיד מעבירים לחג בלחיצה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um pouco menos durante a semana e mais nos dias de refeed. A média semanal é a mesma, e o refeed vai para um feriado com um toque."
           }
         }
       }
@@ -8614,6 +8710,7 @@
       }
     },
     "г / день" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9031,6 +9128,7 @@
       }
     },
     "Готово!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9543,6 +9641,7 @@
       }
     },
     "Давай настроим твою персональную норму калорий — займёт меньше минуты." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14977,6 +15076,52 @@
         }
       }
     },
+    "Из неё приложение соберёт план с темпом и сроком" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سيبني التطبيق منها خطة بوتيرة ومدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daraus baut die App einen Plan mit Tempo und Dauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app builds a plan with a pace and a timeline from it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con ella la app arma un plan con ritmo y plazo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app en tire un plan avec un rythme et une durée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממנה האפליקציה תבנה תוכנית עם קצב ומשך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app monta a partir dela um plano com ritmo e prazo"
+          }
+        }
+      }
+    },
     "Из профиля — норма белка на кг веса под твою цель." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16271,6 +16416,52 @@
         }
       }
     },
+    "Как держать дефицит" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف تحافظ على العجز"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie du das Defizit hältst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to hold the deficit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo mantener el déficit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment tenir le déficit"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "איך להחזיק את הגירעון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como manter o déficit"
+          }
+        }
+      }
+    },
     "как другая сторона" : {
       "localizations" : {
         "ar" : {
@@ -17293,6 +17484,7 @@
       }
     },
     "ккал / день" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19996,6 +20188,52 @@
         }
       }
     },
+    "Можно не трогать и настроить потом в плане" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك تركها وضبطها لاحقًا في الخطة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kannst du so lassen und später im Plan einstellen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can leave this and set it later in the plan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes dejarlo y ajustarlo después en el plan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux laisser ça et le régler plus tard dans le plan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר להשאיר ולכוונן אחר כך בתוכנית"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode deixar assim e ajustar depois no plano"
+          }
+        }
+      }
+    },
     "Мои" : {
       "localizations" : {
         "ar" : {
@@ -20878,6 +21116,52 @@
         }
       }
     },
+    "На поддержании план не нужен: норма — твой расход, без темпа и финиша." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الصيانة لا حاجة لخطة: الهدف هو استهلاكك، بلا وتيرة ولا نهاية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Halten braucht es keinen Plan: Das Ziel ist dein Verbrauch, ohne Tempo und Ende."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance needs no plan: your target is your expenditure, with no pace or finish line."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En mantenimiento no hace falta plan: tu objetivo es tu gasto, sin ritmo ni final."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au maintien, pas besoin de plan : l’objectif, c’est ta dépense, sans rythme ni fin."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בתחזוקה אין צורך בתוכנית: היעד הוא ההוצאה שלך, בלי קצב ובלי סיום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na manutenção não precisa de plano: a meta é o seu gasto, sem ritmo nem fim."
+          }
+        }
+      }
+    },
     "На фото не видно еды." : {
       "localizations" : {
         "ar" : {
@@ -21522,6 +21806,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lembretes"
+          }
+        }
+      }
+    },
+    "Настроим норму калорий и макросов под тебя и твою цель — пара минут." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سنضبط هدف السعرات والماكروز لك ولهدفك — دقيقتان."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir stellen Kalorien und Makros auf dich und dein Ziel ein – ein paar Minuten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let’s set your calories and macros for you and your goal — a couple of minutes."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustemos tus calorías y macros a ti y a tu objetivo: un par de minutos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglons tes calories et tes macros selon toi et ton objectif — deux minutes."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נגדיר יעד קלוריות ומאקרו בשבילך ובשביל המטרה שלך — כמה דקות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vamos ajustar calorias e macros para você e sua meta — dois minutos."
           }
         }
       }
@@ -22820,6 +23150,52 @@
         }
       }
     },
+    "Неделя поддержания после каждых N недель дефицита. Жир уходит так же, а голод и тяга сорваться заметно меньше." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع صيانة بعد كل N أسابيع عجز. تُفقد الدهون بالقدر نفسه، والجوع والرغبة في الانهيار أقل بكثير."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Woche Erhaltung nach je N Wochen Defizit. Fett geht genauso verloren, Hunger und Rückfallgefahr sind deutlich geringer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A maintenance week after every N weeks of deficit. Fat comes off just the same, with noticeably less hunger and urge to cave."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una semana de mantenimiento cada N semanas de déficit. La grasa se pierde igual, con mucha menos hambre y ganas de abandonar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une semaine de maintien après chaque N semaines de déficit. La graisse part pareil, avec nettement moins de faim et d’envie de craquer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע תחזוקה אחרי כל N שבועות גירעון. השומן יורד באותה מידה, והרעב והדחף להישבר נמוכים בהרבה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma semana de manutenção a cada N semanas de déficit. A gordura sai igual, com bem menos fome e vontade de desistir."
+          }
+        }
+      }
+    },
     "Неделя-две на поддержании посреди дефицита. Убрать брейк — смахни его в списке фаз." : {
       "localizations" : {
         "ar" : {
@@ -24072,6 +24448,7 @@
       }
     },
     "Норма калорий" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -26068,6 +26445,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "do quadríceps"
+          }
+        }
+      }
+    },
+    "От него считаются калории, белок и жир" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منه تُحسب السعرات والبروتين والدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daraus werden Kalorien, Protein und Fett berechnet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories, protein and fat are counted from it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A partir de él se calculan calorías, proteína y grasa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calories, protéines et lipides en découlent"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממנו מחושבים קלוריות, חלבון ושומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dele saem calorias, proteína e gordura"
           }
         }
       }
@@ -28668,6 +29091,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plano"
+          }
+        }
+      }
+    },
+    "План бесплатно %lld дней — за это время появится первый вердикт, как он идёт." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطة مجانية لمدة %lld يومًا — خلالها سيظهر أول حكم على سيرها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan ist %lld Tage kostenlos – bis dahin gibt es das erste Urteil, wie er läuft."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The plan is free for %lld days — enough for the first verdict on how it’s going."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plan es gratis %lld días: en ese tiempo verás el primer veredicto de cómo va."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plan est gratuit %lld jours — le temps d’avoir un premier verdict sur son avancée."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התוכנית בחינם ל-%lld ימים — בזמן הזה יופיע הסיכום הראשון איך היא מתקדמת."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O plano é grátis por %lld dias — o bastante para o primeiro veredito de como está indo."
           }
         }
       }
@@ -32238,6 +32707,7 @@
       }
     },
     "Привет!" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33450,6 +33920,52 @@
         }
       }
     },
+    "Работа и зал за типичную неделю" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العمل والصالة خلال أسبوع عادي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeit und Training in einer typischen Woche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work and gym over a typical week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trabajo y gimnasio en una semana típica"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travail et salle sur une semaine type"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עבודה וחדר כושר בשבוע רגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trabalho e academia numa semana típica"
+          }
+        }
+      }
+    },
     "Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -34137,6 +34653,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O reconhecimento está indisponível."
+          }
+        }
+      }
+    },
+    "Распознавание фото" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التعرّف على الصور"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoerkennung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo recognition"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconocimiento de fotos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconnaissance photo"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זיהוי תמונות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconhecimento de fotos"
           }
         }
       }
@@ -38552,7 +39115,6 @@
       }
     },
     "Срок" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39751,6 +40313,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cintura, cm"
+          }
+        }
+      }
+    },
+    "Твоё кольцо" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حلقتك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Ring"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your ring"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu anillo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton anneau"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הטבעת שלך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu anel"
           }
         }
       }
@@ -41010,6 +41618,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Carboidratos"
+          }
+        }
+      }
+    },
+    "Углеводы — всё, что останется от нормы калорий" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الكربوهيدرات هي كل ما يتبقى من هدف السعرات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohlenhydrate sind alles, was vom Kalorienziel übrig bleibt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbs are whatever is left of the calorie target"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los carbohidratos son lo que queda del objetivo de calorías"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les glucides, c’est tout ce qui reste de l’objectif calorique"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחמימות — כל מה שנשאר מיעד הקלוריות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carboidratos são o que sobra da meta de calorias"
           }
         }
       }

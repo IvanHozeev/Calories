@@ -12,6 +12,9 @@ struct RootView: View {
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @AppStorage("app_text_size") private var appTextSize = AppTextSize.normal.rawValue
     @Environment(\.scenePhase) private var scenePhase
+    /// Лаунч-скрин статичен — анимировать его iOS не даёт. Поэтому поверх первого
+    /// кадра лежит его точная копия, которая продолжает знак движением и тает.
+    @State private var showingSplash = true
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -36,6 +39,20 @@ struct RootView: View {
             set: { _ in }
         )) {
             OnboardingView(store: store)
+        }
+        .overlay {
+            if showingSplash {
+                SplashView()
+                    // Касания проходят насквозь: заставка — украшение, а не
+                    // экран, и ждать её конца, чтобы нажать, человек не должен.
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+                    .task {
+                        // Один оборот знака: дуги убегают и заполняются снова.
+                        try? await Task.sleep(for: .seconds(2.3))
+                        withAnimation(.easeOut(duration: 0.35)) { showingSplash = false }
+                    }
+            }
         }
         .environment(purchases)
         // Меню на иконке пересобираем на каждом подъёме: камера в нём появляется

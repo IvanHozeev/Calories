@@ -8,6 +8,7 @@ struct ContentView: View {
     /// Короткие листы с «Сегодня» — одним модификатором: несколько `.sheet`
     /// на одной вьюхе спорят, и срабатывает только последний.
     @State private var todaySheet: TodaySheet?
+    @State private var ringSpinTicket = 0
 
     enum TodaySheet: String, Identifiable {
         case weight, quickCalories, newFood
@@ -55,6 +56,7 @@ struct ContentView: View {
                             proteinTarget: store.proteinTarget,
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
+                            spinTicket: ringSpinTicket,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true
@@ -280,7 +282,14 @@ struct ContentView: View {
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
-            .refreshable { store.refresh() }
+            // Пока тянут вниз, кольцо делает оборот — тот же жест, что у знака на
+            // запуске. Обновление мгновенное, поэтому ждём конца оборота, иначе
+            // индикатор списка пропадал бы на полпути.
+            .refreshable {
+                store.refresh()
+                ringSpinTicket += 1
+                try? await Task.sleep(for: .seconds(1.1))
+            }
             .navigationDestination(for: FoodEntry.self) { entry in
                 EditEntrySheet(store: store, entry: entry, isEmbedded: true)
             }

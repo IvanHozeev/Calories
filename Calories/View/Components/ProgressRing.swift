@@ -54,46 +54,104 @@ struct RingView<Label: View>: View {
     }
 }
 
-/// Кольцо калорий за день. Нажатие открывает добавление приёма пищи.
+/// Кольцо дня: калории и макросы, каждый своей дугой-прогрессом.
 ///
-/// Раньше кольцо переключалось по нажатию между калориями и тремя макросами.
-/// Пользы в этом не было: те же белки, жиры и углеводы стоят на карточке прямо
-/// под кольцом, с целями и без единого нажатия, — а кольцо тем временем занимало
-/// собой самый заметный жест экрана под то, что и так на виду.
+/// Калории — половина круга: это главное число дня. Вторая половина делится
+/// между белками, жирами и углеводами по их целям в граммах, поэтому у типичной
+/// сушки самая длинная дуга углеводная, а самая короткая — жировая. Длина дуги
+/// — сколько нужно съесть, заливка — сколько уже съедено. Тот же знак на иконке
+/// и лаунч-скрине, только там без калорий: буква «С».
 ///
-/// Теперь оно ведёт туда, куда чаще всего и надо. Еду записывают по нескольку
-/// раз в день, а на план смотрят раз в неделю: самая крупная мишень экрана
-/// должна обслуживать частое действие, а не редкое. И на «остаток 2183»
-/// естественный ответ — записать съеденное, а не открыть план; план открывается
-/// строкой под кольцом, где он и подписан.
-///
-/// Ведёт сразу в добавление, а не в меню: меню со сканером и камерой живёт
-/// на плюсе в тулбаре, а кольцо даёт самый короткий путь к самому частому.
+/// Нажатие открывает добавление приёма пищи. Еду записывают по нескольку раз
+/// в день, а на план смотрят раз в неделю: самая крупная мишень экрана должна
+/// обслуживать частое действие. Меню со сканером и камерой живёт на плюсе.
 struct ProgressRing: View {
     let consumed: Int
     let goal: Int
+    var macros: Macros = .zero
+    var proteinTarget: Double? = nil
+    var fatTarget: Double? = nil
+    var carbsTarget: Double? = nil
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
-    private var progress: Double {
-        guard goal > 0 else { return 0 }
-        return min(Double(consumed) / Double(goal), 1.0)
+    private let lineWidth: CGFloat = 12
+    private let size: CGFloat = 230
+    /// Зазор между дугами в градусах — с запасом на скруглённые концы.
+    private let gap: Double = 11
+
+    private struct Segment: Identifiable {
+        let id: String
+        let start: Double
+        let end: Double
+        let progress: Double
+        let colors: [Color]
     }
 
-    private var colors: [Color] {
-        consumed > goal ? [.orange, .red] : [.green, .mint]
+    private static func ratio(_ value: Double, _ target: Double?) -> Double {
+        guard let target, target > 0 else { return 0 }
+        return min(max(value / target, 0), 1)
+    }
+
+    private var segments: [Segment] {
+        let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
+        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : [.mint, .green]
+
+        // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
+        // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
+        let targets = [proteinTarget ?? 0, fatTarget ?? 0, carbsTarget ?? 0]
+        let total = targets.reduce(0, +)
+        let rawShares = total > 0 ? targets.map { $0 / total } : [1.0 / 3, 1.0 / 3, 1.0 / 3]
+        let floored = rawShares.map { max($0, 0.08) }
+        let shares = floored.map { $0 / floored.reduce(0, +) }
+
+        var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
+                              progress: calorieProgress, colors: calorieColors)]
+        let macroParts: [(String, Double, [Color])] = [
+            ("protein", Self.ratio(macros.protein, proteinTarget), [.cyan, .blue]),
+            ("fat", Self.ratio(macros.fat, fatTarget), [.yellow, .orange]),
+            ("carbs", Self.ratio(macros.carbs, carbsTarget), [.pink, .purple]),
+        ]
+        var cursor = 180.0
+        for (index, part) in macroParts.enumerated() {
+            let span = 180 * shares[index]
+            result.append(Segment(id: part.0, start: cursor + gap / 2, end: cursor + span - gap / 2,
+                                  progress: part.1, colors: part.2))
+            cursor += span
+        }
+        return result
     }
 
     var body: some View {
-        RingView(progress: progress, colors: colors, labelID: consumed) {
+        ZStack {
+            ForEach(segments) { segment in
+                RingArc(start: segment.start, end: segment.end)
+                    .stroke(.channel(thickness: lineWidth),
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                if segment.progress > 0 {
+                    RingArc(start: segment.start,
+                            end: segment.start + (segment.end - segment.start) * segment.progress)
+                        .stroke(LinearGradient(colors: segment.colors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                                style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
+                        .glowingFill(segment.colors.last ?? .clear, thickness: lineWidth)
+                }
+            }
+            .padding(lineWidth / 2)
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
+
             centerLabel
+                .id(consumed)
+                .transition(.opacity.combined(with: .scale(scale: 0.85)))
         }
+        .frame(width: size, height: size)
+        // Размер кольца фиксирован, текст внутри масштабировать некуда.
+        .dynamicTypeSize(...DynamicTypeSize.xxLarge)
         .contentShape(Circle())
         .onTapGesture(perform: onOpen)
         // Своей подписи нет намеренно: VoiceOver читает содержимое кольца
         // («Остаток 2183 из 2582 ккал»), и это точнее любой общей фразы.
-        // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе —
-        // и то, и другое стало бы не найти по имени.
+        // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе.
         .accessibilityIdentifier("addFromRing")
         .accessibilityAddTraits(.isButton)
     }
@@ -120,5 +178,27 @@ struct ProgressRing: View {
                 .foregroundStyle(.tertiary)
                 .contentTransition(.numericText())
         }
+    }
+}
+
+/// Дуга кольца. Углы — в градусах от 12 часов по часовой стрелке.
+/// Анимируется по концу, чтобы заливка росла, а не перескакивала.
+private struct RingArc: Shape {
+    var start: Double
+    var end: Double
+
+    var animatableData: Double {
+        get { end }
+        set { end = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY),
+                    radius: min(rect.width, rect.height) / 2,
+                    startAngle: .degrees(start - 90),
+                    endAngle: .degrees(end - 90),
+                    clockwise: false)
+        return path
     }
 }

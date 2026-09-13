@@ -44,6 +44,10 @@ struct ContentView: View {
                         ProgressRing(
                             consumed: store.consumedToday,
                             goal: store.adaptedTodayGoal,
+                            macros: store.macrosToday,
+                            proteinTarget: store.proteinTarget,
+                            fatTarget: store.fatTarget,
+                            carbsTarget: store.carbsTarget,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true

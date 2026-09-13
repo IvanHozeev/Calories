@@ -827,7 +827,11 @@ struct Plan: Codable, Equatable {
 
     init(startDate: Date, startWeightKg: Double, phases: [PlanPhase],
          cyclingEnabled: Bool = false, weekendStyle: WeekendStyle = .satSun) {
-        self.startDate = startDate
+        // Старт — начало суток, а не момент нажатия. Норму на день считают от
+        // полуночи, и план, запущенный вечером, в первый день каждой новой
+        // недели для «Сегодня» ещё числился в прошлой: брейк на экране плана
+        // уже шёл, а кольцо показывало дефицит.
+        self.startDate = Calendar.current.startOfDay(for: startDate)
         self.startWeightKg = startWeightKg
         self.phases = phases.isEmpty ? [PlanPhase(intent: .maintenance, durationWeeks: 8)] : phases
         self.cyclingEnabled = cyclingEnabled
@@ -865,7 +869,8 @@ struct Plan: Codable, Equatable {
     // штуки, и человек с активной сушкой не обнаружит, что она исчезла.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        startDate = try container.decode(Date.self, forKey: .startDate)
+        // Сохранённые раньше планы несут время запуска — приводим к началу суток.
+        startDate = Calendar.current.startOfDay(for: try container.decode(Date.self, forKey: .startDate))
         startWeightKg = try container.decode(Double.self, forKey: .startWeightKg)
         cyclingEnabled = try container.decodeIfPresent(Bool.self, forKey: .cyclingEnabled) ?? false
         weekendStyle = try container.decodeIfPresent(WeekendStyle.self, forKey: .weekendStyle) ?? .satSun

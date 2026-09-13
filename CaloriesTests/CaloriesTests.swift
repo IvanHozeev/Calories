@@ -3217,6 +3217,24 @@ struct DietBreakTests {
         #expect(p.refeedSwapDay(for: tuesday) == nil)
     }
 
+    @Test func breakStartsAtMidnight_evenForAPlanStartedInTheEvening() {
+        // План запустили в 20:00. Для нормы на день брейк должен идти с полуночи
+        // первого дня пятой недели, а не с 20:00.
+        let evening = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: start)!
+        let p = Plan(startDate: evening, startWeightKg: 80,
+                     phases: [PlanPhase(intent: .cut, durationWeeks: 12, weeklyRatePercent: 0.5, dietBreakEvery: 4)])
+        let breakMidnight = calendar.startOfDay(for: week(4))
+        #expect(p.isDietBreak(on: breakMidnight))
+        #expect(!p.isDietBreak(on: calendar.date(byAdding: .minute, value: -1, to: breakMidnight)!))
+    }
+
+    @Test func storedPlanStartIsNormalisedToMidnight() throws {
+        let evening = calendar.date(bySettingHour: 20, minute: 0, second: 0, of: start)!
+        let p = Plan(startDate: evening, startWeightKg: 80, phases: [PlanPhase(intent: .cut, durationWeeks: 8)])
+        let decoded = try JSONDecoder().decode(Plan.self, from: JSONEncoder().encode(p))
+        #expect(decoded.startDate == calendar.startOfDay(for: evening))
+    }
+
     @Test func title_staysCutWithBreaks() {
         let p = plan().startingDietBreak(from: week(2, plus: 1), weeks: 1)
         #expect(p.title == plan().title)

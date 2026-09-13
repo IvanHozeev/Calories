@@ -72,6 +72,13 @@
 			);
 			target = 544F0651303723AC00D4693B /* CaloriesWidgetExtension */;
 		};
+		54C0FFEE303723AF00D46A01 /* Exceptions for "Calories" folder in "Calories" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 547895C4302B3D4C00C36433 /* Calories */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -85,6 +92,9 @@
 		};
 		547895C7302B3D4C00C36433 /* Calories */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				54C0FFEE303723AF00D46A01 /* Exceptions for "Calories" folder in "Calories" target */,
+			);
 			path = Calories;
 			sourceTree = "<group>";
 		};
@@ -596,6 +606,7 @@
 				DEVELOPMENT_TEAM = 8M6PB5S8BZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Calories/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
@@ -603,7 +614,6 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -640,6 +650,7 @@
 				DEVELOPMENT_TEAM = 8M6PB5S8BZ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Calories/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
@@ -647,7 +658,6 @@
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";

@@ -306,7 +306,7 @@ struct ContentView: View {
             .refreshable {
                 store.refresh()
                 ringSpinTicket += 1
-                try? await Task.sleep(for: .seconds(1.2))
+                try? await Task.sleep(for: .seconds(ProgressRing.refreshHold))
             }
             .navigationDestination(for: FoodEntry.self) { entry in
                 EditEntrySheet(store: store, entry: entry, isEmbedded: true)

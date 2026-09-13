@@ -52,7 +52,7 @@ struct RingView<Label: View>: View {
             .compositingGroup()
             .rotationEffect(.degrees(turn))
             .onChange(of: spinTicket) { _, _ in
-                withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: 1.2)) {
+                withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: ProgressRing.spinDuration)) {
                     turn += 360
                 } completion: {
                     var instant = Transaction()
@@ -103,7 +103,11 @@ struct ProgressRing: View {
     let onOpen: () -> Void
 
     @State private var turn: Double = 0
-    @State private var spinning = false
+    /// Кольцо не слушает палец: идёт оборот, или после него список ещё не
+    /// вернулся в покой. Место под скрытым спиннером держит список стянутым,
+    /// пока идёт обновление, и без этой паузы кольцо откручивалось назад
+    /// вместе с возвращающимся списком.
+    @State private var ignoresPull = false
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -130,6 +134,12 @@ struct ProgressRing: View {
     private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
     private static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
 
+    /// Оборот длиннее, чем держится обновление (`refreshHold`): после него
+    /// система ещё с полсекунды возвращает список наверх, и кольцо должно
+    /// докрутиться вместе с этим возвратом, а не встать раньше и ждать.
+    static let spinDuration = 1.6
+    static let refreshHold = 1.15
+
     /// Оборот на обновление: с того угла, где кольцо оставил палец, вперёд
     /// до полного оборота и ещё один. Назад оно не крутится никогда — поэтому
     /// угол от пальца сначала переносится в оборот, а список возвращается на
@@ -139,15 +149,16 @@ struct ProgressRing: View {
         instant.disablesAnimations = true
         withTransaction(instant) {
             turn += pullAngle
-            spinning = true
+            ignoresPull = true
         }
         let target = (ceil(turn / 360) + 1) * 360
-        withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: 1.2)) {
+        withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: Self.spinDuration)) {
             turn = target
         } completion: {
             withTransaction(instant) {
                 turn = 0
-                spinning = false
+                // Список мог уже вернуться — тогда палец снова слушаем сразу.
+                if pullAngle < 1 { ignoresPull = false }
             }
         }
     }
@@ -218,8 +229,12 @@ struct ProgressRing: View {
             // и на обороте цвета размазывались друг по другу. Склеенное кольцо
             // поворачивается как цельная картинка.
             .compositingGroup()
-            .rotationEffect(.degrees(Self.rotation + turn + (spinning ? 0 : pullAngle)))
+            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? 0 : pullAngle)))
             .onChange(of: spinTicket) { _, _ in spin() }
+            .onChange(of: pullAngle) { _, angle in
+                // Меньше градуса — уже покой: отскок списка редко останавливается ровно в ноль.
+                if angle < 1, turn == 0 { ignoresPull = false }
+            }
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 

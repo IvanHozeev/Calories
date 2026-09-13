@@ -74,7 +74,7 @@ final class StepsViewModel {
         store.fetchAll()
         refreshTicket += 1
         // Ждём оборот: без спиннера конец обновления виден только по кольцу.
-        try? await Task.sleep(for: .seconds(1.2))
+        try? await Task.sleep(for: .seconds(ProgressRing.refreshHold))
     }
 }
 

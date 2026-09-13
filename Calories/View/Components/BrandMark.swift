@@ -110,14 +110,14 @@ private struct MarkArc: Shape {
 /// Продолжение лаунч-скрина: тот же фон и тот же знак на том же месте.
 ///
 /// Размеры повторяют картинку лаунч-скрина (Tools/brand_assets.swift): знак
-/// 150 pt по центру экрана без учёта безопасных зон. Иначе на стыке двух
-/// экранов знак бы прыгал.
+/// 230 pt — как кольцо на «Сегодня» — по центру экрана без учёта безопасных
+/// зон. Иначе на стыке двух экранов знак бы прыгал.
 struct SplashView: View {
     var body: some View {
         ZStack {
             Color("LaunchBackground")
             BrandMark(animated: true)
-                .frame(width: 150, height: 150)
+                .frame(width: 230, height: 230)
         }
         .ignoresSafeArea()
     }

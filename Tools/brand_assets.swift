@@ -151,15 +151,15 @@ do {
     save(ctx, "AppIcon-tinted.png")
 }
 
-// Лаунч-скрин: одна «С», без названия, нарисованная как кольцо на «Сегодня» —
-// тонкие дуги в пропорции 18 к 230, мягкие цвета, едва заметное свечение, без
-// объёма. Следующим кадром запуска её может сменить такая же анимированная.
-// 200×200 pt, знак 150 pt в поперечнике, остальное — поле под свечение.
+// Лаунч-скрин: одна «С», без названия, того же размера и толщины, что кольцо
+// на «Сегодня» (230 pt, дуга 18 pt), мягкие цвета, едва заметное свечение, без
+// объёма. Следом её сменяет такая же анимированная (SplashView).
+// 270×270 pt: знак 230 pt в поперечнике, остальное — поле под свечение.
 func launch(scale: CGFloat, dark: Bool, name: String) {
-    let side = 200 * scale
+    let side = 270 * scale
     let ctx = context(Int(side), Int(side), opaque: false)
-    let diameter = 150 * scale
-    let width = diameter * 18 / 230
+    let diameter = 230 * scale
+    let width = 18 * scale
     drawC(ctx, center: CGPoint(x: side / 2, y: side / 2), radius: (diameter - width) / 2, width: width,
           parts: parts, glow: width * 0.7, glowAlpha: dark ? 0.35 : 0.25, sheen: false, opening: 60, gap: 16)
     save(ctx, name)

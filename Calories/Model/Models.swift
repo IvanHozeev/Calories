@@ -323,6 +323,23 @@ enum ActivityLevel: String, Codable, CaseIterable, Identifiable {
         case .veryActive: return 1.9
         }
     }
+
+    /// Сколько шагов в день оправдывают этот уровень.
+    ///
+    /// Уровень — это обещание: множитель к BMR выдаёт калории под заявленную
+    /// активность, и если её нет, дефицит на бумаге не случается в жизни.
+    /// Шаги — единственная часть этого обещания, которую телефон видит сам,
+    /// поэтому цель по ним и есть проверка. Лестница — классические пороги
+    /// Тюдор-Локе (5 000 сидячий … 12 500 очень активный) с шагом 2 500.
+    var stepTarget: Int {
+        switch self {
+        case .sedentary: return 5_000
+        case .light: return 7_500
+        case .moderate: return 10_000
+        case .active: return 12_500
+        case .veryActive: return 15_000
+        }
+    }
 }
 
 enum Goal: String, Codable, CaseIterable, Identifiable {

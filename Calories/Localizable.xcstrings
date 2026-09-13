@@ -4,6 +4,98 @@
     "" : {
       "shouldTranslate" : false
     },
+    "По уровню активности" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسب مستوى النشاط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach Aktivitätslevel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match activity level"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según el nivel de actividad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon le niveau d’activité"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי רמת הפעילות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo nível de atividade"
+          }
+        }
+      }
+    },
+    "Столько шагов оправдывают уровень «%@». Меньше — и норма калорий считает активность, которой не было." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هذا عدد الخطوات الذي يبرر مستوى «%@». أقل من ذلك — وحساب السعرات يفترض نشاطًا لم يحدث."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So viele Schritte rechtfertigen das Level „%@“. Weniger – und dein Kalorienziel rechnet mit Aktivität, die es nicht gab."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This many steps back up the “%@” level. Fewer, and your calorie target counts activity that never happened."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estos pasos justifican el nivel «%@». Con menos, tu objetivo de calorías cuenta actividad que no hubo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C’est le nombre de pas qui justifie le niveau « %@ ». En dessous, ton objectif calorique compte une activité qui n’a pas eu lieu."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "זה מספר הצעדים שמצדיק את הרמה „%@“. פחות מזה — ויעד הקלוריות מחשב פעילות שלא הייתה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esses passos justificam o nível «%@». Menos que isso, e sua meta de calorias conta uma atividade que não aconteceu."
+          }
+        }
+      }
+    },
     "—" : {
       "shouldTranslate" : false
     },

@@ -24,6 +24,8 @@ struct FoodRow: View {
     /// «Богат белком» — свойство продукта, а не порции: иначе один и тот же
     /// творог в разных списках то подсвечен, то нет.
     var leadingMacros: Macros? = nil
+    /// Свойства продукта: можно много, термический эффект, легко переесть.
+    var traits: [FoodTrait] = []
 
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
 
@@ -54,8 +56,18 @@ struct FoodRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(name)
-                    .lineLimit(2)
+                // Значки свойств — рядом с названием: это про сам продукт,
+                // а не про порцию, и читаются они до цифр.
+                HStack(alignment: .firstTextBaseline, spacing: 5) {
+                    Text(name)
+                        .lineLimit(2)
+                    ForEach(traits) { trait in
+                        Image(systemName: trait.symbol)
+                            .font(.caption)
+                            .foregroundStyle(trait.color)
+                            .accessibilityLabel(Text(verbatim: trait.title))
+                    }
+                }
 
                 // Та же строка подписей, что и в дневнике: ячейки продукта
                 // должны читаться одинаково, где бы они ни стояли.
@@ -127,5 +139,33 @@ struct FoodRow: View {
         // Разделитель начинается от края содержимого — там же, где полоска,
         // а не от названия, отодвинутого под неё.
         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+    }
+}
+
+/// Свойства продукта строками с пояснением — для экрана порции.
+struct FoodTraitsSection: View {
+    let traits: [FoodTrait]
+
+    var body: some View {
+        if !traits.isEmpty {
+            Section {
+                ForEach(traits) { trait in
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(verbatim: trait.title)
+                                .font(.subheadline.weight(.semibold))
+                            Text(verbatim: trait.explanation)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    } icon: {
+                        Image(systemName: trait.symbol)
+                            .foregroundStyle(trait.color)
+                    }
+                    .padding(.vertical, 2)
+                }
+            }
+        }
     }
 }

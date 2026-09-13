@@ -539,12 +539,10 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        openAddEntry(in: app)
-
-        // Поле «только калории» убрано с экрана: оно мешало всё остальное время,
-        // и теперь открывается из меню на плюсе.
-        let addMenu = app.buttons["addMoreMenu"]
-        XCTAssertTrue(addMenu.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
+        // «Только калории» живёт в плюсе на «Сегодня», рядом с остальными
+        // способами что-то записать.
+        let addMenu = app.buttons["addMenu"]
+        XCTAssertTrue(addMenu.waitForExistence(timeout: 5), "Нет плюса на «Сегодня»")
         addMenu.tap()
         app.buttons["Calories only"].tap()
 

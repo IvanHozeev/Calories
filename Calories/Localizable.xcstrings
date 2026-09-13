@@ -4,1014 +4,48 @@
     "" : {
       "shouldTranslate" : false
     },
-    "%lld : 1" : {
+    "Распознавание фото" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "التعرّف على الصور"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "Fotoerkennung"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "Photo recognition"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "Reconocimiento de fotos"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "Reconnaissance photo"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
+            "value" : "זיהוי תמונות"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld : 1"
-          }
-        }
-      }
-    },
-    "«Вручную» — брейк берёшь сам, когда нужен, на экране плана. «4 : 1» — неделя поддержания после каждых четырёх недель дефицита, приложение ставит её само; взять внеплановый брейк можно и так. Срок фазы — недели дефицита, брейки добавляются к нему." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "«يدويًا» — تأخذ الاستراحة بنفسك عند الحاجة من شاشة الخطة. «4 : 1» — أسبوع صيانة بعد كل أربعة أسابيع عجز، يضعه التطبيق تلقائيًا؛ ويمكنك مع ذلك أخذ استراحة إضافية. مدة المرحلة هي أسابيع العجز، والاستراحات تُضاف إليها."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„Manuell“ – du nimmst die Pause selbst, wenn du sie brauchst, auf dem Planbildschirm. „4 : 1“ – eine Woche Erhaltung nach je vier Wochen Defizit, die App plant sie selbst ein; eine außerplanmäßige Pause geht trotzdem. Die Phasendauer zählt Defizitwochen, Pausen kommen hinzu."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“Manual” — you take a break yourself when you need one, on the plan screen. “4 : 1” — a maintenance week after every four weeks of deficit, placed by the app; you can still take an extra break. The phase length counts deficit weeks; breaks are added on top."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "«Manual»: tomas el descanso tú mismo cuando lo necesitas, en la pantalla del plan. «4 : 1»: una semana de mantenimiento cada cuatro semanas de déficit, la app la coloca sola; aun así puedes tomar un descanso extra. La duración de la fase son semanas de déficit; los descansos se suman."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "« Manuel » : tu prends la pause toi-même quand il faut, sur l’écran du plan. « 4 : 1 » : une semaine de maintien après chaque quatre semaines de déficit, placée par l’app ; tu peux quand même prendre une pause en plus. La durée de la phase compte les semaines de déficit, les pauses s’y ajoutent."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„ידני“ — אתה לוקח הפסקה בעצמך כשצריך, במסך התוכנית. „4 : 1“ — שבוע תחזוקה אחרי כל ארבעה שבועות גירעון, האפליקציה קובעת אותו לבד; אפשר עדיין לקחת הפסקה נוספת. אורך השלב נספר בשבועות גירעון, וההפסקות מתווספות אליו."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "«Manual» — você faz a pausa quando precisar, na tela do plano. «4 : 1» — uma semana de manutenção a cada quatro semanas de déficit, colocada pelo app; ainda dá para fazer uma pausa extra. A duração da fase conta semanas de déficit; as pausas são somadas."
-          }
-        }
-      }
-    },
-    "Брейк запланирован" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحة مجدولة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause geplant"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Break scheduled"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descanso programado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause prévue"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקה מתוכננת"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa agendada"
-          }
-        }
-      }
-    },
-    "Вернуть рефид на его день" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إعادة يوم التحميل إلى يومه"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed auf seinen Tag zurücklegen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move refeed back to its day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Devolver el refeed a su día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remettre le refeed à son jour"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "להחזיר את הריפיד ליומו"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Devolver o refeed ao seu dia"
-          }
-        }
-      }
-    },
-    "Взять брейк" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أخذ استراحة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause einlegen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Take a break"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tomar un descanso"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Faire une pause"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לקחת הפסקה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fazer uma pausa"
-          }
-        }
-      }
-    },
-    "Вручную" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يدويًا"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuell"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manual"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manual"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manuel"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ידני"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Manual"
-          }
-        }
-      }
-    },
-    "Дефицит вернётся" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يعود العجز"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Defizit kehrt zurück"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deficit resumes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vuelve el déficit"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retour du déficit"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הגירעון חוזר"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O déficit volta"
-          }
-        }
-      }
-    },
-    "Диет-брейк" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحة الحمية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diätpause"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diet break"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descanso de dieta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause diète"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקת דיאטה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa na dieta"
-          }
-        }
-      }
-    },
-    "Диет-брейки" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحات الحمية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diätpausen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diet breaks"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descansos de dieta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pauses diète"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקות דיאטה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausas na dieta"
-          }
-        }
-      }
-    },
-    "Идёт брейк" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الاستراحة جارية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause läuft"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Break in progress"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descanso en curso"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause en cours"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההפסקה פעילה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa em andamento"
-          }
-        }
-      }
-    },
-    "Идёт диет-брейк. Плюс на весах сейчас — вода и гликоген, а не жир; план по весу оценим, когда вернётся дефицит." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحة الحمية جارية. الزيادة على الميزان الآن ماء وجليكوجين وليست دهونًا؛ سنقيّم الخطة بالوزن عندما يعود العجز."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diätpause läuft. Das Plus auf der Waage ist jetzt Wasser und Glykogen, kein Fett; den Plan bewerten wir wieder, wenn das Defizit zurück ist."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diet break in progress. The gain on the scale right now is water and glycogen, not fat; we’ll judge the plan by weight once the deficit is back."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descanso de dieta en curso. Lo que sube en la báscula ahora es agua y glucógeno, no grasa; evaluaremos el plan por el peso cuando vuelva el déficit."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause diète en cours. La hausse sur la balance, c’est de l’eau et du glycogène, pas de la graisse ; on jugera le plan au poids quand le déficit reprendra."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקת דיאטה פעילה. העלייה במשקל כרגע היא מים וגליקוגן, לא שומן; נעריך את התוכנית לפי המשקל כשהגירעון יחזור."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa na dieta em andamento. O aumento na balança agora é água e glicogênio, não gordura; vamos avaliar o plano pelo peso quando o déficit voltar."
-          }
-        }
-      }
-    },
-    "На 1 неделю" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لأسبوع واحد"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für 1 Woche"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For 1 week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por 1 semana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pour 1 semaine"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לשבוע אחד"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por 1 semana"
-          }
-        }
-      }
-    },
-    "На 2 недели" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لأسبوعين"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für 2 Wochen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For 2 weeks"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por 2 semanas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pour 2 semaines"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לשבועיים"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Por 2 semanas"
-          }
-        }
-      }
-    },
-    "Начнётся" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تبدأ"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beginnt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starts"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empieza"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Commence"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מתחילה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Começa"
-          }
-        }
-      }
-    },
-    "Начнётся %@" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تبدأ %@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beginnt %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Starts %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Empieza %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Commence %@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מתחילה %@"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Começa %@"
-          }
-        }
-      }
-    },
-    "Неделя-две на поддержании посреди дефицита. Убрать брейк — смахни его в списке фаз." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أسبوع أو اثنان على الصيانة وسط العجز. لإزالة الاستراحة اسحبها في قائمة المراحل."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein, zwei Wochen Erhaltung mitten im Defizit. Zum Entfernen die Pause in der Phasenliste wegwischen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A week or two at maintenance in the middle of a deficit. To remove the break, swipe it away in the phase list."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una o dos semanas en mantenimiento en medio del déficit. Para quitar el descanso, deslízalo en la lista de fases."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une ou deux semaines au maintien au milieu du déficit. Pour retirer la pause, balaie-la dans la liste des phases."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שבוע-שבועיים בתחזוקה באמצע גירעון. כדי להסיר את ההפסקה, החלק אותה ברשימת השלבים."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma ou duas semanas em manutenção no meio do déficit. Para remover a pausa, deslize-a na lista de fases."
-          }
-        }
-      }
-    },
-    "Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أسبوع أو اثنان على الصيانة. تُفقد الدهون بنفس القدر، لكن الجوع والرغبة في الانهيار أقل بكثير. تبدأ الاستراحة مع بداية أسبوع الخطة، ويتأخر الانتهاء بطولها، والوزن المستهدف لا يتغير."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein, zwei Wochen Erhaltung. Fett geht in der Diät genauso verloren, Hunger und Rückfallgefahr sind aber deutlich geringer. Die Pause beginnt mit einer Planwoche, das Ende verschiebt sich um ihre Länge, das Zielgewicht bleibt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A week or two at maintenance. Fat comes off just the same over the cut, with noticeably less hunger and urge to cave. The break starts at the beginning of a plan week, the finish moves by its length, the target weight stays."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una o dos semanas en mantenimiento. La grasa se pierde igual durante la definición, con mucha menos hambre y ganas de romper la dieta. El descanso empieza al inicio de una semana del plan, el final se retrasa lo que dure y el peso objetivo no cambia."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une ou deux semaines au maintien. La graisse part tout autant sur la sèche, avec nettement moins de faim et d’envie de craquer. La pause commence en début de semaine du plan, la fin recule d’autant, le poids cible ne change pas."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שבוע-שבועיים בתחזוקה. השומן יורד באותה מידה, והרעב והדחף להישבר נמוכים בהרבה. ההפסקה מתחילה בתחילת שבוע בתוכנית, הסיום זז באורכה, ומשקל היעד לא משתנה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma ou duas semanas em manutenção. A gordura sai igual no cutting, com bem menos fome e vontade de chutar o balde. A pausa começa no início de uma semana do plano, o fim é adiado pelo seu tamanho e o peso-alvo não muda."
-          }
-        }
-      }
-    },
-    "Праздник не в тот день — перенеси рефид на сегодня. Он меняется местами с самым сытным днём, что ещё впереди на этой неделе, так что недельный дефицит не меняется. Со следующего понедельника — обычная раскладка." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "العطلة ليست في يوم التحميل؟ انقل يوم التحميل إلى اليوم. يتبادل مع أكبر يوم متبقٍ هذا الأسبوع، فيبقى العجز الأسبوعي كما هو. من الاثنين القادم يعود التوزيع المعتاد."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feiertag am falschen Tag? Leg den Refeed auf heute. Er tauscht mit dem größten noch kommenden Tag dieser Woche, das Wochendefizit bleibt gleich. Ab nächstem Montag gilt wieder die normale Verteilung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Holiday on the wrong day? Move the refeed to today. It swaps with the biggest day still ahead this week, so the weekly deficit stays the same. Next Monday the usual layout returns."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Festivo en otro día? Pasa el refeed a hoy. Se intercambia con el día más alto que queda esta semana, así que el déficit semanal no cambia. Desde el próximo lunes vuelve el reparto habitual."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jour férié au mauvais moment ? Déplace le refeed à aujourd’hui. Il s’échange avec le jour le plus copieux encore à venir cette semaine, le déficit hebdomadaire reste le même. Dès lundi prochain, la répartition habituelle revient."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "החג לא ביום הריפיד? העבר את הריפיד להיום. הוא מתחלף עם היום הגדול ביותר שעוד נותר השבוע, כך שהגירעון השבועי לא משתנה. מיום שני הבא — החלוקה הרגילה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feriado no dia errado? Passe o refeed para hoje. Ele troca de lugar com o maior dia que ainda falta na semana, então o déficit semanal não muda. A partir da próxima segunda, volta a distribuição normal."
-          }
-        }
-      }
-    },
-    "Рефид сегодня" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يوم التحميل اليوم"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed heute"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed today"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed hoy"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed aujourd’hui"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ריפיד היום"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refeed hoje"
-          }
-        }
-      }
-    },
-    "Следующий по плану" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التالية حسب الخطة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nächste laut Plan"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next scheduled"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próximo según el plan"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prochaine prévue"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הבאה לפי התוכנית"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Próxima pelo plano"
-          }
-        }
-      }
-    },
-    "Убрать брейк" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إزالة الاستراحة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause entfernen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remove break"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quitar descanso"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retirer la pause"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "להסיר הפסקה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remover pausa"
-          }
-        }
-      }
-    },
-    "брейк %lld : 1" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحة %lld : 1"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause %lld : 1"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "break %lld : 1"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "descanso %lld : 1"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pause %lld : 1"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקה %lld : 1"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pausa %lld : 1"
+            "value" : "Reconhecimento de fotos"
           }
         }
       }
@@ -1071,6 +105,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "· %@"
+          }
+        }
+      }
+    },
+    "«Вручную» — брейк берёшь сам, когда нужен, на экране плана. «4 : 1» — неделя поддержания после каждых четырёх недель дефицита, приложение ставит её само; взять внеплановый брейк можно и так. Срок фазы — недели дефицита, брейки добавляются к нему." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«يدويًا» — تأخذ الاستراحة بنفسك عند الحاجة من شاشة الخطة. «4 : 1» — أسبوع صيانة بعد كل أربعة أسابيع عجز، يضعه التطبيق تلقائيًا؛ ويمكنك مع ذلك أخذ استراحة إضافية. مدة المرحلة هي أسابيع العجز، والاستراحات تُضاف إليها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Manuell“ – du nimmst die Pause selbst, wenn du sie brauchst, auf dem Planbildschirm. „4 : 1“ – eine Woche Erhaltung nach je vier Wochen Defizit, die App plant sie selbst ein; eine außerplanmäßige Pause geht trotzdem. Die Phasendauer zählt Defizitwochen, Pausen kommen hinzu."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Manual” — you take a break yourself when you need one, on the plan screen. “4 : 1” — a maintenance week after every four weeks of deficit, placed by the app; you can still take an extra break. The phase length counts deficit weeks; breaks are added on top."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Manual»: tomas el descanso tú mismo cuando lo necesitas, en la pantalla del plan. «4 : 1»: una semana de mantenimiento cada cuatro semanas de déficit, la app la coloca sola; aun así puedes tomar un descanso extra. La duración de la fase son semanas de déficit; los descansos se suman."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« Manuel » : tu prends la pause toi-même quand il faut, sur l’écran du plan. « 4 : 1 » : une semaine de maintien après chaque quatre semaines de déficit, placée par l’app ; tu peux quand même prendre une pause en plus. La durée de la phase compte les semaines de déficit, les pauses s’y ajoutent."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„ידני“ — אתה לוקח הפסקה בעצמך כשצריך, במסך התוכנית. „4 : 1“ — שבוע תחזוקה אחרי כל ארבעה שבועות גירעון, האפליקציה קובעת אותו לבד; אפשר עדיין לקחת הפסקה נוספת. אורך השלב נספר בשבועות גירעון, וההפסקות מתווספות אליו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Manual» — você faz a pausa quando precisar, na tela do plano. «4 : 1» — uma semana de manutenção a cada quatro semanas de déficit, colocada pelo app; ainda dá para fazer uma pausa extra. A duração da fase conta semanas de déficit; as pausas são somadas."
           }
         }
       }
@@ -1216,6 +296,52 @@
     },
     "%lld" : {
       "shouldTranslate" : false
+    },
+    "%lld : 1" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld : 1"
+          }
+        }
+      }
     },
     "%lld %@" : {
       "extractionState" : "manual",
@@ -5078,6 +4204,52 @@
         }
       }
     },
+    "Больше половины калорий — белок. На его переваривание уходит около четверти его энергии." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أكثر من نصف السعرات من البروتين. هضمه يستهلك نحو ربع طاقته."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über die Hälfte der Kalorien ist Protein. Seine Verdauung verbraucht etwa ein Viertel seiner Energie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over half the calories are protein. Digesting it burns about a quarter of its energy."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más de la mitad de las calorías son proteína. Digerirla consume cerca de una cuarta parte de su energía."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus de la moitié des calories viennent des protéines. Les digérer consomme environ un quart de leur énergie."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יותר ממחצית הקלוריות הן חלבון. העיכול שלו שורף כרבע מהאנרגיה שלו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais da metade das calorias é proteína. Digeri-la consome cerca de um quarto da sua energia."
+          }
+        }
+      }
+    },
     "Большинство выводов считается по паре обхватов. Сними ещё несколько — талию, пояс, шею и запястье, они дают больше всего." : {
       "localizations" : {
         "ar" : {
@@ -5166,6 +4338,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sopa de beterraba, peito de frango com arroz..."
+          }
+        }
+      }
+    },
+    "брейк %lld : 1" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحة %lld : 1"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause %lld : 1"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "break %lld : 1"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "descanso %lld : 1"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pause %lld : 1"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקה %lld : 1"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pausa %lld : 1"
+          }
+        }
+      }
+    },
+    "Брейк запланирован" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحة مجدولة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause geplant"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Break scheduled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descanso programado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause prévue"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקה מתוכננת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausa agendada"
           }
         }
       }
@@ -5637,10 +4901,6 @@
       }
     },
     "В мои продукты" : {
-
-    },
-    "В мои продукты" : {
-      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5663,7 +4923,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A mis alimentos"
+            "value" : "A mis productos"
           }
         },
         "fr" : {
@@ -6193,6 +5453,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada foi medido nesta sessão"
+          }
+        }
+      }
+    },
+    "Вернуть рефид на его день" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة يوم التحميل إلى يومه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed auf seinen Tag zurücklegen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move refeed back to its day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devolver el refeed a su día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre le refeed à son jour"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להחזיר את הריפיד ליומו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devolver o refeed ao seu dia"
           }
         }
       }
@@ -7318,6 +6624,52 @@
         }
       }
     },
+    "Взять брейк" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أخذ استراحة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause einlegen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take a break"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomar un descanso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faire une pause"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לקחת הפסקה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer uma pausa"
+          }
+        }
+      }
+    },
     "Вид" : {
       "localizations" : {
         "ar" : {
@@ -8329,6 +7681,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No nível da estrutura"
+          }
+        }
+      }
+    },
+    "Вручную" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يدويًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuell"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuel"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ידני"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual"
           }
         }
       }
@@ -10934,6 +10332,144 @@
         }
       }
     },
+    "Дефицит вернётся" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يعود العجز"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defizit kehrt zurück"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deficit resumes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vuelve el déficit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour du déficit"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגירעון חוזר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O déficit volta"
+          }
+        }
+      }
+    },
+    "Диет-брейк" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحة الحمية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diätpause"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diet break"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descanso de dieta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause diète"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקת דיאטה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausa na dieta"
+          }
+        }
+      }
+    },
+    "Диет-брейки" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحات الحمية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diätpausen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diet breaks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descansos de dieta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauses diète"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקות דיאטה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausas na dieta"
+          }
+        }
+      }
+    },
     "Динамика" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13250,6 +12786,52 @@
         }
       }
     },
+    "Жирное вместе с углеводным и калорийное: такое съедается незаметно и не насыщает." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دهون مع كربوهيدرات وسعرات عالية: يُؤكل دون أن تشعر ولا يُشبع."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett und Kohlenhydrate zusammen und kalorienreich: isst sich unbemerkt und sättigt nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat and carbs together, and calorie-dense: it goes down unnoticed and doesn’t fill you up."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa y carbohidratos juntos y muy calórico: se come sin darte cuenta y no sacia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gras et glucides ensemble, et calorique : ça se mange sans s’en rendre compte et ne rassasie pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן ופחמימות יחד ועתיר קלוריות: נאכל בלי לשים לב ולא משביע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura e carboidrato juntos e calórico: desce sem perceber e não sacia."
+          }
+        }
+      }
+    },
     "Жиром — %d%% изменения веса." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14971,6 +14553,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proporção áurea"
+          }
+        }
+      }
+    },
+    "Идёт брейк" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاستراحة جارية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause läuft"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Break in progress"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descanso en curso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause en cours"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההפסקה פעילה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausa em andamento"
+          }
+        }
+      }
+    },
+    "Идёт диет-брейк. Плюс на весах сейчас — вода и гликоген, а не жир; план по весу оценим, когда вернётся дефицит." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحة الحمية جارية. الزيادة على الميزان الآن ماء وجليكوجين وليست دهونًا؛ سنقيّم الخطة بالوزن عندما يعود العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diätpause läuft. Das Plus auf der Waage ist jetzt Wasser und Glykogen, kein Fett; den Plan bewerten wir wieder, wenn das Defizit zurück ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diet break in progress. The gain on the scale right now is water and glycogen, not fat; we’ll judge the plan by weight once the deficit is back."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descanso de dieta en curso. Lo que sube en la báscula ahora es agua y glucógeno, no grasa; evaluaremos el plan por el peso cuando vuelva el déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause diète en cours. La hausse sur la balance, c’est de l’eau et du glycogène, pas de la graisse ; on jugera le plan au poids quand le déficit reprendra."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקת דיאטה פעילה. העלייה במשקל כרגע היא מים וגליקוגן, לא שומן; נעריך את התוכנית לפי המשקל כשהגירעון יחזור."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausa na dieta em andamento. O aumento na balança agora é água e glicogênio, não gordura; vamos avaliar o plano pelo peso quando o déficit voltar."
           }
         }
       }
@@ -18827,6 +18501,52 @@
         }
       }
     },
+    "Легко переесть" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سهل الإفراط فيه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leicht zu viel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Easy to overeat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fácil de comer de más"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facile d’en abuser"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קל לאכול יותר מדי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fácil de comer demais"
+          }
+        }
+      }
+    },
     "Лисички" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -19525,6 +19245,98 @@
         }
       }
     },
+    "Меньше 30 ккал на 100 г: объём и сытость почти даром." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أقل من 30 سعرة لكل 100 غ: حجم وشبع شبه مجاني."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unter 30 kcal pro 100 g: Volumen und Sättigung fast umsonst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under 30 kcal per 100 g: volume and fullness almost for free."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos de 30 kcal por 100 g: volumen y saciedad casi gratis."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins de 30 kcal pour 100 g : du volume et de la satiété presque gratuits."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחות מ-30 קק״ל ל-100 ג׳: נפח ושובע כמעט בחינם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos de 30 kcal por 100 g: volume e saciedade quase de graça."
+          }
+        }
+      }
+    },
+    "Меньше 60 ккал на 100 г: можно есть много и остаться в норме." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أقل من 60 سعرة لكل 100 غ: يمكنك أن تأكل كثيرًا وتبقى ضمن الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unter 60 kcal pro 100 g: viel essen und im Ziel bleiben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Under 60 kcal per 100 g: you can eat a lot and stay on target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos de 60 kcal por 100 g: puedes comer mucho y seguir en tu objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moins de 60 kcal pour 100 g : on peut en manger beaucoup et rester dans l’objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחות מ-60 קק״ל ל-100 ג׳: אפשר לאכול הרבה ולהישאר ביעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menos de 60 kcal por 100 g: dá para comer muito e continuar na meta."
+          }
+        }
+      }
+    },
     "Меньше соли. Соль — главный двигатель жажды, и солёный ужин накануне ощущается весь следующий день." : {
       "localizations" : {
         "ar" : {
@@ -20134,6 +19946,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As vitaminas podem vir do catálogo"
+          }
+        }
+      }
+    },
+    "Можно много" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكن الإكثار منه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viel essbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eat plenty"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes comer mucho"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À volonté"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר הרבה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode comer bastante"
           }
         }
       }
@@ -20785,6 +20643,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "em %@"
+          }
+        }
+      }
+    },
+    "На 1 неделю" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لأسبوع واحد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für 1 Woche"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For 1 week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por 1 semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour 1 semaine"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לשבוע אחד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por 1 semana"
+          }
+        }
+      }
+    },
+    "На 2 недели" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لأسبوعين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für 2 Wochen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For 2 weeks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por 2 semanas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour 2 semaines"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לשבועיים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por 2 semanas"
           }
         }
       }
@@ -21757,6 +21707,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tipografia"
+          }
+        }
+      }
+    },
+    "Начнётся" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تبدأ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginnt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתחילה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começa"
+          }
+        }
+      }
+    },
+    "Начнётся %@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تبدأ %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginnt %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence %@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתחילה %@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começa %@"
           }
         }
       }
@@ -22774,6 +22816,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semana %d de %d"
+          }
+        }
+      }
+    },
+    "Неделя-две на поддержании посреди дефицита. Убрать брейк — смахни его в списке фаз." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع أو اثنان على الصيانة وسط العجز. لإزالة الاستراحة اسحبها في قائمة المراحل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein, zwei Wochen Erhaltung mitten im Defizit. Zum Entfernen die Pause in der Phasenliste wegwischen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A week or two at maintenance in the middle of a deficit. To remove the break, swipe it away in the phase list."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una o dos semanas en mantenimiento en medio del déficit. Para quitar el descanso, deslízalo en la lista de fases."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une ou deux semaines au maintien au milieu du déficit. Pour retirer la pause, balaie-la dans la liste des phases."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע-שבועיים בתחזוקה באמצע גירעון. כדי להסיר את ההפסקה, החלק אותה ברשימת השלבים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma ou duas semanas em manutenção no meio do déficit. Para remover a pausa, deslize-a na lista de fases."
+          }
+        }
+      }
+    },
+    "Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع أو اثنان على الصيانة. تُفقد الدهون بنفس القدر، لكن الجوع والرغبة في الانهيار أقل بكثير. تبدأ الاستراحة مع بداية أسبوع الخطة، ويتأخر الانتهاء بطولها، والوزن المستهدف لا يتغير."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein, zwei Wochen Erhaltung. Fett geht in der Diät genauso verloren, Hunger und Rückfallgefahr sind aber deutlich geringer. Die Pause beginnt mit einer Planwoche, das Ende verschiebt sich um ihre Länge, das Zielgewicht bleibt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A week or two at maintenance. Fat comes off just the same over the cut, with noticeably less hunger and urge to cave. The break starts at the beginning of a plan week, the finish moves by its length, the target weight stays."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una o dos semanas en mantenimiento. La grasa se pierde igual durante la definición, con mucha menos hambre y ganas de romper la dieta. El descanso empieza al inicio de una semana del plan, el final se retrasa lo que dure y el peso objetivo no cambia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une ou deux semaines au maintien. La graisse part tout autant sur la sèche, avec nettement moins de faim et d’envie de craquer. La pause commence en début de semaine du plan, la fin recule d’autant, le poids cible ne change pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע-שבועיים בתחזוקה. השומן יורד באותה מידה, והרעב והדחף להישבר נמוכים בהרבה. ההפסקה מתחילה בתחילת שבוע בתוכנית, הסיום זז באורכה, ומשקל היעד לא משתנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma ou duas semanas em manutenção. A gordura sai igual no cutting, com bem menos fome e vontade de chutar o balde. A pausa começa no início de uma semana do plano, o fim é adiado pelo seu tamanho e o peso-alvo não muda."
           }
         }
       }
@@ -31271,6 +31405,52 @@
         }
       }
     },
+    "Почти без калорий" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "شبه خالٍ من السعرات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast kalorienfrei"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost no calories"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casi sin calorías"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presque sans calories"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמעט בלי קלוריות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quase sem calorias"
+          }
+        }
+      }
+    },
     "Пояс" : {
       "localizations" : {
         "ar" : {
@@ -31636,6 +31816,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Direita"
+          }
+        }
+      }
+    },
+    "Праздник не в тот день — перенеси рефид на сегодня. Он меняется местами с самым сытным днём, что ещё впереди на этой неделе, так что недельный дефицит не меняется. Со следующего понедельника — обычная раскладка." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العطلة ليست في يوم التحميل؟ انقل يوم التحميل إلى اليوم. يتبادل مع أكبر يوم متبقٍ هذا الأسبوع، فيبقى العجز الأسبوعي كما هو. من الاثنين القادم يعود التوزيع المعتاد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feiertag am falschen Tag? Leg den Refeed auf heute. Er tauscht mit dem größten noch kommenden Tag dieser Woche, das Wochendefizit bleibt gleich. Ab nächstem Montag gilt wieder die normale Verteilung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Holiday on the wrong day? Move the refeed to today. It swaps with the biggest day still ahead this week, so the weekly deficit stays the same. Next Monday the usual layout returns."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Festivo en otro día? Pasa el refeed a hoy. Se intercambia con el día más alto que queda esta semana, así que el déficit semanal no cambia. Desde el próximo lunes vuelve el reparto habitual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour férié au mauvais moment ? Déplace le refeed à aujourd’hui. Il s’échange avec le jour le plus copieux encore à venir cette semaine, le déficit hebdomadaire reste le même. Dès lundi prochain, la répartition habituelle revient."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החג לא ביום הריפיד? העבר את הריפיד להיום. הוא מתחלף עם היום הגדול ביותר שעוד נותר השבוע, כך שהגירעון השבועי לא משתנה. מיום שני הבא — החלוקה הרגילה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feriado no dia errado? Passe o refeed para hoje. Ele troca de lugar com o maior dia que ainda falta na semana, então o déficit semanal não muda. A partir da próxima segunda, volta a distribuição normal."
           }
         }
       }
@@ -34709,6 +34935,52 @@
         }
       }
     },
+    "Рефид сегодня" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم التحميل اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed aujourd’hui"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ריפיד היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed hoje"
+          }
+        }
+      }
+    },
     "Рефид-дни" : {
       "localizations" : {
         "ar" : {
@@ -36698,6 +36970,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esquerda/direita e a diferença. Menos de 1 cm é erro da fita; mais de 2 cm merece atenção."
+          }
+        }
+      }
+    },
+    "Следующий по плану" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التالية حسب الخطة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächste laut Plan"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next scheduled"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo según el plan"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochaine prévue"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבאה לפי התוכנית"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próxima pelo plano"
           }
         }
       }
@@ -39770,6 +40088,52 @@
         }
       }
     },
+    "Термический эффект" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تأثير حراري"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thermischer Effekt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thermic effect"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efecto térmico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effet thermique"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפקט תרמי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Efeito térmico"
+          }
+        }
+      }
+    },
     "Тип" : {
       "localizations" : {
         "ar" : {
@@ -40462,6 +40826,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perto do mínimo. Serve por pouco tempo — no pico da definição, não a fase toda."
+          }
+        }
+      }
+    },
+    "Убрать брейк" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة الاستراحة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove break"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar descanso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer la pause"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להסיר הפסקה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover pausa"
           }
         }
       }

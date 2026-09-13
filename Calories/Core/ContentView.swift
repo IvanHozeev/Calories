@@ -5,7 +5,14 @@ struct ContentView: View {
     var store: CalorieStore
     var stepStore: StepStore
     @State private var showingAdd = false
-    @State private var showingAddWeight = false
+    /// Короткие листы с «Сегодня» — одним модификатором: несколько `.sheet`
+    /// на одной вьюхе спорят, и срабатывает только последний.
+    @State private var todaySheet: TodaySheet?
+
+    enum TodaySheet: String, Identifiable {
+        case weight, quickCalories, newFood
+        var id: String { rawValue }
+    }
     @State private var showingMeasurements = false
     @State private var showingActivity = false
     @State private var showingDayNutrition = false
@@ -27,7 +34,7 @@ struct ContentView: View {
         quickActions.pending = nil
         switch action {
         case .weight:
-            showingAddWeight = true
+            todaySheet = .weight
         case .measurements:
             showingMeasurements = true
         case .meal, .camera, .scanner:
@@ -126,7 +133,7 @@ struct ContentView: View {
                             .buttonStyle(.plain)
                         } else if !store.hasWeighedToday {
                             Button {
-                                showingAddWeight = true
+                                todaySheet = .weight
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "scalemass")
@@ -320,13 +327,30 @@ struct ContentView: View {
                         } label: {
                             Label("Добавить еду", systemImage: "fork.knife")
                         }
-                        // Взвешивание тут же: плюс на «Сегодня» отвечает на вопрос
-                        // «записать сегодняшнее», а вес — такая же сегодняшняя запись,
-                        // как еда. Раньше за ним шли на «Вес» отдельным путём.
+                        // Переехали сюда из плюса на экране приёма пищи: всё, чем
+                        // что-то записывают, собрано в одном меню.
                         Button {
-                            showingAddWeight = true
+                            todaySheet = .quickCalories
+                        } label: {
+                            Label("Только калории", systemImage: "number")
+                        }
+                        Button {
+                            todaySheet = .newFood
+                        } label: {
+                            Label("Новый продукт", systemImage: "plus")
+                        }
+                        Divider()
+                        // Вес и замеры тут же: плюс на «Сегодня» отвечает на вопрос
+                        // «записать сегодняшнее», а тело — такая же запись, как еда.
+                        Button {
+                            todaySheet = .weight
                         } label: {
                             Label("Взвеситься", systemImage: "scalemass")
+                        }
+                        Button {
+                            showingMeasurements = true
+                        } label: {
+                            Label("Снять замеры", systemImage: "ruler")
                         }
                     } label: {
                         Image(systemName: "plus")
@@ -342,9 +366,22 @@ struct ContentView: View {
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
             }
-            .sheet(isPresented: $showingAddWeight) {
-                AddWeightView(store: store)
-                    .presentationDetents([.height(320)])
+            .sheet(item: $todaySheet) { sheet in
+                switch sheet {
+                case .weight:
+                    AddWeightView(store: store)
+                        .presentationDetents([.height(320)])
+                case .quickCalories:
+                    QuickCaloriesSheet { calories in
+                        store.add(name: String(localized: "Приём пищи"), calories: calories)
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        todaySheet = nil
+                    }
+                    .presentationDetents([.height(260)])
+                case .newFood:
+                    NewFoodSheet(store: store)
+                        .presentationDetents([.large])
+                }
             }
             // Замеры открываются прямо здесь, а не переходом на экран замеров:
             // по контролу приходят с лентой в руках, чтобы вбить числа, а не

@@ -3194,3 +3194,51 @@ struct DietBreakTests {
         #expect(p.title == plan().title)
     }
 }
+
+// MARK: - Свойства продуктов
+
+struct FoodTraitTests {
+
+    private func traits(_ kcal: Int, p: Double, f: Double, c: Double, _ category: FoodCategory? = nil) -> [FoodTrait] {
+        FoodTrait.traits(caloriesPer100g: kcal, macros: Macros(protein: p, fat: f, carbs: c), category: category)
+    }
+
+    @Test func cucumber_isAlmostNoCalories() {
+        #expect(traits(15, p: 0.7, f: 0.1, c: 3.6) == [.almostNoCalories])
+    }
+
+    @Test func berries_eatALot() {
+        #expect(traits(45, p: 1, f: 0.3, c: 10) == [.eatALot])
+    }
+
+    @Test func sweetSoda_isNotEatALot() {
+        #expect(traits(42, p: 0, f: 0, c: 10.6, .drinks).isEmpty)
+    }
+
+    @Test func chickenBreast_hasThermicEffect() {
+        #expect(traits(113, p: 23.6, f: 1.9, c: 0) == [.highThermicEffect])
+    }
+
+    @Test func cod_isBothLowCalorieAndThermic() {
+        // Треска — 70 ккал: не «можно много», но белковая.
+        #expect(traits(70, p: 16, f: 0.6, c: 0) == [.highThermicEffect])
+    }
+
+    @Test func chocolate_isEasyToOvereat() {
+        #expect(traits(540, p: 6, f: 31, c: 58) == [.easyToOvereat])
+    }
+
+    @Test func nuts_areNotEasyToOvereat() {
+        // Орехи почти один жир: легко переесть по калориям, но не то сочетание.
+        #expect(!traits(650, p: 15, f: 60, c: 14).contains(.easyToOvereat))
+    }
+
+    @Test func rice_hasNoTraits() {
+        #expect(traits(130, p: 2.7, f: 0.3, c: 28).isEmpty)
+    }
+
+    @Test func lowProteinWhiteFood_isNotThermic() {
+        // Бульон: белок — больше половины калорий, но грамм слишком мало.
+        #expect(!traits(15, p: 3, f: 0.2, c: 0).contains(.highThermicEffect))
+    }
+}

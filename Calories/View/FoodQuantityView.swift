@@ -90,6 +90,10 @@ struct FoodQuantityView: View {
                         }
                 }
             }
+
+            // Чем продукт хорош или опасен на сушке, словами: в списке это
+            // только значок, а здесь есть место объяснить.
+            FoodTraitsSection(traits: food.traits)
         }
         .glassRow()
         // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
@@ -257,6 +261,10 @@ struct DishQuantityView: View {
                         }
                 }
             }
+
+            // Чем продукт хорош или опасен на сушке, словами: в списке это
+            // только значок, а здесь есть место объяснить.
+            FoodTraitsSection(traits: dish.traits)
 
             if !dish.ingredients.isEmpty {
                 Section("Состав") {

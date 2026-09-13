@@ -13,8 +13,6 @@ struct AddEntryView: View {
     @State private var debouncedSearch = ""
     @State private var draftItems: [MealItem] = []
 
-    @State private var showingNewFood = false
-    @State private var showingQuickCalories = false
     @State private var showingMealTime = false
     /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
     /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
@@ -344,40 +342,20 @@ struct AddEntryView: View {
                         Button("Отмена") { dismiss() }
                     }
                 }
+                // Своего плюса у экрана нет: «новый продукт» и «только калории»
+                // живут в плюсе на «Сегодня», вместе с остальными способами
+                // что-то записать. Два плюса с разным содержимым заставляли
+                // помнить, в каком из них что лежит.
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 16) {
-                        // Время приёма — само по себе, а не в меню: это не способ
-                        // что-то добавить, а свойство записи.
-                        Button {
-                            showingMealTime = true
-                        } label: {
-                            Image(systemName: "clock")
-                        }
-                        .accessibilityLabel("Время приёма")
-                        .accessibilityIdentifier("mealTime")
-
-                        // Только ручные способы. Камера и сканер переехали на
-                        // «Сегодня» и в Пункт управления: способ добавления
-                        // выбирают до входа, а не внутри уже открытого экрана.
-                        // Здесь остаётся то, что нужно, когда продукта нет нигде.
-                        Menu {
-                            Button {
-                                showingNewFood = true
-                            } label: {
-                                Label("Новый продукт", systemImage: "plus")
-                            }
-                            Button {
-                                showingQuickCalories = true
-                            } label: {
-                                Label("Только калории", systemImage: "number")
-                            }
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                        // Не «addMenu»: так называется меню плюса на «Сегодня»,
-                        // а это — «добавить ещё» к уже открытому приёму пищи.
-                        .accessibilityIdentifier("addMoreMenu")
+                    // Время приёма — само по себе: это не способ что-то
+                    // добавить, а свойство записи.
+                    Button {
+                        showingMealTime = true
+                    } label: {
+                        Image(systemName: "clock")
                     }
+                    .accessibilityLabel("Время приёма")
+                    .accessibilityIdentifier("mealTime")
                 }
                 // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,
                 // она не нужна — показываем её только при непустом черновике.
@@ -424,18 +402,6 @@ struct AddEntryView: View {
                 MealTimeSheet(date: $selectedDate)
             }
             .onChange(of: selectedDate) { _, _ in timeAdjusted = true }
-            .sheet(isPresented: $showingQuickCalories) {
-                // Шит закрываем первым: иначе экран уезжает из-под него и анимация
-                // схлопывается в рывок — та же история, что и с экраном порции.
-                QuickCaloriesSheet { calories in
-                    saveQuickCalories(calories)
-                }
-                .presentationDetents([.height(260)])
-            }
-            .sheet(isPresented: $showingNewFood) {
-                NewFoodSheet(store: store)
-                    .presentationDetents([.large])
-            }
             .sheet(item: $editingFood) { food in
                 NewFoodSheet(store: store, editingFood: food)
                     .presentationDetents([.medium])
@@ -724,18 +690,6 @@ struct AddEntryView: View {
         finish()
     }
 
-    /// Приём пищи, где известно только число калорий. Черновик, если он уже набран,
-    /// уходит в дневник вместе с ним — иначе набранное пришлось бы сохранять отдельно.
-    private func saveQuickCalories(_ calories: Int) {
-        let items = draftItems + [MealItem(name: String(localized: "Приём пищи"), calories: calories, macros: .zero)]
-        let totalCalories = items.reduce(0) { $0 + $1.calories }
-        let totalMacros = items.reduce(Macros.zero) { $0 + $1.macros }
-        let name = items.count == 1 ? String(localized: "Приём пищи") : joinedName(items)
-        store.add(name: name, calories: totalCalories, macros: totalMacros, date: entryDate)
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        finish()
-    }
-
     /// Раскладывает продукты по категориям в порядке самого перечисления —
     /// он осмысленный (мясо, рыба, молочное...), в отличие от алфавитного.
     private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
@@ -795,7 +749,8 @@ struct AddEntryView: View {
             macros: food.macrosPer100g,
             icons: [food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: 100),
-            offersVitamins: store.foodsOfferedVitamins.contains(food.id)
+            offersVitamins: store.foodsOfferedVitamins.contains(food.id),
+            traits: food.traits
         )
     }
 
@@ -807,7 +762,8 @@ struct AddEntryView: View {
             macros: dish.macrosPer100g,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
             icons: store.foodCategories(of: dish).map(\.icon),
-            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: 100)
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: 100),
+            traits: dish.traits
         )
     }
 }

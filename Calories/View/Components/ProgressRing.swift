@@ -90,10 +90,11 @@ struct ProgressRing: View {
 
     // Те же пары цветов, что на иконке: кольцо — лицо приложения, и его
     // цвета не должны расходиться со знаком на домашнем экране.
-    private static let kcalColors = [Color(hex: 0x9DFFB0), Color(hex: 0x21C45A)]
-    private static let proteinColors = [Color(hex: 0x7FD3FF), Color(hex: 0x2F7BFF)]
-    private static let fatColors = [Color(hex: 0xFFD36B), Color(hex: 0xFF8A1F)]
-    private static let carbColors = [Color(hex: 0xF08BFF), Color(hex: 0xA63BFF)]
+    // Пары близкие: цвет почти однотонный, градиент только оживляет дугу.
+    private static let kcalColors = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
+    private static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
+    private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
+    private static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
 
     /// Точка на окружности в долях рамки — для градиента вдоль дуги.
     private static func point(at degrees: Double) -> UnitPoint {
@@ -151,7 +152,9 @@ struct ProgressRing: View {
                                                startPoint: Self.point(at: segment.start),
                                                endPoint: Self.point(at: segment.end)),
                                 style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
-                        .glowingFill(segment.colors.last ?? .clear, thickness: lineWidth)
+                        // Свечение едва заметное: полное размывало края дуг,
+                        // а совсем без него цвет выглядел плоско.
+                        .shadow(color: (segment.colors.last ?? .clear).opacity(0.25), radius: lineWidth * 0.35)
                 }
             }
             .padding(lineWidth / 2)

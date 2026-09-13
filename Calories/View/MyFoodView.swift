@@ -240,7 +240,8 @@ struct MyFoodView: View {
                                 macros: dish.totalMacros,
                                 detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
                                 icons: store.foodCategories(of: dish).map(\.icon),
-                                leadingMacros: dish.macrosPer100g
+                                leadingMacros: dish.macrosPer100g,
+                                traits: dish.traits
                             )
                         }
                     }
@@ -290,7 +291,8 @@ struct MyFoodView: View {
                             macros: dish.totalMacros,
                             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
                             icons: store.foodCategories(of: dish).map(\.icon),
-                            leadingMacros: dish.macrosPer100g
+                            leadingMacros: dish.macrosPer100g,
+                            traits: dish.traits
                         )
                     }
                     .swipeActions(edge: .leading) {
@@ -446,7 +448,8 @@ struct MyFoodView: View {
             icons: [food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),
-            leadingMacros: food.macrosPer100g
+            leadingMacros: food.macrosPer100g,
+            traits: food.traits
         )
     }
 

@@ -59,8 +59,8 @@ let rotation: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["BRAN
 let weights = grams.map { $0 / grams.reduce(0, +) }
 
 func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
-           parts: [Part], glow: CGFloat, glowAlpha: CGFloat, grayscale: [CGFloat]? = nil, sheen: Bool = true) {
-    let opening: CGFloat = 80, gap: CGFloat = 26
+           parts: [Part], glow: CGFloat, glowAlpha: CGFloat, grayscale: [CGFloat]? = nil, sheen: Bool = true,
+           opening: CGFloat = 80, gap: CGFloat = 26) {
     // Разрыв смотрит не прямо вправо, а повёрнут против часовой: так знак
     // читается скорее как полумесяц кольца, чем как буква «С».
     let top = 90 - rotation - opening / 2
@@ -142,26 +142,17 @@ do {
     save(ctx, "AppIcon-tinted.png")
 }
 
-// Логотип лаунч-скрина: «С» и под ней Calories. 240×260 pt.
+// Лаунч-скрин: одна «С», без названия, нарисованная как кольцо на «Сегодня» —
+// тонкие дуги в пропорции 18 к 230, мягкие цвета, едва заметное свечение, без
+// объёма. Следующим кадром запуска её может сменить такая же анимированная.
+// 200×200 pt, знак 150 pt в поперечнике, остальное — поле под свечение.
 func launch(scale: CGFloat, dark: Bool, name: String) {
-    let w = 240 * scale, h = 260 * scale
-    let ctx = context(Int(w), Int(h), opaque: false)
-    let radius = 62 * scale, width = 24 * scale
-    let c = CGPoint(x: w / 2, y: h - 30 * scale - radius - width / 2)
-    drawC(ctx, center: c, radius: radius, width: width, parts: parts, glow: 14 * scale, glowAlpha: dark ? 1 : 0.6)
-
-    // Системный шрифт обычного начертания: название рядом со знаком, а не
-    // вместо него — жирное перетягивало внимание.
-    let font = NSFont.systemFont(ofSize: 38 * scale, weight: .regular)
-    let attrs: [NSAttributedString.Key: Any] = [
-        .font: font,
-        .foregroundColor: dark ? NSColor.white : NSColor(calibratedWhite: 0.07, alpha: 1),
-        .kern: 0.5 * scale,
-    ]
-    let line = CTLineCreateWithAttributedString(NSAttributedString(string: "Calories", attributes: attrs))
-    let bounds = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
-    ctx.textPosition = CGPoint(x: (w - bounds.width) / 2 - bounds.minX, y: 30 * scale)
-    CTLineDraw(line, ctx)
+    let side = 200 * scale
+    let ctx = context(Int(side), Int(side), opaque: false)
+    let diameter = 150 * scale
+    let width = diameter * 18 / 230
+    drawC(ctx, center: CGPoint(x: side / 2, y: side / 2), radius: (diameter - width) / 2, width: width,
+          parts: parts, glow: width * 0.7, glowAlpha: dark ? 0.35 : 0.25, sheen: false, opening: 60, gap: 16)
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {

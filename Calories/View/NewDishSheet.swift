@@ -378,7 +378,7 @@ struct IngredientPickerSheet: View {
                     Text("\(Int(grams)) г")
                 }
                 .onChange(of: grams) { _, v in
-                    if !gramsFocused { gramsText = "\(Int(v))" }
+                    if Double(gramsText) != v { gramsText = "\(Int(v))" }
                 }
             }
 

@@ -81,7 +81,10 @@ struct FoodQuantityView: View {
                             }
                         }
                         .onChange(of: grams) { _, newValue in
-                            if !gramsFocused {
+                            // Не по фокусу, а по расхождению: с поднятой клавиатурой
+                            // степпер тоже жмут, и строка оставалась со старым числом.
+                            // Своё же набранное не перетираем — оно уже совпадает.
+                            if Double(gramsText) != newValue {
                                 gramsText = "\(Int(newValue))"
                             }
                         }
@@ -245,7 +248,10 @@ struct DishQuantityView: View {
                             }
                         }
                         .onChange(of: grams) { _, newValue in
-                            if !gramsFocused {
+                            // Не по фокусу, а по расхождению: с поднятой клавиатурой
+                            // степпер тоже жмут, и строка оставалась со старым числом.
+                            // Своё же набранное не перетираем — оно уже совпадает.
+                            if Double(gramsText) != newValue {
                                 gramsText = "\(Int(newValue))"
                             }
                         }

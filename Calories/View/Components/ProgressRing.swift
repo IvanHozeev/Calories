@@ -75,7 +75,7 @@ struct ProgressRing: View {
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
-    private let lineWidth: CGFloat = 12
+    private let lineWidth: CGFloat = 18
     private let size: CGFloat = 230
     /// Зазор между дугами в градусах — с запасом на скруглённые концы.
     private let gap: Double = 11
@@ -88,6 +88,19 @@ struct ProgressRing: View {
         let colors: [Color]
     }
 
+    // Те же пары цветов, что на иконке: кольцо — лицо приложения, и его
+    // цвета не должны расходиться со знаком на домашнем экране.
+    private static let kcalColors = [Color(hex: 0x9DFFB0), Color(hex: 0x21C45A)]
+    private static let proteinColors = [Color(hex: 0x7FD3FF), Color(hex: 0x2F7BFF)]
+    private static let fatColors = [Color(hex: 0xFFD36B), Color(hex: 0xFF8A1F)]
+    private static let carbColors = [Color(hex: 0xF08BFF), Color(hex: 0xA63BFF)]
+
+    /// Точка на окружности в долях рамки — для градиента вдоль дуги.
+    private static func point(at degrees: Double) -> UnitPoint {
+        let radians = degrees * .pi / 180
+        return UnitPoint(x: 0.5 + 0.5 * sin(radians), y: 0.5 - 0.5 * cos(radians))
+    }
+
     private static func ratio(_ value: Double, _ target: Double?) -> Double {
         guard let target, target > 0 else { return 0 }
         return min(max(value / target, 0), 1)
@@ -95,7 +108,7 @@ struct ProgressRing: View {
 
     private var segments: [Segment] {
         let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
-        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : [.mint, .green]
+        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : Self.kcalColors
 
         // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
@@ -108,9 +121,9 @@ struct ProgressRing: View {
         var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
                               progress: calorieProgress, colors: calorieColors)]
         let macroParts: [(String, Double, [Color])] = [
-            ("protein", Self.ratio(macros.protein, proteinTarget), [.cyan, .blue]),
-            ("fat", Self.ratio(macros.fat, fatTarget), [.yellow, .orange]),
-            ("carbs", Self.ratio(macros.carbs, carbsTarget), [.pink, .purple]),
+            ("protein", Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
+            ("fat", Self.ratio(macros.fat, fatTarget), Self.fatColors),
+            ("carbs", Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
         ]
         var cursor = 180.0
         for (index, part) in macroParts.enumerated() {
@@ -131,7 +144,12 @@ struct ProgressRing: View {
                 if segment.progress > 0 {
                     RingArc(start: segment.start,
                             end: segment.start + (segment.end - segment.start) * segment.progress)
-                        .stroke(LinearGradient(colors: segment.colors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                        // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
+                        // в углу получала бы только один край градиента, и углеводы
+                        // выглядели розовыми вместо фиолетовых.
+                        .stroke(LinearGradient(colors: segment.colors,
+                                               startPoint: Self.point(at: segment.start),
+                                               endPoint: Self.point(at: segment.end)),
                                 style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
                         .glowingFill(segment.colors.last ?? .clear, thickness: lineWidth)
                 }
@@ -200,5 +218,14 @@ private struct RingArc: Shape {
                     endAngle: .degrees(end - 90),
                     clockwise: false)
         return path
+    }
+}
+
+private extension Color {
+    init(hex: UInt32) {
+        self.init(.displayP3,
+                  red: Double((hex >> 16) & 0xFF) / 255,
+                  green: Double((hex >> 8) & 0xFF) / 255,
+                  blue: Double(hex & 0xFF) / 255)
     }
 }

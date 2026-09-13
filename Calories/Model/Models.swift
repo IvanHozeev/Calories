@@ -1071,7 +1071,9 @@ struct Plan: Codable, Equatable {
     /// Норма на конкретную дату — с учётом фазы и недельного цикла, если он включён.
     func calorieTarget(for date: Date, tdee: Double) -> Int {
         let base = Double(dailyCalorieTarget(for: date, tdee: tdee))
-        guard cyclingEnabled else { return Int(base.rounded()) }
+        // Брейк — ровное поддержание каждый день. С циклом будни шли бы ниже
+        // поддержания, а весь смысл брейка — неделя без чувства диеты.
+        guard cyclingEnabled, !isDietBreak(on: date) else { return Int(base.rounded()) }
         let offset = cycleOffsets(forWeekOf: date)[Self.mondayBasedWeekdayIndex(for: date)]
         return Int((base * (1 + offset)).rounded())
     }
@@ -1103,10 +1105,16 @@ struct Plan: Codable, Equatable {
     /// именно рефид, а не второй по величине день. Один перенос на неделю —
     /// второй начал бы тасовать уже тасованное.
     func refeedSwapDay(for date: Date) -> Int? {
-        guard cyclingEnabled, canMoveRefeed(in: date) else { return nil }
+        guard cyclingEnabled, canMoveRefeed(in: date), !isDietBreak(on: date) else { return nil }
         let offsets = weekendStyle.cycleOffsets
         let today = Self.mondayBasedWeekdayIndex(for: date)
-        let later = offsets.indices.filter { $0 > today }
+        let monday = Self.weekStart(for: date)
+        // Дни брейка в этой неделе не в счёт: рефида там нет, и забрать его
+        // оттуда значило бы добавить неделе калорий.
+        let later = offsets.indices.filter { index in
+            guard index > today, let day = Calendar.current.date(byAdding: .day, value: index, to: monday) else { return false }
+            return !isDietBreak(on: day)
+        }
         guard let peak = later.max(by: { offsets[$0] < offsets[$1] }),
               offsets[peak] > 0, offsets[peak] > offsets[today] else { return nil }
         return peak

@@ -50,7 +50,7 @@ struct PlanView: View {
                 dietBreakSection(plan)
             }
 
-            if store.planOutcome == nil, let plan = store.plan, plan.cyclingEnabled {
+            if store.planOutcome == nil, let plan = store.plan, plan.cyclingEnabled, !plan.isDietBreak(on: Date()) {
                 weekCycleSection(plan)
             }
 

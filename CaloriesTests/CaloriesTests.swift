@@ -3171,6 +3171,24 @@ struct DietBreakTests {
         #expect(decoded.timeline.map(\.isDietBreak) == p.timeline.map(\.isDietBreak))
     }
 
+    @Test func breakWeek_isFlatEvenWithCycling() {
+        var p = plan(every: 4)
+        p.cyclingEnabled = true
+        let tdee = 2800.0
+        let breakDays = (0..<7).map { calendar.date(byAdding: .day, value: 28 + $0, to: start)! }
+        let targets = Set(breakDays.map { p.calorieTarget(for: $0, tdee: tdee) })
+        #expect(targets == [Int(tdee)])
+    }
+
+    @Test func refeedIsNotTakenFromABreakDay() {
+        // Брейк с 30 июля (чт). Неделя 27 июля — 2 августа: Пн–Ср дефицит, Чт–Вс брейк.
+        var p = plan(every: 4)
+        p.cyclingEnabled = true
+        p.weekendStyle = .satSun
+        let tuesday = calendar.date(from: DateComponents(year: 2026, month: 7, day: 28))!
+        #expect(p.refeedSwapDay(for: tuesday) == nil)
+    }
+
     @Test func title_staysCutWithBreaks() {
         let p = plan().startingDietBreak(from: week(2, plus: 1), weeks: 1)
         #expect(p.title == plan().title)

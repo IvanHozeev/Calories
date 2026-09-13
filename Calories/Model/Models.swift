@@ -668,18 +668,45 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     /// прыжком на пятьсот калорий возвращает гликоген и воду, и весы за три дня
     /// показывают плюс два килограмма, которые к жиру отношения не имеют.
     var rampWeeks: Int = 0
+    /// Неделя поддержания после каждых N недель дефицита. nil — без брейков.
+    ///
+    /// Брейки не лежат в `phases` отдельными фазами: фаза «12 недель сушки,
+    /// брейк раз в 4» — одна мысль, и в редакторе она должна оставаться одной
+    /// строкой. На недели их раскладывает `Plan.timeline`.
+    var dietBreakEvery: Int?
+    /// Сколько недель дефицита до первого брейка. nil — столько же, сколько между ними.
+    ///
+    /// Отдельно, потому что расписание включают и посреди сушки: у человека
+    /// седьмая неделя дефицита, брейк раз в четыре — первый должен встать на
+    /// следующей неделе, а не задним числом на пятой.
+    var firstDietBreakAfter: Int?
+    /// Эта фаза — диет-брейк: поставленный руками или разложенный из расписания.
+    var isDietBreak: Bool = false
+
+    /// Название для полосы фаз и строки плана: брейк — не просто «поддержание».
+    var title: String {
+        isDietBreak ? String(localized: "Диет-брейк") : intent.title
+    }
+
+    /// Варианты расписания: сколько недель дефицита на одну неделю поддержания.
+    static let dietBreakOptions = [4, 5, 6]
 
     init(id: UUID = UUID(), intent: PlanIntent, durationWeeks: Int,
-         weeklyRatePercent: Double? = nil, rampWeeks: Int = 0) {
+         weeklyRatePercent: Double? = nil, rampWeeks: Int = 0,
+         dietBreakEvery: Int? = nil, firstDietBreakAfter: Int? = nil, isDietBreak: Bool = false) {
         self.id = id
         self.intent = intent
         self.durationWeeks = max(1, durationWeeks)
         self.weeklyRatePercent = abs(weeklyRatePercent ?? intent.defaultWeeklyRatePercent)
         self.rampWeeks = max(0, min(rampWeeks, self.durationWeeks))
+        self.dietBreakEvery = dietBreakEvery
+        self.firstDietBreakAfter = firstDietBreakAfter
+        self.isDietBreak = isDietBreak
     }
 
     private enum CodingKeys: String, CodingKey {
         case id, intent, durationWeeks, weeklyRatePercent, rampWeeks
+        case dietBreakEvery, firstDietBreakAfter, isDietBreak
     }
 
     // Явный init(from:): фазы, сохранённые до появления рампы, её не несут.
@@ -690,6 +717,53 @@ struct PlanPhase: Codable, Equatable, Identifiable {
         durationWeeks = max(1, try container.decode(Int.self, forKey: .durationWeeks))
         weeklyRatePercent = abs(try container.decode(Double.self, forKey: .weeklyRatePercent))
         rampWeeks = max(0, min(try container.decodeIfPresent(Int.self, forKey: .rampWeeks) ?? 0, durationWeeks))
+        dietBreakEvery = try container.decodeIfPresent(Int.self, forKey: .dietBreakEvery)
+        firstDietBreakAfter = try container.decodeIfPresent(Int.self, forKey: .firstDietBreakAfter)
+        isDietBreak = try container.decodeIfPresent(Bool.self, forKey: .isDietBreak) ?? false
+    }
+
+    /// Фаза, разложенная на недели дефицита и брейки между ними.
+    ///
+    /// Брейка в конце нет: после последнего блока дефицита идёт уже следующая
+    /// фаза, и неделя поддержания перед ней — решение той фазы, а не этой.
+    func expanded() -> [PlanPhase] {
+        guard intent == .cut, !isDietBreak, let every = dietBreakEvery, every > 0 else { return [self] }
+        var segments: [PlanPhase] = []
+        var remaining = durationWeeks
+        var run = min(max(0, firstDietBreakAfter ?? every), remaining)
+        var index = 0
+        while remaining > 0 {
+            if run > 0 {
+                var cut = self
+                cut.id = Self.segmentID(id, index)
+                cut.durationWeeks = run
+                cut.rampWeeks = segments.isEmpty ? min(rampWeeks, run) : 0
+                cut.dietBreakEvery = nil
+                cut.firstDietBreakAfter = nil
+                segments.append(cut)
+                remaining -= run
+                index += 1
+            }
+            guard remaining > 0 else { break }
+            segments.append(PlanPhase(id: Self.segmentID(id, index), intent: .maintenance,
+                                      durationWeeks: 1, isDietBreak: true))
+            index += 1
+            run = min(every, remaining)
+        }
+        return segments
+    }
+
+    /// Недель в развёрнутом виде — вместе с брейками.
+    var expandedWeeks: Int { expanded().reduce(0) { $0 + $1.durationWeeks } }
+
+    /// Устойчивый id куска: полоса фаз держит идентичность по нему, и новый
+    /// UUID на каждое чтение перерисовывал бы её целиком.
+    private static func segmentID(_ base: UUID, _ index: Int) -> UUID {
+        guard index > 0 else { return base }
+        var bytes = base.uuid
+        bytes.15 = bytes.15 &+ UInt8(truncatingIfNeeded: index)
+        bytes.14 = bytes.14 ^ 0xB5
+        return UUID(uuid: bytes)
     }
 
     /// Темп со знаком, в долях массы за неделю.
@@ -839,7 +913,8 @@ struct Plan: Codable, Equatable {
         // Название по тому, чем план занят большую часть времени: цепочка
         // «сушка — поддержание — набор» не «снижение» и не «набор», и врать
         // одним из них хуже, чем назвать её планом.
-        let byIntent = Dictionary(grouping: phases, by: \.intent)
+        // Брейки названия не меняют: сушка с неделей поддержания — всё ещё сушка.
+        let byIntent = Dictionary(grouping: phases.filter { !$0.isDietBreak }, by: \.intent)
             .mapValues { $0.reduce(0) { $0 + $1.durationWeeks } }
         guard byIntent.count == 1, let only = byIntent.first?.key else {
             return String(localized: "План")
@@ -851,7 +926,11 @@ struct Plan: Codable, Equatable {
         }
     }
 
-    var durationWeeks: Int { phases.reduce(0) { $0 + $1.durationWeeks } }
+    /// Фазы по неделям — с разложенными диет-брейками. Всё, что считает даты,
+    /// веса и калории, идёт по ней; `phases` — то, что человек настраивает.
+    var timeline: [PlanPhase] { phases.flatMap { $0.expanded() } }
+
+    var durationWeeks: Int { timeline.reduce(0) { $0 + $1.durationWeeks } }
 
     var endDate: Date {
         Calendar.current.date(byAdding: .day, value: durationWeeks * 7, to: startDate) ?? startDate
@@ -859,7 +938,7 @@ struct Plan: Codable, Equatable {
 
     /// Дата начала фазы по её индексу.
     func startDate(ofPhaseAt index: Int) -> Date {
-        let weeksBefore = phases.prefix(max(0, index)).reduce(0) { $0 + $1.durationWeeks }
+        let weeksBefore = timeline.prefix(max(0, index)).reduce(0) { $0 + $1.durationWeeks }
         return Calendar.current.date(byAdding: .day, value: weeksBefore * 7, to: startDate) ?? startDate
     }
 
@@ -867,7 +946,7 @@ struct Plan: Codable, Equatable {
     /// от того, сколько человек весит к началу фазы, а не к началу всего плана.
     func weight(atStartOfPhaseAt index: Int) -> Double {
         var weight = startWeightKg
-        for phase in phases.prefix(max(0, index)) {
+        for phase in timeline.prefix(max(0, index)) {
             weight += phase.weeklyRateKg(fromWeightKg: weight) * Double(phase.durationWeeks)
         }
         return weight
@@ -878,7 +957,7 @@ struct Plan: Codable, Equatable {
         let days = Calendar.current.dateComponents([.day], from: startDate, to: date).day ?? 0
         guard days >= 0 else { return nil }
         var weeksPassed = 0
-        for (index, phase) in phases.enumerated() {
+        for (index, phase) in timeline.enumerated() {
             weeksPassed += phase.durationWeeks
             if days < weeksPassed * 7 { return index }
         }
@@ -886,12 +965,12 @@ struct Plan: Codable, Equatable {
     }
 
     func phase(on date: Date) -> PlanPhase? {
-        phaseIndex(on: date).map { phases[$0] }
+        phaseIndex(on: date).map { timeline[$0] }
     }
 
     /// Фаза, которая идёт сейчас, — или последняя, если план уже закончился.
     var currentPhase: PlanPhase? {
-        phase(on: Date()) ?? phases.last
+        phase(on: Date()) ?? timeline.last
     }
 
     /// Куда план приводит вес: считается по цепочке, а не задаётся числом.
@@ -899,7 +978,7 @@ struct Plan: Codable, Equatable {
     /// Спрашивать целевой вес у цепочки нельзя: за тридцать недель вперёд его
     /// никто не знает. Знают темп, который готовы держать, — из него и выходит
     /// прогноз, и он честно называется прогнозом.
-    var targetWeightKg: Double { weight(atStartOfPhaseAt: phases.count) }
+    var targetWeightKg: Double { weight(atStartOfPhaseAt: timeline.count) }
 
     /// Прогноз веса на дату — по фазам, которые до неё успели пройти.
     func projectedWeight(on date: Date) -> Double {
@@ -907,7 +986,7 @@ struct Plan: Codable, Equatable {
         guard days > 0 else { return startWeightKg }
         var weight = startWeightKg
         var daysLeft = Double(days)
-        for phase in phases {
+        for phase in timeline {
             let phaseDays = Double(phase.durationWeeks * 7)
             let used = min(daysLeft, phaseDays)
             weight += phase.weeklyRateKg(fromWeightKg: weight) * used / 7
@@ -928,8 +1007,9 @@ struct Plan: Codable, Equatable {
     }
 
     func weeklyRateKg(on date: Date) -> Double {
-        guard let index = phaseIndex(on: date) ?? (phases.isEmpty ? nil : phases.count - 1) else { return 0 }
-        return phases[index].weeklyRateKg(fromWeightKg: weight(atStartOfPhaseAt: index))
+        let segments = timeline
+        guard let index = phaseIndex(on: date) ?? (segments.isEmpty ? nil : segments.count - 1) else { return 0 }
+        return segments[index].weeklyRateKg(fromWeightKg: weight(atStartOfPhaseAt: index))
     }
 
     /// Суточная поправка к TDEE (отрицательная — дефицит, положительная — профицит).
@@ -938,7 +1018,7 @@ struct Plan: Codable, Equatable {
     func dailyCalorieDelta(on date: Date) -> Double {
         let target = weeklyRateKg(on: date) * Self.kcalPerKg / 7
         guard let index = phaseIndex(on: date), index > 0 else { return target }
-        let phase = phases[index]
+        let phase = timeline[index]
         guard phase.rampWeeks > 0 else { return target }
 
         let phaseStart = startDate(ofPhaseAt: index)
@@ -967,7 +1047,7 @@ struct Plan: Codable, Equatable {
         let previousEnd = Calendar.current.date(byAdding: .day, value: -1, to: phaseStart) ?? phaseStart
         // Только вверх: переход в дефицит воду не возвращает.
         guard weeklyRateKg(on: date) > weeklyRateKg(on: previousEnd) else { return false }
-        let weeks = max(phases[index].rampWeeks, Self.settlingWeeks)
+        let weeks = max(timeline[index].rampWeeks, Self.settlingWeeks)
         let daysIn = Calendar.current.dateComponents([.day], from: phaseStart, to: date).day ?? 0
         return daysIn < weeks * 7
     }
@@ -1103,10 +1183,172 @@ struct Plan: Codable, Equatable {
         guard !phases.isEmpty else { return self }
         let days = Calendar.current.dateComponents([.day], from: startDate, to: newEndDate).day ?? 0
         let totalWeeks = max(1, Int((Double(days) / 7).rounded(.up)))
-        let weeksBefore = phases.dropLast().reduce(0) { $0 + $1.durationWeeks }
+        let weeksBefore = phases.dropLast().reduce(0) { $0 + $1.expandedWeeks }
         var updated = self
-        updated.phases[phases.count - 1].durationWeeks = max(1, totalWeeks - weeksBefore)
+        // Срок последней фазы задан неделями дефицита, а финиш — неделями вместе
+        // с брейками. Подбираем первый срок, при котором фаза дотягивается до даты.
+        var last = phases[phases.count - 1]
+        last.durationWeeks = 1
+        while weeksBefore + last.expandedWeeks < totalWeeks, last.durationWeeks < 520 {
+            last.durationWeeks += 1
+        }
+        updated.phases[phases.count - 1] = last
         return updated
+    }
+
+    // MARK: - Диет-брейк вручную
+
+    /// Неделя плана (с нуля), с которой встанет брейк, если попросить его сейчас.
+    ///
+    /// Не сегодняшний день, а ближайшая граница недели плана: фазы считаются
+    /// целыми неделями от старта. Если сегодня и есть первый день недели — сегодня.
+    func dietBreakStartWeek(from date: Date) -> Int {
+        let days = max(0, Calendar.current.dateComponents([.day], from: startDate,
+                                                          to: Calendar.current.startOfDay(for: date)).day ?? 0)
+        return (days + 6) / 7
+    }
+
+    func startDate(ofWeek week: Int) -> Date {
+        Calendar.current.date(byAdding: .day, value: week * 7, to: startDate) ?? startDate
+    }
+
+    /// Какая фаза `phases` и сколько недель дефицита в ней пройдено к неделе плана.
+    /// nil — неделя приходится не на дефицит (брейк, поддержание, конец плана).
+    private func cutPosition(atWeek week: Int) -> (phase: Int, cutWeeks: Int)? {
+        var weeksBefore = 0
+        for (phaseIndex, phase) in phases.enumerated() {
+            var cutWeeks = 0
+            var cursor = weeksBefore
+            for segment in phase.expanded() {
+                if week < cursor + segment.durationWeeks {
+                    guard segment.intent == .cut, !segment.isDietBreak else { return nil }
+                    return (phaseIndex, cutWeeks + (week - cursor))
+                }
+                if !segment.isDietBreak { cutWeeks += segment.durationWeeks }
+                cursor += segment.durationWeeks
+            }
+            weeksBefore = cursor
+        }
+        return nil
+    }
+
+    /// Можно ли поставить брейк вручную с ближайшей недели.
+    ///
+    /// Нужен дефицит на эту неделю и хотя бы неделя дефицита после неё:
+    /// брейк в самом конце сушки — это уже не брейк, а выход из неё.
+    func canStartDietBreak(from date: Date) -> Bool {
+        guard let position = cutPosition(atWeek: dietBreakStartWeek(from: date)) else { return false }
+        return position.cutWeeks < phases[position.phase].durationWeeks
+    }
+
+    /// План с брейком на `weeks` недель с ближайшей недели.
+    ///
+    /// Фаза режется на пройденную часть и остаток, между ними — поддержание.
+    /// Пройденная часть сохраняет расписание как было, поэтому прошлое не
+    /// двигается; остаток начинает счёт до следующего брейка заново.
+    func startingDietBreak(from date: Date, weeks: Int) -> Plan {
+        guard canStartDietBreak(from: date),
+              let position = cutPosition(atWeek: dietBreakStartWeek(from: date)) else { return self }
+        let original = phases[position.phase]
+        var pieces: [PlanPhase] = []
+        if position.cutWeeks > 0 {
+            var done = original
+            done.durationWeeks = position.cutWeeks
+            pieces.append(done)
+        }
+        pieces.append(PlanPhase(intent: .maintenance, durationWeeks: max(1, weeks), isDietBreak: true))
+        var rest = original
+        rest.id = UUID()
+        rest.durationWeeks = original.durationWeeks - position.cutWeeks
+        rest.rampWeeks = 0
+        rest.firstDietBreakAfter = nil
+        pieces.append(rest)
+
+        var updated = self
+        updated.phases.replaceSubrange(position.phase...position.phase, with: pieces)
+        return updated
+    }
+
+    /// Брейк, поставленный руками и ещё не начавшийся, — его можно убрать.
+    func pendingManualDietBreak(on date: Date) -> Int? {
+        var weeksBefore = 0
+        let today = Calendar.current.startOfDay(for: date)
+        for (index, phase) in phases.enumerated() {
+            if phase.isDietBreak, startDate(ofWeek: weeksBefore) > today { return index }
+            weeksBefore += phase.expandedWeeks
+        }
+        return nil
+    }
+
+    /// План без не начавшегося ручного брейка: куски фазы по краям склеиваются обратно.
+    func cancelingPendingDietBreak(on date: Date) -> Plan {
+        guard let index = pendingManualDietBreak(on: date) else { return self }
+        var updated = self
+        updated.phases.remove(at: index)
+        if index > 0, index < updated.phases.count {
+            let before = updated.phases[index - 1]
+            let after = updated.phases[index]
+            if before.intent == .cut, after.intent == .cut, !before.isDietBreak, !after.isDietBreak,
+               before.weeklyRatePercent == after.weeklyRatePercent,
+               before.dietBreakEvery == after.dietBreakEvery {
+                var merged = before
+                merged.durationWeeks += after.durationWeeks
+                updated.phases.replaceSubrange((index - 1)...index, with: [merged])
+            }
+        }
+        return updated
+    }
+
+    /// Сколько недель дефицита фаза уже прошла к дате. nil — фаза ещё не началась.
+    /// Нужно, чтобы расписание, включённое посреди сушки, не ставило брейк в прошлое.
+    func cutWeeksElapsed(inPhaseWithID id: UUID, on date: Date) -> Int? {
+        var weeksBefore = 0
+        for phase in phases {
+            if phase.id == id {
+                let days = Calendar.current.dateComponents([.day], from: startDate(ofWeek: weeksBefore),
+                                                           to: Calendar.current.startOfDay(for: date)).day ?? 0
+                guard days > 0 else { return nil }
+                var cutDays = 0
+                var cursor = 0
+                for segment in phase.expanded() {
+                    let length = segment.durationWeeks * 7
+                    let used = min(max(days - cursor, 0), length)
+                    if !segment.isDietBreak { cutDays += used }
+                    cursor += length
+                }
+                return (cutDays + 6) / 7
+            }
+            weeksBefore += phase.expandedWeeks
+        }
+        return nil
+    }
+
+    /// Первый ближайший брейк — ручной или по расписанию, — который ещё не начался.
+    func nextDietBreakStart(after date: Date) -> Date? {
+        let today = Calendar.current.startOfDay(for: date)
+        var weeks = 0
+        for segment in timeline {
+            let start = startDate(ofWeek: weeks)
+            if segment.isDietBreak, start >= today { return start }
+            weeks += segment.durationWeeks
+        }
+        return nil
+    }
+
+    /// Идёт ли брейк на дату.
+    func isDietBreak(on date: Date) -> Bool {
+        phase(on: date)?.isDietBreak == true
+    }
+
+    /// Ближайший с даты день, который не брейк. Для нормы, которую запоминают
+    /// числом: запомни её посреди брейка — и после него человек так и остался бы
+    /// на поддержании.
+    func firstNonBreakDay(from date: Date) -> Date {
+        var day = date
+        for _ in 0..<10 where isDietBreak(on: day) {
+            day = Calendar.current.date(byAdding: .day, value: 7, to: day) ?? day
+        }
+        return day
     }
 
     /// План, приводящий к другому весу к той же дате.
@@ -1115,16 +1357,19 @@ struct Plan: Codable, Equatable {
     /// то, как быстро идти, а не про то, когда закончить.
     func retargeted(to weightKg: Double) -> Plan {
         guard let last = phases.last else { return self }
-        let base = weight(atStartOfPhaseAt: phases.count - 1)
+        let base = weight(atStartOfPhaseAt: timeline.count - last.expanded().count)
         guard base > 0, last.durationWeeks > 0 else { return self }
         let change = weightKg - base
         let intent: PlanIntent = change < 0 ? .cut : (change > 0 ? .bulk : .maintenance)
         let ratePercent = abs(change) / Double(last.durationWeeks) / base * 100
         var updated = self
+        // Брейки переживают смену темпа: расписание — про то, как идти, а не куда.
         updated.phases[phases.count - 1] = PlanPhase(id: last.id,
                                                      intent: intent,
                                                      durationWeeks: last.durationWeeks,
-                                                     weeklyRatePercent: ratePercent)
+                                                     weeklyRatePercent: ratePercent,
+                                                     dietBreakEvery: intent == .cut ? last.dietBreakEvery : nil,
+                                                     firstDietBreakAfter: intent == .cut ? last.firstDietBreakAfter : nil)
         return updated
     }
 }

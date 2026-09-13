@@ -18,10 +18,11 @@ struct PlanProgressChart: View {
     /// снижаться, и факт рядом с ней выглядит отставанием.
     private var planned: [(date: Date, weightKg: Double)] {
         var points: [(Date, Double)] = [(plan.startDate, plan.startWeightKg)]
-        for index in plan.phases.indices {
+        let timeline = plan.timeline
+        for index in timeline.indices {
             let end = Calendar.current.date(
                 byAdding: .day,
-                value: plan.phases.prefix(index + 1).reduce(0) { $0 + $1.durationWeeks } * 7,
+                value: timeline.prefix(index + 1).reduce(0) { $0 + $1.durationWeeks } * 7,
                 to: plan.startDate
             ) ?? plan.endDate
             points.append((end, plan.weight(atStartOfPhaseAt: index + 1)))

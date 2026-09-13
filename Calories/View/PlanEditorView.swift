@@ -40,7 +40,7 @@ struct PlanEditorView: View {
         return Plan(
             startDate: store.plan?.startDate ?? Date(),
             startWeightKg: startWeight,
-            phases: phases,
+            phases: anchoredPhases,
             cyclingEnabled: cyclingEnabled,
             weekendStyle: weekendStyle
         )
@@ -181,6 +181,27 @@ struct PlanEditorView: View {
         }
     }
 
+    /// Фазы, где расписание брейков не лезет в прошлое.
+    ///
+    /// Брейки включили посреди сушки: у человека седьмая неделя дефицита,
+    /// а расписание «раз в четыре» поставило бы брейк на пятую, задним числом.
+    /// Первый брейк сдвигается на ближайшую неделю, дальше — как выбрано.
+    private var anchoredPhases: [PlanPhase] {
+        guard let plan = store.plan else { return phases }
+        return phases.map { phase in
+            var phase = phase
+            let stored = plan.phases.first { $0.id == phase.id }
+            guard phase.dietBreakEvery != stored?.dietBreakEvery else { return phase }
+            phase.firstDietBreakAfter = nil
+            if let every = phase.dietBreakEvery,
+               let elapsed = plan.cutWeeksElapsed(inPhaseWithID: phase.id, on: Date()),
+               elapsed > every {
+                phase.firstDietBreakAfter = elapsed
+            }
+            return phase
+        }
+    }
+
     /// Вес, с которым фаза начинается, — по фазам до неё.
     private func weight(atStartOf phase: PlanPhase) -> Double {
         guard let index = phases.firstIndex(where: { $0.id == phase.id }) else { return startWeight }
@@ -195,11 +216,11 @@ struct PlanEditorView: View {
         let start = weight(atStartOf: phase)
         let end = start + phase.weeklyRateKg(fromWeightKg: start) * Double(phase.durationWeeks)
         return HStack(spacing: 10) {
-            Image(systemName: phase.intent.symbol)
+            Image(systemName: phase.isDietBreak ? "cup.and.saucer" : phase.intent.symbol)
                 .foregroundStyle(phase.isAggressive ? .orange : .secondary)
                 .frame(width: 20)
             VStack(alignment: .leading, spacing: 2) {
-                Text(phase.intent.title)
+                Text(phase.title)
                 HStack(spacing: 6) {
                     Text(String(format: String(localized: "%lld нед."), phase.durationWeeks))
                     if phase.intent != .maintenance {
@@ -209,6 +230,10 @@ struct PlanEditorView: View {
                     if phase.rampWeeks > 0 {
                         Text(verbatim: "·")
                         Image(systemName: "arrow.turn.right.up")
+                    }
+                    if phase.intent == .cut, let every = phase.dietBreakEvery {
+                        Text(verbatim: "·")
+                        Text(String(format: String(localized: "брейк %lld : 1"), every))
                     }
                 }
                 .font(.caption)

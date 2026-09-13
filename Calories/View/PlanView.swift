@@ -46,6 +46,10 @@ struct PlanView: View {
                 adherenceSection(plan: plan, adherence: adherence)
             }
 
+            if store.planOutcome == nil, let plan = store.plan, plan.phases.contains(where: { $0.intent == .cut }) {
+                dietBreakSection(plan)
+            }
+
             if store.planOutcome == nil, let plan = store.plan, plan.cyclingEnabled {
                 weekCycleSection(plan)
             }
@@ -137,17 +141,17 @@ struct PlanView: View {
 
                 // Полоса фаз только когда их несколько: у плана из одной фазы
                 // она повторяла бы то, что уже сказано неделей и темпом.
-                if plan.phases.count > 1 {
+                if plan.timeline.count > 1 {
                     PlanTimeline(plan: plan)
                 }
 
                 HStack(spacing: 6) {
                     Text(String(format: String(localized: "Неделя %d из %d"),
                                 plan.currentWeek, plan.durationWeeks))
-                    if let phase = plan.currentPhase, plan.phases.count > 1 {
+                    if let phase = plan.currentPhase, plan.timeline.count > 1 {
                         Text("·")
                             .foregroundStyle(.tertiary)
-                        Text(phase.intent.title)
+                        Text(phase.title)
                     }
                     Text("·")
                         .foregroundStyle(.tertiary)
@@ -342,6 +346,50 @@ struct PlanView: View {
             Text("План завершён")
         } footer: {
             Text("Пока план не закрыт, дневная норма продолжает держать его дефицит. Заверши — она вернётся к расчёту по профилю, или увеличь срок ниже, чтобы продолжить.")
+        }
+    }
+
+    /// Диет-брейк: идёт ли он, когда следующий и кнопка поставить его руками.
+    @ViewBuilder
+    private func dietBreakSection(_ plan: Plan) -> some View {
+        let today = Date()
+        let dateStyle = Date.FormatStyle.dateTime.weekday(.wide).day().month(.wide)
+        Section {
+            if plan.isDietBreak(on: today) {
+                let end = plan.firstNonBreakDay(from: today)
+                resultRow("Идёт диет-брейк", String(format: String(localized: "до %@"),
+                                                   end.formatted(.dateTime.day().month(.wide))))
+            } else if plan.pendingManualDietBreak(on: today) != nil,
+                      let start = plan.nextDietBreakStart(after: today) {
+                resultRow("Брейк", String(format: String(localized: "с %@"), start.formatted(dateStyle)))
+                Button("Убрать брейк", role: .destructive) {
+                    store.cancelPendingDietBreak()
+                }
+                .accessibilityIdentifier("cancelDietBreak")
+            } else {
+                if let next = plan.nextDietBreakStart(after: today) {
+                    resultRow("Следующий по плану", next.formatted(dateStyle))
+                }
+                if plan.canStartDietBreak(from: today) {
+                    let start = plan.startDate(ofWeek: plan.dietBreakStartWeek(from: today))
+                    Menu {
+                        Button("На 1 неделю") { store.startDietBreak(weeks: 1) }
+                        Button("На 2 недели") { store.startDietBreak(weeks: 2) }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Label("Диет-брейк", systemImage: "cup.and.saucer")
+                            Text(String(format: String(localized: "с %@"), start.formatted(dateStyle)))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .accessibilityIdentifier("startDietBreak")
+                }
+            }
+        } header: {
+            Text("Диет-брейк")
+        } footer: {
+            Text("Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется.")
         }
     }
 

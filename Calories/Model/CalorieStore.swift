@@ -419,7 +419,7 @@ final class CalorieStore {
             // не было: там цель считалась заново на каждый день. Один и тот же план
             // вёл себя по-разному в зависимости от тумблера, который по смыслу
             // отвечает только за распределение калорий по дням недели.
-            dailyGoal = plan.dailyCalorieTarget(tdee: newProfile.tdee)
+            dailyGoal = plan.dailyCalorieTarget(for: plan.firstNonBreakDay(from: Date()), tdee: newProfile.tdee)
         } else if syncDailyGoal {
             dailyGoal = newProfile.calorieTarget
         } else {
@@ -444,7 +444,7 @@ final class CalorieStore {
             defaults.set(data, forKey: Keys.plan)
         }
         if let profile {
-            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
+            dailyGoal = newPlan.dailyCalorieTarget(for: newPlan.firstNonBreakDay(from: Date()), tdee: profile.tdee)
         }
         rebuildCaches()
     }
@@ -552,6 +552,22 @@ final class CalorieStore {
         let moved = plan.movingRefeed(to: date)
         guard moved != plan else { return }
         savePlanKeepingGoal(moved)
+    }
+
+    /// Ставит диет-брейк с ближайшей недели плана.
+    func startDietBreak(weeks: Int, from date: Date = Date()) {
+        guard let plan else { return }
+        let updated = plan.startingDietBreak(from: date, weeks: weeks)
+        guard updated != plan else { return }
+        savePlanKeepingGoal(updated)
+    }
+
+    /// Убирает поставленный руками брейк, пока он не начался.
+    func cancelPendingDietBreak(on date: Date = Date()) {
+        guard let plan else { return }
+        let updated = plan.cancelingPendingDietBreak(on: date)
+        guard updated != plan else { return }
+        savePlanKeepingGoal(updated)
     }
 
     /// Возвращает рефид этой недели на его обычный день.

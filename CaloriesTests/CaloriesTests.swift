@@ -3047,3 +3047,108 @@ struct RefeedMoveTests {
         #expect(decoded.refeedMove == moved.refeedMove)
     }
 }
+
+// MARK: - Диет-брейки
+
+struct DietBreakTests {
+
+    private let calendar = Calendar.current
+
+    private var start: Date { calendar.date(from: DateComponents(year: 2026, month: 7, day: 2))! }
+
+    private func week(_ n: Int, plus days: Int = 0) -> Date {
+        calendar.date(byAdding: .day, value: n * 7 + days, to: start)!
+    }
+
+    private func plan(cutWeeks: Int = 12, every: Int? = nil, firstAfter: Int? = nil) -> Plan {
+        Plan(startDate: start, startWeightKg: 80,
+             phases: [PlanPhase(intent: .cut, durationWeeks: cutWeeks, weeklyRatePercent: 0.5,
+                                dietBreakEvery: every, firstDietBreakAfter: firstAfter)])
+    }
+
+    @Test func schedule_laysBreaksBetweenCutBlocks() {
+        // 12 недель дефицита, брейк раз в 4: 4 + 1 + 4 + 1 + 4, в конце брейка нет.
+        let segments = plan(every: 4).timeline
+        #expect(segments.map(\.durationWeeks) == [4, 1, 4, 1, 4])
+        #expect(segments.map(\.isDietBreak) == [false, true, false, true, false])
+        #expect(plan(every: 4).durationWeeks == 14)
+    }
+
+    @Test func schedule_noTrailingBreak() {
+        #expect(plan(cutWeeks: 8, every: 4).timeline.map(\.durationWeeks) == [4, 1, 4])
+    }
+
+    @Test func schedule_firstBreakCanComeLater() {
+        #expect(plan(cutWeeks: 12, every: 4, firstAfter: 7).timeline.map(\.durationWeeks) == [7, 1, 4, 1, 1])
+    }
+
+    @Test func breakWeek_isMaintenance() {
+        let p = plan(every: 4)
+        #expect(p.isDietBreak(on: week(4, plus: 2)))
+        #expect(p.weeklyRateKg(on: week(4, plus: 2)) == 0)
+        #expect(p.weeklyRateKg(on: week(5, plus: 2)) < 0)
+    }
+
+    @Test func manualBreak_startsAtNextPlanWeek() {
+        let base = plan()
+        // Середина шестой недели: брейк встанет с седьмой.
+        let today = week(5, plus: 3)
+        let withBreak = base.startingDietBreak(from: today, weeks: 1)
+        #expect(withBreak.phases.map(\.durationWeeks) == [6, 1, 6])
+        #expect(withBreak.isDietBreak(on: week(6)))
+        #expect(!withBreak.isDietBreak(on: today))
+        #expect(withBreak.durationWeeks == base.durationWeeks + 1)
+    }
+
+    @Test func manualBreak_keepsThePast() {
+        let base = plan()
+        let today = week(5, plus: 3)
+        let withBreak = base.startingDietBreak(from: today, weeks: 2)
+        #expect(abs(withBreak.projectedWeight(on: today) - base.projectedWeight(on: today)) < 0.0001)
+        #expect(withBreak.phase(on: today)?.intent == .cut)
+    }
+
+    @Test func manualBreak_onPlanWeekBoundaryStartsToday() {
+        let withBreak = plan().startingDietBreak(from: week(6), weeks: 1)
+        #expect(withBreak.isDietBreak(on: week(6)))
+    }
+
+    @Test func manualBreak_notDuringABreak() {
+        #expect(!plan(every: 4).canStartDietBreak(from: week(4)))
+    }
+
+    @Test func manualBreak_resetsTheScheduleCounter() {
+        let withBreak = plan(cutWeeks: 12, every: 4).startingDietBreak(from: week(2, plus: 1), weeks: 1)
+        // 3 недели дефицита, ручной брейк, дальше 9 недель с брейком после каждых 4.
+        #expect(withBreak.timeline.map(\.durationWeeks) == [3, 1, 4, 1, 4, 1, 1])
+    }
+
+    @Test func cancelingPendingBreak_restoresThePlan() {
+        let base = plan(every: 4)
+        let today = week(2, plus: 1)
+        let restored = base.startingDietBreak(from: today, weeks: 1).cancelingPendingDietBreak(on: today)
+        #expect(restored.timeline.map(\.durationWeeks) == base.timeline.map(\.durationWeeks))
+    }
+
+    @Test func startedBreak_cannotBeCanceled() {
+        let withBreak = plan().startingDietBreak(from: week(5, plus: 3), weeks: 1)
+        #expect(withBreak.pendingManualDietBreak(on: week(6, plus: 1)) == nil)
+    }
+
+    @Test func cutWeeksElapsed_ignoresBreaks() {
+        let p = plan(every: 4)
+        #expect(p.cutWeeksElapsed(inPhaseWithID: p.phases[0].id, on: week(6, plus: 2)) == 6)
+    }
+
+    @Test func schedule_survivesEncoding() throws {
+        let p = plan(every: 5, firstAfter: 7).startingDietBreak(from: week(2, plus: 1), weeks: 1)
+        let decoded = try JSONDecoder().decode(Plan.self, from: JSONEncoder().encode(p))
+        #expect(decoded.timeline.map(\.durationWeeks) == p.timeline.map(\.durationWeeks))
+        #expect(decoded.timeline.map(\.isDietBreak) == p.timeline.map(\.isDietBreak))
+    }
+
+    @Test func title_staysCutWithBreaks() {
+        let p = plan().startingDietBreak(from: week(2, plus: 1), weeks: 1)
+        #expect(p.title == plan().title)
+    }
+}

@@ -66,9 +66,9 @@ struct PlanStrip: View {
             // Фаза только когда их несколько — иначе она повторяет название плана.
             Text(String(format: String(localized: "Неделя %d из %d"),
                         plan.currentWeek, plan.durationWeeks))
-            if plan.phases.count > 1, let phase = plan.currentPhase {
+            if plan.timeline.count > 1, let phase = plan.currentPhase {
                 Text(verbatim: "·").foregroundStyle(.tertiary)
-                Text(phase.intent.title)
+                Text(phase.title)
             }
             Text(verbatim: "·").foregroundStyle(.tertiary)
             Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))

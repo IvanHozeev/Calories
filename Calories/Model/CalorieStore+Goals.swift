@@ -124,6 +124,11 @@ extension CalorieStore {
         if let plan, plan.cyclingEnabled, let profile {
             return plan.calorieTarget(for: date, tdee: profile.tdee)
         }
+        // Неделя брейка — поддержание по формуле. `dailyGoal` хранит норму
+        // дефицита, и без этого брейк существовал бы только на экране плана.
+        if let plan, let profile, plan.isDietBreak(on: date) {
+            return plan.dailyCalorieTarget(for: date, tdee: profile.tdee)
+        }
         return dailyGoal
     }
 
@@ -397,8 +402,9 @@ extension CalorieStore {
         // Дальше всё меряется по идущей фазе, а не по плану целиком. Средний
         // темп цепочки «сушка — поддержание — набор» близок к нулю и не
         // отвечает ни на один вопрос, который здесь задают.
-        let phaseIndex = plan.phaseIndex(on: today) ?? max(0, plan.phases.count - 1)
-        let phase = plan.phases[phaseIndex]
+        let timeline = plan.timeline
+        let phaseIndex = plan.phaseIndex(on: today) ?? max(0, timeline.count - 1)
+        let phase = timeline[phaseIndex]
         let phaseStart = plan.startDate(ofPhaseAt: phaseIndex)
         let phaseEnd = Calendar.current.date(byAdding: .day,
                                              value: phase.durationWeeks * 7,

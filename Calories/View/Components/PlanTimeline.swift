@@ -25,7 +25,7 @@ struct PlanTimeline: View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
                     HStack(spacing: 2) {
-                        ForEach(Array(plan.phases.enumerated()), id: \.element.id) { index, phase in
+                        ForEach(Array(plan.timeline.enumerated()), id: \.element.id) { index, phase in
                             Capsule()
                                 .fill(color(for: phase.intent)
                                     .opacity(index == currentIndex ? 1 : 0.35))
@@ -45,12 +45,12 @@ struct PlanTimeline: View {
             .frame(height: 10)
 
             HStack(spacing: 10) {
-                ForEach(Array(plan.phases.enumerated()), id: \.element.id) { index, phase in
+                ForEach(Array(plan.timeline.enumerated()), id: \.element.id) { index, phase in
                     HStack(spacing: 4) {
                         Circle()
                             .fill(color(for: phase.intent))
                             .frame(width: 6, height: 6)
-                        Text(phase.intent.title)
+                        Text(phase.title)
                             .lineLimit(1)
                         // Недели — только у идущей фазы. У всех трёх подписи
                         // не помещаются в строку и переносятся, а «сколько

@@ -219,6 +219,8 @@ private struct GoalPickerSheet: View {
 private struct StepsContentView: View {
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
+    @State private var ringRestingY: CGFloat?
+    @State private var ringPull: CGFloat = 0
     @AppStorage("use_imperial") private var useImperial = false
 
     private var distanceText: String {
@@ -287,8 +289,22 @@ private struct StepsContentView: View {
     private var todayCard: some View {
         VStack(spacing: 24) {
             RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday,
-                     spinTicket: viewModel.refreshTicket) {
+                     spinTicket: viewModel.refreshTicket, pullAngle: Double(ringPull) * 1.4) {
                 ringLabel
+            }
+            // Насколько список стянут вниз: кольцо поворачивается за пальцем.
+            // Покой — первое положение, которое увидели.
+            .background {
+                GeometryReader { geometry in
+                    Color.clear
+                        .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                            guard let resting = ringRestingY else {
+                                ringRestingY = y
+                                return
+                            }
+                            ringPull = max(0, y - resting)
+                        }
+                }
             }
 
             Divider()

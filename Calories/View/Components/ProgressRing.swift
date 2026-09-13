@@ -8,6 +8,8 @@ struct RingView<Label: View>: View {
     let labelID: AnyHashable
     /// Растёт с каждым обновлением — кольцо делает оборот вместо спиннера.
     var spinTicket: Int = 0
+    /// Насколько кольцо повернули, потянув список вниз, в градусах.
+    var pullAngle: Double = 0
     @ViewBuilder let label: () -> Label
 
     /// Толщина кольца одной константой: трек, дуга и её отступ обязаны совпадать,
@@ -43,8 +45,6 @@ struct RingView<Label: View>: View {
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
     }
 
-    @State private var turn: Double = 0
-
     var body: some View {
         ZStack {
             ZStack {
@@ -52,17 +52,7 @@ struct RingView<Label: View>: View {
                 filling
             }
             .compositingGroup()
-            .rotationEffect(.degrees(turn))
-            .onChange(of: spinTicket) { _, _ in
-                RingTicks.play(from: 0, to: 360)
-                withAnimation(RingTicks.curve) {
-                    turn += 360
-                } completion: {
-                    var instant = Transaction()
-                    instant.disablesAnimations = true
-                    withTransaction(instant) { turn = 0 }
-                }
-            }
+            .modifier(RefreshSpin(baseRotation: 0, pullAngle: pullAngle, spinTicket: spinTicket))
             label()
                 .id(labelID)
                 .transition(.opacity.combined(with: .scale(scale: 0.85)))
@@ -105,24 +95,6 @@ struct ProgressRing: View {
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
-    @State private var turn: Double = 0
-    /// Кольцо не слушает палец: идёт оборот, или после него список ещё не
-    /// вернулся в покой. Место под скрытым спиннером держит список стянутым,
-    /// пока идёт обновление, и без этой паузы кольцо откручивалось назад
-    /// вместе с возвращающимся списком.
-    @State private var ignoresPull = false
-    /// Кольцо встало перед финишем и ждёт, когда экран тронется вверх:
-    /// здесь лежит, насколько список был стянут в этот момент.
-    ///
-    /// Докрут запускается одним движением по первому сдвигу списка, а не
-    /// следует за ним: система возвращает список в два приёма, и кольцо,
-    /// повторявшее каждый, дёргалось на финише дважды.
-    @State private var settleFromPull: Double?
-    @State private var settling = false
-
-    /// Сколько градусов оборота оставлять на возврат экрана.
-    static let settleAngle = 45.0
-
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
     private static let rotation: Double = -40
@@ -153,62 +125,6 @@ struct ProgressRing: View {
     /// Обновление держится чуть дольше, чем кольцо идёт до остановки: пауза
     /// перед финишем, а докрут — уже вместе с возвратом экрана.
     static let refreshHold = RingTicks.duration + 0.3
-
-    /// Оборот на обновление: с того угла, где кольцо оставил палец, вперёд
-    /// до полного оборота и ещё один. Назад оно не крутится никогда — поэтому
-    /// угол от пальца сначала переносится в оборот, а список возвращается на
-    /// место уже без влияния на кольцо.
-    private func spin() {
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        withTransaction(instant) {
-            turn += pullAngle
-            ignoresPull = true
-            settleFromPull = nil
-        }
-        // Встаём за 30° до полного оборота (и ещё одного) и ждём возврата экрана.
-        let stop = (ceil(turn / 360) + 1) * 360 - Self.settleAngle
-        RingTicks.play(from: turn, to: stop)
-        withAnimation(RingTicks.curve) {
-            turn = stop
-        } completion: {
-            if pullAngle > 5 {
-                settleFromPull = pullAngle
-                // Страховка: если список так и не тронулся, финиш не ждёт вечно.
-                Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(1.5))
-                    if settleFromPull != nil, !settling { settle() }
-                }
-            } else {
-                // Список уже вернулся сам — докручиваем без него.
-                settle()
-            }
-        }
-    }
-
-    /// Последние градусы — одним плавным движением, вместе с подъёмом экрана.
-    private func settle() {
-        settling = true
-        withAnimation(.timingCurve(0.25, 0.1, 0.25, 1, duration: 0.5)) {
-            turn += Self.settleAngle
-        } completion: {
-            finishSpin()
-        }
-    }
-
-    /// Оборот закончен: последний щелчок, угол сводится к нулю — на вид то же
-    /// самое, полный оборот, — и кольцо снова слушает палец.
-    private func finishSpin() {
-        var instant = Transaction()
-        instant.disablesAnimations = true
-        RingTicks.tick()
-        withTransaction(instant) {
-            turn = 0
-            settleFromPull = nil
-            settling = false
-            ignoresPull = pullAngle >= 1
-        }
-    }
 
     /// Точка на окружности в долях рамки — для градиента вдоль дуги.
     private static func point(at degrees: Double) -> UnitPoint {
@@ -276,20 +192,7 @@ struct ProgressRing: View {
             // и на обороте цвета размазывались друг по другу. Склеенное кольцо
             // поворачивается как цельная картинка.
             .compositingGroup()
-            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? 0 : pullAngle)))
-            .onChange(of: spinTicket) { _, _ in spin() }
-            .onChange(of: pullAngle) { old, angle in
-                // Меньше градуса — уже покой: отскок списка редко останавливается ровно в ноль.
-                if let hold = settleFromPull {
-                    if !settling, angle < hold - 2 { settle() }
-                    return
-                }
-                if angle < 1, turn == 0 { ignoresPull = false }
-                // Щелчок на каждом делении, пока кольцо идёт за пальцем.
-                if !ignoresPull, RingTicks.notch(angle) != RingTicks.notch(old) {
-                    RingTicks.tick()
-                }
-            }
+            .modifier(RefreshSpin(baseRotation: Self.rotation, pullAngle: pullAngle, spinTicket: spinTicket))
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 
@@ -498,4 +401,110 @@ final class RingHaptics {
             self.engine = nil
         }
     }
+}
+
+/// Оборот кольца вместо спиннера обновления — общий для «Сегодня» и «Шагов».
+///
+/// Пока список тянут, кольцо идёт за пальцем и щёлкает на делениях. Отпустили —
+/// кольцо идёт вперёд до полного оборота и ещё одного, но встаёт за 45° до
+/// финиша, ждёт, когда экран тронется вверх, и докручивает остаток одним
+/// движением вместе с ним.
+struct RefreshSpin: ViewModifier {
+    /// Постоянный поворот кольца, поверх которого идёт оборот.
+    let baseRotation: Double
+    let pullAngle: Double
+    let spinTicket: Int
+
+    @State private var turn: Double = 0
+    /// Кольцо не слушает палец: идёт оборот, или после него список ещё не
+    /// вернулся в покой. Место под скрытым спиннером держит список стянутым,
+    /// пока идёт обновление, и без этой паузы кольцо откручивалось назад
+    /// вместе с возвращающимся списком.
+    @State private var ignoresPull = false
+    /// Кольцо встало перед финишем и ждёт, когда экран тронется вверх:
+    /// здесь лежит, насколько список был стянут в этот момент.
+    ///
+    /// Докрут запускается одним движением по первому сдвигу списка, а не
+    /// следует за ним: система возвращает список в два приёма, и кольцо,
+    /// повторявшее каждый, дёргалось на финише дважды.
+    @State private var settleFromPull: Double?
+    @State private var settling = false
+
+    /// Сколько градусов оборота оставлять на возврат экрана.
+    static let settleAngle = 45.0
+
+    func body(content: Content) -> some View {
+        content
+            .rotationEffect(.degrees(baseRotation + turn + (ignoresPull ? 0 : pullAngle)))
+            .onChange(of: spinTicket) { _, _ in spin() }
+            .onChange(of: pullAngle) { old, angle in
+                if let hold = settleFromPull {
+                    if !settling, angle < hold - 2 { settle() }
+                    return
+                }
+                // Меньше градуса — уже покой: отскок списка редко останавливается ровно в ноль.
+                if angle < 1, turn == 0 { ignoresPull = false }
+                // Щелчок на каждом делении, пока кольцо идёт за пальцем.
+                if !ignoresPull, RingTicks.notch(angle) != RingTicks.notch(old) {
+                    RingTicks.tick()
+                }
+            }
+    }
+
+    /// Оборот на обновление: с того угла, где кольцо оставил палец, вперёд
+    /// до полного оборота и ещё один. Назад оно не крутится никогда — поэтому
+    /// угол от пальца сначала переносится в оборот, а список возвращается на
+    /// место уже без влияния на кольцо.
+    private func spin() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        withTransaction(instant) {
+            turn += pullAngle
+            ignoresPull = true
+            settleFromPull = nil
+        }
+        // Встаём за 45° до полного оборота (и ещё одного) и ждём возврата экрана.
+        let stop = (ceil(turn / 360) + 1) * 360 - Self.settleAngle
+        RingTicks.play(from: turn, to: stop)
+        withAnimation(RingTicks.curve) {
+            turn = stop
+        } completion: {
+            if pullAngle > 5 {
+                settleFromPull = pullAngle
+                // Страховка: если список так и не тронулся, финиш не ждёт вечно.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
+                    if settleFromPull != nil, !settling { settle() }
+                }
+            } else {
+                // Список уже вернулся сам — докручиваем без него.
+                settle()
+            }
+        }
+    }
+
+    /// Последние градусы — одним плавным движением, вместе с подъёмом экрана.
+    private func settle() {
+        settling = true
+        withAnimation(.timingCurve(0.25, 0.1, 0.25, 1, duration: 0.5)) {
+            turn += Self.settleAngle
+        } completion: {
+            finishSpin()
+        }
+    }
+
+    /// Оборот закончен: последний щелчок, угол сводится к нулю — на вид то же
+    /// самое, полный оборот, — и кольцо снова слушает палец.
+    private func finishSpin() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        RingTicks.tick()
+        withTransaction(instant) {
+            turn = 0
+            settleFromPull = nil
+            settling = false
+            ignoresPull = pullAngle >= 1
+        }
+    }
+
 }

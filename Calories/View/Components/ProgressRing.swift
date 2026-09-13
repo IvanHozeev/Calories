@@ -1,4 +1,5 @@
 import SwiftUI
+import AudioToolbox
 
 struct RingView<Label: View>: View {
     let progress: Double
@@ -391,12 +392,20 @@ enum RingTicks {
     private static let c1 = (x: 0.4, y: 0.0)
     private static let c2 = (x: 0.2, y: 1.0)
 
-    @MainActor private static let generator = UISelectionFeedbackGenerator()
+    /// Не `UISelectionFeedbackGenerator`: его щелчок настолько слабый, что на
+    /// обороте его не чувствовали вовсе. Лёгкий жёсткий удар ближе к ощущению
+    /// колеса, которое проскакивает деления.
+    @MainActor private static let generator = UIImpactFeedbackGenerator(style: .rigid)
+
+    /// Системный звук щелчка колеса выбора — тот же, что у барабанов даты.
+    /// Как и все системные звуки, молчит при выключенном звонке.
+    private static let clickSound: SystemSoundID = 1157
 
     static func notch(_ angle: Double) -> Int { Int((angle / step).rounded(.down)) }
 
     @MainActor static func tick() {
-        generator.selectionChanged()
+        generator.impactOccurred(intensity: 0.55)
+        AudioServicesPlaySystemSound(clickSound)
     }
 
     /// Щелчки на пути от угла к углу за время оборота.
@@ -409,7 +418,7 @@ enum RingTicks {
             for time in times {
                 try? await Task.sleep(for: .seconds(time - elapsed))
                 elapsed = time
-                generator.selectionChanged()
+                tick()
             }
         }
     }

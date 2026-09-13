@@ -42,16 +42,10 @@ struct RootView: View {
         }
         .overlay {
             if showingSplash {
-                SplashView()
+                SplashView { showingSplash = false }
                     // Касания проходят насквозь: заставка — украшение, а не
                     // экран, и ждать её конца, чтобы нажать, человек не должен.
                     .allowsHitTesting(false)
-                    .transition(.opacity)
-                    .task {
-                        // Один оборот знака: дуги убегают и заполняются снова.
-                        try? await Task.sleep(for: .seconds(2.3))
-                        withAnimation(.easeOut(duration: 0.35)) { showingSplash = false }
-                    }
             }
         }
         .environment(purchases)

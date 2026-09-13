@@ -112,14 +112,39 @@ private struct MarkArc: Shape {
 /// Размеры повторяют картинку лаунч-скрина (Tools/brand_assets.swift): знак
 /// 230 pt — как кольцо на «Сегодня» — по центру экрана без учёта безопасных
 /// зон. Иначе на стыке двух экранов знак бы прыгал.
+///
+/// Анимация одна и цельная, а не кусок бесконечного цикла: знак с
+/// лаунч-скрина делает один плавный оборот, замирает полным и растворяется.
+/// Цикл «убежали — заполнились» обрывался посередине, и экран появлялся
+/// на полузаполненном кольце.
 struct SplashView: View {
+    var onFinish: () -> Void
+
+    @State private var turn: Double = 0
+    @State private var dissolving = false
+
     var body: some View {
         ZStack {
             Color("LaunchBackground")
-            BrandMark(animated: true)
+                .opacity(dissolving ? 0 : 1)
+            BrandMark()
                 .frame(width: 230, height: 230)
+                .rotationEffect(.degrees(turn))
+                .scaleEffect(dissolving ? 1.12 : 1)
+                .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
+        .task {
+            withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
+                turn = 360
+            } completion: {
+                withAnimation(.easeOut(duration: 0.35)) {
+                    dissolving = true
+                } completion: {
+                    onFinish()
+                }
+            }
+        }
     }
 }
 

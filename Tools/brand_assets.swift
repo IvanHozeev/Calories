@@ -60,7 +60,7 @@ let weights = grams.map { $0 / grams.reduce(0, +) }
 
 func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
            parts: [Part], glow: CGFloat, glowAlpha: CGFloat, grayscale: [CGFloat]? = nil, sheen: Bool = true,
-           opening: CGFloat = 80, gap: CGFloat = 26) {
+           opening: CGFloat = 80, gap: CGFloat = 26, groove: Bool = false) {
     // Разрыв смотрит не прямо вправо, а повёрнут против часовой: так знак
     // читается скорее как полумесяц кольца, чем как буква «С».
     let top = 90 - rotation - opening / 2
@@ -77,6 +77,27 @@ func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
         arc.addArc(center: center, radius: radius, startAngle: a0, endAngle: a1, clockwise: true)
         let path = arc.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
         let colors = grayscale.map { [gray($0[i]), gray($0[i] * 0.8)] } ?? part.colors
+        if groove {
+            // Канавка, прорезанная в графите: шире дуги, тёмное дно, внутренняя
+            // тень от верхней стенки, а свет ловит только нижняя кромка —
+            // как у колец и полос в приложении.
+            let cut = arc.copy(strokingWithWidth: width * 1.24, lineCap: .round, lineJoin: .round, miterLimit: 10)
+            ctx.saveGState()
+            ctx.translateBy(x: 0, y: -width * 0.035)
+            ctx.addPath(cut); ctx.setFillColor(gray(1, 0.10)); ctx.fillPath()
+            ctx.restoreGState()
+            ctx.saveGState()
+            ctx.addPath(cut); ctx.setFillColor(rgb(0x050506)); ctx.fillPath()
+            ctx.restoreGState()
+            ctx.saveGState()
+            ctx.addPath(cut); ctx.clip()
+            ctx.setShadow(offset: CGSize(width: 0, height: -width * 0.10), blur: width * 0.18, color: gray(0, 1))
+            ctx.addRect(CGRect(x: -2000, y: -2000, width: 6000, height: 6000))
+            ctx.addPath(cut)
+            ctx.setFillColor(gray(0, 1))
+            ctx.fillPath(using: .evenOdd)
+            ctx.restoreGState()
+        }
         if glow > 0 {
             ctx.saveGState()
             ctx.setShadow(offset: .zero, blur: glow, color: part.glow.copy(alpha: glowAlpha)!)
@@ -125,21 +146,29 @@ let iconParts = [
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
 
-// Обычная: градиентный фон.
+// Графит — тот же материал, что карточки приложения: знак прорезан в
+// поверхности канавками, а заливка в них светится. Фон не декоративный
+// градиент, а поверхность, из которой сделан интерфейс.
+func graphite(_ ctx: CGContext, dark: Bool) {
+    linear(ctx, dark ? [rgb(0x0B0B0D), rgb(0x1C1C20)] : [rgb(0x141417), rgb(0x2E2E34)], [0, 1],
+           from: CGPoint(x: 0, y: 0), to: CGPoint(x: 0, y: S))
+    // Мягкий свет сверху, как на матовом металле.
+    radial(ctx, [gray(1, dark ? 0.05 : 0.08), gray(1, 0)], center: CGPoint(x: S * 0.5, y: S * 0.95), radius: S * 0.85)
+}
+
 do {
     let ctx = context(1024, 1024, opaque: true)
-    linear(ctx, [rgb(0x1B1447), rgb(0x3A1F8F), rgb(0x1466D6)], [0, 0.55, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: S, y: 0))
-    radial(ctx, [rgb(0xB06BFF, 0.45), rgb(0xB06BFF, 0)], center: CGPoint(x: S * 0.42, y: S * 0.62), radius: S * 0.6)
-    radial(ctx, [rgb(0x35D0FF, 0.30), rgb(0x35D0FF, 0)], center: CGPoint(x: S * 0.8, y: S * 0.2), radius: S * 0.5)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 48, glowAlpha: 1)
+    graphite(ctx, dark: false)
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 22, glowAlpha: 0.8,
+          sheen: false, groove: true)
     save(ctx, "AppIcon-light.png")
 }
-// Тёмная: почти чёрный фон, дуги светятся сильнее.
+// Тёмная: тот же графит, чуть глубже, свечение сильнее.
 do {
     let ctx = context(1024, 1024, opaque: true)
-    linear(ctx, [rgb(0x0B0B14), rgb(0x151027)], [0, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: S, y: 0))
-    radial(ctx, [rgb(0x6B3BFF, 0.22), rgb(0x6B3BFF, 0)], center: iconCenter, radius: S * 0.55)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 64, glowAlpha: 1)
+    graphite(ctx, dark: true)
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 34, glowAlpha: 0.9,
+          sheen: false, groove: true)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.

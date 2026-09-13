@@ -45,22 +45,10 @@ struct PlanPhaseEditorView: View {
 
     private var phaseForm: some View {
         Form {
-            Section {
-                Picker("Зачем", selection: $phase.intent) {
-                    ForEach(PlanIntent.allCases) { intent in
-                        Text(intent.title).tag(intent)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .listRowBackground(Color.clear)
-                // Темп при смене намерения берётся типичный для него: 0.7% на
-                // сушке и 0.7% на наборе — очень разные заявления.
-                .onChange(of: phase.intent) { _, newIntent in
-                    phase.weeklyRatePercent = newIntent.defaultWeeklyRatePercent
-                }
-            }
-
+            // Переключателя «дефицит / поддержание / набор» здесь нет: что это за
+            // фаза, выбирают при добавлении, и заголовок экрана об этом говорит.
+            // Сушку, превращённую в набор на месте, проще не заметить, чем
+            // сделать нарочно — нужна другая фаза, её и добавляют.
             Section("Длительность") {
                 Stepper("Недель: \(phase.durationWeeks)", value: $phase.durationWeeks, in: 1...52)
             }

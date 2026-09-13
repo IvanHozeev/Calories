@@ -39128,48 +39128,48 @@
         }
       }
     },
-    "тренд · последнее %.1f кг, %@" : {
+    "тренд · последнее %@ кг, %@" : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "الاتجاه · آخر قياس %1$.1f كغ، %2$@"
+            "value" : "الاتجاه · آخر قياس %1$@ كغ، %2$@"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trend · letzte %1$.1f kg, %2$@"
+            "value" : "Trend · letzte %1$@ kg, %2$@"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "trend · last %1$.1f kg, %2$@"
+            "value" : "trend · last %1$@ kg, %2$@"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tendencia · última %1$.1f kg, %2$@"
+            "value" : "tendencia · última %1$@ kg, %2$@"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tendance · dernière %1$.1f kg, %2$@"
+            "value" : "tendance · dernière %1$@ kg, %2$@"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "מגמה · אחרון %1$.1f ק״ג, %2$@"
+            "value" : "מגמה · אחרון %1$@ ק״ג, %2$@"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "tendência · última %1$.1f kg, %2$@"
+            "value" : "tendência · última %1$@ kg, %2$@"
           }
         }
       }

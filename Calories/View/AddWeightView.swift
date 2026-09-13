@@ -5,7 +5,9 @@ struct AddWeightView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var wholeKg: Int
-    @State private var tenths: Int
+    /// Сотые кило шагом 0,05. Весы с точностью до 50 г — обычное дело, и
+    /// округлять их показания до 100 г значит терять половину деления.
+    @State private var hundredths: Int
     @State private var date: Date
 
     init(store: CalorieStore, initialDate: Date = Date()) {
@@ -13,11 +15,29 @@ struct AddWeightView: View {
         _date = State(initialValue: initialDate)
         let kg = store.latestWeight?.weightKg ?? 70.0
         _wholeKg = State(initialValue: max(30, min(150, Int(kg))))
-        _tenths = State(initialValue: min(9, Int((kg * 10).truncatingRemainder(dividingBy: 10))))
+        let fraction = Int((kg * 100).rounded()) % 100
+        _hundredths = State(initialValue: min(95, fraction / Self.hundredthsStep * Self.hundredthsStep))
     }
 
     private var weight: Double {
-        Double(wholeKg) + Double(tenths) / 10.0
+        Double(wholeKg) + Double(hundredths) / 100.0
+    }
+
+    private static let hundredthsStep = 5
+
+    /// Как пишется дробная часть на колесе: «0», «05», «1», «15»… — то есть
+    /// ровно то, что стоит после запятой, без хвостового нуля.
+    private static func fractionLabel(_ hundredths: Int) -> String {
+        hundredths % 10 == 0 ? "\(hundredths / 10)" : String(format: "%02d", hundredths)
+    }
+
+    /// Вес записью: одна цифра после запятой, вторая — только если она есть.
+    /// Иначе 76,15 показывалось бы как 76,2, а 76,1 — как 76,10.
+    static func format(_ kg: Double) -> String {
+        let hundredths = Int((kg * 100).rounded())
+        return hundredths % 10 == 0
+            ? String(format: "%.1f", kg)
+            : String(format: "%.2f", kg)
     }
 
     var body: some View {
@@ -37,13 +57,13 @@ struct AddWeightView: View {
                         Text(",")
                             .font(.title2.weight(.semibold))
 
-                        Picker("", selection: $tenths) {
-                            ForEach(0...9, id: \.self) { t in
-                                Text("\(t)").tag(t)
+                        Picker("", selection: $hundredths) {
+                            ForEach(Array(stride(from: 0, through: 95, by: Self.hundredthsStep)), id: \.self) { h in
+                                Text(verbatim: Self.fractionLabel(h)).tag(h)
                             }
                         }
                         .pickerStyle(.wheel)
-                        .frame(width: 60)
+                        .frame(width: 70)
                         .clipped()
 
                         Text("кг")

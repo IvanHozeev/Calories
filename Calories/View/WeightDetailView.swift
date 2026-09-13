@@ -51,8 +51,8 @@ struct WeightDetailView: View {
                                 .font(.system(size: 32, weight: .bold, design: .rounded))
                                 .minimumScaleFactor(0.6)
                                 .lineLimit(1)
-                            Text(verbatim: String(format: String(localized: "тренд · последнее %.1f кг, %@"),
-                                                  latest.weightKg,
+                            Text(verbatim: String(format: String(localized: "тренд · последнее %@ кг, %@"),
+                                                  AddWeightView.format(latest.weightKg),
                                                   latest.date.formatted(.dateTime.day().month(.wide))))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
@@ -130,7 +130,7 @@ struct WeightDetailView: View {
                         HStack {
                             Text(entry.date.formatted(.dateTime.day().month(.wide)))
                             Spacer()
-                            Text(String(format: "%.1f \(String(localized: "кг"))", entry.weightKg))
+                            Text(verbatim: "\(AddWeightView.format(entry.weightKg)) \(String(localized: "кг"))")
                                 .foregroundStyle(.secondary)
                         }
                         .swipeActions {

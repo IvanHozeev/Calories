@@ -46,6 +46,10 @@ struct PlanView: View {
                 adherenceSection(plan: plan, adherence: adherence)
             }
 
+            if store.planOutcome == nil, let plan = store.plan, plan.cyclingEnabled {
+                weekCycleSection(plan)
+            }
+
             if let composition = store.planCompositionChange {
                 compositionSection(composition, intent: store.plan?.currentPhase?.intent)
             }
@@ -338,6 +342,73 @@ struct PlanView: View {
             Text("План завершён")
         } footer: {
             Text("Пока план не закрыт, дневная норма продолжает держать его дефицит. Заверши — она вернётся к расчёту по профилю, или увеличь срок ниже, чтобы продолжить.")
+        }
+    }
+
+    /// Неделя цикла по дням и перенос рефида на сегодня.
+    ///
+    /// Здесь, а не в настройке плана: переносят рефид не раз и навсегда, а когда
+    /// жизнь подкинула праздник, — и искать это в редакторе, где меняют стиль
+    /// цикла на весь план, никто не станет.
+    private func weekCycleSection(_ plan: Plan) -> some View {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let monday = Plan.weekStart(for: today)
+        let days = (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
+        let offsets = plan.cycleOffsets(forWeekOf: today)
+        let symbols = calendar.shortWeekdaySymbols
+
+        return Section {
+            HStack(spacing: 4) {
+                ForEach(Array(days.enumerated()), id: \.offset) { index, day in
+                    let isToday = calendar.isDate(day, inSameDayAs: today)
+                    let isRefeed = offsets[index] > 0
+                    VStack(spacing: 4) {
+                        Text(symbols[(index + 1) % 7])
+                            .font(.caption2)
+                            .foregroundStyle(isToday ? .primary : .secondary)
+                        Text(store.goal(for: day).formatted())
+                            .font(.caption.weight(isRefeed ? .bold : .regular))
+                            .monospacedDigit()
+                            .minimumScaleFactor(0.7)
+                            .lineLimit(1)
+                            .foregroundStyle(isRefeed ? Color.orange : (day < today ? .secondary : .primary))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background {
+                        if isToday {
+                            RoundedRectangle(cornerRadius: 8)
+                                .strokeBorder(Color.secondary.opacity(0.5), lineWidth: 1)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+
+            if plan.canUndoRefeedMove(on: today) {
+                Button {
+                    store.undoRefeedMove()
+                } label: {
+                    Label("Вернуть рефид на его день", systemImage: "arrow.uturn.backward")
+                }
+                .accessibilityIdentifier("undoRefeedMove")
+            } else if plan.refeedSwapDay(for: today) != nil {
+                Button {
+                    store.moveRefeed()
+                } label: {
+                    Label("Рефид сегодня", systemImage: "fork.knife")
+                }
+                .accessibilityIdentifier("moveRefeedToToday")
+            }
+        } header: {
+            Text("Эта неделя")
+        } footer: {
+            // Объяснение — только когда есть что нажать: в сам рефид-день
+            // «перенеси на сегодня» без кнопки звучит как издёвка.
+            if plan.refeedSwapDay(for: today) != nil {
+                Text("Праздник не в тот день — перенеси рефид на сегодня. Он меняется местами с самым сытным днём, что ещё впереди на этой неделе, так что недельный дефицит не меняется. Со следующего понедельника — обычная раскладка.")
+            }
         }
     }
 

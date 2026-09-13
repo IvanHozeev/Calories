@@ -2976,3 +2976,74 @@ struct WeightTrendTests {
         #expect(abs((store.weightTrend(on: month) ?? 0) - 80.066) < 0.01)
     }
 }
+
+// MARK: - Перенос рефида
+
+struct RefeedMoveTests {
+
+    private let calendar = Calendar.current
+
+    /// Дата с нужным днём недели (Пн=0…Вс=6) на неделе 7 сентября 2026 — это понедельник.
+    private func day(_ index: Int) -> Date {
+        let monday = calendar.date(from: DateComponents(year: 2026, month: 9, day: 7))!
+        return calendar.date(byAdding: .day, value: index, to: monday)!
+    }
+
+    private func plan(_ style: WeekendStyle = .satSun, cycling: Bool = true) -> Plan {
+        Plan(startDate: day(0), durationWeeks: 12, startWeightKg: 80, targetWeightKg: 76,
+             cyclingEnabled: cycling, weekendStyle: style)
+    }
+
+    @Test func movingToWednesday_takesTheBiggestDayAhead() {
+        let moved = plan().movingRefeed(to: day(2))
+        let offsets = moved.cycleOffsets(forWeekOf: day(2))
+        #expect(offsets[2] == 0.30)
+        #expect(offsets[6] == WeekendStyle.satSun.cycleOffsets[2])
+        #expect(offsets[5] == 0.14)
+    }
+
+    @Test func moving_keepsWeeklyAverage() {
+        let base = plan()
+        let moved = base.movingRefeed(to: day(2))
+        let tdee = 2600.0
+        let before = (0..<7).map { base.calorieTarget(for: day($0), tdee: tdee) }.reduce(0, +)
+        let after = (0..<7).map { moved.calorieTarget(for: day($0), tdee: tdee) }.reduce(0, +)
+        #expect(before == after)
+    }
+
+    @Test func move_endsWithTheWeek() {
+        let moved = plan().movingRefeed(to: day(2))
+        let nextWeek = calendar.date(byAdding: .day, value: 7, to: day(2))!
+        #expect(moved.cycleOffsets(forWeekOf: nextWeek) == WeekendStyle.satSun.cycleOffsets)
+    }
+
+    @Test func noMove_whenRefeedAlreadyPassed() {
+        // Пн+Вт: в среду рефид уже съеден, второй сломал бы неделю.
+        #expect(plan(.monTue).refeedSwapDay(for: day(2)) == nil)
+    }
+
+    @Test func noMove_withoutCycling() {
+        #expect(plan(cycling: false).refeedSwapDay(for: day(2)) == nil)
+    }
+
+    @Test func noMove_onTheRefeedItself() {
+        #expect(plan().refeedSwapDay(for: day(6)) == nil)
+    }
+
+    @Test func onlyOneMovePerWeek() {
+        let moved = plan().movingRefeed(to: day(2))
+        #expect(moved.refeedSwapDay(for: day(3)) == nil)
+    }
+
+    @Test func undo_onlyUntilTheMovedDayPasses() {
+        let moved = plan().movingRefeed(to: day(2))
+        #expect(moved.canUndoRefeedMove(on: day(2)))
+        #expect(!moved.canUndoRefeedMove(on: day(3)))
+    }
+
+    @Test func move_survivesEncoding() throws {
+        let moved = plan().movingRefeed(to: day(2))
+        let decoded = try JSONDecoder().decode(Plan.self, from: JSONEncoder().encode(moved))
+        #expect(decoded.refeedMove == moved.refeedMove)
+    }
+}

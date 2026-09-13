@@ -546,6 +546,31 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Делает сегодня рефидом, забирая его у самого высокого из оставшихся дней недели.
+    func moveRefeed(to date: Date = Date()) {
+        guard let plan else { return }
+        let moved = plan.movingRefeed(to: date)
+        guard moved != plan else { return }
+        savePlanKeepingGoal(moved)
+    }
+
+    /// Возвращает рефид этой недели на его обычный день.
+    func undoRefeedMove(on date: Date = Date()) {
+        guard var plan, plan.canUndoRefeedMove(on: date) else { return }
+        plan.refeedMove = nil
+        savePlanKeepingGoal(plan)
+    }
+
+    /// Сохраняет план, не трогая `dailyGoal`. Перенос рефида меняет только
+    /// раскладку по дням — пересчитанную «замедлить» норму он затирать не должен.
+    private func savePlanKeepingGoal(_ newPlan: Plan) {
+        plan = newPlan
+        if let data = try? JSONEncoder().encode(newPlan) {
+            defaults.set(data, forKey: Keys.plan)
+        }
+        rebuildCaches()
+    }
+
     /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
     func reschedulePlan(to newEndDate: Date) {
         guard let plan else { return }

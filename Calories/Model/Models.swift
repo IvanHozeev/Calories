@@ -550,8 +550,8 @@ enum WeekendStyle: String, Codable, CaseIterable, Identifiable {
     case sunMon   // Израиль: Вс+Пн
     case wedSat   // рефид в среду и субботу
     case wedFri   // рефид в среду и пятницу
-    // Фиксированные пары — временное решение: жизнь сдвигает рефид на праздник,
-    // а не на заранее выбранный день недели. Потом — плавающие рефиды.
+    // Праздники этими парами больше не закрываем: для них есть перенос рефида
+    // на конкретный день, см. `RefeedMove`. Пары остаются, пока ими пользуются.
 
     var id: String { rawValue }
 
@@ -705,6 +705,21 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     }
 }
 
+/// Рефид, перенесённый на другой день одной конкретной недели.
+///
+/// Праздник не совпадает с днём недели, выбранным под рефид заранее, а заводить
+/// под каждый случай новую пару дней — тупик. Перенос меняет местами смещения
+/// двух дней той же недели, поэтому среднее за неделю, а с ним и дефицит,
+/// остаются ровно прежними. Со следующего понедельника снова обычная раскладка.
+struct RefeedMove: Codable, Equatable {
+    /// Понедельник недели, к которой относится перенос.
+    var weekStart: Date
+    /// День, ставший рефидом (Пн=0…Вс=6).
+    var day: Int
+    /// День, у которого рефид забрали.
+    var swappedWith: Int
+}
+
 /// Персональный план: срок в неделях и целевой вес, с точным расчётом дневной нормы калорий
 /// (в отличие от фиксированного множителя calorieMultiplier у Goal). Одна активная запись —
 /// хранится в UserDefaults (JSON), как и профиль.
@@ -722,6 +737,9 @@ struct Plan: Codable, Equatable {
     /// остаётся точно равно dailyCalorieTarget — меняется только распределение по дням.
     var cyclingEnabled: Bool = false
     var weekendStyle: WeekendStyle = .satSun
+    /// Рефид этой недели, перенесённый на другой день. Прошлые недели не держим:
+    /// их дни уже зафиксированы снапшотами целей.
+    var refeedMove: RefeedMove?
 
     /// Идущая неделя плана, считая с первой. Упирается в длительность: после
     /// финиша номер расти не должен, иначе «неделя 14 из 12».
@@ -765,7 +783,7 @@ struct Plan: Codable, Equatable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled, weekendStyle, phases
+        case startDate, durationWeeks, startWeightKg, targetWeightKg, cyclingEnabled, weekendStyle, phases, refeedMove
     }
 
     // Явный init(from:), чтобы уже сохранённые планы не переставали декодироваться.
@@ -777,6 +795,7 @@ struct Plan: Codable, Equatable {
         startWeightKg = try container.decode(Double.self, forKey: .startWeightKg)
         cyclingEnabled = try container.decodeIfPresent(Bool.self, forKey: .cyclingEnabled) ?? false
         weekendStyle = try container.decodeIfPresent(WeekendStyle.self, forKey: .weekendStyle) ?? .satSun
+        refeedMove = try container.decodeIfPresent(RefeedMove.self, forKey: .refeedMove)
 
         if let stored = try container.decodeIfPresent([PlanPhase].self, forKey: .phases), !stored.isEmpty {
             phases = stored
@@ -802,6 +821,7 @@ struct Plan: Codable, Equatable {
         try container.encode(phases, forKey: .phases)
         try container.encode(cyclingEnabled, forKey: .cyclingEnabled)
         try container.encode(weekendStyle, forKey: .weekendStyle)
+        try container.encodeIfPresent(refeedMove, forKey: .refeedMove)
         try container.encode(durationWeeks, forKey: .durationWeeks)
         try container.encode(targetWeightKg, forKey: .targetWeightKg)
     }
@@ -809,7 +829,7 @@ struct Plan: Codable, Equatable {
     /// Грубое общепринятое приближение: ~7700 ккал на 1 кг жировой массы.
     static let kcalPerKg: Double = 7700
 
-    private static func mondayBasedWeekdayIndex(for date: Date) -> Int {
+    static func mondayBasedWeekdayIndex(for date: Date) -> Int {
         // Calendar.weekday: 1=Вс … 7=Сб. Приводим к Пн=0 … Вс=6.
         let weekday = Calendar.current.component(.weekday, from: date)
         return (weekday + 5) % 7
@@ -972,8 +992,67 @@ struct Plan: Codable, Equatable {
     func calorieTarget(for date: Date, tdee: Double) -> Int {
         let base = Double(dailyCalorieTarget(for: date, tdee: tdee))
         guard cyclingEnabled else { return Int(base.rounded()) }
-        let offset = weekendStyle.cycleOffsets[Self.mondayBasedWeekdayIndex(for: date)]
+        let offset = cycleOffsets(forWeekOf: date)[Self.mondayBasedWeekdayIndex(for: date)]
         return Int((base * (1 + offset)).rounded())
+    }
+
+    // MARK: - Перенос рефида
+
+    /// Понедельник недели, в которую попадает дата.
+    static func weekStart(for date: Date) -> Date {
+        let day = Calendar.current.startOfDay(for: date)
+        return Calendar.current.date(byAdding: .day, value: -mondayBasedWeekdayIndex(for: day), to: day) ?? day
+    }
+
+    /// Смещения Пн…Вс для недели с датой — с переносом, если он на этой неделе.
+    func cycleOffsets(forWeekOf date: Date) -> [Double] {
+        var offsets = weekendStyle.cycleOffsets
+        if let move = refeedMove,
+           Calendar.current.isDate(move.weekStart, inSameDayAs: Self.weekStart(for: date)),
+           offsets.indices.contains(move.day), offsets.indices.contains(move.swappedWith) {
+            offsets.swapAt(move.day, move.swappedWith)
+        }
+        return offsets
+    }
+
+    /// С каким днём поменяться, чтобы рефид пришёлся на эту дату. nil — нельзя.
+    ///
+    /// Только с днём, который ещё впереди: прошедшие дни уже съедены и
+    /// зафиксированы, и забрать рефид у них значит получить второй рефид за
+    /// неделю вместо перенесённого. Из будущих — самый высокий: переносят
+    /// именно рефид, а не второй по величине день. Один перенос на неделю —
+    /// второй начал бы тасовать уже тасованное.
+    func refeedSwapDay(for date: Date) -> Int? {
+        guard cyclingEnabled, canMoveRefeed(in: date) else { return nil }
+        let offsets = weekendStyle.cycleOffsets
+        let today = Self.mondayBasedWeekdayIndex(for: date)
+        let later = offsets.indices.filter { $0 > today }
+        guard let peak = later.max(by: { offsets[$0] < offsets[$1] }),
+              offsets[peak] > 0, offsets[peak] > offsets[today] else { return nil }
+        return peak
+    }
+
+    private func canMoveRefeed(in date: Date) -> Bool {
+        guard let move = refeedMove else { return true }
+        return !Calendar.current.isDate(move.weekStart, inSameDayAs: Self.weekStart(for: date))
+    }
+
+    /// План, где рефид этой недели перенесён на дату. Без изменений, если нельзя.
+    func movingRefeed(to date: Date) -> Plan {
+        guard let peak = refeedSwapDay(for: date) else { return self }
+        var plan = self
+        plan.refeedMove = RefeedMove(weekStart: Self.weekStart(for: date),
+                                     day: Self.mondayBasedWeekdayIndex(for: date),
+                                     swappedWith: peak)
+        return plan
+    }
+
+    /// Можно ли вернуть перенос на дату: только пока новый рефид-день не прошёл.
+    /// Иначе рефид уже съеден, и возврат дал бы второй.
+    func canUndoRefeedMove(on date: Date) -> Bool {
+        guard let move = refeedMove,
+              Calendar.current.isDate(move.weekStart, inSameDayAs: Self.weekStart(for: date)) else { return false }
+        return move.day >= Self.mondayBasedWeekdayIndex(for: date)
     }
 
     /// Раскладка нормы по дням недели (Пн…Вс) — для превью в UI.

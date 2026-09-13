@@ -4,6 +4,144 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Вернуть рефид на его день" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة يوم التحميل إلى يومه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed auf seinen Tag zurücklegen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move refeed back to its day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devolver el refeed a su día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remettre le refeed à son jour"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להחזיר את הריפיד ליומו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devolver o refeed ao seu dia"
+          }
+        }
+      }
+    },
+    "Праздник не в тот день — перенеси рефид на сегодня. Он меняется местами с самым сытным днём, что ещё впереди на этой неделе, так что недельный дефицит не меняется. Со следующего понедельника — обычная раскладка." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العطلة ليست في يوم التحميل؟ انقل يوم التحميل إلى اليوم. يتبادل مع أكبر يوم متبقٍ هذا الأسبوع، فيبقى العجز الأسبوعي كما هو. من الاثنين القادم يعود التوزيع المعتاد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feiertag am falschen Tag? Leg den Refeed auf heute. Er tauscht mit dem größten noch kommenden Tag dieser Woche, das Wochendefizit bleibt gleich. Ab nächstem Montag gilt wieder die normale Verteilung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Holiday on the wrong day? Move the refeed to today. It swaps with the biggest day still ahead this week, so the weekly deficit stays the same. Next Monday the usual layout returns."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Festivo en otro día? Pasa el refeed a hoy. Se intercambia con el día más alto que queda esta semana, así que el déficit semanal no cambia. Desde el próximo lunes vuelve el reparto habitual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour férié au mauvais moment ? Déplace le refeed à aujourd’hui. Il s’échange avec le jour le plus copieux encore à venir cette semaine, le déficit hebdomadaire reste le même. Dès lundi prochain, la répartition habituelle revient."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החג לא ביום הריפיד? העבר את הריפיד להיום. הוא מתחלף עם היום הגדול ביותר שעוד נותר השבוע, כך שהגירעון השבועי לא משתנה. מיום שני הבא — החלוקה הרגילה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feriado no dia errado? Passe o refeed para hoje. Ele troca de lugar com o maior dia que ainda falta na semana, então o déficit semanal não muda. A partir da próxima segunda, volta a distribuição normal."
+          }
+        }
+      }
+    },
+    "Рефид сегодня" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم التحميل اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed aujourd’hui"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ריפיד היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeed hoje"
+          }
+        }
+      }
+    },
     "—" : {
       "shouldTranslate" : false
     },

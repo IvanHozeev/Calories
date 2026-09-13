@@ -105,7 +105,8 @@ func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
                            locations: [0, 0.35, 0.6, 1])!,
                 startCenter: center, startRadius: inner, endCenter: center, endRadius: outer, options: [])
             // Сверху свет, снизу мягкая тень — как у значков Apple.
-            linear(ctx, [gray(1, 0.30), gray(1, 0.0), gray(0, 0.0), gray(0, 0.14)], [0, 0.5, 0.62, 1],
+            // Блик слабый: сильный белил цвет, и дуги становились пастельными.
+            linear(ctx, [gray(1, 0.16), gray(1, 0.0), gray(0, 0.0), gray(0, 0.14)], [0, 0.5, 0.62, 1],
                    from: CGPoint(x: 0, y: center.y + radius + width), to: CGPoint(x: 0, y: center.y - radius - width))
         }
         ctx.restoreGState()
@@ -113,6 +114,14 @@ func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
 }
 
 let parts = [carbs, fat, protein]
+// На иконке цвета ярче и светлее, чем в приложении: фон там сам фиолетово-синий,
+// и дуги родных оттенков тонули в нём. Белок уходит к голубому, углеводы к
+// розово-сиреневому, жир к солнечному — каждая дуга отделяется от фона.
+let iconParts = [
+    Part(colors: [rgb(0xD94DFF), rgb(0xB322FF)], glow: rgb(0xC43BFF)),
+    Part(colors: [rgb(0xFFB300), rgb(0xFF7A00)], glow: rgb(0xFF9500)),
+    Part(colors: [rgb(0x1FC8FF), rgb(0x0A84FF)], glow: rgb(0x14A8FF)),
+]
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
 
@@ -122,7 +131,7 @@ do {
     linear(ctx, [rgb(0x1B1447), rgb(0x3A1F8F), rgb(0x1466D6)], [0, 0.55, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: S, y: 0))
     radial(ctx, [rgb(0xB06BFF, 0.45), rgb(0xB06BFF, 0)], center: CGPoint(x: S * 0.42, y: S * 0.62), radius: S * 0.6)
     radial(ctx, [rgb(0x35D0FF, 0.30), rgb(0x35D0FF, 0)], center: CGPoint(x: S * 0.8, y: S * 0.2), radius: S * 0.5)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: parts, glow: 40, glowAlpha: 0.9)
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 48, glowAlpha: 1)
     save(ctx, "AppIcon-light.png")
 }
 // Тёмная: почти чёрный фон, дуги светятся сильнее.
@@ -130,7 +139,7 @@ do {
     let ctx = context(1024, 1024, opaque: true)
     linear(ctx, [rgb(0x0B0B14), rgb(0x151027)], [0, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: S, y: 0))
     radial(ctx, [rgb(0x6B3BFF, 0.22), rgb(0x6B3BFF, 0)], center: iconCenter, radius: S * 0.55)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: parts, glow: 60, glowAlpha: 1)
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 64, glowAlpha: 1)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.

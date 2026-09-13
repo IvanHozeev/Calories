@@ -52,7 +52,8 @@ struct RingView<Label: View>: View {
             .compositingGroup()
             .rotationEffect(.degrees(turn))
             .onChange(of: spinTicket) { _, _ in
-                withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: ProgressRing.spinDuration)) {
+                RingTicks.play(from: 0, to: 360)
+                withAnimation(RingTicks.curve) {
                     turn += 360
                 } completion: {
                     var instant = Transaction()
@@ -108,6 +109,19 @@ struct ProgressRing: View {
     /// пока идёт обновление, и без этой паузы кольцо откручивалось назад
     /// вместе с возвращающимся списком.
     @State private var ignoresPull = false
+    /// Докрут последних градусов оборота вместе с возвратом списка: здесь
+    /// лежит, насколько список был стянут, когда кольцо встало перед финишем.
+    /// Пока он поднимается к покою, кольцо проходит оставшиеся градусы —
+    /// ровно в такт экрану, а не по угаданному таймеру.
+    @State private var settleFromPull: Double?
+
+    /// Сколько градусов оборота оставлять на возврат экрана.
+    static let settleAngle = 30.0
+
+    private var settleOffset: Double {
+        guard let hold = settleFromPull, hold > 0 else { return 0 }
+        return Self.settleAngle * (1 - min(max(pullAngle / hold, 0), 1))
+    }
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -134,11 +148,11 @@ struct ProgressRing: View {
     private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
     private static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
 
-    /// Оборот длиннее, чем держится обновление (`refreshHold`): после него
-    /// система ещё с полсекунды возвращает список наверх, и кольцо должно
-    /// докрутиться вместе с этим возвратом, а не встать раньше и ждать.
-    static let spinDuration = 1.6
-    static let refreshHold = 1.15
+    /// Путь кольца до остановки перед финишем.
+    static let spinDuration = RingTicks.duration
+    /// Обновление держится чуть дольше, чем кольцо идёт до остановки: пауза
+    /// перед финишем, а докрут — уже вместе с возвратом экрана.
+    static let refreshHold = RingTicks.duration + 0.3
 
     /// Оборот на обновление: с того угла, где кольцо оставил палец, вперёд
     /// до полного оборота и ещё один. Назад оно не крутится никогда — поэтому
@@ -150,16 +164,37 @@ struct ProgressRing: View {
         withTransaction(instant) {
             turn += pullAngle
             ignoresPull = true
+            settleFromPull = nil
         }
-        let target = (ceil(turn / 360) + 1) * 360
-        withAnimation(.timingCurve(0.4, 0, 0.2, 1, duration: Self.spinDuration)) {
-            turn = target
+        // Встаём за 30° до полного оборота (и ещё одного) и ждём возврата экрана.
+        let stop = (ceil(turn / 360) + 1) * 360 - Self.settleAngle
+        RingTicks.play(from: turn, to: stop)
+        withAnimation(RingTicks.curve) {
+            turn = stop
         } completion: {
-            withTransaction(instant) {
-                turn = 0
-                // Список мог уже вернуться — тогда палец снова слушаем сразу.
-                if pullAngle < 1 { ignoresPull = false }
+            if pullAngle > 5 {
+                settleFromPull = pullAngle
+            } else {
+                // Список уже вернулся сам — докручиваем коротко, без него.
+                withAnimation(.easeOut(duration: 0.35)) {
+                    turn += Self.settleAngle
+                } completion: {
+                    finishSpin()
+                }
             }
+        }
+    }
+
+    /// Оборот закончен: последний щелчок, угол сводится к нулю — на вид то же
+    /// самое, полный оборот, — и кольцо снова слушает палец.
+    private func finishSpin() {
+        var instant = Transaction()
+        instant.disablesAnimations = true
+        RingTicks.tick()
+        withTransaction(instant) {
+            turn = 0
+            settleFromPull = nil
+            ignoresPull = pullAngle >= 1
         }
     }
 
@@ -229,11 +264,28 @@ struct ProgressRing: View {
             // и на обороте цвета размазывались друг по другу. Склеенное кольцо
             // поворачивается как цельная картинка.
             .compositingGroup()
-            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? 0 : pullAngle)))
+            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? settleOffset : pullAngle)))
+            // Докрут сглажен: список система может вернуть и одним скачком,
+            // и тогда без сглаживания кольцо перепрыгнуло бы 30° за кадр.
+            .animation(settleFromPull != nil ? .easeOut(duration: 0.3) : nil, value: pullAngle)
             .onChange(of: spinTicket) { _, _ in spin() }
-            .onChange(of: pullAngle) { _, angle in
+            .onChange(of: pullAngle) { old, angle in
                 // Меньше градуса — уже покой: отскок списка редко останавливается ровно в ноль.
+                if settleFromPull != nil {
+                    if angle < 1 {
+                        // Сводим угол, когда сглаженный докрут доиграл.
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .seconds(0.32))
+                            if settleFromPull != nil, pullAngle < 1 { finishSpin() }
+                        }
+                    }
+                    return
+                }
                 if angle < 1, turn == 0 { ignoresPull = false }
+                // Щелчок на каждом делении, пока кольцо идёт за пальцем.
+                if !ignoresPull, RingTicks.notch(angle) != RingTicks.notch(old) {
+                    RingTicks.tick()
+                }
             }
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
@@ -319,5 +371,67 @@ private extension Color {
                   red: Double((hex >> 16) & 0xFF) / 255,
                   green: Double((hex >> 8) & 0xFF) / 255,
                   blue: Double(hex & 0xFF) / 255)
+    }
+}
+
+/// Щелчки колеса при повороте кольца — как у барабана выбора.
+///
+/// Во время оборота значения угла SwiftUI наружу не отдаёт, поэтому моменты
+/// щелчков считаются заранее по той же кривой, что и анимация: где угол
+/// пересекает очередное деление, там и щелчок. Так они сами редеют к концу,
+/// как у докручивающегося колеса.
+enum RingTicks {
+    /// Путь до остановки перед финишем. Неторопливо: быстрый оборот щёлкал
+    /// сплошной трелью.
+    static let duration = 1.7
+    static let step = 30.0
+    static let curve = Animation.timingCurve(c1.x, c1.y, c2.x, c2.y, duration: duration)
+
+    private static let c1 = (x: 0.4, y: 0.0)
+    private static let c2 = (x: 0.2, y: 1.0)
+
+    @MainActor private static let generator = UISelectionFeedbackGenerator()
+
+    static func notch(_ angle: Double) -> Int { Int((angle / step).rounded(.down)) }
+
+    @MainActor static func tick() {
+        generator.selectionChanged()
+    }
+
+    /// Щелчки на пути от угла к углу за время оборота.
+    @MainActor static func play(from start: Double, to end: Double) {
+        guard end > start else { return }
+        generator.prepare()
+        let times = crossingTimes(from: start, to: end)
+        Task { @MainActor in
+            var elapsed = 0.0
+            for time in times {
+                try? await Task.sleep(for: .seconds(time - elapsed))
+                elapsed = time
+                generator.selectionChanged()
+            }
+        }
+    }
+
+    /// Когда по кривой анимации угол проходит каждое деление.
+    static func crossingTimes(from start: Double, to end: Double) -> [Double] {
+        var times: [Double] = []
+        var next = (Double(notch(start)) + 1) * step
+        let samples = 400
+        for i in 0...samples {
+            let s = Double(i) / Double(samples)
+            let x = bezier(s, c1.x, c2.x)
+            let angle = start + (end - start) * bezier(s, c1.y, c2.y)
+            while angle >= next, next <= end {
+                times.append(x * duration)
+                next += step
+            }
+        }
+        return times
+    }
+
+    private static func bezier(_ t: Double, _ p1: Double, _ p2: Double) -> Double {
+        let u = 1 - t
+        return 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t
     }
 }

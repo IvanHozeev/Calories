@@ -3270,3 +3270,26 @@ struct FoodTraitTests {
         #expect(!traits(15, p: 3, f: 0.2, c: 0).contains(.highThermicEffect))
     }
 }
+
+// MARK: - Щелчки кольца
+
+struct RingTicksTests {
+
+    @Test func fullTurn_clicksEveryNotch() {
+        let times = RingTicks.crossingTimes(from: 0, to: 360)
+        #expect(times.count == 12)
+        #expect(times == times.sorted())
+        #expect((times.last ?? 0) <= RingTicks.duration)
+    }
+
+    @Test func clicksThinOutTowardsTheEnd() {
+        // Колесо докручивается: промежутки между щелчками к концу растут.
+        let times = RingTicks.crossingTimes(from: 0, to: 720)
+        let gaps = zip(times.dropFirst(), times).map { $0 - $1 }
+        #expect((gaps.last ?? 0) > (gaps[gaps.count / 2]))
+    }
+
+    @Test func turnFromMidway_startsAtTheNextNotch() {
+        #expect(RingTicks.crossingTimes(from: 45, to: 360).count == 11)
+    }
+}

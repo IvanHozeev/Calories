@@ -1,5 +1,6 @@
 import SwiftUI
 import AudioToolbox
+import CoreHaptics
 
 struct RingView<Label: View>: View {
     let progress: Double
@@ -392,34 +393,34 @@ enum RingTicks {
     private static let c1 = (x: 0.4, y: 0.0)
     private static let c2 = (x: 0.2, y: 1.0)
 
-    /// Не `UISelectionFeedbackGenerator`: его щелчок настолько слабый, что на
-    /// обороте его не чувствовали вовсе. Лёгкий жёсткий удар ближе к ощущению
-    /// колеса, которое проскакивает деления.
-    @MainActor private static let generator = UIImpactFeedbackGenerator(style: .rigid)
-
     /// Системный звук щелчка колеса выбора — тот же, что у барабанов даты.
     /// Как и все системные звуки, молчит при выключенном звонке.
     private static let clickSound: SystemSoundID = 1157
 
+    /// Звук идёт со своей очереди: запущенный с главной, он стопорил кадры
+    /// анимации, и оборот подлагивал на каждом щелчке.
+    private static let soundQueue = DispatchQueue(label: "calories.ring.click", qos: .userInteractive)
+
     static func notch(_ angle: Double) -> Int { Int((angle / step).rounded(.down)) }
 
+    /// Один щелчок — пока кольцо идёт за пальцем.
     @MainActor static func tick() {
-        generator.impactOccurred(intensity: 0.55)
-        AudioServicesPlaySystemSound(clickSound)
+        RingHaptics.shared.play(at: [0])
+        soundQueue.async { AudioServicesPlaySystemSound(clickSound) }
     }
 
     /// Щелчки на пути от угла к углу за время оборота.
+    ///
+    /// Всё расписание отдаётся сразу: вибрация одним узором Core Haptics,
+    /// звук — отложенными вызовами от одного начала отсчёта. Цепочка задержек
+    /// на главном потоке набегала и уводила щелчки от кольца.
     @MainActor static func play(from start: Double, to end: Double) {
         guard end > start else { return }
-        generator.prepare()
         let times = crossingTimes(from: start, to: end)
-        Task { @MainActor in
-            var elapsed = 0.0
-            for time in times {
-                try? await Task.sleep(for: .seconds(time - elapsed))
-                elapsed = time
-                tick()
-            }
+        RingHaptics.shared.play(at: times)
+        let origin = DispatchTime.now()
+        for time in times {
+            soundQueue.asyncAfter(deadline: origin + time) { AudioServicesPlaySystemSound(clickSound) }
         }
     }
 
@@ -443,5 +444,58 @@ enum RingTicks {
     private static func bezier(_ t: Double, _ p1: Double, _ p2: Double) -> Double {
         let u = 1 - t
         return 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t
+    }
+}
+
+/// Вибромотор напрямую, через Core Haptics.
+///
+/// Генераторы UIKit на обороте молчали: и щелчок выбора, и лёгкий удар. Core
+/// Haptics играет узор целиком с точным расписанием и не зависит от того,
+/// чем в этот момент занят главный поток.
+@MainActor
+final class RingHaptics {
+    static let shared = RingHaptics()
+
+    private var engine: CHHapticEngine?
+
+    private init() {}
+
+    private func startedEngine() -> CHHapticEngine? {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return nil }
+        if let engine { return engine }
+        do {
+            let engine = try CHHapticEngine()
+            engine.isAutoShutdownEnabled = true
+            engine.playsHapticsOnly = true
+            // Система может остановить мотор (фон, звонок) — поднимаем при следующем щелчке.
+            engine.resetHandler = { [weak self] in
+                Task { @MainActor in self?.engine = nil }
+            }
+            engine.stoppedHandler = { [weak self] _ in
+                Task { @MainActor in self?.engine = nil }
+            }
+            try engine.start()
+            self.engine = engine
+            return engine
+        } catch {
+            return nil
+        }
+    }
+
+    /// Короткие чёткие толчки в заданные моменты от «сейчас», в секундах.
+    func play(at times: [Double]) {
+        guard !times.isEmpty, let engine = startedEngine() else { return }
+        let events = times.map { time in
+            CHHapticEvent(eventType: .hapticTransient, parameters: [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.9),
+            ], relativeTime: time)
+        }
+        do {
+            let pattern = try CHHapticPattern(events: events, parameters: [])
+            try engine.makePlayer(with: pattern).start(atTime: CHHapticTimeImmediate)
+        } catch {
+            self.engine = nil
+        }
     }
 }

@@ -109,19 +109,17 @@ struct ProgressRing: View {
     /// пока идёт обновление, и без этой паузы кольцо откручивалось назад
     /// вместе с возвращающимся списком.
     @State private var ignoresPull = false
-    /// Докрут последних градусов оборота вместе с возвратом списка: здесь
-    /// лежит, насколько список был стянут, когда кольцо встало перед финишем.
-    /// Пока он поднимается к покою, кольцо проходит оставшиеся градусы —
-    /// ровно в такт экрану, а не по угаданному таймеру.
+    /// Кольцо встало перед финишем и ждёт, когда экран тронется вверх:
+    /// здесь лежит, насколько список был стянут в этот момент.
+    ///
+    /// Докрут запускается одним движением по первому сдвигу списка, а не
+    /// следует за ним: система возвращает список в два приёма, и кольцо,
+    /// повторявшее каждый, дёргалось на финише дважды.
     @State private var settleFromPull: Double?
+    @State private var settling = false
 
     /// Сколько градусов оборота оставлять на возврат экрана.
-    static let settleAngle = 30.0
-
-    private var settleOffset: Double {
-        guard let hold = settleFromPull, hold > 0 else { return 0 }
-        return Self.settleAngle * (1 - min(max(pullAngle / hold, 0), 1))
-    }
+    static let settleAngle = 45.0
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -174,14 +172,25 @@ struct ProgressRing: View {
         } completion: {
             if pullAngle > 5 {
                 settleFromPull = pullAngle
-            } else {
-                // Список уже вернулся сам — докручиваем коротко, без него.
-                withAnimation(.easeOut(duration: 0.35)) {
-                    turn += Self.settleAngle
-                } completion: {
-                    finishSpin()
+                // Страховка: если список так и не тронулся, финиш не ждёт вечно.
+                Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(1.5))
+                    if settleFromPull != nil, !settling { settle() }
                 }
+            } else {
+                // Список уже вернулся сам — докручиваем без него.
+                settle()
             }
+        }
+    }
+
+    /// Последние градусы — одним плавным движением, вместе с подъёмом экрана.
+    private func settle() {
+        settling = true
+        withAnimation(.timingCurve(0.25, 0.1, 0.25, 1, duration: 0.5)) {
+            turn += Self.settleAngle
+        } completion: {
+            finishSpin()
         }
     }
 
@@ -194,6 +203,7 @@ struct ProgressRing: View {
         withTransaction(instant) {
             turn = 0
             settleFromPull = nil
+            settling = false
             ignoresPull = pullAngle >= 1
         }
     }
@@ -264,21 +274,12 @@ struct ProgressRing: View {
             // и на обороте цвета размазывались друг по другу. Склеенное кольцо
             // поворачивается как цельная картинка.
             .compositingGroup()
-            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? settleOffset : pullAngle)))
-            // Докрут сглажен: список система может вернуть и одним скачком,
-            // и тогда без сглаживания кольцо перепрыгнуло бы 30° за кадр.
-            .animation(settleFromPull != nil ? .easeOut(duration: 0.3) : nil, value: pullAngle)
+            .rotationEffect(.degrees(Self.rotation + turn + (ignoresPull ? 0 : pullAngle)))
             .onChange(of: spinTicket) { _, _ in spin() }
             .onChange(of: pullAngle) { old, angle in
                 // Меньше градуса — уже покой: отскок списка редко останавливается ровно в ноль.
-                if settleFromPull != nil {
-                    if angle < 1 {
-                        // Сводим угол, когда сглаженный докрут доиграл.
-                        Task { @MainActor in
-                            try? await Task.sleep(for: .seconds(0.32))
-                            if settleFromPull != nil, pullAngle < 1 { finishSpin() }
-                        }
-                    }
+                if let hold = settleFromPull {
+                    if !settling, angle < hold - 2 { settle() }
                     return
                 }
                 if angle < 1, turn == 0 { ignoresPull = false }

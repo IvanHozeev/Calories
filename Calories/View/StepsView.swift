@@ -74,14 +74,12 @@ final class StepsViewModel {
 
 struct StepsNavigationView: View {
     var store: StepStore
-    var activityLevel: ActivityLevel?
     @State private var viewModel: StepsViewModel
     @State private var selectedGoal: Int = 10_000
     @State private var showingGoalEditor = false
 
-    init(store: StepStore, activityLevel: ActivityLevel? = nil) {
+    init(store: StepStore) {
         self.store = store
-        self.activityLevel = activityLevel
         _viewModel = State(initialValue: StepsViewModel(store: store))
     }
 
@@ -111,16 +109,9 @@ struct StepsNavigationView: View {
             }
         }
         .sheet(isPresented: $showingGoalEditor, onDismiss: {
-            if store.goalFollowsActivity, activityLevel != nil {
-                store.applyActivity(activityLevel)
-            } else {
-                store.stepGoal = selectedGoal
-            }
+            store.stepGoal = selectedGoal
         }) {
-            GoalPickerSheet(goal: $selectedGoal,
-                            followsActivity: Binding(get: { store.goalFollowsActivity },
-                                                     set: { store.goalFollowsActivity = $0 }),
-                            activityLevel: activityLevel)
+            GoalPickerSheet(goal: $selectedGoal)
         }
     }
 
@@ -186,8 +177,6 @@ struct StepsNavigationView: View {
 
 private struct GoalPickerSheet: View {
     @Binding var goal: Int
-    @Binding var followsActivity: Bool
-    let activityLevel: ActivityLevel?
     @Environment(\.dismiss) private var dismiss
 
     private let values = Array(stride(from: 1000, through: 30_000, by: 500))
@@ -209,40 +198,14 @@ private struct GoalPickerSheet: View {
             .padding(.top, 20)
             .padding(.bottom, 4)
 
-            // Уровень есть не всегда: без профиля выводить цель не из чего.
-            if let activityLevel {
-                Toggle("По уровню активности", isOn: $followsActivity.animation())
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                    .accessibilityIdentifier("stepGoalFollowsActivity")
-                    .onChange(of: followsActivity, initial: true) { _, follows in
-                        if follows { goal = activityLevel.stepTarget }
-                    }
-            }
-
-            if followsActivity, let activityLevel {
-                VStack(spacing: 8) {
-                    Text(activityLevel.stepTarget.formatted())
-                        .font(.system(size: 44, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                    Text(String(format: String(localized: "Столько шагов оправдывают уровень «%@». Меньше — и норма калорий считает активность, которой не было."), activityLevel.title))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
+            Picker("Цель", selection: $goal) {
+                ForEach(values, id: \.self) { value in
+                    Text(value.formatted()).tag(value)
                 }
-                .padding(.horizontal)
-                .frame(maxHeight: .infinity)
-            } else {
-                Picker("Цель", selection: $goal) {
-                    ForEach(values, id: \.self) { value in
-                        Text(value.formatted()).tag(value)
-                    }
-                }
-                .pickerStyle(.wheel)
             }
+            .pickerStyle(.wheel)
         }
-        .presentationDetents([.height(activityLevel == nil ? 280 : 330)])
+        .presentationDetents([.height(280)])
         .presentationDragIndicator(.visible)
     }
 }

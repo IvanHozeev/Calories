@@ -1025,32 +1025,6 @@ struct StepStoreTests {
         return StepStore(defaults: defaults, groupDefaults: nil)
     }
 
-    @Test func stepGoal_followsActivityByDefault() {
-        let store = makeStore(goal: 8_000)
-        store.applyActivity(.active)
-        #expect(store.stepGoal == ActivityLevel.active.stepTarget)
-    }
-
-    @Test func stepGoal_keptWhenNotFollowingActivity() {
-        let store = makeStore(goal: 8_000)
-        store.goalFollowsActivity = false
-        store.applyActivity(.veryActive)
-        #expect(store.stepGoal == 8_000)
-        #expect(defaults.object(forKey: "step_goal_follows_activity") as? Bool == false)
-    }
-
-    @Test func stepGoal_untouchedWithoutProfile() {
-        let store = makeStore(goal: 8_000)
-        store.applyActivity(nil)
-        #expect(store.stepGoal == 8_000)
-    }
-
-    @Test func stepTarget_growsWithActivity() {
-        let targets = ActivityLevel.allCases.map(\.stepTarget)
-        #expect(targets == targets.sorted())
-        #expect(Set(targets).count == targets.count)
-    }
-
     @Test func defaultStepGoal_is10000() {
         let store = makeStore()
         #expect(store.stepGoal == 10_000)

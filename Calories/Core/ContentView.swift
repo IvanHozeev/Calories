@@ -354,12 +354,8 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingActivity) {
                 ActivityView(store: store)
             }
-            // Сменили уровень активности — цель по шагам едет следом, если за ним следует.
-            .onChange(of: store.profile?.activityLevel, initial: true) { _, level in
-                stepStore.applyActivity(level)
-            }
             .navigationDestination(isPresented: $showingSteps) {
-                StepsNavigationView(store: stepStore, activityLevel: store.profile?.activityLevel)
+                StepsNavigationView(store: stepStore)
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)

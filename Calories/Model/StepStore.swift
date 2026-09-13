@@ -45,17 +45,6 @@ final class StepStore {
         }
     }
 
-    /// Цель по шагам следует за уровнем активности, а не выставлена руками.
-    var goalFollowsActivity: Bool {
-        didSet { defaults.set(goalFollowsActivity, forKey: "step_goal_follows_activity") }
-    }
-
-    /// Подтягивает цель к уровню активности, если она за ним следует.
-    func applyActivity(_ level: ActivityLevel?) {
-        guard goalFollowsActivity, let level, stepGoal != level.stepTarget else { return }
-        stepGoal = level.stepTarget
-    }
-
     init(
         defaults: UserDefaults = .standard,
         groupDefaults: UserDefaults? = UserDefaults(suiteName: CalorieStore.appGroup)
@@ -64,7 +53,6 @@ final class StepStore {
         self.groupDefaults = groupDefaults
         let goal = defaults.object(forKey: "step_goal") as? Int ?? 10_000
         self.stepGoal = goal
-        self.goalFollowsActivity = defaults.object(forKey: "step_goal_follows_activity") as? Bool ?? true
         groupDefaults?.set(goal, forKey: "widget_step_goal")
         requestAuthorization()
     }

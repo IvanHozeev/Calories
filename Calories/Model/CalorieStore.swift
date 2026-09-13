@@ -28,8 +28,22 @@ final class CalorieStore {
         // пока что-нибудь другое не дёрнет пересчёт.
         didSet {
             defaults.set(dailyGoal, forKey: Keys.goal)
+            stampDailyGoalPhase()
             rebuildCaches()
         }
+    }
+    /// Под какой кусок плана (фазу или брейк) записана `dailyGoal`.
+    ///
+    /// Норма без цикла хранится числом, и раньше она не замечала смены фазы:
+    /// сушка кончалась, начиналось поддержание, а кольцо до первой правки
+    /// профиля показывало дефицит. Теперь число действует только в той фазе,
+    /// под которую его записали, — дальше норма идёт по формуле плана. Числом,
+    /// а не формулой, его держат ради «замедлить»: та пишет сюда пересчитанное.
+    private(set) var dailyGoalPhaseID: UUID?
+
+    private func stampDailyGoalPhase() {
+        dailyGoalPhaseID = plan?.phase(on: Date())?.id
+        defaults.set(dailyGoalPhaseID?.uuidString, forKey: Keys.goalPhase)
     }
     private(set) var profile: UserProfile?
     private(set) var plan: Plan?
@@ -88,6 +102,7 @@ final class CalorieStore {
 
     private enum Keys {
         static let goal = "daily_goal"
+        static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
         static let plan = "active_plan"
         static let premium = "is_premium"
@@ -103,7 +118,15 @@ final class CalorieStore {
         self.groupDefaults = groupDefaults
         self.dailyGoal = defaults.object(forKey: Keys.goal) as? Int ?? 2000
         self.profile = Self.loadProfile(from: defaults)
-        self.plan = Self.loadPlan(from: defaults)
+        let loadedPlan = Self.loadPlan(from: defaults)
+        self.plan = loadedPlan
+        // Норма, записанная до появления отметки, — норма идущей фазы: другой
+        // у человека до сих пор и не было.
+        if let stored = defaults.string(forKey: Keys.goalPhase).flatMap(UUID.init(uuidString:)) {
+            self.dailyGoalPhaseID = stored
+        } else {
+            self.dailyGoalPhaseID = loadedPlan?.phase(on: Date())?.id
+        }
         self.isPremium = defaults.bool(forKey: Keys.premium)
         refresh()
         lockPastGoals()
@@ -419,7 +442,7 @@ final class CalorieStore {
             // не было: там цель считалась заново на каждый день. Один и тот же план
             // вёл себя по-разному в зависимости от тумблера, который по смыслу
             // отвечает только за распределение калорий по дням недели.
-            dailyGoal = plan.dailyCalorieTarget(for: plan.firstNonBreakDay(from: Date()), tdee: newProfile.tdee)
+            dailyGoal = plan.dailyCalorieTarget(tdee: newProfile.tdee)
         } else if syncDailyGoal {
             dailyGoal = newProfile.calorieTarget
         } else {
@@ -444,7 +467,7 @@ final class CalorieStore {
             defaults.set(data, forKey: Keys.plan)
         }
         if let profile {
-            dailyGoal = newPlan.dailyCalorieTarget(for: newPlan.firstNonBreakDay(from: Date()), tdee: profile.tdee)
+            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
         }
         rebuildCaches()
     }

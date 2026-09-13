@@ -2006,6 +2006,30 @@ struct PlanCompletionTests {
              ])
     }
 
+    @Test func slowedDownGoalStaysWithinItsPhase() {
+        // «Замедлить» пишет число — оно должно действовать, пока идёт та же фаза.
+        store.startPlan(chainedPlan(weeksAgo: 1))
+        store.dailyGoal = 1234
+        #expect(store.effectiveGoal(for: Date()) == 1234)
+        // Через четыре недели сушка кончится — там норма уже поддержания по формуле,
+        // а не записанное под сушку число.
+        let plan = try! #require(store.plan)
+        let tdee = try! #require(store.profile?.tdee)
+        let inMaintenance = Date().addingTimeInterval(4 * 7 * 86_400)
+        #expect(store.effectiveGoal(for: inMaintenance) == plan.dailyCalorieTarget(for: inMaintenance, tdee: tdee))
+    }
+
+    @Test func dietBreakWeekIsMaintenanceWithoutCycling() {
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-2 * 86_400), startWeightKg: 77,
+                             phases: [PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.5,
+                                                dietBreakEvery: 4)]))
+        let tdee = try! #require(store.profile?.tdee)
+        let breakDay = Date().addingTimeInterval(30 * 86_400)
+        let afterBreak = Date().addingTimeInterval(37 * 86_400)
+        #expect(store.effectiveGoal(for: breakDay) == Int(tdee.rounded()))
+        #expect(store.effectiveGoal(for: afterBreak) < store.effectiveGoal(for: breakDay))
+    }
+
     @Test func maintenanceIsNotExpectedToKeepLosing() {
         // Шестая неделя: дефицит кончился на четвёртой, идёт поддержание.
         let plan = chainedPlan(weeksAgo: 6)

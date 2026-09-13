@@ -124,9 +124,9 @@ extension CalorieStore {
         if let plan, plan.cyclingEnabled, let profile {
             return plan.calorieTarget(for: date, tdee: profile.tdee)
         }
-        // Неделя брейка — поддержание по формуле. `dailyGoal` хранит норму
-        // дефицита, и без этого брейк существовал бы только на экране плана.
-        if let plan, let profile, plan.isDietBreak(on: date) {
+        // Число действует в фазе, под которую записано. В другой фазе, в том
+        // числе в неделю брейка, — формула плана, см. `dailyGoalPhaseID`.
+        if let plan, let profile, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
             return plan.dailyCalorieTarget(for: date, tdee: profile.tdee)
         }
         return dailyGoal

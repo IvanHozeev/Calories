@@ -1340,9 +1340,7 @@ struct Plan: Codable, Equatable {
         phase(on: date)?.isDietBreak == true
     }
 
-    /// Ближайший с даты день, который не брейк. Для нормы, которую запоминают
-    /// числом: запомни её посреди брейка — и после него человек так и остался бы
-    /// на поддержании.
+    /// Ближайший с даты день, который не брейк: когда брейк кончится.
     func firstNonBreakDay(from date: Date) -> Date {
         var day = date
         for _ in 0..<10 where isDietBreak(on: day) {

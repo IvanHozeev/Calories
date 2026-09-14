@@ -14,7 +14,11 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     /// Лаунч-скрин статичен — анимировать его iOS не даёт. Поэтому поверх первого
     /// кадра лежит его точная копия, которая продолжает знак движением и тает.
-    @State private var showingSplash = true
+    /// Не показываем при «Уменьшении движения» — анимация ради анимации там
+    /// как раз то, от чего человек просил избавить, — и когда её выключили
+    /// настройкой (так делают UI-тесты: заставка перехватывала первые нажатия).
+    @State private var showingSplash = !UIAccessibility.isReduceMotionEnabled
+        && UserDefaults.standard.object(forKey: "show_launch_splash") as? Bool ?? true
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -38,7 +42,7 @@ struct RootView: View {
             get: { !onboardingCompleted },
             set: { _ in }
         )) {
-            OnboardingView(store: store)
+            OnboardingView(store: store, stepStore: stepStore)
         }
         .overlay {
             if showingSplash {

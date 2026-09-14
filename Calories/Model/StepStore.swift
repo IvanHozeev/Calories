@@ -54,11 +54,28 @@ final class StepStore {
         let goal = defaults.object(forKey: "step_goal") as? Int ?? 10_000
         self.stepGoal = goal
         groupDefaults?.set(goal, forKey: "widget_step_goal")
-        requestAuthorization()
+        // Доступ к «Здоровью» спрашивает онбординг, отдельным шагом с объяснением.
+        // Раньше системное окно выскакивало при самом первом запуске, поверх
+        // приветствия, — без единого слова, зачем приложению шаги. После
+        // онбординга запрос повторяется на каждом запуске: окна он больше не
+        // показывает, а только поднимает чтение, если доступ дали. Кроме случая,
+        // когда в онбординге ответили «не сейчас», — тогда ждём, пока человек
+        // сам откроет шаги.
+        if defaults.bool(forKey: "onboarding_completed"), !defaults.bool(forKey: Self.deferredKey) {
+            requestAuthorization()
+        }
+    }
+
+    static let deferredKey = "health_access_deferred"
+
+    /// Ответ «не сейчас» в онбординге: без спроса окно доступа больше не всплывает.
+    func deferAuthorization() {
+        defaults.set(true, forKey: Self.deferredKey)
     }
 
     func requestAuthorization() {
         guard HKHealthStore.isHealthDataAvailable() else { return }
+        defaults.set(false, forKey: Self.deferredKey)
         let types: Set<HKObjectType> = [
             HKQuantityType(.stepCount),
             HKQuantityType(.distanceWalkingRunning),

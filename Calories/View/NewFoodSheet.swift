@@ -17,7 +17,6 @@ struct NewFoodSheet: View {
     @State private var category = FoodCategory.other
     /// Пусто — значит обычные 100 г.
     @State private var servingGrams = ""
-    @State private var showingQuickAdd = false
     /// Витамины, взятые из каталога, и строка, из которой они взяты.
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
@@ -335,16 +334,6 @@ struct NewFoodSheet: View {
 
             }
             .glassRow()
-            .sheet(isPresented: $showingQuickAdd) {
-                QuickAddSheet(
-                    store: store,
-                    name: name.trimmingCharacters(in: .whitespaces),
-                    caloriesPer100g: Int(caloriesPer100g) ?? 0,
-                    macrosPer100g: draftMacros,
-                    defaultGrams: servingToSave
-                )
-                .presentationDetents([.medium, .large])
-            }
             .task(id: searchQuery) {
                 guard !searchQuery.isEmpty else { offResults = []; isSearchingOFF = false; return }
                 try? await Task.sleep(for: .milliseconds(300))

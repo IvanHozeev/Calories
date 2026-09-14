@@ -6,11 +6,15 @@ import StoreKit
 enum PaywallFocus {
     case general
     case plan
+    /// Пробные две недели кончились: разговор не про «купи», а про «вот что было
+    /// за две недели, и вот что закрылось».
+    case trialEnded
 
     var headline: String {
         switch self {
         case .general: return String(localized: "Premium")
         case .plan: return String(localized: "Персональный план")
+        case .trialEnded: return String(localized: "Пробные две недели закончились")
         }
     }
 
@@ -18,6 +22,7 @@ enum PaywallFocus {
         switch self {
         case .general: return nil
         case .plan: return String(localized: "Персональный план калорийности под твои цели")
+        case .trialEnded: return String(localized: "План продолжает считать норму. Экран плана, вердикт и настройка — в Premium.")
         }
     }
 }
@@ -32,6 +37,9 @@ struct PaywallView: View {
     @State private var selectedID: String?
     @State private var isPurchasing = false
 
+    /// Кончился пробный период — говорим об этом, откуда бы ни открыли пэйвол.
+    private var shownFocus: PaywallFocus { store.trialEnded ? .trialEnded : focus }
+
     private var selectedProduct: Product? {
         purchases.products.first { $0.id == selectedID }
             ?? purchases.subscriptions.first
@@ -42,6 +50,7 @@ struct PaywallView: View {
             ScrollView {
                 VStack(spacing: 22) {
                     header
+                    if shownFocus == .trialEnded { trialSummary }
                     features
 
                     if purchases.isPremium {
@@ -94,11 +103,11 @@ struct PaywallView: View {
                 .foregroundStyle(.yellow)
                 .padding(.top, 20)
 
-            Text(focus.headline)
+            Text(shownFocus.headline)
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
 
-            if let subtitle = focus.subtitle {
+            if let subtitle = shownFocus.subtitle {
                 Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
@@ -110,11 +119,45 @@ struct PaywallView: View {
 
     private var features: some View {
         VStack(alignment: .leading, spacing: 14) {
-            featureRow("Персональный план: срок в неделях, целевой вес, точная дневная норма калорий")
-            featureRow("Автоматический пересчёт темпа и предупреждение, если он слишком агрессивный")
-            featureRow("Прогресс плана прямо на главном экране")
+            featureRow("План из фаз: сушка, поддержание, набор — с темпом и сроком каждой")
+            featureRow("Диет-брейки по расписанию или вручную")
+            featureRow("Недельный цикл калорий и перенос рефида на праздник")
+            featureRow("Вердикт по весу: идёшь по графику, опережаешь или отстаёшь — и что с этим делать")
         }
         .padding(.horizontal, 28)
+    }
+
+    /// Итоги пробного периода: то, что уже работает на человека.
+    @ViewBuilder
+    private var trialSummary: some View {
+        if let summary = store.trialSummary {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("За две недели")
+                    .font(.headline)
+                summaryRow("calendar", String(format: String(localized: "Дней с записями: %lld из %lld"),
+                                              summary.loggedDays, CalorieStore.trialDays))
+                if let change = summary.weightChangeKg {
+                    summaryRow("scalemass", String(format: String(localized: "Вес по тренду: %+.1f кг"), change))
+                }
+                if let status = store.planAdherence()?.status {
+                    summaryRow(status.icon, status.title)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .glassCard()
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private func summaryRow(_ icon: String, _ text: String) -> some View {
+        Label {
+            Text(verbatim: text)
+        } icon: {
+            Image(systemName: icon)
+                .foregroundStyle(.green)
+        }
+        .font(.subheadline)
     }
 
     private var activeState: some View {

@@ -35,7 +35,6 @@ struct NewDishSheet: View {
     @State private var gramsEditText = ""
     @State private var showingIngredientPicker = false
     @State private var showDiscardAlert = false
-    @State private var showingQuickAdd = false
 
     private var totalCalories: Int { ingredients.reduce(0) { $0 + $1.calories } }
     private var totalGrams: Double { ingredients.reduce(0) { $0 + $1.grams } }
@@ -223,16 +222,6 @@ struct NewDishSheet: View {
             Button("Сохранить") { applyGrams(to: target) }
         } message: { target in
             Text(verbatim: target.foodName)
-        }
-        .sheet(isPresented: $showingQuickAdd) {
-            QuickAddSheet(
-                store: store,
-                name: name.trimmingCharacters(in: .whitespaces),
-                caloriesPer100g: perHundredGrams.calories,
-                macrosPer100g: perHundredGrams.macros,
-                defaultGrams: totalGrams
-            )
-            .presentationDetents([.medium, .large])
         }
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)

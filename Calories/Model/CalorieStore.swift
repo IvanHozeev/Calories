@@ -84,6 +84,21 @@ final class CalorieStore {
         set { hasPurchasedPremium = newValue }
     }
 
+    /// Пробный период был и кончился, а покупки нет — пэйвол говорит об этом прямо.
+    var trialEnded: Bool {
+        trialStartedAt != nil && !isTrialActive && !hasPurchasedPremium
+    }
+
+    /// Что человек успел за пробный период: дни с записями и сдвиг веса по тренду.
+    var trialSummary: (loggedDays: Int, weightChangeKg: Double?)? {
+        guard let start = trialStartedAt, let end = trialEndsAt else { return nil }
+        let from = Calendar.current.startOfDay(for: start)
+        let days = entriesByDay.keys.filter { $0 >= from && $0 < end }.count
+        var change: Double?
+        if let plan, let trend = weightKg { change = trend - plan.startWeightKg }
+        return (days, change)
+    }
+
     func startTrialIfNeeded(now: Date = Date()) {
         guard trialStartedAt == nil else { return }
         trialStartedAt = now

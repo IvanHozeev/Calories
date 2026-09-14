@@ -610,6 +610,25 @@ struct CalorieStoreTests {
         #expect(!store.isTrialActive)
     }
 
+    @Test func trialEnded_onlyAfterTrialAndWithoutPurchase() {
+        #expect(!store.trialEnded)
+        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
+        #expect(store.trialEnded)
+        store.isPremium = true
+        #expect(!store.trialEnded)
+    }
+
+    @Test func trialSummary_countsLoggedDaysWithinTheTrial() {
+        let start = Date().addingTimeInterval(-15 * 86_400)
+        store.startTrialIfNeeded(now: start)
+        store.add(name: "A", calories: 500, date: start.addingTimeInterval(86_400))
+        store.add(name: "B", calories: 500, date: start.addingTimeInterval(2 * 86_400))
+        store.add(name: "C", calories: 500, date: start.addingTimeInterval(2 * 86_400 + 3600))
+        // Запись после конца пробного периода в итог не входит.
+        store.add(name: "D", calories: 500, date: Date())
+        #expect(store.trialSummary?.loggedDays == 2)
+    }
+
     @Test func purchaseOutlivesTheTrial() {
         store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
         store.isPremium = true

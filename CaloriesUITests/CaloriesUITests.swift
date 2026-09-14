@@ -19,6 +19,8 @@ final class CaloriesUITests: XCTestCase {
             "-AppleLanguages", "(en)",
             "-AppleLocale", "en_US",
             "-onboarding_completed", "YES",
+            // Заставка поверх первого кадра перехватывала первые нажатия теста.
+            "-show_launch_splash", "NO",
             "-is_premium", premium ? "YES" : "NO",
             "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO"
         ]
@@ -100,6 +102,41 @@ final class CaloriesUITests: XCTestCase {
             tries += 1
         }
         return search
+    }
+
+    // MARK: - Онбординг
+
+    /// Онбординг проходится одними «Далее», спрашивает доступ к шагам своим
+    /// шагом, а не системным окном на старте, и кончается на «Сегодня».
+    @MainActor
+    func testOnboardingWalksThroughToToday() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US",
+            "-onboarding_completed", "NO",
+            "-show_launch_splash", "NO",
+        ]
+        app.launch()
+
+        let start = app.buttons["Get Started"]
+        XCTAssertTrue(start.waitForExistence(timeout: 30), "Онбординг не открылся")
+        start.tap()
+
+        // Шагов с настройкой несколько; доходим «Далее» до шага с доступом к шагам.
+        let health = app.buttons["onboardingHealthAccess"]
+        var taps = 0
+        while !health.exists && taps < 12 {
+            app.buttons["Next"].tap()
+            taps += 1
+        }
+        XCTAssertTrue(health.waitForExistence(timeout: 5), "Нет шага с доступом к шагам")
+
+        app.buttons["Next"].tap()
+        XCTAssertTrue(app.staticTexts["Ready?"].waitForExistence(timeout: 5), "Нет итогового шага")
+        app.buttons["Get Started"].tap()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
+                      "После онбординга должно открываться «Сегодня»")
     }
 
     // MARK: - Навигация
@@ -254,10 +291,15 @@ final class CaloriesUITests: XCTestCase {
         scrollIntoReach(strip, in: app)
         if strip.exists { strip.tap() }
 
+        // Без плана экран плана и есть редактор — показывать нечего. Тест
+        // проверяет путь к правке, а он в этом случае короче на одно нажатие.
+        let phases = app.staticTexts["Phases"]
+        if phases.waitForExistence(timeout: 3) { return }
+
         let edit = app.buttons["editPlan"]
         XCTAssertTrue(edit.waitForExistence(timeout: 5), "В тулбаре плана нет кнопки правки")
         edit.tap()
-        XCTAssertTrue(app.staticTexts["Phases"].waitForExistence(timeout: 5),
+        XCTAssertTrue(phases.waitForExistence(timeout: 5),
                       "Кнопка тулбара не открыла редактор плана")
     }
 

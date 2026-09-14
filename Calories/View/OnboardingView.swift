@@ -12,6 +12,7 @@ import SwiftUI
 /// первый вердикт «как идёт план», и будет видно, за что платить.
 struct OnboardingView: View {
     var store: CalorieStore
+    var stepStore: StepStore
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
 
     @State private var step: Step = .welcome
@@ -30,11 +31,12 @@ struct OnboardingView: View {
     @State private var cyclingEnabled = false
     @State private var weekendStyle: WeekendStyle = .satSun
 
+    @State private var healthAsked = false
     @State private var proteinTenths = Int(UserProfile.defaultProteinPerKg * 10)
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
 
     enum Step: Int, CaseIterable {
-        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, result
+        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -106,6 +108,7 @@ struct OnboardingView: View {
                 case .goal:       goalStep
                 case .cutOptions: cutOptionsStep
                 case .macros:     macrosStep
+                case .health:     healthStep
                 case .result:     resultStep
                 }
             }
@@ -366,6 +369,37 @@ struct OnboardingView: View {
         }
     }
 
+    /// Доступ к шагам — здесь, с объяснением, а не системным окном на первом
+    /// запуске. Кнопка одна: «Разрешить» открывает окно «Здоровья», «Далее»
+    /// снизу — пропустить. Шаги потом можно подключить с их карточки.
+    private var healthStep: some View {
+        stepShell(title: "Шаги", subtitle: "Приложение только читает их из «Здоровья», ничего туда не пишет") {
+            VStack(spacing: 20) {
+                Image(systemName: "figure.walk.circle.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(.blue)
+                Text("Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button {
+                    stepStore.requestAuthorization()
+                    healthAsked = true
+                } label: {
+                    Label(healthAsked ? "Доступ запрошен" : "Разрешить доступ",
+                          systemImage: healthAsked ? "checkmark" : "heart.fill")
+                        .font(.body.weight(.semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
+                .disabled(healthAsked)
+                .accessibilityIdentifier("onboardingHealthAccess")
+            }
+        }
+    }
+
     private func macroLine(title: LocalizedStringKey, perKg: Double, grams: Double, color: Color) -> some View {
         HStack {
             Text(title)
@@ -436,6 +470,7 @@ struct OnboardingView: View {
     /// Профиль, план и пробный период — в таком порядке: `startPlan` закрыт
     /// премиумом, и без пробного периода план молча не сохранился бы.
     private func finish() {
+        if !healthAsked { stepStore.deferAuthorization() }
         store.updateProfile(draftProfile)
         if let plan = draftPlan {
             store.startTrialIfNeeded()

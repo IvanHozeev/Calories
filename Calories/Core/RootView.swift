@@ -85,11 +85,15 @@ struct RootView: View {
         // она гоняет транзакцию по всему дереву вместе со стеком навигации, и экран
         // выбрасывало назад прямо во время перетаскивания ползунка.
         .modifier(AppTextSizeModifier(size: AppTextSize(rawValue: appTextSize) ?? .normal))
+        // Макросы тоже: виджет макросов обновлялся только по своему
+        // пятнадцатиминутному расписанию и отставал от записанной еды.
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "MacrosWidget")
         }
         .onChange(of: store.adaptedTodayGoal) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "MacrosWidget")
         }
     }
 }

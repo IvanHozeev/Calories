@@ -12,6 +12,8 @@ import SwiftUI
 /// (пустое кольцо, поворот на полный оборот), поэтому шов не виден.
 struct BrandMark: View {
     var animated = false
+    /// Дуги в канавках, как на иконке и лаунч-скрине: для графитового фона.
+    var engraved = false
 
     /// Углеводы, жиры, белки — граммы типичной сушки на 80 кг.
     private static let grams: [Double] = [250, 64, 160]
@@ -83,6 +85,11 @@ struct BrandMark: View {
     private func mark(lineWidth: CGFloat, from: Double, to: Double) -> some View {
         ZStack {
             ForEach(Self.arcs) { arc in
+                if engraved {
+                    MarkArc(start: arc.start, end: arc.end)
+                        .stroke(.channel(thickness: lineWidth * 1.24),
+                                style: StrokeStyle(lineWidth: lineWidth * 1.24, lineCap: .round))
+                }
                 MarkArc(start: arc.start, end: arc.end)
                     .trim(from: from, to: to)
                     .stroke(LinearGradient(colors: Self.colors[arc.id], startPoint: .top, endPoint: .bottom),
@@ -127,13 +134,15 @@ struct SplashView: View {
         ZStack {
             Color("LaunchBackground")
                 .opacity(dissolving ? 0 : 1)
-            BrandMark()
+            BrandMark(engraved: true)
                 .frame(width: 230, height: 230)
                 .rotationEffect(.degrees(turn))
                 .scaleEffect(dissolving ? 1.12 : 1)
                 .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
+        // Графит тёмный в любой теме телефона — и канавка должна быть тёмной.
+        .environment(\.colorScheme, .dark)
         .task {
             withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
                 turn = 360

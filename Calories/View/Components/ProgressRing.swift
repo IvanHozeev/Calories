@@ -111,9 +111,9 @@ struct ProgressRing: View {
         let colors: [Color]
     }
 
-    // Те же пары цветов, что на иконке: кольцо — лицо приложения, и его
-    // цвета не должны расходиться со знаком на домашнем экране.
     // Пары близкие: цвет почти однотонный, градиент только оживляет дугу.
+    // Эмаль иконки с глубоким градиентом пробовали — на кольце с его тонкими
+    // дугами прежние мягкие цвета смотрелись лучше.
     private static let kcalColors = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
     private static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
     private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
@@ -175,8 +175,7 @@ struct ProgressRing: View {
                     RingArc(start: segment.start,
                             end: segment.start + (segment.end - segment.start) * segment.progress)
                         // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
-                        // в углу получала бы только один край градиента, и углеводы
-                        // выглядели розовыми вместо фиолетовых.
+                        // в углу получала бы только один край градиента.
                         .stroke(LinearGradient(colors: segment.colors,
                                                startPoint: Self.point(at: segment.start),
                                                endPoint: Self.point(at: segment.end)),
@@ -270,7 +269,7 @@ private struct RingArc: Shape {
     }
 }
 
-private extension Color {
+extension Color {
     init(hex: UInt32) {
         self.init(.displayP3,
                   red: Double((hex >> 16) & 0xFF) / 255,

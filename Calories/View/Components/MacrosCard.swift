@@ -25,9 +25,9 @@ struct MacrosCard: View {
             HStack(spacing: 8) {
                 layout {
                     macroColumn(.protein, value: macros.protein, color: .blue)
-                    if !isBig { Divider().frame(height: 36) }
+                    if !isBig { Divider().frame(height: 30) }
                     macroColumn(.fat, value: macros.fat, color: .orange)
-                    if !isBig { Divider().frame(height: 36) }
+                    if !isBig { Divider().frame(height: 30) }
                     macroColumn(.carbs, value: macros.carbs, color: .purple)
                 }
                 // Шеврон как у остальных карточек: без него непонятно, что
@@ -36,7 +36,10 @@ struct MacrosCard: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.tertiary)
             }
-            .padding()
+            // Потуже по вертикали: так кольцо, карточки и неделя помещаются
+            // в экран до таббара без прокрутки.
+            .padding(.horizontal)
+            .padding(.vertical, 10)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -56,7 +59,7 @@ struct MacrosCard: View {
         let isBig = dynamicTypeSize.isAccessibilitySize
         let inner: AnyLayout = isBig
             ? AnyLayout(HStackLayout(spacing: 8))
-            : AnyLayout(VStackLayout(spacing: 4))
+            : AnyLayout(VStackLayout(spacing: 1))
         return inner {
                 Text(String(format: "%.0f \(String(localized: "г"))", value))
                     .font(.title3.bold())

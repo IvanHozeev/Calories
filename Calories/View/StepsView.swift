@@ -102,7 +102,7 @@ struct StepsNavigationView: View {
         }
         .navigationTitle("Шаги")
         .scrollIndicators(.hidden)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

@@ -21,10 +21,16 @@ struct FoodQuantityView: View {
     /// «в приём пищи» — он уже там, — а подтверждение нового веса.
     private let addTitle: LocalizedStringKey
 
+    /// Время приёма пищи, в который добавляют продукт. Кнопка с часами — здесь,
+    /// на экране продукта: время решают, когда уже выбрали, что съели.
+    var mealDate: Binding<Date>?
+    @State private var showingMealTime = false
+
     init(food: FoodItem, grams initialGrams: Double? = nil, addTitle: LocalizedStringKey = "В приём пищи",
          onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
-         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
+         isPushed: Bool = false, mealDate: Binding<Date>? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
+        self.mealDate = mealDate
         self.food = food
         self.addTitle = addTitle
         self.onSave = onSave
@@ -107,6 +113,9 @@ struct FoodQuantityView: View {
                 if drag.translation.height > 40 { gramsFocused = false }
             }
         )
+        .sheet(isPresented: $showingMealTime) {
+            if let mealDate { MealTimeSheet(date: mealDate) }
+        }
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -115,6 +124,17 @@ struct FoodQuantityView: View {
             if !isPushed {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
+                }
+            }
+            if mealDate != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingMealTime = true
+                    } label: {
+                        Image(systemName: "clock")
+                    }
+                    .accessibilityLabel("Время приёма")
+                    .accessibilityIdentifier("mealTime")
                 }
             }
             // Пополнение справочника не должно закрывать экран: порцию ещё
@@ -200,9 +220,13 @@ struct DishQuantityView: View {
 
     var isPushed: Bool = false
 
+    var mealDate: Binding<Date>?
+    @State private var showingMealTime = false
+
     init(dish: Dish, onAddAndSave: ((MealItem) -> Void)? = nil,
-         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
+         isPushed: Bool = false, mealDate: Binding<Date>? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
+        self.mealDate = mealDate
         self.dish = dish
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
@@ -291,12 +315,26 @@ struct DishQuantityView: View {
                 if drag.translation.height > 40 { gramsFocused = false }
             }
         )
+        .sheet(isPresented: $showingMealTime) {
+            if let mealDate { MealTimeSheet(date: mealDate) }
+        }
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !isPushed {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
+                }
+            }
+            if mealDate != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingMealTime = true
+                    } label: {
+                        Image(systemName: "clock")
+                    }
+                    .accessibilityLabel("Время приёма")
+                    .accessibilityIdentifier("mealTime")
                 }
             }
         }

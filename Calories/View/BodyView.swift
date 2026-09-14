@@ -522,6 +522,8 @@ struct BodyView: View {
             Text(activityChangeMessage(to: level))
         }
         .navigationTitle("Тело")
+        .navigationBarTitleDisplayMode(.inline)
+        .hiddenNavigationTitle()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack(spacing: 16) {

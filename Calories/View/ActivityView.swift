@@ -1,14 +1,15 @@
 import SwiftUI
 
-/// Экран дисциплины и достижений. Раньше жил приватной структурой внутри ContentView
-/// и смешивал две несовместимые вещи: эмоциональную часть (стрик, награды) и сухой
-/// архив записей. Теперь архив тоже визуальный — календарь месяца либо карточки дней
-/// с мини-баром и макросами, вместо строки «22 августа · 2706 ккал · −336».
+/// История дней: календарь месяца или карточки дней.
+///
+/// Раньше это был экран «Активность» за огоньком в тулбаре: серия, награды,
+/// неделя макросов и только в самом низу — прошедшие дни. Заходили туда ради
+/// последнего. Серия переехала подписью к полоске недели на «Сегодня», неделя
+/// макросов живёт в разборе дня, а здесь осталась только история.
 struct ActivityView: View {
     let store: CalorieStore
 
     @State private var historyMode: HistoryMode = .calendar
-    @State private var selectedAchievement: Achievement?
     @State private var selectedDay: Date?
 
     enum HistoryMode: String, CaseIterable, Identifiable {
@@ -28,22 +29,6 @@ struct ActivityView: View {
 
     var body: some View {
         List {
-            Section {
-                streakHero
-            }
-            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-
-            MacroWeekSection(days: store.macroWeek)
-
-            Section("Награды") {
-                achievementsStrip
-            }
-            .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-
             Section {
                 Picker("Вид", selection: $historyMode) {
                     ForEach(HistoryMode.allCases) { mode in
@@ -88,150 +73,12 @@ struct ActivityView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("Активность")
+        .navigationTitle("История")
         .navigationDestination(item: $selectedDay) { date in
             DayDetailView(store: store, date: date)
         }
-        .sheet(item: $selectedAchievement) { achievement in
-            AchievementSheet(achievement: achievement)
-                .presentationDetents([.height(340)])
-        }
     }
 
-    // MARK: - Верх: стрик
-
-    private var milestoneColor: Color { StreakStyle.color(for: store.streak) }
-
-    private var streakLabel: String {
-        let s = store.streak
-        switch s % 10 {
-        case 1 where s % 100 != 11: return String(localized: "день подряд")
-        case 2...4 where !(s % 100 >= 12 && s % 100 <= 14): return String(localized: "дня подряд")
-        default: return s == 0 ? String(localized: "начни серию сегодня") : String(localized: "дней подряд")
-        }
-    }
-
-    private var motivationalText: String {
-        if store.streak >= 30 { return String(localized: "Продолжай в том же духе — ты уже пример для других!") }
-        if store.streak >= 7 { return String(localized: "Продолжай в том же духе — ты в отличной форме!") }
-        if store.streak > 0 { return String(localized: "Продолжай в том же духе — каждый день на счету!") }
-        return String(localized: "Начни сегодня — первый шаг уже завтра станет серией!")
-    }
-
-    private var streakHero: some View {
-        VStack(spacing: 18) {
-            VStack(spacing: 4) {
-                // Огонь и цифра в один ряд: столбиком карточка съедала пол-экрана
-                // и отодвигала ленту дней с наградами за фолд.
-                HStack(alignment: .center, spacing: 10) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 46))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [milestoneColor, milestoneColor.opacity(0.55)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                    Text("\(store.streak)")
-                        .font(.system(size: 56, weight: .bold, design: .rounded))
-                        .minimumScaleFactor(0.6)
-                        .foregroundStyle(milestoneColor)
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
-                }
-                Text(streakLabel)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                if store.bestStreak > store.streak && store.bestStreak > 0 {
-                    Label("Рекорд: \(store.bestStreak) дней", systemImage: "trophy.fill")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.yellow)
-                }
-            }
-
-            DayStrip(days: store.streakHistory)
-
-            Text(motivationalText)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(20)
-        .glassCard(cornerRadius: 20)
-    }
-
-    // MARK: - Награды
-
-    private var achievementsStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(store.achievements) { achievement in
-                    Button {
-                        selectedAchievement = achievement
-                    } label: {
-                        AchievementCard(achievement: achievement)
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 4)
-        }
-    }
-}
-
-// MARK: - Лента дней
-
-/// Крупная лента последних дней. Прежние кружки по 20pt с подписями в 8pt
-/// прочитать было невозможно, поэтому ячейки увеличены и получили цифру числа.
-private struct DayStrip: View {
-    let days: [(date: Date, hasEntries: Bool, onGoal: Bool)]
-
-    var body: some View {
-        HStack(spacing: 4) {
-            ForEach(days.suffix(7), id: \.date) { day in
-                let isToday = Calendar.current.isDateInToday(day.date)
-                VStack(spacing: 6) {
-                    Text(weekdayLetter(day.date))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    ZStack {
-                        Circle()
-                            .fill(color(for: day).opacity(day.onGoal || day.hasEntries ? 1 : 0.35))
-                        if day.onGoal {
-                            Image(systemName: "checkmark")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundStyle(.white)
-                        } else {
-                            Text("\(Calendar.current.component(.day, from: day.date))")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(day.hasEntries ? .white : .secondary)
-                        }
-                    }
-                    .frame(width: 36, height: 36)
-                    .overlay(
-                        isToday
-                            ? Circle().stroke(Color.primary.opacity(0.6), lineWidth: 2)
-                            : nil
-                    )
-                }
-                .frame(maxWidth: .infinity)
-            }
-        }
-    }
-
-    private func color(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
-        if day.onGoal { return .green }
-        if day.hasEntries { return .orange }
-        return Color(.systemGray4)
-    }
-
-    private func weekdayLetter(_ date: Date) -> String {
-        let weekday = Calendar.current.component(.weekday, from: date)
-        return Calendar.current.veryShortWeekdaySymbols[weekday - 1]
-    }
 }
 
 // MARK: - Календарь месяца
@@ -375,90 +222,4 @@ private struct HistoryDayCard: View {
         .padding(.vertical, 6)
     }
 
-}
-
-// MARK: - Награды
-
-private struct AchievementCard: View {
-    let achievement: Achievement
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: achievement.icon)
-                .font(.title2)
-                .foregroundStyle(achievement.isUnlocked ? achievement.tint : Color(.systemGray3))
-
-            Text(achievement.title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(achievement.isUnlocked ? .primary : .secondary)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-
-            Spacer(minLength: 0)
-
-            if achievement.isUnlocked {
-                Label("Получено", systemImage: "checkmark.circle.fill")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(achievement.tint)
-            } else {
-                VStack(alignment: .leading, spacing: 4) {
-                    ProgressView(value: achievement.progress)
-                        .progressViewStyle(.engraved(achievement.tint, thickness: 5))
-                    Text(verbatim: "\(achievement.current)/\(achievement.target)")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
-                }
-            }
-        }
-        .frame(width: 132, height: 130, alignment: .leading)
-        .padding(14)
-        .glassCard()
-    }
-}
-
-private struct AchievementSheet: View {
-    let achievement: Achievement
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        VStack(spacing: 18) {
-            Image(systemName: achievement.icon)
-                .font(.system(size: 52))
-                .foregroundStyle(achievement.isUnlocked ? achievement.tint : Color(.systemGray3))
-                .padding(.top, 28)
-
-            Text(achievement.title)
-                .font(.title2.bold())
-
-            Text(achievement.requirement)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 28)
-
-            if achievement.isUnlocked {
-                Label("Получено", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(achievement.tint)
-            } else {
-                VStack(spacing: 6) {
-                    ProgressView(value: achievement.progress)
-                        .progressViewStyle(.engraved(achievement.tint))
-                    Text(verbatim: "\(achievement.current)/\(achievement.target)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
-                }
-                .padding(.horizontal, 40)
-            }
-
-            Spacer()
-
-            Button("Закрыть") { dismiss() }
-                .font(.body.weight(.semibold))
-                .padding(.bottom, 20)
-        }
-        .frame(maxWidth: .infinity)
-    }
 }

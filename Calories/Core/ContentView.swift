@@ -14,11 +14,13 @@ struct ContentView: View {
     @State private var ringPull: CGFloat = 0
 
     enum TodaySheet: String, Identifiable {
-        case weight, quickCalories, newFood
+        case weight, quickCalories, newFood, newDish, scanner
         var id: String { rawValue }
     }
     @State private var showingMeasurements = false
+    /// Экран истории: календарь месяца, за кнопкой в конце полоски недели.
     @State private var showingActivity = false
+    @State private var selectedHistoryDay: Date?
     @State private var showingDayNutrition = false
     @State private var showingSteps = false
     @State private var showingBankInfo = false
@@ -41,7 +43,9 @@ struct ContentView: View {
             todaySheet = .weight
         case .measurements:
             showingMeasurements = true
-        case .meal, .camera, .scanner:
+        case .scanner:
+            todaySheet = .scanner
+        case .meal, .camera:
             entryAction = action
             showingAdd = true
         }
@@ -52,6 +56,12 @@ struct ContentView: View {
             List {
                 Section {
                     VStack(spacing: 24) {
+                        // Неделя — на месте скрытого заголовка: верх экрана
+                        // освободился, и полоска больше не отнимает место у кольца.
+                        WeekStrip(days: store.goalHistory(days: 7), streak: store.streak,
+                                  onSelect: { selectedHistoryDay = $0 },
+                                  onShowAll: { showingActivity = true })
+
                         ProgressRing(
                             consumed: store.consumedToday,
                             goal: store.adaptedTodayGoal,
@@ -214,8 +224,6 @@ struct ContentView: View {
                             weightKg: store.weightKg,
                             onOpen: { showingDayNutrition = true }
                         )
-
-                        StepsCard(store: stepStore) { showingSteps = true }
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -318,12 +326,13 @@ struct ContentView: View {
                 PlanView(store: store)
             }
             .navigationTitle("Сегодня")
-            .navigationBarTitleDisplayMode(.large)
+            // Без заголовка: большой «Сегодня» спорил за внимание с кольцом,
+            // а вкладка и так подписана в таббаре.
+            .navigationBarTitleDisplayMode(.inline)
+            .hiddenNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { showingActivity = true } label: {
-                        StreakBadge(streak: store.streak)
-                    }
+                    StepsChip(store: stepStore) { showingSteps = true }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     // Способы добавить еду выбираются здесь, до входа в лист.
@@ -341,9 +350,10 @@ struct ContentView: View {
                                 Label("Снять еду", systemImage: "camera")
                             }
                         }
+                        // Сканер сразу, без экрана приёма пищи под ним: штрихкод
+                        // сканируют, когда упаковка в руках, и записывают её же.
                         Button {
-                            entryAction = .scanner
-                            showingAdd = true
+                            todaySheet = .scanner
                         } label: {
                             Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
                         }
@@ -352,7 +362,7 @@ struct ContentView: View {
                             entryAction = nil
                             showingAdd = true
                         } label: {
-                            Label("Добавить еду", systemImage: "fork.knife")
+                            Label("Приём пищи", systemImage: "fork.knife")
                         }
                         // Переехали сюда из плюса на экране приёма пищи: всё, чем
                         // что-то записывают, собрано в одном меню.
@@ -365,6 +375,11 @@ struct ContentView: View {
                             todaySheet = .newFood
                         } label: {
                             Label("Новый продукт", systemImage: "plus")
+                        }
+                        Button {
+                            todaySheet = .newDish
+                        } label: {
+                            Label("Новое блюдо", systemImage: "frying.pan")
                         }
                         Divider()
                         // Вес и замеры тут же: плюс на «Сегодня» отвечает на вопрос
@@ -408,6 +423,16 @@ struct ContentView: View {
                 case .newFood:
                     NewFoodSheet(store: store)
                         .presentationDetents([.large])
+                case .newDish:
+                    NewDishSheet(store: store)
+                        .presentationDetents([.large])
+                case .scanner:
+                    // С «Сегодня» отсканированное записывается приёмом пищи;
+                    // со вкладки «Еда» тот же сканер сохраняет в мои продукты.
+                    BarcodeScannerSheet(store: store) { item in
+                        store.add(name: item.name, calories: item.calories, macros: item.macros, grams: item.grams)
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    }
                 }
             }
             // Замеры открываются прямо здесь, а не переходом на экран замеров:
@@ -421,6 +446,9 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingActivity) {
                 ActivityView(store: store)
+            }
+            .navigationDestination(item: $selectedHistoryDay) { date in
+                DayDetailView(store: store, date: date)
             }
             .navigationDestination(isPresented: $showingSteps) {
                 StepsNavigationView(store: stepStore)
@@ -442,110 +470,63 @@ struct ContentView: View {
     }
 }
 
-private struct StepsCard: View {
+/// Шаги капсулой в тулбаре, напротив плюса.
+///
+/// Раньше это была целая карточка между макросами и неделей. На шаги смотрят
+/// мельком — хватит числа и кольца размером с кнопку, — а место на экране
+/// нужнее кольцу, карточкам и неделе. Строка тулбара после того, как убрали
+/// заголовок, всё равно пустовала.
+private struct StepsChip: View {
     var store: StepStore
     var onTap: () -> Void
-    @AppStorage("use_imperial") private var useImperial = false
 
     private var progress: Double {
         guard store.stepGoal > 0 else { return 0 }
         return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
     }
 
-    private var distanceText: String? {
-        guard store.distanceTodayKm > 0 else { return nil }
-        return useImperial
-            ? String(format: "%.1f \(String(localized: "ми"))", store.distanceTodayKm * 0.621371)
-            : String(format: "%.1f \(String(localized: "км"))", store.distanceTodayKm)
-    }
+    private var tint: Color { progress >= 1 ? .green : .blue }
 
     var body: some View {
-        if !store.isAuthorized {
-            Button { store.requestAuthorization() } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "figure.walk.circle")
-                        .font(.title2)
-                        .foregroundStyle(.blue)
-                    Text("Подключить шаги")
-                        .font(.subheadline)
-                        .foregroundStyle(.primary)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .padding()
-                .glassCard()
-            }
-            .buttonStyle(.plain)
-        } else {
-            Button(action: onTap) {
-                HStack(spacing: 16) {
+        Button {
+            // Без доступа к «Здоровью» считать нечего — нажатие просит доступ.
+            if store.isAuthorized { onTap() } else { store.requestAuthorization() }
+        } label: {
+            HStack(spacing: 7) {
+                if store.isAuthorized {
+                    // Кольцо во всю высоту кнопки и пешеход внутри: одно число
+                    // без значка не читалось как шаги.
                     ZStack {
                         Circle()
-                            .stroke(Color.blue.opacity(0.2), lineWidth: 4)
+                            .stroke(tint.opacity(0.2), lineWidth: 3)
                         Circle()
                             .trim(from: 0, to: progress)
-                            .stroke(
-                                progress >= 1 ? Color.green : Color.blue,
-                                style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                            )
+                            .stroke(tint, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                             .rotationEffect(.degrees(-90))
                             .animation(.easeOut, value: progress)
                         Image(systemName: "figure.walk")
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(progress >= 1 ? .green : .blue)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(tint)
                     }
-                    .frame(width: 40, height: 40)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(store.stepsToday.formatted())
-                            .font(.headline)
-                            .monospacedDigit()
-                        Text("шагов из \(store.stepGoal.formatted())")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    if let dist = distanceText {
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(dist)
-                                .font(.subheadline.weight(.medium))
-                            Text("дистанция")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                    .frame(width: 32, height: 32)
+                    Text(store.stepsToday.formatted())
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                } else {
+                    Image(systemName: "figure.walk")
+                        .font(.subheadline.weight(.medium))
+                    Text("Шаги")
+                        .font(.subheadline)
                 }
-                .padding()
-                .glassCard()
             }
-            .buttonStyle(.plain)
+            .foregroundStyle(store.isAuthorized ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+            .padding(.leading, 2)
+            .padding(.trailing, 6)
         }
-    }
-}
-
-private struct StreakBadge: View {
-    let streak: Int
-
-    private var color: Color { StreakStyle.color(for: streak) }
-
-    var body: some View {
-        HStack(spacing: 3) {
-            Image(systemName: "flame.fill")
-            if streak > 0 {
-                Text("\(streak)")
-                    .font(.subheadline.bold())
-                    .monospacedDigit()
-            }
-        }
-        .foregroundStyle(color)
+        .accessibilityLabel(store.isAuthorized
+            ? Text(verbatim: store.stepsToday.formatted() + " " + String(localized: "шагов из \(store.stepGoal.formatted())"))
+            : Text("Подключить шаги"))
+        .accessibilityIdentifier("stepsChip")
     }
 }
 

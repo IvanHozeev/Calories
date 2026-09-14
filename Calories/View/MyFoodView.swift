@@ -125,6 +125,10 @@ struct MyFoodView: View {
         }
         .glassRow()
         .navigationTitle("Рацион")
+        // На корневых вкладках заголовок скрыт: крупный спорил с содержимым,
+        // а название и так в таббаре.
+        .navigationBarTitleDisplayMode(.inline)
+        .hiddenNavigationTitle()
         .scrollIndicators(.hidden)
         .searchable(text: $query, prompt: Text("Поиск в базе или моих блюдах"))
         // Клавиатура уходит протягиванием списка вниз, как в остальных списках.

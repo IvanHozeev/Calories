@@ -4,650 +4,6 @@
     "" : {
       "shouldTranslate" : false
     },
-    "Вердикт по весу: идёшь по графику, опережаешь или отстаёшь — и что с этим делать" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حكم على الوزن: على المسار أو متقدم أو متأخر — وماذا تفعل حيال ذلك"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Urteil nach Gewicht: im Plan, voraus oder hinterher – und was zu tun ist"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A weight verdict: on track, ahead or behind — and what to do about it"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Veredicto por el peso: vas al día, adelantado o atrasado, y qué hacer"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verdict sur le poids : dans les temps, en avance ou en retard — et quoi faire"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סיכום לפי משקל: לפי הלוח, מקדים או מאחר — ומה לעשות"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Veredito pelo peso: no ritmo, adiantado ou atrasado — e o que fazer"
-          }
-        }
-      }
-    },
-    "Вес по тренду: %+.1f кг" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الوزن حسب الاتجاه: %+.1f كغ"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gewicht im Trend: %+.1f kg"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trend weight: %+.1f kg"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peso según la tendencia: %+.1f kg"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poids tendance : %+.1f kg"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "משקל לפי מגמה: %+.1f ק״ג"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Peso pela tendência: %+.1f kg"
-          }
-        }
-      }
-    },
-    "Готов?" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "جاهز؟"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bereit?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ready?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Listo?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prêt ?"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מוכן?"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pronto?"
-          }
-        }
-      }
-    },
-    "Диет-брейки по расписанию или вручную" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "استراحات حمية مجدولة أو يدوية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diätpausen nach Plan oder manuell"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diet breaks on a schedule or by hand"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descansos de dieta programados o manuales"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pauses diète planifiées ou manuelles"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הפסקות דיאטה לפי לוח זמנים או ידנית"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausas na dieta programadas ou manuais"
-          }
-        }
-      }
-    },
-    "Дней с записями: %lld из %lld" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أيام بتسجيلات: %1$lld من %2$lld"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tage mit Einträgen: %1$lld von %2$lld"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Days logged: %1$lld of %2$lld"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Días con registros: %1$lld de %2$lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jours saisis : %1$lld sur %2$lld"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ימים עם רישומים: %1$lld מתוך %2$lld"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dias com registros: %1$lld de %2$lld"
-          }
-        }
-      }
-    },
-    "Доступ запрошен" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم طلب الوصول"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zugriff angefragt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Access requested"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acceso solicitado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Accès demandé"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הגישה התבקשה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acesso solicitado"
-          }
-        }
-      }
-    },
-    "За две недели" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خلال أسبوعين"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In zwei Wochen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Over two weeks"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En dos semanas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En deux semaines"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בשבועיים"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em duas semanas"
-          }
-        }
-      }
-    },
-    "Недельный цикл калорий и перенос рефида на праздник" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "دورة سعرات أسبوعية ونقل يوم التحميل إلى عطلة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wöchentlicher Kalorienzyklus und Refeed auf einen Feiertag verschieben"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Weekly calorie cycling and moving a refeed to a holiday"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ciclo semanal de calorías y mover el refeed a un festivo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cycle calorique hebdomadaire et refeed déplacé sur un jour férié"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מחזור קלוריות שבועי והעברת ריפיד לחג"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ciclo semanal de calorias e mover o refeed para um feriado"
-          }
-        }
-      }
-    },
-    "План из фаз: сушка, поддержание, набор — с темпом и сроком каждой" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطة من مراحل: تنشيف، صيانة، زيادة — بوتيرة ومدة لكل منها"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan aus Phasen: Diät, Erhaltung, Aufbau – jede mit Tempo und Dauer"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A plan of phases: cut, maintenance, bulk — each with its own pace and length"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan por fases: definición, mantenimiento, volumen, cada una con su ritmo y plazo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un plan en phases : sèche, maintien, prise de masse — chacune avec son rythme et sa durée"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תוכנית משלבים: חיטוב, תחזוקה, מסה — לכל אחד קצב ומשך"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plano em fases: cutting, manutenção, bulking — cada uma com ritmo e prazo"
-          }
-        }
-      }
-    },
-    "План продолжает считать норму. Экран плана, вердикт и настройка — в Premium." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الخطة ما زالت تحسب هدفك. شاشة الخطة والحكم والإعدادات ضمن Premium."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Plan berechnet dein Ziel weiter. Planansicht, Urteil und Einstellungen gibt es mit Premium."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The plan keeps setting your target. The plan screen, verdict and settings are in Premium."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El plan sigue calculando tu objetivo. La pantalla del plan, el veredicto y los ajustes están en Premium."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le plan continue de calculer ton objectif. L’écran du plan, le verdict et les réglages sont dans Premium."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "התוכנית ממשיכה לחשב את היעד. מסך התוכנית, הסיכום וההגדרות — ב-Premium."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O plano continua calculando sua meta. A tela do plano, o veredito e os ajustes estão no Premium."
-          }
-        }
-      }
-    },
-    "Приложение только читает их из «Здоровья», ничего туда не пишет" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التطبيق يقرأها فقط من «صحتي» ولا يكتب شيئًا هناك"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die App liest sie nur aus Health und schreibt nichts hinein"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The app only reads them from Health and writes nothing back"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La app solo los lee de Salud y no escribe nada allí"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’app les lit seulement dans Santé et n’y écrit rien"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "האפליקציה רק קוראת אותם מ״בריאות״ ולא כותבת לשם כלום"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O app só lê esses dados do Saúde e não grava nada lá"
-          }
-        }
-      }
-    },
-    "Пробные две недели закончились" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انتهت فترة التجربة لمدة أسبوعين"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die zwei Probewochen sind vorbei"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your two-week trial has ended"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminaron las dos semanas de prueba"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tes deux semaines d’essai sont terminées"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שבועיים הניסיון הסתיימו"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As duas semanas de teste acabaram"
-          }
-        }
-      }
-    },
-    "Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ستظهر الخطوات والسعرات النشطة في «اليوم» بجانب الطعام — تلقائيًا، دون إدخال يدوي."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schritte und aktive Kalorien erscheinen unter „Heute“ neben dem Essen – von selbst, ohne Eintippen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps and active calories show up on Today next to your food — on their own, no typing."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los pasos y las calorías activas aparecerán en Hoy junto a la comida, solos, sin escribir nada."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les pas et les calories actives apparaîtront dans Aujourd’hui à côté des repas — tout seuls, sans saisie."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הצעדים והקלוריות הפעילות יופיעו ב״היום״ ליד האוכל — לבד, בלי הקלדה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passos e calorias ativas aparecem em Hoje ao lado da comida — sozinhos, sem digitar."
-          }
-        }
-      }
-    },
-    "ккал в день" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "سعرة في اليوم"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kcal pro Tag"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kcal a day"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kcal al día"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kcal par jour"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קק״ל ביום"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "kcal por dia"
-          }
-        }
-      }
-    },
     "—" : {
       "shouldTranslate" : false
     },
@@ -2758,6 +2114,7 @@
       }
     },
     "Автоматический пересчёт темпа и предупреждение, если он слишком агрессивный" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5130,6 +4487,7 @@
       }
     },
     "Будет записано" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6151,6 +5509,52 @@
         }
       }
     },
+    "Вердикт по весу: идёшь по графику, опережаешь или отстаёшь — и что с этим делать" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حكم على الوزن: على المسار أو متقدم أو متأخر — وماذا تفعل حيال ذلك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Urteil nach Gewicht: im Plan, voraus oder hinterher – und was zu tun ist"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A weight verdict: on track, ahead or behind — and what to do about it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veredicto por el peso: vas al día, adelantado o atrasado, y qué hacer"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verdict sur le poids : dans les temps, en avance ou en retard — et quoi faire"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיכום לפי משקל: לפי הלוח, מקדים או מאחר — ומה לעשות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veredito pelo peso: no ritmo, adiantado ou atrasado — e o que fazer"
+          }
+        }
+      }
+    },
     "Вернуть рефид на его день" : {
       "localizations" : {
         "ar" : {
@@ -6565,6 +5969,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O peso não se moveu"
+          }
+        }
+      }
+    },
+    "Вес по тренду: %+.1f кг" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن حسب الاتجاه: %+.1f كغ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewicht im Trend: %+.1f kg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trend weight: %+.1f kg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso según la tendencia: %+.1f kg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids tendance : %+.1f kg"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל לפי מגמה: %+.1f ק״ג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso pela tendência: %+.1f kg"
           }
         }
       }
@@ -8472,6 +7922,52 @@
         }
       }
     },
+    "Все дни" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كل الأيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Tage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos los días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les jours"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כל הימים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os dias"
+          }
+        }
+      }
+    },
     "Все записи" : {
       "localizations" : {
         "ar" : {
@@ -9675,6 +9171,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jejum"
+          }
+        }
+      }
+    },
+    "Готов?" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جاهز؟"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Listo?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prêt ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוכן?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pronto?"
           }
         }
       }
@@ -11167,6 +10709,52 @@
         }
       }
     },
+    "Диет-брейки по расписанию или вручную" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استراحات حمية مجدولة أو يدوية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diätpausen nach Plan oder manuell"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diet breaks on a schedule or by hand"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descansos de dieta programados o manuales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pauses diète planifiées ou manuelles"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הפסקות דיאטה לפי לוח זמנים או ידנית"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pausas na dieta programadas ou manuais"
+          }
+        }
+      }
+    },
     "Динамика" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11307,6 +10895,7 @@
       }
     },
     "дистанция" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -11816,6 +11405,52 @@
         }
       }
     },
+    "Дней с записями: %lld из %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيام بتسجيلات: %1$lld من %2$lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tage mit Einträgen: %1$lld von %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days logged: %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días con registros: %1$lld de %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours saisis : %1$lld sur %2$lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ימים עם רישומים: %1$lld מתוך %2$lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias com registros: %1$lld de %2$lld"
+          }
+        }
+      }
+    },
     "Дней с целью" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12004,6 +11639,7 @@
       }
     },
     "Добавить в дневник" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -12602,6 +12238,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Percentual do valor diário por 100 g. No sódio é parte do limite, não de uma meta."
+          }
+        }
+      }
+    },
+    "Доступ запрошен" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم طلب الوصول"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zugriff angefragt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Access requested"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acceso solicitado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accès demandé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגישה התבקשה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acesso solicitado"
           }
         }
       }
@@ -13851,6 +13533,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não houve pesagens durante o plano, então não há de onde tirar um balanço."
+          }
+        }
+      }
+    },
+    "За две недели" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خلال أسبوعين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In zwei Wochen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Over two weeks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En dos semanas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En deux semaines"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בשבועיים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em duas semanas"
           }
         }
       }
@@ -18175,6 +17903,52 @@
         }
       }
     },
+    "ккал в день" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سعرة في اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal pro Tag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal a day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal al día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal par jour"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קק״ל ביום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kcal por dia"
+          }
+        }
+      }
+    },
     "Ккал в день" : {
       "localizations" : {
         "ar" : {
@@ -22039,6 +21813,7 @@
       }
     },
     "Награды" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -23651,6 +23426,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ciclo semanal de calorias"
+          }
+        }
+      }
+    },
+    "Недельный цикл калорий и перенос рефида на праздник" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دورة سعرات أسبوعية ونقل يوم التحميل إلى عطلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wöchentlicher Kalorienzyklus und Refeed auf einen Feiertag verschieben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weekly calorie cycling and moving a refeed to a holiday"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo semanal de calorías y mover el refeed a un festivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycle calorique hebdomadaire et refeed déplacé sur un jour férié"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מחזור קלוריות שבועי והעברת ריפיד לחג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo semanal de calorias e mover o refeed para um feriado"
           }
         }
       }
@@ -29461,6 +29282,7 @@
       }
     },
     "Персональный план: срок в неделях, целевой вес, точная дневная норма калорий" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29828,6 +29650,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O plano terminou — veja o resultado"
+          }
+        }
+      }
+    },
+    "План из фаз: сушка, поддержание, набор — с темпом и сроком каждой" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطة من مراحل: تنشيف، صيانة، زيادة — بوتيرة ومدة لكل منها"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan aus Phasen: Diät, Erhaltung, Aufbau – jede mit Tempo und Dauer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A plan of phases: cut, maintenance, bulk — each with its own pace and length"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plan por fases: definición, mantenimiento, volumen, cada una con su ritmo y plazo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un plan en phases : sèche, maintien, prise de masse — chacune avec son rythme et sa durée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תוכנית משלבים: חיטוב, תחזוקה, מסה — לכל אחד קצב ומשך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plano em fases: cutting, manutenção, bulking — cada uma com ritmo e prazo"
+          }
+        }
+      }
+    },
+    "План продолжает считать норму. Экран плана, вердикт и настройка — в Premium." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطة ما زالت تحسب هدفك. شاشة الخطة والحكم والإعدادات ضمن Premium."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Plan berechnet dein Ziel weiter. Planansicht, Urteil und Einstellungen gibt es mit Premium."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The plan keeps setting your target. The plan screen, verdict and settings are in Premium."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El plan sigue calculando tu objetivo. La pantalla del plan, el veredicto y los ajustes están en Premium."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plan continue de calculer ton objectif. L’écran du plan, le verdict et les réglages sont dans Premium."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התוכנית ממשיכה לחשב את היעד. מסך התוכנית, הסיכום וההגדרות — ב-Premium."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O plano continua calculando sua meta. A tela do plano, o veredito e os ajustes estão no Premium."
           }
         }
       }
@@ -31637,6 +31551,7 @@
       }
     },
     "Получено" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -33586,6 +33501,98 @@
         }
       }
     },
+    "Приложение только читает их из «Здоровья», ничего туда не пишет" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيق يقرأها فقط من «صحتي» ولا يكتب شيئًا هناك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App liest sie nur aus Health und schreibt nichts hinein"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app only reads them from Health and writes nothing back"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app solo los lee de Salud y no escribe nada allí"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app les lit seulement dans Santé et n’y écrit rien"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האפליקציה רק קוראת אותם מ״בריאות״ ולא כותבת לשם כלום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app só lê esses dados do Saúde e não grava nada lá"
+          }
+        }
+      }
+    },
+    "Пробные две недели закончились" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهت فترة التجربة لمدة أسبوعين"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die zwei Probewochen sind vorbei"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your two-week trial has ended"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminaron las dos semanas de prueba"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes deux semaines d’essai sont terminées"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבועיים הניסיון הסתיימו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As duas semanas de teste acabaram"
+          }
+        }
+      }
+    },
     "Проверка" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33728,6 +33735,7 @@
       }
     },
     "Прогресс плана прямо на главном экране" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37255,6 +37263,52 @@
         }
       }
     },
+    "Серия %lld дн. в норме" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة %lld يومًا ضمن الهدف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Tage in Folge im Ziel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days on target in a row"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días seguidos en tu objetivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld jours d’affilée dans l’objectif"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ימים ברצף ביעד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dias seguidos na meta"
+          }
+        }
+      }
+    },
     "Серым показано, сколько примерно ожидается по пропорциям от уже снятого. Это ориентир, а не замер: у людей с одинаковым запястьем разброс достигает нескольких сантиметров. В данные попадает только то, что ты ввёл сам." : {
       "localizations" : {
         "ar" : {
@@ -38825,6 +38879,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Coletando dados"
+          }
+        }
+      }
+    },
+    "Совпадения" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطابقات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treffer"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matches"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coincidencias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correspondances"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התאמות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correspondências"
           }
         }
       }
@@ -44418,6 +44518,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passos"
+          }
+        }
+      }
+    },
+    "Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستظهر الخطوات والسعرات النشطة في «اليوم» بجانب الطعام — تلقائيًا، دون إدخال يدوي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schritte und aktive Kalorien erscheinen unter „Heute“ neben dem Essen – von selbst, ohne Eintippen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps and active calories show up on Today next to your food — on their own, no typing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pasos y las calorías activas aparecerán en Hoy junto a la comida, solos, sin escribir nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pas et les calories actives apparaîtront dans Aujourd’hui à côté des repas — tout seuls, sans saisie."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הצעדים והקלוריות הפעילות יופיעו ב״היום״ ליד האוכל — לבד, בלי הקלדה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passos e calorias ativas aparecem em Hoje ao lado da comida — sozinhos, sem digitar."
           }
         }
       }

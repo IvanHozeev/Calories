@@ -189,6 +189,106 @@ struct AddEntryView: View {
         return store.recentDishes.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
 
+    // MARK: - Лучшие совпадения
+
+    private enum TopMatch: Identifiable {
+        case food(FoodItem, savable: Bool)
+        case dish(Dish)
+
+        var id: String {
+            switch self {
+            case .food(let food, _): return "food-\(food.id.uuidString)"
+            case .dish(let dish):    return "dish-\(dish.id.uuidString)"
+            }
+        }
+        var name: String {
+            switch self {
+            case .food(let food, _): return food.name
+            case .dish(let dish):    return dish.name
+            }
+        }
+        var isDish: Bool { if case .dish = self { return true } else { return false } }
+    }
+
+    /// Насколько название совпадает с запросом: 0 — целиком, 1 — начинается
+    /// с него, 2 — с него начинается одно из слов. Остальное — не совпадение.
+    private static func matchRank(_ name: String, _ query: String) -> Int? {
+        let name = name.lowercased(), query = query.lowercased()
+        if name == query { return 0 }
+        if name.hasPrefix(query) { return 1 }
+        if name.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).contains(where: { $0.hasPrefix(query) }) { return 2 }
+        return nil
+    }
+
+    /// Совпадения по названию — поверх секций по источникам.
+    ///
+    /// Раньше на «Хумус» первым шло «Недавнее» с «Хумус туна тирас», потом
+    /// «Мои блюда» с тем же, а сам хумус из базы — только после прокрутки:
+    /// секции шли по источникам, а не по тому, насколько похоже название.
+    /// Сверху теперь то, что названо ровно так или начинается с запроса;
+    /// продукты раньше блюд, короткие названия раньше длинных.
+    private var topMatches: [TopMatch] {
+        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return [] }
+        var seen = Set<String>()
+        var candidates: [(TopMatch, Int)] = []
+        func consider(_ match: TopMatch) {
+            guard let rank = Self.matchRank(match.name, query), rank <= 1 else { return }
+            guard seen.insert(match.name.lowercased()).inserted else { return }
+            candidates.append((match, rank))
+        }
+        filteredBuiltInFoods.forEach { consider(.food($0, savable: true)) }
+        filteredCustomFoods.forEach { consider(.food($0, savable: false)) }
+        recentFoodItems.forEach { consider(.food($0, savable: false)) }
+        filteredDishes.forEach { consider(.dish($0)) }
+        recentDishItems.forEach { consider(.dish($0)) }
+        return candidates
+            .sorted {
+                if $0.1 != $1.1 { return $0.1 < $1.1 }
+                if $0.0.isDish != $1.0.isDish { return !$0.0.isDish }
+                return $0.0.name.count < $1.0.name.count
+            }
+            .prefix(6)
+            .map(\.0)
+    }
+
+    private func notOnTop<T>(_ items: [T], _ name: (T) -> String) -> [T] {
+        guard isSearching else { return items }
+        let top = topMatchNames
+        return items.filter { !top.contains(name($0).lowercased()) }
+    }
+    private var shownRecentFoods: [FoodItem] { notOnTop(recentFoodItems) { $0.name } }
+    private var shownRecentDishes: [Dish] { notOnTop(recentDishItems) { $0.name } }
+    private var shownDishes: [Dish] { notOnTop(filteredDishes) { $0.name } }
+    private var shownCustomFoods: [FoodItem] { notOnTop(filteredCustomFoods) { $0.name } }
+    private var shownBuiltInFoods: [FoodItem] { notOnTop(filteredBuiltInFoods) { $0.name } }
+
+    /// Имена, уже показанные сверху, — ниже в секциях источников их не повторяем.
+    private var topMatchNames: Set<String> {
+        Set(topMatches.map { $0.name.lowercased() })
+    }
+
+    @ViewBuilder
+    private var topMatchesSection: some View {
+        let matches = topMatches
+        if !matches.isEmpty {
+            Section("Совпадения") {
+                ForEach(matches) { match in
+                    switch match {
+                    case .food(let food, let savable):
+                        foodRow(food)
+                            .contentShape(Rectangle())
+                            .onTapGesture { openServing(.food(food, savable: savable, quickSave: true)) }
+                    case .dish(let dish):
+                        dishRow(dish)
+                            .contentShape(Rectangle())
+                            .onTapGesture { openServing(.dish(dish)) }
+                    }
+                }
+            }
+        }
+    }
+
     @ViewBuilder private var offSearchSection: some View {
         Section("Глобальный поиск") {
             if isSearchingOFF {
@@ -342,21 +442,9 @@ struct AddEntryView: View {
                         Button("Отмена") { dismiss() }
                     }
                 }
-                // Своего плюса у экрана нет: «новый продукт» и «только калории»
-                // живут в плюсе на «Сегодня», вместе с остальными способами
-                // что-то записать. Два плюса с разным содержимым заставляли
-                // помнить, в каком из них что лежит.
-                ToolbarItem(placement: .topBarTrailing) {
-                    // Время приёма — само по себе: это не способ что-то
-                    // добавить, а свойство записи.
-                    Button {
-                        showingMealTime = true
-                    } label: {
-                        Image(systemName: "clock")
-                    }
-                    .accessibilityLabel("Время приёма")
-                    .accessibilityIdentifier("mealTime")
-                }
+                // Ни плюса, ни часов в тулбаре: «новый продукт» и «только калории»
+                // живут в плюсе на «Сегодня», а время приёма — на экране продукта,
+                // где его решают, уже выбрав, что съели.
                 // Плавающая кнопка нижней панели перекрывает список. Пока сохранять нечего,
                 // она не нужна — показываем её только при непустом черновике.
                 if !draftItems.isEmpty {
@@ -496,14 +584,18 @@ struct AddEntryView: View {
         }
         }
 
-        if isSearching || source == .recent, !recentFoodItems.isEmpty || !recentDishItems.isEmpty {
+        if isSearching {
+            topMatchesSection
+        }
+
+        if isSearching || source == .recent, !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
             Section("Недавнее") {
-                ForEach(recentFoodItems) { food in
+                ForEach(shownRecentFoods) { food in
                     foodRow(food)
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.food(food, savable: false, quickSave: true)) }
                 }
-                ForEach(recentDishItems) { dish in
+                ForEach(shownRecentDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.dish(dish)) }
@@ -511,9 +603,9 @@ struct AddEntryView: View {
             }
         }
 
-        if isSearching || source == .mine, !filteredDishes.isEmpty {
+        if isSearching || source == .mine, !shownDishes.isEmpty {
             Section("Мои блюда") {
-                ForEach(filteredDishes) { dish in
+                ForEach(shownDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.dish(dish)) }
@@ -526,7 +618,7 @@ struct AddEntryView: View {
         // там порядок и есть смысл: сверху последнее съеденное, и
         // группировка сломала бы именно то, ради чего туда заходят.
         if isSearching || source == .mine {
-            ForEach(grouped(filteredCustomFoods), id: \.0) { category, foods in
+            ForEach(grouped(shownCustomFoods), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
                         foodRow(food)
@@ -582,7 +674,7 @@ struct AddEntryView: View {
                 // База разложена по категориям, а не идёт одним списком из
                 // шести десятков строк. Отдельного контрола для этого не нужно:
                 // заголовки секций сами работают навигацией.
-                ForEach(grouped(filteredBuiltInFoods), id: \.0) { category, foods in
+                ForEach(grouped(shownBuiltInFoods), id: \.0) { category, foods in
                     Section {
                         ForEach(foods) { food in
                             foodRow(food)
@@ -610,18 +702,19 @@ struct AddEntryView: View {
                 food: food,
                 onSave: saveAction(for: food, enabled: savable),
                 onAddAndSave: quickAction(enabled: quickSave),
-                isPushed: true
+                isPushed: true,
+                mealDate: $selectedDate
             ) { item in
                 addToDraft(item)
             }
         case .dish(let dish):
-            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true) { item in
+            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true, mealDate: $selectedDate) { item in
                 addToDraft(item)
             }
         case .edit(let itemID):
             if let item = draftItems.first(where: { $0.id == itemID }), let grams = item.grams, grams > 0 {
                 FoodQuantityView(food: per100g(item, grams: grams), grams: grams,
-                                 addTitle: "Готово", isPushed: true) { edited in
+                                 addTitle: "Готово", isPushed: true, mealDate: $selectedDate) { edited in
                     if let index = draftItems.firstIndex(where: { $0.id == itemID }) {
                         draftItems[index] = edited
                     }

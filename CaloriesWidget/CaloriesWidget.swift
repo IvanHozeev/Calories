@@ -9,21 +9,33 @@ struct CaloriesEntry: TimelineEntry {
     let date: Date
     let consumed: Int
     let goal: Int
+    let protein: Double
+    let fat: Double
+    let carbs: Double
+    let proteinTarget: Double
+    let fatTarget: Double
+    let carbsTarget: Double
 
     var progress: Double {
         guard goal > 0 else { return 0 }
         return min(Double(consumed) / Double(goal), 1.0)
     }
     var remaining: Int { max(goal - consumed, 0) }
+
+    var segments: [WidgetRingSegment] {
+        WidgetRingLayout.today(consumed: consumed, goal: goal, protein: protein, fat: fat, carbs: carbs,
+                               proteinTarget: proteinTarget, fatTarget: fatTarget, carbsTarget: carbsTarget)
+    }
 }
 
 struct CaloriesProvider: TimelineProvider {
     func placeholder(in context: Context) -> CaloriesEntry {
-        CaloriesEntry(date: Date(), consumed: 1500, goal: 2000)
+        CaloriesEntry(date: Date(), consumed: 1500, goal: 2400, protein: 110, fat: 45, carbs: 160,
+                      proteinTarget: 160, fatTarget: 64, carbsTarget: 250)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (CaloriesEntry) -> Void) {
-        completion(loadEntry())
+        completion(context.isPreview ? placeholder(in: context) : loadEntry())
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<CaloriesEntry>) -> Void) {
@@ -36,21 +48,28 @@ struct CaloriesProvider: TimelineProvider {
         let defaults = UserDefaults(suiteName: appGroup)
         let consumed = defaults?.integer(forKey: "widget_consumed_today") ?? 0
         let rawGoal = defaults?.integer(forKey: "widget_goal_today") ?? 0
-        let goal = rawGoal > 0 ? rawGoal : 2000
-        return CaloriesEntry(date: Date(), consumed: consumed, goal: goal)
+        return CaloriesEntry(
+            date: Date(),
+            consumed: consumed,
+            goal: rawGoal > 0 ? rawGoal : 2000,
+            protein: defaults?.double(forKey: "widget_protein") ?? 0,
+            fat: defaults?.double(forKey: "widget_fat") ?? 0,
+            carbs: defaults?.double(forKey: "widget_carbs") ?? 0,
+            proteinTarget: defaults?.double(forKey: "widget_protein_target") ?? 0,
+            fatTarget: defaults?.double(forKey: "widget_fat_target") ?? 0,
+            carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0
+        )
     }
 }
 
+/// Кольцо «Сегодня» на домашнем экране и блокировке.
+///
+/// Раньше это было одно оранжевое кольцо калорий на коричневом фоне — чужое
+/// приложению. Теперь виджет — то же кольцо, что на главном экране: калории на
+/// половину круга, макросы делят вторую по граммам целей, в графите иконки.
 struct CaloriesWidgetEntryView: View {
     var entry: CaloriesEntry
     @Environment(\.widgetFamily) var family
-    @Environment(\.widgetRenderingMode) var renderingMode
-
-    private let ringColors: [Color] = [.orange, Color(red: 1, green: 0.75, blue: 0)]
-    private let bg = LinearGradient(
-        colors: [Color(red: 0.18, green: 0.07, blue: 0.00), Color(red: 0.10, green: 0.04, blue: 0.00)],
-        startPoint: .topLeading, endPoint: .bottomTrailing
-    )
 
     var body: some View {
         switch family {
@@ -69,14 +88,15 @@ struct CaloriesWidgetEntryView: View {
     // толщина и акцент. Показываем «осталось», а не «съедено»: на блокировке
     // смотрят, чтобы решить, есть ли ещё запас или уже нет.
 
+    /// То же кольцо, одним цветом: форма узнаётся и без цвета.
     private var circularView: some View {
-        Gauge(value: entry.progress) {
-            Image(systemName: "flame.fill")
-        } currentValueLabel: {
+        ZStack {
+            WidgetRing(segments: entry.segments, lineWidth: 5, rotation: -40)
             Text(verbatim: "\(entry.remaining)")
-                .minimumScaleFactor(0.4)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .minimumScaleFactor(0.5)
+                .padding(8)
         }
-        .gaugeStyle(.accessoryCircularCapacity)
         .containerBackground(.clear, for: .widget)
     }
 
@@ -107,114 +127,67 @@ struct CaloriesWidgetEntryView: View {
         .containerBackground(.clear, for: .widget)
     }
 
-    private var smallView: some View {
-        ZStack {
-            Circle()
-                .stroke(WidgetEngraving.channel(thickness: 6, mode: renderingMode),
-                        style: StrokeStyle(lineWidth: 6))
-            Circle()
-                .trim(from: 0, to: entry.progress)
-                .stroke(
-                    LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .shadow(color: .orange.opacity(0.5), radius: 6)
+    // MARK: - Домашний экран
 
-            VStack(spacing: 2) {
-                Text("\(entry.consumed)")
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
+    private func ringWithRemaining(lineWidth: CGFloat, number: CGFloat) -> some View {
+        ZStack {
+            WidgetRing(segments: entry.segments, lineWidth: lineWidth, rotation: -40)
+            VStack(spacing: 0) {
+                Text(verbatim: "\(entry.remaining)")
+                    .font(.system(size: number, weight: .bold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.5)
-                Text("ккал")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .textCase(.uppercase)
-                    .tracking(0.5)
+                    .lineLimit(1)
+                Text("Остаток")
+                    .font(.system(size: number * 0.38, weight: .semibold))
+                    .foregroundStyle(WidgetPalette.kcal[0])
             }
+            .padding(lineWidth * 1.6)
         }
-        .containerBackground(for: .widget) { bg }
+    }
+
+    private var smallView: some View {
+        ringWithRemaining(lineWidth: 11, number: 26)
+            .padding(-2)
+            .containerBackground(for: .widget) { WidgetPalette.graphite }
     }
 
     private var mediumView: some View {
         HStack(spacing: 18) {
-            ZStack {
-                Circle()
-                    .stroke(WidgetEngraving.channel(thickness: 5, mode: renderingMode),
-                            style: StrokeStyle(lineWidth: 5))
-                Circle()
-                    .trim(from: 0, to: entry.progress)
-                    .stroke(
-                        LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: .orange.opacity(0.5), radius: 5)
+            ringWithRemaining(lineWidth: 10, number: 22)
+                .frame(width: 118, height: 118)
 
-                VStack(spacing: 2) {
-                    Text("\(entry.consumed)")
-                        .font(.system(size: 22, weight: .bold, design: .rounded))
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
-                        .minimumScaleFactor(0.5)
-                    Text("ккал")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.55))
-                        .textCase(.uppercase)
-                        .tracking(0.5)
-                }
+            VStack(alignment: .leading, spacing: 7) {
+                statRow(letter: "ккал", color: WidgetPalette.kcal[0], value: entry.consumed, target: Double(entry.goal))
+                statRow(letter: "Б", color: WidgetPalette.protein[0], value: Int(entry.protein.rounded()), target: entry.proteinTarget)
+                statRow(letter: "Ж", color: WidgetPalette.fat[0], value: Int(entry.fat.rounded()), target: entry.fatTarget)
+                statRow(letter: "У", color: WidgetPalette.carbs[0], value: Int(entry.carbs.rounded()), target: entry.carbsTarget)
             }
-            .frame(width: 88, height: 88)
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Калории")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.bottom, 8)
-
-                statRow(label: "Съедено", value: "\(entry.consumed) \(String(localized: "ккал"))")
-                Spacer().frame(height: 5)
-                statRow(label: "Цель", value: "\(entry.goal) \(String(localized: "ккал"))")
-                Spacer().frame(height: 5)
-                statRow(label: "Остаток", value: "\(entry.remaining) \(String(localized: "ккал"))")
-
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(WidgetEngraving.channel(thickness: 4, mode: renderingMode))
-                            .frame(height: 4)
-                        Capsule()
-                            .fill(LinearGradient(colors: ringColors, startPoint: .leading, endPoint: .trailing))
-                            .frame(width: geo.size.width * entry.progress, height: 4)
-                            .shadow(color: ringColors[0].opacity(0.5), radius: 3)
-                    }
-                }
-                .frame(height: 4)
-                .padding(.top, 10)
-            }
-
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .containerBackground(for: .widget) { bg }
+        .containerBackground(for: .widget) { WidgetPalette.graphite }
     }
 
     /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
-    /// со строкой ничего не локализует, и «Съедено» показывалось по-русски
-    /// на любом языке системы. Заметно это только на неродном языке, поэтому
-    /// и прожило так долго.
-    private func statRow(label: LocalizedStringKey, value: String) -> some View {
-        HStack {
-            Text(label)
-                .font(.system(size: 11))
-                .foregroundStyle(.white.opacity(0.5))
-            Spacer()
-            Text(value)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+    /// со строкой ничего не локализует, и подпись показывалась по-русски
+    /// на любом языке системы.
+    private func statRow(letter: LocalizedStringKey, color: Color, value: Int, target: Double) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(letter)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(color)
+                .frame(width: 30, alignment: .leading)
+            Text(verbatim: "\(value)")
+                .font(.system(size: 15, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(.white)
+            if target > 0 {
+                Text(verbatim: "/ \(Int(target.rounded()))")
+                    .font(.system(size: 11, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white.opacity(0.45))
+            }
         }
     }
 }
@@ -277,11 +250,14 @@ struct StepsWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     @Environment(\.widgetRenderingMode) var renderingMode
 
-    private let ringColors: [Color] = [Color(red: 0.2, green: 0.6, blue: 1.0), .cyan]
-    private let bg = LinearGradient(
-        colors: [Color(red: 0.03, green: 0.08, blue: 0.22), Color(red: 0.01, green: 0.04, blue: 0.14)],
-        startPoint: .topLeading, endPoint: .bottomTrailing
-    )
+    private let ringColors: [Color] = WidgetPalette.steps
+    /// Графит, как у иконки и кольца калорий: виджеты одного приложения
+    /// не должны быть разноцветными плашками.
+    private var bg: LinearGradient { WidgetPalette.graphite }
+
+    private var stepsSegment: [WidgetRingSegment] {
+        [WidgetRingSegment(id: "steps", start: 0, end: 359.9, progress: entry.progress, colors: ringColors)]
+    }
 
     var body: some View {
         switch family {
@@ -336,17 +312,7 @@ struct StepsWidgetEntryView: View {
 
     private var smallView: some View {
         ZStack {
-            Circle()
-                .stroke(WidgetEngraving.channel(thickness: 6, mode: renderingMode),
-                        style: StrokeStyle(lineWidth: 6))
-            Circle()
-                .trim(from: 0, to: entry.progress)
-                .stroke(
-                    LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .shadow(color: .blue.opacity(0.6), radius: 6)
+            WidgetRing(segments: stepsSegment, lineWidth: 11)
 
             VStack(spacing: 2) {
                 Text(entry.steps.formatted())
@@ -367,17 +333,7 @@ struct StepsWidgetEntryView: View {
     private var mediumView: some View {
         HStack(spacing: 18) {
             ZStack {
-                Circle()
-                    .stroke(WidgetEngraving.channel(thickness: 5, mode: renderingMode),
-                            style: StrokeStyle(lineWidth: 5))
-                Circle()
-                    .trim(from: 0, to: entry.progress)
-                    .stroke(
-                        LinearGradient(colors: ringColors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: .blue.opacity(0.6), radius: 5)
+                WidgetRing(segments: stepsSegment, lineWidth: 9)
 
                 VStack(spacing: 2) {
                     Text(entry.steps.formatted())
@@ -416,7 +372,7 @@ struct StepsWidgetEntryView: View {
                         Capsule()
                             .fill(LinearGradient(colors: ringColors, startPoint: .leading, endPoint: .trailing))
                             .frame(width: geo.size.width * entry.progress, height: 4)
-                            .shadow(color: ringColors[0].opacity(0.5), radius: 3)
+                            .shadow(color: ringColors[1].opacity(0.3), radius: 3)
                     }
                 }
                 .frame(height: 4)
@@ -514,10 +470,7 @@ struct MacrosWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     @Environment(\.widgetRenderingMode) var renderingMode
 
-    private let bg = LinearGradient(
-        colors: [Color(red: 0.06, green: 0.09, blue: 0.18), Color(red: 0.03, green: 0.05, blue: 0.10)],
-        startPoint: .topLeading, endPoint: .bottomTrailing
-    )
+    private var bg: LinearGradient { WidgetPalette.graphite }
 
     private struct Macro {
         /// Ключ для `ForEach` — русская буква как она записана в коде.
@@ -539,19 +492,53 @@ struct MacrosWidgetEntryView: View {
 
     private var macros: [Macro] {
         [
-            Macro(id: "Б", letter: "Б", value: entry.protein, target: entry.proteinTarget, color: .blue),
-            Macro(id: "Ж", letter: "Ж", value: entry.fat, target: entry.fatTarget, color: .orange),
-            Macro(id: "У", letter: "У", value: entry.carbs, target: entry.carbsTarget, color: .purple)
+            Macro(id: "Б", letter: "Б", value: entry.protein, target: entry.proteinTarget, color: WidgetPalette.protein[0]),
+            Macro(id: "Ж", letter: "Ж", value: entry.fat, target: entry.fatTarget, color: WidgetPalette.fat[0]),
+            Macro(id: "У", letter: "У", value: entry.carbs, target: entry.carbsTarget, color: WidgetPalette.carbs[0])
         ]
     }
 
     var body: some View {
         switch family {
+        case .systemSmall: markView
         case .accessoryCircular: circularView
         case .accessoryRectangular: rectangularView
         case .accessoryInline: inlineView
         default: homeView
         }
+    }
+
+    // MARK: Знак
+
+    /// Маленький — знак приложения «С», только живой: каждая дуга залита по
+    /// своему макросу. В середине белок — у того, кто держит макросы, это
+    /// обязательство, а остальное — остаток.
+    private var markView: some View {
+        ZStack {
+            WidgetRing(segments: WidgetRingLayout.mark(
+                protein: entry.protein, fat: entry.fat, carbs: entry.carbs,
+                proteinTarget: entry.proteinTarget, fatTarget: entry.fatTarget, carbsTarget: entry.carbsTarget),
+                       lineWidth: 11, fillsFromEnd: true)
+            VStack(spacing: 0) {
+                Text(verbatim: "\(Int(entry.protein.rounded()))")
+                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.5)
+                if entry.proteinTarget > 0 {
+                    Text(verbatim: "/ \(Int(entry.proteinTarget.rounded()))")
+                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.45))
+                }
+                Text("Б")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(WidgetPalette.protein[0])
+            }
+            .padding(18)
+        }
+        .padding(-2)
+        .containerBackground(for: .widget) { bg }
     }
 
     // MARK: Домашний экран
@@ -591,7 +578,7 @@ struct MacrosWidgetEntryView: View {
                         Capsule()
                             .fill(macro.color)
                             .frame(width: geometry.size.width * macro.share)
-                            .shadow(color: macro.color.opacity(0.5), radius: 3)
+                            .shadow(color: macro.color.opacity(0.3), radius: 3)
                     }
                 }
                 .frame(height: 5)

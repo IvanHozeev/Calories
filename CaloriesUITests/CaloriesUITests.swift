@@ -21,6 +21,9 @@ final class CaloriesUITests: XCTestCase {
             "-onboarding_completed", "YES",
             // Заставка поверх первого кадра перехватывала первые нажатия теста.
             "-show_launch_splash", "NO",
+            // Системное окно доступа к «Здоровью» на свежей установке перекрывало
+            // вкладки. Тот же флаг ставит «не сейчас» в онбординге.
+            "-health_access_deferred", "YES",
             "-is_premium", premium ? "YES" : "NO",
             "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO"
         ]
@@ -124,9 +127,19 @@ final class CaloriesUITests: XCTestCase {
         start.tap()
 
         // Шагов с настройкой несколько; доходим «Далее» до шага с доступом к шагам.
+        // На шаге цели выбираем поддержание: план с дефицитом запустил бы
+        // пробный период, и следующие тесты получили бы премиум, которого не ждут.
         let health = app.buttons["onboardingHealthAccess"]
+        let maintenance = app.buttons["Maintenance"]
         var taps = 0
         while !health.exists && taps < 12 {
+            if maintenance.exists, !maintenance.isSelected {
+                // Шаг въезжает сбоку: тап посреди перехода попадал по соседнему
+                // сегменту («Набор»), и план всё равно создавался.
+                Thread.sleep(forTimeInterval: 0.6)
+                maintenance.tap()
+                XCTAssertTrue(maintenance.isSelected, "Не удалось выбрать поддержание")
+            }
             app.buttons["Next"].tap()
             taps += 1
         }
@@ -137,6 +150,9 @@ final class CaloriesUITests: XCTestCase {
         app.buttons["Get Started"].tap()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
                       "После онбординга должно открываться «Сегодня»")
+        // Без плана пробный период не начат — строка плана зовёт в пэйвол.
+        XCTAssertTrue(app.staticTexts["Personal plan"].waitForExistence(timeout: 5),
+                      "Поддержание не должно создавать план и пробный период")
     }
 
     // MARK: - Навигация
@@ -641,7 +657,7 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Restore"].exists,
                       "Восстановление покупок обязательно для App Review")
-        XCTAssertTrue(app.staticTexts["Plan progress right on the main screen"].exists,
+        XCTAssertTrue(app.staticTexts["Diet breaks on a schedule or by hand"].exists,
                       "Перечень фич должен быть переведён, а не падать на русский исходник")
     }
 

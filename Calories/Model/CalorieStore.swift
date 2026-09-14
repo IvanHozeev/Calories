@@ -336,6 +336,9 @@ final class CalorieStore {
 
         cachesBuiltForDay = calendar.startOfDay(for: Date())
 
+        // День, к которому относятся числа: после полуночи виджет не должен
+        // показывать вчерашнее съеденное, пока приложение не открыли.
+        groupDefaults?.set(calendar.startOfDay(for: Date()), forKey: "widget_day")
         groupDefaults?.set(consumedToday, forKey: "widget_consumed_today")
         groupDefaults?.set(adaptedTodayGoal, forKey: "widget_goal_today")
         // Макросы виджету: съеденное и цели. Углеводы без цели — это минимум

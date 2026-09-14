@@ -160,6 +160,7 @@ final class StepStore {
                 // Число отдаём всегда — запись в общий контейнер ничего не стоит,
                 // и когда система обновит виджет сама, она возьмёт свежее.
                 // Дорого стоит только просьба перестроиться, её и экономим.
+                self?.groupDefaults?.set(Calendar.current.startOfDay(for: Date()), forKey: "widget_steps_day")
                 self?.groupDefaults?.set(steps, forKey: "widget_steps_today")
                 self?.refreshStepsWidgetIfWorthIt(steps: steps)
             }

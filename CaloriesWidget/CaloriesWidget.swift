@@ -3,6 +3,28 @@ import SwiftUI
 
 private let appGroup = "group.calories.shared"
 
+/// Числа за сегодня — только если записаны сегодня.
+///
+/// Приложение пишет съеденное, когда его открывают. Ночью никто его не
+/// открывает, и после полуночи виджет показывал вчерашний день целиком. Если
+/// записи за сегодня ещё нет, съеденное — ноль, а цели остаются вчерашними:
+/// новую норму знает только приложение.
+private func isToday(_ key: String, in defaults: UserDefaults?) -> Bool {
+    guard let day = defaults?.object(forKey: key) as? Date else { return false }
+    return Calendar.current.isDateInToday(day)
+}
+
+/// Расписание виджета: текущая запись и обнулённая в полночь, чтобы новый день
+/// начинался с нуля, даже если до следующего обновления ещё далеко.
+private func timeline<Entry: TimelineEntry>(now: Entry, midnight: Entry) -> Timeline<Entry> {
+    let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
+    return Timeline(entries: [now, midnight], policy: .after(next))
+}
+
+private var nextMidnight: Date {
+    Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
+}
+
 // MARK: - Calories Widget
 
 struct CaloriesEntry: TimelineEntry {
@@ -39,22 +61,20 @@ struct CaloriesProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<CaloriesEntry>) -> Void) {
-        let entry = loadEntry()
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(next)))
+        completion(timeline(now: loadEntry(), midnight: loadEntry(at: nextMidnight, fresh: true)))
     }
 
-    private func loadEntry() -> CaloriesEntry {
+    private func loadEntry(at date: Date = Date(), fresh: Bool = false) -> CaloriesEntry {
         let defaults = UserDefaults(suiteName: appGroup)
-        let consumed = defaults?.integer(forKey: "widget_consumed_today") ?? 0
+        let current = !fresh && isToday("widget_day", in: defaults)
         let rawGoal = defaults?.integer(forKey: "widget_goal_today") ?? 0
         return CaloriesEntry(
-            date: Date(),
-            consumed: consumed,
+            date: date,
+            consumed: current ? defaults?.integer(forKey: "widget_consumed_today") ?? 0 : 0,
             goal: rawGoal > 0 ? rawGoal : 2000,
-            protein: defaults?.double(forKey: "widget_protein") ?? 0,
-            fat: defaults?.double(forKey: "widget_fat") ?? 0,
-            carbs: defaults?.double(forKey: "widget_carbs") ?? 0,
+            protein: current ? defaults?.double(forKey: "widget_protein") ?? 0 : 0,
+            fat: current ? defaults?.double(forKey: "widget_fat") ?? 0 : 0,
+            carbs: current ? defaults?.double(forKey: "widget_carbs") ?? 0 : 0,
             proteinTarget: defaults?.double(forKey: "widget_protein_target") ?? 0,
             fatTarget: defaults?.double(forKey: "widget_fat_target") ?? 0,
             carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0
@@ -230,18 +250,18 @@ struct StepsProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<StepsEntry>) -> Void) {
-        let entry = loadEntry()
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
-        completion(Timeline(entries: [entry], policy: .after(next)))
+        completion(timeline(now: loadEntry(), midnight: loadEntry(at: nextMidnight, fresh: true)))
     }
 
-    private func loadEntry() -> StepsEntry {
+    private func loadEntry(at date: Date = Date(), fresh: Bool = false) -> StepsEntry {
         let defaults = UserDefaults(suiteName: appGroup)
-        let steps = defaults?.integer(forKey: "widget_steps_today") ?? 0
+        let current = !fresh && isToday("widget_steps_day", in: defaults)
         let rawGoal = defaults?.integer(forKey: "widget_step_goal") ?? 0
         let goal = rawGoal > 0 ? rawGoal : 10_000
-        let distanceKm = defaults?.double(forKey: "widget_distance_km") ?? 0
-        return StepsEntry(date: Date(), steps: steps, goal: goal, distanceKm: distanceKm)
+        return StepsEntry(date: date,
+                          steps: current ? defaults?.integer(forKey: "widget_steps_today") ?? 0 : 0,
+                          goal: goal,
+                          distanceKm: current ? defaults?.double(forKey: "widget_distance_km") ?? 0 : 0)
     }
 }
 
@@ -447,17 +467,17 @@ struct MacrosProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<MacrosEntry>) -> Void) {
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: Date()) ?? Date()
-        completion(Timeline(entries: [loadEntry()], policy: .after(next)))
+        completion(timeline(now: loadEntry(), midnight: loadEntry(at: nextMidnight, fresh: true)))
     }
 
-    private func loadEntry() -> MacrosEntry {
+    private func loadEntry(at date: Date = Date(), fresh: Bool = false) -> MacrosEntry {
         let defaults = UserDefaults(suiteName: appGroup)
+        let current = !fresh && isToday("widget_day", in: defaults)
         return MacrosEntry(
-            date: Date(),
-            protein: defaults?.double(forKey: "widget_protein") ?? 0,
-            fat: defaults?.double(forKey: "widget_fat") ?? 0,
-            carbs: defaults?.double(forKey: "widget_carbs") ?? 0,
+            date: date,
+            protein: current ? defaults?.double(forKey: "widget_protein") ?? 0 : 0,
+            fat: current ? defaults?.double(forKey: "widget_fat") ?? 0 : 0,
+            carbs: current ? defaults?.double(forKey: "widget_carbs") ?? 0 : 0,
             proteinTarget: defaults?.double(forKey: "widget_protein_target") ?? 0,
             fatTarget: defaults?.double(forKey: "widget_fat_target") ?? 0,
             carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0

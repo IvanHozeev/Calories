@@ -21,9 +21,23 @@ func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
 }
 func gray(_ v: CGFloat, _ a: CGFloat = 1) -> CGColor { CGColor(colorSpace: space, components: [v, v, v, a])! }
 
+/// Рисуем в 16 битах на канал: свечение и градиенты на тёмном графите в
+/// 8 битах расходились ступенями-кольцами. Сохраняется уже в 8 бит — одним
+/// переводом в конце ступеней почти не остаётся, в отличие от накопления на
+/// каждом полупрозрачном слое.
 func context(_ w: Int, _ h: Int, opaque: Bool) -> CGContext {
+    CGContext(data: nil, width: w, height: h, bitsPerComponent: 16, bytesPerRow: 0, space: space,
+              bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder16Little.rawValue)!
+}
+
+/// Непрозрачные картинки (иконка) сводятся к 8 битам без альфа-канала:
+/// App Store не принимает иконки с прозрачностью.
+func flatten(_ image: CGImage, opaque: Bool) -> CGImage {
     let info = opaque ? CGImageAlphaInfo.noneSkipLast.rawValue : CGImageAlphaInfo.premultipliedLast.rawValue
-    return CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: space, bitmapInfo: info)!
+    let ctx = CGContext(data: nil, width: image.width, height: image.height, bitsPerComponent: 8, bytesPerRow: 0,
+                        space: space, bitmapInfo: info)!
+    ctx.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+    return ctx.makeImage()!
 }
 
 func linear(_ ctx: CGContext, _ colors: [CGColor], _ loc: [CGFloat], from: CGPoint, to: CGPoint) {
@@ -37,7 +51,8 @@ func radial(_ ctx: CGContext, _ colors: [CGColor], center: CGPoint, radius: CGFl
 
 func save(_ ctx: CGContext, _ name: String) {
     let dest = CGImageDestinationCreateWithURL(out.appendingPathComponent(name) as CFURL, UTType.png.identifier as CFString, 1, nil)!
-    CGImageDestinationAddImage(dest, ctx.makeImage()!, nil)
+    let image = ctx.makeImage()!
+    CGImageDestinationAddImage(dest, flatten(image, opaque: name.hasPrefix("AppIcon")), nil)
     CGImageDestinationFinalize(dest)
 }
 
@@ -138,11 +153,22 @@ let parts = [carbs, fat, protein]
 // На иконке цвета ярче и светлее, чем в приложении: фон там сам фиолетово-синий,
 // и дуги родных оттенков тонули в нём. Белок уходит к голубому, углеводы к
 // розово-сиреневому, жир к солнечному — каждая дуга отделяется от фона.
+// Неон: на графите чистые насыщенные цвета дают самый сильный контраст.
 let iconParts = [
-    Part(colors: [rgb(0xD94DFF), rgb(0xB322FF)], glow: rgb(0xC43BFF)),
-    Part(colors: [rgb(0xFFB300), rgb(0xFF7A00)], glow: rgb(0xFF9500)),
-    Part(colors: [rgb(0x1FC8FF), rgb(0x0A84FF)], glow: rgb(0x14A8FF)),
+    Part(colors: [rgb(0xE562FF), rgb(0xBF00FF)], glow: rgb(0xCC33FF)),
+    Part(colors: [rgb(0xFFC800), rgb(0xFF6A00)], glow: rgb(0xFF8C00)),
+    Part(colors: [rgb(0x38DBFF), rgb(0x0070FF)], glow: rgb(0x12A0FF)),
 ]
+
+/// Знак на графите: сперва широкий ореол — свет от дуг растекается по
+/// поверхности, — потом канавки с заливкой и тонким светом у кромки.
+/// Ореол умеренный: сильный размывал форму «С» на маленьком размере.
+func engravedIconMark(_ ctx: CGContext, haloAlpha: CGFloat) {
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 110, glowAlpha: haloAlpha,
+          sheen: false, groove: false)
+    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 30, glowAlpha: 0.9,
+          sheen: false, groove: true)
+}
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
 
@@ -159,16 +185,14 @@ func graphite(_ ctx: CGContext, dark: Bool) {
 do {
     let ctx = context(1024, 1024, opaque: true)
     graphite(ctx, dark: false)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 22, glowAlpha: 0.8,
-          sheen: false, groove: true)
+    engravedIconMark(ctx, haloAlpha: 0.55)
     save(ctx, "AppIcon-light.png")
 }
 // Тёмная: тот же графит, чуть глубже, свечение сильнее.
 do {
     let ctx = context(1024, 1024, opaque: true)
     graphite(ctx, dark: true)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 34, glowAlpha: 0.9,
-          sheen: false, groove: true)
+    engravedIconMark(ctx, haloAlpha: 0.7)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.

@@ -150,49 +150,141 @@ func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
 }
 
 let parts = [carbs, fat, protein]
-// На иконке цвета ярче и светлее, чем в приложении: фон там сам фиолетово-синий,
-// и дуги родных оттенков тонули в нём. Белок уходит к голубому, углеводы к
-// розово-сиреневому, жир к солнечному — каждая дуга отделяется от фона.
-// Неон: на графите чистые насыщенные цвета дают самый сильный контраст.
-let iconParts = [
-    Part(colors: [rgb(0xE562FF), rgb(0xBF00FF)], glow: rgb(0xCC33FF)),
-    Part(colors: [rgb(0xFFC800), rgb(0xFF6A00)], glow: rgb(0xFF8C00)),
-    Part(colors: [rgb(0x38DBFF), rgb(0x0070FF)], glow: rgb(0x12A0FF)),
-]
 
-/// Знак на графите: сперва широкий ореол — свет от дуг растекается по
-/// поверхности, — потом канавки с заливкой и тонким светом у кромки.
-/// Ореол умеренный: сильный размывал форму «С» на маленьком размере.
-func engravedIconMark(_ ctx: CGContext, haloAlpha: CGFloat) {
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 110, glowAlpha: haloAlpha,
-          sheen: false, groove: false)
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: iconParts, glow: 30, glowAlpha: 0.9,
-          sheen: false, groove: true)
-}
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
+/// Толщина «С» на иконке: 160 из 118/140/160/180. Тоньше знак выглядел
+/// второстепенным, толще короткая жировая дуга превращалась в пятно.
+/// Переопределяется ICON_WIDTH для подбора.
+let iconWidth: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_WIDTH"] ?? "160") ?? 160)
+/// Внешний край знака: крупно по полю иконки, чтобы толстая «С» не сжималась внутрь.
+let iconOuter = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_OUTER"] ?? "385") ?? 385)
+let iconRadius: CGFloat = iconOuter - iconWidth * 0.565
 
-// Графит — тот же материал, что карточки приложения: знак прорезан в
-// поверхности канавками, а заливка в них светится. Фон не декоративный
-// градиент, а поверхность, из которой сделан интерфейс.
-func graphite(_ ctx: CGContext, dark: Bool) {
-    linear(ctx, dark ? [rgb(0x0B0B0D), rgb(0x1C1C20)] : [rgb(0x141417), rgb(0x2E2E34)], [0, 1],
-           from: CGPoint(x: 0, y: 0), to: CGPoint(x: 0, y: S))
-    // Мягкий свет сверху, как на матовом металле.
-    radial(ctx, [gray(1, dark ? 0.05 : 0.08), gray(1, 0)], center: CGPoint(x: S * 0.5, y: S * 0.95), radius: S * 0.85)
+// MARK: - Иконка: «С», прорезанная в чёрном стекле
+//
+// Реалистично и серьёзно, но живым цветом. Стекло с зерном и косым отблеском,
+// один свет сверху-слева и виньетка. «С» прорезана тонко: у прорези тёмная
+// фаска сверху и светлая кромка снизу, внутри — утопленная эмаль, на которую
+// край бросает тень, с мягким бликом и лёгким свечением.
+
+/// Цвета эмали — живые, но не неон: неон на стекле выглядел игрушечно.
+let enamel: [[CGColor]] = [
+    [rgb(0xD67EFF), rgb(0xA93BF2)],
+    [rgb(0xFFBC42), rgb(0xFF8214)],
+    [rgb(0x5EB8FF), rgb(0x1C76FF)],
+]
+
+/// Середины трёх дуг «С» с долями как у кольца.
+func iconSpines() -> [CGPath] {
+    // Зазор от толщины: скруглённые концы толстой дуги съедали фиксированный
+    // зазор, и дуги слипались. Нужна ширина прорези плюс четверть толщины воздуха.
+    let gap = (iconWidth * 1.13 + iconWidth * 0.12) / iconRadius * 180 / .pi
+    let opening = max(72, gap * 1.9)
+    let top = 90 - rotation - opening / 2
+    let bottom = 90 - rotation + opening / 2 - 360
+    let available = top - bottom - gap * 2
+    var cursor = top
+    return (0..<3).map { i in
+        let end = cursor, start = end - available * weights[i]
+        cursor = start - gap
+        let arc = CGMutablePath()
+        arc.addArc(center: iconCenter, radius: iconRadius,
+                   startAngle: (90 - start) * .pi / 180, endAngle: (90 - end) * .pi / 180, clockwise: true)
+        return arc
+    }
+}
+
+func outline(_ spine: CGPath, _ width: CGFloat) -> CGPath {
+    spine.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
+}
+
+/// Тень внутрь фигуры: от края вглубь, со смещением.
+func innerShadow(_ ctx: CGContext, _ path: CGPath, dy: CGFloat, blur: CGFloat, alpha: CGFloat) {
+    ctx.saveGState()
+    ctx.addPath(path); ctx.clip()
+    ctx.setShadow(offset: CGSize(width: 0, height: dy), blur: blur, color: gray(0, alpha))
+    ctx.addRect(CGRect(x: -4000, y: -4000, width: 9000, height: 9000))
+    ctx.addPath(path)
+    ctx.setFillColor(gray(0, 1))
+    ctx.fillPath(using: .evenOdd)
+    ctx.restoreGState()
+}
+
+/// Зерно стекла. Фиксированный генератор — иначе каждый прогон давал бы другую иконку.
+func grain(strength: CGFloat) -> CGImage {
+    let n = Int(S)
+    var seed: UInt64 = 0x9E3779B97F4A7C15
+    var px = [UInt8](repeating: 0, count: n * n * 4)
+    for k in stride(from: 0, to: px.count, by: 4) {
+        seed = seed &* 6364136223846793005 &+ 1442695040888963407
+        let g = UInt8(truncatingIfNeeded: seed >> 56)
+        px[k] = g; px[k + 1] = g; px[k + 2] = g; px[k + 3] = UInt8(strength * 255)
+    }
+    return CGImage(width: n, height: n, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: n * 4,
+                   space: CGColorSpaceCreateDeviceRGB(),
+                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+                   provider: CGDataProvider(data: CFDataCreate(nil, px, px.count))!,
+                   decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
+}
+
+func blackGlass(_ ctx: CGContext) {
+    linear(ctx, [rgb(0x1A1A1E), rgb(0x050506)], [0, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
+    ctx.saveGState()
+    ctx.setBlendMode(.softLight)
+    ctx.draw(grain(strength: 0.06), in: CGRect(x: 0, y: 0, width: S, height: S))
+    ctx.restoreGState()
+    radial(ctx, [gray(1, 0.10), gray(1, 0)], center: CGPoint(x: S * 0.3, y: S), radius: S * 0.9)
+    ctx.drawRadialGradient(CGGradient(colorsSpace: space, colors: [gray(0, 0), gray(0, 0.45)] as CFArray, locations: [0.55, 1])!,
+                           startCenter: iconCenter, startRadius: 0, endCenter: iconCenter, endRadius: S * 0.75,
+                           options: [.drawsAfterEndLocation])
+}
+
+func engravedMark(_ ctx: CGContext, glow: CGFloat) {
+    let spines = iconSpines()
+    let cutScale: CGFloat = 1.13
+    let lip = iconWidth * (cutScale - 1) * 0.35
+    for spine in spines {
+        let cut = outline(spine, iconWidth * cutScale)
+        ctx.saveGState(); ctx.translateBy(x: 0, y: -lip)
+        ctx.addPath(cut); ctx.setFillColor(gray(1, 0.16)); ctx.fillPath()
+        ctx.restoreGState()
+        ctx.saveGState(); ctx.translateBy(x: 0, y: lip * 0.8)
+        ctx.addPath(cut); ctx.setFillColor(gray(0, 0.5)); ctx.fillPath()
+        ctx.restoreGState()
+        ctx.addPath(cut); ctx.setFillColor(rgb(0x050506)); ctx.fillPath()
+        innerShadow(ctx, cut, dy: -iconWidth * 0.06, blur: iconWidth * 0.10, alpha: 1)
+    }
+    for (index, spine) in spines.enumerated() {
+        let colors = enamel[index]
+        let fill = outline(spine, iconWidth)
+        ctx.saveGState()
+        ctx.setShadow(offset: .zero, blur: glow, color: colors[1].copy(alpha: 0.55)!)
+        ctx.addPath(fill); ctx.setFillColor(colors[1]); ctx.fillPath()
+        ctx.restoreGState()
+        ctx.saveGState(); ctx.addPath(fill); ctx.clip()
+        linear(ctx, colors, [0, 1], from: CGPoint(x: 0, y: iconCenter.y + iconRadius + iconWidth),
+               to: CGPoint(x: 0, y: iconCenter.y - iconRadius - iconWidth))
+        ctx.restoreGState()
+        innerShadow(ctx, fill, dy: -iconWidth * 0.06, blur: iconWidth * 0.09, alpha: 0.5)
+        ctx.saveGState(); ctx.addPath(fill); ctx.clip()
+        linear(ctx, [gray(1, 0.16), gray(1, 0)], [0, 1], from: CGPoint(x: 0, y: iconCenter.y + iconRadius + iconWidth),
+               to: CGPoint(x: 0, y: iconCenter.y))
+        ctx.restoreGState()
+    }
 }
 
 do {
     let ctx = context(1024, 1024, opaque: true)
-    graphite(ctx, dark: false)
-    engravedIconMark(ctx, haloAlpha: 0.55)
+    blackGlass(ctx)
+    engravedMark(ctx, glow: 34)
     save(ctx, "AppIcon-light.png")
 }
-// Тёмная: тот же графит, чуть глубже, свечение сильнее.
+// Тёмная: то же стекло, эмаль светится чуть сильнее.
 do {
     let ctx = context(1024, 1024, opaque: true)
-    graphite(ctx, dark: true)
-    engravedIconMark(ctx, haloAlpha: 0.7)
+    blackGlass(ctx)
+    engravedMark(ctx, glow: 46)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.
@@ -205,8 +297,8 @@ do {
 }
 
 // Лаунч-скрин: одна «С», без названия, того же размера и толщины, что кольцо
-// на «Сегодня» (230 pt, дуга 18 pt), прорезанная в графите, как на иконке.
-// Фон — сплошной графит из LaunchBackground (градиент лаунч-скрин не умеет). Следом её сменяет такая же анимированная (SplashView).
+// на «Сегодня» (230 pt, дуга 18 pt), прорезанная в чёрном стекле эмалью иконки.
+// Фон — сплошное чёрное стекло из LaunchBackground (градиент лаунч-скрин не умеет). Следом её сменяет такая же анимированная (SplashView).
 // 270×270 pt: знак 230 pt в поперечнике, остальное — поле под свечение.
 func launch(scale: CGFloat, dark: Bool, name: String) {
     let side = 270 * scale
@@ -214,7 +306,8 @@ func launch(scale: CGFloat, dark: Bool, name: String) {
     let diameter = 230 * scale
     let width = 18 * scale
     drawC(ctx, center: CGPoint(x: side / 2, y: side / 2), radius: (diameter - width) / 2, width: width,
-          parts: parts, glow: width * 0.6, glowAlpha: 0.35, sheen: false, opening: 60, gap: 16, groove: true)
+          parts: enamel.map { Part(colors: $0, glow: $0[1]) }, glow: width * 0.6, glowAlpha: 0.4,
+          sheen: false, opening: 60, gap: 16, groove: true)
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {

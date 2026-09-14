@@ -14,9 +14,9 @@ enum WidgetPalette {
     static let carbs = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
     static let steps = [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
 
-    /// Графит — материал иконки: знак прорезан в поверхности, свет сверху.
+    /// Чёрное стекло — материал иконки: знак прорезан в поверхности, свет сверху.
     static var graphite: LinearGradient {
-        LinearGradient(colors: [Color(hex: 0x2E2E34), Color(hex: 0x141417)],
+        LinearGradient(colors: [Color(hex: 0x1F1F24), Color(hex: 0x060607)],
                        startPoint: .top, endPoint: .bottom)
     }
 }

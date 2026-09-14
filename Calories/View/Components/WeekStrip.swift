@@ -18,7 +18,7 @@ struct WeekStrip: View {
     private let calendar = Calendar.current
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 0) {
                 ForEach(days, id: \.date) { day in
                     dayCell(day)
@@ -26,8 +26,8 @@ struct WeekStrip: View {
                 }
                 Button(action: onShowAll) {
                     Image(systemName: "calendar")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
                         .frame(width: 34, height: 44)
                 }
                 .buttonStyle(.plain)
@@ -43,29 +43,29 @@ struct WeekStrip: View {
         }
     }
 
+    /// Тихо, как шапка недели в Календаре: цвет — только точка под числом.
+    /// Залитые кружки над кольцом давали ряд из семи цветных пятен тех же
+    /// зелёного и оранжевого, что в кольце, и спорили с ним за внимание.
     private func dayCell(_ day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> some View {
         let isToday = calendar.isDateInToday(day.date)
-        let fill: Color = day.onGoal ? .green : (day.hasEntries ? .orange : .clear)
+        let dot: Color = day.onGoal ? .green : (day.hasEntries ? .orange : .clear)
         return Button {
             onSelect(day.date)
         } label: {
-            VStack(spacing: 3) {
+            VStack(spacing: 2) {
                 Text(day.date.formatted(.dateTime.weekday(.narrow)))
                     .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                Text(verbatim: "\(calendar.component(.day, from: day.date))")
+                    .font(.subheadline.weight(isToday ? .bold : .regular))
+                    .monospacedDigit()
                     .foregroundStyle(isToday ? .primary : .secondary)
-                ZStack {
-                    Circle()
-                        .fill(day.hasEntries ? AnyShapeStyle(fill.opacity(0.22)) : AnyShapeStyle(.channel(thickness: 6)))
-                    if isToday {
-                        Circle().strokeBorder(Color.primary.opacity(0.6), lineWidth: 1.5)
-                    }
-                    Text(verbatim: "\(calendar.component(.day, from: day.date))")
-                        .font(.caption.weight(isToday ? .bold : .medium))
-                        .monospacedDigit()
-                        .foregroundStyle(day.hasEntries ? fill : .secondary)
-                }
-                .frame(width: 32, height: 32)
+                Circle()
+                    .fill(dot)
+                    .frame(width: 5, height: 5)
             }
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         // Сегодняшний день и так на экране.

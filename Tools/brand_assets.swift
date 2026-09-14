@@ -153,10 +153,10 @@ let parts = [carbs, fat, protein]
 
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
-/// Толщина «С» на иконке: 160 из 118/140/160/180. Тоньше знак выглядел
+/// Толщина «С» на иконке: 148 — между 140 и 160 (160 оказалось жирновато). Тоньше знак выглядел
 /// второстепенным, толще короткая жировая дуга превращалась в пятно.
 /// Переопределяется ICON_WIDTH для подбора.
-let iconWidth: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_WIDTH"] ?? "160") ?? 160)
+let iconWidth: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_WIDTH"] ?? "148") ?? 148)
 /// Внешний край знака: крупно по полю иконки, чтобы толстая «С» не сжималась внутрь.
 let iconOuter = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_OUTER"] ?? "385") ?? 385)
 let iconRadius: CGFloat = iconOuter - iconWidth * 0.565
@@ -169,14 +169,16 @@ let iconRadius: CGFloat = iconOuter - iconWidth * 0.565
 // край бросает тень, с мягким бликом и лёгким свечением.
 
 /// Цвета эмали — живые, но не неон: неон на стекле выглядел игрушечно.
+/// Пара — светлая и глубокая сторона одной дуги: градиент даёт объём и глубину.
 let enamel: [[CGColor]] = [
-    [rgb(0xD67EFF), rgb(0xA93BF2)],
-    [rgb(0xFFBC42), rgb(0xFF8214)],
-    [rgb(0x5EB8FF), rgb(0x1C76FF)],
+    [rgb(0xDA8CFF), rgb(0x8318DC)],
+    [rgb(0xFFC23A), rgb(0xEE5C00)],
+    [rgb(0x6EC6FF), rgb(0x0A52DA)],
 ]
 
 /// Середины трёх дуг «С» с долями как у кольца.
-func iconSpines() -> [CGPath] {
+func iconSpines(width iconWidth: CGFloat = iconWidth) -> [CGPath] {
+    let iconRadius = iconOuter - iconWidth * 0.565
     // Зазор от толщины: скруглённые концы толстой дуги съедали фиксированный
     // зазор, и дуги слипались. Нужна ширина прорези плюс четверть толщины воздуха.
     let gap = (iconWidth * 1.13 + iconWidth * 0.12) / iconRadius * 180 / .pi
@@ -240,8 +242,9 @@ func blackGlass(_ ctx: CGContext) {
                            options: [.drawsAfterEndLocation])
 }
 
-func engravedMark(_ ctx: CGContext, glow: CGFloat) {
-    let spines = iconSpines()
+func engravedMark(_ ctx: CGContext, glow: CGFloat, width iconWidth: CGFloat = iconWidth) {
+    let iconRadius = iconOuter - iconWidth * 0.565
+    let spines = iconSpines(width: iconWidth)
     let cutScale: CGFloat = 1.13
     let lip = iconWidth * (cutScale - 1) * 0.35
     for spine in spines {
@@ -263,8 +266,12 @@ func engravedMark(_ ctx: CGContext, glow: CGFloat) {
         ctx.addPath(fill); ctx.setFillColor(colors[1]); ctx.fillPath()
         ctx.restoreGState()
         ctx.saveGState(); ctx.addPath(fill); ctx.clip()
-        linear(ctx, colors, [0, 1], from: CGPoint(x: 0, y: iconCenter.y + iconRadius + iconWidth),
-               to: CGPoint(x: 0, y: iconCenter.y - iconRadius - iconWidth))
+        // Один свет на всю иконку — сверху-слева: светлая сторона у всех дуг
+        // смотрит туда же, куда падает свет на стекло. Вдоль самой дуги
+        // светлые концы смотрели в разные стороны, и это читалось как случайность.
+        let bounds = spine.boundingBoxOfPath.insetBy(dx: -iconWidth / 2, dy: -iconWidth / 2)
+        linear(ctx, colors, [0, 1], from: CGPoint(x: bounds.minX, y: bounds.maxY),
+               to: CGPoint(x: bounds.maxX, y: bounds.minY))
         ctx.restoreGState()
         innerShadow(ctx, fill, dy: -iconWidth * 0.06, blur: iconWidth * 0.09, alpha: 0.5)
         ctx.saveGState(); ctx.addPath(fill); ctx.clip()
@@ -296,18 +303,21 @@ do {
     save(ctx, "AppIcon-tinted.png")
 }
 
-// Лаунч-скрин: одна «С», без названия, того же размера и толщины, что кольцо
-// на «Сегодня» (230 pt, дуга 18 pt), прорезанная в чёрном стекле эмалью иконки.
-// Фон — сплошное чёрное стекло из LaunchBackground (градиент лаунч-скрин не умеет). Следом её сменяет такая же анимированная (SplashView).
-// 270×270 pt: знак 230 pt в поперечнике, остальное — поле под свечение.
+// Лаунч-скрин: та же «С», что на иконке, — прорезь, эмаль, свет сверху-слева, —
+// размером с кольцо «Сегодня» (230 pt), но тоньше иконки: 100 из 148 её единиц,
+// около 30 pt. Как на иконке целиком было тяжело на весь экран, как кольцо —
+// скачок толщины после иконки. Фон — LaunchBackground, заставка (SplashView)
+// продолжает этот кадр тем же знаком.
+let launchMarkWidth: CGFloat = 100
+
 func launch(scale: CGFloat, dark: Bool, name: String) {
     let side = 270 * scale
     let ctx = context(Int(side), Int(side), opaque: false)
-    let diameter = 230 * scale
-    let width = 18 * scale
-    drawC(ctx, center: CGPoint(x: side / 2, y: side / 2), radius: (diameter - width) / 2, width: width,
-          parts: enamel.map { Part(colors: $0, glow: $0[1]) }, glow: width * 0.6, glowAlpha: 0.4,
-          sheen: false, opening: 60, gap: 16, groove: true)
+    let factor = (230 * scale) / (2 * iconOuter)
+    ctx.translateBy(x: side / 2, y: side / 2)
+    ctx.scaleBy(x: factor, y: factor)
+    ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
+    engravedMark(ctx, glow: 34, width: launchMarkWidth)
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {

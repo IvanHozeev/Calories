@@ -14,10 +14,19 @@ enum WidgetPalette {
     static let carbs = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
     static let steps = [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
 
-    /// Чёрное стекло — материал иконки: знак прорезан в поверхности, свет сверху.
-    static var graphite: LinearGradient {
-        LinearGradient(colors: [Color(hex: 0x1F1F24), Color(hex: 0x060607)],
+    /// Поле виджета — как у иконки: белое, чуть сереющее книзу, а в тёмной
+    /// теме почти чёрное. Графит под «С» в чёрном стекле ушёл вместе с ней:
+    /// рядом со светлой иконкой тёмный виджет выглядел чужим.
+    static var surface: LinearGradient {
+        LinearGradient(colors: [dynamic(light: 0xFFFFFF, dark: 0x1C1C1F),
+                                dynamic(light: 0xF1F3F7, dark: 0x0A0A0B)],
                        startPoint: .top, endPoint: .bottom)
+    }
+
+    private static func dynamic(light: UInt32, dark: UInt32) -> Color {
+        Color(uiColor: UIColor { traits in
+            UIColor(Color(hex: traits.userInterfaceStyle == .dark ? dark : light))
+        })
     }
 }
 

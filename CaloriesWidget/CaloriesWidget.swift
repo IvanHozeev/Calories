@@ -156,12 +156,12 @@ struct CaloriesWidgetEntryView: View {
                 Text(verbatim: "\(entry.remaining)")
                     .font(.system(size: number, weight: .bold))
                     .monospacedDigit()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                 Text("Остаток")
                     .font(.system(size: number * 0.38))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.secondary)
             }
             .padding(lineWidth * 1.6)
         }
@@ -170,7 +170,7 @@ struct CaloriesWidgetEntryView: View {
     private var smallView: some View {
         ringWithRemaining(lineWidth: 11, number: 26)
             .padding(-2)
-            .containerBackground(for: .widget) { WidgetPalette.graphite }
+            .containerBackground(for: .widget) { WidgetPalette.surface }
     }
 
     private var mediumView: some View {
@@ -187,7 +187,7 @@ struct CaloriesWidgetEntryView: View {
             }
             Spacer(minLength: 0)
         }
-        .containerBackground(for: .widget) { WidgetPalette.graphite }
+        .containerBackground(for: .widget) { WidgetPalette.surface }
     }
 
     /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
@@ -202,12 +202,12 @@ struct CaloriesWidgetEntryView: View {
                 Text(verbatim: "\(Int(value.rounded()))")
                     .font(.system(size: 14, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                 if target > 0 {
                     Text(verbatim: "/ \(Int(target.rounded()))")
                         .font(.system(size: 11))
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.tertiary)
                 }
             }
             WidgetBar(share: target > 0 ? min(value / target, 1) : 0, color: color)
@@ -274,9 +274,9 @@ struct StepsWidgetEntryView: View {
     @Environment(\.widgetRenderingMode) var renderingMode
 
     private let ringColors: [Color] = WidgetPalette.steps
-    /// Графит, как у иконки и кольца калорий: виджеты одного приложения
-    /// не должны быть разноцветными плашками.
-    private var bg: LinearGradient { WidgetPalette.graphite }
+    /// То же поле, что у остальных виджетов и иконки: виджеты одного
+    /// приложения не должны быть разноцветными плашками.
+    private var bg: LinearGradient { WidgetPalette.surface }
 
     private var stepsSegment: [WidgetRingSegment] {
         [WidgetRingSegment(id: "steps", start: 0, end: 359.9, progress: entry.progress, colors: ringColors)]
@@ -341,11 +341,11 @@ struct StepsWidgetEntryView: View {
                 Text(entry.steps.formatted())
                     .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
                 Text("шагов")
                     .font(.system(size: 11))
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.secondary)
             }
         }
         .containerBackground(for: .widget) { bg }
@@ -360,11 +360,11 @@ struct StepsWidgetEntryView: View {
                     Text(entry.steps.formatted())
                         .font(.system(size: 20, weight: .bold))
                         .monospacedDigit()
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.primary)
                         .minimumScaleFactor(0.5)
                     Text("шагов")
                         .font(.system(size: 9))
-                        .foregroundStyle(.white.opacity(0.5))
+                        .foregroundStyle(.secondary)
                 }
             }
             .frame(width: 88, height: 88)
@@ -372,7 +372,7 @@ struct StepsWidgetEntryView: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text("Шаги")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .padding(.bottom, 8)
 
                 statRow(label: "Пройдено", value: entry.steps.formatted())
@@ -402,12 +402,12 @@ struct StepsWidgetEntryView: View {
         HStack {
             Text(label)
                 .font(.system(size: 11))
-                .foregroundStyle(.white.opacity(0.4))
+                .foregroundStyle(.tertiary)
             Spacer()
             Text(value)
                 .font(.system(size: 11, weight: .semibold))
                 .monospacedDigit()
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
         }
     }
 }
@@ -478,7 +478,7 @@ struct MacrosWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     @Environment(\.widgetRenderingMode) var renderingMode
 
-    private var bg: LinearGradient { WidgetPalette.graphite }
+    private var bg: LinearGradient { WidgetPalette.surface }
 
     private struct Macro {
         /// Ключ для `ForEach` — русская буква как она записана в коде.
@@ -531,13 +531,13 @@ struct MacrosWidgetEntryView: View {
                 Text(verbatim: "\(Int(entry.protein.rounded()))")
                     .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
                 if entry.proteinTarget > 0 {
                     Text(verbatim: "/ \(Int(entry.proteinTarget.rounded()))")
                         .font(.system(size: 11))
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.tertiary)
                 }
                 Text("Б")
                     .font(.system(size: 11, weight: .bold))
@@ -569,12 +569,12 @@ struct MacrosWidgetEntryView: View {
                     .foregroundStyle(macro.color)
                 Text(verbatim: "\(Int(macro.value.rounded()))")
                     .font(.callout.weight(.semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.primary)
                     .monospacedDigit()
                 if macro.hasTarget {
                     Text(verbatim: "/ \(Int(macro.target.rounded()))")
                         .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.4))
+                        .foregroundStyle(.tertiary)
                         .monospacedDigit()
                 }
                 Spacer(minLength: 0)

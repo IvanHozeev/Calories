@@ -500,6 +500,11 @@ struct BodyView: View {
                 macroBudgetSection(draftProfile)
             }
 
+
+            Section {
+                BrandFooter()
+                    .brandFooterRow()
+            }
         }
         .glassRow()
         .listStyle(.insetGrouped)

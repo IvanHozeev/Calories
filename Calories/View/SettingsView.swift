@@ -198,6 +198,11 @@ struct SettingsView: View {
                 }
             }
 #endif
+
+            Section {
+                BrandFooter(showsVersion: true)
+                    .brandFooterRow()
+            }
         }
         .glassRow()
         .listStyle(.insetGrouped)

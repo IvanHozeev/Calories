@@ -619,7 +619,11 @@ struct CalorieStoreTests {
     }
 
     @Test func trialSummary_countsLoggedDaysWithinTheTrial() {
-        let start = Date().addingTimeInterval(-15 * 86_400)
+        // От полудня: иначе поздно вечером запись «через час» уезжала на
+        // следующие сутки, и тест насчитывал три дня вместо двух.
+        let calendar = Calendar.current
+        let start = calendar.date(byAdding: .hour, value: 12,
+                                  to: calendar.startOfDay(for: Date().addingTimeInterval(-15 * 86_400)))!
         store.startTrialIfNeeded(now: start)
         store.add(name: "A", calories: 500, date: start.addingTimeInterval(86_400))
         store.add(name: "B", calories: 500, date: start.addingTimeInterval(2 * 86_400))
@@ -3406,5 +3410,23 @@ struct RingTicksTests {
 
     @Test func turnFromMidway_startsAtTheNextNotch() {
         #expect(RingTicks.crossingTimes(from: 45, to: 360).count == 11)
+    }
+
+    /// По умолчанию — прежний звук колеса, чтобы у тех, кто не заходил
+    /// в настройки, ничего не поменялось.
+    @Test func ringSound_defaultsToTheWheel() {
+        let saved = UserDefaults.standard.string(forKey: RingSound.defaultsKey)
+        defer { UserDefaults.standard.set(saved, forKey: RingSound.defaultsKey) }
+        UserDefaults.standard.removeObject(forKey: RingSound.defaultsKey)
+        #expect(RingSound.current == .wheel)
+        #expect(RingSound.wheel.soundID == 1157)
+    }
+
+    /// «Без звука» действительно без звука, а у остальных звуки разные.
+    @Test func ringSound_offIsSilentAndOthersDiffer() {
+        #expect(RingSound.off.soundID == nil)
+        let ids = RingSound.allCases.compactMap(\.soundID)
+        #expect(ids.count == RingSound.allCases.count - 1)
+        #expect(Set(ids).count == ids.count)
     }
 }

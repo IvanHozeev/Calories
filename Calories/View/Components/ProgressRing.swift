@@ -291,10 +291,6 @@ enum RingTicks {
     private static let c1 = (x: 0.4, y: 0.0)
     private static let c2 = (x: 0.2, y: 1.0)
 
-    /// Системный звук щелчка колеса выбора — тот же, что у барабанов даты.
-    /// Как и все системные звуки, молчит при выключенном звонке.
-    private static let clickSound: SystemSoundID = 1157
-
     /// Звук идёт со своей очереди: запущенный с главной, он стопорил кадры
     /// анимации, и оборот подлагивал на каждом щелчке.
     private static let soundQueue = DispatchQueue(label: "calories.ring.click", qos: .userInteractive)
@@ -307,7 +303,8 @@ enum RingTicks {
     /// сам щёлкал — и через динамик под звуком колеса был слышен второй, тихий
     /// звук, будто каждый щелчок двоится.
     @MainActor static func tick() {
-        soundQueue.async { AudioServicesPlaySystemSound(clickSound) }
+        guard let sound = RingSound.current.soundID else { return }
+        soundQueue.async { AudioServicesPlaySystemSound(sound) }
     }
 
     /// Щелчки на пути от угла к углу за время оборота.
@@ -316,11 +313,11 @@ enum RingTicks {
     /// отсчёта. Цепочка задержек на главном потоке набегала и уводила щелчки
     /// от кольца.
     @MainActor static func play(from start: Double, to end: Double) {
-        guard end > start else { return }
+        guard end > start, let sound = RingSound.current.soundID else { return }
         let times = crossingTimes(from: start, to: end)
         let origin = DispatchTime.now()
         for time in times {
-            soundQueue.asyncAfter(deadline: origin + time) { AudioServicesPlaySystemSound(clickSound) }
+            soundQueue.asyncAfter(deadline: origin + time) { AudioServicesPlaySystemSound(sound) }
         }
     }
 
@@ -344,6 +341,45 @@ enum RingTicks {
     private static func bezier(_ t: Double, _ p1: Double, _ p2: Double) -> Double {
         let u = 1 - t
         return 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t
+    }
+}
+
+/// Звук щелчков кольца — на выбор в настройках.
+///
+/// Системные звуки: у приложения нет своих файлов, а системные звучат так же,
+/// как клавиатура и барабаны даты, и, как все системные, молчат при
+/// выключенном звонке.
+enum RingSound: String, CaseIterable, Identifiable {
+    case wheel, click, tock, tink, off
+
+    static let defaultsKey = "ring_sound"
+
+    var id: String { rawValue }
+
+    /// Выбранный звук. Читается при каждом обороте, а не держится в памяти:
+    /// выбор в настройках действует сразу.
+    static var current: RingSound {
+        UserDefaults.standard.string(forKey: defaultsKey).flatMap(RingSound.init(rawValue:)) ?? .wheel
+    }
+
+    var title: String {
+        switch self {
+        case .wheel: return String(localized: "Колесо")
+        case .click: return String(localized: "Щелчок")
+        case .tock:  return String(localized: "Тук")
+        case .tink:  return String(localized: "Динь")
+        case .off:   return String(localized: "Без звука")
+        }
+    }
+
+    var soundID: SystemSoundID? {
+        switch self {
+        case .wheel: return 1157 // барабан выбора даты
+        case .click: return 1104 // клавиша клавиатуры
+        case .tock:  return 1105 // «ток» клавиатуры
+        case .tink:  return 1103 // «тинь»
+        case .off:   return nil
+        }
     }
 }
 

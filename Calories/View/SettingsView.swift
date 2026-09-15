@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
+    @AppStorage(RingSound.defaultsKey) private var ringSound = RingSound.wheel.rawValue
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -128,6 +129,17 @@ struct SettingsView: View {
                 } label: {
                     Label("Единицы измерения", systemImage: "globe")
                 }
+                NavigationLink {
+                    RingSoundSettingsView()
+                } label: {
+                    HStack {
+                        Label("Звук кольца", systemImage: "speaker.wave.2")
+                        Spacer()
+                        Text(verbatim: (RingSound(rawValue: ringSound) ?? .wheel).title)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .accessibilityIdentifier("openRingSound")
                 NavigationLink {
                     RemindersView()
                 } label: {
@@ -268,6 +280,43 @@ struct SettingsView: View {
         .sheet(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
         }
+    }
+}
+
+/// Выбор звука щелчков кольца. Нажатие на вариант сразу проигрывает
+/// короткий оборот — выбирать звук по названию бессмысленно.
+private struct RingSoundSettingsView: View {
+    @AppStorage(RingSound.defaultsKey) private var selected = RingSound.wheel.rawValue
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(RingSound.allCases) { sound in
+                    Button {
+                        selected = sound.rawValue
+                        RingTicks.play(from: 0, to: 150)
+                    } label: {
+                        HStack {
+                            Text(verbatim: sound.title)
+                                .foregroundStyle(Color.primary)
+                            Spacer()
+                            if selected == sound.rawValue {
+                                Image(systemName: "checkmark")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.tint)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                }
+            } footer: {
+                Text("Щелчки, когда тянешь «Сегодня» или «Шаги» вниз. Как и все системные звуки, молчат при выключенном звонке.")
+            }
+        }
+        .glassRow()
+        .listStyle(.insetGrouped)
+        .navigationTitle("Звук кольца")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

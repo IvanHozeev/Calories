@@ -3,9 +3,9 @@ import SwiftUI
 /// Знак приложения: незамкнутое кольцо из трёх дуг — углеводы, жиры, белки.
 ///
 /// Тот же, что на иконке и лаунч-скрине (Tools/brand_assets.swift): доли дуг
-/// как у типичной сушки, разрыв повёрнут на 40° против часовой, эмаль с
-/// градиентом от света сверху-слева. Толщина — как на лаунч-скрине: 100 единиц
-/// при внешнем радиусе 385, зазоры считаются от толщины так же, как там. Иначе
+/// как у типичной сушки, разрыв повёрнут на 40° против часовой, плоские дуги
+/// цветами кольца «Сегодня». Толщина — как на лаунч-скрине: 90 единиц при
+/// внешнем радиусе 372, зазоры считаются от толщины так же, как там. Иначе
 /// заставка, которая продолжает лаунч-скрин, на первом кадре бы от него отличалась.
 ///
 /// С `animated` знак живёт по кругу: дуги заполняются, знак прокручивается,
@@ -13,20 +13,14 @@ import SwiftUI
 /// (пустое кольцо, поворот на полный оборот), поэтому шов не виден.
 struct BrandMark: View {
     var animated = false
-    /// Дуги в канавках, как на иконке и лаунч-скрине: для тёмного фона.
-    var engraved = false
 
     /// Углеводы, жиры, белки — граммы типичной сушки на 80 кг.
     private static let grams: [Double] = [250, 64, 160]
-    /// Светлая и глубокая сторона эмали — те же, что на иконке.
-    private static let colors: [[Color]] = [
-        [Color(hex: 0xDA8CFF), Color(hex: 0x8318DC)],
-        [Color(hex: 0xFFC23A), Color(hex: 0xEE5C00)],
-        [Color(hex: 0x6EC6FF), Color(hex: 0x0A52DA)],
-    ]
+    /// Цвета дуг кольца «Сегодня» — те же, что на иконке.
+    private static let colors: [[Color]] = [ProgressRing.carbColors, ProgressRing.fatColors, ProgressRing.proteinColors]
     private static let rotation: Double = 40
     /// Толщина к внешнему радиусу — как на лаунч-скрине.
-    private static let widthToOuterRadius: Double = 100.0 / 385.0
+    private static let widthToOuterRadius: Double = 90.0 / 372.0
 
     private struct Arc: Identifiable {
         let id: Int
@@ -38,7 +32,7 @@ struct BrandMark: View {
     /// `radiusInWidths` — радиус середины дуги в толщинах дуги.
     private static func arcs(radiusInWidths: Double) -> [Arc] {
         // Зазор от толщины: скруглённые концы толстой дуги съедают фиксированный зазор.
-        let gap = (1.13 + 0.12) / radiusInWidths * 180 / .pi
+        let gap = 1.25 / radiusInWidths * 180 / .pi
         let opening = max(72, gap * 1.9)
         let top = 90 - rotation - opening / 2
         let available = 360 - opening - gap * Double(grams.count - 1)
@@ -89,28 +83,22 @@ struct BrandMark: View {
     }
 
     private func mark(side: CGFloat, lineWidth: CGFloat, from: Double, to: Double) -> some View {
-        // Внешний край прорези — по краю рамки, как на лаунч-скрине.
-        let inset = lineWidth * 0.565
+        // Внешний край дуги — по краю рамки, как на лаунч-скрине.
+        let inset = lineWidth / 2
         let radius = side / 2 - inset
         let arcs = Self.arcs(radiusInWidths: radius / lineWidth)
         return ZStack {
             ForEach(arcs) { arc in
-                if engraved {
-                    MarkArc(start: arc.start, end: arc.end)
-                        .stroke(.channel(thickness: lineWidth * 1.13),
-                                style: StrokeStyle(lineWidth: lineWidth * 1.13, lineCap: .round))
-                }
                 MarkArc(start: arc.start, end: arc.end)
                     .trim(from: from, to: to)
                     .stroke(Self.gradient(for: arc, radius: radius, lineWidth: lineWidth, inset: inset, side: side),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    .shadow(color: Self.colors[arc.id][1].opacity(0.45), radius: lineWidth * 0.17)
             }
         }
         .padding(inset)
     }
 
-    /// Градиент от света сверху-слева в границах самой дуги, как на иконке.
+    /// Градиент по диагонали в границах самой дуги, как на иконке.
     private static func gradient(for arc: Arc, radius: CGFloat, lineWidth: CGFloat, inset: CGFloat, side: CGFloat) -> LinearGradient {
         var minX = CGFloat.infinity, minY = CGFloat.infinity, maxX = -CGFloat.infinity, maxY = -CGFloat.infinity
         let steps = 24
@@ -163,15 +151,13 @@ struct SplashView: View {
         ZStack {
             Color("LaunchBackground")
                 .opacity(dissolving ? 0 : 1)
-            BrandMark(engraved: true)
+            BrandMark()
                 .frame(width: 230, height: 230)
                 .rotationEffect(.degrees(turn))
                 .scaleEffect(dissolving ? 1.12 : 1)
                 .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
-        // Графит тёмный в любой теме телефона — и канавка должна быть тёмной.
-        .environment(\.colorScheme, .dark)
         .task {
             withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
                 turn = 360

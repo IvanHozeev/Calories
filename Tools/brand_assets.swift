@@ -1,16 +1,21 @@
 import Foundation
 import AppKit
 import CoreGraphics
-import CoreText
 import ImageIO
 import UniformTypeIdentifiers
 
-// Знак Calories: «С» из трёх дуг — белки, жиры, углеводы. Незамкнутое кольцо макросов.
-// Генерирует иконку (обычная, тёмная, tinted) и логотип лаунч-скрина (светлый и тёмный).
+// Знак Calories: «С» из трёх дуг — углеводы, жиры, белки. Незамкнутое кольцо макросов.
+// Генерирует иконку (светлая, тёмная, tinted), логотип лаунч-скрина и иконку
+// вкладки «Сегодня».
 //
 // Запуск из корня репозитория:
 //   mkdir -p /tmp/brand && swift Tools/brand_assets.swift /tmp/brand
-// Потом файлы разложить по Calories/Assets.xcassets/AppIcon.appiconset и LaunchLogo.imageset.
+// Потом файлы разложить по Calories/Assets.xcassets: AppIcon.appiconset,
+// LaunchLogo.imageset и TodayTab.imageset.
+//
+// Вайб — лёгкость и свежесть: плоские дуги цветами кольца «Сегодня» на светлом
+// поле, без стекла, канавок и свечения. Прежний знак, прорезанный в чёрном
+// стекле, спорил с приложением, которое стало светлым и тихим.
 
 let out = URL(fileURLWithPath: CommandLine.arguments[1])
 let space = CGColorSpace(name: CGColorSpace.displayP3)!
@@ -21,11 +26,9 @@ func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
 }
 func gray(_ v: CGFloat, _ a: CGFloat = 1) -> CGColor { CGColor(colorSpace: space, components: [v, v, v, a])! }
 
-/// Рисуем в 16 битах на канал: свечение и градиенты на тёмном графите в
-/// 8 битах расходились ступенями-кольцами. Сохраняется уже в 8 бит — одним
-/// переводом в конце ступеней почти не остаётся, в отличие от накопления на
-/// каждом полупрозрачном слое.
-func context(_ w: Int, _ h: Int, opaque: Bool) -> CGContext {
+/// Рисуем в 16 битах на канал: плавные градиенты фона в 8 битах расходились
+/// ступенями. Сохраняется уже в 8 бит одним переводом в конце.
+func context(_ w: Int, _ h: Int) -> CGContext {
     CGContext(data: nil, width: w, height: h, bitsPerComponent: 16, bytesPerRow: 0, space: space,
               bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder16Little.rawValue)!
 }
@@ -40,158 +43,47 @@ func flatten(_ image: CGImage, opaque: Bool) -> CGImage {
     return ctx.makeImage()!
 }
 
-func linear(_ ctx: CGContext, _ colors: [CGColor], _ loc: [CGFloat], from: CGPoint, to: CGPoint) {
-    ctx.drawLinearGradient(CGGradient(colorsSpace: space, colors: colors as CFArray, locations: loc)!,
-                           start: from, end: to, options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
-}
-func radial(_ ctx: CGContext, _ colors: [CGColor], center: CGPoint, radius: CGFloat) {
-    ctx.drawRadialGradient(CGGradient(colorsSpace: space, colors: colors as CFArray, locations: [0, 1])!,
-                           startCenter: center, startRadius: 0, endCenter: center, endRadius: radius, options: [])
-}
-
 func save(_ ctx: CGContext, _ name: String) {
     let dest = CGImageDestinationCreateWithURL(out.appendingPathComponent(name) as CFURL, UTType.png.identifier as CFString, 1, nil)!
-    let image = ctx.makeImage()!
-    CGImageDestinationAddImage(dest, flatten(image, opaque: name.hasPrefix("AppIcon")), nil)
+    CGImageDestinationAddImage(dest, flatten(ctx.makeImage()!, opaque: name.hasPrefix("AppIcon")), nil)
     CGImageDestinationFinalize(dest)
 }
 
-struct Part { let colors: [CGColor]; let glow: CGColor }
-// Пары цветов близкие: цвет почти однотонный, объём даёт светотень, а не градиент.
-let protein = Part(colors: [rgb(0x4C9BFF), rgb(0x2F7BFF)], glow: rgb(0x2F7BFF))
-let fat = Part(colors: [rgb(0xFFA23D), rgb(0xFF8A1F)], glow: rgb(0xFF8A1F))
-let carbs = Part(colors: [rgb(0xB85CFF), rgb(0xA63BFF)], glow: rgb(0xA63BFF))
-
-/// Рисует «С» с центром и радиусом. Углы — от 12 часов по часовой.
-/// Доли дуг как у кольца на «Сегодня» при типичной сушке на 80 кг:
-/// углеводы 250 г, жиры 64 г, белки 160 г. Порядок тот же, что на кольце:
-/// сверху вниз против часовой — углеводы, жиры, белки.
-let grams: [CGFloat] = [250, 64, 160]
-/// Поворот знака против часовой, в градусах.
-/// 40° подобраны из 0/25/40/55: разрыв по диагонали вверх-вправо, знак ещё
-/// читается кольцом, но уже не буквой. Переопределяется BRAND_ROTATION.
-let rotation: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["BRAND_ROTATION"] ?? "40") ?? 40)
-let weights = grams.map { $0 / grams.reduce(0, +) }
-
-func drawC(_ ctx: CGContext, center: CGPoint, radius: CGFloat, width: CGFloat,
-           parts: [Part], glow: CGFloat, glowAlpha: CGFloat, grayscale: [CGFloat]? = nil, sheen: Bool = true,
-           opening: CGFloat = 80, gap: CGFloat = 26, groove: Bool = false) {
-    // Разрыв смотрит не прямо вправо, а повёрнут против часовой: так знак
-    // читается скорее как полумесяц кольца, чем как буква «С».
-    let top = 90 - rotation - opening / 2
-    let bottom = 90 - rotation + opening / 2 - 360
-    let available = top - bottom - gap * CGFloat(parts.count - 1)
-    var cursor = top
-    for (i, part) in parts.enumerated() {
-        let share = available * weights[i]
-        let end = cursor
-        let start = end - share
-        cursor = start - gap
-        let a0 = (90 - start) * .pi / 180, a1 = (90 - end) * .pi / 180
-        let arc = CGMutablePath()
-        arc.addArc(center: center, radius: radius, startAngle: a0, endAngle: a1, clockwise: true)
-        let path = arc.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
-        let colors = grayscale.map { [gray($0[i]), gray($0[i] * 0.8)] } ?? part.colors
-        if groove {
-            // Канавка, прорезанная в графите: шире дуги, тёмное дно, внутренняя
-            // тень от верхней стенки, а свет ловит только нижняя кромка —
-            // как у колец и полос в приложении.
-            let cut = arc.copy(strokingWithWidth: width * 1.24, lineCap: .round, lineJoin: .round, miterLimit: 10)
-            ctx.saveGState()
-            ctx.translateBy(x: 0, y: -width * 0.035)
-            ctx.addPath(cut); ctx.setFillColor(gray(1, 0.10)); ctx.fillPath()
-            ctx.restoreGState()
-            ctx.saveGState()
-            ctx.addPath(cut); ctx.setFillColor(rgb(0x050506)); ctx.fillPath()
-            ctx.restoreGState()
-            ctx.saveGState()
-            ctx.addPath(cut); ctx.clip()
-            ctx.setShadow(offset: CGSize(width: 0, height: -width * 0.10), blur: width * 0.18, color: gray(0, 1))
-            ctx.addRect(CGRect(x: -2000, y: -2000, width: 6000, height: 6000))
-            ctx.addPath(cut)
-            ctx.setFillColor(gray(0, 1))
-            ctx.fillPath(using: .evenOdd)
-            ctx.restoreGState()
-        }
-        if glow > 0 {
-            ctx.saveGState()
-            ctx.setShadow(offset: .zero, blur: glow, color: part.glow.copy(alpha: glowAlpha)!)
-            ctx.addPath(path); ctx.setFillColor(colors[0]); ctx.fillPath()
-            ctx.restoreGState()
-        }
-        // Тень под дугой: она лежит над фоном, а не нарисована на нём.
-        ctx.saveGState()
-        ctx.setShadow(offset: CGSize(width: 0, height: -width * 0.10), blur: width * 0.28, color: gray(0, sheen ? 0.45 : 0))
-        ctx.addPath(path); ctx.setFillColor(colors[1]); ctx.fillPath()
-        ctx.restoreGState()
-        ctx.saveGState()
-        ctx.addPath(path); ctx.clip()
-        let p0 = CGPoint(x: center.x + cos(a0) * radius, y: center.y + sin(a0) * radius)
-        let p1 = CGPoint(x: center.x + cos(a1) * radius, y: center.y + sin(a1) * radius)
-        linear(ctx, colors, [0, 1], from: p0, to: p1)
-        if sheen {
-            // Выпуклость, как у значков Apple: дуга — трубка. Поперёк неё свет
-            // гаснет к краям, сверху кольцо освещено, снизу в тени, а по
-            // внешнему краю идёт тонкий блик.
-            let inner = radius - width / 2, outer = radius + width / 2
-            // Поперёк дуги: края чуть темнее середины — округлость без блика-полосы.
-            ctx.drawRadialGradient(
-                CGGradient(colorsSpace: space,
-                           colors: [gray(0, 0.14), gray(1, 0.06), gray(1, 0.06), gray(0, 0.16)] as CFArray,
-                           locations: [0, 0.35, 0.6, 1])!,
-                startCenter: center, startRadius: inner, endCenter: center, endRadius: outer, options: [])
-            // Сверху свет, снизу мягкая тень — как у значков Apple.
-            // Блик слабый: сильный белил цвет, и дуги становились пастельными.
-            linear(ctx, [gray(1, 0.16), gray(1, 0.0), gray(0, 0.0), gray(0, 0.14)], [0, 0.5, 0.62, 1],
-                   from: CGPoint(x: 0, y: center.y + radius + width), to: CGPoint(x: 0, y: center.y - radius - width))
-        }
-        ctx.restoreGState()
-    }
+func linear(_ ctx: CGContext, _ colors: [CGColor], from: CGPoint, to: CGPoint) {
+    ctx.drawLinearGradient(CGGradient(colorsSpace: space, colors: colors as CFArray, locations: [0, 1])!,
+                           start: from, end: to, options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
 }
 
-let parts = [carbs, fat, protein]
+/// Цвета дуг кольца «Сегодня» (ProgressRing): иконка и приложение одного цвета.
+/// Сверху вниз против часовой — углеводы, жиры, белки, как на кольце.
+let palette: [[CGColor]] = [
+    [rgb(0xB85CFF), rgb(0xA63BFF)],
+    [rgb(0xFFA23D), rgb(0xFF8A1F)],
+    [rgb(0x4C9BFF), rgb(0x2F7BFF)],
+]
+/// Доли дуг как у типичной сушки на 80 кг: углеводы 250 г, жиры 64 г, белки 160 г.
+let grams: [CGFloat] = [250, 64, 160]
+let weights = grams.map { $0 / grams.reduce(0, +) }
+/// Разрыв повёрнут на 40° против часовой: знак читается кольцом, а не буквой.
+let rotation: CGFloat = 40
 
 let S: CGFloat = 1024
 let iconCenter = CGPoint(x: S / 2, y: S / 2)
-/// Толщина «С» на иконке: 148 — между 140 и 160 (160 оказалось жирновато). Тоньше знак выглядел
-/// второстепенным, толще короткая жировая дуга превращалась в пятно.
-/// Переопределяется ICON_WIDTH для подбора.
-let iconWidth: CGFloat = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_WIDTH"] ?? "148") ?? 148)
-/// Внешний край знака: крупно по полю иконки, чтобы толстая «С» не сжималась внутрь.
-let iconOuter = CGFloat(Double(ProcessInfo.processInfo.environment["ICON_OUTER"] ?? "385") ?? 385)
-let iconRadius: CGFloat = iconOuter - iconWidth * 0.565
 
-// MARK: - Иконка: «С», прорезанная в чёрном стекле
-//
-// Реалистично и серьёзно, но живым цветом. Стекло с зерном и косым отблеском,
-// один свет сверху-слева и виньетка. «С» прорезана тонко: у прорези тёмная
-// фаска сверху и светлая кромка снизу, внутри — утопленная эмаль, на которую
-// край бросает тень, с мягким бликом и лёгким свечением.
-
-/// Цвета эмали — живые, но не неон: неон на стекле выглядел игрушечно.
-/// Пара — светлая и глубокая сторона одной дуги: градиент даёт объём и глубину.
-let enamel: [[CGColor]] = [
-    [rgb(0xDA8CFF), rgb(0x8318DC)],
-    [rgb(0xFFC23A), rgb(0xEE5C00)],
-    [rgb(0x6EC6FF), rgb(0x0A52DA)],
-]
-
-/// Середины трёх дуг «С» с долями как у кольца.
-func iconSpines(width iconWidth: CGFloat = iconWidth) -> [CGPath] {
-    let iconRadius = iconOuter - iconWidth * 0.565
-    // Зазор от толщины: скруглённые концы толстой дуги съедали фиксированный
-    // зазор, и дуги слипались. Нужна ширина прорези плюс четверть толщины воздуха.
-    let gap = (iconWidth * 1.13 + iconWidth * 0.12) / iconRadius * 180 / .pi
+/// Середины трёх дуг. `outer` — внешний край знака, `width` — толщина дуги.
+/// Зазор от толщины: скруглённые концы съедали бы фиксированный зазор.
+func spines(width: CGFloat, outer: CGFloat) -> [CGPath] {
+    let radius = outer - width / 2
+    let gap = width * 1.25 / radius * 180 / .pi
     let opening = max(72, gap * 1.9)
     let top = 90 - rotation - opening / 2
-    let bottom = 90 - rotation + opening / 2 - 360
-    let available = top - bottom - gap * 2
+    let available = 360 - opening - gap * 2
     var cursor = top
     return (0..<3).map { i in
         let end = cursor, start = end - available * weights[i]
         cursor = start - gap
         let arc = CGMutablePath()
-        arc.addArc(center: iconCenter, radius: iconRadius,
+        arc.addArc(center: iconCenter, radius: radius,
                    startAngle: (90 - start) * .pi / 180, endAngle: (90 - end) * .pi / 180, clockwise: true)
         return arc
     }
@@ -201,126 +93,90 @@ func outline(_ spine: CGPath, _ width: CGFloat) -> CGPath {
     spine.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
 }
 
-/// Тень внутрь фигуры: от края вглубь, со смещением.
-func innerShadow(_ ctx: CGContext, _ path: CGPath, dy: CGFloat, blur: CGFloat, alpha: CGFloat) {
-    ctx.saveGState()
-    ctx.addPath(path); ctx.clip()
-    ctx.setShadow(offset: CGSize(width: 0, height: dy), blur: blur, color: gray(0, alpha))
-    ctx.addRect(CGRect(x: -4000, y: -4000, width: 9000, height: 9000))
-    ctx.addPath(path)
-    ctx.setFillColor(gray(0, 1))
-    ctx.fillPath(using: .evenOdd)
-    ctx.restoreGState()
-}
-
-/// Зерно стекла. Фиксированный генератор — иначе каждый прогон давал бы другую иконку.
-func grain(strength: CGFloat) -> CGImage {
-    let n = Int(S)
-    var seed: UInt64 = 0x9E3779B97F4A7C15
-    var px = [UInt8](repeating: 0, count: n * n * 4)
-    for k in stride(from: 0, to: px.count, by: 4) {
-        seed = seed &* 6364136223846793005 &+ 1442695040888963407
-        let g = UInt8(truncatingIfNeeded: seed >> 56)
-        px[k] = g; px[k + 1] = g; px[k + 2] = g; px[k + 3] = UInt8(strength * 255)
-    }
-    return CGImage(width: n, height: n, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: n * 4,
-                   space: CGColorSpaceCreateDeviceRGB(),
-                   bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
-                   provider: CGDataProvider(data: CFDataCreate(nil, px, px.count))!,
-                   decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
-}
-
-func blackGlass(_ ctx: CGContext) {
-    linear(ctx, [rgb(0x1A1A1E), rgb(0x050506)], [0, 1], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
-    ctx.saveGState()
-    ctx.setBlendMode(.softLight)
-    ctx.draw(grain(strength: 0.06), in: CGRect(x: 0, y: 0, width: S, height: S))
-    ctx.restoreGState()
-    radial(ctx, [gray(1, 0.10), gray(1, 0)], center: CGPoint(x: S * 0.3, y: S), radius: S * 0.9)
-    ctx.drawRadialGradient(CGGradient(colorsSpace: space, colors: [gray(0, 0), gray(0, 0.45)] as CFArray, locations: [0.55, 1])!,
-                           startCenter: iconCenter, startRadius: 0, endCenter: iconCenter, endRadius: S * 0.75,
-                           options: [.drawsAfterEndLocation])
-}
-
-func engravedMark(_ ctx: CGContext, glow: CGFloat, width iconWidth: CGFloat = iconWidth) {
-    let iconRadius = iconOuter - iconWidth * 0.565
-    let spines = iconSpines(width: iconWidth)
-    let cutScale: CGFloat = 1.13
-    let lip = iconWidth * (cutScale - 1) * 0.35
-    for spine in spines {
-        let cut = outline(spine, iconWidth * cutScale)
-        ctx.saveGState(); ctx.translateBy(x: 0, y: -lip)
-        ctx.addPath(cut); ctx.setFillColor(gray(1, 0.16)); ctx.fillPath()
-        ctx.restoreGState()
-        ctx.saveGState(); ctx.translateBy(x: 0, y: lip * 0.8)
-        ctx.addPath(cut); ctx.setFillColor(gray(0, 0.5)); ctx.fillPath()
-        ctx.restoreGState()
-        ctx.addPath(cut); ctx.setFillColor(rgb(0x050506)); ctx.fillPath()
-        innerShadow(ctx, cut, dy: -iconWidth * 0.06, blur: iconWidth * 0.10, alpha: 1)
-    }
-    for (index, spine) in spines.enumerated() {
-        let colors = enamel[index]
-        let fill = outline(spine, iconWidth)
+/// Плоская «С»: у каждой дуги лёгкий градиент своей пары по диагонали, и всё.
+func freshMark(_ ctx: CGContext, width: CGFloat, outer: CGFloat, grayscale: [CGFloat]? = nil) {
+    for (index, spine) in spines(width: width, outer: outer).enumerated() {
+        let shape = outline(spine, width)
+        let colors = grayscale.map { [gray($0[index]), gray($0[index])] } ?? palette[index]
         ctx.saveGState()
-        ctx.setShadow(offset: .zero, blur: glow, color: colors[1].copy(alpha: 0.55)!)
-        ctx.addPath(fill); ctx.setFillColor(colors[1]); ctx.fillPath()
-        ctx.restoreGState()
-        ctx.saveGState(); ctx.addPath(fill); ctx.clip()
-        // Один свет на всю иконку — сверху-слева: светлая сторона у всех дуг
-        // смотрит туда же, куда падает свет на стекло. Вдоль самой дуги
-        // светлые концы смотрели в разные стороны, и это читалось как случайность.
-        let bounds = spine.boundingBoxOfPath.insetBy(dx: -iconWidth / 2, dy: -iconWidth / 2)
-        linear(ctx, colors, [0, 1], from: CGPoint(x: bounds.minX, y: bounds.maxY),
-               to: CGPoint(x: bounds.maxX, y: bounds.minY))
-        ctx.restoreGState()
-        innerShadow(ctx, fill, dy: -iconWidth * 0.06, blur: iconWidth * 0.09, alpha: 0.5)
-        ctx.saveGState(); ctx.addPath(fill); ctx.clip()
-        linear(ctx, [gray(1, 0.16), gray(1, 0)], [0, 1], from: CGPoint(x: 0, y: iconCenter.y + iconRadius + iconWidth),
-               to: CGPoint(x: 0, y: iconCenter.y))
+        ctx.addPath(shape); ctx.clip()
+        let bounds = shape.boundingBoxOfPath
+        linear(ctx, colors, from: CGPoint(x: bounds.minX, y: bounds.maxY), to: CGPoint(x: bounds.maxX, y: bounds.minY))
         ctx.restoreGState()
     }
 }
 
+// MARK: - Иконка
+
+/// Толщина и размер «С» на иконке: крупно, но с воздухом до краёв.
+let iconWidth: CGFloat = 120
+let iconOuter: CGFloat = 372
+
+// Светлая: белое поле, чуть сереющее книзу.
 do {
-    let ctx = context(1024, 1024, opaque: true)
-    blackGlass(ctx)
-    engravedMark(ctx, glow: 34)
+    let ctx = context(1024, 1024)
+    linear(ctx, [rgb(0xFFFFFF), rgb(0xF1F3F7)], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
+    freshMark(ctx, width: iconWidth, outer: iconOuter)
     save(ctx, "AppIcon-light.png")
 }
-// Тёмная: то же стекло, эмаль светится чуть сильнее.
+// Тёмная: то же на почти чёрном поле — как тёмная тема приложения.
 do {
-    let ctx = context(1024, 1024, opaque: true)
-    blackGlass(ctx)
-    engravedMark(ctx, glow: 46)
+    let ctx = context(1024, 1024)
+    linear(ctx, [rgb(0x1C1C1F), rgb(0x0A0A0B)], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
+    freshMark(ctx, width: iconWidth, outer: iconOuter)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.
 do {
-    let ctx = context(1024, 1024, opaque: true)
+    let ctx = context(1024, 1024)
     ctx.setFillColor(gray(0)); ctx.fill(CGRect(x: 0, y: 0, width: S, height: S))
-    drawC(ctx, center: iconCenter, radius: 300, width: 118, parts: parts, glow: 0, glowAlpha: 0,
-          grayscale: [1, 0.9, 0.8], sheen: false)
+    freshMark(ctx, width: iconWidth, outer: iconOuter, grayscale: [1, 0.85, 0.7])
     save(ctx, "AppIcon-tinted.png")
 }
 
-// Лаунч-скрин: та же «С», что на иконке, — прорезь, эмаль, свет сверху-слева, —
-// размером с кольцо «Сегодня» (230 pt), но тоньше иконки: 100 из 148 её единиц,
-// около 30 pt. Как на иконке целиком было тяжело на весь экран, как кольцо —
-// скачок толщины после иконки. Фон — LaunchBackground, заставка (SplashView)
-// продолжает этот кадр тем же знаком.
-let launchMarkWidth: CGFloat = 100
+// MARK: - Лаунч-скрин
 
-func launch(scale: CGFloat, dark: Bool, name: String) {
+// Та же «С» размером с кольцо «Сегодня» (230 pt) на холсте 270 pt, но тоньше
+// иконки: на весь экран толщина иконки тяжелела. Фон — LaunchBackground,
+// заставка (SplashView) продолжает этот кадр тем же знаком. Картинка одна на
+// обе темы: плоские дуги одинаково читаются на светлом и на чёрном.
+let launchMarkWidth: CGFloat = 90
+
+func launch(scale: CGFloat, name: String) {
     let side = 270 * scale
-    let ctx = context(Int(side), Int(side), opaque: false)
+    let ctx = context(Int(side), Int(side))
     let factor = (230 * scale) / (2 * iconOuter)
     ctx.translateBy(x: side / 2, y: side / 2)
     ctx.scaleBy(x: factor, y: factor)
     ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
-    engravedMark(ctx, glow: 34, width: launchMarkWidth)
+    freshMark(ctx, width: launchMarkWidth, outer: iconOuter)
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {
-    launch(scale: scale, dark: false, name: "LaunchLogo\(suffix).png")
-    launch(scale: scale, dark: true, name: "LaunchLogo-dark\(suffix).png")
+    launch(scale: scale, name: "LaunchLogo\(suffix).png")
+}
+
+// MARK: - Иконка вкладки «Сегодня»
+
+// Та же «С», одноцветным шаблоном — цвет выбранной и невыбранной вкладки даёт
+// система. Вектором в PDF, 28×28 pt, как ячейка системного символа в таббаре.
+// Тоньше иконки (около 3,7 pt): при толщине иконки дуги спорили весом с
+// соседними символами.
+do {
+    let tabSide: CGFloat = 28
+    let tabWidth: CGFloat = 105
+    let factor = (tabSide / 2 - 1) / iconOuter
+    var box = CGRect(x: 0, y: 0, width: tabSide, height: tabSide)
+    let ctx = CGContext(out.appendingPathComponent("TodayTab.pdf") as CFURL, mediaBox: &box, nil)!
+    ctx.beginPDFPage(nil)
+    ctx.translateBy(x: tabSide / 2, y: tabSide / 2)
+    ctx.scaleBy(x: factor, y: factor)
+    ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
+    ctx.setFillColor(CGColor(gray: 0, alpha: 1))
+    for spine in spines(width: tabWidth, outer: iconOuter) {
+        ctx.addPath(outline(spine, tabWidth))
+        ctx.fillPath()
+    }
+    ctx.endPDFPage()
+    ctx.closePDF()
 }

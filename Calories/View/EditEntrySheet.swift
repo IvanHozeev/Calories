@@ -148,9 +148,9 @@ struct EditEntrySheet: View {
                 // ввода нет своей направляющей, и её берут от первого текста.
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 HStack(spacing: 10) {
-                    unitField("Б", color: .blue, text: $protein, field: .protein)
-                    unitField("Ж", color: .orange, text: $fat, field: .fat)
-                    unitField("У", color: .purple, text: $carbs, field: .carbs)
+                    unitField("Б", color: MacroKind.protein.color, text: $protein, field: .protein)
+                    unitField("Ж", color: MacroKind.fat.color, text: $fat, field: .fat)
+                    unitField("У", color: MacroKind.carbs.color, text: $carbs, field: .carbs)
                 }
                 .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
                 DatePicker(

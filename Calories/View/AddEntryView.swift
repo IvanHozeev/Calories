@@ -43,6 +43,7 @@ struct AddEntryView: View {
     @State private var showingScanner: Bool
     @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
+    @State private var editingDish: Dish? = nil
 
     @State private var offResults: [FoodItem] = []
     @State private var isSearchingOFF = false
@@ -494,6 +495,9 @@ struct AddEntryView: View {
                 NewFoodSheet(store: store, editingFood: food)
                     .presentationDetents([.medium])
             }
+            .sheet(item: $editingDish) { dish in
+                NewDishSheet(store: store, editingDish: dish)
+            }
             } // ScrollViewReader
         }
     }
@@ -609,6 +613,23 @@ struct AddEntryView: View {
                     dishRow(dish)
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.dish(dish)) }
+                        // Как у своих продуктов. Отдельной вкладки «Еда», где
+                        // блюда правили и удаляли, больше нет — всё здесь.
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                store.deleteDish(dish)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                editingDish = dish
+                            } label: {
+                                Image(systemName: "pencil")
+                            }
+                            .tint(.blue)
+                        }
                 }
             }
         }

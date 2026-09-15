@@ -11,43 +11,64 @@ enum FastingAdvice {
         /// Когда это делать — «за сутки», «сразу после».
         let when: String
         let text: String
+        /// За сколько дней до голодания совет к месту: 0 — сам день. По нему
+        /// «Сегодня» показывает подсказку ровно тогда, когда она нужна, а не
+        /// всю памятку разом.
+        let daysBefore: ClosedRange<Int>
     }
 
     static func preparation(for kind: FastKind) -> [Item] {
         var items = [
             Item(when: String(localized: "За 2–3 дня"),
-                 text: String(localized: "Снижай кофе постепенно. Головная боль в пост чаще от отмены кофеина, чем от голода, и резкий отказ накануне делает только хуже.")),
+                 text: String(localized: "Снижай кофе постепенно. Головная боль в пост чаще от отмены кофеина, чем от голода, и резкий отказ накануне делает только хуже."),
+                 daysBefore: 2...3),
             Item(when: String(localized: "За сутки"),
-                 text: String(localized: "Меньше соли. Соль — главный двигатель жажды, и солёный ужин накануне ощущается весь следующий день."))
+                 text: String(localized: "Меньше соли. Соль — главный двигатель жажды, и солёный ужин накануне ощущается весь следующий день."),
+                 daysBefore: 1...1)
         ]
         if kind == .dry {
             items.append(Item(
                 when: String(localized: "За сутки"),
-                text: String(localized: "Пей равномерно весь день, а не литр перед началом: выпитое залпом уходит в мочевой пузырь, а не в ткани.")))
+                text: String(localized: "Пей равномерно весь день, а не литр перед началом: выпитое залпом уходит в мочевой пузырь, а не в ткани."),
+                daysBefore: 1...1))
         }
         items.append(Item(
             when: String(localized: "Последний приём"),
-            text: String(localized: "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости.")))
+            text: String(localized: "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости."),
+            daysBefore: 1...1))
         items.append(Item(
             when: String(localized: "Накануне"),
-            text: String(localized: "Без алкоголя — он обезвоживает.")))
+            text: String(localized: "Без алкоголя — он обезвоживает."),
+            daysBefore: 1...1))
         return items
     }
 
     static func breakingFast(for kind: FastKind) -> [Item] {
         var items = [
             Item(when: String(localized: "Первые минуты"),
-                 text: String(localized: "Начни с жидкости небольшими порциями. Литр залпом после сухого дня — самый частый способ испортить себе вечер."))
+                 text: String(localized: "Начни с жидкости небольшими порциями. Литр залпом после сухого дня — самый частый способ испортить себе вечер."),
+                 daysBefore: 0...0)
         ]
         items.append(Item(
             when: String(localized: "Через 30–60 минут"),
-            text: String(localized: "Обычная еда. Не жирное и не солёное застолье сразу — разбитость после поста чаще от него, чем от самого поста.")))
+            text: String(localized: "Обычная еда. Не жирное и не солёное застолье сразу — разбитость после поста чаще от него, чем от самого поста."),
+            daysBefore: 0...0))
         if kind == .water {
             items.append(Item(
                 when: String(localized: "Дальше"),
-                text: String(localized: "После голодания на воде выход мягче: организм не обезвожен, и полноценный приём пищи переносится легче.")))
+                text: String(localized: "После голодания на воде выход мягче: организм не обезвожен, и полноценный приём пищи переносится легче."),
+                daysBefore: 0...0))
         }
         return items
+    }
+
+    /// Самое раннее, за сколько дней до голодания есть что посоветовать.
+    static let earliestDaysBefore = 3
+
+    /// Советы к месту на этот день: за 2–3 дня — про кофе, накануне — про соль,
+    /// воду и последний приём, в сам день — как выходить.
+    static func advice(for kind: FastKind, daysBefore: Int) -> [Item] {
+        (preparation(for: kind) + breakingFast(for: kind)).filter { $0.daysBefore.contains(daysBefore) }
     }
 
     /// Граница, которую приложение переходить не должно.

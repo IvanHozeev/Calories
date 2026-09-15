@@ -8,24 +8,25 @@ struct MacroTags: View {
     var compact: Bool = false
 
     var body: some View {
-        HStack(spacing: compact ? 4 : 6) {
-            tag("Б", value: macros.protein, color: .blue)
-            tag("Ж", value: macros.fat, color: .orange)
-            tag("У", value: macros.carbs, color: .purple)
+        HStack(spacing: compact ? 8 : 10) {
+            tag("Б", value: macros.protein, color: MacroKind.protein.color)
+            tag("Ж", value: macros.fat, color: MacroKind.fat.color)
+            tag("У", value: macros.carbs, color: MacroKind.carbs.color)
         }
     }
 
     private func tag(_ letter: LocalizedStringKey, value: Double, color: Color) -> some View {
-        HStack(spacing: 3) {
+        // Без цветных капсул: в стиле плашек под кольцом цвет несёт только
+        // буква, и это цвет дуги макроса. Ряд капсул под каждой строкой
+        // списка был самым пёстрым местом экрана.
+        HStack(spacing: 2) {
             Text(letter)
                 .font(.caption2.weight(.bold))
                 .foregroundStyle(color)
             Text(verbatim: "\(Int(value.rounded()))")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .monospacedDigit()
         }
-        .padding(.horizontal, compact ? 5 : 7)
-        .padding(.vertical, 3)
-        .background(color.opacity(0.12), in: Capsule())
     }
 }

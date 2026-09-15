@@ -113,7 +113,7 @@ struct CaloriesWidgetEntryView: View {
         ZStack {
             WidgetRing(segments: entry.segments, lineWidth: 5, rotation: -40)
             Text(verbatim: "\(entry.remaining)")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .font(.system(size: 13, weight: .semibold))
                 .minimumScaleFactor(0.5)
                 .padding(8)
         }
@@ -154,14 +154,14 @@ struct CaloriesWidgetEntryView: View {
             WidgetRing(segments: entry.segments, lineWidth: lineWidth, rotation: -40)
             VStack(spacing: 0) {
                 Text(verbatim: "\(entry.remaining)")
-                    .font(.system(size: number, weight: .bold, design: .rounded))
+                    .font(.system(size: number, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
                 Text("Остаток")
-                    .font(.system(size: number * 0.38, weight: .semibold))
-                    .foregroundStyle(WidgetPalette.kcal[0])
+                    .font(.system(size: number * 0.38))
+                    .foregroundStyle(.white.opacity(0.5))
             }
             .padding(lineWidth * 1.6)
         }
@@ -178,11 +178,12 @@ struct CaloriesWidgetEntryView: View {
             ringWithRemaining(lineWidth: 10, number: 22)
                 .frame(width: 118, height: 118)
 
-            VStack(alignment: .leading, spacing: 7) {
-                statRow(letter: "ккал", color: WidgetPalette.kcal[0], value: entry.consumed, target: Double(entry.goal))
-                statRow(letter: "Б", color: WidgetPalette.protein[0], value: Int(entry.protein.rounded()), target: entry.proteinTarget)
-                statRow(letter: "Ж", color: WidgetPalette.fat[0], value: Int(entry.fat.rounded()), target: entry.fatTarget)
-                statRow(letter: "У", color: WidgetPalette.carbs[0], value: Int(entry.carbs.rounded()), target: entry.carbsTarget)
+            // Как плашка макросов под кольцом: число с целью мелко и тонкая
+            // полоска цветом дуги. Калории уже в кольце.
+            VStack(alignment: .leading, spacing: 9) {
+                statRow(letter: "Б", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
+                statRow(letter: "Ж", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)
+                statRow(letter: "У", color: WidgetPalette.carbs[0], value: entry.carbs, target: entry.carbsTarget)
             }
             Spacer(minLength: 0)
         }
@@ -192,22 +193,24 @@ struct CaloriesWidgetEntryView: View {
     /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
     /// со строкой ничего не локализует, и подпись показывалась по-русски
     /// на любом языке системы.
-    private func statRow(letter: LocalizedStringKey, color: Color, value: Int, target: Double) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Text(letter)
-                .font(.system(size: 11, weight: .bold))
-                .foregroundStyle(color)
-                .frame(width: 30, alignment: .leading)
-            Text(verbatim: "\(value)")
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.white)
-            if target > 0 {
-                Text(verbatim: "/ \(Int(target.rounded()))")
-                    .font(.system(size: 11, design: .rounded))
+    private func statRow(letter: LocalizedStringKey, color: Color, value: Double, target: Double) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(letter)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(color)
+                Text(verbatim: "\(Int(value.rounded()))")
+                    .font(.system(size: 14, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(.white.opacity(0.45))
+                    .foregroundStyle(.white)
+                if target > 0 {
+                    Text(verbatim: "/ \(Int(target.rounded()))")
+                        .font(.system(size: 11))
+                        .monospacedDigit()
+                        .foregroundStyle(.white.opacity(0.4))
+                }
             }
+            WidgetBar(share: target > 0 ? min(value / target, 1) : 0, color: color)
         }
     }
 }
@@ -336,15 +339,13 @@ struct StepsWidgetEntryView: View {
 
             VStack(spacing: 2) {
                 Text(entry.steps.formatted())
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.5)
                 Text("шагов")
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundStyle(.white.opacity(0.55))
-                    .textCase(.uppercase)
-                    .tracking(0.5)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.white.opacity(0.5))
             }
         }
         .containerBackground(for: .widget) { bg }
@@ -357,15 +358,13 @@ struct StepsWidgetEntryView: View {
 
                 VStack(spacing: 2) {
                     Text(entry.steps.formatted())
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.system(size: 20, weight: .bold))
                         .monospacedDigit()
                         .foregroundStyle(.white)
                         .minimumScaleFactor(0.5)
                     Text("шагов")
-                        .font(.system(size: 9, weight: .semibold))
-                        .foregroundStyle(.white.opacity(0.55))
-                        .textCase(.uppercase)
-                        .tracking(0.5)
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.5))
                 }
             }
             .frame(width: 88, height: 88)
@@ -384,19 +383,8 @@ struct StepsWidgetEntryView: View {
                     statRow(label: "Дистанция", value: String(format: "%.1f \(String(localized: "км"))", entry.distanceKm))
                 }
 
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(WidgetEngraving.channel(thickness: 4, mode: renderingMode))
-                            .frame(height: 4)
-                        Capsule()
-                            .fill(LinearGradient(colors: ringColors, startPoint: .leading, endPoint: .trailing))
-                            .frame(width: geo.size.width * entry.progress, height: 4)
-                            .shadow(color: ringColors[1].opacity(0.3), radius: 3)
-                    }
-                }
-                .frame(height: 4)
-                .padding(.top, 10)
+                WidgetBar(share: entry.progress, color: ringColors[0])
+                    .padding(.top, 10)
             }
 
             Spacer(minLength: 0)
@@ -414,10 +402,10 @@ struct StepsWidgetEntryView: View {
         HStack {
             Text(label)
                 .font(.system(size: 11))
-                .foregroundStyle(.white.opacity(0.5))
+                .foregroundStyle(.white.opacity(0.4))
             Spacer()
             Text(value)
-                .font(.system(size: 11, weight: .semibold, design: .rounded))
+                .font(.system(size: 11, weight: .semibold))
                 .monospacedDigit()
                 .foregroundStyle(.white)
         }
@@ -541,15 +529,15 @@ struct MacrosWidgetEntryView: View {
                        lineWidth: 11, fillsFromEnd: true)
             VStack(spacing: 0) {
                 Text(verbatim: "\(Int(entry.protein.rounded()))")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 26, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.5)
                 if entry.proteinTarget > 0 {
                     Text(verbatim: "/ \(Int(entry.proteinTarget.rounded()))")
-                        .font(.system(size: 11, weight: .semibold, design: .rounded))
+                        .font(.system(size: 11))
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.45))
+                        .foregroundStyle(.white.opacity(0.4))
                 }
                 Text("Б")
                     .font(.system(size: 11, weight: .bold))
@@ -586,22 +574,13 @@ struct MacrosWidgetEntryView: View {
                 if macro.hasTarget {
                     Text(verbatim: "/ \(Int(macro.target.rounded()))")
                         .font(.caption2)
-                        .foregroundStyle(.white.opacity(0.5))
+                        .foregroundStyle(.white.opacity(0.4))
                         .monospacedDigit()
                 }
                 Spacer(minLength: 0)
             }
             if macro.hasTarget {
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(WidgetEngraving.channel(thickness: 5, mode: renderingMode))
-                        Capsule()
-                            .fill(macro.color)
-                            .frame(width: geometry.size.width * macro.share)
-                            .shadow(color: macro.color.opacity(0.3), radius: 3)
-                    }
-                }
-                .frame(height: 5)
+                WidgetBar(share: macro.share, color: macro.color)
             }
         }
     }
@@ -661,5 +640,27 @@ struct MacrosWidget: Widget {
         .description("Макросы за день и насколько закрыты нормы.")
         .supportedFamilies([.systemSmall, .systemMedium,
                             .accessoryCircular, .accessoryRectangular, .accessoryInline])
+    }
+}
+
+/// Тонкая полоска прогресса, как под плашкой макросов в приложении: дорожка
+/// того же цвета, приглушённая, без канавки и свечения.
+struct WidgetBar: View {
+    let share: Double
+    let color: Color
+    @Environment(\.widgetRenderingMode) private var renderingMode
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(renderingMode == .fullColor ? color.opacity(0.22) : Color.white.opacity(0.25))
+                Capsule()
+                    .fill(renderingMode == .fullColor ? color : Color.white)
+                    .frame(width: geometry.size.width * share)
+                    .widgetAccentable()
+            }
+        }
+        .frame(height: 3)
     }
 }

@@ -12,10 +12,29 @@ extension CalorieStore {
         let today = calendar.startOfDay(for: Date())
         return (0..<days).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            // Голодание — день с «записью» и в норме, как и для серии: пустой
+            // кружок в неделе и в истории читался бы как забытый дневник.
+            if isFastDay(date) { return (date, true, true) }
             let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
             let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
             return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
         }
+    }
+
+    /// Недели для полоски на «Сегодня», от давней к текущей: окна по семь
+    /// дней, последнее заканчивается сегодня.
+    ///
+    /// Назад — не глубже первого дня с записями, чтобы новичок не листал пустые
+    /// страницы, и не больше `maxWeeks`: двенадцать недель — это одна фаза
+    /// сушки или набора целиком, а старше открывается календарём.
+    func weekStripWeeks(maxWeeks: Int = 12) -> [[(date: Date, hasEntries: Bool, onGoal: Bool)]] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let firstDay = entriesByDay.keys.min() ?? today
+        let daysBack = max(0, calendar.dateComponents([.day], from: firstDay, to: today).day ?? 0)
+        let weeks = min(daysBack / 7 + 1, maxWeeks)
+        let history = goalHistory(days: weeks * 7)
+        return stride(from: 0, to: history.count, by: 7).map { Array(history[$0..<$0 + 7]) }
     }
 
     /// Сколько дней подряд закрыта норма белка. Историческая норма нигде не фиксируется,
@@ -257,7 +276,10 @@ extension CalorieStore {
 
     
     func adaptedGoal(for date: Date) -> Int {
-        guard isPremium else { return effectiveGoal(for: date) }
+        // С планом норму на каждый день задаёт схема — фазы, рефиды, брейки, —
+        // и банк сдвигал бы её мимо замысла: недобор в начале недели раздувал
+        // день дефицита на сотни калорий. Банк — для тех, кто считает без плана.
+        guard isPremium, plan == nil else { return effectiveGoal(for: date) }
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: date)
         // Respect locale's first weekday (Sun=1 for IL/US, Mon=2 for Europe)

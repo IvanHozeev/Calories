@@ -8015,6 +8015,7 @@
       }
     },
     "Все категории" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -9171,6 +9172,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jejum"
+          }
+        }
+      }
+    },
+    "Голодание через %lld дн." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صيام بعد %lld أيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fasten in %lld Tagen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast in %lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayuno en %lld días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeûne dans %lld jours"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צום בעוד %lld ימים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jejum em %lld dias"
           }
         }
       }
@@ -12381,6 +12428,7 @@
       }
     },
     "Еда" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13855,6 +13903,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Encerrar plano atual"
+          }
+        }
+      }
+    },
+    "Завтра голодание" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صيام غدًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgen Fasten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast tomorrow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayuno mañana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeûne demain"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צום מחר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jejum amanhã"
           }
         }
       }
@@ -16558,6 +16652,7 @@
       }
     },
     "Ищем…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27613,6 +27708,7 @@
       }
     },
     "Открытая база продуктов" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30765,6 +30861,7 @@
       }
     },
     "Поиск в базе или моих блюдах" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31088,6 +31185,7 @@
       }
     },
     "Пока нет своих блюд" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -31134,6 +31232,7 @@
       }
     },
     "Пока нет своих продуктов" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34294,6 +34393,7 @@
       }
     },
     "Пропуск" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34340,7 +34440,6 @@
       }
     },
     "Профиль" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34804,6 +34903,7 @@
       }
     },
     "Раздел" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35451,6 +35551,7 @@
       }
     },
     "Рацион" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -37264,6 +37365,7 @@
       }
     },
     "Серия %lld дн. в норме" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41156,6 +41258,7 @@
       }
     },
     "Тело" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

@@ -24,25 +24,24 @@ struct MacroSplitBar: View {
         VStack(alignment: .leading, spacing: 8) {
             GeometryReader { geo in
                 HStack(spacing: 2) {
-                    segment(kcal.protein, color: .blue, width: geo.size.width)
-                    segment(kcal.fat, color: .orange, width: geo.size.width)
-                    segment(kcal.carbs, color: .purple, width: geo.size.width)
+                    segment(kcal.protein, color: MacroKind.protein.color, width: geo.size.width)
+                    segment(kcal.fat, color: MacroKind.fat.color, width: geo.size.width)
+                    segment(kcal.carbs, color: MacroKind.carbs.color, width: geo.size.width)
                 }
             }
-            .frame(height: 8)
+            .frame(height: 4)
             .clipShape(Capsule())
-            // Полоса — та же канавка, что кольцо, только прямая: цвет налит
-            // в углубление, а не наклеен на карточку. Канавка видна и пустой,
-            // когда макросов ещё нет, — и это честнее пустого места.
+            // Тонкая плоская дорожка, как полоски под плашкой макросов на
+            // «Сегодня». Видна и пустой, когда макросов ещё нет.
             .background {
-                Capsule().fill(.channel(thickness: 8))
+                Capsule().fill(Color.secondary.opacity(0.15))
             }
 
             if showsLabels {
                 HStack(spacing: 12) {
-                    label("Белки", percent(kcal.protein), .blue)
-                    label("Жиры", percent(kcal.fat), .orange)
-                    label("Углеводы", percent(kcal.carbs), .purple)
+                    label("Белки", percent(kcal.protein), MacroKind.protein.color)
+                    label("Жиры", percent(kcal.fat), MacroKind.fat.color)
+                    label("Углеводы", percent(kcal.carbs), MacroKind.carbs.color)
                 }
             }
         }

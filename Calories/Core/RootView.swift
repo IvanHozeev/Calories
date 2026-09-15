@@ -23,19 +23,26 @@ struct RootView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             ContentView(store: store, stepStore: stepStore)
-                .tabItem { Label("Сегодня", systemImage: "book.fill") }
+                .tabItem { Label("Сегодня", image: "TodayTab") }
                 .tag(0)
-
-            NavigationStack {
-                MyFoodView(store: store)
-            }
-            .tabItem { Label("Еда", systemImage: "fork.knife") }
-            .tag(1)
 
             NavigationStack {
                 BodyView(store: store)
             }
-            .tabItem { Label("Тело", systemImage: "figure.arms.open") }
+            .tabItem { Label("Профиль", systemImage: "person.crop.circle") }
+            .tag(1)
+
+            // Своя вкладка, а не шестерёнка в тулбаре «Профиля»: после ухода
+            // «Еды» внизу осталось две вкладки, а в настройки ходят сами по себе.
+            NavigationStack {
+                SettingsView(store: store)
+                    // Как на остальных вкладках: название и так в таббаре.
+                    // Здесь, а не в самом экране: с «Сегодня» в него заходят
+                    // переходом, и там заголовок нужен.
+                    .navigationBarTitleDisplayMode(.inline)
+                    .hiddenNavigationTitle()
+            }
+            .tabItem { Label("Настройки", systemImage: "gearshape") }
             .tag(2)
         }
         .fullScreenCover(isPresented: Binding(

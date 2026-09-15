@@ -629,6 +629,23 @@ struct CalorieStoreTests {
         #expect(store.trialSummary?.loggedDays == 2)
     }
 
+    @Test func weekStrip_goesBackToTheFirstEntryAndEndsToday() {
+        #expect(store.weekStripWeeks().count == 1)
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        store.add(name: "A", calories: 500, date: calendar.date(byAdding: .day, value: -8, to: today)!.addingTimeInterval(3600))
+        let weeks = store.weekStripWeeks()
+        #expect(weeks.count == 2)
+        #expect(weeks.allSatisfy { $0.count == 7 })
+        #expect(weeks.last?.last?.date == today)
+        #expect(weeks.first?.first?.date == calendar.date(byAdding: .day, value: -13, to: today))
+    }
+
+    @Test func weekStrip_isCappedAtTwelveWeeks() {
+        store.add(name: "A", calories: 500, date: Date().addingTimeInterval(-200 * 86_400))
+        #expect(store.weekStripWeeks().count == 12)
+    }
+
     @Test func purchaseOutlivesTheTrial() {
         store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
         store.isPremium = true
@@ -2282,6 +2299,50 @@ struct FastDayTests {
         Calendar.current.date(byAdding: .day, value: -ago, to: Date())!
     }
 
+    /// Совет приходит к своему дню: за три дня — про кофе, накануне — про соль,
+    /// в сам день — как выходить. Раньше памятка лежала в настройках целиком.
+    @Test func fastingHint_givesTheAdviceForThatDay() {
+        #expect(store.fastingHint() == nil)
+
+        store.markFastDay(day(-3), kind: .dry)
+        let early = try! #require(store.fastingHint())
+        #expect(early.daysUntil == 3)
+        #expect(early.items.allSatisfy { $0.daysBefore.contains(3) })
+        #expect(!early.items.isEmpty)
+
+        let dayBefore = try! #require(store.fastingHint(now: day(-2)))
+        #expect(dayBefore.daysUntil == 1)
+        #expect(dayBefore.items.count == FastingAdvice.advice(for: .dry, daysBefore: 1).count)
+
+        let fastDay = try! #require(store.fastingHint(now: day(-3)))
+        #expect(fastDay.daysUntil == 0)
+        #expect(fastDay.items.allSatisfy { $0.daysBefore == 0...0 })
+    }
+
+    /// Совет пить равномерно — только перед сухим голоданием: на воде он лишний.
+    @Test func fastingHint_followsTheKind() {
+        store.markFastDay(day(-1), kind: .water)
+        let water = try! #require(store.fastingHint())
+        store.markFastDay(day(-1), kind: .dry)
+        let dry = try! #require(store.fastingHint())
+        #expect(dry.items.count == water.items.count + 1)
+    }
+
+    /// Дальше трёх дней советовать нечего, и прошедшее голодание подсказку не держит.
+    @Test func fastingHint_ignoresFarAndPastFasts() {
+        store.markFastDay(day(-5), kind: .dry)
+        store.markFastDay(day(1), kind: .dry)
+        #expect(store.fastingHint() == nil)
+    }
+
+    /// В неделе и истории голодание — день в норме, а не пустой.
+    @Test func goalHistory_countsAFastAsKept() {
+        store.markFastDay(day(1), kind: .dry)
+        let yesterday = try! #require(store.goalHistory(days: 2).first)
+        #expect(yesterday.hasEntries)
+        #expect(yesterday.onGoal)
+    }
+
     /// Голодание не рвёт серию: человек сделал ровно то, что собирался.
     @Test func aMarkedFastKeepsTheStreak() {
         store.add(name: "Обед", calories: 1500, date: day(2))
@@ -2327,6 +2388,23 @@ struct FastDayTests {
         store.markFastDay(fastDate, kind: .dry)
 
         #expect(store.adaptedGoal(for: midWeek) > withoutFast)
+    }
+
+    /// С планом банк выключен: норму каждого дня задаёт схема, и недобор
+    /// в начале недели не должен раздувать день дефицита.
+    @Test func aPlanTurnsTheBankOff() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let daysFromFirst = (calendar.component(.weekday, from: today) - calendar.firstWeekday + 7) % 7
+        let weekStart = calendar.date(byAdding: .day, value: -daysFromFirst, to: today)!
+        let midWeek = calendar.date(byAdding: .day, value: 3, to: weekStart)!
+        store.markFastDay(calendar.date(byAdding: .day, value: 1, to: weekStart)!, kind: .dry)
+        #expect(store.adaptedGoal(for: midWeek) > store.effectiveGoal(for: midWeek))
+
+        store.startPlan(Plan(startDate: weekStart, startWeightKg: 77,
+                             phases: [PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.5)]))
+        try #require(store.plan != nil)
+        #expect(store.adaptedGoal(for: midWeek) == store.effectiveGoal(for: midWeek))
     }
 
     /// А забытый день в банк не идёт: иначе он изображал бы нулевую еду.

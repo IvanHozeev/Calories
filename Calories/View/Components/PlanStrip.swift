@@ -35,7 +35,10 @@ struct PlanStrip: View {
             .minimumScaleFactor(0.85)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color.secondary.opacity(0.10), in: Capsule())
+            // Форма касания до стекла: без неё нажатие ловилось только по
+            // тексту, а стекло между буквами его не пропускало.
+            .contentShape(Capsule())
+            .liquidGlass(in: Capsule())
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("planStrip")
@@ -80,3 +83,4 @@ struct PlanStrip: View {
         }
     }
 }
+

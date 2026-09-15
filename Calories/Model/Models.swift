@@ -83,12 +83,14 @@ enum MacroKind: String, Identifiable {
         }
     }
 
-    /// Те же цвета, что у тегов и полосы БЖУ по всему приложению.
+    /// Цвета дуг кольца «Сегодня» — они же у тегов, полос и цифр БЖУ по всему
+    /// приложению. Системные синий, оранжевый и фиолетовый рядом с кольцом
+    /// читались как другие цвета.
     var color: Color {
         switch self {
-        case .protein: return .blue
-        case .fat: return .orange
-        case .carbs: return .purple
+        case .protein: return ProgressRing.proteinColors[0]
+        case .fat: return ProgressRing.fatColors[0]
+        case .carbs: return ProgressRing.carbColors[0]
         }
     }
 }

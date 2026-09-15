@@ -127,10 +127,10 @@ struct WidgetRing: View {
     var body: some View {
         ZStack {
             ForEach(segments) { segment in
+                // Дорожка цветом дуги, приглушённым, — как кольцо в приложении.
+                // На тонированном экране цвета нет, там дорожка просто тусклая.
                 WidgetArc(start: segment.start, end: segment.end)
-                    .stroke(renderingMode == .fullColor
-                            ? WidgetEngraving.channel(thickness: lineWidth, mode: renderingMode)
-                            : AnyShapeStyle(Color.white.opacity(0.25)),
+                    .stroke(renderingMode == .fullColor ? segment.colors[0].opacity(0.2) : Color.white.opacity(0.25),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 if segment.progress > 0 {
                     let span = (segment.end - segment.start) * segment.progress
@@ -139,10 +139,9 @@ struct WidgetRing: View {
                         : WidgetArc(start: segment.start, end: segment.start + span)
                     if renderingMode == .fullColor {
                         arc.stroke(gradient(for: segment),
-                                   style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
-                            .shadow(color: (segment.colors.last ?? .clear).opacity(0.3), radius: lineWidth * 0.35)
+                                   style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     } else {
-                        arc.stroke(Color.white, style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
+                        arc.stroke(Color.white, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                             .widgetAccentable()
                     }
                 }

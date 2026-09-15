@@ -158,19 +158,22 @@ final class CaloriesUITests: XCTestCase {
     // MARK: - Навигация
 
     @MainActor
-    func testAllThreeTabsOpen() {
+    func testAllTabsOpen() {
         let app = launchApp()
 
         XCTAssertTrue(app.staticTexts["Today"].waitForExistence(timeout: 5),
                       "Приложение должно открываться на вкладке «Сегодня»")
 
-        app.tabBars.buttons["Body"].tap()
-        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5),
-                      "Вкладка «Тело» не открылась")
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 5),
+                      "Вкладка «Профиль» не открылась")
+        // Вкладки «Еда» больше нет: свои продукты и блюда живут в экране
+        // добавления, а склад без записи в дневник был лишним.
+        XCTAssertFalse(app.tabBars.buttons["Food"].exists)
 
-        app.tabBars.buttons["Food"].tap()
-        XCTAssertTrue(app.navigationBars["Pantry"].waitForExistence(timeout: 5),
-                      "Вкладка «Еда» не открылась")
+        app.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
+                      "Вкладка «Настройки» не открылась")
 
         app.tabBars.buttons["Today"].tap()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5),
@@ -178,24 +181,21 @@ final class CaloriesUITests: XCTestCase {
     }
 
     @MainActor
-    func testSettingsReachableFromBody() {
+    func testSettingsHaveTheirOwnTab() {
         let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        // Ждём тулбар, а не жмём вслепую: переключение вкладки возвращается
-        // раньше, чем экран собран, и тап уходил в пустоту.
-        let settings = app.buttons["openSettings"]
-        XCTAssertTrue(settings.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
-        settings.tap()
+        let tab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
+        tab.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Шестерёнка на «Теле» должна вести в настройки")
+                      "Вкладка должна открывать настройки")
     }
 
     /// Вход в замеры должен быть виден на пустом экране, иначе фичу просто не найдут.
     @MainActor
     func testBodyTabOffersFirstMeasurement() {
         let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 5))
         // Профиль расформирован: параметры тела лежат прямо на вкладке.
         XCTAssertTrue(app.staticTexts["Body Parameters"].exists,
                       "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
@@ -213,10 +213,9 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testSettingsOffersDataExport() {
         let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        let gear = app.buttons["openSettings"]
-        XCTAssertTrue(gear.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
-        gear.tap()
+        let tab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
+        tab.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let backup = app.buttons["Backup (JSON)"]
@@ -323,7 +322,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testMeasurementsSuggestMissingSites() {
         let app = launchApp(resetMeasurements: true)
-        app.tabBars.buttons["Body"].tap()
+        app.tabBars.buttons["Profile"].tap()
         app.buttons["openMeasurementsRow"].tap()
         app.buttons["openMeasurementEntry"].tap()
 
@@ -465,10 +464,9 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testFontChoiceIsOfferedAndPersists() {
         let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        let gear = app.buttons["openSettings"]
-        XCTAssertTrue(gear.waitForExistence(timeout: 10), "На «Теле» нет шестерёнки")
-        gear.tap()
+        let tab = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
+        tab.tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let entry = app.buttons["openFontSettings"]
@@ -501,8 +499,8 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testActivityLevelChangeAsksFirst() {
         let app = launchApp()
-        app.tabBars.buttons["Body"].tap()
-        XCTAssertTrue(app.navigationBars["Body"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 5))
 
         // Уровень переживает прогоны, а тап по уже выбранному ничего не делает —
         // поэтому сначала уводим его в заведомо другое положение.
@@ -628,25 +626,6 @@ final class CaloriesUITests: XCTestCase {
             attempts += 1
         }
         XCTAssertTrue(entry.exists, "Добавленные калории не отобразились на «Сегодня»")
-    }
-
-    // MARK: - Еда
-
-    @MainActor
-    func testFoodTabHasSearchAndSegments() {
-        let app = launchApp()
-        app.tabBars.buttons["Food"].tap()
-        XCTAssertTrue(app.navigationBars["Pantry"].waitForExistence(timeout: 5))
-
-        XCTAssertTrue(app.searchFields.firstMatch.exists,
-                      "На «Моей еде» должна быть поисковая строка")
-        // Счётчиков в подписях больше нет: «Мои продукты (128)» не влезало в
-        // сегмент и обрезалось, а количество и так видно в самом списке.
-        let sources = app.segmentedControls.firstMatch
-        XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя разделов")
-        for name in ["My Dishes", "My Foods", "Database"] {
-            XCTAssertTrue(sources.buttons[name].exists, "Нет раздела «\(name)»")
-        }
     }
 
     // MARK: - Покупки

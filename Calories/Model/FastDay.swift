@@ -46,3 +46,17 @@ enum FastKind: String, Codable, CaseIterable, Identifiable {
         }
     }
 }
+
+/// Подсказка на «Сегодня» перед голоданием и в его день.
+struct FastingHint: Equatable {
+    let date: Date
+    let kind: FastKind
+    /// 0 — голодание сегодня.
+    let daysUntil: Int
+    let items: [FastingAdvice.Item]
+
+    static func == (lhs: FastingHint, rhs: FastingHint) -> Bool {
+        lhs.date == rhs.date && lhs.kind == rhs.kind && lhs.daysUntil == rhs.daysUntil
+            && lhs.items.map(\.text) == rhs.items.map(\.text)
+    }
+}

@@ -100,52 +100,8 @@ struct SettingsView: View {
                 }
             }
             
-            Section {
-                Button {
-                    prepareBackup()
-                } label: {
-                    Label("Резервная копия (JSON)", systemImage: "arrow.down.doc")
-                }
-                Button {
-                    prepareCSV()
-                } label: {
-                    Label("Дневник таблицей (CSV)", systemImage: "tablecells")
-                }
-            } header: {
-                Text("Данные")
-            } footer: {
-                Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
-            }
-
-            Section {
-                if backups.isConfigured {
-                    LabeledContent("Папка", value: backups.folderName ?? "—")
-                    LabeledContent("Последняя копия", value: lastBackupText)
-                    Button("Сделать копию сейчас") { backups.backupNow(store) }
-                    Button("Выбрать другую папку") { pick(.backupFolder) }
-                } else {
-                    Button {
-                        pick(.backupFolder)
-                    } label: {
-                        Label("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
-                    }
-                }
-                Button {
-                    pick(.backupFile)
-                } label: {
-                    Label("Восстановить из копии", systemImage: "arrow.up.doc")
-                }
-                if let error = backups.lastError {
-                    Text(verbatim: error)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                }
-            } header: {
-                Text("Автоматическая копия")
-            } footer: {
-                Text("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.")
-            }
-            
+            // Системное сразу после подписки: оформление, шрифт и язык ищут
+            // чаще, чем выгрузку копий, а та нужна раз в жизни телефона.
             Section("Системное") {
                 Picker(selection: $appTheme) {
                     ForEach(AppTheme.allCases) { theme in
@@ -178,18 +134,58 @@ struct SettingsView: View {
                     Label("Напоминания", systemImage: "bell")
                 }
                 NavigationLink {
-                    FastingView(store: store)
-                } label: {
-                    Label("Голодание", systemImage: "moon.stars")
-                }
-                .accessibilityIdentifier("openFasting")
-                NavigationLink {
                     LanguageSettingsView()
                 } label: {
                     Label("Язык", systemImage: "character.bubble")
                 }
             }
 
+            Section {
+                Button {
+                    prepareBackup()
+                } label: {
+                    rowLabel("Резервная копия (JSON)", systemImage: "arrow.down.doc")
+                }
+                Button {
+                    prepareCSV()
+                } label: {
+                    rowLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
+                }
+            } header: {
+                Text("Данные")
+            } footer: {
+                Text("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.")
+            }
+
+            Section {
+                if backups.isConfigured {
+                    LabeledContent("Папка", value: backups.folderName ?? "—")
+                    LabeledContent("Последняя копия", value: lastBackupText)
+                    Button("Сделать копию сейчас") { backups.backupNow(store) }
+                    Button("Выбрать другую папку") { pick(.backupFolder) }
+                } else {
+                    Button {
+                        pick(.backupFolder)
+                    } label: {
+                        rowLabel("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
+                    }
+                }
+                Button {
+                    pick(.backupFile)
+                } label: {
+                    rowLabel("Восстановить из копии", systemImage: "arrow.up.doc")
+                }
+                if let error = backups.lastError {
+                    Text(verbatim: error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Автоматическая копия")
+            } footer: {
+                Text("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.")
+            }
+            
 #if DEBUG
             // Инструменты разработчика собраны на своём экране и только в
             // отладочной сборке. Вперемешку с настройками пользователя они
@@ -482,3 +478,13 @@ struct DeveloperSettingsView: View {
     }
 }
 #endif
+
+/// Строка-действие в стиле остальных экранов: текст обычным цветом, акцент —
+/// только у значка. Синие подписи на всех строках спорили с тихими плашками.
+private func rowLabel(_ title: LocalizedStringKey, systemImage: String) -> some View {
+    Label {
+        Text(title).foregroundStyle(Color.primary)
+    } icon: {
+        Image(systemName: systemImage).foregroundStyle(.tint)
+    }
+}

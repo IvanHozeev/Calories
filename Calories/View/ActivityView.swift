@@ -36,8 +36,6 @@ struct ActivityView: View {
                     }
                 }
                 .pickerStyle(.segmented)
-            } header: {
-                Text("История")
             }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -116,7 +114,7 @@ private struct MonthGrid: View {
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                     Text(symbol)
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity)
                 }
 
@@ -125,26 +123,30 @@ private struct MonthGrid: View {
                 // ячеек — те же 0…N, и SwiftUI считал их одной ячейкой.
                 // Строка вместо числа разводит их гарантированно.
                 ForEach((0..<leadingBlanks).map { "blank-\($0)" }, id: \.self) { _ in
-                    Color.clear.frame(height: 34)
+                    Color.clear.frame(height: 40)
                 }
 
                 ForEach(days, id: \.date) { day in
                     let isToday = calendar.isDateInToday(day.date)
+                    // Как неделя на «Сегодня»: число без плашки, цвет — точкой
+                    // под ним, сегодня жирным. Сетка залитых квадратов была
+                    // тяжелее всего остального приложения.
                     Button {
                         guard day.hasEntries else { return }
                         onSelect(day.date)
                     } label: {
-                        Text("\(calendar.component(.day, from: day.date))")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(day.hasEntries ? .white : .secondary)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 34)
-                            .background(color(for: day), in: RoundedRectangle(cornerRadius: 8))
-                            .overlay(
-                                isToday
-                                    ? RoundedRectangle(cornerRadius: 8).stroke(Color.primary.opacity(0.6), lineWidth: 2)
-                                    : nil
-                            )
+                        VStack(spacing: 3) {
+                            Text(verbatim: "\(calendar.component(.day, from: day.date))")
+                                .font(.subheadline.weight(isToday ? .bold : .regular))
+                                .monospacedDigit()
+                                .foregroundStyle(isToday ? .primary : (day.hasEntries ? .secondary : .tertiary))
+                            Circle()
+                                .fill(color(for: day))
+                                .frame(width: 5, height: 5)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .disabled(!day.hasEntries)
@@ -152,9 +154,8 @@ private struct MonthGrid: View {
             }
 
             HStack(spacing: 14) {
-                legend(.green, "В цели")
+                legend(ProgressRing.kcalColors[0], "В цели")
                 legend(.orange, "Мимо цели")
-                legend(Color(.systemGray5), "Пропуск")
             }
             .font(.caption2)
             .foregroundStyle(.secondary)
@@ -163,17 +164,17 @@ private struct MonthGrid: View {
 
     private func legend(_ color: Color, _ title: LocalizedStringKey) -> some View {
         HStack(spacing: 4) {
-            RoundedRectangle(cornerRadius: 3)
+            Circle()
                 .fill(color)
-                .frame(width: 10, height: 10)
+                .frame(width: 6, height: 6)
             Text(title)
         }
     }
 
     private func color(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
-        if day.onGoal { return .green }
+        if day.onGoal { return ProgressRing.kcalColors[0] }
         if day.hasEntries { return .orange }
-        return Color(.systemGray5)
+        return .clear
     }
 }
 
@@ -205,17 +206,18 @@ private struct HistoryDayCard: View {
                     .monospacedDigit()
             }
 
+            // Как полоски на «Сегодня»: тонко и плоско, цвет — кольца.
+            let barColor = overGoal ? Color.orange : ProgressRing.kcalColors[0]
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(.channel(thickness: 6))
+                        .fill(barColor.opacity(0.18))
                     Capsule()
-                        .fill(overGoal ? Color.red : Color.green)
+                        .fill(barColor)
                         .frame(width: max(4, geo.size.width * fill))
-                        .glowingFill(overGoal ? Color.red : Color.green, thickness: 6)
                 }
             }
-            .frame(height: 6)
+            .frame(height: 4)
 
             MacroTags(macros: day.totalMacros)
         }

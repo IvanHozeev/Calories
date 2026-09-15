@@ -22,10 +22,10 @@ struct DayNutritionView: View {
     var body: some View {
         List {
             Section {
-                macroRow(.protein, value: macros.protein, target: store.proteinTarget, color: .blue)
-                macroRow(.fat, value: macros.fat, target: store.fatTarget, color: .orange)
+                macroRow(.protein, value: macros.protein, target: store.proteinTarget, color: MacroKind.protein.color)
+                macroRow(.fat, value: macros.fat, target: store.fatTarget, color: MacroKind.fat.color)
                 macroRow(.carbs, value: macros.carbs,
-                         target: store.carbsTarget ?? MacroTargets.carbsMinimum, color: .purple)
+                         target: store.carbsTarget ?? MacroTargets.carbsMinimum, color: MacroKind.carbs.color)
             } header: {
                 Text("Белки, жиры, углеводы")
             }

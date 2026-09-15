@@ -14,7 +14,7 @@ struct ContentView: View {
     @State private var ringPull: CGFloat = 0
 
     enum TodaySheet: String, Identifiable {
-        case weight, quickCalories, newFood, newDish, scanner
+        case weight, quickCalories, newFood, newDish, scanner, fasting
         var id: String { rawValue }
     }
     @State private var showingMeasurements = false
@@ -56,12 +56,6 @@ struct ContentView: View {
             List {
                 Section {
                     VStack(spacing: 24) {
-                        // Неделя — на месте скрытого заголовка: верх экрана
-                        // освободился, и полоска больше не отнимает место у кольца.
-                        WeekStrip(days: store.goalHistory(days: 7), streak: store.streak,
-                                  onSelect: { selectedHistoryDay = $0 },
-                                  onShowAll: { showingActivity = true })
-
                         ProgressRing(
                             consumed: store.consumedToday,
                             goal: store.adaptedTodayGoal,
@@ -101,6 +95,13 @@ struct ContentView: View {
                             onShowPaywall: { showingPaywall = true }
                         )
 
+                        // Неделя — под планом: сегодня в кольце, план объясняет его
+                        // норму, прошедшие дни следом. Над кольцом она первой ловила
+                        // взгляд, хотя прошлые дни открывают изредка.
+                        WeekStrip(weeks: store.weekStripWeeks(),
+                                  onSelect: { selectedHistoryDay = $0 },
+                                  onShowAll: { showingActivity = true })
+
                         if store.calorieBankBonus != 0 {
                             Button { showingBankInfo = true } label: {
                                 HStack(spacing: 4) {
@@ -125,7 +126,7 @@ struct ContentView: View {
                                 )
                                 .presentationCompactAdaptation(.popover)
                             }
-                        } else if !store.isPremium {
+                        } else if !store.isPremium && store.plan == nil {
                             Button { showingPaywall = true } label: {
                                 HStack(spacing: 4) {
                                     Image(systemName: "lock.fill")
@@ -189,30 +190,11 @@ struct ContentView: View {
                         // Отмеченный день голодания — не строка в настройках, а
                         // состояние сегодняшнего дня: пустой дневник в такой день
                         // должен читаться как «так и задумано», а не как провал.
-                        if let fast = store.fastDay(on: Date()) {
-                            Button {
-                                showingFasting = true
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Image(systemName: "moon.stars.fill")
-                                        .foregroundStyle(.indigo)
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Сегодня голодание")
-                                            .font(.subheadline.weight(.semibold))
-                                        Text(verbatim: fast.kind.title)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundStyle(.tertiary)
-                                }
-                                .padding(14)
-                                .glassCard()
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("fastingCard")
+                        // Голодание сегодня или в ближайшие три дня: подсказка к
+                        // месту — за пару дней про кофе, накануне про соль и воду,
+                        // в сам день про выход. Вся памятка — по нажатию.
+                        if let hint = store.fastingHint() {
+                            FastingStrip(hint: hint) { showingFasting = true }
                         }
 
 
@@ -295,12 +277,19 @@ struct ContentView: View {
                         } header: {
                             // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
                             // во сколько обошёлся обед, приходится складывать строки глазами.
-                            HStack {
+                            // Тихо, как подписи недели и макросов: название
+                            // приёма пищи — главное, итог рядом мельче.
+                            HStack(alignment: .firstTextBaseline) {
                                 Text(LocalizedStringKey(group.period.rawValue))
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
                                 Spacer()
                                 Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                                     .monospacedDigit()
                             }
+                            .textCase(nil)
                         }
                     }
                 }
@@ -331,9 +320,12 @@ struct ContentView: View {
             .navigationBarTitleDisplayMode(.inline)
             .hiddenNavigationTitle()
             .toolbar {
+                // Без общей стеклянной подложки: в строке остаются сами
+                // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
                 ToolbarItem(placement: .topBarLeading) {
                     StepsChip(store: stepStore) { showingSteps = true }
                 }
+                .withoutSharedBackground()
                 ToolbarItem(placement: .topBarTrailing) {
                     // Способы добавить еду выбираются здесь, до входа в лист.
                     // Раньше это меню жило внутри самого листа: чтобы отсканировать
@@ -394,11 +386,20 @@ struct ContentView: View {
                         } label: {
                             Label("Снять замеры", systemImage: "ruler")
                         }
+                        // Голодание — тоже отметка дня, а не настройка: его ставят
+                        // на конкретную дату, и искать это в настройках не станут.
+                        Button {
+                            todaySheet = .fasting
+                        } label: {
+                            Label("Голодание", systemImage: "moon.stars")
+                        }
+                        .accessibilityIdentifier("openFasting")
                     } label: {
                         Image(systemName: "plus")
                     }
                     .accessibilityIdentifier("addMenu")
                 }
+                .withoutSharedBackground()
             }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
@@ -426,9 +427,18 @@ struct ContentView: View {
                 case .newDish:
                     NewDishSheet(store: store)
                         .presentationDetents([.large])
+                case .fasting:
+                    NavigationStack {
+                        FastingView(store: store)
+                            .toolbar {
+                                ToolbarItem(placement: .confirmationAction) {
+                                    CheckmarkButton { todaySheet = nil }
+                                }
+                            }
+                    }
                 case .scanner:
-                    // С «Сегодня» отсканированное записывается приёмом пищи;
-                    // со вкладки «Еда» тот же сканер сохраняет в мои продукты.
+                    // Отсканированное записывается приёмом пищи; сохранить в мои
+                    // продукты можно второй кнопкой на экране продукта.
                     BarcodeScannerSheet(store: store) { item in
                         store.add(name: item.name, calories: item.calories, macros: item.macros, grams: item.grams)
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()

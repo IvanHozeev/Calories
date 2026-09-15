@@ -15,31 +15,22 @@ struct RingView<Label: View>: View {
     /// а раньше это было три числа в разных местах, которые легко разъезжались.
     private let lineWidth: CGFloat = 9
 
-    /// Канавка, прорезанная в карточке. Раньше здесь была плоская серая обводка,
-    /// а на iOS 26 — стеклянный бублик; стекло убрано намеренно. Стекло лежит
-    /// поверх поверхности и преломляет то, что под ним, гравировка уходит внутрь
-    /// неё — две противоположные метафоры на одном элементе спорят друг с другом,
-    /// и кольцо переставало читаться как одна вещь.
+    /// Дорожка цветом кольца, приглушённым, — как у кольца «Сегодня» и полосок.
     private var channel: some View {
         Circle()
             .inset(by: lineWidth / 2)
-            .stroke(.channel(thickness: lineWidth), style: StrokeStyle(lineWidth: lineWidth))
+            .stroke((colors.first ?? .secondary).opacity(0.18), style: StrokeStyle(lineWidth: lineWidth))
     }
 
-    /// Цвет, налитый в канавку. Дуга уже канавки на пол-пункта с каждой стороны:
-    /// остаётся видна стенка, и цвет не выглядит наклеенным вровень с краями.
-    ///
-    /// Заливка светится, а не повторяет рельеф стенок. Рельеф физически честнее,
-    /// но гасит цвет — а светящаяся заливка в прорезанной канавке живее.
+    /// Заливка вровень с дорожкой, без свечения.
     private var filling: some View {
         Circle()
             .inset(by: lineWidth / 2)
             .trim(from: 0, to: progress)
             .stroke(
                 LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
-                style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round)
+                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
             )
-            .glowingFill(colors.first ?? .clear, thickness: lineWidth)
             .rotationEffect(.degrees(-90))
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
     }
@@ -98,7 +89,9 @@ struct ProgressRing: View {
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
     private static let rotation: Double = -40
 
-    private let lineWidth: CGFloat = 18
+    /// Тоньше прежних 18: рядом с тонкими полосками и стеклом толстое кольцо
+    /// было единственной тяжёлой формой на экране.
+    private let lineWidth: CGFloat = 14
     private let size: CGFloat = 230
     /// Зазор между дугами в градусах — с запасом на скруглённые концы.
     private let gap: Double = 11
@@ -114,10 +107,12 @@ struct ProgressRing: View {
     // Пары близкие: цвет почти однотонный, градиент только оживляет дугу.
     // Эмаль иконки с глубоким градиентом пробовали — на кольце с его тонкими
     // дугами прежние мягкие цвета смотрелись лучше.
-    private static let kcalColors = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
-    private static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
-    private static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
-    private static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
+    // Открыты для карточки макросов: цифры под кольцом должны быть того же
+    // цвета, что дуги, а не системных синего, оранжевого и фиолетового.
+    static let kcalColors = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
+    static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
+    static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
+    static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
 
     /// Путь кольца до остановки перед финишем.
     static let spinDuration = RingTicks.duration
@@ -168,8 +163,11 @@ struct ProgressRing: View {
     var body: some View {
         ZStack {
             ForEach(segments) { segment in
+                // Дорожка — цвет самой дуги, приглушённый, как у полосок
+                // макросов под кольцом. Вместо серой канавки: пустое кольцо
+                // уже показывает, на что делится день.
                 RingArc(start: segment.start, end: segment.end)
-                    .stroke(.channel(thickness: lineWidth),
+                    .stroke(segment.colors[0].opacity(0.18),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 if segment.progress > 0 {
                     RingArc(start: segment.start,
@@ -179,14 +177,11 @@ struct ProgressRing: View {
                         .stroke(LinearGradient(colors: segment.colors,
                                                startPoint: Self.point(at: segment.start),
                                                endPoint: Self.point(at: segment.end)),
-                                style: StrokeStyle(lineWidth: lineWidth - 1, lineCap: .round))
-                        // Свечение едва заметное: полное размывало края дуг,
-                        // а совсем без него цвет выглядел плоско.
-                        .shadow(color: (segment.colors.last ?? .clear).opacity(0.25), radius: lineWidth * 0.35)
+                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 }
             }
             .padding(lineWidth / 2)
-            // Одним слоем: каждая дуга со своим свечением крутилась отдельно,
+            // Одним слоем: каждая дуга крутилась отдельно,
             // и на обороте цвета размазывались друг по другу. Склеенное кольцо
             // поворачивается как цельная картинка.
             .compositingGroup()
@@ -219,22 +214,24 @@ struct ProgressRing: View {
         if showsTargets {
             return AnyView(VStack(spacing: 2) {
                 Text("Норма")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.green)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Text(verbatim: "\(goal)")
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .font(.system(size: 42, weight: .bold))
                 Text("ккал в день")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             })
         }
         return AnyView(VStack(spacing: 2) {
+            // Тихо, как подписи плашек: цвет только у слова «Перебор», число
+            // остаётся обычным — красная цифра во весь круг кричала.
             Text(overGoal ? "Перебор" : "Остаток")
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(overGoal ? .red : .green)
+                .font(.caption)
+                .foregroundStyle(overGoal ? Color.orange : Color.secondary)
             Text("\(abs(remaining))")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
-                .foregroundStyle(overGoal ? Color.red : Color.primary)
+                .font(.system(size: 42, weight: .bold))
+                .foregroundStyle(Color.primary)
                 .contentTransition(.numericText())
             Text("из \(goal) ккал")
                 .font(.caption)

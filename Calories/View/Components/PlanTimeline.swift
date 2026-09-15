@@ -26,10 +26,12 @@ struct PlanTimeline: View {
                 ZStack(alignment: .leading) {
                     HStack(spacing: 2) {
                         ForEach(Array(plan.timeline.enumerated()), id: \.element.id) { index, phase in
+                            // Тонкие полоски, как у макросов под кольцом;
+                            // отметка «сегодня» выше их, чтобы не потеряться.
                             Capsule()
                                 .fill(color(for: phase.intent)
                                     .opacity(index == currentIndex ? 1 : 0.35))
-                                .frame(width: width(of: phase, in: geometry.size.width))
+                                .frame(width: width(of: phase, in: geometry.size.width), height: 4)
                         }
                     }
                     // Отметка «сегодня»: без неё полоса показывает расписание,

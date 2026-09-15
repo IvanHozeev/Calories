@@ -256,15 +256,19 @@ private struct StepsContentView: View {
         return Double(max(store.stepGoal, maxSteps)) * 1.15
     }
 
+    /// Шаги — голубым, как кольцо шагов в виджете; цель взята — зелёным
+    /// кольца калорий. Оранжево-красный читался как перебор, а не как успех.
+    private static let stepsColors = [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
+
     private var ringColors: [Color] {
-        viewModel.stepGoalAchieved ? [.orange, .red] : [.blue, .cyan]
+        viewModel.stepGoalAchieved ? ProgressRing.kcalColors : Self.stepsColors
     }
 
     private var ringLabel: some View {
         let remaining = store.stepGoal - store.stepsToday
         return VStack(spacing: 2) {
             Text(store.stepsToday.formatted())
-                .font(.system(size: 42, weight: .bold, design: .rounded))
+                .font(.system(size: 42, weight: .bold))
                 .monospacedDigit()
                 .contentTransition(.numericText())
             Text("из \(store.stepGoal.formatted()) шагов")
@@ -272,20 +276,21 @@ private struct StepsContentView: View {
                 .foregroundStyle(.secondary)
             if remaining > 0 {
                 Text("\(remaining.formatted()) осталось")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.blue)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
                     .contentTransition(.numericText())
             } else {
                 Text("цель достигнута")
                     .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(ProgressRing.kcalColors[0])
                     .contentTransition(.numericText())
             }
         }
     }
 
-    /// Кольцо и три показателя — единый блок. Раньше кольцо висело на фоне экрана,
-    /// а под ним лежала отдельная серая плашка: получалась карточка внутри карточки.
+    /// Кольцо прямо на фоне, как на «Сегодня», а показатели под ним — стеклянной
+    /// плашкой в стиле макросов. Кольцо в карточке было единственным таким
+    /// во всём приложении.
     private var todayCard: some View {
         VStack(spacing: 24) {
             RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday,
@@ -307,26 +312,23 @@ private struct StepsContentView: View {
                 }
             }
 
-            Divider()
-
             HStack(spacing: 0) {
                 statCell(title: String(localized: "Дистанция"), value: distanceText, subtitle: "")
-                Divider().frame(height: 40)
                 statCell(title: String(localized: "от цели"), value: viewModel.goalPercentText, subtitle: "")
-                Divider().frame(height: 40)
                 statCell(title: String(localized: "Цель"), value: store.stepGoal.formatted(), subtitle: "")
             }
+            .padding(.vertical, 12)
+            .glassCard()
         }
-        .padding(.vertical, 20)
+        .padding(.top, 8)
         .frame(maxWidth: .infinity)
-        .glassCard()
     }
 
     private var chartCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("История")
-                    .font(.headline)
+                    .font(.subheadline.weight(.semibold))
                 Spacer()
                 Picker("Период", selection: $viewModel.period) {
                     ForEach(StepPeriod.allCases, id: \.self) { p in
@@ -347,12 +349,12 @@ private struct StepsContentView: View {
                         x: .value("Дата", day.date, unit: .day),
                         y: .value("Шаги", day.steps)
                     )
-                    .foregroundStyle(day.steps >= store.stepGoal ? Color.green : Color.blue)
+                    .foregroundStyle(day.steps >= store.stepGoal ? ProgressRing.kcalColors[0] : Self.stepsColors[0])
                     .cornerRadius(4)
 
                     RuleMark(y: .value("Цель", store.stepGoal))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
-                        .foregroundStyle(.orange.opacity(0.7))
+                        .foregroundStyle(Color.secondary.opacity(0.6))
                 }
                 .chartXAxis {
                     let stride = viewModel.period == .week ? 1 : 5
@@ -380,23 +382,20 @@ private struct StepsContentView: View {
     private var trendsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Обзор")
-                .font(.headline)
+                .font(.subheadline.weight(.semibold))
 
             HStack(spacing: 0) {
                 trendCell
-                Divider().frame(height: 40)
                 statCell(
                     title: String(localized: "Стрик"),
                     value: "\(store.goalStreak)",
                     subtitle: viewModel.goalStreakSubtitle
                 )
-                Divider().frame(height: 40)
                 statCell(
                     title: String(localized: "Неделя"),
                     value: store.weeklyTotal > 0 ? store.weeklyTotal.formatted() : "—",
                     subtitle: String(localized: "шагов")
                 )
-                Divider().frame(height: 40)
                 statCell(
                     title: String(localized: "Калории"),
                     value: store.activeCaloriesToday > 0 ? "\(store.activeCaloriesToday)" : "—",
@@ -415,18 +414,18 @@ private struct StepsContentView: View {
                     Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
                         .font(.caption.weight(.bold))
                     Text(String(format: "%.0f%%", abs(trend)))
-                        .font(.title3.weight(.semibold))
+                        .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
                 }
-                .foregroundStyle(trend >= 0 ? .green : .red)
+                .foregroundStyle(trend >= 0 ? ProgressRing.kcalColors[0] : .orange)
             } else {
                 Text("—")
-                    .font(.title3.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
             Text(verbatim: String(localized: "vs пред. неделя"))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -439,13 +438,11 @@ private struct StepsContentView: View {
                 value: viewModel.average > 0 ? viewModel.average.formatted() : "—",
                 subtitle: String(localized: "шагов/день")
             )
-            Divider().frame(height: 40)
             statCell(
                 title: String(localized: "Рекорд"),
                 value: viewModel.best.map { $0.steps.formatted() } ?? "—",
                 subtitle: viewModel.best.map { $0.date.formatted(.dateTime.day().month(.abbreviated)) } ?? ""
             )
-            Divider().frame(height: 40)
             statCell(
                 title: String(localized: "Дней с целью"),
                 value: "\(viewModel.daysOnGoal)",
@@ -458,13 +455,15 @@ private struct StepsContentView: View {
     }
 
     private func statCell(title: String, value: String, subtitle: String) -> some View {
-        VStack(spacing: 4) {
+        // Как колонки плашки макросов: подпись мелко, число — без крика,
+        // без разделителей между ячейками.
+        VStack(spacing: 3) {
             Text(value)
-                .font(.title3.weight(.semibold))
+                .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
             Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
                 // Ячеек в ряду до четырёх, и длинные подписи вроде «vs пред. неделя»
                 // обрезались многоточием вместо переноса.
                 .multilineTextAlignment(.center)

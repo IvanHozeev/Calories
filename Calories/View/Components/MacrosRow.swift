@@ -5,9 +5,9 @@ struct MacrosRow: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            macroItem(title: "Белки", value: macros.protein, color: .blue)
-            macroItem(title: "Жиры", value: macros.fat, color: .orange)
-            macroItem(title: "Углеводы", value: macros.carbs, color: .purple)
+            macroItem(title: "Белки", value: macros.protein, color: MacroKind.protein.color)
+            macroItem(title: "Жиры", value: macros.fat, color: MacroKind.fat.color)
+            macroItem(title: "Углеводы", value: macros.carbs, color: MacroKind.carbs.color)
         }
     }
 

@@ -163,7 +163,9 @@ struct PlanView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .glassCard()
+        // Тем же стеклом, что строка плана на «Сегодня»: план — премиум, и
+        // шапка его экрана — продолжение той строки, а не белая карточка.
+        .liquidGlass(in: RoundedRectangle(cornerRadius: 22))
     }
 
     /// Полоса пройденного пути — по весу, а не по времени.
@@ -182,17 +184,18 @@ struct PlanView: View {
             : plan.progress
 
         return VStack(alignment: .leading, spacing: 6) {
+            // Тонкая полоска с подложкой того же цвета, как у макросов под
+            // кольцом, — вместо толстой канавки со свечением.
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule()
-                        .fill(.channel(thickness: 8))
+                        .fill(tint.opacity(0.18))
                     Capsule()
                         .fill(tint)
-                        .frame(width: max(3, geo.size.width * progress))
-                        .glowingFill(tint, thickness: 8)
+                        .frame(width: max(4, geo.size.width * progress))
                 }
             }
-            .frame(height: 8)
+            .frame(height: 4)
 
             HStack {
                 Text(String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg))
@@ -441,25 +444,24 @@ struct PlanView: View {
                 ForEach(Array(days.enumerated()), id: \.offset) { index, day in
                     let isToday = calendar.isDate(day, inSameDayAs: today)
                     let isRefeed = offsets[index] > 0
-                    VStack(spacing: 4) {
+                    // Как неделя на «Сегодня»: без рамок, сегодня — жирным,
+                    // рефид — точкой под числом, цвет только у неё.
+                    VStack(spacing: 2) {
                         Text(symbols[(index + 1) % 7])
                             .font(.caption2)
-                            .foregroundStyle(isToday ? .primary : .secondary)
+                            .foregroundStyle(.tertiary)
                         Text(store.goal(for: day).formatted())
-                            .font(.caption.weight(isRefeed ? .bold : .regular))
+                            .font(.caption.weight(isToday ? .bold : .regular))
                             .monospacedDigit()
                             .minimumScaleFactor(0.7)
                             .lineLimit(1)
-                            .foregroundStyle(isRefeed ? Color.orange : (day < today ? .secondary : .primary))
+                            .foregroundStyle(isToday ? .primary : .secondary)
+                        Circle()
+                            .fill(isRefeed ? ProgressRing.fatColors[0] : .clear)
+                            .frame(width: 5, height: 5)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
-                    .background {
-                        if isToday {
-                            RoundedRectangle(cornerRadius: 8)
-                                .strokeBorder(Color.secondary.opacity(0.5), lineWidth: 1)
-                        }
-                    }
+                    .padding(.vertical, 4)
                 }
             }
             .padding(.vertical, 4)

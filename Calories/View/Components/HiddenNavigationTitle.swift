@@ -15,3 +15,16 @@ extension View {
         }
     }
 }
+
+extension ToolbarContent {
+    /// Элемент тулбара без стеклянной подложки, которую iOS 26 рисует под
+    /// кнопками. На ранних системах подложки нет, и менять нечего.
+    @ToolbarContentBuilder
+    func withoutSharedBackground() -> some ToolbarContent {
+        if #available(iOS 26, *) {
+            sharedBackgroundVisibility(.hidden)
+        } else {
+            self
+        }
+    }
+}

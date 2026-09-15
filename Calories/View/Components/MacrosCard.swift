@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// Макросы за день одной стеклянной плашкой под кольцом.
+///
+/// В стиле строки плана и недели: без белой карточки, тихо, цвет — только у
+/// цифр и тонких полосок, и это те же цвета, что у дуг кольца. Белая карточка
+/// с крупными системными цветами была самым тяжёлым пятном под кольцом.
 struct MacrosCard: View {
     let macros: Macros
     let proteinTarget: Double?
@@ -20,64 +25,65 @@ struct MacrosCard: View {
         let isBig = dynamicTypeSize.isAccessibilitySize
         let layout = isBig
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
-            : AnyLayout(HStackLayout())
+            : AnyLayout(HStackLayout(spacing: 14))
         return Button(action: onOpen) {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 layout {
-                    macroColumn(.protein, value: macros.protein, color: .blue)
-                    if !isBig { Divider().frame(height: 30) }
-                    macroColumn(.fat, value: macros.fat, color: .orange)
-                    if !isBig { Divider().frame(height: 30) }
-                    macroColumn(.carbs, value: macros.carbs, color: .purple)
+                    macroColumn(.protein, value: macros.protein, color: MacroKind.protein.color)
+                    macroColumn(.fat, value: macros.fat, color: MacroKind.fat.color)
+                    macroColumn(.carbs, value: macros.carbs, color: MacroKind.carbs.color)
                 }
-                // Шеврон как у остальных карточек: без него непонятно, что
-                // карточка вообще куда-то ведёт — раньше она открывала попапы.
+                // Шеврон как у строки плана: без него непонятно, что плашка
+                // куда-то ведёт.
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                    .font(.caption2.weight(.semibold))
                     .foregroundStyle(.tertiary)
             }
-            // Потуже по вертикали: так кольцо, карточки и неделя помещаются
-            // в экран до таббара без прокрутки.
-            .padding(.horizontal)
+            .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
+            .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
-        .glassCard()
         .accessibilityIdentifier("openDayNutrition")
     }
 
-    private func value(for kind: MacroKind) -> Double {
-        switch kind {
-        case .protein: return macros.protein
-        case .fat: return macros.fat
-        case .carbs: return macros.carbs
-        }
-    }
-
     private func macroColumn(_ kind: MacroKind, value: Double, color: Color) -> some View {
-        let isBig = dynamicTypeSize.isAccessibilitySize
-        let inner: AnyLayout = isBig
-            ? AnyLayout(HStackLayout(spacing: 8))
-            : AnyLayout(VStackLayout(spacing: 1))
-        return inner {
-                Text(String(format: "%.0f \(String(localized: "г"))", value))
-                    .font(.title3.bold())
+        let target = target(for: kind)
+        let progress = target.map { $0 > 0 ? min(value / $0, 1) : 0 } ?? 0
+        return VStack(alignment: .leading, spacing: 3) {
+            Text(LocalizedStringKey(kind.title))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(String(format: "%.0f", value))
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(color)
-                // Съеденное без цели — просто число: непонятно, много это или мало.
-                // Цель мелким шрифтом под ним, чтобы не спорить с самим значением.
-                if let target = target(for: kind) {
+                // Цель мелко рядом, чтобы не спорить с самим значением.
+                if let target {
                     Text(verbatim: "/ \(Int(target.rounded()))")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
-                        .monospacedDigit()
                 }
-                Text(LocalizedStringKey(kind.title))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if isBig { Spacer(minLength: 0) }
+                Text("г")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
             }
-        .frame(maxWidth: .infinity, alignment: isBig ? Alignment.leading : Alignment.center)
+            .monospacedDigit()
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            // Полоска вместо разделителей: как далеко до цели, тем же цветом,
+            // что дуга макроса в кольце.
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(color.opacity(0.18))
+                    Capsule().fill(color)
+                        .frame(width: geometry.size.width * progress)
+                }
+            }
+            .frame(height: 3)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func target(for kind: MacroKind) -> Double? {
@@ -88,3 +94,4 @@ struct MacrosCard: View {
         }
     }
 }
+

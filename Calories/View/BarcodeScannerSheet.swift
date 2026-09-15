@@ -5,7 +5,7 @@ import Vision
 struct BarcodeScannerSheet: View {
     let store: CalorieStore
     /// Nil означает режим «только сохранить в продукты» (без кнопки добавить в приём пищи)
-    var onAdd: ((MealItem) -> Void)? = nil
+    var onAdd: (MealItem) -> Void
     @Environment(\.dismiss) private var dismiss
 
     @State private var phase: Phase = .scanning
@@ -138,29 +138,27 @@ struct BarcodeScannerSheet: View {
         let saved = isSaved(product)
 
         VStack(spacing: 10) {
-            if let onAdd {
-                Button {
-                    guard grams > 0 else { return }
-                    onAdd(MealItem(
-                        name: product.name,
-                        calories: Int((Double(product.caloriesPer100g) * factor).rounded()),
-                        macros: Macros(
-                            protein: product.protein * factor,
-                            fat: product.fat * factor,
-                            carbs: product.carbs * factor
-                        ),
-                        grams: grams
-                    ))
-                    dismiss()
-                } label: {
-                    Label("Добавить в приём пищи", systemImage: "plus.circle.fill")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(grams <= 0)
+            Button {
+                guard grams > 0 else { return }
+                onAdd(MealItem(
+                    name: product.name,
+                    calories: Int((Double(product.caloriesPer100g) * factor).rounded()),
+                    macros: Macros(
+                        protein: product.protein * factor,
+                        fat: product.fat * factor,
+                        carbs: product.carbs * factor
+                    ),
+                    grams: grams
+                ))
+                dismiss()
+            } label: {
+                Label("Добавить в приём пищи", systemImage: "plus.circle.fill")
+                    .fontWeight(.semibold)
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .disabled(grams <= 0)
 
             if saved {
                 Label("Уже в моих продуктах", systemImage: "checkmark.circle.fill")
@@ -168,15 +166,6 @@ struct BarcodeScannerSheet: View {
                     .foregroundStyle(.green)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
-            } else if onAdd == nil {
-                // Когда добавлять в приём пищи некуда, сохранение и есть главное действие.
-                Button { saveToProducts(product) } label: {
-                    Label("Сохранить в мои продукты", systemImage: "bookmark")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
             } else {
                 Button { saveToProducts(product) } label: {
                     Label("Сохранить в мои продукты", systemImage: "bookmark")

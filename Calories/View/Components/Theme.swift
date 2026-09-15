@@ -21,6 +21,17 @@ struct GlassCard: ViewModifier {
     }
 
     func body(content: Content) -> some View {
+        // На iOS 26 карточки — то же живое стекло, что плашки плана и макросов
+        // на «Сегодня»: один материал на всё приложение, а не белые карточки
+        // рядом со стеклом. Ниже — прежняя карточка для ранних систем.
+        if #available(iOS 26, *) {
+            content.liquidGlass(in: RoundedRectangle(cornerRadius: max(cornerRadius, 18)))
+        } else {
+            legacy(content)
+        }
+    }
+
+    private func legacy(_ content: Content) -> some View {
         content
             .background {
                 RoundedRectangle(cornerRadius: cornerRadius)
@@ -41,6 +52,24 @@ struct GlassCard: ViewModifier {
 }
 
 extension View {
+    /// Живое стекло iOS 26 — плашки «Сегодня» и плана. На ранних системах
+    /// стекла нет, вместо него полупрозрачная заливка той же формы.
+    ///
+    /// Одно место на все плашки: план, макросы, шапка плана должны быть
+    /// одним материалом, а не тремя похожими.
+    ///
+    /// `interactive` — только для плашек без кнопки внутри: интерактивное
+    /// стекло забирает касание себе, и обёрнутая им кнопка переставала
+    /// нажиматься — строка плана не открывала ни план, ни пейволл.
+    @ViewBuilder
+    func liquidGlass<S: Shape>(in shape: S, interactive: Bool = false) -> some View {
+        if #available(iOS 26, *) {
+            glassEffect(.regular.interactive(interactive), in: shape)
+        } else {
+            background(Color.secondary.opacity(0.10), in: shape)
+        }
+    }
+
     /// Карточка из матового стекла с градиентным кантом.
     func glassCard(cornerRadius: CGFloat = 16) -> some View {
         modifier(GlassCard(cornerRadius: cornerRadius))
@@ -156,7 +185,7 @@ extension View {
 /// что внутри стиля системный tint не прочитать.
 struct EngravedProgressViewStyle: ProgressViewStyle {
     let color: Color
-    var thickness: CGFloat = 6
+    var thickness: CGFloat = 4
 
     func makeBody(configuration: Configuration) -> some View {
         Bar(value: configuration.fractionCompleted ?? 0, color: color, thickness: thickness)
@@ -170,14 +199,16 @@ struct EngravedProgressViewStyle: ProgressViewStyle {
         var body: some View {
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
+                    // Плоская дорожка тем же цветом, приглушённым, — как полоски
+                    // макросов на «Сегодня». Канавка со свечением осталась
+                    // только у кольца.
                     Capsule()
-                        .fill(.channel(thickness: thickness))
+                        .fill(color.opacity(0.18))
                     Capsule()
                         .fill(color)
                         // Ноль остаётся нулём: полоски-огрызка на пустом прогрессе
                         // быть не должно, иначе «ещё не начато» выглядит как «чуть-чуть».
                         .frame(width: max(0, geometry.size.width * min(max(value, 0), 1)))
-                        .glowingFill(color, thickness: thickness)
                 }
             }
             .frame(height: thickness)
@@ -186,7 +217,7 @@ struct EngravedProgressViewStyle: ProgressViewStyle {
 }
 
 extension ProgressViewStyle where Self == EngravedProgressViewStyle {
-    static func engraved(_ color: Color, thickness: CGFloat = 6) -> EngravedProgressViewStyle {
+    static func engraved(_ color: Color, thickness: CGFloat = 4) -> EngravedProgressViewStyle {
         EngravedProgressViewStyle(color: color, thickness: thickness)
     }
 }

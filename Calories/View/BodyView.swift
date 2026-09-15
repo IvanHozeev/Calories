@@ -148,10 +148,10 @@ struct BodyView: View {
         let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
 
         Section {
-            macroBudgetRow("Белки", grams: protein, color: .blue)
-            macroBudgetRow("Жиры", grams: fat, color: .orange)
+            macroBudgetRow("Белки", grams: protein, color: MacroKind.protein.color)
+            macroBudgetRow("Жиры", grams: fat, color: MacroKind.fat.color)
             if carbs > 0 {
-                macroBudgetRow("Углеводы", grams: carbs, color: .purple)
+                macroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
             } else {
                 Label(
                     String(
@@ -200,6 +200,86 @@ struct BodyView: View {
     
     var body: some View {
         List {
+            // Расчёт первым: ради него профиль и открывают — сколько тратишь,
+            // сколько есть и сколько белка. Параметры, из которых он собран,
+            // правят редко, и им место ниже.
+            if let draftProfile {
+                Section {
+                    HStack {
+                        Text("Жир % (оценка)")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
+                        Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityIdentifier("bodyFatRow")
+                    
+                    HStack {
+                        Text("ИМТ")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(String(format: "%.1f", draftProfile.bmi))
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(bmiColor(draftProfile.bmi))
+                        (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
+                    resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
+                    // Цель редактируется здесь, а не долгим нажатием на кольцо.
+                    // Жест был невидимый и позволял вписать число, спорящее
+                    // с планом: план цель считает, и правка руками потом молча
+                    // отменялась на первой же смене профиля.
+                    if store.plan != nil {
+                        HStack {
+                            Text("Целевые калории")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(ProgressRing.kcalColors[0])
+                            Image(systemName: "target")
+                                .font(.caption)
+                                .foregroundStyle(.yellow)
+                        }
+                        .accessibilityIdentifier("calorieTargetRow")
+                    } else {
+                        Button {
+                            goalText = String(store.dailyGoal)
+                            showingGoalEditor = true
+                        } label: {
+                            HStack {
+                                Text("Целевые калории")
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(.green)
+                                Image(systemName: "pencil")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .accessibilityIdentifier("calorieTargetRow")
+                    }
+                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))", highlighted: true)
+                } header: {
+                    Text("Расчёт")
+                } footer: {
+                    if store.plan != nil {
+                        Text("Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план.")
+                    }
+                    Text(draftProfile.isNavyMethod(from: measurement)
+                         ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+                         : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
+                }
+            }
+
             if store.plan == nil {
                 Section {
                     Picker("Цель", selection: $goal) {
@@ -297,17 +377,21 @@ struct BodyView: View {
                         pendingActivity = level
                     } label: {
                         HStack {
+                            // Цвета явные: иерархический .primary внутри кнопки
+                            // списка берёт акцент, и все пять строк были синими —
+                            // самым шумным местом профиля.
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(level.title)
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(Color.primary)
                                 Text(level.subtitle)
                                     .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color.secondary)
                             }
                             Spacer()
                             if activityLevel == level {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(.green)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.tint)
                             }
                         }
                     }
@@ -415,83 +499,7 @@ struct BodyView: View {
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
             }
-            
-            if let draftProfile {
-                Section {
-                    HStack {
-                        Text("Жир % (оценка)")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
-                        Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityIdentifier("bodyFatRow")
-                    
-                    HStack {
-                        Text("ИМТ")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.1f", draftProfile.bmi))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(bmiColor(draftProfile.bmi))
-                        (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
-                    resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
-                    // Цель редактируется здесь, а не долгим нажатием на кольцо.
-                    // Жест был невидимый и позволял вписать число, спорящее
-                    // с планом: план цель считает, и правка руками потом молча
-                    // отменялась на первой же смене профиля.
-                    if store.plan != nil {
-                        HStack {
-                            Text("Целевые калории")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(.green)
-                            Image(systemName: "target")
-                                .font(.caption)
-                                .foregroundStyle(.yellow)
-                        }
-                        .accessibilityIdentifier("calorieTargetRow")
-                    } else {
-                        Button {
-                            goalText = String(store.dailyGoal)
-                            showingGoalEditor = true
-                        } label: {
-                            HStack {
-                                Text("Целевые калории")
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(.green)
-                                Image(systemName: "pencil")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .accessibilityIdentifier("calorieTargetRow")
-                    }
-                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))", highlighted: true)
-                } header: {
-                    Text("Расчёт")
-                } footer: {
-                    if store.plan != nil {
-                        Text("Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план.")
-                    }
-                    Text(draftProfile.isNavyMethod(from: measurement)
-                         ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
-                         : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
-                }
-            }
+
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -521,30 +529,21 @@ struct BodyView: View {
         } message: { level in
             Text(activityChangeMessage(to: level))
         }
-        .navigationTitle("Тело")
+        .navigationTitle("Профиль")
         .navigationBarTitleDisplayMode(.inline)
         .hiddenNavigationTitle()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 16) {
-                    // Замеры — не строка в параметрах тела: туда заходят смотреть
-                    // выводы, а не править число, и лежать это должно там же, где
-                    // остальные входы на свои экраны.
-                    NavigationLink {
-                        MeasurementsView(store: store)
-                    } label: {
-                        Image(systemName: "ruler")
-                    }
-                    .accessibilityLabel("Замеры")
-                    .accessibilityIdentifier("openMeasurementsRow")
-
-                    NavigationLink {
-                        SettingsView(store: store)
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                    .accessibilityIdentifier("openSettings")
+                // Замеры — не строка в параметрах тела: туда заходят смотреть
+                // выводы, а не править число, и лежать это должно там же, где
+                // остальные входы на свои экраны.
+                NavigationLink {
+                    MeasurementsView(store: store)
+                } label: {
+                    Image(systemName: "ruler")
                 }
+                .accessibilityLabel("Замеры")
+                .accessibilityIdentifier("openMeasurementsRow")
             }
         }
         .onChange(of: draftProfile) { _, newProfile in

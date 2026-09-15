@@ -442,6 +442,22 @@ final class CalorieStore {
         return fastDays.first { Calendar.current.startOfDay(for: $0.date) == day }
     }
 
+    /// Ближайшее голодание — сегодня или в пределах трёх дней — и советы, которые
+    /// к месту именно сейчас. nil, когда голодания впереди нет или советовать
+    /// пока рано.
+    func fastingHint(now: Date = Date()) -> FastingHint? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        for offset in 0...FastingAdvice.earliestDaysBefore {
+            guard let date = calendar.date(byAdding: .day, value: offset, to: today),
+                  let fast = fastDay(on: date) else { continue }
+            let items = FastingAdvice.advice(for: fast.kind, daysBefore: offset)
+            guard !items.isEmpty else { return nil }
+            return FastingHint(date: date, kind: fast.kind, daysUntil: offset, items: items)
+        }
+        return nil
+    }
+
     @discardableResult
     func markFastDay(_ date: Date = Date(), kind: FastKind) -> FastDay {
         if let existing = fastDay(on: date) {

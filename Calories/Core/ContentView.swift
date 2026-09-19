@@ -86,6 +86,15 @@ struct ContentView: View {
                             }
                         }
 
+                        MacrosCard(
+                            macros: store.macrosToday,
+                            proteinTarget: store.proteinTarget,
+                            fatTarget: store.fatTarget,
+                            carbsTarget: store.carbsTarget,
+                            weightKg: store.weightKg,
+                            onOpen: { showingDayNutrition = true }
+                        )
+                        
                         // Строка вместо карточки: план виден и открывается,
                         // но не занимает полэкрана. Подробности — на его
                         // собственном экране, куда ведёт и она, и кольцо.
@@ -196,16 +205,6 @@ struct ContentView: View {
                         if let hint = store.fastingHint() {
                             FastingStrip(hint: hint) { showingFasting = true }
                         }
-
-
-                        MacrosCard(
-                            macros: store.macrosToday,
-                            proteinTarget: store.proteinTarget,
-                            fatTarget: store.fatTarget,
-                            carbsTarget: store.carbsTarget,
-                            weightKg: store.weightKg,
-                            onOpen: { showingDayNutrition = true }
-                        )
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)

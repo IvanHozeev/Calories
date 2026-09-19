@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @AppStorage(RingSound.defaultsKey) private var ringSound = RingSound.wheel.rawValue
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -43,6 +44,13 @@ struct SettingsView: View {
         return formatter.string(from: Date())
     }
     
+    /// Имя текущего языка на нём самом — как его показывают Настройки.
+    private var currentLanguageName: String {
+        let code = Bundle.main.preferredLocalizations.first ?? Locale.current.identifier
+        let locale = Locale(identifier: code)
+        return locale.localizedString(forLanguageCode: code)?.capitalized(with: locale) ?? code
+    }
+
     private func prepareBackup() {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -124,10 +132,27 @@ struct SettingsView: View {
                 }
                 .accessibilityIdentifier("openFontSettings")
 
-                NavigationLink {
-                    UnitsSettingsView()
+                Picker(selection: $appAccent) {
+                    ForEach(AppAccent.allCases) { accent in
+                        Label {
+                            Text(verbatim: accent.title)
+                        } icon: {
+                            Image(systemName: "circle.fill").foregroundStyle(accent.color)
+                        }
+                        .tag(accent.rawValue)
+                    }
                 } label: {
-                    Label("Единицы измерения", systemImage: "globe")
+                    Label("Цвет акцента", systemImage: "paintpalette")
+                }
+                .accessibilityIdentifier("accentColor")
+
+                // Меню прямо в строке, как у оформления: вариантов два, и
+                // ради них открывать свой экран было незачем.
+                Picker(selection: $useImperial) {
+                    Text("Метрическая").tag(false)
+                    Text("Американская").tag(true)
+                } label: {
+                    Label("Единицы измерения", systemImage: "ruler")
                 }
                 NavigationLink {
                     RingSoundSettingsView()
@@ -145,11 +170,28 @@ struct SettingsView: View {
                 } label: {
                     Label("Напоминания", systemImage: "bell")
                 }
-                NavigationLink {
-                    LanguageSettingsView()
+                // Язык меняет система: свой список всё равно требовал
+                // перезапуска руками, а системный экран делает это сам и
+                // выглядит как обычный переход в настройки приложения.
+                Button {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
                 } label: {
-                    Label("Язык", systemImage: "character.bubble")
+                    HStack {
+                        Label("Язык", systemImage: "character.bubble")
+                            .foregroundStyle(Color.primary)
+                        Spacer()
+                        // Цвета явные: иерархические внутри кнопки списка
+                        // берут акцент, и язык красился синим, как ссылка.
+                        Text(verbatim: currentLanguageName)
+                            .foregroundStyle(Color.secondary)
+                        Image(systemName: "arrow.up.forward.app")
+                            .font(.caption)
+                            .foregroundStyle(Color.secondary.opacity(0.6))
+                    }
                 }
+                .accessibilityIdentifier("openLanguage")
             }
 
             Section {
@@ -320,89 +362,6 @@ private struct RingSoundSettingsView: View {
     }
 }
 
-private struct UnitsSettingsView: View {
-    @AppStorage("use_imperial") private var useImperial = false
-    
-    var body: some View {
-        List {
-            Section {
-                Picker("Система", selection: $useImperial) {
-                    Text("Метрическая").tag(false)
-                    Text("Американская").tag(true)
-                }
-                .pickerStyle(.segmented)
-            } header: {
-                Text("Система")
-            }
-        }
-        .glassRow()
-        .listStyle(.insetGrouped)
-        .navigationTitle("Единицы измерения")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-}
-
-private struct LanguageSettingsView: View {
-    @State private var selectedLanguage: String
-    @State private var showRestartAlert = false
-    
-    init() {
-        let saved = UserDefaults.standard.array(forKey: "AppleLanguages")?.first as? String
-        let lang: String
-        if let saved {
-            lang = String(saved.prefix(2))
-        } else {
-            lang = Locale.preferredLanguages.first?.hasPrefix("ru") == true ? "ru" : "en"
-        }
-        _selectedLanguage = State(initialValue: lang)
-    }
-    
-    var body: some View {
-        List {
-            Section {
-                languageRow(code: "ru", title: "Русский", flag: "🇷🇺")
-                languageRow(code: "en", title: "English", flag: "🇺🇸")
-                languageRow(code: "he", title: "עברית", flag: "🇮🇱")
-                languageRow(code: "es", title: "Español", flag: "🇪🇸")
-                languageRow(code: "ar", title: "العربية", flag: "🇸🇦")
-                languageRow(code: "pt", title: "Português", flag: "🇧🇷")
-                languageRow(code: "fr", title: "Français", flag: "🇫🇷")
-                languageRow(code: "de", title: "Deutsch", flag: "🇩🇪")
-            } footer: {
-                Text("Для применения нового языка перезапусти приложение.")
-            }
-        }
-        .glassRow()
-        .listStyle(.insetGrouped)
-        .navigationTitle("Язык")
-        .navigationBarTitleDisplayMode(.inline)
-        .alert("Перезапусти приложение", isPresented: $showRestartAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Закрой и открой приложение заново, чтобы язык применился.")
-        }
-    }
-    
-    private func languageRow(code: String, title: String, flag: String) -> some View {
-        Button {
-            guard selectedLanguage != code else { return }
-            selectedLanguage = code
-            UserDefaults.standard.set([code], forKey: "AppleLanguages")
-            showRestartAlert = true
-        } label: {
-            HStack {
-                Text(flag)
-                Text(title)
-                    .foregroundStyle(.primary)
-                Spacer()
-                if selectedLanguage == code {
-                    Image(systemName: "checkmark")
-                        .foregroundStyle(.green)
-                }
-            }
-        }
-    }
-}
 
 
 /// Выбор начертания. Каждый вариант написан своим же шрифтом — иначе выбирать

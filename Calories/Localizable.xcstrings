@@ -4,328 +4,6 @@
     "" : {
       "shouldTranslate" : false
     },
-    "Без звука" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "بدون صوت"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kein Ton"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No sound"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sin sonido"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun son"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ללא צליל"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sem som"
-          }
-        }
-      }
-    },
-    "Динь" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "رنة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ping"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tink"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tin"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tink"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "טינג"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tim"
-          }
-        }
-      }
-    },
-    "Звук кольца" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "صوت الحلقة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ring-Ton"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ring sound"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sonido del anillo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Son de l’anneau"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "צליל הטבעת"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Som do anel"
-          }
-        }
-      }
-    },
-    "Колесо" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عجلة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rad"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wheel"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rueda"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Molette"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "גלגל"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Roda"
-          }
-        }
-      }
-    },
-    "Тук" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "طق"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tock"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tock"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toc"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toc"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "טוק"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toque"
-          }
-        }
-      }
-    },
-    "Щелчки, когда тянешь «Сегодня» или «Шаги» вниз. Как и все системные звуки, молчат при выключенном звонке." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نقرات عند سحب «اليوم» أو «الخطوات» للأسفل. مثل كل أصوات النظام، تصمت عند إيقاف الرنين."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klicks beim Herunterziehen von „Heute“ oder „Schritte“. Wie alle Systemtöne bleiben sie bei ausgeschaltetem Klingelton stumm."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clicks as you pull Today or Steps down. Like all system sounds, they stay silent when the ringer is off."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clics al deslizar Hoy o Pasos hacia abajo. Como todos los sonidos del sistema, callan con el timbre desactivado."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Des clics quand vous tirez Aujourd’hui ou Pas vers le bas. Comme tous les sons système, ils se taisent en mode silencieux."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קליקים כשמושכים את «היום» או «צעדים» למטה. כמו כל צלילי המערכת, הם שותקים כשהצלצול כבוי."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cliques ao puxar Hoje ou Passos para baixo. Como todos os sons do sistema, ficam mudos com a campainha desligada."
-          }
-        }
-      }
-    },
-    "Щелчок" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نقرة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Klick"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Click"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clic"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clic"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קליק"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clique"
-          }
-        }
-      }
-    },
     "—" : {
       "shouldTranslate" : false
     },
@@ -333,9 +11,6 @@
       "shouldTranslate" : false
     },
     "·" : {
-      "shouldTranslate" : false
-    },
-    "· " : {
       "shouldTranslate" : false
     },
     "· %@" : {
@@ -430,6 +105,9 @@
           }
         }
       }
+    },
+    "%" : {
+
     },
     "%.0f г при весе %.1f кг" : {
       "extractionState" : "manual",
@@ -576,6 +254,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ restante"
+          }
+        }
+      }
+    },
+    "%1$@ · %2$lld дн." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld يوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld Tage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld jours"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld ימים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$lld dias"
           }
         }
       }
@@ -1995,6 +1719,9 @@
         }
       }
     },
+    "BMR" : {
+
+    },
     "FFMI (индекс сухой массы)" : {
       "localizations" : {
         "ar" : {
@@ -3187,6 +2914,9 @@
         }
       }
     },
+    "Базовый обмен" : {
+
+    },
     "Базовый обмен (BMR)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3509,6 +3239,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada de álcool — ele desidrata."
+          }
+        }
+      }
+    },
+    "Без звука" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بدون صوت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Ton"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sound"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin sonido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun son"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ללא צליל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem som"
           }
         }
       }
@@ -10056,6 +9832,52 @@
         }
       }
     },
+    "грубо" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقريبي جدًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sehr grob"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "very rough"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "muy aproximado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "très approximatif"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גס מאוד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "muito aproximado"
+          }
+        }
+      }
+    },
     "Грудь" : {
       "localizations" : {
         "ar" : {
@@ -11263,6 +11085,52 @@
         }
       }
     },
+    "Динь" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رنة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ping"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tink"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tin"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tink"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טינג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tim"
+          }
+        }
+      }
+    },
     "дистанция" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11405,6 +11273,7 @@
       }
     },
     "Для применения нового языка перезапусти приложение." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14323,6 +14192,7 @@
       }
     },
     "Закрой и открой приложение заново, чтобы язык применился." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -15210,6 +15080,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Punho"
+          }
+        }
+      }
+    },
+    "Звук кольца" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صوت الحلقة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ring-Ton"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ring sound"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sonido del anillo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Son de l’anneau"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צליל הטבעת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som do anel"
           }
         }
       }
@@ -16235,6 +16151,9 @@
           }
         }
       }
+    },
+    "изменить" : {
+
     },
     "Изменить" : {
       "localizations" : {
@@ -18735,6 +18654,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Refrigerante de cola"
+          }
+        }
+      }
+    },
+    "Колесо" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عجلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wheel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rueda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Molette"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "גלגל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Roda"
           }
         }
       }
@@ -29329,6 +29294,7 @@
       }
     },
     "Перезапусти приложение" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30582,6 +30548,9 @@
         }
       }
     },
+    "по плану" : {
+
+    },
     "По самой выступающей точке ягодиц, стопы вместе, мышцы расслаблены." : {
       "localizations" : {
         "ar" : {
@@ -30762,6 +30731,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Na altura dos mamilos, fita nivelada nas costas. Na expiração tranquila, sem estufar o peito."
+          }
+        }
+      }
+    },
+    "по формуле" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسب المعادلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laut Formel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "from the formula"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "según la fórmula"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "selon la formule"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי הנוסחה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pela fórmula"
           }
         }
       }
@@ -33968,6 +33983,52 @@
         }
       }
     },
+    "примерно" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقريبي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ungefähr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rough"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aproximado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "approximatif"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בערך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "aproximado"
+          }
+        }
+      }
+    },
     "Пробные две недели закончились" : {
       "localizations" : {
         "ar" : {
@@ -35731,6 +35792,101 @@
           }
         }
       }
+    },
+    "Расход по факту" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإنفاق الفعلي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tatsächlicher Verbrauch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actual expenditure"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto real"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépense réelle"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוצאה בפועל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto real"
+          }
+        }
+      }
+    },
+    "Расход по факту: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Значит, тратится около %3$lld. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإنفاق الفعلي: %1$lld سعرة يوميًا في المتوسط، ووزن الاتجاه %2$@ كجم أسبوعيًا. أي نحو %3$lld محروقة. المعادلة لا ترى ذلك — لا تعرف عملك ولا تكيّفك مع العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tatsächlicher Verbrauch: im Schnitt %1$lld kcal am Tag gegessen, Trendgewicht %2$@ kg pro Woche. Das ergibt etwa %3$lld verbrannt. Die Formel sieht das nicht — sie kennt weder deine Arbeit noch die Anpassung an das Defizit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actual expenditure: %1$lld kcal a day eaten on average, trend weight %2$@ kg a week. That works out to about %3$lld burned. The formula cannot see this — it knows neither your job nor how you adapted to the deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto real: %1$lld kcal al día de media, peso por tendencia %2$@ kg por semana. Eso son unas %3$lld quemadas. La fórmula no ve esto: no conoce tu trabajo ni tu adaptación al déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépense réelle : %1$lld kcal par jour en moyenne, poids en tendance %2$@ kg par semaine. Cela fait environ %3$lld brûlées. La formule ne le voit pas : elle ignore votre travail comme votre adaptation au déficit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הוצאה בפועל: %1$lld קלוריות ביום בממוצע, משקל לפי מגמה %2$@ ק״ג בשבוע. יוצא בערך %3$lld שנשרפות. הנוסחה לא רואה את זה — היא לא מכירה את העבודה שלך ולא את ההסתגלות לגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gasto real: %1$lld kcal por dia em média, peso pela tendência %2$@ kg por semana. Isso dá cerca de %3$lld gastas. A fórmula não vê isso — não conhece seu trabalho nem a adaptação ao déficit."
+          }
+        }
+      }
+    },
+    "Расход с активностью" : {
+
     },
     "Расход с активностью (TDEE)" : {
       "extractionState" : "manual",
@@ -38014,6 +38170,7 @@
       }
     },
     "Система" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41068,6 +41225,52 @@
         }
       }
     },
+    "Считать норму от факта" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "احسب الهدف من الإنفاق الفعلي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel vom tatsächlichen Verbrauch rechnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the target from actual expenditure"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular el objetivo según el gasto real"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calculer l’objectif d’après la dépense réelle"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחשב את היעד לפי ההוצאה בפועל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calcular a meta pelo gasto real"
+          }
+        }
+      }
+    },
     "съедено %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42096,6 +42299,52 @@
         }
       }
     },
+    "точно" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "موثوق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "belastbar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "solid"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fiable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fiable"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מהימן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "confiável"
+          }
+        }
+      }
+    },
     "Тренд" : {
       "localizations" : {
         "ar" : {
@@ -42276,6 +42525,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tríade: braço / panturrilha / pescoço"
+          }
+        }
+      }
+    },
+    "Тук" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tock"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tock"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toc"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toc"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "טוק"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque"
           }
         }
       }
@@ -44062,6 +44357,52 @@
         }
       }
     },
+    "Цвет акцента" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لون التمييز"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akzentfarbe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accent colour"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color de acento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couleur d’accent"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צבע הדגשה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cor de destaque"
+          }
+        }
+      }
+    },
     "Целевой белок" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -45502,6 +45843,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fonte e tamanho"
+          }
+        }
+      }
+    },
+    "Щелчки, когда тянешь «Сегодня» или «Шаги» вниз. Как и все системные звуки, молчат при выключенном звонке." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقرات عند سحب «اليوم» أو «الخطوات» للأسفل. مثل كل أصوات النظام، تصمت عند إيقاف الرنين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicks beim Herunterziehen von „Heute“ oder „Schritte“. Wie alle Systemtöne bleiben sie bei ausgeschaltetem Klingelton stumm."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicks as you pull Today or Steps down. Like all system sounds, they stay silent when the ringer is off."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clics al deslizar Hoy o Pasos hacia abajo. Como todos los sonidos del sistema, callan con el timbre desactivado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des clics quand vous tirez Aujourd’hui ou Pas vers le bas. Comme tous les sons système, ils se taisent en mode silencieux."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קליקים כשמושכים את «היום» או «צעדים» למטה. כמו כל צלילי המערכת, הם שותקים כשהצלצול כבוי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cliques ao puxar Hoje ou Passos para baixo. Como todos os sons do sistema, ficam mudos com a campainha desligada."
+          }
+        }
+      }
+    },
+    "Щелчок" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقرة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klick"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clic"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clic"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קליק"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clique"
           }
         }
       }

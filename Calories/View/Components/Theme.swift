@@ -243,3 +243,35 @@ enum BodyFatStyle {
         }
     }
 }
+
+/// Цвет акцента приложения — на выбор в настройках.
+///
+/// Сначала вкладки подсвечивались каждая своим макросом, но низ экрана от
+/// этого мельтешил. Цвет теперь один на всё приложение, и его выбирает человек.
+enum AppAccent: String, CaseIterable, Identifiable {
+    case system, kcal, protein, fat, carbs
+
+    static let defaultsKey = "app_accent"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system:  return String(localized: "Системный")
+        case .kcal:    return String(localized: "Калории")
+        case .protein: return String(localized: "Белки")
+        case .fat:     return String(localized: "Жиры")
+        case .carbs:   return String(localized: "Углеводы")
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .system:  return .blue
+        case .kcal:    return ProgressRing.kcalColors[0]
+        case .protein: return MacroKind.protein.color
+        case .fat:     return MacroKind.fat.color
+        case .carbs:   return MacroKind.carbs.color
+        }
+    }
+}

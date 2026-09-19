@@ -205,74 +205,25 @@ struct BodyView: View {
             // правят редко, и им место ниже.
             if let draftProfile {
                 Section {
-                    HStack {
-                        Text("Жир % (оценка)")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.1f%%", draftProfile.bodyFatPercentage(from: measurement)))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)))
-                        Text("· ") + Text(LocalizedStringKey(draftProfile.bodyFatCategory(from: measurement)))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    .accessibilityIdentifier("bodyFatRow")
-                    
-                    HStack {
-                        Text("ИМТ")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(String(format: "%.1f", draftProfile.bmi))
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(bmiColor(draftProfile.bmi))
-                        (Text("· ") + Text(LocalizedStringKey(bmiLabel(draftProfile.bmi))))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    resultRow(title: "Базовый обмен (BMR)", value: "\(Int(draftProfile.bmr.rounded())) \(String(localized: "ккал"))")
-                    resultRow(title: "Расход с активностью (TDEE)", value: "\(Int(draftProfile.tdee.rounded())) \(String(localized: "ккал"))")
-                    // Цель редактируется здесь, а не долгим нажатием на кольцо.
-                    // Жест был невидимый и позволял вписать число, спорящее
-                    // с планом: план цель считает, и правка руками потом молча
-                    // отменялась на первой же смене профиля.
-                    if store.plan != nil {
-                        HStack {
-                            Text("Целевые калории")
-                                .foregroundStyle(.secondary)
-                            Spacer()
-                            Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(ProgressRing.kcalColors[0])
-                            Image(systemName: "target")
-                                .font(.caption)
-                                .foregroundStyle(.yellow)
+                    calculationTiles(draftProfile)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                    if store.adaptiveTDEE != nil {
+                        Toggle(isOn: Binding(get: { store.usesAdaptiveTDEE },
+                                             set: { store.usesAdaptiveTDEE = $0 })) {
+                            Text("Считать норму от факта")
                         }
-                        .accessibilityIdentifier("calorieTargetRow")
-                    } else {
-                        Button {
-                            goalText = String(store.dailyGoal)
-                            showingGoalEditor = true
-                        } label: {
-                            HStack {
-                                Text("Целевые калории")
-                                    .foregroundStyle(.secondary)
-                                Spacer()
-                                Text(verbatim: "\(store.dailyGoal) \(String(localized: "ккал"))")
-                                    .font(.body.weight(.semibold))
-                                    .foregroundStyle(.green)
-                                Image(systemName: "pencil")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .accessibilityIdentifier("calorieTargetRow")
+                        .accessibilityIdentifier("useAdaptiveTDEE")
                     }
-                    resultRow(title: "Целевой белок", value: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))", highlighted: true)
                 } header: {
                     Text("Расчёт")
                 } footer: {
-                    if store.plan != nil {
-                        Text("Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план.")
+                    if let fact = store.adaptiveTDEE {
+                        Text(String(format: String(localized: "Расход по факту: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Значит, тратится около %3$lld. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
+                                    Int(fact.meanIntake.rounded()),
+                                    String(format: "%+.2f", fact.weeklyRateKg),
+                                    Int((store.smoothedTDEE ?? fact.tdee).rounded())))
                     }
                     Text(draftProfile.isNavyMethod(from: measurement)
                          ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
@@ -587,6 +538,93 @@ struct BodyView: View {
         }
     }
     
+    /// Расчёт плашками по две в ряд, а не девятью строками списка.
+    ///
+    /// Ради этих чисел профиль и открывают, а списком они занимали пол-экрана,
+    /// и до нормы белка приходилось листать. Плашки читаются с одного взгляда
+    /// и держат стиль «Сегодня»: подпись мелко, число крупно, цвет только там,
+    /// где он что-то значит.
+    @ViewBuilder
+    private func calculationTiles(_ profile: UserProfile) -> some View {
+        let fat = profile.bodyFatPercentage(from: measurement)
+        let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
+        LazyVGrid(columns: columns, spacing: 10) {
+            // Норму калорий и белка держим первой парой: это то, что
+            // выполняют каждый день, остальное — откуда они взялись.
+            if store.plan != nil {
+                tile(title: "Целевые калории", value: "\(store.dailyGoal)", unit: "ккал",
+                     color: ProgressRing.kcalColors[0], caption: String(localized: "по плану"))
+                    .accessibilityIdentifier("calorieTargetRow")
+            } else {
+                Button {
+                    goalText = String(store.dailyGoal)
+                    showingGoalEditor = true
+                } label: {
+                    tile(title: "Целевые калории", value: "\(store.dailyGoal)", unit: "ккал",
+                         color: ProgressRing.kcalColors[0], caption: String(localized: "изменить"))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("calorieTargetRow")
+            }
+
+            tile(title: "Целевой белок",
+                 value: "\(Int(profile.proteinTargetGrams(from: measurement).rounded()))", unit: "г",
+                 color: MacroKind.protein.color)
+
+            // Расход по факту — главное число профиля: формула ошибается на
+            // сотни калорий, а это считано по дневнику и весам.
+            if let fact = store.adaptiveTDEE, let smoothed = store.smoothedTDEE {
+                tile(title: "Расход по факту", value: "\(Int(smoothed.rounded()))", unit: "ккал",
+                     color: ProgressRing.kcalColors[0],
+                     caption: String(format: String(localized: "%1$@ · %2$lld дн."), fact.confidence.title, fact.loggedDays))
+                    .accessibilityIdentifier("adaptiveTDEE")
+            }
+            tile(title: "Расход с активностью", value: "\(Int(profile.tdee.rounded()))", unit: "ккал",
+                 caption: String(localized: "по формуле"))
+            tile(title: "Базовый обмен", value: "\(Int(profile.bmr.rounded()))", unit: "ккал",
+                 caption: String(localized: "BMR"))
+
+            tile(title: "Жир % (оценка)", value: String(format: "%.1f", fat), unit: "%",
+                 color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)),
+                 caption: String(localized: String.LocalizationValue(profile.bodyFatCategory(from: measurement))))
+                .accessibilityIdentifier("bodyFatRow")
+            tile(title: "ИМТ", value: String(format: "%.1f", profile.bmi), unit: "",
+                 color: bmiColor(profile.bmi),
+                 caption: String(localized: String.LocalizationValue(bmiLabel(profile.bmi))))
+        }
+    }
+
+    private func tile(title: LocalizedStringKey, value: String, unit: LocalizedStringKey,
+                      color: Color? = nil, caption: String? = nil) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text(verbatim: value)
+                    .font(.title3.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(color ?? .primary)
+                Text(unit)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            Text(verbatim: caption ?? " ")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .contentShape(Rectangle())
+        .liquidGlass(in: RoundedRectangle(cornerRadius: 16))
+    }
+
     private func resultRow(title: LocalizedStringKey, value: String, highlighted: Bool = false) -> some View {
         HStack {
             Text(title)

@@ -11,6 +11,7 @@ struct RootView: View {
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @AppStorage("app_text_size") private var appTextSize = AppTextSize.normal.rawValue
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     @Environment(\.scenePhase) private var scenePhase
     /// Лаунч-скрин статичен — анимировать его iOS не даёт. Поэтому поверх первого
     /// кадра лежит его точная копия, которая продолжает знак движением и тает.
@@ -45,6 +46,8 @@ struct RootView: View {
             .tabItem { Label("Настройки", systemImage: "gearshape") }
             .tag(2)
         }
+        // Один цвет на всё приложение, выбранный в настройках.
+        .tint((AppAccent(rawValue: appAccent) ?? .system).color)
         .fullScreenCover(isPresented: Binding(
             get: { !onboardingCompleted },
             set: { _ in }

@@ -114,6 +114,29 @@ final class CalorieStore {
     private(set) var historyDays: [DaySummary] = []
     private(set) var hasWeighedToday: Bool = false
     private(set) var adherence: PlanAdherence?
+    /// Расход по факту за последние две недели — что говорят дневник и весы.
+    private(set) var adaptiveTDEE: AdaptiveTDEE.Result?
+    /// Он же, сглаженный между днями: цель не должна прыгать за каждым всплеском.
+    private(set) var smoothedTDEE: Double?
+    /// Считать ли норму от факта, а не от формулы. Включено, пока человек
+    /// не выключил: формула ошибается на сотни калорий, и дефицит, в котором
+    /// сидят, думая, что едят вдоволь, — цена этой ошибки.
+    var usesAdaptiveTDEE: Bool {
+        didSet {
+            defaults.set(usesAdaptiveTDEE, forKey: Keys.usesAdaptiveTDEE)
+            // Забыть, от какого расхода считали: переключение должно
+            // пересчитать норму сразу, а не ждать завтрашнего дня.
+            defaults.removeObject(forKey: Keys.goalSyncedTDEE)
+            rebuildCaches()
+        }
+    }
+
+    /// Расход, от которого считается норма: факт, если он есть и включён,
+    /// иначе формула по профилю.
+    var workingTDEE: Double {
+        if usesAdaptiveTDEE, let smoothedTDEE { return smoothedTDEE }
+        return profile?.tdee ?? Double(dailyGoal)
+    }
     private(set) var streak: Int = 0
     private(set) var bestStreak: Int = 0
     private(set) var loggingStreak: Int = 0
@@ -156,6 +179,10 @@ final class CalorieStore {
 
     private enum Keys {
         static let goal = "daily_goal"
+        static let adaptiveTDEE = "adaptive_tdee"
+        static let adaptiveTDEEDay = "adaptive_tdee_day"
+        static let usesAdaptiveTDEE = "use_adaptive_tdee"
+        static let goalSyncedTDEE = "goal_synced_tdee"
         static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
         static let plan = "active_plan"
@@ -172,6 +199,7 @@ final class CalorieStore {
         self.defaults = defaults
         self.groupDefaults = groupDefaults
         self.dailyGoal = defaults.object(forKey: Keys.goal) as? Int ?? 2000
+        self.usesAdaptiveTDEE = defaults.object(forKey: Keys.usesAdaptiveTDEE) as? Bool ?? true
         self.profile = Self.loadProfile(from: defaults)
         let loadedPlan = Self.loadPlan(from: defaults)
         self.plan = loadedPlan
@@ -234,6 +262,25 @@ final class CalorieStore {
         goalRecords = (try? context.fetch(goalDescriptor)) ?? []
 
         rebuildCaches()
+    }
+
+    /// Подтянуть норму плана к расходу, от которого её считают.
+    ///
+    /// План пересчитывает дневную норму от расхода, но записанное число живёт
+    /// в фазе и само не меняется. Пока расход брали из формулы, это было верно:
+    /// формула не двигается. Факт двигается — и норма должна идти за ним, иначе
+    /// выходит ровно то, ради чего всё делалось: тратишь 4000, ешь 2700 и
+    /// думаешь, что это поддержание.
+    ///
+    /// Синхронизируем только когда расход изменился: иначе правка «ставить N
+    /// ккал/день» с экрана плана затиралась бы на каждой перестройке кэшей.
+    private func syncGoalWithExpenditure() {
+        guard let plan, profile != nil else { return }
+        let expenditure = (workingTDEE / 5).rounded() * 5
+        guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
+        defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
+        let target = plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
+        if target != dailyGoal { dailyGoal = target }
     }
 
     private func rebuildCaches() {
@@ -325,6 +372,28 @@ final class CalorieStore {
         .sorted { lhs, rhs in
             (lhs.entries.first?.date ?? .distantPast) > (rhs.entries.first?.date ?? .distantPast)
         }
+
+        // Расход по факту: пересчитывается на каждой перестройке, а сглаженное
+        // значение двигается раз в сутки — иначе одна запись еды дёргала бы
+        // цель несколько раз за день.
+        adaptiveTDEE = computeAdaptiveTDEE()
+        let today = calendar.startOfDay(for: Date())
+        if let estimate = adaptiveTDEE?.tdee {
+            let storedDay = defaults.object(forKey: Keys.adaptiveTDEEDay) as? Date
+            let stored = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
+            if storedDay == today {
+                smoothedTDEE = stored ?? estimate
+            } else {
+                let next = AdaptiveTDEE.smoothed(previous: stored, estimate: estimate)
+                smoothedTDEE = next
+                defaults.set(next, forKey: Keys.adaptiveTDEE)
+                defaults.set(today, forKey: Keys.adaptiveTDEEDay)
+            }
+        } else {
+            smoothedTDEE = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
+        }
+
+        syncGoalWithExpenditure()
 
         let adapted = computeAdaptedTodayGoal()
         adaptedTodayGoal = adapted
@@ -517,7 +586,7 @@ final class CalorieStore {
             // не было: там цель считалась заново на каждый день. Один и тот же план
             // вёл себя по-разному в зависимости от тумблера, который по смыслу
             // отвечает только за распределение калорий по дням недели.
-            dailyGoal = plan.dailyCalorieTarget(tdee: newProfile.tdee)
+            dailyGoal = plan.dailyCalorieTarget(tdee: workingTDEE)
         } else if syncDailyGoal {
             dailyGoal = newProfile.calorieTarget
         } else {
@@ -542,7 +611,7 @@ final class CalorieStore {
             defaults.set(data, forKey: Keys.plan)
         }
         if let profile {
-            dailyGoal = newPlan.dailyCalorieTarget(tdee: profile.tdee)
+            dailyGoal = newPlan.dailyCalorieTarget(tdee: workingTDEE)
         }
         rebuildCaches()
     }

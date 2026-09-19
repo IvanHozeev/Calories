@@ -37,6 +37,39 @@ extension CalorieStore {
         return stride(from: 0, to: history.count, by: 7).map { Array(history[$0..<$0 + 7]) }
     }
 
+    /// История для расчёта расхода по факту: съеденное за день и взвешивание.
+    ///
+    /// День без записей — это nil, а не ноль: забытый дневник и голодание
+    /// выглядят одинаково только для того, кто не спрашивал. Голодание
+    /// отмечено явно и идёт настоящим нулём.
+    func adaptiveDays(window: Int = 28) -> [AdaptiveTDEE.Day] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        // Последнее взвешивание за день: утреннее и вечернее в один день —
+        // это одно и то же измерение с разной водой.
+        var weightByDay: [Date: Double] = [:]
+        for entry in weightEntries.sorted(by: { $0.date < $1.date }) {
+            weightByDay[calendar.startOfDay(for: entry.date)] = entry.weightKg
+        }
+        return (0..<window).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            let entries = entriesByDay[date] ?? []
+            let calories: Int?
+            if !entries.isEmpty {
+                calories = entries.reduce(0) { $0 + $1.calories }
+            } else if isFastDay(date) {
+                calories = 0
+            } else {
+                calories = nil
+            }
+            return AdaptiveTDEE.Day(date: date, weightKg: weightByDay[date], calories: calories)
+        }
+    }
+
+    func computeAdaptiveTDEE() -> AdaptiveTDEE.Result? {
+        AdaptiveTDEE.estimate(adaptiveDays())
+    }
+
     /// Сколько дней подряд закрыта норма белка. Историческая норма нигде не фиксируется,
     /// поэтому берём текущую из профиля — при смене веса или множителя прошлые дни
     /// пересчитаются под новую планку. Для достижения этого достаточно.
@@ -141,12 +174,12 @@ extension CalorieStore {
     /// затирала бы её на следующем же чтении.
     func effectiveGoal(for date: Date) -> Int {
         if let plan, plan.cyclingEnabled, let profile {
-            return plan.calorieTarget(for: date, tdee: profile.tdee)
+            return plan.calorieTarget(for: date, tdee: workingTDEE)
         }
         // Число действует в фазе, под которую записано. В другой фазе, в том
         // числе в неделю брейка, — формула плана, см. `dailyGoalPhaseID`.
         if let plan, let profile, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
-            return plan.dailyCalorieTarget(for: date, tdee: profile.tdee)
+            return plan.dailyCalorieTarget(for: date, tdee: workingTDEE)
         }
         return dailyGoal
     }
@@ -496,7 +529,7 @@ extension CalorieStore {
         if remainingDaysInPhase > 0 {
             let remainingChangeNeeded = phaseTargetWeight - actualWeightToday
             let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDaysInPhase
-            recalibratedDailyCalories = Int((profile.tdee + dailyDelta).rounded())
+            recalibratedDailyCalories = Int((workingTDEE + dailyDelta).rounded())
         }
 
         let remainingWeeksInPhase = remainingDaysInPhase / 7

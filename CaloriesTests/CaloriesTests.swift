@@ -3390,6 +3390,169 @@ struct FoodTraitTests {
     }
 }
 
+// MARK: - Расход по факту
+
+struct AdaptiveTDEETests {
+
+    private func days(_ count: Int, calories: Int?, startWeight: Double, perDay: Double,
+                      weighEvery: Int = 1) -> [AdaptiveTDEE.Day] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        return (0..<count).map { offset in
+            let date = calendar.date(byAdding: .day, value: -(count - 1 - offset), to: today)!
+            let weight = offset % weighEvery == 0 ? startWeight + perDay * Double(offset) : nil
+            return AdaptiveTDEE.Day(date: date, weightKg: weight, calories: calories)
+        }
+    }
+
+    /// Случай, ради которого всё и затевалось: две недели по 3300 ккал, а вес
+    /// уходит по 100 г в день. Значит, тратится около 4070, а не 3300.
+    @Test func twoWeeksOfLosingOn3300_showsAboutFourThousand() throws {
+        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3300, startWeight: 80, perDay: -0.1)))
+        #expect(abs(result.tdee - 4070) < 30)
+        #expect(abs(result.weeklyRateKg + 0.7) < 0.05)
+        #expect(result.confidence == .high)
+    }
+
+    /// Держит вес — значит, ест ровно свой расход.
+    @Test func steadyWeight_meansIntakeIsTheExpenditure() throws {
+        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 2700, startWeight: 80, perDay: 0)))
+        #expect(abs(result.tdee - 2700) < 10)
+        #expect(abs(result.weeklyRateKg) < 0.01)
+    }
+
+    /// Набирает — расход ниже съеденного.
+    @Test func gainingWeight_meansEatingAboveTheExpenditure() throws {
+        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3000, startWeight: 80, perDay: 0.05)))
+        #expect(abs(result.tdee - (3000 - 385)) < 30)
+    }
+
+    /// Взвешивания через день — оценка та же: наклон считается по точкам,
+    /// а не по числу дней.
+    @Test func weighingEveryOtherDay_stillWorks() throws {
+        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3300, startWeight: 80, perDay: -0.1, weighEvery: 2)))
+        #expect(abs(result.tdee - 4070) < 60)
+    }
+
+    /// Без дневника считать нечего: среднее по паре дней не говорит, сколько ест человек.
+    @Test func withoutLoggedDays_thereIsNoEstimate() {
+        #expect(AdaptiveTDEE.estimate(days(14, calories: nil, startWeight: 80, perDay: -0.1)) == nil)
+    }
+
+    /// Двух взвешиваний подряд мало: это наклон по воде.
+    @Test func withoutSpreadOutWeighIns_thereIsNoEstimate() {
+        let weighed = days(14, calories: 3000, startWeight: 80, perDay: -0.1, weighEvery: 13)
+        #expect(AdaptiveTDEE.estimate(weighed) == nil)
+    }
+
+    /// Неполный дневник понижает доверие, но оценку не отменяет.
+    @Test func gapsInTheDiaryLowerConfidence() throws {
+        var input = days(14, calories: 3300, startWeight: 80, perDay: -0.1)
+        for index in stride(from: 0, to: 6, by: 1) {
+            input[index] = AdaptiveTDEE.Day(date: input[index].date, weightKg: input[index].weightKg, calories: nil)
+        }
+        let result = try #require(AdaptiveTDEE.estimate(input))
+        #expect(result.confidence != .high)
+    }
+
+    /// Сглаживание тянет оценку к новой, но не прыгает на неё целиком.
+    @Test func smoothingMovesTowardsTheNewEstimate() {
+        let next = AdaptiveTDEE.smoothed(previous: 2700, estimate: 4070)
+        #expect(next > 2700 && next < 4070)
+        #expect(AdaptiveTDEE.smoothed(previous: nil, estimate: 4070) == 4070)
+    }
+
+    /// Тренд сглаживает шум весов и держится, когда не взвешивались.
+    @Test func trendSmoothsAndHoldsThroughGaps() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let input: [AdaptiveTDEE.Day] = (0..<5).map { offset in
+            let date = calendar.date(byAdding: .day, value: -(4 - offset), to: today)!
+            // Один день с «плюс два килограмма» после солёного ужина.
+            let weight: Double? = offset == 2 ? 82 : (offset == 3 ? nil : 80)
+            return AdaptiveTDEE.Day(date: date, weightKg: weight, calories: 2500)
+        }
+        let trend = AdaptiveTDEE.trend(input)
+        let spikeDay = calendar.date(byAdding: .day, value: -2, to: today)!
+        let gapDay = calendar.date(byAdding: .day, value: -1, to: today)!
+        let spike = try #require(trend[spikeDay])
+        #expect(spike < 80.5, "Тренд не должен прыгать за одним взвешиванием")
+        #expect(trend[gapDay] == spike, "День без взвешивания держит последний тренд")
+    }
+}
+
+// MARK: - Расход по факту в сторе
+
+@MainActor
+@Suite(.serialized)
+struct AdaptiveTDEEStoreTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+    private let defaults: UserDefaults
+
+    init() async throws {
+        defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(UserProfile(weightKg: 80, heightCm: 175, age: 25, sex: .male,
+                                        activityLevel: .moderate, goal: .maintenance,
+                                        proteinPerKg: 1.7, fatPerKg: 0.8))
+    }
+
+    /// Две недели по 3300 ккал с уходящим весом: приложение должно понять, что
+    /// расход около 4000, а не 2700 по формуле, и поднять норму.
+    private func feedLosingWeeks() {
+        let calendar = Calendar.current
+        for offset in stride(from: 13, through: 0, by: -1) {
+            let date = calendar.date(byAdding: .day, value: -offset, to: Date())!
+            store.add(name: "День", calories: 3300, date: date)
+            store.addWeight(80 - 0.1 * Double(13 - offset), date: date)
+        }
+    }
+
+    @Test func expenditureIsReadFromTheDiaryAndTheScale() throws {
+        feedLosingWeeks()
+        let fact = try #require(store.adaptiveTDEE)
+        #expect(abs(fact.tdee - 4070) < 60)
+        let smoothed = try #require(store.smoothedTDEE)
+        #expect(smoothed > 3000, "Сглаженная оценка должна уйти от формулы к факту")
+        #expect(store.workingTDEE == smoothed)
+    }
+
+    /// Выключили — считаем по формуле, как раньше.
+    @Test func turningItOffFallsBackToTheFormula() throws {
+        feedLosingWeeks()
+        store.usesAdaptiveTDEE = false
+        let profile = try #require(store.profile)
+        #expect(store.workingTDEE == profile.tdee)
+    }
+
+    /// Без данных нечего и считать: пустой дневник не должен двигать норму.
+    @Test func withoutDataThereIsNoEstimate() {
+        #expect(store.adaptiveTDEE == nil)
+        #expect(store.workingTDEE == store.profile?.tdee)
+    }
+
+    /// План считает дневную норму от факта: та же сушка на большем расходе
+    /// даёт большую норму, а не тот же дефицит от формулы.
+    @Test func thePlanCountsFromTheFact() throws {
+        feedLosingWeeks()
+        store.startPlan(Plan(startDate: Date(), startWeightKg: 80,
+                             phases: [PlanPhase(intent: .cut, durationWeeks: 8, weeklyRatePercent: 0.5)]))
+        let withFact = store.effectiveGoal(for: Date())
+        store.usesAdaptiveTDEE = false
+        let withFormula = store.effectiveGoal(for: Date())
+        #expect(withFact > withFormula + 300)
+    }
+}
+
 // MARK: - Щелчки кольца
 
 struct RingTicksTests {

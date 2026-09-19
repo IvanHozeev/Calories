@@ -23,6 +23,7 @@ struct BodyView: View {
     /// подгоняем её так, чтобы граммы не изменились.
     @State private var proteinLeanIsSet: Bool
     @State private var showingGoalEditor = false
+    @State private var showingBasis = false
     @State private var goalText = ""
     @State private var showHeightPicker = false
     @State private var showAgePicker = false
@@ -205,29 +206,23 @@ struct BodyView: View {
             // правят редко, и им место ниже.
             if let draftProfile {
                 Section {
-                    calculationTiles(draftProfile)
+                    calculationCard(draftProfile)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                    if store.adaptiveTDEE != nil {
-                        Toggle(isOn: Binding(get: { store.usesAdaptiveTDEE },
-                                             set: { store.usesAdaptiveTDEE = $0 })) {
-                            Text("Считать норму от факта")
-                        }
-                        .accessibilityIdentifier("useAdaptiveTDEE")
-                    }
                 } header: {
                     Text("Расчёт")
                 } footer: {
-                    if let fact = store.adaptiveTDEE {
-                        Text(String(format: String(localized: "Расход по факту: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Значит, тратится около %3$lld. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
+                    if let fact = store.adaptiveTDEE, store.usesAdaptiveTDEE {
+                        Text(String(format: String(localized: "Съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю — значит, тратится около %3$lld. Формула этого не видит: она не знает ни твоей работы, ни адаптации к дефициту."),
                                     Int(fact.meanIntake.rounded()),
                                     String(format: "%+.2f", fact.weeklyRateKg),
                                     Int((store.smoothedTDEE ?? fact.tdee).rounded())))
+                    } else {
+                        Text(draftProfile.isNavyMethod(from: measurement)
+                             ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+                             : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                     }
-                    Text(draftProfile.isNavyMethod(from: measurement)
-                         ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
-                         : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                 }
             }
 
@@ -318,6 +313,10 @@ struct BodyView: View {
                 }
             }
             
+            // Пока норма идёт от факта, множитель активности ни на что не
+            // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
+            // «Как считаем» — вместе с переключателем, который его включает.
+            if !usesFact {
             Section {
                 ForEach(ActivityLevel.allCases) { level in
                     Button {
@@ -351,6 +350,7 @@ struct BodyView: View {
                 Text("Уровень активности")
             } footer: {
                 Text("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.")
+            }
             }
             
             Section {
@@ -457,6 +457,10 @@ struct BodyView: View {
                     .brandFooterRow()
             }
         }
+        .sheet(isPresented: $showingBasis) {
+            CalculationBasisSheet(store: store, activityLevel: $activityLevel)
+                .presentationDetents([.medium])
+        }
         .glassRow()
         .listStyle(.insetGrouped)
         .alert("Дневная цель", isPresented: $showingGoalEditor) {
@@ -538,91 +542,121 @@ struct BodyView: View {
         }
     }
     
-    /// Расчёт плашками по две в ряд, а не девятью строками списка.
+    /// Считаем ли норму от измеренного расхода.
+    private var usesFact: Bool { store.usesAdaptiveTDEE && store.adaptiveTDEE != nil }
+
+    /// Расчёт одной карточкой: крупно то, ради чего заходят, мелко — из чего
+    /// оно собрано.
     ///
-    /// Ради этих чисел профиль и открывают, а списком они занимали пол-экрана,
-    /// и до нормы белка приходилось листать. Плашки читаются с одного взгляда
-    /// и держат стиль «Сегодня»: подпись мелко, число крупно, цвет только там,
-    /// где он что-то значит.
-    @ViewBuilder
-    private func calculationTiles(_ profile: UserProfile) -> some View {
+    /// Шесть отдельных плашек были шестью подложками подряд и занимали пол-экрана;
+    /// девять строк списка до этого — ещё больше. Здесь один блок: сверху расход,
+    /// под чертой четыре числа строкой, ниже серым — откуда что взялось.
+    private func calculationCard(_ profile: UserProfile) -> some View {
         let fat = profile.bodyFatPercentage(from: measurement)
-        let columns = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
-        LazyVGrid(columns: columns, spacing: 10) {
-            // Норму калорий и белка держим первой парой: это то, что
-            // выполняют каждый день, остальное — откуда они взялись.
-            if store.plan != nil {
-                tile(title: "Целевые калории", value: "\(store.dailyGoal)", unit: "ккал",
-                     color: ProgressRing.kcalColors[0], caption: String(localized: "по плану"))
-                    .accessibilityIdentifier("calorieTargetRow")
-            } else {
-                Button {
-                    goalText = String(store.dailyGoal)
-                    showingGoalEditor = true
-                } label: {
-                    tile(title: "Целевые калории", value: "\(store.dailyGoal)", unit: "ккал",
-                         color: ProgressRing.kcalColors[0], caption: String(localized: "изменить"))
+        let expenditure = usesFact ? (store.smoothedTDEE ?? profile.tdee) : profile.tdee
+        return VStack(alignment: .leading, spacing: 12) {
+            Button {
+                showingBasis = true
+            } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(usesFact ? "Расход по факту" : "Расход по формуле")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(verbatim: "\(Int(expenditure.rounded()))")
+                                .font(.system(size: 30, weight: .bold))
+                                .monospacedDigit()
+                                .foregroundStyle(Color.primary)
+                            Text("ккал")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    Spacer(minLength: 8)
+                    if let fact = store.adaptiveTDEE, usesFact {
+                        Text(verbatim: fact.confidence.title)
+                            .font(.caption2)
+                            .foregroundStyle(ProgressRing.kcalColors[0])
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(ProgressRing.kcalColors[0].opacity(0.15), in: Capsule())
+                    }
+                    Image(systemName: "chevron.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.tertiary)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("calorieTargetRow")
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("adaptiveTDEE")
+
+            Divider().opacity(0.4)
+
+            HStack(alignment: .top, spacing: 8) {
+                if store.plan != nil {
+                    miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                        .accessibilityIdentifier("calorieTargetRow")
+                } else {
+                    Button {
+                        goalText = String(store.dailyGoal)
+                        showingGoalEditor = true
+                    } label: {
+                        miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("calorieTargetRow")
+                }
+                miniStat("Белок", "\(Int(profile.proteinTargetGrams(from: measurement).rounded()))",
+                         unit: "г", color: MacroKind.protein.color)
+                miniStat("Жир %", String(format: "%.1f", fat), unit: "%",
+                         color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)))
+                    .accessibilityIdentifier("bodyFatRow")
+                miniStat("ИМТ", String(format: "%.1f", profile.bmi), unit: "", color: bmiColor(profile.bmi))
             }
 
-            tile(title: "Целевой белок",
-                 value: "\(Int(profile.proteinTargetGrams(from: measurement).rounded()))", unit: "г",
-                 color: MacroKind.protein.color)
-
-            // Расход по факту — главное число профиля: формула ошибается на
-            // сотни калорий, а это считано по дневнику и весам.
-            if let fact = store.adaptiveTDEE, let smoothed = store.smoothedTDEE {
-                tile(title: "Расход по факту", value: "\(Int(smoothed.rounded()))", unit: "ккал",
-                     color: ProgressRing.kcalColors[0],
-                     caption: String(format: String(localized: "%1$@ · %2$lld дн."), fact.confidence.title, fact.loggedDays))
-                    .accessibilityIdentifier("adaptiveTDEE")
-            }
-            tile(title: "Расход с активностью", value: "\(Int(profile.tdee.rounded()))", unit: "ккал",
-                 caption: String(localized: "по формуле"))
-            tile(title: "Базовый обмен", value: "\(Int(profile.bmr.rounded()))", unit: "ккал",
-                 caption: String(localized: "BMR"))
-
-            tile(title: "Жир % (оценка)", value: String(format: "%.1f", fat), unit: "%",
-                 color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)),
-                 caption: String(localized: String.LocalizationValue(profile.bodyFatCategory(from: measurement))))
-                .accessibilityIdentifier("bodyFatRow")
-            tile(title: "ИМТ", value: String(format: "%.1f", profile.bmi), unit: "",
-                 color: bmiColor(profile.bmi),
-                 caption: String(localized: String.LocalizationValue(bmiLabel(profile.bmi))))
+            Text(verbatim: basisCaption(profile))
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
+        .padding(14)
+        .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
     }
 
-    private func tile(title: LocalizedStringKey, value: String, unit: LocalizedStringKey,
-                      color: Color? = nil, caption: String? = nil) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+    /// Откуда взялись числа — одной серой строкой.
+    private func basisCaption(_ profile: UserProfile) -> String {
+        var parts = [String(format: String(localized: "по формуле %lld"), Int(profile.tdee.rounded())),
+                     String(format: String(localized: "BMR %lld"), Int(profile.bmr.rounded()))]
+        if let fact = store.adaptiveTDEE, usesFact {
+            parts.append(String(format: String(localized: "%lld дн. данных"), fact.loggedDays))
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    private func miniStat(_ title: LocalizedStringKey, _ value: String,
+                          unit: LocalizedStringKey, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(verbatim: value)
-                    .font(.title3.weight(.semibold))
+                    .font(.subheadline.weight(.semibold))
                     .monospacedDigit()
-                    .foregroundStyle(color ?? .primary)
+                    .foregroundStyle(color)
                 Text(unit)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
             .lineLimit(1)
             .minimumScaleFactor(0.7)
-            Text(verbatim: caption ?? " ")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
         .contentShape(Rectangle())
-        .liquidGlass(in: RoundedRectangle(cornerRadius: 16))
     }
 
     private func resultRow(title: LocalizedStringKey, value: String, highlighted: Bool = false) -> some View {
@@ -663,5 +697,64 @@ private struct WeightSparkline: View {
             }
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// Как считается расход: по факту или по формуле, и с каким множителем активности.
+///
+/// Отдельным листом, а не секцией профиля: пока расход измеряется по дневнику
+/// и весам, множитель активности ни на что не влияет, и держать его на главном
+/// экране значит спрашивать то, что не спросят.
+private struct CalculationBasisSheet: View {
+    var store: CalorieStore
+    @Binding var activityLevel: ActivityLevel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Toggle(isOn: Binding(get: { store.usesAdaptiveTDEE },
+                                         set: { store.usesAdaptiveTDEE = $0 })) {
+                        Text("Считать по факту")
+                    }
+                    .disabled(store.adaptiveTDEE == nil)
+                    .accessibilityIdentifier("useAdaptiveTDEE")
+                } footer: {
+                    if let fact = store.adaptiveTDEE {
+                        Text(String(format: String(localized: "По дневнику и весам: около %1$lld ккал в день, данных за %2$lld дн. Формула даёт %3$lld."),
+                                    Int((store.smoothedTDEE ?? fact.tdee).rounded()), fact.loggedDays,
+                                    Int((store.profile?.tdee ?? 0).rounded())))
+                    } else {
+                        Text("Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле.")
+                    }
+                }
+
+                if !(store.usesAdaptiveTDEE && store.adaptiveTDEE != nil) {
+                    Section {
+                        Picker("Уровень активности", selection: $activityLevel) {
+                            ForEach(ActivityLevel.allCases) { level in
+                                Text(level.title).tag(level)
+                            }
+                        }
+                        .pickerStyle(.inline)
+                        .labelsHidden()
+                    } header: {
+                        Text("Уровень активности")
+                    } footer: {
+                        Text("Множитель к базовому обмену. Он нужен, только пока расход считается по формуле: измеренный расход уже знает и работу, и зал.")
+                    }
+                }
+            }
+            .glassRow()
+            .listStyle(.insetGrouped)
+            .navigationTitle("Как считаем")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    CheckmarkButton { dismiss() }
+                }
+            }
+        }
     }
 }

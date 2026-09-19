@@ -109,5 +109,11 @@ struct RootView: View {
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "MacrosWidget")
         }
+        // Цвет акцента виджету шагов: он в своём процессе и настроек
+        // приложения не видит, поэтому выбор кладётся в общие настройки группы.
+        .onChange(of: appAccent, initial: true) { _, accent in
+            UserDefaults(suiteName: CalorieStore.appGroup)?.set(accent, forKey: "widget_accent")
+            WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")
+        }
     }
 }

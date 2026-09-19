@@ -204,6 +204,48 @@
     },
     "%@ к %@ · план бесплатно %lld дней" : {
       "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ إلى %@ · الخطة مجانًا %lld يومًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ auf %@ · Plan %lld Tage gratis"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ to %@ · plan free for %lld days"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ a %@ · plan gratis %lld días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vers %@ · plan gratuit %lld jours"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ל-%@ · התוכנית חינם %lld ימים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ para %@ · plano grátis por %lld dias"
+          }
+        },
         "ru" : {
           "stringUnit" : {
             "state" : "new",
@@ -259,6 +301,7 @@
       }
     },
     "%1$@ · %2$lld дн." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -510,6 +553,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld d."
+          }
+        }
+      }
+    },
+    "%lld дн. данных" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld يوم بيانات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Tage Daten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days of data"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días de datos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld j. de données"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ימי נתונים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dias de dados"
           }
         }
       }
@@ -1719,7 +1808,7 @@
         }
       }
     },
-    "BMR" : {
+    "BMR %lld" : {
 
     },
     "FFMI (индекс сухой массы)" : {
@@ -2257,6 +2346,7 @@
       }
     },
     "Американская" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2913,9 +3003,6 @@
           }
         }
       }
-    },
-    "Базовый обмен" : {
-
     },
     "Базовый обмен (BMR)" : {
       "extractionState" : "manual",
@@ -12665,7 +12752,54 @@
         }
       }
     },
+    "Единицы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوحدات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einheiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Units"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unidades"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unités"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יחידות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unidades"
+          }
+        }
+      }
+    },
     "Единицы измерения" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13128,7 +13262,6 @@
       }
     },
     "Жир %" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13175,6 +13308,7 @@
       }
     },
     "Жир % (оценка)" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16152,9 +16286,6 @@
         }
       }
     },
-    "изменить" : {
-
-    },
     "Изменить" : {
       "localizations" : {
         "ar" : {
@@ -17212,6 +17343,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progresso do plano"
+          }
+        }
+      }
+    },
+    "Как считаем" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف نحسب"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie wir rechnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How We Calculate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo calculamos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment on calcule"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "איך מחשבים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como calculamos"
           }
         }
       }
@@ -20524,6 +20701,7 @@
       }
     },
     "Метрическая" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20845,6 +21023,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Muito: cada grama extra de gordura são mais de dois gramas de carboidrato a menos no treino."
+          }
+        }
+      }
+    },
+    "Множитель к базовому обмену. Он нужен, только пока расход считается по формуле: измеренный расход уже знает и работу, и зал." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "معامل على معدل التمثيل الغذائي الأساسي. يهم فقط ما دام الحساب بالمعادلة — الحساب المقاس يأخذ العمل والنادي في الحسبان مسبقًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Multiplikator für deinen Grundumsatz. Er zählt nur, solange der Verbrauch per Formel berechnet wird — der gemessene Verbrauch berücksichtigt Arbeit und Training bereits."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A multiplier on your basal rate. It only matters while expenditure is calculated by formula — measured expenditure already accounts for work and the gym."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un multiplicador sobre tu metabolismo basal. Solo importa mientras el gasto se calcula por fórmula: el gasto medido ya tiene en cuenta el trabajo y el gimnasio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un multiplicateur de ton métabolisme de base. Il ne compte que tant que la dépense est calculée par formule : la dépense mesurée tient déjà compte du travail et de la salle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מכפיל לחילוף החומרים הבסיסי. הוא רלוונטי רק כל עוד ההוצאה מחושבת לפי נוסחה — ההוצאה הנמדדת כבר יודעת גם על העבודה וגם על החדר כושר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um multiplicador sobre o seu metabolismo basal. Só importa enquanto o gasto é calculado por fórmula: o gasto medido já leva em conta o trabalho e a academia."
           }
         }
       }
@@ -25341,6 +25565,52 @@
         }
       }
     },
+    "Норма на день поднята: заправь углеводами. В пост держит печёночный гликоген — около 100 г, и уходит он за первые 12–24 часа. Заполнить его хватает одного дня." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف اليوم مرتفع: اشحن بالكربوهيدرات. غلايكوجين الكبد هو ما يحملك خلال الصيام — نحو 100 غرام، يُستهلك في أول 12-24 ساعة. يكفي يوم واحد لتعويضه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das heutige Ziel ist erhöht: tank Kohlenhydrate. Das Leberglykogen trägt dich durchs Fasten — etwa 100 g, aufgebraucht in den ersten 12–24 Stunden. Ein Tag reicht, um es aufzufüllen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's target is raised: fuel up with carbs. Liver glycogen carries you through the fast — about 100 g, gone within the first 12–24 hours. One day is enough to refill it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoy el objetivo está más alto: repón con carbohidratos. El glucógeno hepático te sostiene durante el ayuno: unos 100 g, que se agotan en las primeras 12-24 horas. Un día basta para rellenarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif du jour est relevé : fais le plein de glucides. Le glycogène hépatique te porte pendant le jeûne — environ 100 g, épuisés dans les 12 à 24 premières heures. Une journée suffit pour le reconstituer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד היום הועלה: תדלק בפחמימות. גליקוגן הכבד הוא מה שמחזיק אותך בצום — כ-100 גרם, שנגמרים ב-12–24 השעות הראשונות. יום אחד מספיק כדי למלא אותו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta de hoje foi elevada: reabasteça com carboidratos. O glicogênio hepático sustenta o jejum — cerca de 100 g, que se esgotam nas primeiras 12-24 horas. Um dia é suficiente para reabastecê-lo."
+          }
+        }
+      }
+    },
     "Норма на сегодня перебрана на %lld ккал." : {
       "localizations" : {
         "ar" : {
@@ -25383,6 +25653,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta do dia foi ultrapassada em %lld kcal."
+          }
+        }
+      }
+    },
+    "Норма сегодня выше — заправить гликоген перед постом" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف اليوم أعلى — اشحن الغلايكوجين قبل الصيام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das heutige Ziel ist höher — Glykogen vor dem Fasten auffüllen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's target is higher — refuel glycogen before the fast"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo de hoy es más alto: repón glucógeno antes del ayuno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif du jour est plus élevé — refais le plein de glycogène avant le jeûne"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד היום גבוה יותר — למלא גליקוגן לפני הצום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta de hoje é maior — reabasteça o glicogênio antes do jejum"
           }
         }
       }
@@ -30409,6 +30725,52 @@
         }
       }
     },
+    "По дневнику и весам: около %1$lld ккал в день, данных за %2$lld дн. Формула даёт %3$lld." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من سجل الطعام والوزن: نحو %1$lld سعرة حرارية في اليوم، بناءً على %2$lld يوم من البيانات. المعادلة تعطي %3$lld."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus Tagebuch und Gewicht: etwa %1$lld kcal pro Tag, %2$lld Tage Daten. Die Formel ergibt %3$lld."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From food log and weigh-ins: about %1$lld kcal a day, %2$lld days of data. Formula gives %3$lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Según el diario y el peso: unas %1$lld kcal al día, con %2$lld días de datos. La fórmula da %3$lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'après le journal et les pesées : environ %1$lld kcal par jour, %2$lld jours de données. La formule donne %3$lld."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי היומן והשקילות: כ-%1$lld קק״ל ביום, על סמך %2$lld ימי נתונים. הנוסחה נותנת %3$lld."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo diário e pelas pesagens: cerca de %1$lld kcal por dia, com %2$lld dias de dados. A fórmula dá %3$lld."
+          }
+        }
+      }
+    },
     "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя." : {
       "localizations" : {
         "ar" : {
@@ -30547,9 +30909,6 @@
           }
         }
       }
-    },
-    "по плану" : {
-
     },
     "По самой выступающей точке ягодиц, стопы вместе, мышцы расслаблены." : {
       "localizations" : {
@@ -30736,6 +31095,7 @@
       }
     },
     "по формуле" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30777,6 +31137,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "pela fórmula"
+          }
+        }
+      }
+    },
+    "по формуле %lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بالمعادلة %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nach Formel %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "by formula %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "por fórmula %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "par formule %lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי נוסחה %lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "por fórmula %lld"
           }
         }
       }
@@ -35839,7 +36245,54 @@
         }
       }
     },
+    "Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يظهر الحساب الفعلي عندما يتوفر أسبوعان من سجل الطعام وقياسات الوزن. حتى ذلك الحين نحسب بالمعادلة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der tatsächliche Verbrauch erscheint, sobald zwei Wochen Tagebuch und Wiegungen vorliegen. Bis dahin rechnen wir per Formel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actual expenditure appears once you've logged two weeks of food and weigh-ins. Until then, we use the formula."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El gasto real aparecerá cuando tengas dos semanas de diario y pesajes registrados. Hasta entonces, usamos la fórmula."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dépense réelle apparaîtra une fois deux semaines de journal et de pesées enregistrées. Jusque-là, on utilise la formule."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההוצאה בפועל תופיע כשיצטברו שבועיים של יומן ושקילות. עד אז מחשבים לפי נוסחה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O gasto real vai aparecer quando você tiver duas semanas de diário e pesagens registradas. Até então, usamos a fórmula."
+          }
+        }
+      }
+    },
     "Расход по факту: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Значит, тратится около %3$lld. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -35885,7 +36338,7 @@
         }
       }
     },
-    "Расход с активностью" : {
+    "Расход по формуле" : {
 
     },
     "Расход с активностью (TDEE)" : {
@@ -41226,6 +41679,7 @@
       }
     },
     "Считать норму от факта" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -41267,6 +41721,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calcular a meta pelo gasto real"
+          }
+        }
+      }
+    },
+    "Считать по факту" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحساب من البيانات الفعلية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tatsächliche Daten verwenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Use Actual Data"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar datos reales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utiliser les données réelles"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחשב לפי נתונים בפועל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar dados reais"
           }
         }
       }
@@ -41314,6 +41814,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld consumidas"
+          }
+        }
+      }
+    },
+    "Съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю — значит, тратится около %3$lld. Формула этого не видит: она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تناولت بمعدل %1$lld سعرة حرارية في اليوم، ووزن الاتجاه يتغير %2$@ كجم في الأسبوع — أي أنك تحرق نحو %3$lld. المعادلة لا ترى ذلك: فهي لا تعرف عملك ولا تكيّفك مع العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du hast im Schnitt %1$lld kcal am Tag gegessen, und dein Trendgewicht ändert sich um %2$@ kg pro Woche — das heißt, du verbrauchst etwa %3$lld. Die Formel sieht das nicht: Sie kennt weder deine Arbeit noch deine Anpassung ans Defizit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've averaged %1$lld kcal a day, and your trend weight is moving %2$@ kg a week — so you're burning about %3$lld. The formula can't see that: it doesn't know your work or your adaptation to the deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has comido en promedio %1$lld kcal al día, y tu peso de tendencia cambia %2$@ kg por semana; eso significa que gastas unas %3$lld. La fórmula no ve esto: no conoce ni tu trabajo ni tu adaptación al déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as mangé en moyenne %1$lld kcal par jour, et ton poids de tendance varie de %2$@ kg par semaine — donc tu dépenses environ %3$lld. La formule ne voit pas ça : elle ne connaît ni ton travail ni ton adaptation au déficit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אכלת בממוצע %1$lld קק״ל ביום, ומשקל המגמה שלך משתנה ב-%2$@ ק״ג בשבוע — כלומר אתה שורף בערך %3$lld. הנוסחה לא רואה את זה: היא לא מכירה את העבודה שלך ולא את ההסתגלות לגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você comeu em média %1$lld kcal por dia, e seu peso de tendência varia %2$@ kg por semana — ou seja, você gasta cerca de %3$lld. A fórmula não vê isso: ela não conhece seu trabalho nem sua adaptação ao déficit."
           }
         }
       }
@@ -41825,6 +42371,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Corpo"
+          }
+        }
+      }
+    },
+    "Тема" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المظهر"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Design"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Theme"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thème"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מראה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tema"
           }
         }
       }
@@ -43087,6 +43679,52 @@
         }
       }
     },
+    "Углеводы плюс немного жира: жир замедляет опорожнение желудка, и сытость держится дольше. Без острого и очень солёного — переевший солёного начинает пост с жажды." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كربوهيدرات مع قليل من الدهون: الدهون تبطئ إفراغ المعدة فيدوم الشبع أطول. تجنّب الحار والمالح جدًا — من يفرط في الملح يبدأ الصيام بالعطش."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohlenhydrate plus etwas Fett: Fett verzögert die Magenentleerung, das Sättigungsgefühl hält länger. Verzichte auf scharfes und sehr salziges Essen — zu viel Salz, und du startest das Fasten mit Durst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbs plus a little fat: fat slows stomach emptying, so you stay full longer. Skip spicy and very salty food — too much salt starts the fast with thirst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidratos más un poco de grasa: la grasa ralentiza el vaciado gástrico, así que la saciedad dura más. Evita lo picante y muy salado: quien se excede con la sal empieza el ayuno con sed."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des glucides avec un peu de gras : le gras ralentit la vidange gastrique, la satiété dure donc plus longtemps. Évite les plats épicés et très salés — trop de sel, et tu commences le jeûne avec la soif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחמימות עם קצת שומן: השומן מאט את התרוקנות הקיבה, כך שהשובע נמשך יותר זמן. הימנע מחריף ומאוד מלוח — מי שמגזים במלח מתחיל את הצום עם צמא."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carboidratos mais um pouco de gordura: a gordura retarda o esvaziamento gástrico, então a saciedade dura mais. Evite comidas picantes e muito salgadas — quem exagera no sal começa o jejum com sede."
+          }
+        }
+      }
+    },
     "Углеводы, г" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -43464,6 +44102,7 @@
       }
     },
     "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44357,7 +44996,54 @@
         }
       }
     },
+    "Цвет" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اللون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farbe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couleur"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צבע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cor"
+          }
+        }
+      }
+    },
     "Цвет акцента" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44399,6 +45085,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cor de destaque"
+          }
+        }
+      }
+    },
+    "Цвет кнопок, ссылок и кольца шагов. Дуги — те же, что на «Сегодня»: калории, белки, жиры, углеводы и системный синий." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لون الأزرار والروابط وحلقة الخطوات. الأقواس نفسها الموجودة في «اليوم»: السعرات، البروتين، الدهون، الكربوهيدرات، والأزرق النظامي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Farbe für Buttons, Links und den Schritte-Ring. Die Bögen entsprechen Heute: Kalorien, Eiweiß, Fett, Kohlenhydrate und Systemblau."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color for buttons, links, and the steps ring. The arcs match Today: calories, protein, fat, carbs, and system blue."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color de los botones, enlaces y el anillo de pasos. Los arcos son los mismos que en Hoy: calorías, proteínas, grasas, carbohidratos y azul del sistema."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couleur des boutons, des liens et de l'anneau de pas. Les arcs sont les mêmes que sur Aujourd'hui : calories, protéines, lipides, glucides et bleu système."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צבע הכפתורים, הקישורים וטבעת הצעדים. הקשתות זהות לאלה שב'היום': קלוריות, חלבון, שומן, פחמימות וכחול המערכת."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cor dos botões, links e do anel de passos. Os arcos são os mesmos de Hoje: calorias, proteínas, gorduras, carboidratos e azul do sistema."
           }
         }
       }

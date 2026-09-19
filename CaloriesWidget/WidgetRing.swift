@@ -12,7 +12,18 @@ enum WidgetPalette {
     static let protein = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
     static let fat = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
     static let carbs = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
-    static let steps = [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
+    /// Шаги красятся цветом акцента из настроек приложения: у этого кольца
+    /// цвет ничего не означает, и пусть он будет тем, который человек выбрал.
+    /// Приложение кладёт выбор в общие настройки группы.
+    static var steps: [Color] {
+        switch UserDefaults(suiteName: "group.calories.shared")?.string(forKey: "widget_accent") {
+        case "kcal":    return kcal
+        case "protein": return protein
+        case "fat":     return fat
+        case "carbs":   return carbs
+        default:        return [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
+        }
+    }
 
     /// Поле виджета — как у иконки: белое, чуть сереющее книзу, а в тёмной
     /// теме почти чёрное. Графит под «С» в чёрном стекле ушёл вместе с ней:

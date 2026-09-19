@@ -162,6 +162,8 @@ final class StepStore {
                 // Дорого стоит только просьба перестроиться, её и экономим.
                 self?.groupDefaults?.set(Calendar.current.startOfDay(for: Date()), forKey: "widget_steps_day")
                 self?.groupDefaults?.set(steps, forKey: "widget_steps_today")
+                // Цвет акцента виджету: он в своём процессе и настроек не видит.
+                self?.groupDefaults?.set(AppAccent.current.rawValue, forKey: "widget_accent")
                 self?.refreshStepsWidgetIfWorthIt(steps: steps)
             }
         }

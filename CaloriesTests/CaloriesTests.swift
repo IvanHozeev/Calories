@@ -2394,6 +2394,29 @@ struct FastDayTests {
         #expect(store.adaptedGoal(for: midWeek) > withoutFast)
     }
 
+    /// Накануне голодания норма выше: за день можно заправить печёночный
+    /// гликоген, и тогда пост начинается не с пустых депо.
+    @Test func theEveOfAFastGetsMoreCalories() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let plain = store.effectiveGoal(for: today)
+        store.markFastDay(calendar.date(byAdding: .day, value: 1, to: today)!, kind: .dry)
+        let eve = store.effectiveGoal(for: today)
+        #expect(eve > plain)
+        #expect(abs(Double(eve) - Double(plain) * CalorieStore.fastEveBoost) <= 10)
+        #expect(store.isFastEve(today))
+    }
+
+    /// За два дня норма обычная: заправляются накануне, а не всю неделю.
+    @Test func twoDaysBeforeAFastTheGoalIsUnchanged() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let plain = store.effectiveGoal(for: today)
+        store.markFastDay(calendar.date(byAdding: .day, value: 2, to: today)!, kind: .dry)
+        #expect(store.effectiveGoal(for: today) == plain)
+        #expect(!store.isFastEve(today))
+    }
+
     /// С планом банк выключен: норму каждого дня задаёт схема, и недобор
     /// в начале недели не должен раздувать день дефицита.
     @Test func aPlanTurnsTheBankOff() throws {

@@ -172,13 +172,35 @@ extension CalorieStore {
     /// Из `dailyGoal`, а не из формулы, ещё по одной причине: кнопка «замедлить»
     /// в разборе плана пишет туда пересчитанное число, и живая формула молча
     /// затирала бы её на следующем же чтении.
+    /// Канун отмеченного голодания: завтра не едят, а сегодня заправляются.
+    func isFastEve(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: date))
+        else { return false }
+        return isFastDay(tomorrow)
+    }
+
+    /// Насколько поднимается норма накануне голодания.
+    ///
+    /// В пост держит печёночный гликоген — около 100 г, то есть примерно
+    /// 400 ккал, и уходит он за первые 12–24 часа. Заправить его можно за один
+    /// день, фаза истощения для этого не нужна. Прибавка сама уходит в углеводы:
+    /// белок и жир заданы телом, углеводы — остаток нормы.
+    static let fastEveBoost = 1.15
+
     func effectiveGoal(for date: Date) -> Int {
-        if let plan, plan.cyclingEnabled, let profile {
+        let base = baseGoal(for: date)
+        guard isFastEve(date) else { return base }
+        return Int((Double(base) * Self.fastEveBoost / 10).rounded() * 10)
+    }
+
+    private func baseGoal(for date: Date) -> Int {
+        if let plan, plan.cyclingEnabled, profile != nil {
             return plan.calorieTarget(for: date, tdee: workingTDEE)
         }
         // Число действует в фазе, под которую записано. В другой фазе, в том
         // числе в неделю брейка, — формула плана, см. `dailyGoalPhaseID`.
-        if let plan, let profile, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
+        if let plan, profile != nil, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
             return plan.dailyCalorieTarget(for: date, tdee: workingTDEE)
         }
         return dailyGoal

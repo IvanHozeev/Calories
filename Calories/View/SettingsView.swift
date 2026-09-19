@@ -111,15 +111,17 @@ struct SettingsView: View {
             
             // Системное сразу после подписки: оформление, шрифт и язык ищут
             // чаще, чем выгрузку копий, а та нужна раз в жизни телефона.
-            Section("Системное") {
+            // Оформление отдельной секцией: тема, шрифт и цвет — это про вид,
+            // а не про то, как приложение считает.
+            Section("Оформление") {
                 Picker(selection: $appTheme) {
                     ForEach(AppTheme.allCases) { theme in
                         Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
                     }
                 } label: {
-                    Label("Оформление", systemImage: "circle.lefthalf.filled")
+                    Label("Тема", systemImage: "circle.lefthalf.filled")
                 }
-                
+
                 NavigationLink {
                     FontSettingsView()
                 } label: {
@@ -132,28 +134,33 @@ struct SettingsView: View {
                 }
                 .accessibilityIdentifier("openFontSettings")
 
-                Picker(selection: $appAccent) {
-                    ForEach(AppAccent.allCases) { accent in
-                        Label {
-                            Text(verbatim: accent.title)
-                        } icon: {
-                            Image(systemName: "circle.fill").foregroundStyle(accent.color)
+                // Цвета кружками и без названий: «Белки» в строке про цвет
+                // читались как настройка макросов, а кружок говорит всё сам.
+                HStack {
+                    Label("Цвет", systemImage: "paintpalette")
+                    Spacer(minLength: 12)
+                    HStack(spacing: 10) {
+                        ForEach(AppAccent.allCases) { accent in
+                            Button {
+                                appAccent = accent.rawValue
+                            } label: {
+                                Circle()
+                                    .fill(accent.color)
+                                    .frame(width: 22, height: 22)
+                                    .overlay {
+                                        Circle()
+                                            .strokeBorder(Color.primary.opacity(appAccent == accent.rawValue ? 0.7 : 0),
+                                                          lineWidth: 2)
+                                            .padding(-3)
+                                    }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(Text(verbatim: accent.rawValue))
                         }
-                        .tag(accent.rawValue)
                     }
-                } label: {
-                    Label("Цвет акцента", systemImage: "paintpalette")
                 }
                 .accessibilityIdentifier("accentColor")
 
-                // Меню прямо в строке, как у оформления: вариантов два, и
-                // ради них открывать свой экран было незачем.
-                Picker(selection: $useImperial) {
-                    Text("Метрическая").tag(false)
-                    Text("Американская").tag(true)
-                } label: {
-                    Label("Единицы измерения", systemImage: "ruler")
-                }
                 NavigationLink {
                     RingSoundSettingsView()
                 } label: {
@@ -165,6 +172,18 @@ struct SettingsView: View {
                     }
                 }
                 .accessibilityIdentifier("openRingSound")
+            }
+
+            Section("Системное") {
+                // Единицы одной строкой: «Метрическая» и «Американская» не
+                // помещались рядом с подписью и переносились.
+                Picker(selection: $useImperial) {
+                    Text(verbatim: "кг · см").tag(false)
+                    Text(verbatim: "lb · in").tag(true)
+                } label: {
+                    Label("Единицы", systemImage: "ruler")
+                }
+
                 NavigationLink {
                     RemindersView()
                 } label: {

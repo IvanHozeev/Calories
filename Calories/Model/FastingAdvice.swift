@@ -33,8 +33,12 @@ enum FastingAdvice {
                 daysBefore: 1...1))
         }
         items.append(Item(
+            when: String(localized: "Накануне"),
+            text: String(localized: "Норма на день поднята: заправь углеводами. В пост держит печёночный гликоген — около 100 г, и уходит он за первые 12–24 часа. Заполнить его хватает одного дня."),
+            daysBefore: 1...1))
+        items.append(Item(
             when: String(localized: "Последний приём"),
-            text: String(localized: "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости."),
+            text: String(localized: "Углеводы плюс немного жира: жир замедляет опорожнение желудка, и сытость держится дольше. Без острого и очень солёного — переевший солёного начинает пост с жажды."),
             daysBefore: 1...1))
         items.append(Item(
             when: String(localized: "Накануне"),

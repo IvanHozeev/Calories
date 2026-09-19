@@ -255,14 +255,10 @@ enum AppAccent: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var title: String {
-        switch self {
-        case .system:  return String(localized: "Системный")
-        case .kcal:    return String(localized: "Калории")
-        case .protein: return String(localized: "Белки")
-        case .fat:     return String(localized: "Жиры")
-        case .carbs:   return String(localized: "Углеводы")
-        }
+    /// Выбранный цвет. Читается напрямую там, где своего окружения нет:
+    /// кольцо шагов и графики красятся им же, а не системным синим.
+    static var current: AppAccent {
+        UserDefaults.standard.string(forKey: defaultsKey).flatMap(AppAccent.init(rawValue:)) ?? .system
     }
 
     var color: Color {

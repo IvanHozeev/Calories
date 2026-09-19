@@ -31,7 +31,14 @@ struct FastingStrip: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if let item = hint.items.first {
+                    if hint.daysUntil == 1 {
+                        // Про поднятую норму говорим прямо: цифра в кольце
+                        // сегодня другая, и человек должен знать почему.
+                        Text("Норма сегодня выше — заправить гликоген перед постом")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else if let item = hint.items.first {
                         Text(verbatim: item.text)
                             .font(.caption)
                             .foregroundStyle(.secondary)

@@ -273,7 +273,7 @@ struct StepsWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     @Environment(\.widgetRenderingMode) var renderingMode
 
-    private let ringColors: [Color] = WidgetPalette.steps
+    private var ringColors: [Color] { WidgetPalette.steps }
     /// То же поле, что у остальных виджетов и иконки: виджеты одного
     /// приложения не должны быть разноцветными плашками.
     private var bg: LinearGradient { WidgetPalette.surface }

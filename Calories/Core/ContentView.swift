@@ -494,7 +494,9 @@ private struct StepsChip: View {
         return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
     }
 
-    private var tint: Color { progress >= 1 ? .green : .blue }
+    // Цвет акцента, выбранный в настройках: кольцо шагов у него единственное
+    // без своего смысла у цвета. Цель взята — зелёным, как «в норме» везде.
+    private var tint: Color { progress >= 1 ? ProgressRing.kcalColors[0] : AppAccent.current.color }
 
     var body: some View {
         Button {
@@ -518,9 +520,12 @@ private struct StepsChip: View {
                             .foregroundStyle(tint)
                     }
                     .frame(width: 32, height: 32)
+                    // Число обычным цветом: в цвете акцента кольцо и пешеход,
+                    // а цифра читается лучше нейтральной.
                     Text(store.stepsToday.formatted())
                         .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
+                        .foregroundStyle(Color.primary)
                 } else {
                     Image(systemName: "figure.walk")
                         .font(.subheadline.weight(.medium))

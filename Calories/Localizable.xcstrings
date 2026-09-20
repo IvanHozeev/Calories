@@ -4,6 +4,650 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Белка мало: не хватило %lld г. На дефиците недобор белка оплачивается мышцами — это те самые «похудел, но выгляжу хуже»." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين قليل: نقص %lld غ. في العجز، نقص البروتين يُدفع من العضلات — هذا هو المثال الكلاسيكي «خسرت الوزن، لكن مظهري أسوأ»."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu wenig Protein: %lld g fehlten. Im Defizit wird ein Proteinmangel mit Muskeln bezahlt — das ist das klassische „abgenommen, aber sehe schlechter aus“."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein's low: %lld g short. On a deficit, a protein shortfall is paid for in muscle — that's the classic “lost weight, but look worse”."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poca proteína: faltaron %lld g. En déficit, la falta de proteína se paga con músculo — es el clásico «adelgacé, pero me veo peor»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protéines insuffisantes : il manquait %lld g. En déficit, un manque de protéines se paie en muscle — c'est le classique « j'ai perdu du poids mais j'ai l'air pire »."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלבון נמוך: חסרו %lld גרם. בגירעון, מחסור בחלבון משולם בשריר — זה אותו „ירדתי במשקל אבל נראה גרוע יותר” הקלאסי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pouca proteína: faltaram %lld g. No déficit, a falta de proteína é paga em músculo — é aquele clássico “perdi peso, mas fiquei com pior aparência”."
+          }
+        }
+      }
+    },
+    "Белка не хватило %lld г. Разница небольшая, но если так каждый день — за месяц она заметна." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقص %lld غ من البروتين. الفرق صغير، لكن لو تكرر كل يوم يصبح ملحوظًا خلال شهر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es fehlten %lld g Protein. Der Unterschied ist klein, aber Tag für Tag summiert er sich über einen Monat merklich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein fell short by %lld g. The gap is small, but every day like this adds up over a month."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltaron %lld g de proteína. La diferencia es pequeña, pero si se repite cada día, en un mes se nota."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il manquait %lld g de protéines. L'écart est faible, mais répété chaque jour, il se voit sur un mois."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חסרו %lld גרם חלבון. ההפרש קטן, אבל אם זה קורה כל יום — בסוף החודש זה מורגש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltaram %lld g de proteína. A diferença é pequena, mas se for assim todos os dias, em um mês ela se nota."
+          }
+        }
+      }
+    },
+    "Белок закрыт. На дефиците это главное: он решает, уходит жир или мышцы." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البروتين مضبوط. في العجز هذا هو الأهم: هو ما يحدد إن كنت تخسر الدهون أم العضلات."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein ist abgedeckt. Im Defizit ist das der wichtigste Punkt: Es entscheidet, ob Fett oder Muskeln verschwinden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protein's covered. On a deficit that's what matters most: it decides whether you lose fat or muscle."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La proteína está cubierta. En déficit es lo que más importa: decide si pierdes grasa o músculo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les protéines sont couvertes. En déficit, c'est l'essentiel : ça décide si tu perds du gras ou du muscle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלבון מכוסה. בגירעון זה העיקר: הוא קובע אם יורד שומן או שריר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A proteína está garantida. No déficit é o que mais importa: decide se você perde gordura ou músculo."
+          }
+        }
+      }
+    },
+    "В норму попал. Неделя таких дней — это и есть результат." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ضبطت الهدف. أسبوع من أيام كهذا هو النتيجة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziel erreicht. Eine Woche solcher Tage ist das Ergebnis."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right on target. A week of days like this is the result."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dentro del objetivo. Una semana de días así es el resultado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans l'objectif. Une semaine de jours comme ça, c'est le résultat."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פגעת ביעד. שבוע של ימים כאלה — זו התוצאה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dentro da meta. Uma semana de dias assim é o resultado."
+          }
+        }
+      }
+    },
+    "День голодания — разбирать нечего. Ноль здесь намеренный, и на серию он не влияет." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم صيام — لا شيء لتحليله. الصفر هنا مقصود ولا يؤثر على تتابعك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fastentag — nichts zu analysieren. Die Null hier ist beabsichtigt und wirkt sich nicht auf deine Serie aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fasting day — nothing to analyze. Zero here is intentional, and it doesn't affect your streak."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de ayuno — no hay nada que analizar. El cero aquí es intencional y no afecta tu racha."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour de jeûne — rien à analyser. Le zéro ici est volontaire et n'affecte pas ta série."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום צום — אין מה לנתח. האפס כאן מכוון ולא משפיע על הרצף."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia de jejum — não há o que analisar. O zero aqui é intencional e não afeta sua sequência."
+          }
+        }
+      }
+    },
+    "День ещё идёт — разбор будет к вечеру, когда съедено всё." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اليوم لم ينتهِ بعد — سيكون التفصيل جاهزًا مساءً، عندما يُسجَّل كل شيء."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Tag läuft noch — die Aufschlüsselung ist am Abend fertig, wenn alles erfasst ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day's still going — the breakdown will be ready by evening, once everything's logged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El día todavía no termina — el desglose estará listo por la noche, cuando todo esté registrado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La journée n'est pas finie — le bilan sera prêt le soir, une fois tout enregistré."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום עוד לא נגמר — הפירוט יהיה מוכן בערב, כשהכל יירשם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O dia ainda não terminou — o detalhamento estará pronto à noite, quando tudo estiver registrado."
+          }
+        }
+      }
+    },
+    "Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُحسب الحصص بالسعرات، لا بالجرامات: الجرام من الدهون يمنح تسع كيلوسعرات مقابل أربع للبروتين والكربوهيدرات."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anteile werden in Kalorien berechnet, nicht in Gramm: ein Gramm Fett liefert neun Kilokalorien gegenüber vier bei Eiweiß und Kohlenhydraten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shares are counted in calories, not grams: a gram of fat gives nine kilocalories against four for protein and carbs."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las proporciones se calculan en calorías, no en gramos: un gramo de grasa aporta nueve kilocalorías frente a cuatro de proteína e hidratos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les parts sont calculées en calories, pas en grammes : un gramme de lipides donne neuf kilocalories contre quatre pour les protéines et les glucides."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלקים נספרים בקלוריות, לא בגרמים: גרם שומן נותן תשע קילוקלוריות לעומת ארבע בחלבון ובפחמימות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As proporções são calculadas em calorias, não em gramas: um grama de gordura dá nove quilocalorias contra quatro de proteína e carboidratos."
+          }
+        }
+      }
+    },
+    "Жира %.2f г/кг — ниже рабочего минимума 0.5. День-другой ничего не решают, но неделями так сидеть значит платить тестостероном." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون %.2f غ/كغ — أقل من الحد الأدنى العملي 0.5. يوم أو يومان لا يغيران شيئًا، لكن أسابيع على هذا الحال تُدفع من التستوستيرون."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett: %.2f g/kg — unter dem Arbeitsminimum von 0.5. Ein Tag oder zwei ändern nichts, aber Wochen so zu leben kostet Testosteron."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat is %.2f g/kg — below the working minimum of 0.5. A day or two changes nothing, but weeks like this means paying with testosterone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa: %.2f g/kg — por debajo del mínimo de trabajo de 0.5. Un día o dos no cambian nada, pero semanas así se pagan con testosterona."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides : %.2f g/kg — sous le minimum de travail de 0.5. Un jour ou deux ne changent rien, mais des semaines comme ça se paient en testostérone."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן %.2f גרם/ק״ג — מתחת למינימום העבודה של 0.5. יום-יומיים לא משנים כלום, אבל שבועות כאלה משולמים בטסטוסטרון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura: %.2f g/kg — abaixo do mínimo de trabalho de 0.5. Um dia ou outro não decide nada, mas semanas assim custam testosterona."
+          }
+        }
+      }
+    },
+    "Недобор %lld ккал до нормы. Ускорить сушку так не выйдет: недоеденное возвращается срывом, а тело отвечает замедлением." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أنت أقل من هدفك بـ%lld سعرة. هذا لا يسرّع التنشيف: ما لم تأكله يعود كنوبة أكل، والجسم يرد بالتبطيء."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du liegst %lld kcal unter deinem Ziel. Das beschleunigt die Definitionsphase nicht: Was du nicht isst, kommt als Fressanfall zurück, und der Körper antwortet mit Verlangsamung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're %lld kcal under your target. This won't speed up the cut: what you skip comes back as a binge, and your body answers by slowing down."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vas %lld kcal por debajo de tu objetivo. Así no aceleras la definición: lo que no comes vuelve como atracón, y el cuerpo responde frenando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il manque %lld kcal pour atteindre l'objectif. Ça n'accélère pas la sèche : ce qui n'est pas mangé revient en excès, et le corps répond en ralentissant."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אתה %lld קלוריות מתחת ליעד. זה לא מזרז את החיטוב: מה שדילגת עליו חוזר כהתקף אכילה, והגוף מגיב בהאטה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faltam %lld kcal para a meta. Isso não acelera a definição: o que você deixa de comer volta como compulsão, e o corpo responde desacelerando."
+          }
+        }
+      }
+    },
+    "Перебор %lld ккал. Один день погоды не делает — важно, что скажет неделя." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تجاوزت الهدف بـ%lld سعرة. يوم واحد لا يصنع الفارق — المهم ما سيقوله الأسبوع."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du liegst %lld kcal drüber. Ein Tag macht noch kein Wetter — entscheidend ist, was die Woche sagt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're %lld kcal over. One day doesn't make the weather — what matters is what the week says."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Superaste en %lld kcal. Un día no hace tendencia — lo que importa es lo que diga la semana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépassement de %lld kcal. Un jour ne fait pas la tendance — ce qui compte, c'est ce que dira la semaine."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עברת ב-%lld קלוריות. יום אחד לא קובע — מה שחשוב זה מה שהשבוע יגיד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excesso de %lld kcal. Um dia não faz diferença — o que importa é o que a semana disser."
+          }
+        }
+      }
+    },
+    "Почти половина калорий из жира. Он сытнее на грамм, но вытесняет углеводы, на которых идут тренировки." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نصف السعرات تقريبًا من الدهون. تُشبع أكثر لكل جرام، لكنها تزحم الكربوهيدرات التي تعتمد عليها تمارينك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast die Hälfte der Kalorien kommt aus Fett. Es sättigt mehr pro Gramm, verdrängt aber die Kohlenhydrate, auf denen dein Training läuft."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Almost half your calories come from fat. It's more filling per gram, but it crowds out the carbs your workouts run on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casi la mitad de las calorías viene de la grasa. Sacia más por gramo, pero desplaza los carbohidratos con los que entrenas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Près de la moitié des calories viennent des lipides. Ils rassasient plus par gramme, mais évincent les glucides qui font tourner tes entraînements."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמעט מחצית מהקלוריות מגיעות משומן. הוא משביע יותר לגרם, אבל דוחק את הפחמימות שעליהן האימונים רצים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quase metade das calorias vem da gordura. Ela sacia mais por grama, mas desloca os carboidratos que sustentam os treinos."
+          }
+        }
+      }
+    },
+    "Разбор" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التفصيل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufschlüsselung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breakdown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desglose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilan"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פירוט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhamento"
+          }
+        }
+      }
+    },
+    "Состав рациона" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تكوين النظام الغذائي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nährstoffverteilung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diet composition"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composición de la dieta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composition du régime"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרכב התזונה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composição da dieta"
+          }
+        }
+      }
+    },
+    "Углеводов %lld г — меньше 130, минимума для мозга. Если день был тренировочный, силовые просядут на следующей же тренировке." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الكربوهيدرات %lld غ — أقل من 130، الحد الأدنى للدماغ. إن كان اليوم يوم تمرين، ستنخفض قوتك في التمرين التالي مباشرة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohlenhydrate: %lld g — unter 130, dem Minimum fürs Gehirn. War heute ein Trainingstag, sackt deine Kraft schon in der nächsten Einheit ab."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbs: %lld g — under 130, the minimum for your brain. If today was a training day, your lifts will dip at the very next session."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carbohidratos: %lld g — menos de 130, el mínimo para el cerebro. Si hoy fue día de entreno, tu fuerza bajará en la próxima sesión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glucides : %lld g — moins de 130, le minimum pour le cerveau. Si aujourd'hui était un jour d'entraînement, ta force chutera dès la prochaine séance."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פחמימות: %lld גרם — מתחת ל-130, המינימום למוח. אם היום היה יום אימון, החוזק ירד באימון הבא."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carboidratos: %lld g — menos de 130, o mínimo para o cérebro. Se hoje foi dia de treino, sua força vai cair já no próximo treino."
+          }
+        }
+      }
+    },
     "—" : {
       "shouldTranslate" : false
     },
@@ -106,9 +750,7 @@
         }
       }
     },
-    "%" : {
-
-    },
+    "%" : {},
     "%.0f г при весе %.1f кг" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1808,9 +2450,7 @@
         }
       }
     },
-    "BMR %lld" : {
-
-    },
+    "BMR %lld" : {},
     "FFMI (индекс сухой массы)" : {
       "localizations" : {
         "ar" : {
@@ -36338,9 +36978,7 @@
         }
       }
     },
-    "Расход по формуле" : {
-
-    },
+    "Расход по формуле" : {},
     "Расход с активностью (TDEE)" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 /// Разбор дня: макросы и микронутриенты на одном экране.
 ///
@@ -19,8 +20,47 @@ struct DayNutritionView: View {
         store.micronutrients(on: date)
     }
 
+    private var analysis: [DayAnalysis.Advice] {
+        let day = Calendar.current.startOfDay(for: date)
+        let entries = store.entriesByDay[day] ?? []
+        return DayAnalysis.advice(.init(
+            macros: macros,
+            calories: entries.reduce(0) { $0 + $1.calories },
+            goal: store.goal(for: date),
+            proteinTarget: store.proteinTarget,
+            fatTarget: store.fatTarget,
+            carbsTarget: store.carbsTarget,
+            weightKg: store.weightKg,
+            isFast: store.isFastDay(date),
+            // Сегодняшний день ещё идёт: недобор в обед — это не недобор.
+            isInProgress: Calendar.current.isDateInToday(date)
+        ))
+    }
+
     var body: some View {
         List {
+            if !DayAnalysis.composition(macros).isEmpty {
+                Section {
+                    compositionChart
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } header: {
+                    Text("Состав рациона")
+                } footer: {
+                    Text("Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов.")
+                }
+            }
+
+            if !analysis.isEmpty {
+                Section {
+                    ForEach(analysis) { item in
+                        adviceRow(item)
+                    }
+                } header: {
+                    Text("Разбор")
+                }
+            }
+
             Section {
                 macroRow(.protein, value: macros.protein, target: store.proteinTarget, color: MacroKind.protein.color)
                 macroRow(.fat, value: macros.fat, target: store.fatTarget, color: MacroKind.fat.color)
@@ -37,6 +77,81 @@ struct DayNutritionView: View {
         .scrollIndicators(.hidden)
         .navigationTitle("Разбор дня")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: - Состав и разбор
+
+    /// Кольцо состава: те же цвета, что у макросов везде, в середине — калории.
+    private var compositionChart: some View {
+        let parts = DayAnalysis.composition(macros)
+        return Chart(parts, id: \.kind) { part in
+            SectorMark(angle: .value("Калории", part.calories),
+                       innerRadius: .ratio(0.62),
+                       angularInset: 1.5)
+                .cornerRadius(4)
+                .foregroundStyle(part.kind.color)
+        }
+        .chartLegend(.hidden)
+        .frame(height: 190)
+        .overlay {
+            VStack(spacing: 2) {
+                Text(verbatim: "\(Int((parts.reduce(0) { $0 + $1.calories }).rounded()))")
+                    .font(.app(size: 26, weight: .bold))
+                    .monospacedDigit()
+                Text("ккал")
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            HStack(spacing: 14) {
+                ForEach(parts, id: \.kind) { part in
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(part.kind.color)
+                            .frame(width: 6, height: 6)
+                        Text(LocalizedStringKey(part.kind.title))
+                            .foregroundStyle(.secondary)
+                        Text(verbatim: "\(Int((part.share * 100).rounded()))%")
+                            .foregroundStyle(.tertiary)
+                            .monospacedDigit()
+                    }
+                }
+            }
+            .font(.app(.caption2))
+            .offset(y: 14)
+        }
+        .padding(.bottom, 18)
+    }
+
+    private func adviceRow(_ item: DayAnalysis.Advice) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon(for: item.tone))
+                .font(.app(.footnote))
+                .foregroundStyle(color(for: item.tone))
+                .frame(width: 18)
+            Text(verbatim: item.text)
+                .font(.app(.footnote))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func icon(for tone: DayAnalysis.Advice.Tone) -> String {
+        switch tone {
+        case .good:    return "checkmark.circle.fill"
+        case .warning: return "exclamationmark.triangle.fill"
+        case .info:    return "info.circle"
+        }
+    }
+
+    private func color(for tone: DayAnalysis.Advice.Tone) -> Color {
+        switch tone {
+        case .good:    return ProgressRing.kcalColors[0]
+        case .warning: return .orange
+        case .info:    return .secondary
+        }
     }
 
     // MARK: - Макросы

@@ -3413,6 +3413,89 @@ struct FoodTraitTests {
     }
 }
 
+// MARK: - Разбор дня
+
+struct DayAnalysisTests {
+
+    private func input(protein: Double = 140, fat: Double = 60, carbs: Double = 300,
+                       calories: Int = 2500, goal: Int = 2500,
+                       isFast: Bool = false, inProgress: Bool = false) -> DayAnalysis.Input {
+        .init(macros: Macros(protein: protein, fat: fat, carbs: carbs),
+              calories: calories, goal: goal,
+              proteinTarget: 136, fatTarget: 64, carbsTarget: 300,
+              weightKg: 80, isFast: isFast, isInProgress: inProgress)
+    }
+
+    private func ids(_ advice: [DayAnalysis.Advice]) -> [String] { advice.map(\.id) }
+
+    /// Белок закрыт и в норму попал — хвалим, а не молчим.
+    @Test func aGoodDayIsCalledGood() {
+        let result = DayAnalysis.advice(input())
+        #expect(ids(result).contains("protein-ok"))
+        #expect(ids(result).contains("calories-ok"))
+        #expect(result.allSatisfy { $0.tone != .warning })
+    }
+
+    /// Недобор белка на дефиците — главное предупреждение дня.
+    @Test func lowProteinIsAWarning() {
+        let result = DayAnalysis.advice(input(protein: 90))
+        let protein = result.first { $0.id == "protein-low" }
+        #expect(protein?.tone == .warning)
+    }
+
+    /// Чуть-чуть не хватило — это замечание, а не тревога.
+    @Test func almostEnoughProteinIsJustANote() {
+        let result = DayAnalysis.advice(input(protein: 125))
+        #expect(result.first { $0.id == "protein-close" }?.tone == .info)
+        #expect(!ids(result).contains("protein-low"))
+    }
+
+    /// Жир ниже 0.5 г/кг — про гормоны, и это предупреждение.
+    @Test func fatBelowTheFloorWarnsAboutHormones() {
+        let result = DayAnalysis.advice(input(fat: 30))
+        #expect(result.first { $0.id == "fat-low" }?.tone == .warning)
+    }
+
+    /// Углеводы ниже RDA — предупреждение про мозг и тренировки.
+    @Test func lowCarbsWarn() {
+        #expect(ids(DayAnalysis.advice(input(carbs: 90))).contains("carbs-low"))
+    }
+
+    /// Недобор и перебор по калориям одинаково заметны.
+    @Test func bothUnderAndOverEatingAreFlagged() {
+        #expect(ids(DayAnalysis.advice(input(calories: 1800))).contains("calories-low"))
+        #expect(ids(DayAnalysis.advice(input(calories: 3200))).contains("calories-high"))
+    }
+
+    /// Пока день идёт, выводов не делаем: недобор в обед — не недобор.
+    @Test func anUnfinishedDayIsNotJudged() {
+        let result = DayAnalysis.advice(input(protein: 20, carbs: 50, calories: 600, inProgress: true))
+        #expect(!ids(result).contains("protein-low"))
+        #expect(!ids(result).contains("calories-low"))
+    }
+
+    /// В день голодания разбирать нечего.
+    @Test func aFastDayIsLeftAlone() {
+        let result = DayAnalysis.advice(input(protein: 0, fat: 0, carbs: 0, calories: 0, isFast: true))
+        #expect(ids(result) == ["fast"])
+    }
+
+    /// Пустой день молчит, а не жалуется.
+    @Test func anEmptyDaySaysNothing() {
+        #expect(DayAnalysis.advice(input(protein: 0, fat: 0, carbs: 0, calories: 0)).isEmpty)
+    }
+
+    /// Состав считается в калориях: жир весит девять на грамм.
+    @Test func compositionCountsCalories() throws {
+        let parts = DayAnalysis.composition(Macros(protein: 100, fat: 100, carbs: 100))
+        let fat = try #require(parts.first { $0.kind == .fat })
+        let protein = try #require(parts.first { $0.kind == .protein })
+        #expect(fat.share > protein.share)
+        #expect(abs(parts.reduce(0) { $0 + $1.share } - 1) < 0.001)
+        #expect(DayAnalysis.composition(.zero).isEmpty)
+    }
+}
+
 // MARK: - Расход по факту
 
 struct AdaptiveTDEETests {

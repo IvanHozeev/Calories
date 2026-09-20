@@ -48,6 +48,7 @@ CATEGORIES = {"meat", "fish", "dairy", "legumes", "grains", "dishes",
 # в приложении — если менять, менять в обоих местах.
 ENERGY, PROTEIN, FAT, CARBS = 1008, 1003, 1004, 1005
 MICRO = {
+    1079: "fiber",
     1106: "vitaminA", 1162: "vitaminC", 1114: "vitaminD", 1109: "vitaminE",
     1175: "vitaminB6", 1178: "vitaminB12", 1177: "folate", 1087: "calcium",
     1089: "iron", 1090: "magnesium", 1095: "zinc", 1092: "potassium",

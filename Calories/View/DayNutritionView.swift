@@ -33,7 +33,8 @@ struct DayNutritionView: View {
             weightKg: store.weightKg,
             isFast: store.isFastDay(date),
             // Сегодняшний день ещё идёт: недобор в обед — это не недобор.
-            isInProgress: Calendar.current.isDateInToday(date)
+            isInProgress: Calendar.current.isDateInToday(date),
+            fiber: micronutrients.isTrustworthy ? micronutrients.totals[.fiber] : nil
         ))
     }
 

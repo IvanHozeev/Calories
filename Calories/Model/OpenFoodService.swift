@@ -33,12 +33,16 @@ enum OpenFoodService {
                 let proteins100g: Double?
                 let fat100g: Double?
                 let carbohydrates100g: Double?
+                /// Клетчатку Open Food Facts знает у большинства товаров —
+                /// в отличие от витаминов, которых там почти нет.
+                let fiber100g: Double?
 
                 enum CodingKeys: String, CodingKey {
                     case energyKcal100g = "energy-kcal_100g"
                     case proteins100g = "proteins_100g"
                     case fat100g = "fat_100g"
                     case carbohydrates100g = "carbohydrates_100g"
+                    case fiber100g = "fiber_100g"
                 }
             }
 
@@ -66,16 +70,20 @@ enum OpenFoodService {
             throw ServiceError.unavailable
         }
         let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
-        return decoded.products.compactMap { product in
+        return decoded.products.compactMap { product -> FoodItem? in
             let name = (product.productName ?? "").trimmingCharacters(in: .whitespaces)
             guard !name.isEmpty, let kcal = product.nutriments?.energyKcal100g, kcal > 0 else { return nil }
-            return FoodItem(
+            let item = FoodItem(
                 name: name,
                 caloriesPer100g: Int(kcal.rounded()),
                 protein: product.nutriments?.proteins100g ?? 0,
                 fat: product.nutriments?.fat100g ?? 0,
                 carbs: product.nutriments?.carbohydrates100g ?? 0
             )
+            if let fiber = product.nutriments?.fiber100g, fiber > 0 {
+                item.micronutrients = Micronutrients([.fiber: fiber])
+            }
+            return item
         }
     }
 

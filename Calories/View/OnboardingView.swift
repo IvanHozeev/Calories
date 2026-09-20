@@ -36,7 +36,7 @@ struct OnboardingView: View {
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
 
     enum Step: Int, CaseIterable {
-        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, health, result
+        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, gear, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -108,6 +108,7 @@ struct OnboardingView: View {
                 case .goal:       goalStep
                 case .cutOptions: cutOptionsStep
                 case .macros:     macrosStep
+                case .gear:       gearStep
                 case .health:     healthStep
                 case .result:     resultStep
                 }
@@ -372,6 +373,40 @@ struct OnboardingView: View {
     /// Доступ к шагам — здесь, с объяснением, а не системным окном на первом
     /// запуске. Кнопка одна: «Разрешить» открывает окно «Здоровья», «Далее»
     /// снизу — пропустить. Шаги потом можно подключить с их карточки.
+    /// Чем мерить. Приложение считает по факту — по дневнику и весам, — и без
+    /// инструментов считать нечего: это честнее сказать на входе, чем потом
+    /// показывать человеку «данных мало».
+    private var gearStep: some View {
+        stepShell(title: "Что понадобится", subtitle: "Норма считается по твоим данным, а данные нужно чем-то снимать") {
+            VStack(alignment: .leading, spacing: 18) {
+                gearLine(icon: "scalemass", title: "Напольные весы",
+                         text: "Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы.")
+                gearLine(icon: "square.stack.3d.up", title: "Кухонные весы",
+                         text: "«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно».")
+                gearLine(icon: "applewatch", title: "Браслет или часы",
+                         text: "Не обязательно. Шаги и активные калории подтянутся из «Здоровья» сами, и активность перестанет быть догадкой.")
+            }
+        }
+    }
+
+    private func gearLine(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: icon)
+                .font(.app(.title3))
+                .foregroundStyle(.tint)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.app(.body, weight: .semibold))
+                Text(text)
+                    .font(.app(.footnote))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
     private var healthStep: some View {
         stepShell(title: "Шаги", subtitle: "Приложение только читает их из «Здоровья», ничего туда не пишет") {
             VStack(spacing: 20) {

@@ -31,6 +31,9 @@ enum DayAnalysis {
         let isFast: Bool
         /// Сегодняшний день ещё идёт — выводы по нему преждевременны.
         let isInProgress: Bool
+        /// Клетчатка за день, если состав съеденного известен достаточно точно.
+        /// nil — считать не по чему, и молчать об этом честнее, чем пугать нулём.
+        var fiber: Double? = nil
     }
 
     /// Ниже этой доли жира от веса страдают гормоны — тот самый порог,
@@ -38,6 +41,9 @@ enum DayAnalysis {
     static let fatFloorPerKg = 0.5
     /// Минимум углеводов, ниже которого мозгу не хватает глюкозы (RDA).
     static let carbsFloor = 130.0
+    /// Рабочий ориентир по клетчатке. Привычные 25–38 г в день; берём нижнюю
+    /// границу — на дефиците она важнее всего для сытости.
+    static let fiberFloor = 25.0
 
     static func advice(_ input: Input) -> [Advice] {
         guard !input.isFast else {
@@ -97,6 +103,17 @@ enum DayAnalysis {
             } else if share >= 0.95 {
                 result.append(Advice(id: "calories-ok", tone: .good,
                                      text: String(localized: "В норму попал. Неделя таких дней — это и есть результат.")))
+            }
+        }
+
+        // Клетчатка — про сытость на дефиците, а не про «полезно».
+        if let fiber = input.fiber, !input.isInProgress {
+            if fiber < fiberFloor {
+                result.append(Advice(id: "fiber-low", tone: .info,
+                                     text: String(format: String(localized: "Клетчатки %lld г из 25. На дефиците она дешевле всего покупает сытость: объём есть, калорий почти нет."), Int(fiber.rounded()))))
+            } else {
+                result.append(Advice(id: "fiber-ok", tone: .good,
+                                     text: String(localized: "Клетчатки достаточно — с ней дефицит переносится легче.")))
             }
         }
 

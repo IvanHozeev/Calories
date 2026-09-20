@@ -3485,6 +3485,22 @@ struct DayAnalysisTests {
         #expect(DayAnalysis.advice(input(protein: 0, fat: 0, carbs: 0, calories: 0)).isEmpty)
     }
 
+    /// Клетчатка: мало — замечание про сытость, достаточно — похвала.
+    @Test func fiberIsJudgedWhenItIsKnown() {
+        var low = input(); low.fiber = 12
+        #expect(ids(DayAnalysis.advice(low)).contains("fiber-low"))
+        var enough = input(); enough.fiber = 34
+        #expect(ids(DayAnalysis.advice(enough)).contains("fiber-ok"))
+    }
+
+    /// Про клетчатку молчим, когда состав съеденного неизвестен: ноль там
+    /// значит «не посчитали», а не «не ел».
+    @Test func unknownFiberIsNotJudged() {
+        let result = DayAnalysis.advice(input())
+        #expect(!ids(result).contains("fiber-low"))
+        #expect(!ids(result).contains("fiber-ok"))
+    }
+
     /// Состав считается в калориях: жир весит девять на грамм.
     @Test func compositionCountsCalories() throws {
         let parts = DayAnalysis.composition(Macros(protein: 100, fat: 100, carbs: 100))

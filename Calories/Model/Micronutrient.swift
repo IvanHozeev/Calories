@@ -9,6 +9,9 @@ import Foundation
 /// перечисление без поведения — его читают и из `Micronutrients`, который живёт
 /// вне актора, и из фоновых разборов. Данных без состояния изоляция не касается.
 nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
+    /// Клетчатка идёт первой: она не витамин, но считается так же — по составу
+    /// съеденного, — а видеть её хочется рядом с макросами, а не в конце списка.
+    case fiber
     case vitaminA, vitaminC, vitaminD, vitaminE, vitaminB6, vitaminB12, folate
     case calcium, iron, magnesium, zinc, potassium, sodium, selenium
 
@@ -16,6 +19,7 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
+        case .fiber:      return String(localized: "Клетчатка")
         case .vitaminA:   return String(localized: "Витамин A")
         case .vitaminC:   return String(localized: "Витамин C")
         case .vitaminD:   return String(localized: "Витамин D")
@@ -40,6 +44,8 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
             return String(localized: "мкг")
         case .vitaminC, .vitaminE, .vitaminB6, .calcium, .iron, .magnesium, .zinc, .potassium, .sodium:
             return String(localized: "мг")
+        case .fiber:
+            return String(localized: "г")
         }
     }
 
@@ -48,6 +54,7 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
     /// переводить тут нечего.
     var symbol: String {
         switch self {
+        case .fiber:      return "Fib"
         case .vitaminA:   return "A"
         case .vitaminC:   return "C"
         case .vitaminD:   return "D"
@@ -73,6 +80,9 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
     /// записал.
     var dailyValue: Double {
         switch self {
+        // 28 г — привычный Daily Value. Рабочий ориентир выше — около 14 г
+        // на тысячу килокалорий, — но шкала здесь общая для всех нутриентов.
+        case .fiber:      return 28
         case .vitaminA:   return 900
         case .vitaminC:   return 90
         case .vitaminD:   return 20
@@ -99,6 +109,7 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
     /// Единицы там совпадают с нашими, поэтому пересчёт не нужен.
     var usdaNutrientID: Int {
         switch self {
+        case .fiber:      return 1079   // Fiber, total dietary
         case .vitaminA:   return 1106   // Vitamin A, RAE
         case .vitaminC:   return 1162
         case .vitaminD:   return 1114   // Vitamin D (D2 + D3)

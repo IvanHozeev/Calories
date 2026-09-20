@@ -4,6 +4,52 @@
     "" : {
       "shouldTranslate" : false
     },
+    "«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно»." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقدير «بالعين» يخطئ بمئات السعرات في اليوم. الطعام الموزون هو الفرق بين «الأمر ينجح» و«لا أحد يعرف السبب»."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Nach Augenmaß“ verschätzt man sich um Hunderte Kalorien am Tag. Gewogenes Essen ist der Unterschied zwischen „es funktioniert“ und „keine Ahnung, warum nicht“."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“Eyeballing it” is off by hundreds of calories a day. Weighed food is the difference between “it works” and “no idea why.”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«A ojo» te equivocas por cientos de calorías al día. La comida pesada es la diferencia entre «funciona» y «ni idea de por qué no»."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« À l'œil », on se trompe de centaines de calories par jour. La nourriture pesée, c'est la différence entre « ça marche » et « on ne sait pas pourquoi »."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הערכה „לפי העין” טועה במאות קלוריות ביום. אוכל שנשקל הוא ההבדל בין „זה עובד” ל„אין מושג למה לא”."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“No olho” você erra por centenas de calorias por dia. Comida pesada é a diferença entre “funciona” e “não sei por quê”."
+          }
+        }
+      }
+    },
     "Белка мало: не хватило %lld г. На дефиците недобор белка оплачивается мышцами — это те самые «похудел, но выгляжу хуже»." : {
       "localizations" : {
         "ar" : {
@@ -142,6 +188,52 @@
         }
       }
     },
+    "Браслет или часы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سوار أو ساعة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fitnessarmband oder Uhr"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fitness band or watch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulsera o reloj"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un bracelet ou une montre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צמיד או שעון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulseira ou relógio"
+          }
+        }
+      }
+    },
     "В норму попал. Неделя таких дней — это и есть результат." : {
       "localizations" : {
         "ar" : {
@@ -184,6 +276,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dentro da meta. Uma semana de dias assim é o resultado."
+          }
+        }
+      }
+    },
+    "Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زن نفسك كل صباح. اتجاه الوزن يوضح كم تحرق فعليًا — والهدف يُحسب من الواقع، لا من معادلة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiege dich jeden Morgen. Der Trend zeigt, wie viel du wirklich verbrauchst — und dein Ziel wird aus der Tatsache berechnet, nicht aus einer Formel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weigh yourself every morning. The trend shows how much you actually burn — and your target is calculated from fact, not a formula."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pésate cada mañana. Su tendencia muestra cuánto gastas en realidad — y la meta se calcula a partir del dato real, no de una fórmula."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pèse-toi chaque matin. La tendance montre ce que tu dépenses vraiment — et l'objectif est calculé à partir du fait, pas d'une formule."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שקול את עצמך בכל בוקר. המגמה מראה כמה אתה שורף בפועל — והמטרה מחושבת מהעובדה, לא מנוסחה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pese-se todas as manhãs. A tendência mostra quanto você realmente gasta — e a meta é calculada a partir do dado real, não de uma fórmula."
           }
         }
       }
@@ -372,6 +510,282 @@
         }
       }
     },
+    "Клетчатка" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الألياف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ballaststoffe"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibre"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibres"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיבים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra"
+          }
+        }
+      }
+    },
+    "Клетчатки %lld г из 25. На дефиците она дешевле всего покупает сытость: объём есть, калорий почти нет." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الألياف: %lld غ من 25. في العجز هي أرخص شبع: حجم بلا سعرات تقريبًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ballaststoffe: %lld g von 25. Im Defizit sättigen sie am günstigsten — Volumen fast ohne Kalorien."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibre: %lld g out of 25. On a deficit it buys fullness cheaper than anything else — bulk without the calories."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra: %lld g de 25. En déficit es lo que más sacia por caloría: volumen sin apenas energía."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibres : %lld g sur 25. En déficit, rien ne rassasie à si bas prix : du volume, presque pas de calories."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סיבים: %lld גרם מתוך 25. בגירעון הם השובע הזול ביותר — נפח כמעט בלי קלוריות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra: %lld g de 25. Em déficit, é o que mais sacia por caloria: volume quase sem energia."
+          }
+        }
+      }
+    },
+    "Клетчатки достаточно — с ней дефицит переносится легче." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ألياف كافية — يصبح العجز أسهل معها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genug Ballaststoffe — damit hält man ein Defizit leichter aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enough fibre — a deficit is easier to sit through with it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra suficiente: con ella el déficit se lleva mejor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assez de fibres — le déficit se supporte mieux avec."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מספיק סיבים — ככה קל יותר לעמוד בגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fibra suficiente — com ela o déficit passa mais fácil."
+          }
+        }
+      }
+    },
+    "Кухонные весы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ميزان المطبخ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Küchenwaage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A kitchen scale"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Báscula de cocina"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une balance de cuisine"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל מטבח"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balança de cozinha"
+          }
+        }
+      }
+    },
+    "Напольные весы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ميزان الجسم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Personenwaage"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A body scale"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Báscula de baño"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pèse-personne"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל גוף"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balança corporal"
+          }
+        }
+      }
+    },
+    "Не обязательно. Шаги и активные калории подтянутся из «Здоровья» сами, и активность перестанет быть догадкой." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير ضروري. الخطوات والسعرات النشطة ستأتي تلقائيًا من «الصحة»، ولن يبقى النشاط مجرد تخمين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht zwingend. Schritte und aktive Kalorien kommen von selbst aus Health, und Aktivität ist keine Vermutung mehr."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not required. Steps and active calories will pull in from Health on their own, and activity stops being a guess."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No es obligatorio. Los pasos y las calorías activas llegarán solos desde Salud, y la actividad deja de ser una suposición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas obligatoire. Les pas et les calories actives arriveront tout seuls depuis Santé, et l'activité arrête d'être une supposition."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא חובה. הצעדים והקלוריות הפעילות יגיעו לבד מ״בריאות״, והפעילות תפסיק להיות ניחוש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não é obrigatório. Os passos e as calorias ativas vêm sozinhos do Saúde, e a atividade deixa de ser um palpite."
+          }
+        }
+      }
+    },
     "Недобор %lld ккал до нормы. Ускорить сушку так не выйдет: недоеденное возвращается срывом, а тело отвечает замедлением." : {
       "localizations" : {
         "ar" : {
@@ -414,6 +828,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Faltam %lld kcal para a meta. Isso não acelera a definição: o que você deixa de comer volta como compulsão, e o corpo responde desacelerando."
+          }
+        }
+      }
+    },
+    "Норма считается по твоим данным, а данные нужно чем-то снимать" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف يُحسب من بياناتك، وهذه البيانات يجب أن يقيسها شيء ما."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Ziel wird aus deinen eigenen Daten berechnet, und diese Daten muss irgendetwas erfassen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your target is calculated from your own data, and something has to capture that data."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La meta se calcula con tus propios datos, y esos datos hay que registrarlos con algo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton objectif est calculé à partir de tes données, et ces données, il faut bien les mesurer avec quelque chose."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המטרה מחושבת מהנתונים שלך, ואת הנתונים האלה צריך למדוד במשהו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta é calculada com os seus próprios dados, e esses dados precisam ser registrados com algo."
           }
         }
       }
@@ -644,6 +1104,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Carboidratos: %lld g — menos de 130, o mínimo para o cérebro. Se hoje foi dia de treino, sua força vai cair já no próximo treino."
+          }
+        }
+      }
+    },
+    "Что понадобится" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما ستحتاجه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was du brauchst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What you'll need"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué vas a necesitar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qu'il te faut"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה תצטרך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que você vai precisar"
           }
         }
       }

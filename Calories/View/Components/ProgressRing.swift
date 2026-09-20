@@ -102,6 +102,10 @@ struct ProgressRing: View {
     @State private var shown: RingValues?
     /// Галочка в середине после заливки — короткое «записал».
     @State private var showingCheck = false
+    /// Идёт заливка после приёма пищи. Пока идёт, встроенная пружина кольца
+    /// выключена: иначе одно изменение анимировалось дважды — сперва пружиной,
+    /// потом заливкой, — и дуги дёргались два раза подряд.
+    @State private var isRevealing = false
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -207,20 +211,24 @@ struct ProgressRing: View {
             // поворачивается как цельная картинка.
             .compositingGroup()
             .modifier(RefreshSpin(baseRotation: Self.rotation, pullAngle: pullAngle, spinTicket: spinTicket))
-            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: shownConsumed)
-            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: shownMacros)
+            // Пружина — только на обычные правки: удаление свайпом, правку
+            // записи. Заливку после приёма пищи ведёт свой easeOut.
+            .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownConsumed)
+            .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownMacros)
+
+            // Число не подменяется галочкой рывком: оно гаснет, галочка
+            // всплывает поверх и тает, число возвращается на место.
+            centerLabel
+                .opacity(showingCheck ? 0.12 : 1)
 
             if showingCheck {
-                // Галочка вместо числа на мгновение: «записал». Появляется
-                // после заливки, потому что до неё записывать ещё нечего.
                 Image(systemName: "checkmark")
-                    .font(.system(size: 54, weight: .bold))
+                    .font(.system(size: 58, weight: .bold))
                     .foregroundStyle(Self.kcalColors[0])
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
-            } else {
-                centerLabel
-                    .id(shownConsumed)
-                    .transition(.opacity.combined(with: .scale(scale: 0.85)))
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.55).combined(with: .opacity),
+                        removal: .scale(scale: 1.15).combined(with: .opacity)
+                    ))
             }
         }
         .frame(width: size, height: size)
@@ -237,6 +245,7 @@ struct ProgressRing: View {
         // показывает прежние цифры, потом наливается до новых.
         .onChange(of: revealTicket) { _, _ in
             guard let from = revealFrom else { return }
+            isRevealing = true
             shown = from
             // Отдельным проходом, а не следом: заданные подряд, оба изменения
             // попадали в одну транзакцию и гасили друг друга. Пауза заодно
@@ -244,15 +253,18 @@ struct ProgressRing: View {
             // проходила за ним, и на «Сегодня» кольцо было уже полным.
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(450))
-                withAnimation(.easeOut(duration: 0.9)) {
+                withAnimation(.easeOut(duration: 0.85)) {
                     shown = nil
                 } completion: {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                    // Галочка встык к заливке: она и есть её концовка, и пауза
+                    // между ними читалась как сбой, а не как ответ.
+                    isRevealing = false
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) {
                         showingCheck = true
                     }
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.75))
-                        withAnimation(.easeInOut(duration: 0.35)) { showingCheck = false }
+                        try? await Task.sleep(for: .seconds(0.7))
+                        withAnimation(.easeOut(duration: 0.3)) { showingCheck = false }
                     }
                 }
             }

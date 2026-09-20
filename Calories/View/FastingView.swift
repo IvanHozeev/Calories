@@ -8,15 +8,43 @@ import SwiftUI
 struct FastingView: View {
     var store: CalorieStore
 
-    @State private var date = Date()
+    @State private var start = FastingView.defaultStart()
+    @State private var end = FastingView.defaultStart().addingTimeInterval(25 * 3600)
     @State private var kind: FastKind = .dry
 
-    private var marked: FastDay? { store.fastDay(on: date) }
+    private var marked: FastDay? { store.fastDay(on: start) }
+
+    /// По умолчанию — ближайший вечер: посты начинаются вечером, а не утром.
+    /// Двадцать пять часов сверху — длина Йом Кипура, самого частого случая.
+    private static func defaultStart(now: Date = Date()) -> Date {
+        let calendar = Calendar.current
+        let evening = calendar.date(bySettingHour: 18, minute: 0, second: 0, of: now) ?? now
+        return evening > now ? evening : calendar.date(byAdding: .day, value: 1, to: evening) ?? evening
+    }
+
+    private var duration: String {
+        let minutes = max(0, Int(end.timeIntervalSince(start) / 60))
+        let hours = minutes / 60
+        return minutes % 60 == 0
+            ? String(format: String(localized: "%lld ч"), hours)
+            : String(format: String(localized: "%1$lld ч %2$lld мин"), hours, minutes % 60)
+    }
 
     var body: some View {
         List {
             Section {
-                DatePicker("Когда", selection: $date, displayedComponents: [.date])
+                // Пост редко совпадает с календарным днём: Йом Кипур идёт
+                // с вечера до вечера следующего дня, и считать его сутками
+                // значило бы промахнуться на полпоста.
+                DatePicker("Начало", selection: $start, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("Конец", selection: $end, in: start..., displayedComponents: [.date, .hourAndMinute])
+                HStack {
+                    Text("Длительность")
+                    Spacer()
+                    Text(verbatim: duration)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
                 Picker("Тип", selection: $kind) {
                     ForEach(FastKind.allCases) { Text($0.title).tag($0) }
                 }
@@ -30,20 +58,26 @@ struct FastingView: View {
             Section {
                 if marked == nil {
                     Button {
-                        store.markFastDay(date, kind: kind)
+                        store.markFast(from: start, to: end, kind: kind)
                     } label: {
-                        Label("Отметить день голоданием", systemImage: "moon.stars")
+                        Label("Отметить голодание", systemImage: "moon.stars")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     .listRowBackground(Color.clear)
                     .accessibilityIdentifier("markFastDay")
-                } else {
-                    Label("День отмечен", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                } else if let marked {
+                    Label {
+                        Text(verbatim: String(format: String(localized: "Отмечено: %1$@ — %2$@"),
+                                              marked.interval.start.formatted(date: .abbreviated, time: .shortened),
+                                              marked.interval.end.formatted(date: .abbreviated, time: .shortened)))
+                    } icon: {
+                        Image(systemName: "checkmark.circle.fill")
+                    }
+                        .foregroundStyle(ProgressRing.kcalColors[0])
                     Button("Снять отметку", role: .destructive) {
-                        store.unmarkFastDay(date)
+                        store.unmarkFastDay(marked.date)
                     }
                 }
             } footer: {
@@ -65,10 +99,16 @@ struct FastingView: View {
         .navigationTitle("Голодание")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            if let existing = store.fastDay(on: date) { kind = existing.kind }
+            if let existing = store.fastDay(on: start) {
+                kind = existing.kind
+                start = existing.interval.start
+                end = existing.interval.end
+            }
         }
-        .onChange(of: date) { _, newValue in
+        .onChange(of: start) { _, newValue in
             if let existing = store.fastDay(on: newValue) { kind = existing.kind }
+            // Конец не должен оказаться раньше начала.
+            if end <= newValue { end = newValue.addingTimeInterval(25 * 3600) }
         }
     }
 

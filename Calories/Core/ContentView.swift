@@ -130,7 +130,9 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
                             weightKg: store.weightKg,
-                            onOpen: { showingDayNutrition = true }
+                            onOpen: { showingDayNutrition = true },
+                            revealFrom: ringReveal?.macros,
+                            revealTicket: ringRevealTicket
                         )
                         
                         // Строка вместо карточки: план виден и открывается,

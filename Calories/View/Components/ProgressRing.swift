@@ -238,20 +238,21 @@ struct ProgressRing: View {
         .onChange(of: revealTicket) { _, _ in
             guard let from = revealFrom else { return }
             shown = from
-            // Вторым проходом, а не следом: заданные подряд, оба изменения
-            // попадали в одну транзакцию, гасили друг друга, и кольцо просто
-            // оказывалось заполненным — ровно то, от чего уходим.
+            // Отдельным проходом, а не следом: заданные подряд, оба изменения
+            // попадали в одну транзакцию и гасили друг друга. Пауза заодно
+            // пропускает уезжающий экран добавления — заливка, начатая сразу,
+            // проходила за ним, и на «Сегодня» кольцо было уже полным.
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(40))
-                withAnimation(.spring(response: 0.8, dampingFraction: 0.85)) {
+                try? await Task.sleep(for: .milliseconds(450))
+                withAnimation(.easeOut(duration: 0.9)) {
                     shown = nil
                 } completion: {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
                         showingCheck = true
                     }
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.7))
-                        withAnimation(.easeOut(duration: 0.3)) { showingCheck = false }
+                        try? await Task.sleep(for: .seconds(0.75))
+                        withAnimation(.easeInOut(duration: 0.35)) { showingCheck = false }
                     }
                 }
             }

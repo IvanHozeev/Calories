@@ -16,8 +16,14 @@ struct MacrosCard: View {
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
     /// между собой было нельзя, а витаминам в таком формате места нет вовсе.
     var onOpen: () -> Void = {}
+    /// Макросы на момент, когда открыли добавление еды: от них полоски
+    /// доливаются, когда возвращаешься на «Сегодня». Без этого цифры и полоски
+    /// просто оказывались другими — самое частое событие дня проходило молча.
+    var revealFrom: Macros? = nil
+    var revealTicket: Int = 0
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var shown: Macros?
 
     var body: some View {
         // Три колонки на accessibility-размерах ломают слова посреди («Pro-tein»),
@@ -26,12 +32,13 @@ struct MacrosCard: View {
         let layout = isBig
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
             : AnyLayout(HStackLayout(spacing: 14))
+        let values = shown ?? macros
         return Button(action: onOpen) {
             HStack(spacing: 10) {
                 layout {
-                    macroColumn(.protein, value: macros.protein, color: MacroKind.protein.color)
-                    macroColumn(.fat, value: macros.fat, color: MacroKind.fat.color)
-                    macroColumn(.carbs, value: macros.carbs, color: MacroKind.carbs.color)
+                    macroColumn(.protein, value: values.protein, color: MacroKind.protein.color)
+                    macroColumn(.fat, value: values.fat, color: MacroKind.fat.color)
+                    macroColumn(.carbs, value: values.carbs, color: MacroKind.carbs.color)
                 }
                 // Шеврон как у строки плана: без него непонятно, что плашка
                 // куда-то ведёт.
@@ -46,6 +53,16 @@ struct MacrosCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("openDayNutrition")
+        // Та же пауза и та же кривая, что у кольца: полоски и дуги — одно
+        // событие, и расходиться по времени им нельзя.
+        .onChange(of: revealTicket) { _, _ in
+            guard let from = revealFrom else { return }
+            shown = from
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(450))
+                withAnimation(.easeOut(duration: 0.9)) { shown = nil }
+            }
+        }
     }
 
     private func macroColumn(_ kind: MacroKind, value: Double, color: Color) -> some View {
@@ -59,6 +76,7 @@ struct MacrosCard: View {
                 Text(String(format: "%.0f", value))
                     .font(.app(.subheadline, weight: .semibold))
                     .foregroundStyle(color)
+                    .contentTransition(.numericText())
                 // Цель мелко рядом, чтобы не спорить с самим значением.
                 if let target {
                     Text(verbatim: "/ \(Int(target.rounded()))")

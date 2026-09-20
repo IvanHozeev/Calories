@@ -2394,6 +2394,37 @@ struct FastDayTests {
         #expect(store.adaptedGoal(for: midWeek) > withoutFast)
     }
 
+    /// Пост с вечера до вечера следующего дня — как Йом Кипур. Он касается
+    /// двух суток, и обе считаются постом.
+    @Test func aFastFromEveningToEveningCoversTwoDays() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = calendar.date(byAdding: .hour, value: 18, to: today)!
+            .addingTimeInterval(20 * 60)
+        let end = calendar.date(byAdding: .day, value: 1, to: start)!
+            .addingTimeInterval(55 * 60)
+        let fast = store.markFast(from: start, to: end, kind: .dry)
+
+        #expect(fast.coveredDays.count == 2)
+        #expect(store.isFastDay(today))
+        #expect(store.isFastDay(calendar.date(byAdding: .day, value: 1, to: today)!))
+        #expect(!store.isFastDay(calendar.date(byAdding: .day, value: -1, to: today)!))
+        #expect(fast.isRunning(at: start.addingTimeInterval(3600)))
+        #expect(!fast.isRunning(at: start.addingTimeInterval(-3600)))
+        #expect(store.runningFast(at: start.addingTimeInterval(3600))?.id == fast.id)
+    }
+
+    /// Норма поднимается накануне начала поста, а не накануне его конца.
+    @Test func theBoostLandsOnTheDayTheFastStarts() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = calendar.date(byAdding: .day, value: 1, to: today)!.addingTimeInterval(18 * 3600)
+        let plain = store.effectiveGoal(for: today)
+        store.markFast(from: start, to: start.addingTimeInterval(25 * 3600), kind: .dry)
+        #expect(store.effectiveGoal(for: today) > plain)
+        #expect(store.isFastEve(today))
+    }
+
     /// Накануне голодания норма выше: за день можно заправить печёночный
     /// гликоген, и тогда пост начинается не с пустых депо.
     @Test func theEveOfAFastGetsMoreCalories() {

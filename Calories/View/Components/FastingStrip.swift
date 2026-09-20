@@ -10,6 +10,19 @@ struct FastingStrip: View {
     var onOpen: () -> Void
 
     private var title: String {
+        // Пост идёт — говорим, сколько осталось: это единственное, что в этот
+        // момент интересно.
+        if let left = hint.remaining() {
+            let hours = Int(left / 3600)
+            let minutes = Int(left.truncatingRemainder(dividingBy: 3600) / 60)
+            return hours > 0
+                ? String(format: String(localized: "Пост идёт · осталось %1$lld ч %2$lld мин"), hours, minutes)
+                : String(format: String(localized: "Пост идёт · осталось %lld мин"), minutes)
+        }
+        if hint.daysUntil == 0, let start = hint.interval?.start, start > Date() {
+            return String(format: String(localized: "Голодание сегодня в %@"),
+                          start.formatted(date: .omitted, time: .shortened))
+        }
         switch hint.daysUntil {
         case 0: return String(localized: "Сегодня голодание")
         case 1: return String(localized: "Завтра голодание")
@@ -31,7 +44,12 @@ struct FastingStrip: View {
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
-                    if hint.daysUntil == 1 {
+                    if let interval = hint.interval, hint.isRunning() {
+                        Text(verbatim: String(format: String(localized: "До %@ — потом выход"),
+                                              interval.end.formatted(date: .omitted, time: .shortened)))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    } else if hint.daysUntil == 1 {
                         // Про поднятую норму говорим прямо: цифра в кольце
                         // сегодня другая, и человек должен знать почему.
                         Text("Норма сегодня выше — заправить гликоген перед постом")

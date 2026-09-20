@@ -296,7 +296,8 @@ final class CalorieStore {
         entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
         // Свой продукт идёт последним и перекрывает одноимённый встроенный:
         // так же, как в прежнем поиске, где сначала смотрели свои.
-        fastDates = Set(fastDays.map { calendar.startOfDay(for: $0.date) })
+        // Пост может идти через полночь: в наборе все сутки, которых он касается.
+        fastDates = Set(fastDays.flatMap(\.coveredDays))
         categoryByFoodName = Dictionary(
             (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
             uniquingKeysWith: { _, own in own }
@@ -514,7 +515,7 @@ final class CalorieStore {
 
     func fastDay(on date: Date) -> FastDay? {
         let day = Calendar.current.startOfDay(for: date)
-        return fastDays.first { Calendar.current.startOfDay(for: $0.date) == day }
+        return fastDays.first { $0.coveredDays.contains(day) }
     }
 
     /// Ближайшее голодание — сегодня или в пределах трёх дней — и советы, которые
@@ -528,9 +529,36 @@ final class CalorieStore {
                   let fast = fastDay(on: date) else { continue }
             let items = FastingAdvice.advice(for: fast.kind, daysBefore: offset)
             guard !items.isEmpty else { return nil }
-            return FastingHint(date: date, kind: fast.kind, daysUntil: offset, items: items)
+            return FastingHint(date: date, kind: fast.kind, daysUntil: offset,
+                               items: items, interval: fast.interval)
         }
         return nil
+    }
+
+    /// Отметить пост промежутком: с вечера одного дня до вечера другого.
+    @discardableResult
+    func markFast(from start: Date, to end: Date, kind: FastKind) -> FastDay {
+        let day = Calendar.current.startOfDay(for: start)
+        if let existing = fastDay(on: day) {
+            existing.kind = kind
+            existing.date = day
+            existing.startedAt = start
+            existing.endedAt = end
+            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+            rebuildCaches()
+            return existing
+        }
+        let fast = FastDay(date: day, kind: kind, startedAt: start, endedAt: end)
+        context.insert(fast)
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        fastDays = (fastDays + [fast]).sorted { $0.date > $1.date }
+        rebuildCaches()
+        return fast
+    }
+
+    /// Идущий прямо сейчас пост — для обратного отсчёта на «Сегодня».
+    func runningFast(at moment: Date = Date()) -> FastDay? {
+        fastDays.first { $0.isRunning(at: moment) }
     }
 
     @discardableResult

@@ -1,6 +1,7 @@
 import OSLog
 import SwiftUI
 import UIKit
+import UserNotifications
 
 /// Пункты меню по долгому нажатию на иконку приложения.
 ///
@@ -133,12 +134,49 @@ final class QuickActionSceneDelegate: NSObject, UIWindowSceneDelegate {
     }
 }
 
-final class QuickActionAppDelegate: NSObject, UIApplicationDelegate {
+final class QuickActionAppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        let center = UNUserNotificationCenter.current()
+        center.delegate = self
+        // Действия в шторке объявляются один раз на запуск: без категории
+        // напоминание об окне приходило бы без кнопок.
+        center.setNotificationCategories([MealReminders.notificationCategory])
+        return true
+    }
+
     func application(_ application: UIApplication,
                      configurationForConnecting connectingSceneSession: UISceneSession,
                      options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
         configuration.delegateClass = QuickActionSceneDelegate.self
         return configuration
+    }
+
+    /// Ответ на напоминание об окне приёма пищи.
+    ///
+    /// «Пропустить» ничего не записывает: калории пропущенного окна расходятся
+    /// по оставшимся сами, и лишнее состояние тут только разъехалось бы с тем,
+    /// что показывает расписание.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse) async {
+        switch response.actionIdentifier {
+        case MealReminders.snoozeAction:
+            MealReminders.snooze(response.notification.request.content)
+        case MealReminders.skipAction:
+            break
+        case UNNotificationDefaultActionIdentifier
+            where response.notification.request.content.categoryIdentifier == MealReminders.category:
+            await MainActor.run { QuickActionRouter.shared.pending = .meal }
+        default:
+            break
+        }
+    }
+
+    /// Напоминание, пришедшее при открытом приложении, всё равно показываем:
+    /// человек мог смотреть другой экран, а окно приёма — событие по времени.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
+        [.banner, .sound]
     }
 }

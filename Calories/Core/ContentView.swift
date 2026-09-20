@@ -36,6 +36,8 @@ struct ContentView: View {
     @State private var ringBaseline = RingValues(consumed: 0, macros: .zero)
     @State private var ringReveal: RingValues?
     @State private var ringRevealTicket = 0
+    @State private var mealSchedule = MealScheduleSettings()
+    @State private var showingMealSchedule = false
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -61,6 +63,19 @@ struct ContentView: View {
     /// наливаться будет не от чего.
     private var isAddingFood: Bool {
         showingAdd || appendingTo != nil || todaySheet != nil
+    }
+
+    /// День по приёмам: окна, их калории и что уже съедено.
+    private var todaySlots: [MealSchedule.Slot] {
+        let now = Date()
+        return MealSchedule.slots(.init(
+            wake: mealSchedule.today(mealSchedule.wake, now: now),
+            sleep: mealSchedule.today(mealSchedule.sleep, now: now),
+            mealCount: mealSchedule.count,
+            dailyGoal: store.adaptedTodayGoal,
+            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+            now: now
+        ))
     }
 
     /// Показать заливку, если за время, пока экран был закрыт, еды прибавилось.
@@ -126,6 +141,12 @@ struct ContentView: View {
                             onOpenPlan: { showingPlan = true },
                             onShowPaywall: { showingPaywall = true }
                         )
+
+                        // Расписание приёмов — сразу под планом: план говорит,
+                        // сколько есть за день, расписание — сколько прямо сейчас.
+                        if mealSchedule.isEnabled, !todaySlots.isEmpty {
+                            MealScheduleStrip(slots: todaySlots) { showingMealSchedule = true }
+                        }
 
                         // Неделя — под планом: сегодня в кольце, план объясняет его
                         // норму, прошедшие дни следом. Над кольцом она первой ловила
@@ -441,6 +462,10 @@ struct ContentView: View {
             .fullScreenCover(item: $appendingTo, onDismiss: { revealRingIfChanged() }) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
+            }
+            .sheet(isPresented: $showingMealSchedule) {
+                MealScheduleSheet(slots: todaySlots)
+                    .presentationDetents([.medium, .large])
             }
             .sheet(item: $todaySheet, onDismiss: { revealRingIfChanged() }) { sheet in
                 switch sheet {

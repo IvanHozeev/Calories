@@ -48,6 +48,26 @@ struct PlanEditorView: View {
 
     var body: some View {
         Form {
+                // Совет первым: прежде чем выбирать фазу, полезно знать, что
+                // телу сейчас выгоднее — и почему.
+                if store.plan == nil {
+                    let advice = store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent)
+                    Section {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(verbatim: advice.headline)
+                                .font(.app(.subheadline, weight: .semibold))
+                            Text(verbatim: advice.detail)
+                                .font(.app(.footnote))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, 2)
+                        .accessibilityIdentifier("phaseAdvice")
+                    } header: {
+                        Text("Что дальше")
+                    }
+                }
+
                 Section {
                     HStack {
                         Text("Текущий вес")

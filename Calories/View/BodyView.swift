@@ -226,7 +226,10 @@ struct BodyView: View {
                 }
             }
 
-            if store.plan == nil {
+            // Выбор цели — только без премиума. С премиумом режим задаётся
+            // планом: вне плана идёт поддержание, и множитель из профиля
+            // означал бы вечный дефицит по настройке, о которой забыли.
+            if store.plan == nil, !store.isPremium {
                 Section {
                     Picker("Цель", selection: $goal) {
                         ForEach(Goal.allCases) { Text($0.title).tag($0) }

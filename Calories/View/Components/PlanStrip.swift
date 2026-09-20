@@ -78,7 +78,11 @@ struct PlanStrip: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         } else {
-            Text("Спланировать сушку или набор")
+            // Без плана у премиума идёт поддержание, и строка не зовёт
+            // «спланировать» вообще, а говорит, что сейчас имеет смысл.
+            Text(verbatim: store.isPremium
+                 ? store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent).headline
+                 : String(localized: "Спланировать сушку или набор"))
                 .foregroundStyle(.secondary)
         }
     }

@@ -114,6 +114,9 @@ final class CalorieStore {
     private(set) var historyDays: [DaySummary] = []
     private(set) var hasWeighedToday: Bool = false
     private(set) var adherence: PlanAdherence?
+    /// Что было до сегодня: законченные сушки, наборы и поддержания.
+    /// Без этой памяти нельзя ответить, когда снова можно сушиться.
+    private(set) var phaseHistory: [PhaseRecord] = []
     /// Расход по факту за последние две недели — что говорят дневник и весы.
     private(set) var adaptiveTDEE: AdaptiveTDEE.Result?
     /// Он же, сглаженный между днями: цель не должна прыгать за каждым всплеском.
@@ -183,6 +186,7 @@ final class CalorieStore {
         static let adaptiveTDEEDay = "adaptive_tdee_day"
         static let usesAdaptiveTDEE = "use_adaptive_tdee"
         static let goalSyncedTDEE = "goal_synced_tdee"
+        static let phaseHistory = "phase_history"
         static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
         static let plan = "active_plan"
@@ -200,6 +204,8 @@ final class CalorieStore {
         self.groupDefaults = groupDefaults
         self.dailyGoal = defaults.object(forKey: Keys.goal) as? Int ?? 2000
         self.usesAdaptiveTDEE = defaults.object(forKey: Keys.usesAdaptiveTDEE) as? Bool ?? true
+        self.phaseHistory = (defaults.data(forKey: Keys.phaseHistory))
+            .flatMap { try? JSONDecoder().decode([PhaseRecord].self, from: $0) } ?? []
         self.profile = Self.loadProfile(from: defaults)
         let loadedPlan = Self.loadPlan(from: defaults)
         self.plan = loadedPlan
@@ -587,6 +593,11 @@ final class CalorieStore {
             // вёл себя по-разному в зависимости от тумблера, который по смыслу
             // отвечает только за распределение калорий по дням недели.
             dailyGoal = plan.dailyCalorieTarget(tdee: workingTDEE)
+        } else if syncDailyGoal, isPremium {
+            // Премиум без плана — поддержание: режим задаётся планом, а вне
+            // плана тело держат. Иначе выбранная когда-то цель профиля тихо
+            // держала бы вечный дефицит.
+            dailyGoal = Int(workingTDEE.rounded())
         } else if syncDailyGoal {
             dailyGoal = newProfile.calorieTarget
         } else {
@@ -704,10 +715,58 @@ final class CalorieStore {
     }
 
     /// Завершает план и возвращает дневную цель к обычному расчёту по профилю.
+    /// С какого дня идёт нынешнее поддержание: с конца прошлой фазы, а если
+    /// её не было — со дня, когда появился профиль и начался дневник.
+    var maintenanceSince: Date? {
+        guard plan == nil else { return nil }
+        if let last = phaseHistory.max(by: { $0.endDate < $1.endDate })?.endDate { return last }
+        return entries.map(\.date).min() ?? weightEntries.map(\.date).min()
+    }
+
+    /// Процент жира по последним замерам. nil, когда метод по обхватам ещё
+    /// не включился: оценка по ИМТ для советов про фазы слишком груба.
+    var measuredBodyFatPercent: Double? {
+        guard let profile, profile.navyBodyFat(from: latestMeasurement) != nil else { return nil }
+        return profile.bodyFatPercentage(from: latestMeasurement)
+    }
+
+    /// Что делать дальше — сушиться, набирать или ещё постоять.
+    func phaseAdvice(bodyFatPercent: Double?, now: Date = Date()) -> PhaseAdvice.Recommendation {
+        PhaseAdvice.recommend(history: phaseHistory,
+                              maintenanceSince: maintenanceSince,
+                              bodyFatPercent: bodyFatPercent,
+                              today: now)
+    }
+
+    /// Записать закончившийся план в историю. Вызывается при завершении плана,
+    /// а не при каждой правке: история — про прожитое, а не про задуманное.
+    private func rememberFinishedPlan(_ finished: Plan, now: Date = Date()) {
+        let end = min(now, finished.endDate)
+        guard end > finished.startDate else { return }
+        // Намерение всей фазы — то, чем план был по сути: сушка с брейком
+        // внутри остаётся сушкой.
+        let intent = finished.phases.first(where: { $0.intent == .cut })?.intent
+            ?? finished.phases.first?.intent ?? .maintenance
+        let record = PhaseRecord(intent: intent,
+                                 startDate: finished.startDate,
+                                 endDate: end,
+                                 startWeightKg: finished.startWeightKg,
+                                 endWeightKg: weightTrend(on: end))
+        phaseHistory.append(record)
+        if let data = try? JSONEncoder().encode(phaseHistory) {
+            defaults.set(data, forKey: Keys.phaseHistory)
+        }
+    }
+
     func cancelPlan() {
+        if let plan { rememberFinishedPlan(plan) }
         plan = nil
         defaults.removeObject(forKey: Keys.plan)
-        if let profile {
+        // Без плана у премиума идёт поддержание: режим — это план, а вне
+        // плана тело держат, а не гонят в вечный дефицит по настройке профиля.
+        if isPremium {
+            dailyGoal = Int(workingTDEE.rounded())
+        } else if let profile {
             dailyGoal = profile.calorieTarget
         }
         rebuildCaches()

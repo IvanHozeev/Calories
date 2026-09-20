@@ -3413,6 +3413,142 @@ struct FoodTraitTests {
     }
 }
 
+// MARK: - Расписание приёмов пищи
+
+struct MealScheduleTests {
+
+    private let calendar = Calendar.current
+
+    private func at(_ hour: Int, _ minute: Int = 0) -> Date {
+        calendar.date(bySettingHour: hour, minute: minute, second: 0, of: calendar.startOfDay(for: Date()))!
+    }
+
+    private func input(count: Int = 4, goal: Int = 2800,
+                       entries: [(Date, Int)] = [], now: Date? = nil) -> MealSchedule.Input {
+        .init(wake: at(7), sleep: at(23), mealCount: count, dailyGoal: goal,
+              entries: entries.map { (date: $0.0, calories: $0.1) }, now: now ?? at(7, 30))
+    }
+
+    /// День раскладывается от подъёма до отбоя: первый через 45 минут после
+    /// подъёма, последний за час до сна, остальные — поровну между ними.
+    @Test func theDayIsSplitBetweenWakingAndSleep() {
+        let times = MealSchedule.times(wake: at(7), sleep: at(23), count: 4)
+        #expect(times.count == 4)
+        #expect(times[0] == at(7, 45))
+        #expect(times[3] == at(22))
+        let gaps = zip(times.dropFirst(), times).map { $0.timeIntervalSince($1) }
+        #expect(gaps.allSatisfy { abs($0 - gaps[0]) < 1 })
+    }
+
+    /// Норма делится поровну, а остаток от деления достаётся последнему окну:
+    /// сумма по приёмам обязана сходиться с дневной нормой.
+    @Test func caloriesAddUpToTheDailyTarget() {
+        let slots = MealSchedule.slots(input(goal: 2801))
+        #expect(slots.count == 4)
+        #expect(slots.reduce(0) { $0 + $1.calories } == 2801)
+    }
+
+    /// Пропущенное окно не сгорает: его калории расходятся по оставшимся.
+    @Test func aMissedWindowIsSpreadOverWhatIsLeft() {
+        // Полдень: первые два окна прошли, съедено ноль.
+        let slots = MealSchedule.slots(input(now: at(15)))
+        let missed = slots.filter { $0.state == .missed }
+        #expect(!missed.isEmpty)
+        let ahead = slots.filter { $0.state == .upcoming || $0.state == .current }
+        #expect(ahead.reduce(0) { $0 + $1.calories } == 2800)
+        #expect(ahead.allSatisfy { $0.calories > 2800 / 4 })
+    }
+
+    /// Съеденное попадает в своё окно и уменьшает то, что осталось на день.
+    @Test func whatIsEatenCountsAgainstTheDay() {
+        // В одиннадцать первое окно уже закрыто: его граница — середина
+        // между первым и вторым приёмом.
+        let slots = MealSchedule.slots(input(entries: [(at(8), 700)], now: at(11)))
+        #expect(slots[0].consumed == 700)
+        #expect(slots[0].state == .done)
+        let ahead = slots.filter { $0.state != .done && $0.state != .missed }
+        #expect(ahead.reduce(0) { $0 + $1.calories } == 2100)
+    }
+
+    /// Переел за день — оставшимся окнам достаётся ноль, а не отрицательное.
+    @Test func overeatingLeavesNothingRatherThanNegatives() {
+        let slots = MealSchedule.slots(input(entries: [(at(8), 3200)], now: at(11)))
+        #expect(slots.allSatisfy { $0.calories >= 0 })
+        #expect(slots.filter { $0.state == .upcoming }.allSatisfy { $0.calories == 0 })
+    }
+
+    /// Ближайшее окно — то, что идёт сейчас, иначе следующее по времени.
+    @Test func theNextWindowIsTheCurrentOneOrTheOneAfter() throws {
+        let slots = MealSchedule.slots(input(now: at(9)))
+        let next = try #require(MealSchedule.nextSlot(slots, now: at(9)))
+        #expect(next.start <= at(9))
+        let later = try #require(MealSchedule.nextSlot(slots.filter { $0.state == .upcoming }, now: at(9)))
+        #expect(later.start > at(9))
+    }
+
+    /// Ложится за полночь — расписание не схлопывается.
+    @Test func aLateBedtimeStillWorks() {
+        let times = MealSchedule.times(wake: at(11), sleep: at(2), count: 3)
+        #expect(times.count == 3)
+        #expect(times[2] > times[0])
+    }
+}
+
+// MARK: - Фазы: что делать дальше
+
+struct PhaseAdviceTests {
+
+    private func record(_ intent: PlanIntent, weeks: Int, endedWeeksAgo: Int) -> PhaseRecord {
+        let end = Date().addingTimeInterval(-Double(endedWeeksAgo) * 7 * 86_400)
+        return PhaseRecord(intent: intent,
+                           startDate: end.addingTimeInterval(-Double(weeks) * 7 * 86_400),
+                           endDate: end, startWeightKg: 80, endWeightKg: 76)
+    }
+
+    /// Сразу после сушки снова сушиться нельзя: телу нужно поддержание.
+    @Test func rightAfterACutTheAnswerIsRest() {
+        let advice = PhaseAdvice.recommend(history: [record(.cut, weeks: 12, endedWeeksAgo: 1)],
+                                           maintenanceSince: Date().addingTimeInterval(-7 * 86_400),
+                                           bodyFatPercent: 22)
+        #expect(advice.kind == .maintain)
+        #expect(advice.weeks == PhaseAdvice.restWeeks(afterCutOf: 12) - 1)
+    }
+
+    /// Отдых считается от длины сушки: половина, но не меньше месяца.
+    @Test func restIsHalfTheCutButAtLeastAMonth() {
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 12) == 6)
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 4) == 4)
+    }
+
+    /// Отдохнул и жира много — пора сушиться, и темп назван.
+    @Test func afterEnoughRestHighFatMeansCut() {
+        let advice = PhaseAdvice.recommend(history: [record(.cut, weeks: 8, endedWeeksAgo: 10)],
+                                           maintenanceSince: Date().addingTimeInterval(-10 * 7 * 86_400),
+                                           bodyFatPercent: 22)
+        #expect(advice.kind == .cut)
+        #expect(advice.weeklyRatePercent == 0.5)
+    }
+
+    /// Сухой — можно набирать, и темп вдвое осторожнее.
+    @Test func beingLeanMeansBulk() {
+        let advice = PhaseAdvice.recommend(history: [], maintenanceSince: nil, bodyFatPercent: 12)
+        #expect(advice.kind == .bulk)
+        #expect(advice.weeklyRatePercent == 0.25)
+    }
+
+    /// Середина — выбор за человеком, приложение не решает за него.
+    @Test func theMiddleIsLeftToTheLifter() {
+        #expect(PhaseAdvice.recommend(history: [], maintenanceSince: nil, bodyFatPercent: 18).kind == .maintain)
+    }
+
+    /// Без замеров советовать нечего — и так и говорим.
+    @Test func withoutMeasurementsThereIsNoAdvice() {
+        let advice = PhaseAdvice.recommend(history: [], maintenanceSince: nil, bodyFatPercent: nil)
+        #expect(advice.kind == .maintain)
+        #expect(advice.weeks == nil)
+    }
+}
+
 // MARK: - Разбор дня
 
 struct DayAnalysisTests {

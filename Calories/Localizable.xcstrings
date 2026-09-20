@@ -4,6 +4,98 @@
     "" : {
       "shouldTranslate" : false
     },
+    "%1$@ – %2$@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$@"
+          }
+        }
+      }
+    },
+    "%1$lld ккал · окно до %2$@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld سعرة حرارية · النافذة حتى %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal · Fenster bis %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal · window until %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal · ventana hasta %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal · fenêtre jusqu'à %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld קלוריות · חלון עד %2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal · janela até %2$@"
+          }
+        }
+      }
+    },
     "«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно»." : {
       "localizations" : {
         "ar" : {
@@ -46,6 +138,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“No olho” você erra por centenas de calorias por dia. Comida pesada é a diferença entre “funciona” e “não sei por quê”."
+          }
+        }
+      }
+    },
+    "Без процента жира советовать нечего: от него зависит, что выгоднее — сушиться или набирать. Сними шею и пояс в замерах, и приложение посчитает." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "دون نسبة الدهون لا يوجد ما يمكن اقتراحه: فهي التي تحدد الأجدى — التنشيف أم الزيادة. قِس الرقبة والسرة، وسيحسب التطبيق ذلك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Körperfettanteil gibt es nichts zu empfehlen: er entscheidet, was sich mehr lohnt — Cut oder Aufbau. Miss Hals und Nabel, dann rechnet die App es aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Without a body fat percentage there's nothing to recommend: it decides which is the better move — cutting or bulking. Measure your neck and navel and the app will work it out."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin el porcentaje de grasa no hay nada que recomendar: de él depende qué conviene más — definición o volumen. Mide el cuello y el ombligo, y la app lo calculará."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans le taux de graisse, il n'y a rien à conseiller : c'est lui qui décide ce qui est le plus avantageux — sèche ou prise de masse. Mesure ton cou et ton nombril, et l'appli calculera."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בלי אחוז שומן אין מה להמליץ: הוא זה שקובע מה משתלם יותר — חיטוב או עלייה. מדוד צוואר וטבור, והאפליקציה תחשב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem o percentual de gordura não há o que recomendar: dele depende o que compensa mais — definição ou ganho. Meça o pescoço e o umbigo, e o app calcula."
           }
         }
       }
@@ -326,6 +464,52 @@
         }
       }
     },
+    "Делить день на приёмы" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقسيم اليوم إلى وجبات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag in Mahlzeiten aufteilen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Split day into meals"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dividir el día en comidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répartir la journée en repas"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחלק את היום לארוחות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dividir o dia em refeições"
+          }
+        }
+      }
+    },
     "День голодания — разбирать нечего. Ноль здесь намеренный, и на серию он не влияет." : {
       "localizations" : {
         "ar" : {
@@ -418,6 +602,52 @@
         }
       }
     },
+    "День закрыт" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انتهى اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tag beendet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day done"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día terminado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journée terminée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היום הסתיים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia encerrado"
+          }
+        }
+      }
+    },
     "Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов." : {
       "localizations" : {
         "ar" : {
@@ -460,6 +690,144 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As proporções são calculadas em calorias, não em gramas: um grama de gordura dá nove quilocalorias contra quatro de proteína e carboidratos."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%% — هذه منطقة وسط يعمل فيها التنشيف والزيادة معًا. الهدف يحدد: إن كنت تريد تحديد العضلات بحلول الصيف فالتنشيف، وإن كنت تريد الكتلة فالزيادة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett: etwa %.0f%% — das ist die Mitte, in der sowohl Cut als auch Aufbau funktionieren. Das Ziel entscheidet: Willst du bis zum Sommer Definition, ist es der Cut; willst du Masse, ist es der Aufbau."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat is about %.0f%% — that's the middle ground where both a cut and a bulk work. The goal decides: want definition by summer — cut; want mass — bulk."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa: alrededor del %.0f%% — es el punto medio desde el que funcionan tanto la definición como el volumen. Decide el objetivo: si quieres marcarte para el verano, toca definición; si quieres masa, toca volumen."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides : environ %.0f%% — c'est le juste milieu où la sèche et la prise de masse fonctionnent toutes les deux. Tout dépend de l'objectif : vouloir être découpé pour l'été, c'est la sèche ; vouloir de la masse, c'est la prise de masse."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן: בסביבות %.0f%% — זו הנקודה האמצעית שבה גם חיטוב וגם עלייה עובדים. המטרה קובעת: רוצה להיות מוגדר לקיץ — זה חיטוב; רוצה מסה — זו עלייה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura: por volta de %.0f%% — esse é o meio-termo de onde funcionam tanto a definição quanto o ganho de massa. O objetivo decide: quer ficar definido para o verão — é definição; quer massa — é ganho."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%%. Есть куда набирать: на этом проценте прибавка идёт в мышцы охотнее всего. Темп 0.25%% массы в неделю — быстрее набирается жир, а не сила." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%%. هناك مجال للزيادة: عند هذه النسبة تذهب الزيادة إلى العضلات بأفضل شكل. وتيرة 0.25%% من الوزن أسبوعياً — الأسرع يعني زيادة الدهن لا القوة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett: etwa %.0f%%. Da ist noch Luft für Aufbau: bei diesem Anteil geht die Zunahme am ehesten in Muskeln. Tempo von 0.25%% des Körpergewichts pro Woche — schneller heißt, Fett statt Kraft aufzubauen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat is about %.0f%%. There's room to bulk: at this percentage, gains go to muscle most readily. A pace of 0.25%% of body weight a week: faster and it's fat you gain, not strength."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa: alrededor del %.0f%%. Hay margen para ganar volumen: a este porcentaje, la ganancia va al músculo con más facilidad. Ritmo de 0.25%% del peso a la semana: más rápido es ganar grasa, no fuerza."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides : environ %.0f%%. Il y a de la marge pour prendre de la masse : à ce taux, le gain part surtout en muscle. Rythme de 0.25%% du poids par semaine : plus vite, c'est gagner du gras, pas de la force."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן: בסביבות %.0f%%. יש עוד לאן לעלות: באחוז הזה התוספת הולכת לשריר בקלות הרבה ביותר. קצב של 0.25%% ממשקל הגוף בשבוע — מהר יותר פירושו לצבור שומן, לא כוח."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura: por volta de %.0f%%. Há espaço para ganhar massa: nesse percentual, o ganho vai para o músculo com mais facilidade. Ritmo de 0.25%% do peso por semana: mais rápido é ganhar gordura, não força."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%%. На таком проценте набор уходит в жир, а не в мышцы: сушка сейчас выгоднее. Темп 0.5%% массы в неделю — быстрее значит терять мышцы." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%%. عند هذه النسبة تذهب الزيادة إلى الدهون لا العضلات: التنشيف أجدى الآن. وتيرة 0.5%% من الوزن أسبوعياً — الأسرع يعني خسارة العضل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett: etwa %.0f%%. Bei diesem Anteil geht der Aufbau in Fett, nicht in Muskeln: der Cut lohnt sich jetzt mehr. Tempo von 0.5%% des Körpergewichts pro Woche — schneller heißt, Muskeln zu verlieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat is about %.0f%%. At this level, a bulk turns into fat, not muscle — a cut pays off more right now. A pace of 0.5%% of body weight a week: faster means losing muscle."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa: alrededor del %.0f%%. A este porcentaje, el volumen se va a grasa y no a músculo: ahora conviene más la definición. Ritmo de 0.5%% del peso a la semana: más rápido es perder músculo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides : environ %.0f%%. À ce taux, la prise de masse part en graisse, pas en muscle : la sèche est plus payante maintenant. Rythme de 0.5%% du poids par semaine : plus vite, c'est perdre du muscle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן: בסביבות %.0f%%. באחוז הזה העלייה הולכת לשומן, לא לשריר: החיטוב משתלם יותר כרגע. קצב של 0.5%% ממשקל הגוף בשבוע — מהר יותר פירושו לאבד שריר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura: por volta de %.0f%%. Nesse percentual, o ganho vira gordura, não músculo: a definição compensa mais agora. Ritmo de 0.5%% do peso por semana: mais rápido é perder músculo."
           }
         }
       }
@@ -694,6 +1062,144 @@
         }
       }
     },
+    "Можно и то, и другое" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك كليهما"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst beides"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can do either"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes hacer las dos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux faire les deux"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר גם וגם"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode fazer as duas"
+          }
+        }
+      }
+    },
+    "Можно набирать" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك الزيادة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst aufbauen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can bulk"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes ganar volumen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux prendre de la masse"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לעלות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode ganhar massa"
+          }
+        }
+      }
+    },
+    "Можно сушиться" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك التنشيف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst cutten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can cut"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes definir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux sécher"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לחטב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode definir"
+          }
+        }
+      }
+    },
     "Напольные весы" : {
       "localizations" : {
         "ar" : {
@@ -832,6 +1338,52 @@
         }
       }
     },
+    "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف اليومي يُقسَّم إلى وجبات متساوية، وفي «اليوم» ترى كم تبقّى للوجبة القادمة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tagesziel teilt sich in gleiche Mahlzeiten, und unter Heute siehst du, wie viel für die nächste übrig ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The daily target splits into equal meals, and Today shows how much is left for the next one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La meta diaria se divide en comidas iguales, y en Hoy se ve cuánto queda para la próxima."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif du jour se divise en repas égaux, et Aujourd'hui indique combien il reste pour le prochain."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד היומי מתחלק לארוחות שוות, וב״היום״ אפשר לראות כמה נשאר לארוחה הקרובה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta diária se divide em refeições iguais, e em Hoje você vê quanto resta para a próxima."
+          }
+        }
+      }
+    },
     "Норма считается по твоим данным, а данные нужно чем-то снимать" : {
       "localizations" : {
         "ar" : {
@@ -874,6 +1426,190 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta é calculada com os seus próprios dados, e esses dados precisam ser registrados com algo."
+          }
+        }
+      }
+    },
+    "Окно открылось — запиши, что ешь." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فُتحت النافذة — سجّل ما تأكله."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Fenster ist offen — trag ein, was du isst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your window is open — log what you eat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se abrió la ventana — registra lo que comes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fenêtre est ouverte — note ce que tu manges."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלון נפתח — רשום מה אתה אוכל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A janela abriu — registre o que você come."
+          }
+        }
+      }
+    },
+    "Отбой" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlafenszeit"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bedtime"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hora de dormir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coucher"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שעת שינה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hora de dormir"
+          }
+        }
+      }
+    },
+    "Отложить на 30 минут" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تأجيل 30 دقيقة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 Min. verschieben"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snooze 30 min"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posponer 30 min"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reporter de 30 min"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לדחות ב-30 דקות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adiar 30 min"
+          }
+        }
+      }
+    },
+    "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أول وجبة تبدأ بعد 45 دقيقة من الاستيقاظ، والأخيرة قبل النوم بساعة، وما بينهما يتوزّع بالتساوي. النافذة الفائتة لا تضيع: تتوزّع سعراتها على الوجبات المتبقية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die erste Mahlzeit kommt 45 Minuten nach dem Aufstehen, die letzte eine Stunde vor dem Schlafengehen, die übrigen verteilen sich gleichmäßig dazwischen. Ein verpasstes Fenster verfällt nicht: Seine Kalorien verteilen sich auf die restlichen Mahlzeiten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first meal comes 45 minutes after wake-up, the last one an hour before bedtime, and the rest are spaced evenly between them. A missed window isn't wasted: its calories spread across the remaining meals."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera comida llega 45 minutos después de despertar, la última una hora antes de dormir, y el resto se reparte por igual entre ambas. Una ventana que te saltas no se pierde: sus calorías se reparten entre las comidas restantes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le premier repas arrive 45 minutes après le réveil, le dernier une heure avant le coucher, et les autres se répartissent également entre eux. Une fenêtre manquée n'est pas perdue : ses calories se répartissent entre les repas restants."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הארוחה הראשונה מתחילה 45 דקות אחרי ההתעוררות, האחרונה שעה לפני השינה, והשאר מתחלקות ביניהן באופן שווה. חלון שהוחמץ לא הולך לאיבוד: הקלוריות שלו מתחלקות בין הארוחות שנותרו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A primeira refeição chega 45 minutos depois de despertar, a última uma hora antes de dormir, e as demais se dividem igualmente entre elas. Uma janela perdida não se perde: as calorias dela se distribuem pelas refeições restantes."
           }
         }
       }
@@ -924,6 +1660,98 @@
         }
       }
     },
+    "Поддержание ещё %lld нед." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بقي على الصيانة %lld أسبوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erhaltung, noch %lld Wo."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance for %lld more wk."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sem. más de mantenimiento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encore %lld sem. de maintien"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נותרו %lld שבועות תחזוקה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais %lld sem. de manutenção"
+          }
+        }
+      }
+    },
+    "Подъём" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاستيقاظ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aufstehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wake-up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Despertar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réveil"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "התעוררות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Despertar"
+          }
+        }
+      }
+    },
     "Почти половина калорий из жира. Он сытнее на грамм, но вытесняет углеводы, на которых идут тренировки." : {
       "localizations" : {
         "ar" : {
@@ -970,6 +1798,282 @@
         }
       }
     },
+    "Приём %1$lld из %2$lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة %1$lld من %2$lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mahlzeit %1$lld von %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meal %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida %1$lld de %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas %1$lld sur %2$lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחה %1$lld מתוך %2$lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeição %1$lld de %2$lld"
+          }
+        }
+      }
+    },
+    "Приём %1$lld из %2$lld в %3$@" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة %1$lld من %2$lld في %3$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mahlzeit %1$lld von %2$lld um %3$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meal %1$lld of %2$lld at %3$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comida %1$lld de %2$lld a las %3$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas %1$lld sur %2$lld à %3$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחה %1$lld מתוך %2$lld בשעה %3$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeição %1$lld de %2$lld às %3$@"
+          }
+        }
+      }
+    },
+    "Приёмов в день" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وجبات في اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mahlzeiten pro Tag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meals per day"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comidas al día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repas par jour"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחות ביום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeições por dia"
+          }
+        }
+      }
+    },
+    "Пропустить" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تخطي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überspringen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omitir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דלג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular"
+          }
+        }
+      }
+    },
+    "Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النافذة الفائتة لا تضيع: تتوزّع سعراتها على الوجبات المتبقية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein verpasstes Fenster verfällt nicht: Seine Kalorien verteilen sich auf die restlichen Mahlzeiten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A missed window isn't wasted: its calories spread across the remaining meals."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ventana que te saltas no se pierde: sus calorías se reparten entre las comidas restantes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fenêtre manquée n'est pas perdue : ses calories se répartissent entre les repas restants."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלון שהוחמץ לא הולך לאיבוד: הקלוריות שלו מתחלקות בין הארוחות שנותרו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma janela perdida não se perde: as calorias dela se distribuem pelas refeições restantes."
+          }
+        }
+      }
+    },
+    "Прошлая сушка длилась %1$lld нед., на поддержании ты %2$lld. Дай телу вернуть расход и гормоны — обычно это половина длины сушки, но не меньше месяца. Тогда следующий дефицит снова будет работать." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التنشيف الأخير استمر %1$lld أسبوع، وأنت في الصيانة منذ %2$lld. أعطِ جسمك وقتًا ليستعيد الصرف والهرمونات — عادةً نصف مدة التنشيف، لكن ليس أقل من شهر. عندها سيعمل العجز التالي من جديد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein letzter Cut dauerte %1$lld Wo.; in der Erhaltung bist du bei %2$lld. Gib deinem Körper Zeit, Verbrauch und Hormone zu erholen — meist die Hälfte der Cut-Dauer, aber mindestens einen Monat. Dann funktioniert das nächste Defizit wieder."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your last cut lasted %1$lld wk.; on maintenance you're at %2$lld. Give your body time to restore its expenditure and hormones — usually half the length of the cut, but at least a month. Then the next deficit will work again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu última definición duró %1$lld sem.; en mantenimiento llevas %2$lld. Dale al cuerpo tiempo para recuperar el gasto y las hormonas — normalmente la mitad de la duración de la definición, pero no menos de un mes. Así el siguiente déficit volverá a funcionar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta dernière sèche a duré %1$lld sem. ; en maintien tu es à %2$lld. Laisse au corps le temps de retrouver sa dépense et ses hormones — généralement la moitié de la durée de la sèche, mais au moins un mois. Ensuite, le prochain déficit fonctionnera de nouveau."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החיטוב הקודם נמשך %1$lld שב', ובתחזוקה אתה כבר %2$lld. תן לגוף זמן להחזיר את ההוצאה וההורמונים — בדרך כלל זה חצי מאורך החיטוב, אך לא פחות מחודש. אז הגירעון הבא יעבוד שוב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua última definição durou %1$lld sem.; na manutenção você está em %2$lld. Dê ao corpo tempo para recuperar o gasto e os hormônios — geralmente a metade da duração da definição, mas nunca menos de um mês. Assim o próximo déficit volta a funcionar."
+          }
+        }
+      }
+    },
     "Разбор" : {
       "localizations" : {
         "ar" : {
@@ -1012,6 +2116,98 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Detalhamento"
+          }
+        }
+      }
+    },
+    "Сейчас приём %1$lld из %2$lld" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآن الوجبة %1$lld من %2$lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt Mahlzeit %1$lld von %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now meal %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora, comida %1$lld de %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenant, repas %1$lld sur %2$lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כרגע ארוחה %1$lld מתוך %2$lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agora, refeição %1$lld de %2$lld"
+          }
+        }
+      }
+    },
+    "Сними замеры" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خذ القياسات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messungen nehmen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Take measurements"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomar medidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prendre les mesures"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בצע מדידות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer medidas"
           }
         }
       }
@@ -1108,6 +2304,52 @@
         }
       }
     },
+    "Что дальше" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما التالي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was jetzt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's next"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué sigue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La suite"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה הלאה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que vem agora"
+          }
+        }
+      }
+    },
     "Что понадобится" : {
       "localizations" : {
         "ar" : {
@@ -1150,6 +2392,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O que você vai precisar"
+          }
+        }
+      }
+    },
+    "съедено %lld ккал" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld سعرة حرارية مُستهلكة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal gegessen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal eaten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal consumidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal mangées"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld קלוריות שנאכלו"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal consumidas"
           }
         }
       }

@@ -56,7 +56,7 @@ struct PhotoMealSheet: View {
                 if let failure {
                     Section {
                         Label(failure, systemImage: "exclamationmark.triangle")
-                            .font(.subheadline)
+                            .font(.app(.subheadline))
                             .foregroundStyle(.secondary)
                     }
                 }

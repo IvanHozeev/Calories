@@ -44,7 +44,7 @@ struct FoodRow: View {
             Image(systemName: "sparkles")
             Text("витамины")
         }
-        .font(.caption2.weight(.semibold))
+        .font(.app(.caption2, weight: .semibold))
         .foregroundStyle(.teal)
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
@@ -63,7 +63,7 @@ struct FoodRow: View {
                         .lineLimit(2)
                     ForEach(traits) { trait in
                         Image(systemName: trait.symbol)
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(trait.color)
                             .accessibilityLabel(Text(verbatim: trait.title))
                     }
@@ -87,7 +87,7 @@ struct FoodRow: View {
                         .accessibilityHidden(true)
                     }
                 }
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
@@ -128,10 +128,10 @@ struct FoodRow: View {
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
                 Text("ккал")
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.secondary)
             }
         }
@@ -153,9 +153,9 @@ struct FoodTraitsSection: View {
                     Label {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: trait.title)
-                                .font(.subheadline.weight(.semibold))
+                                .font(.app(.subheadline, weight: .semibold))
                             Text(verbatim: trait.explanation)
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

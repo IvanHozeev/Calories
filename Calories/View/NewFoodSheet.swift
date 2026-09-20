@@ -177,12 +177,12 @@ struct NewFoodSheet: View {
                                             Text(food.name)
                                                 .foregroundStyle(.primary)
                                             Text("Б\(Int(food.protein)) Ж\(Int(food.fat)) У\(Int(food.carbs))")
-                                                .font(.caption2)
+                                                .font(.app(.caption2))
                                                 .foregroundStyle(.secondary)
                                         }
                                         Spacer()
                                         Text("\(food.caloriesPer100g) ккал/100г")
-                                            .font(.caption)
+                                            .font(.app(.caption))
                                             .foregroundStyle(.secondary)
                                     }
                                 }
@@ -229,7 +229,7 @@ struct NewFoodSheet: View {
                         if caloriesMismatch {
                             Label("По БЖУ выходит другое число калорий — проверь данные с упаковки.",
                                   systemImage: "exclamationmark.triangle.fill")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.orange)
                         }
                     }
@@ -250,7 +250,7 @@ struct NewFoodSheet: View {
                     if hasMacros || enteredCalories > 0 {
                         LabeledContent("В порции") {
                             Text(verbatim: "\(portionCalories) \(String(localized: "ккал"))")
-                                .font(.body.weight(.medium))
+                                .font(.app(.body, weight: .medium))
                                 .monospacedDigit()
                         }
                         MacroTags(macros: draftMacros.scaled(by: servingToSave))
@@ -304,7 +304,7 @@ struct NewFoodSheet: View {
                                     Text(verbatim: formatted(amount * servingToSave / 100, nutrient))
                                         .monospacedDigit()
                                     Text(verbatim: "· \(Int((amount * servingToSave / 100 / nutrient.dailyValue * 100).rounded()))%")
-                                        .font(.caption)
+                                        .font(.app(.caption))
                                         .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
                                         .monospacedDigit()
                                 }

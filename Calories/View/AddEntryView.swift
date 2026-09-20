@@ -297,16 +297,16 @@ struct AddEntryView: View {
                     ProgressView()
                     Text("Ищем в базе данных...")
                         .foregroundStyle(.secondary)
-                        .font(.subheadline)
+                        .font(.app(.subheadline))
                 }
                 .padding(.vertical, 2)
             } else if noNetwork {
                 Label("Нет подключения к интернету", systemImage: "wifi.slash")
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
             } else if let searchFailure {
                 Label(searchFailure, systemImage: "exclamationmark.triangle")
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
             } else if offResults.isEmpty {
                 Text("Ничего не найдено")
@@ -349,7 +349,7 @@ struct AddEntryView: View {
                                 Text(selectedDate.formatted(date: .abbreviated, time: .shortened))
                                 Spacer()
                             }
-                            .font(.footnote)
+                            .font(.app(.footnote))
                             .foregroundStyle(.orange)
                         }
                         .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
@@ -556,10 +556,10 @@ struct AddEntryView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Итого")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.app(.subheadline, weight: .semibold))
                         Spacer()
                         Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
-                            .font(.title3.weight(.bold))
+                            .font(.app(.title3, weight: .bold))
                             .monospacedDigit()
                             .foregroundStyle(.green)
                             .contentTransition(.numericText())

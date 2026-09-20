@@ -206,7 +206,7 @@ struct SettingsView: View {
                         Text(verbatim: currentLanguageName)
                             .foregroundStyle(Color.secondary)
                         Image(systemName: "arrow.up.forward.app")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(Color.secondary.opacity(0.6))
                     }
                 }
@@ -250,7 +250,7 @@ struct SettingsView: View {
                 }
                 if let error = backups.lastError {
                     Text(verbatim: error)
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.red)
                 }
             } header: {
@@ -363,7 +363,7 @@ private struct RingSoundSettingsView: View {
                             Spacer()
                             if selected == sound.rawValue {
                                 Image(systemName: "checkmark")
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.app(.subheadline, weight: .semibold))
                                     .foregroundStyle(.tint)
                             }
                         }
@@ -403,14 +403,14 @@ struct FontSettingsView: View {
                     ) {
                         Text("Размер")
                     } minimumValueLabel: {
-                        Text(verbatim: "A").font(.caption2)
+                        Text(verbatim: "A").font(.app(.caption2))
                     } maximumValueLabel: {
-                        Text(verbatim: "A").font(.title3)
+                        Text(verbatim: "A").font(.app(.title3))
                     }
                     .accessibilityIdentifier("textSizeSlider")
 
                     Text(AppTextSize(rawValue: appTextSize)?.title ?? "")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
                 .padding(.vertical, 4)
@@ -428,16 +428,16 @@ struct FontSettingsView: View {
                     } label: {
                         // Образца «каждая строка своим шрифтом» здесь нет намеренно:
                         // корневой .fontDesign переписывает начертание у любого шрифта
-                        // ниже себя, включая собранный из дескриптора, поэтому все
-                        // строки выглядели бы одинаково. Предпросмотр даёт сам выбор —
-                        // по тапу интерфейс мгновенно перерисовывается целиком.
+                        // ниже себя, поэтому системные строки выглядели бы одинаково.
+                        // Предпросмотр даёт сам выбор — по тапу интерфейс мгновенно
+                        // перерисовывается целиком.
                         HStack {
                             Text(font.title)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(Color.primary)
                             Spacer()
                             if appFont == font.rawValue {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(.tint)
                                     .transition(.scale.combined(with: .opacity))
                             }
                         }

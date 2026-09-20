@@ -76,13 +76,13 @@ struct EditEntrySheet: View {
                            text: Binding<String>, field: Field) -> some View {
         HStack(spacing: 3) {
             Text(short)
-                .font(.caption2.weight(.bold))
+                .font(.app(.caption2, weight: .bold))
                 .foregroundStyle(color)
             TextField("0", text: text)
                 .keyboardType(.decimalPad)
                 .focused($focusedField, equals: field)
             Text("г")
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
         }
     }
@@ -100,7 +100,7 @@ struct EditEntrySheet: View {
             Section {
                 VStack(spacing: 10) {
                     Text(verbatim: "\(draftCalories) \(String(localized: "ккал"))")
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .font(.app(size: 34, weight: .bold))
                         .foregroundStyle(.green)
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
@@ -129,7 +129,7 @@ struct EditEntrySheet: View {
                         .keyboardType(.numberPad)
                         .focused($focusedField, equals: .calories)
                     Text("ккал")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                     Divider()
                     TextField("Вес", text: $grams)
@@ -141,7 +141,7 @@ struct EditEntrySheet: View {
                             rescale(to: number(newValue))
                         }
                     Text("г")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
                 // Разделитель без этого начинается от подписи с единицей: у поля

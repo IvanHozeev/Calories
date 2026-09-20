@@ -60,10 +60,10 @@ struct MacroSplitBar: View {
                 .fill(color)
                 .frame(width: 7, height: 7)
             Text(title)
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
             Text(verbatim: "\(percent)%")
-                .font(.caption2.weight(.semibold))
+                .font(.app(.caption2, weight: .semibold))
                 .monospacedDigit()
         }
     }

@@ -70,7 +70,7 @@ struct PlanPhaseEditorView: View {
                               ? "Быстрее процента веса в неделю — на сушке это уже за счёт мышц."
                               : "Быстрее половины процента в неделю — на наборе большая часть прибавки будет жиром.",
                               systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.orange)
                     }
                 } header: {

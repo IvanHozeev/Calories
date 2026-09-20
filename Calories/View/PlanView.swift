@@ -111,7 +111,7 @@ struct PlanView: View {
                 Image(systemName: finished ? "flag.checkered" : "target")
                     .foregroundStyle(finished ? Color.secondary : Color.yellow)
                 Text(plan.title)
-                    .font(.headline)
+                    .font(.app(.headline))
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 if let status, !finished {
@@ -119,7 +119,7 @@ struct PlanView: View {
                     // ломалась на две строки и утаскивала за собой название плана.
                     // Словами статус всё равно назван ниже, в разборе.
                     Image(systemName: status.icon)
-                        .font(.caption.weight(.semibold))
+                        .font(.app(.caption, weight: .semibold))
                         .foregroundStyle(status.color)
                         .padding(6)
                         .background(status.color.opacity(0.12), in: Circle())
@@ -130,10 +130,10 @@ struct PlanView: View {
             if !finished {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(verbatim: "\(store.adaptedTodayGoal)")
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .font(.app(size: 34, weight: .bold))
                         .monospacedDigit()
                     Text("ккал сегодня")
-                        .font(.subheadline)
+                        .font(.app(.subheadline))
                         .foregroundStyle(.secondary)
                 }
 
@@ -157,7 +157,7 @@ struct PlanView: View {
                         .foregroundStyle(.tertiary)
                     Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
                 }
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
             }
         }
@@ -210,7 +210,7 @@ struct PlanView: View {
                 Spacer()
                 Text(String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg))
             }
-            .font(.caption2)
+            .font(.app(.caption2))
             .foregroundStyle(.secondary)
             .monospacedDigit()
         }
@@ -237,25 +237,25 @@ struct PlanView: View {
                 if let intent {
                     let verdict = change.verdict(for: intent)
                     Label(verdict.title, systemImage: verdict.icon)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                         .foregroundStyle(phaseVerdictColor(verdict))
                     Text(verbatim: change.advice(for: intent))
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     if let share = change.fatShareOfChange {
                         Text(String(format: String(localized: "Жиром — %d%% изменения веса."),
                                     Int((share * 100).rounded())))
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.tertiary)
                             .monospacedDigit()
                     }
                 } else {
                     Label(change.verdict.title, systemImage: verdictIcon(change.verdict))
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                         .foregroundStyle(verdictColor(change.verdict))
                     Text(verbatim: change.verdict.explanation)
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -318,19 +318,19 @@ struct PlanView: View {
             if let shortfall = outcome.shortfallKg {
                 if outcome.reachedTarget {
                     Label("Цель взята", systemImage: "checkmark.circle.fill")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                         .foregroundStyle(.green)
                 } else {
                     Label(
                         String(format: String(localized: "Не хватило %.1f кг"), shortfall),
                         systemImage: "flag.checkered"
                     )
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .foregroundStyle(.orange)
                 }
             } else {
                 Text("За время плана не было взвешиваний — подвести итог не по чему.")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
 
@@ -415,7 +415,7 @@ struct PlanView: View {
                 Text(title)
                 if let detail {
                     Text(detail)
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -448,10 +448,10 @@ struct PlanView: View {
                     // рефид — точкой под числом, цвет только у неё.
                     VStack(spacing: 2) {
                         Text(symbols[(index + 1) % 7])
-                            .font(.caption2)
+                            .font(.app(.caption2))
                             .foregroundStyle(.tertiary)
                         Text(store.goal(for: day).formatted())
-                            .font(.caption.weight(isToday ? .bold : .regular))
+                            .font(.app(.caption, weight: isToday ? .bold : .regular))
                             .monospacedDigit()
                             .minimumScaleFactor(0.7)
                             .lineLimit(1)
@@ -503,7 +503,7 @@ struct PlanView: View {
             if plan.isDietBreak(on: Date()) {
                 Label("Идёт диет-брейк. Плюс на весах сейчас — вода и гликоген, а не жир; план по весу оценим, когда вернётся дефицит.",
                       systemImage: "cup.and.saucer.fill")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.green)
                     .fixedSize(horizontal: false, vertical: true)
                 if let actual = adherence.actualWeightToday {
@@ -518,7 +518,7 @@ struct PlanView: View {
             if adherence.isSettlingAfterIncrease {
                 Label("Калории только что подняли — вернувшиеся гликоген и вода дают на весах пару килограммов. Пока это идёт, вес о плане не говорит.",
                       systemImage: "drop.fill")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.blue)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -538,17 +538,17 @@ struct PlanView: View {
                             .progressViewStyle(.engraved(.blue))
                         if gap.weighInsLogged < gap.weighInsRequired {
                             Text("Взвешиваний: \(gap.weighInsLogged) из \(gap.weighInsRequired)")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         } else if gap.daysUntilTrend > 0 {
                             Text("Тренд появится через \(gap.daysUntilTrend) дн.")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }
                     }
                 }
                 Text("Пока недостаточно данных — взвешивайся регулярно хотя бы неделю, чтобы увидеть фактический темп.")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             } else {
                 if let projectedEndDate = adherence.projectedEndDate {
@@ -573,7 +573,7 @@ struct PlanView: View {
         if let recalibrated = adherence.recalibratedDailyCalories, !plan.cyclingEnabled {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Замедлить: при \(recalibrated) ккал/день придёшь к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(plan.endDate.formatted(.dateTime.day().month(.wide))).")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
                     store.dailyGoal = recalibrated
@@ -582,7 +582,7 @@ struct PlanView: View {
             }
         } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
             Text("При включённом цикле замедлить темп можно через увеличение целевого веса или срока — расчёт (\(recalibrated) ккал/день в среднем) пересчитается автоматически.")
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
         }
 
@@ -599,7 +599,7 @@ struct PlanView: View {
             let rounded = (projected * 10).rounded() / 10
             VStack(alignment: .leading, spacing: 8) {
                 Text("Углубить цель: при текущем темпе к \(plan.endDate.formatted(.dateTime.day().month(.wide))) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Поставить цель \(String(format: "%.1f", rounded)) кг") {
                     // Меняется темп последней фазы, а не срок: просьба дойти до
@@ -616,7 +616,7 @@ struct PlanView: View {
         if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal, !plan.cyclingEnabled {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Чтобы успеть к \(plan.endDate.formatted(.dateTime.day().month(.wide))):")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
                     store.dailyGoal = recalibrated
@@ -625,7 +625,7 @@ struct PlanView: View {
             }
         } else if plan.cyclingEnabled, let recalibrated = adherence.recalibratedDailyCalories {
             Text("При включённом цикле точную корректировку стоит вносить через целевой вес/срок — расчёт (\(recalibrated) ккал/день в среднем) учтёт её автоматически.")
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
         }
 
@@ -640,7 +640,7 @@ struct PlanView: View {
     private func statusRow(_ status: PlanStatus) -> some View {
         Label(status.title, systemImage: status.icon)
             .foregroundStyle(status.color)
-            .font(.subheadline.weight(.semibold))
+            .font(.app(.subheadline, weight: .semibold))
     }
 
     private func resultRow(_ title: LocalizedStringKey, _ value: String, highlighted: Bool = false) -> some View {

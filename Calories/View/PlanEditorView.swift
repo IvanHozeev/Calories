@@ -111,7 +111,7 @@ struct PlanEditorView: View {
                                 VStack(alignment: .leading) {
                                     Text(style.title)
                                     Text(style.subtitle)
-                                        .font(.caption)
+                                        .font(.app(.caption))
                                         .foregroundStyle(.secondary)
                                 }
                                 .tag(style)
@@ -159,7 +159,7 @@ struct PlanEditorView: View {
                                 "В плане есть фаза со слишком резким темпом — она отмечена внутри.",
                                 systemImage: "exclamationmark.triangle.fill"
                             )
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.orange)
                         }
                     }
@@ -236,7 +236,7 @@ struct PlanEditorView: View {
                         Text(String(format: String(localized: "брейк %lld : 1"), every))
                     }
                 }
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
             }

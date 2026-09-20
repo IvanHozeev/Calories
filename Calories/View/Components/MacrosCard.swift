@@ -36,7 +36,7 @@ struct MacrosCard: View {
                 // Шеврон как у строки плана: без него непонятно, что плашка
                 // куда-то ведёт.
                 Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
+                    .font(.app(.caption2, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
             .padding(.horizontal, 14)
@@ -53,20 +53,20 @@ struct MacrosCard: View {
         let progress = target.map { $0 > 0 ? min(value / $0, 1) : 0 } ?? 0
         return VStack(alignment: .leading, spacing: 3) {
             Text(LocalizedStringKey(kind.title))
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(String(format: "%.0f", value))
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .foregroundStyle(color)
                 // Цель мелко рядом, чтобы не спорить с самим значением.
                 if let target {
                     Text(verbatim: "/ \(Int(target.rounded()))")
-                        .font(.caption2)
+                        .font(.app(.caption2))
                         .foregroundStyle(.tertiary)
                 }
                 Text("г")
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
             }
             .monospacedDigit()

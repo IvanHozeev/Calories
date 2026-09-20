@@ -54,14 +54,14 @@ struct FoodQuantityView: View {
             Section {
                 VStack(spacing: 12) {
                     Text(food.name)
-                        .font(.title3.weight(.semibold))
+                        .font(.app(.title3, weight: .semibold))
                     Text("\(calories) ккал")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(.app(size: 36, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
                     Text("\(food.caloriesPer100g) ккал / 100 г")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
 
                     MacrosRow(macros: macros)
@@ -80,7 +80,7 @@ struct FoodQuantityView: View {
                     TextField("Граммы", text: $gramsText)
                         .keyboardType(.numberPad)
                         .focused($gramsFocused)
-                        .font(.body.weight(.medium))
+                        .font(.app(.body, weight: .medium))
                         .onChange(of: gramsText) { _, newValue in
                             if let value = Double(newValue), value > 0 {
                                 grams = min(value, 2000)
@@ -248,14 +248,14 @@ struct DishQuantityView: View {
             Section {
                 VStack(spacing: 12) {
                     Text(dish.name)
-                        .font(.title3.weight(.semibold))
+                        .font(.app(.title3, weight: .semibold))
                     Text("\(calories) ккал")
-                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                        .font(.app(size: 36, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
                     Text("\(dish.caloriesPer100g) ккал / 100 г")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                     MacrosRow(macros: macros)
                         .padding(.top, 4)
@@ -269,7 +269,7 @@ struct DishQuantityView: View {
                     TextField("Граммы", text: $gramsText)
                         .keyboardType(.numberPad)
                         .focused($gramsFocused)
-                        .font(.body.weight(.medium))
+                        .font(.app(.body, weight: .medium))
                         .onChange(of: gramsText) { _, newValue in
                             if let value = Double(newValue), value > 0 {
                                 grams = min(value, 5000)

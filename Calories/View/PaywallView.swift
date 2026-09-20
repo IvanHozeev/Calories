@@ -76,7 +76,7 @@ struct PaywallView: View {
                     Button("Восстановить") {
                         Task { await purchases.restore() }
                     }
-                    .font(.footnote)
+                    .font(.app(.footnote))
                 }
             }
             .task {
@@ -99,17 +99,17 @@ struct PaywallView: View {
     private var header: some View {
         VStack(spacing: 12) {
             Image(systemName: "sparkles")
-                .font(.system(size: 52))
+                .font(.app(size: 52))
                 .foregroundStyle(.yellow)
                 .padding(.top, 20)
 
             Text(shownFocus.headline)
-                .font(.largeTitle.bold())
+                .font(.app(.largeTitle, weight: .bold))
                 .multilineTextAlignment(.center)
 
             if let subtitle = shownFocus.subtitle {
                 Text(subtitle)
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
@@ -133,7 +133,7 @@ struct PaywallView: View {
         if let summary = store.trialSummary {
             VStack(alignment: .leading, spacing: 10) {
                 Text("За две недели")
-                    .font(.headline)
+                    .font(.app(.headline))
                 summaryRow("calendar", String(format: String(localized: "Дней с записями: %lld из %lld"),
                                               summary.loggedDays, CalorieStore.trialDays))
                 if let change = summary.weightChangeKg {
@@ -157,13 +157,13 @@ struct PaywallView: View {
             Image(systemName: icon)
                 .foregroundStyle(.green)
         }
-        .font(.subheadline)
+        .font(.app(.subheadline))
     }
 
     private var activeState: some View {
         VStack(spacing: 10) {
             Label("Premium активен", systemImage: "checkmark.seal.fill")
-                .font(.headline)
+                .font(.app(.headline))
                 .foregroundStyle(.green)
             Button("Готово") { dismiss() }
                 .buttonStyle(.borderedProminent)
@@ -174,7 +174,7 @@ struct PaywallView: View {
     private var failedState: some View {
         VStack(spacing: 10) {
             Label("Не удалось загрузить предложения", systemImage: "wifi.slash")
-                .font(.subheadline)
+                .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
             Button("Повторить") {
                 Task { await purchases.load() }
@@ -208,7 +208,7 @@ struct PaywallView: View {
                         ProgressView()
                     } else {
                         Text("Оформить Premium")
-                            .font(.body.weight(.semibold))
+                            .font(.app(.body, weight: .semibold))
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -220,7 +220,7 @@ struct PaywallView: View {
 
             if let intro = introText(for: selectedProduct) {
                 Text(intro)
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -240,10 +240,10 @@ struct PaywallView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(product.displayName)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                     if let period = periodText(for: product) {
                         Text(period)
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -251,7 +251,7 @@ struct PaywallView: View {
                 Spacer()
 
                 Text(product.displayPrice)
-                    .font(.headline)
+                    .font(.app(.headline))
                     .monospacedDigit()
             }
             .padding(14)

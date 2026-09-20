@@ -55,7 +55,7 @@ struct AddWeightView: View {
                         .clipped()
 
                         Text(",")
-                            .font(.title2.weight(.semibold))
+                            .font(.app(.title2, weight: .semibold))
 
                         Picker("", selection: $hundredths) {
                             ForEach(Array(stride(from: 0, through: 95, by: Self.hundredthsStep)), id: \.self) { h in
@@ -67,7 +67,7 @@ struct AddWeightView: View {
                         .clipped()
 
                         Text("кг")
-                            .font(.body)
+                            .font(.app(.body))
                             .foregroundStyle(.secondary)
                             .padding(.leading, 8)
                     }

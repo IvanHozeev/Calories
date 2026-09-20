@@ -90,7 +90,7 @@ struct MeasurementEntryView: View {
                 // Инструкция видна всегда: свёрнутая за кнопкой она не помогает
                 // в тот момент, когда человек стоит с лентой.
                 Text(site.howTo)
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -104,7 +104,7 @@ struct MeasurementEntryView: View {
                             // поэтому «41.5 / 44» не приходится расшифровывать.
                             if site.isPaired {
                                 Text(side.title(site.gender))
-                                    .font(.caption2)
+                                    .font(.app(.caption2))
                                     .foregroundStyle(.secondary)
                             }
                             value(site, side)
@@ -113,7 +113,7 @@ struct MeasurementEntryView: View {
                 }
                 if let source = sharedSource(site) {
                     Text(source)
-                        .font(.caption2)
+                        .font(.app(.caption2))
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -141,13 +141,13 @@ struct MeasurementEntryView: View {
         let measured = values[Self.key(site, side)] ?? 0
         if measured > 0 {
             Text(String(format: "%g", measured))
-                .font(.body.monospacedDigit())
+                .font(.app(.body).monospacedDigit())
                 .accessibilityIdentifier("value-\(Self.key(site, side))")
         } else if let hint = suggestion(site, side) {
             // Округляем до целого: десятая доля в оценке обещала бы точность,
             // которой в ней нет.
             Text("≈ \(String(format: "%.0f", hint.value))")
-                .font(.body.monospacedDigit())
+                .font(.app(.body).monospacedDigit())
                 .foregroundStyle(.tertiary)
                 .accessibilityIdentifier("hint-\(Self.key(site, side))")
         } else {
@@ -165,7 +165,7 @@ struct MeasurementEntryView: View {
                 ForEach(sides(site), id: \.self) { side in
                     VStack(spacing: 0) {
                         Text(side.title(site.gender))
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                         wheel(site, side)
                     }

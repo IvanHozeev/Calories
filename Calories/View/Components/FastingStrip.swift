@@ -21,26 +21,26 @@ struct FastingStrip: View {
         Button(action: onOpen) {
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: hint.daysUntil == 0 ? "moon.stars.fill" : "moon.stars")
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.indigo)
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 4) {
                         Text(verbatim: title)
-                            .font(.subheadline.weight(.semibold))
+                            .font(.app(.subheadline, weight: .semibold))
                         Text(verbatim: "· \(hint.kind.title)")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
                     if hint.daysUntil == 1 {
                         // Про поднятую норму говорим прямо: цифра в кольце
                         // сегодня другая, и человек должен знать почему.
                         Text("Норма сегодня выше — заправить гликоген перед постом")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     } else if let item = hint.items.first {
                         Text(verbatim: item.text)
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
@@ -48,7 +48,7 @@ struct FastingStrip: View {
                 }
                 Spacer(minLength: 4)
                 Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
+                    .font(.app(.caption2, weight: .semibold))
                     .foregroundStyle(.tertiary)
                     .padding(.top, 4)
             }

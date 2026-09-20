@@ -37,7 +37,7 @@ struct MicroTags: View {
 
     private var overflowTag: some View {
         Image(systemName: "arrow.up")
-            .font(.caption2.weight(.bold))
+            .font(.app(.caption2, weight: .bold))
             .foregroundStyle(.secondary)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
@@ -50,7 +50,7 @@ struct MicroTags: View {
 
     private func tag(_ text: String, color: Color) -> some View {
         Text(verbatim: text)
-            .font(.caption2.weight(.bold))
+            .font(.app(.caption2, weight: .bold))
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)

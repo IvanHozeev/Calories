@@ -14,10 +14,10 @@ struct MacrosRow: View {
     private func macroItem(title: LocalizedStringKey, value: Double, color: Color) -> some View {
         VStack(spacing: 2) {
             Text(formatted(value))
-                .font(.subheadline.weight(.semibold))
+                .font(.app(.subheadline, weight: .semibold))
                 .foregroundStyle(color)
             Text(title)
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
         }
     }

@@ -135,7 +135,7 @@ struct OnboardingView: View {
                     go(-1)
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.body.weight(.semibold))
+                        .font(.app(.body, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
                 .accessibilityLabel("Назад")
@@ -171,9 +171,9 @@ struct OnboardingView: View {
                     .frame(width: 150)
                 VStack(spacing: 12) {
                     Text(verbatim: "Calories")
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .font(.app(size: 38, weight: .bold))
                     Text("Настроим норму калорий и макросов под тебя и твою цель — пара минут.")
-                        .font(.body)
+                        .font(.app(.body))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
@@ -286,18 +286,18 @@ struct OnboardingView: View {
                               ? "Быстрее процента веса в неделю — на сушке это уже за счёт мышц."
                               : "Быстрее половины процента в неделю — на наборе большая часть прибавки будет жиром.",
                               systemImage: "exclamationmark.triangle.fill")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.orange)
                     }
 
                     Text(String(format: String(localized: "План бесплатно %lld дней — за это время появится первый вердикт, как он идёт."),
                                 CalorieStore.trialDays))
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 } else {
                     Text("На поддержании план не нужен: норма — твой расход, без темпа и финиша.")
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
@@ -310,7 +310,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Диет-брейки")
-                        .font(.headline)
+                        .font(.app(.headline))
                     Picker("Диет-брейки", selection: $dietBreakEvery) {
                         Text("Вручную").tag(Int?.none)
                         ForEach(PlanPhase.dietBreakOptions, id: \.self) { every in
@@ -319,13 +319,13 @@ struct OnboardingView: View {
                     }
                     .pickerStyle(.segmented)
                     Text("Неделя поддержания после каждых N недель дефицита. Жир уходит так же, а голод и тяга сорваться заметно меньше.")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
                     Toggle("Недельный цикл калорий", isOn: $cyclingEnabled.animation())
-                        .font(.headline)
+                        .font(.app(.headline))
                     if cyclingEnabled {
                         Picker("Рефид-дни", selection: $weekendStyle) {
                             ForEach(WeekendStyle.allCases) { Text($0.title).tag($0) }
@@ -333,7 +333,7 @@ struct OnboardingView: View {
                         .pickerStyle(.menu)
                     }
                     Text("В будни чуть меньше, в рефид-дни больше. Среднее за неделю то же, а рефид переносится на праздник одной кнопкой.")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -376,10 +376,10 @@ struct OnboardingView: View {
         stepShell(title: "Шаги", subtitle: "Приложение только читает их из «Здоровья», ничего туда не пишет") {
             VStack(spacing: 20) {
                 Image(systemName: "figure.walk.circle.fill")
-                    .font(.system(size: 72))
+                    .font(.app(size: 72))
                     .foregroundStyle(.blue)
                 Text("Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода.")
-                    .font(.body)
+                    .font(.app(.body))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 Button {
@@ -388,7 +388,7 @@ struct OnboardingView: View {
                 } label: {
                     Label(healthAsked ? "Доступ запрошен" : "Разрешить доступ",
                           systemImage: healthAsked ? "checkmark" : "heart.fill")
-                        .font(.body.weight(.semibold))
+                        .font(.app(.body, weight: .semibold))
                         .frame(maxWidth: .infinity)
                         .frame(height: 48)
                 }
@@ -417,7 +417,7 @@ struct OnboardingView: View {
             Spacer()
             VStack(spacing: 24) {
                 Text("Готов?")
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .font(.app(size: 30, weight: .bold))
 
                 // Кольцо с «Сегодня», заполненное нормой: сразу видно, на что
                 // делится день — половина калорий и дуги макросов по их граммам.
@@ -438,7 +438,7 @@ struct OnboardingView: View {
                                 String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg),
                                 plan.endDate.formatted(.dateTime.day().month(.wide)),
                                 CalorieStore.trialDays))
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
@@ -453,15 +453,15 @@ struct OnboardingView: View {
         VStack(spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(verbatim: "\(value)")
-                    .font(.title2.weight(.bold))
+                    .font(.app(.title2, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(color)
                 Text(unit)
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
             Text(title)
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
@@ -490,9 +490,9 @@ struct OnboardingView: View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
                 Text(title)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(.app(size: 28, weight: .bold))
                 Text(subtitle)
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
@@ -514,7 +514,7 @@ struct OnboardingView: View {
     private func primaryButton(title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.body.weight(.semibold))
+                .font(.app(.body, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
                 .background(Color.green)
@@ -530,10 +530,10 @@ struct OnboardingView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: title)
-                        .font(.body.weight(.medium))
+                        .font(.app(.body, weight: .medium))
                         .foregroundStyle(.primary)
                     Text(verbatim: subtitle)
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
                 }
@@ -561,9 +561,9 @@ struct OnboardingView: View {
     private func tileCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 10) {
-                Text(verbatim: icon).font(.system(size: 36))
+                Text(verbatim: icon).font(.app(size: 36))
                 Text(verbatim: title)
-                    .font(.body.weight(.medium))
+                    .font(.app(.body, weight: .medium))
                     .foregroundStyle(.primary)
                 if selected {
                     Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)

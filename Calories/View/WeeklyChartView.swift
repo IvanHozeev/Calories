@@ -40,10 +40,10 @@ struct WeeklyChartView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(title)
-                    .font(.headline)
+                    .font(.app(.headline))
                 Spacer()
                 Text(verbatim: goalLabel)
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
             .padding(.bottom, 8)

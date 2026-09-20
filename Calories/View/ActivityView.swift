@@ -53,7 +53,7 @@ struct ActivityView: View {
             } else if loggedDays.isEmpty {
                 Section {
                     Text("Здесь появятся прошедшие дни")
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                 }
             } else {
@@ -113,7 +113,7 @@ private struct MonthGrid: View {
             LazyVGrid(columns: columns, spacing: 6) {
                 ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                     Text(symbol)
-                        .font(.caption2)
+                        .font(.app(.caption2))
                         .foregroundStyle(.tertiary)
                         .frame(maxWidth: .infinity)
                 }
@@ -137,7 +137,7 @@ private struct MonthGrid: View {
                     } label: {
                         VStack(spacing: 3) {
                             Text(verbatim: "\(calendar.component(.day, from: day.date))")
-                                .font(.subheadline.weight(isToday ? .bold : .regular))
+                                .font(.app(.subheadline, weight: isToday ? .bold : .regular))
                                 .monospacedDigit()
                                 .foregroundStyle(isToday ? .primary : (day.hasEntries ? .secondary : .tertiary))
                             Circle()
@@ -157,7 +157,7 @@ private struct MonthGrid: View {
                 legend(ProgressRing.kcalColors[0], "В цели")
                 legend(.orange, "Мимо цели")
             }
-            .font(.caption2)
+            .font(.app(.caption2))
             .foregroundStyle(.secondary)
         }
     }
@@ -196,12 +196,12 @@ private struct HistoryDayCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(day.date, format: .dateTime.day().month(.wide))
-                    .font(.subheadline.weight(.medium))
+                    .font(.app(.subheadline, weight: .medium))
                 Spacer()
                 Text(verbatim: "\(day.totalCalories) \(String(localized: "ккал"))")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                 Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
-                    .font(.caption.weight(.semibold))
+                    .font(.app(.caption, weight: .semibold))
                     .foregroundStyle(overGoal ? .red : .green)
                     .monospacedDigit()
             }

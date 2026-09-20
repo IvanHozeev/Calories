@@ -41,7 +41,7 @@ struct WeightChartView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(caption)
-                .font(.headline)
+                .font(.app(.headline))
 
             Chart {
                 ForEach(entries) { entry in

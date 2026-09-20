@@ -84,7 +84,7 @@ struct NewDishSheet: View {
             Text(verbatim: formatted(amount, nutrient))
                 .monospacedDigit()
             Text(verbatim: "· \(Int((share * 100).rounded()))%")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
                 .monospacedDigit()
         }
@@ -127,11 +127,11 @@ struct NewDishSheet: View {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(alignment: .firstTextBaseline) {
                             Text(verbatim: "\(portionCalories) \(String(localized: "ккал"))")
-                                .font(.title3.weight(.semibold))
+                                .font(.app(.title3, weight: .semibold))
                                 .contentTransition(.numericText())
                             Spacer()
                             Text(verbatim: "\(Int(totalGrams)) \(String(localized: "г всего"))")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }
                         MacroTags(macros: portionMacros)
@@ -174,7 +174,7 @@ struct NewDishSheet: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(ingredient.foodName)
                             Text("\(Int(ingredient.grams)) г")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
@@ -374,7 +374,7 @@ struct IngredientPickerSheet: View {
             Section("Итого") {
                 HStack {
                     Text("\(cal) ккал")
-                        .font(.headline)
+                        .font(.app(.headline))
                     Spacer()
                     Text("Б\(Int(m.protein)) Ж\(Int(m.fat)) У\(Int(m.carbs))")
                         .foregroundStyle(.secondary)
@@ -408,12 +408,12 @@ struct IngredientPickerSheet: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(food.name)
                 Text("Б\(Int(food.macrosPer100g.protein)) Ж\(Int(food.macrosPer100g.fat)) У\(Int(food.macrosPer100g.carbs))")
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.secondary)
             }
             Spacer()
             Text("\(food.caloriesPer100g) ккал/100г")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
         }
     }

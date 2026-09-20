@@ -129,7 +129,7 @@ struct StepsNavigationView: View {
         if store.stepsToday == 0 && store.weekHistory.allSatisfy({ $0.steps == 0 }) {
             VStack(spacing: 8) {
                 Text("Нет данных о шагах. Если ты не разрешил доступ, включи его в «Здоровье» → «Доступ» → Calories.")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                 Button("Открыть настройки") {
@@ -137,7 +137,7 @@ struct StepsNavigationView: View {
                         UIApplication.shared.open(url)
                     }
                 }
-                .font(.caption.weight(.semibold))
+                .font(.app(.caption, weight: .semibold))
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
@@ -149,10 +149,10 @@ struct StepsNavigationView: View {
     private var authView: some View {
         VStack(spacing: 16) {
             Image(systemName: "figure.walk.circle")
-                .font(.system(size: 64))
+                .font(.app(size: 64))
                 .foregroundStyle(AppAccent.current.color)
             Text("Доступ к шагам")
-                .font(.title2.weight(.semibold))
+                .font(.app(.title2, weight: .semibold))
             Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -168,10 +168,10 @@ struct StepsNavigationView: View {
     private var unavailableView: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.circle")
-                .font(.system(size: 64))
+                .font(.app(size: 64))
                 .foregroundStyle(.secondary)
             Text("Недоступно")
-                .font(.title2.weight(.semibold))
+                .font(.app(.title2, weight: .semibold))
             Text("Данные о шагах недоступны на этом устройстве.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
@@ -191,7 +191,7 @@ private struct GoalPickerSheet: View {
         VStack(spacing: 0) {
             HStack {
                 Text("Цель по шагам")
-                    .font(.headline)
+                    .font(.app(.headline))
                 
                 Spacer()
                 
@@ -269,20 +269,20 @@ private struct StepsContentView: View {
         let remaining = store.stepGoal - store.stepsToday
         return VStack(spacing: 2) {
             Text(store.stepsToday.formatted())
-                .font(.system(size: 42, weight: .bold))
+                .font(.app(size: 42, weight: .bold))
                 .monospacedDigit()
                 .contentTransition(.numericText())
             Text("из \(store.stepGoal.formatted()) шагов")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
             if remaining > 0 {
                 Text("\(remaining.formatted()) осталось")
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
                     .contentTransition(.numericText())
             } else {
                 Text("цель достигнута")
-                    .font(.caption2.weight(.semibold))
+                    .font(.app(.caption2, weight: .semibold))
                     .foregroundStyle(ProgressRing.kcalColors[0])
                     .contentTransition(.numericText())
             }
@@ -329,7 +329,7 @@ private struct StepsContentView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("История")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                 Spacer()
                 Picker("Период", selection: $viewModel.period) {
                     ForEach(StepPeriod.allCases, id: \.self) { p in
@@ -383,7 +383,7 @@ private struct StepsContentView: View {
     private var trendsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Обзор")
-                .font(.subheadline.weight(.semibold))
+                .font(.app(.subheadline, weight: .semibold))
 
             HStack(spacing: 0) {
                 trendCell
@@ -413,19 +413,19 @@ private struct StepsContentView: View {
             if let trend = viewModel.trendPercent {
                 HStack(spacing: 2) {
                     Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
-                        .font(.caption.weight(.bold))
+                        .font(.app(.caption, weight: .bold))
                     Text(String(format: "%.0f%%", abs(trend)))
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                         .monospacedDigit()
                 }
                 .foregroundStyle(trend >= 0 ? ProgressRing.kcalColors[0] : .orange)
             } else {
                 Text("—")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
             Text(verbatim: String(localized: "vs пред. неделя"))
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
         }
@@ -460,10 +460,10 @@ private struct StepsContentView: View {
         // без разделителей между ячейками.
         VStack(spacing: 3) {
             Text(value)
-                .font(.subheadline.weight(.semibold))
+                .font(.app(.subheadline, weight: .semibold))
                 .monospacedDigit()
             Text(title)
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 // Ячеек в ряду до четырёх, и длинные подписи вроде «vs пред. неделя»
                 // обрезались многоточием вместо переноса.
@@ -472,7 +472,7 @@ private struct StepsContentView: View {
                 .minimumScaleFactor(0.85)
             if !subtitle.isEmpty {
                 Text(subtitle)
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
             }
         }

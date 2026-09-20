@@ -43,7 +43,7 @@ struct MeasurementHistoryView: View {
             Spacer()
             if let profile = store.profile {
                 Text(verbatim: String(format: "%.1f%%", profile.bodyFatPercentage(from: measurement)))
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
@@ -67,7 +67,7 @@ struct MeasurementSnapshotView: View {
             if rows.isEmpty {
                 Section {
                     Text("В этом сеансе ничего не снято")
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                 }
             } else {
@@ -77,7 +77,7 @@ struct MeasurementSnapshotView: View {
                             Text(site.title)
                             Spacer()
                             Text(verbatim: String(format: "%g \(String(localized: "см"))", value))
-                                .font(.body.weight(.medium))
+                                .font(.app(.body, weight: .medium))
                                 .monospacedDigit()
                         }
                         .accessibilityElement(children: .combine)

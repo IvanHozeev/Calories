@@ -22,15 +22,15 @@ struct PlanStrip: View {
         Button(action: store.isPremium ? onOpenPlan : onShowPaywall) {
             HStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(tint)
                 content
                 Spacer(minLength: 4)
                 Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
+                    .font(.app(.caption2, weight: .semibold))
                     .foregroundStyle(.tertiary)
             }
-            .font(.caption)
+            .font(.app(.caption))
             .lineLimit(1)
             .minimumScaleFactor(0.85)
             .padding(.horizontal, 12)

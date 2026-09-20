@@ -74,7 +74,7 @@ struct CatalogFoodView: View {
                 Stepper(value: $grams, in: 5...2000, step: 5) {
                     HStack {
                         Text(verbatim: "\(Int(grams))")
-                            .font(.body.weight(.medium))
+                            .font(.app(.body, weight: .medium))
                             .monospacedDigit()
                         Text("г")
                             .foregroundStyle(.secondary)
@@ -82,7 +82,7 @@ struct CatalogFoodView: View {
                 }
                 LabeledContent("В порции") {
                     Text(verbatim: "\(portionCalories) \(String(localized: "ккал"))")
-                        .font(.body.weight(.medium))
+                        .font(.app(.body, weight: .medium))
                         .monospacedDigit()
                 }
                 MacroTags(macros: portionMacros)
@@ -133,7 +133,7 @@ struct CatalogFoodView: View {
                 Text(verbatim: formatted(amount, nutrient))
                     .monospacedDigit()
                 Text(verbatim: "\(Int((share * 100).rounded()))%")
-                    .font(.caption.weight(.semibold))
+                    .font(.app(.caption, weight: .semibold))
                     .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
                     .monospacedDigit()
             }

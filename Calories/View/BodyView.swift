@@ -161,7 +161,7 @@ struct BodyView: View {
                     ),
                     systemImage: "exclamationmark.triangle.fill"
                 )
-                .font(.footnote)
+                .font(.app(.footnote))
                 .foregroundStyle(.orange)
             }
         } header: {
@@ -176,7 +176,7 @@ struct BodyView: View {
             Text(title)
             Spacer()
             Text(verbatim: "\(Int(grams.rounded())) \(String(localized: "г"))")
-                .font(.body.weight(.semibold))
+                .font(.app(.body, weight: .semibold))
                 .foregroundStyle(color)
         }
     }
@@ -256,7 +256,7 @@ struct BodyView: View {
                         Spacer()
                         if let trend = weightTrend {
                             Text(trend.caption)
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                             WeightSparkline(points: trend.points)
                                 .frame(width: 44, height: 18)
@@ -334,13 +334,13 @@ struct BodyView: View {
                                 Text(level.title)
                                     .foregroundStyle(Color.primary)
                                 Text(level.subtitle)
-                                    .font(.caption)
+                                    .font(.app(.caption))
                                     .foregroundStyle(Color.secondary)
                             }
                             Spacer()
                             if activityLevel == level {
                                 Image(systemName: "checkmark")
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.app(.subheadline, weight: .semibold))
                                     .foregroundStyle(.tint)
                             }
                         }
@@ -391,7 +391,7 @@ struct BodyView: View {
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text(verbatim: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))")
-                            .font(.body.weight(.semibold))
+                            .font(.app(.body, weight: .semibold))
                     }
                 }
             } header: {
@@ -432,13 +432,13 @@ struct BodyView: View {
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text(verbatim: "\(Int(draftProfile.fatTargetGrams.rounded())) \(String(localized: "г"))")
-                            .font(.body.weight(.semibold))
+                            .font(.app(.body, weight: .semibold))
                     }
                 }
                 // Вне рабочего коридора число разрешено, но о нём сказано вслух.
                 if let warning = fatWarning {
                     Label(warning, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.orange)
                 }
             } header: {
@@ -561,29 +561,29 @@ struct BodyView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(usesFact ? "Расход по факту" : "Расход по формуле")
-                            .font(.caption2)
+                            .font(.app(.caption2))
                             .foregroundStyle(.tertiary)
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text(verbatim: "\(Int(expenditure.rounded()))")
-                                .font(.system(size: 30, weight: .bold))
+                                .font(.app(size: 30, weight: .bold))
                                 .monospacedDigit()
                                 .foregroundStyle(Color.primary)
                             Text("ккал")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.tertiary)
                         }
                     }
                     Spacer(minLength: 8)
                     if let fact = store.adaptiveTDEE, usesFact {
                         Text(verbatim: fact.confidence.title)
-                            .font(.caption2)
+                            .font(.app(.caption2))
                             .foregroundStyle(ProgressRing.kcalColors[0])
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(ProgressRing.kcalColors[0].opacity(0.15), in: Capsule())
                     }
                     Image(systemName: "chevron.right")
-                        .font(.caption2.weight(.semibold))
+                        .font(.app(.caption2, weight: .semibold))
                         .foregroundStyle(.tertiary)
                 }
                 .contentShape(Rectangle())
@@ -616,7 +616,7 @@ struct BodyView: View {
             }
 
             Text(verbatim: basisCaption(profile))
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -639,17 +639,17 @@ struct BodyView: View {
                           unit: LocalizedStringKey, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(verbatim: value)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
                     .foregroundStyle(color)
                 Text(unit)
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
             }
             .lineLimit(1)

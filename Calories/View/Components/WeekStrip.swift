@@ -42,7 +42,7 @@ struct WeekStrip: View {
 
                 Button(action: onShowAll) {
                     Image(systemName: "calendar")
-                        .font(.subheadline)
+                        .font(.app(.subheadline))
                         .foregroundStyle(.tertiary)
                         .frame(width: 34, height: 44)
                 }
@@ -63,10 +63,10 @@ struct WeekStrip: View {
         } label: {
             VStack(spacing: 2) {
                 Text(day.date.formatted(.dateTime.weekday(.narrow)))
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
                 Text(verbatim: "\(calendar.component(.day, from: day.date))")
-                    .font(.subheadline.weight(isToday ? .bold : .regular))
+                    .font(.app(.subheadline, weight: isToday ? .bold : .regular))
                     .monospacedDigit()
                     .foregroundStyle(isToday ? .primary : .secondary)
                 Circle()

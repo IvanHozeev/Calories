@@ -214,12 +214,12 @@ struct ProgressRing: View {
         if showsTargets {
             return AnyView(VStack(spacing: 2) {
                 Text("Норма")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Text(verbatim: "\(goal)")
-                    .font(.system(size: 42, weight: .bold))
+                    .font(.app(size: 42, weight: .bold))
                 Text("ккал в день")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             })
         }
@@ -227,17 +227,17 @@ struct ProgressRing: View {
             // Тихо, как подписи плашек: цвет только у слова «Перебор», число
             // остаётся обычным — красная цифра во весь круг кричала.
             Text(overGoal ? "Перебор" : "Остаток")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(overGoal ? Color.orange : Color.secondary)
             Text("\(abs(remaining))")
-                .font(.system(size: 42, weight: .bold))
+                .font(.app(size: 42, weight: .bold))
                 .foregroundStyle(Color.primary)
                 .contentTransition(.numericText())
             Text("из \(goal) ккал")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
             Text("съедено \(consumed)")
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .contentTransition(.numericText())
         })

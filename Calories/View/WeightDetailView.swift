@@ -41,24 +41,24 @@ struct WeightDetailView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Текущий вес")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                         // Крупно — трендовый вес, потому что именно он показывает,
                         // куда человек идёт. Последнее взвешивание мельче под ним:
                         // видеть его надо, верить ему как направлению — нет.
                         if let trend = store.weightKg, let latest = store.latestWeight {
                             Text(String(format: "%.1f \(String(localized: "кг"))", trend))
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .font(.app(size: 32, weight: .bold))
                                 .minimumScaleFactor(0.6)
                                 .lineLimit(1)
                             Text(verbatim: String(format: String(localized: "тренд · последнее %@ кг, %@"),
                                                   AddWeightView.format(latest.weightKg),
                                                   latest.date.formatted(.dateTime.day().month(.wide))))
-                                .font(.caption2)
+                                .font(.app(.caption2))
                                 .foregroundStyle(.secondary)
                         } else {
                             Text("—")
-                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .font(.app(size: 32, weight: .bold))
                                 .minimumScaleFactor(0.6)
                                 .lineLimit(1)
                                 .foregroundStyle(.secondary)
@@ -68,10 +68,10 @@ struct WeightDetailView: View {
                     if let weightChange {
                         VStack(alignment: .trailing, spacing: 4) {
                             Text("За период")
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                             Text(String(format: "%+.1f \(String(localized: "кг"))", weightChange))
-                                .font(.title3.weight(.semibold))
+                                .font(.app(.title3, weight: .semibold))
                                 .foregroundStyle(weightChange <= 0 ? .green : .red)
                         }
                     }
@@ -109,7 +109,7 @@ struct WeightDetailView: View {
             } else {
                 Section {
                     Text("Пока нет записей веса за этот период")
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                 }
                 .glassRow()

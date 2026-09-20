@@ -21,10 +21,10 @@ struct MacroTags: View {
         // списка был самым пёстрым местом экрана.
         HStack(spacing: 2) {
             Text(letter)
-                .font(.caption2.weight(.bold))
+                .font(.app(.caption2, weight: .bold))
                 .foregroundStyle(color)
             Text(verbatim: "\(Int(value.rounded()))")
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }

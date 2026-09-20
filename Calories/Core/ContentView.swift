@@ -121,7 +121,7 @@ struct ContentView: View {
                                          : "\(store.calorieBankBonus) ккал из недели")
                                         .foregroundStyle(.secondary)
                                 }
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
                                 .background(.ultraThinMaterial, in: Capsule())
@@ -143,7 +143,7 @@ struct ContentView: View {
                                     Text("Банк калорий")
                                         .foregroundStyle(.secondary)
                                 }
-                                .font(.caption)
+                                .font(.app(.caption))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
                                 .background(.ultraThinMaterial, in: Capsule())
@@ -157,12 +157,12 @@ struct ContentView: View {
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "person.crop.circle.badge.questionmark")
-                                        .font(.footnote)
+                                        .font(.app(.footnote))
                                     Text("Заполните профиль, чтобы рассчитать цель")
-                                        .font(.caption)
+                                        .font(.app(.caption))
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.caption2)
+                                        .font(.app(.caption2))
                                 }
                                 .foregroundStyle(.blue)
                                 .padding(.horizontal, 12)
@@ -177,12 +177,12 @@ struct ContentView: View {
                             } label: {
                                 HStack(spacing: 8) {
                                     Image(systemName: "scalemass")
-                                        .font(.footnote)
+                                        .font(.app(.footnote))
                                     Text("Не забудь взвеситься сегодня")
-                                        .font(.caption)
+                                        .font(.app(.caption))
                                     Spacer()
                                     Image(systemName: "chevron.right")
-                                        .font(.caption2)
+                                        .font(.app(.caption2))
                                 }
                                 .foregroundStyle(.orange)
                                 .padding(.horizontal, 12)
@@ -216,7 +216,7 @@ struct ContentView: View {
                     Section {
                         VStack(spacing: 8) {
                             Image(systemName: "tray")
-                                .font(.largeTitle)
+                                .font(.app(.largeTitle))
                                 .foregroundStyle(.secondary)
                             Text("Пока ничего не добавлено")
                                 .foregroundStyle(.secondary)
@@ -280,11 +280,11 @@ struct ContentView: View {
                             // приёма пищи — главное, итог рядом мельче.
                             HStack(alignment: .firstTextBaseline) {
                                 Text(LocalizedStringKey(group.period.rawValue))
-                                    .font(.subheadline.weight(.semibold))
+                                    .font(.app(.subheadline, weight: .semibold))
                                     .foregroundStyle(.primary)
                                 Spacer()
                                 Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
-                                    .font(.caption)
+                                    .font(.app(.caption))
                                     .foregroundStyle(.secondary)
                                     .monospacedDigit()
                             }
@@ -516,21 +516,21 @@ private struct StepsChip: View {
                             .rotationEffect(.degrees(-90))
                             .animation(.easeOut, value: progress)
                         Image(systemName: "figure.walk")
-                            .font(.system(size: 15, weight: .semibold))
+                            .font(.app(size: 15, weight: .semibold))
                             .foregroundStyle(tint)
                     }
                     .frame(width: 32, height: 32)
                     // Число обычным цветом: в цвете акцента кольцо и пешеход,
                     // а цифра читается лучше нейтральной.
                     Text(store.stepsToday.formatted())
-                        .font(.subheadline.weight(.semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(Color.primary)
                 } else {
                     Image(systemName: "figure.walk")
-                        .font(.subheadline.weight(.medium))
+                        .font(.app(.subheadline, weight: .medium))
                     Text("Шаги")
-                        .font(.subheadline)
+                        .font(.app(.subheadline))
                 }
             }
             .foregroundStyle(store.isAuthorized ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
@@ -552,11 +552,11 @@ private struct CalorieBankPopover: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Недельный баланс")
-                .font(.headline)
+                .font(.app(.headline))
             Text(bonus > 0
                  ? "На этой неделе ты сэкономил калории — они распределены по оставшимся дням."
                  : "На этой неделе был перерасход — норма сегодня снижена.")
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             VStack(spacing: 8) {
@@ -583,7 +583,7 @@ private struct CalorieBankPopover: View {
                         .fontWeight(.semibold)
                 }
             }
-            .font(.caption)
+            .font(.app(.caption))
         }
         .padding(.horizontal)
         .padding(.vertical, 25)

@@ -10,17 +10,17 @@ struct DayRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(day.date, format: .dateTime.day().month(.wide))
-                    .font(.body.weight(.medium))
+                    .font(.app(.body, weight: .medium))
                 Text(verbatim: "\(day.entries.count) \(entriesLabel(day.entries.count))")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
                 Text(verbatim: "\(day.totalCalories) \(String(localized: "ккал"))")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                 Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(overGoal ? .red : .green)
             }
         }

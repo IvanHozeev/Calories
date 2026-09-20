@@ -81,12 +81,12 @@ struct MeasurementsView: View {
                         Spacer()
                         if let delta, abs(delta) >= 0.05 {
                             Text(verbatim: String(format: "%+.1f", delta))
-                                .font(.caption.weight(.semibold))
+                                .font(.app(.caption, weight: .semibold))
                                 .foregroundStyle(delta > 0 ? .green : .orange)
                                 .monospacedDigit()
                         }
                         Text(verbatim: String(format: "%g \(String(localized: "см"))", now))
-                            .font(.body.weight(.medium))
+                            .font(.app(.body, weight: .medium))
                             .monospacedDigit()
                     }
                     // Строка целиком — один элемент: и для голосового доступа
@@ -111,21 +111,21 @@ struct MeasurementsView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(insight.title)
-                            .font(.subheadline)
+                            .font(.app(.subheadline))
                             .foregroundStyle(.secondary)
                         Spacer()
                         Text(insight.verdictLabel)
-                            .font(.caption2.weight(.semibold))
+                            .font(.app(.caption2, weight: .semibold))
                             .foregroundStyle(insight.verdict.color)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
                             .background(insight.verdict.color.opacity(0.12), in: Capsule())
                     }
                     Text(insight.value)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .font(.app(size: 20, weight: .bold))
                         .monospacedDigit()
                     Text(insight.explanation)
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -136,7 +136,7 @@ struct MeasurementsView: View {
                 Text("Результаты")
                 Spacer()
                 Text(date, format: .dateTime.day().month(.abbreviated).year())
-                    .font(.caption)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
         }
@@ -166,12 +166,12 @@ struct MeasurementsView: View {
     private func placeholder(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
         VStack(spacing: 14) {
             Image(systemName: icon)
-                .font(.system(size: 52))
+                .font(.app(size: 52))
                 .foregroundStyle(.secondary)
             Text(title)
-                .font(.headline)
+                .font(.app(.headline))
             Text(text)
-                .font(.footnote)
+                .font(.app(.footnote))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button {

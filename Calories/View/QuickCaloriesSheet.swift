@@ -23,7 +23,7 @@ struct QuickCaloriesSheet: View {
                 Section {
                     TextField("Ккал", text: $text)
                         .keyboardType(.numberPad)
-                        .font(.title2.weight(.semibold))
+                        .font(.app(.title2, weight: .semibold))
                         .focused($focused)
                         .accessibilityIdentifier("quickCaloriesField")
                 } footer: {

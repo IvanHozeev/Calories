@@ -47,12 +47,12 @@ struct DayNutritionView: View {
                 Text(LocalizedStringKey(kind.title))
                 Spacer()
                 Text(String(format: "%.0f \(String(localized: "г"))", value))
-                    .font(.body.weight(.semibold))
+                    .font(.app(.body, weight: .semibold))
                     .foregroundStyle(color)
                     .monospacedDigit()
                 if let target {
                     Text(verbatim: "/ \(Int(target.rounded()))")
-                        .font(.caption)
+                        .font(.app(.caption))
                         .foregroundStyle(.tertiary)
                         .monospacedDigit()
                 }
@@ -62,13 +62,13 @@ struct DayNutritionView: View {
             // «120 г белка» ничего не говорит: много это или мало, зависит от веса.
             if kind != .carbs, let weightKg = store.weightKg, weightKg > 0 {
                 Text(String(format: String(localized: "%.2f г/кг при весе %.1f кг"), value / weightKg, weightKg))
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
 
             Text(note(for: kind))
-                .font(.caption2)
+                .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -96,13 +96,13 @@ struct DayNutritionView: View {
         Section {
             if day.totalCalories == 0 {
                 Text("За этот день ещё ничего не записано.")
-                    .font(.footnote)
+                    .font(.app(.footnote))
                     .foregroundStyle(.secondary)
             } else if !day.isTrustworthy {
                 // Показать числа тут было бы враньём умолчанием: они посчитаны
                 // по такой части дня, что означают что угодно.
                 Text("Слишком мало известно о составе съеденного, чтобы считать. Витамины есть у продуктов встроенной базы; у своей еды и товаров из Open Food Facts их нет.")
-                    .font(.footnote)
+                    .font(.app(.footnote))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
@@ -137,7 +137,7 @@ struct DayNutritionView: View {
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
                 Text(verbatim: "\(Int((share * 100).rounded()))%")
-                    .font(.caption.weight(.semibold))
+                    .font(.app(.caption, weight: .semibold))
                     .foregroundStyle(color)
                     .monospacedDigit()
             }

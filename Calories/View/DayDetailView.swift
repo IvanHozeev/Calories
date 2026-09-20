@@ -15,18 +15,18 @@ struct DayDetailView: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Итого")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                         Text("\(day.totalCalories) ккал")
-                            .font(.title2.bold())
+                            .font(.app(.title2, weight: .bold))
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 4) {
                         Text("Цель")
-                            .font(.caption)
+                            .font(.app(.caption))
                             .foregroundStyle(.secondary)
                         Text("\(day.goal) ккал")
-                            .font(.title2.bold())
+                            .font(.app(.title2, weight: .bold))
                     }
                 }
                 .padding(.vertical, 4)

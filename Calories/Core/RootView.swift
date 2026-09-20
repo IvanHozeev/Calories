@@ -91,7 +91,9 @@ struct RootView: View {
         .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         // Начертание задаётся один раз на корне и наследуется всем деревом,
         // поэтому размеры и Dynamic Type нигде не приходится трогать.
-        .fontDesign(AppFont(rawValue: appFont)?.design ?? .default)
+        // У подключённого шрифта системного дизайна нет, и применять его
+        // нельзя: `.fontDesign` подменяет им любой свой шрифт в дереве.
+        .fontDesign((AppFont(rawValue: appFont) ?? .system).design)
         // Смена начертания меняет ширину каждой строки, а значит и всю раскладку.
         // Без анимации интерфейс перескакивает; с ней текст переезжает плавно.
         .animation(.easeInOut(duration: 0.25), value: appFont)

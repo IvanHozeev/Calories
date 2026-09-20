@@ -55,7 +55,7 @@ struct FastingView: View {
 
             Section {
                 Label(FastingAdvice.medicalNote, systemImage: "cross.case")
-                    .font(.footnote)
+                    .font(.app(.footnote))
                     .foregroundStyle(.secondary)
             }
         }
@@ -77,10 +77,10 @@ struct FastingView: View {
             ForEach(items) { item in
                 VStack(alignment: .leading, spacing: 3) {
                     Text(verbatim: item.when)
-                        .font(.caption.weight(.semibold))
+                        .font(.app(.caption, weight: .semibold))
                         .foregroundStyle(.secondary)
                     Text(verbatim: item.text)
-                        .font(.subheadline)
+                        .font(.app(.subheadline))
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.vertical, 2)

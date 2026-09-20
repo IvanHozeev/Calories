@@ -74,7 +74,7 @@ struct BarcodeScannerSheet: View {
             .ignoresSafeArea(edges: .bottom)
             .overlay(alignment: .bottom) {
                 Text("Наведи камеру на штрихкод")
-                    .font(.callout)
+                    .font(.app(.callout))
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .background(.ultraThinMaterial)
@@ -115,7 +115,7 @@ struct BarcodeScannerSheet: View {
                 HStack {
                     TextField("100", text: $gramsText)
                         .keyboardType(.decimalPad)
-                        .font(.title3.weight(.semibold))
+                        .font(.app(.title3, weight: .semibold))
                     Text("г")
                         .foregroundStyle(.secondary)
                 }
@@ -162,7 +162,7 @@ struct BarcodeScannerSheet: View {
 
             if saved {
                 Label("Уже в моих продуктах", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .foregroundStyle(.green)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
@@ -207,10 +207,10 @@ struct BarcodeScannerSheet: View {
     private var notFoundView: some View {
         VStack(spacing: 20) {
             Image(systemName: "barcode.viewfinder")
-                .font(.system(size: 60))
+                .font(.app(size: 60))
                 .foregroundStyle(.secondary)
             Text("Продукт не найден")
-                .font(.title2.weight(.semibold))
+                .font(.app(.title2, weight: .semibold))
             Text("Этого штрихкода нет в базе Open Food Facts. Попробуй добавить вручную.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)

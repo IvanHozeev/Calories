@@ -64,7 +64,7 @@ struct PlanTimeline: View {
                                 .monospacedDigit()
                         }
                     }
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(index == currentIndex ? .primary : .secondary)
                 }
                 Spacer(minLength: 0)

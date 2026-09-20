@@ -26,7 +26,7 @@ struct MacroWeekSection: View {
 
                 if counted.isEmpty {
                     Text("Пока нет законченных дней с записями")
-                        .font(.footnote)
+                        .font(.app(.footnote))
                         .foregroundStyle(.secondary)
                 } else {
                     row("Попадания по белку",
@@ -59,7 +59,7 @@ struct MacroWeekSection: View {
             Text(title)
             Spacer()
             Text(verbatim: value)
-                .font(.body.weight(.semibold))
+                .font(.app(.body, weight: .semibold))
                 .foregroundStyle(color)
                 .monospacedDigit()
         }
@@ -71,7 +71,7 @@ struct MacroWeekSection: View {
             ForEach(days) { day in
                 VStack(spacing: 6) {
                     Text(verbatim: day.date.formatted(.dateTime.weekday(.narrow)))
-                        .font(.caption2)
+                        .font(.app(.caption2))
                         .foregroundStyle(.secondary)
                     RoundedRectangle(cornerRadius: 4)
                         .fill(color(for: day))

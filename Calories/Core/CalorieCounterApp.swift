@@ -71,18 +71,18 @@ private struct StorageErrorView: View {
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "externaldrive.badge.exclamationmark")
-                .font(.system(size: 56))
+                .font(.app(size: 56))
                 .foregroundStyle(.orange)
             Text("Не удалось открыть данные")
-                .font(.title2.weight(.semibold))
+                .font(.app(.title2, weight: .semibold))
                 .multilineTextAlignment(.center)
             Text("Записи не потеряны, но приложение не смогло их прочитать. Попробуй перезапустить устройство. Не переустанавливай приложение — это сотрёт дневник.")
-                .font(.subheadline)
+                .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             if !message.isEmpty {
                 Text(verbatim: message)
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
                     .textSelection(.enabled)

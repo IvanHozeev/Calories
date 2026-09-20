@@ -26,7 +26,7 @@ struct EntryRow: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(entry.name)
-                    .font(.subheadline)
+                    .font(.app(.subheadline))
                     .lineLimit(2)
 
                 // Значки идут в одну строку со временем и граммовкой: это всё
@@ -49,7 +49,7 @@ struct EntryRow: View {
                         .accessibilityHidden(true)
                     }
                 }
-                .font(.caption)
+                .font(.app(.caption))
                 .foregroundStyle(.tertiary)
 
                 if hasMacros || !micros.isEmpty {
@@ -68,10 +68,10 @@ struct EntryRow: View {
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(entry.calories)")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
                 Text("ккал")
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
             }
         }

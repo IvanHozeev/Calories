@@ -23,10 +23,10 @@ struct BrandFooter: View {
                 .resizable()
                 .frame(width: 22, height: 22)
             Text(verbatim: "Calories")
-                .font(.caption.weight(.semibold))
+                .font(.app(.caption, weight: .semibold))
             if showsVersion {
                 Text(verbatim: version)
-                    .font(.caption2)
+                    .font(.app(.caption2))
                     .monospacedDigit()
             }
         }

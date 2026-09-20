@@ -65,6 +65,12 @@ struct RingView<Label: View>: View {
 /// Нажатие открывает добавление приёма пищи. Еду записывают по нескольку раз
 /// в день, а на план смотрят раз в неделю: самая крупная мишень экрана должна
 /// обслуживать частое действие. Меню со сканером и камерой живёт на плюсе.
+/// Съеденное на момент времени — от чего кольцу заполняться.
+struct RingValues: Equatable {
+    let consumed: Int
+    let macros: Macros
+}
+
 struct ProgressRing: View {
     let consumed: Int
     let goal: Int
@@ -78,12 +84,24 @@ struct ProgressRing: View {
     /// Насколько кольцо уже повернули, потянув список вниз, в градусах.
     /// Пока тянут, оно идёт за пальцем — вместо системного спиннера.
     var pullAngle: Double = 0
+    /// От чего показать заливку, когда вернулись на «Сегодня» с добавленной
+    /// едой. Еду записывают поверх закрытого экрана, и кольцо оказывалось уже
+    /// заполненным: самое заметное событие дня проходило молча.
+    var revealFrom: RingValues? = nil
+    /// Счётчик показов, а не флаг: два приёма пищи подряд — две заливки.
+    var revealTicket: Int = 0
     /// Показ нормы, а не дня: все дуги полные, в центре дневная норма. Для
     /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
     /// на что делится день.
     var showsTargets = false
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
+
+    /// Значения, которые кольцо показывает сейчас: во время заливки — прежние,
+    /// в покое — настоящие.
+    @State private var shown: RingValues?
+    /// Галочка в середине после заливки — короткое «записал».
+    @State private var showingCheck = false
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -131,9 +149,12 @@ struct ProgressRing: View {
         return min(max(value / target, 0), 1)
     }
 
+    private var shownConsumed: Int { shown?.consumed ?? consumed }
+    private var shownMacros: Macros { shown?.macros ?? macros }
+
     private var segments: [Segment] {
-        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0)
-        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : Self.kcalColors
+        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(shownConsumed) / Double(goal), 1) : 0)
+        let calorieColors: [Color] = shownConsumed > goal ? [.orange, .red] : Self.kcalColors
 
         // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
@@ -146,9 +167,9 @@ struct ProgressRing: View {
         var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
                               progress: calorieProgress, colors: calorieColors)]
         let macroParts: [(String, Double, [Color])] = [
-            ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
-            ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
-            ("carbs", showsTargets ? 1 : Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
+            ("protein", showsTargets ? 1 : Self.ratio(shownMacros.protein, proteinTarget), Self.proteinColors),
+            ("fat", showsTargets ? 1 : Self.ratio(shownMacros.fat, fatTarget), Self.fatColors),
+            ("carbs", showsTargets ? 1 : Self.ratio(shownMacros.carbs, carbsTarget), Self.carbColors),
         ]
         var cursor = 180.0
         for (index, part) in macroParts.enumerated() {
@@ -186,12 +207,21 @@ struct ProgressRing: View {
             // поворачивается как цельная картинка.
             .compositingGroup()
             .modifier(RefreshSpin(baseRotation: Self.rotation, pullAngle: pullAngle, spinTicket: spinTicket))
-            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
-            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: shownConsumed)
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: shownMacros)
 
-            centerLabel
-                .id(consumed)
-                .transition(.opacity.combined(with: .scale(scale: 0.85)))
+            if showingCheck {
+                // Галочка вместо числа на мгновение: «записал». Появляется
+                // после заливки, потому что до неё записывать ещё нечего.
+                Image(systemName: "checkmark")
+                    .font(.system(size: 54, weight: .bold))
+                    .foregroundStyle(Self.kcalColors[0])
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            } else {
+                centerLabel
+                    .id(shownConsumed)
+                    .transition(.opacity.combined(with: .scale(scale: 0.85)))
+            }
         }
         .frame(width: size, height: size)
         // Размер кольца фиксирован, текст внутри масштабировать некуда.
@@ -203,6 +233,29 @@ struct ProgressRing: View {
         // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе.
         .accessibilityIdentifier("addFromRing")
         .accessibilityAddTraits(.isButton)
+        // Заливка запускается на возврате из добавления еды: кольцо сначала
+        // показывает прежние цифры, потом наливается до новых.
+        .onChange(of: revealTicket) { _, _ in
+            guard let from = revealFrom else { return }
+            shown = from
+            // Вторым проходом, а не следом: заданные подряд, оба изменения
+            // попадали в одну транзакцию, гасили друг друга, и кольцо просто
+            // оказывалось заполненным — ровно то, от чего уходим.
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(40))
+                withAnimation(.spring(response: 0.8, dampingFraction: 0.85)) {
+                    shown = nil
+                } completion: {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                        showingCheck = true
+                    }
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(0.7))
+                        withAnimation(.easeOut(duration: 0.3)) { showingCheck = false }
+                    }
+                }
+            }
+        }
     }
 
     private var centerLabel: some View {

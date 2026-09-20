@@ -31,6 +31,11 @@ struct ContentView: View {
     /// Запись, к которой добавляют ещё еды.
     @State private var appendingTo: FoodEntry?
     @State private var showingFasting = false
+    /// Съеденное на момент, когда экран был виден. От него кольцо наливается,
+    /// когда возвращаешься с добавленной едой.
+    @State private var ringBaseline = RingValues(consumed: 0, macros: .zero)
+    @State private var ringReveal: RingValues?
+    @State private var ringRevealTicket = 0
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -51,6 +56,22 @@ struct ContentView: View {
         }
     }
 
+    /// Открыт ли поверх «Сегодня» экран добавления: пока он открыт, съеденное
+    /// меняется не на глазах, и базовую отметку трогать нельзя — иначе
+    /// наливаться будет не от чего.
+    private var isAddingFood: Bool {
+        showingAdd || appendingTo != nil || todaySheet != nil
+    }
+
+    /// Показать заливку, если за время, пока экран был закрыт, еды прибавилось.
+    private func revealRingIfChanged() {
+        let now = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
+        defer { ringBaseline = now }
+        guard now != ringBaseline else { return }
+        ringReveal = ringBaseline
+        ringRevealTicket += 1
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -65,6 +86,8 @@ struct ContentView: View {
                             carbsTarget: store.carbsTarget,
                             spinTicket: ringSpinTicket,
                             pullAngle: Double(ringPull) * 1.4,
+                            revealFrom: ringReveal,
+                            revealTicket: ringRevealTicket,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true
@@ -296,6 +319,14 @@ struct ContentView: View {
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
+            // Отметка снимается в момент открытия добавления, а не по ходу дела:
+            // запись еды и закрытие листа прилетают одной перерисовкой, и
+            // отметка, идущая за съеденным, успевала стать новой раньше, чем
+            // кольцо успевало от неё налиться.
+            .onChange(of: isAddingFood) { _, adding in
+                guard adding else { return }
+                ringBaseline = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
+            }
             // Пока тянут вниз, кольцо делает оборот — тот же жест, что у знака на
             // запуске. Обновление мгновенное, поэтому ждём конца оборота, иначе
             // индикатор списка пропадал бы на полпути.
@@ -400,15 +431,18 @@ struct ContentView: View {
                 }
                 .withoutSharedBackground()
             }
-            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
+            .fullScreenCover(isPresented: $showingAdd, onDismiss: {
+                entryAction = nil
+                revealRingIfChanged()
+            }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
             }
-            .fullScreenCover(item: $appendingTo) { entry in
+            .fullScreenCover(item: $appendingTo, onDismiss: { revealRingIfChanged() }) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
             }
-            .sheet(item: $todaySheet) { sheet in
+            .sheet(item: $todaySheet, onDismiss: { revealRingIfChanged() }) { sheet in
                 switch sheet {
                 case .weight:
                     AddWeightView(store: store)

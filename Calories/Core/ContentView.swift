@@ -466,8 +466,10 @@ struct ContentView: View {
                              onFinish: { appendingTo = nil })
             }
             .sheet(isPresented: $showingMealSchedule) {
-                MealScheduleSheet(slots: todaySlots)
-                    .presentationDetents([.medium, .large])
+                MealScheduleSheet(entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+                                  dailyGoal: store.adaptedTodayGoal,
+                                  settings: mealSchedule)
+                    .presentationDetents([.large])
             }
             .sheet(item: $todaySheet, onDismiss: { revealRingIfChanged() }) { sheet in
                 switch sheet {

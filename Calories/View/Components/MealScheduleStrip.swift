@@ -56,13 +56,50 @@ struct MealScheduleStrip: View {
 }
 
 /// Весь день по приёмам: когда, сколько отведено и что уже съедено.
+///
+/// Здесь же расписание и настраивается. Настройки жили в «Напоминаниях», и
+/// найти их там можно было только зная, что они там есть: на расписание
+/// смотрят отсюда, значит и править его логично отсюда.
 struct MealScheduleSheet: View {
-    let slots: [MealSchedule.Slot]
+    /// Съеденное за день и норма — чтобы пересчитывать окна прямо на экране,
+    /// пока крутят число приёмов.
+    let entries: [(date: Date, calories: Int)]
+    let dailyGoal: Int
+    @Bindable var settings: MealScheduleSettings
     @Environment(\.dismiss) private var dismiss
+
+    private var slots: [MealSchedule.Slot] {
+        let now = Date()
+        return MealSchedule.slots(.init(
+            wake: settings.today(settings.wake, now: now),
+            sleep: settings.today(settings.sleep, now: now),
+            mealCount: settings.count,
+            dailyGoal: dailyGoal,
+            entries: entries,
+            now: now
+        ))
+    }
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Stepper(value: $settings.count, in: MealSchedule.allowedCounts) {
+                        HStack {
+                            Text("Приёмов в день")
+                            Spacer()
+                            Text(verbatim: "\(settings.count)")
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                    .accessibilityIdentifier("mealCountStepper")
+                    DatePicker("Подъём", selection: $settings.wake, displayedComponents: .hourAndMinute)
+                    DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
+                } footer: {
+                    Text("Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними.")
+                }
+
                 Section {
                     ForEach(slots) { slot in
                         row(slot)
@@ -70,7 +107,17 @@ struct MealScheduleSheet: View {
                 } footer: {
                     Text("Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.")
                 }
+
+                Section {
+                    Toggle("Делить день на приёмы", isOn: $settings.isEnabled)
+                        .accessibilityIdentifier("mealScheduleToggle")
+                } footer: {
+                    Text("Выключишь — строка с ближайшим приёмом пропадёт с «Сегодня», а норма останется дневной.")
+                }
             }
+            // Напоминания переставляются на выходе: пока крутят стрелки,
+            // дёргать систему на каждый тик незачем.
+            .onDisappear { MealReminders.reschedule(settings: settings) }
             .glassRow()
             .listStyle(.insetGrouped)
             .navigationTitle("Приёмы пищи")

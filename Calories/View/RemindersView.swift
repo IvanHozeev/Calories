@@ -45,32 +45,10 @@ struct RemindersView: View {
                 ))
                 .accessibilityIdentifier("mealScheduleToggle")
 
-                if schedule.isEnabled {
-                    DatePicker("Подъём", selection: Binding(
-                        get: { schedule.wake }, set: { schedule.wake = $0 }
-                    ), displayedComponents: .hourAndMinute)
-                    DatePicker("Отбой", selection: Binding(
-                        get: { schedule.sleep }, set: { schedule.sleep = $0 }
-                    ), displayedComponents: .hourAndMinute)
-                    Stepper(value: Binding(get: { schedule.count }, set: { schedule.count = $0 }),
-                            in: MealSchedule.allowedCounts) {
-                        HStack {
-                            Text("Приёмов в день")
-                            Spacer()
-                            Text(verbatim: "\(schedule.count)")
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
-                    }
-                }
             } header: {
                 Text("Приёмы пищи")
             } footer: {
-                if schedule.isEnabled {
-                    Text("Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.")
-                } else {
-                    Text("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший.")
-                }
+                Text("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший. Время подъёма, отбоя и число приёмов правятся там же — по нажатию на строку приёма.")
             }
 
             if store.appEnabled && store.authStatus == .authorized {

@@ -49,7 +49,7 @@ struct NewFoodSheet: View {
         }
         // Введённая руками клетчатка перекрывает найденную: человек смотрит
         // на упаковку того, что купил, а совпадение по названию — догадка.
-        let entered = Double(fiber.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let entered = fiber.decimalValueOrZero
         guard entered > 0 else { return base }
         return base.setting(.fiber, to: entered)
     }
@@ -87,13 +87,13 @@ struct NewFoodSheet: View {
     }
 
     private var servingGramsValue: Double {
-        Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
+        servingGrams.decimalValueOrZero
     }
 
     private var servingToSave: Double { servingGramsValue > 0 ? servingGramsValue : 100 }
 
     private func number(_ text: String) -> Double {
-        Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0
+        text.decimalValueOrZero
     }
 
     private var draftMacros: Macros {
@@ -330,7 +330,7 @@ struct NewFoodSheet: View {
                                 }
                             }
                         }
-                        if let linkedSourceName {
+                        if linkedSourceName != nil {
                             Button(role: .destructive) {
                                 linkedMicronutrients = Micronutrients()
                                 linkedCatalogID = nil
@@ -377,9 +377,9 @@ struct NewFoodSheet: View {
                     CheckmarkButton {
                         guard let calories = Int(caloriesPer100g),
                               !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                        let p = Double(protein.replacingOccurrences(of: ",", with: ".")) ?? 0
-                        let f = Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0
-                        let c = Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        let p = protein.decimalValueOrZero
+                        let f = fat.decimalValueOrZero
+                        let c = carbs.decimalValueOrZero
                         if let food = editingFood {
                             store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID)
                         } else {

@@ -289,9 +289,36 @@ final class CalorieStore {
         if target != dailyGoal { dailyGoal = target }
     }
 
+    /// Пересчитывает всё производное от записей дневника.
+    ///
+    /// Порядок шагов не случаен и держался раньше только комментариями внутри
+    /// одной стотридцатистрочной функции: словари нужны сводкам, сводки —
+    /// сериям, расход — цели, а «Недавнее» берёт категорию из словарей.
+    /// Теперь порядок виден сразу, а каждый шаг читается отдельно.
     private func rebuildCaches() {
         let calendar = Calendar.current
 
+        rebuildLookups(calendar)
+        rebuildToday(calendar)
+        rebuildDays(calendar)
+
+        hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
+        adherence = computePlanAdherence()
+
+        rebuildStreaks(calendar)
+        rebuildExpenditure(calendar)
+
+        // После словарей: «Недавнее» берёт из них категорию продукта.
+        rebuildRecent()
+        rebuildVitaminOffers()
+
+        cachesBuiltForDay = calendar.startOfDay(for: Date())
+        publishToWidget(calendar)
+    }
+
+    /// Словари для O(1)-обращений: день → записи, имя → категория и состав,
+    /// день → зафиксированная цель.
+    private func rebuildLookups(_ calendar: Calendar) {
         // Строим O(1)-словари один раз
         entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
         // Свой продукт идёт последним и перекрывает одноимённый встроенный:
@@ -325,11 +352,30 @@ final class CalorieStore {
             goalRecords.map { (calendar.startOfDay(for: $0.date), $0.goal) },
             uniquingKeysWith: { _, newer in newer }
         )
+    }
+
+    /// Сегодняшний день: записи, съеденное, макросы и приёмы пищи по времени.
+    private func rebuildToday(_ calendar: Calendar) {
         // Агрегаты за сегодня — один проход по entries
         todayEntries = entries.filter { calendar.isDateInToday($0.date) }
         consumedToday = todayEntries.reduce(0) { $0 + $1.calories }
         macrosToday = todayEntries.reduce(Macros.zero) { $0 + $1.macros }
 
+        let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
+        // Группы упорядочены по реальному времени последней записи, а не по порядку
+        // в MealPeriod. Иначе «Перекус» (23:00–05:00) уезжает в начало списка, хотя
+        // записи в нём — с раннего утра, и день читается вперемешку.
+        groupedTodayEntries = MealPeriod.allCases.compactMap { period in
+            guard let entries = grouped[period], !entries.isEmpty else { return nil }
+            return (period, entries.sorted { $0.date > $1.date })
+        }
+        .sorted { lhs, rhs in
+            (lhs.entries.first?.date ?? .distantPast) > (rhs.entries.first?.date ?? .distantPast)
+        }
+    }
+
+    /// Дневные сводки: все дни, последняя неделя и история.
+    private func rebuildDays(_ calendar: Calendar) {
         // Сводки по дням — один проход по сгруппированному словарю
         // entries уже отсортированы по дате desc, порядок внутри группы сохраняется
         let allDays = entriesByDay.map { day, dayEntries in
@@ -351,10 +397,10 @@ final class CalorieStore {
         let last6Dates = Set(last6.map { $0.date })
         let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
         historyDays = (last6 + olderDays).sorted { $0.date > $1.date }
+    }
 
-        hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
-        adherence = computePlanAdherence()
-
+    /// Серии: дней подряд с записями, с выполненной нормой и с белком.
+    private func rebuildStreaks(_ calendar: Calendar) {
         let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
         streak = currentStreak
         bestStreak = bestStreakVal
@@ -367,19 +413,11 @@ final class CalorieStore {
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
             return (date, isDayLogged(date), isDayKept(date))
         }
+    }
 
-        let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
-        // Группы упорядочены по реальному времени последней записи, а не по порядку
-        // в MealPeriod. Иначе «Перекус» (23:00–05:00) уезжает в начало списка, хотя
-        // записи в нём — с раннего утра, и день читается вперемешку.
-        groupedTodayEntries = MealPeriod.allCases.compactMap { period in
-            guard let entries = grouped[period], !entries.isEmpty else { return nil }
-            return (period, entries.sorted { $0.date > $1.date })
-        }
-        .sorted { lhs, rhs in
-            (lhs.entries.first?.date ?? .distantPast) > (rhs.entries.first?.date ?? .distantPast)
-        }
-
+    /// Измеренный расход и то, что из него считается: сглаженное значение,
+    /// цель на сегодня и банк калорий.
+    private func rebuildExpenditure(_ calendar: Calendar) {
         // Расход по факту: пересчитывается на каждой перестройке, а сглаженное
         // значение двигается раз в сутки — иначе одна запись еды дёргала бы
         // цель несколько раз за день.
@@ -405,13 +443,10 @@ final class CalorieStore {
         let adapted = computeAdaptedTodayGoal()
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
+    }
 
-        // После словарей: «Недавнее» берёт из них категорию продукта.
-        rebuildRecent()
-        rebuildVitaminOffers()
-
-        cachesBuiltForDay = calendar.startOfDay(for: Date())
-
+    /// Числа для виджета — в общие настройки группы.
+    private func publishToWidget(_ calendar: Calendar) {
         // День, к которому относятся числа: после полуночи виджет не должен
         // показывать вчерашнее съеденное, пока приложение не открыли.
         groupDefaults?.set(calendar.startOfDay(for: Date()), forKey: "widget_day")
@@ -666,7 +701,9 @@ final class CalorieStore {
         if let data = try? JSONEncoder().encode(newPlan) {
             defaults.set(data, forKey: Keys.plan)
         }
-        if let profile {
+        // Цель считается от расхода, а сам профиль тут не нужен — важно лишь,
+        // что он есть: без него считать не от чего.
+        if profile != nil {
             dailyGoal = newPlan.dailyCalorieTarget(tdee: workingTDEE)
         }
         rebuildCaches()

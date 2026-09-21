@@ -203,7 +203,19 @@ enum BodyAnalysis {
 
     // MARK: - Сводный отчёт
 
+    /// Что видно по обхватам — набором коротких выводов.
+    ///
+    /// Правил больше десятка, и раньше они лежали одной функцией на две сотни
+    /// строк: чтобы добавить одно, приходилось прочитать все. Теперь они
+    /// сгруппированы по смыслу — силуэт и пропорции, состав тела, костяк, —
+    /// а порядок вывода остался прежним: он идёт от того, что видно в зеркале,
+    /// к тому, что видно только с лентой.
     static func insights(measurement m: BodyMeasurement, profile: UserProfile?) -> [BodyInsight] {
+        proportionInsights(m, profile) + compositionInsights(m, profile) + frameInsights(m)
+    }
+
+    /// Силуэт и пропорции: то, что читается на глаз.
+    private static func proportionInsights(_ m: BodyMeasurement, _ profile: UserProfile?) -> [BodyInsight] {
         var out: [BodyInsight] = []
 
         let shoulders = m.shouldersCm
@@ -212,7 +224,7 @@ enum BodyAnalysis {
         let arm = m.best(.biceps)
         let forearm = m.best(.forearm)
         let calf = m.best(.calf)
-        let wrist = m.best(.wrist)
+
 
         // V-taper — главный силуэтный показатель
         if shoulders > 0, waist > 0 {
@@ -285,6 +297,16 @@ enum BodyAnalysis {
             ))
         }
 
+
+        return out
+    }
+
+    /// Состав тела: процент жира и сухая масса.
+    private static func compositionInsights(_ m: BodyMeasurement, _ profile: UserProfile?) -> [BodyInsight] {
+        var out: [BodyInsight] = []
+
+
+
         // Процент жира. Стоит здесь, а не только в расчёте профиля: обхваты,
         // из которых он выведен, снимаются на этом же экране, и увидеть результат
         // логично рядом с ними.
@@ -316,6 +338,20 @@ enum BodyAnalysis {
                 explanation: String(localized: "Сухая масса на рост². Не растёт от жира, поэтому на массе показывает реальный прогресс. Натуральный потолок около 25.")
             ))
         }
+
+
+        return out
+    }
+
+    /// Костяк и то, что считается от него: он не меняется, поэтому отношения
+    /// к нему показывают именно набранное, а не согнанную воду.
+    private static func frameInsights(_ m: BodyMeasurement) -> [BodyInsight] {
+        var out: [BodyInsight] = []
+
+        let shoulders = m.shouldersCm
+        let waist = m.waistCm
+        let wrist = m.best(.wrist)
+
 
         // Обхват плеч — мягкая величина (дельты, широчайшие, грудь), костная ширина плеч
         // мерится циркулем, а не лентой. Ценность здесь в знаменателе: таз не меняется,
@@ -399,6 +435,7 @@ enum BodyAnalysis {
                 explanation: String(localized: "Тонкий сустав визуально усиливает пик мышцы за счёт контраста, но и потолок обхватов ставит ниже.")
             ))
         }
+
 
         return out
     }

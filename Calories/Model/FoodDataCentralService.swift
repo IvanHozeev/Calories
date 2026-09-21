@@ -31,7 +31,7 @@ enum FoodDataCentralService {
         }
     }
 
-    private struct SearchResponse: Decodable {
+    struct SearchResponse: Decodable {
         let foods: [Food]
 
         struct Food: Decodable {
@@ -102,7 +102,9 @@ enum FoodDataCentralService {
         return decoded.foods.compactMap(item(from:))
     }
 
-    private static func item(from food: SearchResponse.Food) -> FoodItem? {
+    /// Разбор одного продукта. Не приватный: разбор — единственное место, где
+    /// теряются данные, и проверяется он тестом, а не запросом к сети.
+    static func item(from food: SearchResponse.Food) -> FoodItem? {
         let name = food.description.trimmingCharacters(in: .whitespaces)
         guard !name.isEmpty else { return nil }
 

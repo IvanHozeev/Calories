@@ -93,7 +93,7 @@ struct BarcodeScannerSheet: View {
     // MARK: - Product form
 
     private func productForm(_ product: BarcodeProduct) -> some View {
-        let grams = Double(gramsText.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let grams = gramsText.decimalValueOrZero
         let factor = grams / 100
 
         return Form {

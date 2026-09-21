@@ -465,7 +465,8 @@ extension CalorieStore {
     }
 
     func computePlanAdherence() -> PlanAdherence? {
-        guard let plan, let profile else { return nil }
+        // Профиль тут нужен лишь как признак, что расчёту есть на чём стоять.
+        guard let plan, profile != nil else { return nil }
 
         let today = Date()
         let totalDays = Double(plan.durationWeeks * 7)

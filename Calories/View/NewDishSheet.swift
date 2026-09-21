@@ -26,7 +26,7 @@ struct NewDishSheet: View {
     }
 
     private var servingGramsValue: Double {
-        Double(servingGrams.replacingOccurrences(of: ",", with: ".")) ?? 0
+        servingGrams.decimalValueOrZero
     }
     @State private var ingredients: [DishIngredient] = []
     /// Ингредиент, которому правят вес. Одно и то же блюдо собирают из разных
@@ -99,7 +99,7 @@ struct NewDishSheet: View {
 
     private func applyGrams(to ingredient: DishIngredient) {
         defer { gramsEditTarget = nil }
-        let value = Double(gramsEditText.replacingOccurrences(of: ",", with: ".")) ?? 0
+        let value = gramsEditText.decimalValueOrZero
         guard value > 0, let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) else { return }
         ingredients[idx].grams = value
     }

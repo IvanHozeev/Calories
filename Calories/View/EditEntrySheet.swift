@@ -22,7 +22,7 @@ struct EditEntrySheet: View {
     private let originalGrams: Double?
 
     private func number(_ text: String) -> Double {
-        Double(text.replacingOccurrences(of: ",", with: ".")) ?? 0
+        text.decimalValueOrZero
     }
 
     private var draftMacros: Macros {
@@ -197,11 +197,11 @@ struct EditEntrySheet: View {
                     guard let cal = Int(calories),
                           !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                     let macros = Macros(
-                        protein: Double(protein.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                        fat: Double(fat.replacingOccurrences(of: ",", with: ".")) ?? 0,
-                        carbs: Double(carbs.replacingOccurrences(of: ",", with: ".")) ?? 0
+                        protein: protein.decimalValueOrZero,
+                        fat: fat.decimalValueOrZero,
+                        carbs: carbs.decimalValueOrZero
                     )
-                    let gramsValue = Double(grams.replacingOccurrences(of: ",", with: "."))
+                    let gramsValue = grams.decimalValue
                     store.updateEntry(entry, name: name, calories: cal, macros: macros, grams: gramsValue, date: date)
                     dismiss()
                 }

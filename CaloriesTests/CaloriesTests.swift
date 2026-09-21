@@ -3673,6 +3673,75 @@ struct OpenFoodParsingTests {
     }
 }
 
+// MARK: - Ввод чисел
+
+/// На русской и израильской раскладках десятичный разделитель — запятая, а
+/// `Double("1,5")` возвращает nil. Замена запятой жила в четырнадцати местах
+/// по вьюхам: забыл в одном поле — и «1,5» молча превращается в ноль.
+struct DecimalInputTests {
+    @Test func aCommaMeansTheSameAsADot() {
+        #expect("1,5".decimalValue == 1.5)
+        #expect("1.5".decimalValue == 1.5)
+        #expect(" 76,15 ".decimalValue == 76.15, "Пробелы по краям — не повод терять число")
+    }
+
+    @Test func nonsenseIsNotANumber() {
+        #expect("".decimalValue == nil)
+        #expect("кг".decimalValue == nil)
+        #expect("".decimalValueOrZero == 0, "Где пусто значит «нет», ноль уместен")
+    }
+}
+
+// MARK: - Разбор ответов USDA
+
+/// У USDA берут ради витаминов и минералов: их нет больше нигде. Разбор —
+/// единственное место, где они могут потеряться по дороге, и проверяется он
+/// без сети, на куске настоящего ответа.
+struct FoodDataCentralParsingTests {
+
+    private func food(_ json: String) throws -> FoodDataCentralService.SearchResponse.Food {
+        try JSONDecoder().decode(FoodDataCentralService.SearchResponse.Food.self, from: Data(json.utf8))
+    }
+
+    @Test func aFoodBringsItsMacrosAndMicronutrients() throws {
+        // 1008 — калории, 1003/1004/1005 — белки, жиры, углеводы,
+        // 1079 — клетчатка, 1089 — железо.
+        let item = FoodDataCentralService.item(from: try food("""
+        {"description": "Spinach, raw", "foodNutrients": [
+          {"nutrientId": 1008, "value": 23}, {"nutrientId": 1003, "value": 2.86},
+          {"nutrientId": 1004, "value": 0.39}, {"nutrientId": 1005, "value": 3.63},
+          {"nutrientId": 1079, "value": 2.2}, {"nutrientId": 1089, "value": 2.71}]}
+        """))
+
+        #expect(item?.caloriesPer100g == 23)
+        #expect(item?.protein == 2.86)
+        #expect(item?.micronutrients[.fiber] == 2.2)
+        #expect(item?.micronutrients[.iron] == 2.71)
+    }
+
+    @Test func aFoodWithoutCaloriesIsSkipped() throws {
+        let item = FoodDataCentralService.item(from: try food("""
+        {"description": "Water", "foodNutrients": [{"nutrientId": 1089, "value": 0.1}]}
+        """))
+        #expect(item == nil, "Дневник считает калории: без них запись не нужна")
+    }
+
+    @Test func anUnnamedFoodIsSkipped() throws {
+        let item = FoodDataCentralService.item(from: try food("""
+        {"description": "   ", "foodNutrients": [{"nutrientId": 1008, "value": 100}]}
+        """))
+        #expect(item == nil)
+    }
+
+    @Test func nutrientsThatAreNotThereStayUnknown() throws {
+        let item = FoodDataCentralService.item(from: try food("""
+        {"description": "Sugar", "foodNutrients": [{"nutrientId": 1008, "value": 387}]}
+        """))
+        #expect(item?.micronutrients[.iron] == nil,
+                "Отсутствие данных — это не ноль: ноль утверждал бы дефицит")
+    }
+}
+
 // MARK: - Расписание приёмов пищи
 
 struct MealScheduleTests {

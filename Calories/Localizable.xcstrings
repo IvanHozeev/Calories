@@ -152,9 +152,7 @@
         }
       }
     },
-    "%" : {
-
-    },
+    "%" : {},
     "%.0f г при весе %.1f кг" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2038,9 +2036,7 @@
         }
       }
     },
-    "BMR %lld" : {
-
-    },
+    "BMR %lld" : {},
     "FFMI (индекс сухой массы)" : {
       "localizations" : {
         "ar" : {
@@ -9165,6 +9161,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escolher da galeria"
+          }
+        }
+      }
+    },
+    "Выключишь — строка с ближайшим приёмом пропадёт с «Сегодня», а норма останется дневной." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عند الإيقاف يختفي سطر الوجبة القادمة من «اليوم»، ويبقى الهدف يوميًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schaltest du es aus, verschwindet die Zeile mit der nächsten Mahlzeit aus „Heute“, und das Ziel bleibt ein Tagesziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn it off and the next-meal line leaves Today; the target stays a daily one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si lo desactivas, la línea de la próxima comida desaparece de Hoy y el objetivo vuelve a ser diario."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactive-le et la ligne du prochain repas disparaît d’Aujourd’hui ; l’objectif redevient journalier."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תכבה — שורת הארוחה הקרובה תיעלם מ«היום», והיעד יישאר יומי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se desativar, a linha da próxima refeição some de Hoje e a meta volta a ser diária."
           }
         }
       }
@@ -26992,6 +27034,7 @@
       }
     },
     "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27033,6 +27076,52 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta diária se divide em refeições iguais, e em Hoje você vê quanto resta para a próxima."
+          }
+        }
+      }
+    },
+    "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший. Время подъёма, отбоя и число приёмов правятся там же — по нажатию на строку приёма." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُقسَّم الهدف على وجبات متساوية، و«اليوم» يعرض نصيب الوجبة القادمة. وقت الاستيقاظ والنوم وعدد الوجبات تُعدَّل هناك نفسه — المس سطر الوجبة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel wird auf gleiche Mahlzeiten verteilt, und „Heute“ zeigt, was auf die nächste entfällt. Aufstehen, Schlafen und die Anzahl der Mahlzeiten stellst du dort ein — tippe auf die Mahlzeit-Zeile."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target is split into equal meals, and Today shows what the nearest one is worth. Wake-up, bedtime and the number of meals are edited there too — tap the meal line."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo se divide en comidas iguales y Hoy muestra cuánto queda para la próxima. La hora de despertar, la de dormir y el número de comidas se editan ahí mismo: toca la línea de la comida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif est réparti en repas égaux, et Aujourd’hui montre ce qui revient au prochain. Le lever, le coucher et le nombre de repas se règlent au même endroit — touche la ligne du repas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד מתחלק לארוחות שוות, ו«היום» מראה כמה נשאר לקרובה. שעת היקיצה, השינה ומספר הארוחות נערכים שם — הקש על שורת הארוחה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta é dividida em refeições iguais e Hoje mostra quanto cabe na próxima. Hora de acordar, de dormir e o número de refeições editam-se ali mesmo — toque na linha da refeição."
           }
         }
       }
@@ -31449,7 +31538,54 @@
         }
       }
     },
+    "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة الأولى بعد 45 دقيقة من الاستيقاظ، والأخيرة قبل النوم بساعة، والباقي موزّع بالتساوي بينهما."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die erste Mahlzeit 45 Minuten nach dem Aufstehen, die letzte eine Stunde vor dem Schlafen, der Rest gleichmäßig dazwischen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The first meal comes 45 minutes after you wake up, the last one an hour before bed, the rest spaced evenly between."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La primera comida 45 minutos después de despertar, la última una hora antes de dormir, y el resto repartidas por igual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le premier repas 45 minutes après le réveil, le dernier une heure avant le coucher, les autres répartis également."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הארוחה הראשונה 45 דקות אחרי היקיצה, האחרונה שעה לפני השינה, והשאר בפער שווה ביניהן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A primeira refeição 45 minutos após acordar, a última uma hora antes de dormir, e as demais igualmente espaçadas."
+          }
+        }
+      }
+    },
     "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38916,9 +39052,7 @@
         }
       }
     },
-    "Расход по формуле" : {
-
-    },
+    "Расход по формуле" : {},
     "Расход с активностью (TDEE)" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -2414,6 +2414,38 @@ struct FastDayTests {
         #expect(store.runningFast(at: start.addingTimeInterval(3600))?.id == fast.id)
     }
 
+    /// Правка времени меняет ту же отметку, а не заводит вторую — даже когда
+    /// новое начало попадает на другие сутки.
+    @Test func editingAFastKeepsOneMark() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = today.addingTimeInterval(18 * 3600)
+        let fast = store.markFast(from: start, to: start.addingTimeInterval(25 * 3600), kind: .dry)
+
+        let moved = start.addingTimeInterval(-26 * 3600)
+        let same = store.markFast(from: moved, to: moved.addingTimeInterval(25 * 3600),
+                                  kind: .water, replacing: fast)
+        #expect(same.id == fast.id)
+        #expect(store.fastDays.count == 1)
+        #expect(same.kind == .water)
+        #expect(same.interval.start == moved)
+    }
+
+    /// Кончившийся пост не показывает обратный отсчёт, и старая отметка
+    /// «днём» — тоже: считать по ней до полуночи неправильно.
+    @Test func aFinishedFastStopsCountingDown() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let start = today.addingTimeInterval(-30 * 3600)
+        store.markFast(from: start, to: start.addingTimeInterval(25 * 3600), kind: .dry)
+        #expect(store.runningFast() == nil)
+
+        store.markFastDay(today, kind: .dry)
+        #expect(store.runningFast() == nil, "Отметка днём не должна считаться идущим постом")
+        let hint = try #require(store.fastingHint())
+        #expect(hint.remaining() == nil)
+    }
+
     /// Норма поднимается накануне начала поста, а не накануне его конца.
     @Test func theBoostLandsOnTheDayTheFastStarts() {
         let calendar = Calendar.current

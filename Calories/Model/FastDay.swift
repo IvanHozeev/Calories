@@ -36,6 +36,10 @@ final class FastDay: Identifiable {
         set { kindRaw = newValue.rawValue }
     }
 
+    /// Заданы ли границы явно. У старых отметок, сделанных «днём», их нет,
+    /// и показывать по ним обратный отсчёт нельзя: он считал бы до полуночи.
+    var hasExplicitInterval: Bool { startedAt != nil && endedAt != nil }
+
     /// Промежуток поста. Без явных границ — целые сутки отмеченного дня.
     var interval: DateInterval {
         let calendar = Calendar.current

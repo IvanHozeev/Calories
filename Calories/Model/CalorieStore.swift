@@ -530,16 +530,33 @@ final class CalorieStore {
             let items = FastingAdvice.advice(for: fast.kind, daysBefore: offset)
             guard !items.isEmpty else { return nil }
             return FastingHint(date: date, kind: fast.kind, daysUntil: offset,
-                               items: items, interval: fast.interval)
+                               items: items,
+                               // Обратный отсчёт — только по явным границам.
+                               // У старой отметки «днём» их нет, и отсчёт шёл
+                               // бы до полуночи, хотя пост давно кончился.
+                               interval: fast.hasExplicitInterval ? fast.interval : nil)
         }
         return nil
     }
 
+    /// Ближайший пост к сегодняшнему дню: идущий, иначе последний прошедший
+    /// или ближайший запланированный. Его и открывает экран голодания.
+    func nearestFast(to moment: Date = Date()) -> FastDay? {
+        if let running = runningFast(at: moment) { return running }
+        return fastDays.min {
+            abs($0.interval.start.timeIntervalSince(moment)) < abs($1.interval.start.timeIntervalSince(moment))
+        }
+    }
+
     /// Отметить пост промежутком: с вечера одного дня до вечера другого.
+    ///
+    /// `replacing` — отметка, которую правят. Без неё правка времени заводила
+    /// бы вторую отметку рядом с прежней, когда новое начало попадает на другие
+    /// сутки.
     @discardableResult
-    func markFast(from start: Date, to end: Date, kind: FastKind) -> FastDay {
+    func markFast(from start: Date, to end: Date, kind: FastKind, replacing: FastDay? = nil) -> FastDay {
         let day = Calendar.current.startOfDay(for: start)
-        if let existing = fastDay(on: day) {
+        if let existing = replacing ?? fastDay(on: day) {
             existing.kind = kind
             existing.date = day
             existing.startedAt = start
@@ -558,7 +575,7 @@ final class CalorieStore {
 
     /// Идущий прямо сейчас пост — для обратного отсчёта на «Сегодня».
     func runningFast(at moment: Date = Date()) -> FastDay? {
-        fastDays.first { $0.isRunning(at: moment) }
+        fastDays.first { $0.hasExplicitInterval && $0.isRunning(at: moment) }
     }
 
     @discardableResult

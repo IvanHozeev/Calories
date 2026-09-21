@@ -33,9 +33,10 @@ struct ContentView: View {
     @State private var showingFasting = false
     /// Съеденное на момент, когда экран был виден. От него кольцо наливается,
     /// когда возвращаешься с добавленной едой.
-    @State private var ringBaseline = RingValues(consumed: 0, macros: .zero)
-    @State private var ringReveal: RingValues?
-    @State private var ringRevealTicket = 0
+    /// Цифры, на которых держим кольцо и полоски, пока открыт экран добавления.
+    @State private var ringPinned: RingValues?
+    /// Показывать ли заливку на выходе: ничего не добавили — отпускаем молча.
+    @State private var ringRevealOnRelease = true
     @State private var mealSchedule = MealScheduleSettings()
     @State private var showingMealSchedule = false
     private let quickActions = QuickActionRouter.shared
@@ -78,13 +79,12 @@ struct ContentView: View {
         ))
     }
 
-    /// Показать заливку, если за время, пока экран был закрыт, еды прибавилось.
-    private func revealRingIfChanged() {
-        let now = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
-        defer { ringBaseline = now }
-        guard now != ringBaseline else { return }
-        ringReveal = ringBaseline
-        ringRevealTicket += 1
+    /// Отпустить кольцо: если за время, пока экран был сверху, еды прибавилось,
+    /// оно нальётся до новых цифр, иначе просто отпустится.
+    private func releaseRing() {
+        guard let pinned = ringPinned else { return }
+        ringRevealOnRelease = RingValues(consumed: store.consumedToday, macros: store.macrosToday) != pinned
+        ringPinned = nil
     }
 
     var body: some View {
@@ -101,8 +101,8 @@ struct ContentView: View {
                             carbsTarget: store.carbsTarget,
                             spinTicket: ringSpinTicket,
                             pullAngle: Double(ringPull) * 1.4,
-                            revealFrom: ringReveal,
-                            revealTicket: ringRevealTicket,
+                            pinned: ringPinned,
+                            revealOnRelease: ringRevealOnRelease,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true
@@ -131,8 +131,8 @@ struct ContentView: View {
                             carbsTarget: store.carbsTarget,
                             weightKg: store.weightKg,
                             onOpen: { showingDayNutrition = true },
-                            revealFrom: ringReveal?.macros,
-                            revealTicket: ringRevealTicket
+                            pinned: ringPinned?.macros,
+                            revealOnRelease: ringRevealOnRelease
                         )
                         
                         // Строка вместо карточки: план виден и открывается,
@@ -346,9 +346,14 @@ struct ContentView: View {
             // запись еды и закрытие листа прилетают одной перерисовкой, и
             // отметка, идущая за съеденным, успевала стать новой раньше, чем
             // кольцо успевало от неё налиться.
+            // Держим кольцо с момента открытия добавления: еда записывается,
+            // пока экран сверху, и кольцо под ним успевало дойти до новых цифр.
             .onChange(of: isAddingFood) { _, adding in
-                guard adding else { return }
-                ringBaseline = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
+                if adding {
+                    ringPinned = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
+                } else {
+                    releaseRing()
+                }
             }
             // Пока тянут вниз, кольцо делает оборот — тот же жест, что у знака на
             // запуске. Обновление мгновенное, поэтому ждём конца оборота, иначе
@@ -454,14 +459,11 @@ struct ContentView: View {
                 }
                 .withoutSharedBackground()
             }
-            .fullScreenCover(isPresented: $showingAdd, onDismiss: {
-                entryAction = nil
-                revealRingIfChanged()
-            }) {
+            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
             }
-            .fullScreenCover(item: $appendingTo, onDismiss: { revealRingIfChanged() }) { entry in
+            .fullScreenCover(item: $appendingTo) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
             }
@@ -471,7 +473,7 @@ struct ContentView: View {
                                   settings: mealSchedule)
                     .presentationDetents([.large])
             }
-            .sheet(item: $todaySheet, onDismiss: { revealRingIfChanged() }) { sheet in
+            .sheet(item: $todaySheet) { sheet in
                 switch sheet {
                 case .weight:
                     AddWeightView(store: store)

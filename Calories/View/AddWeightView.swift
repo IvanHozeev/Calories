@@ -74,11 +74,14 @@ struct AddWeightView: View {
                 }
 
                 Section {
+                    // Со временем, а не только с датой: утреннее и вечернее
+                    // взвешивание отличаются на килограмм воды, и задним
+                    // числом важно, какое из них записывают.
                     DatePicker(
-                        "Дата",
+                        "Когда",
                         selection: $date,
                         in: ...Date(),
-                        displayedComponents: .date
+                        displayedComponents: [.date, .hourAndMinute]
                     )
                 }
             }

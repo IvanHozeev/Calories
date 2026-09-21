@@ -16,11 +16,10 @@ struct MacrosCard: View {
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
     /// между собой было нельзя, а витаминам в таком формате места нет вовсе.
     var onOpen: () -> Void = {}
-    /// Макросы на момент, когда открыли добавление еды: от них полоски
-    /// доливаются, когда возвращаешься на «Сегодня». Без этого цифры и полоски
-    /// просто оказывались другими — самое частое событие дня проходило молча.
-    var revealFrom: Macros? = nil
-    var revealTicket: Int = 0
+    /// Макросы, на которых полоски держат, пока открыт экран добавления еды.
+    /// Отпускаем — доливаются до новых вместе с кольцом.
+    var pinned: Macros? = nil
+    var revealOnRelease: Bool = true
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var shown: Macros?
@@ -53,14 +52,23 @@ struct MacrosCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("openDayNutrition")
-        // Та же пауза и та же кривая, что у кольца: полоски и дуги — одно
-        // событие, и расходиться по времени им нельзя.
-        .onChange(of: revealTicket) { _, _ in
-            guard let from = revealFrom else { return }
-            shown = from
+        // Та же механика, что у кольца: держим, пока экран сверху, и
+        // доливаем одним движением, когда он ушёл.
+        .onChange(of: pinned) { _, values in
+            var instant = Transaction()
+            instant.disablesAnimations = true
+            if let values {
+                withTransaction(instant) { shown = values }
+                return
+            }
+            guard shown != nil else { return }
+            guard revealOnRelease else {
+                withTransaction(instant) { shown = nil }
+                return
+            }
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(450))
-                withAnimation(.easeOut(duration: 0.9)) { shown = nil }
+                try? await Task.sleep(for: .milliseconds(280))
+                withAnimation(.easeOut(duration: 0.8)) { shown = nil }
             }
         }
     }

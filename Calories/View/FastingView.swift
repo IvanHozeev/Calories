@@ -12,7 +12,16 @@ struct FastingView: View {
     @State private var end = FastingView.defaultStart().addingTimeInterval(25 * 3600)
     @State private var kind: FastKind = .dry
 
-    private var marked: FastDay? { store.fastDay(on: start) }
+    /// Уже отмеченный пост, который правим. Ищем его один раз при открытии,
+    /// а не по текущему значению пикера: иначе, сдвинув дату, человек «терял»
+    /// свою отметку и заводил вторую.
+    @State private var editing: FastDay?
+
+    /// Отметка в списке относится к тому же посту, что открыт в пикерах.
+    private var isEdited: Bool {
+        guard let editing else { return false }
+        return editing.interval.start != start || editing.interval.end != end || editing.kind != kind
+    }
 
     /// По умолчанию — ближайший вечер: посты начинаются вечером, а не утром.
     /// Двадцать пять часов сверху — длина Йом Кипура, самого частого случая.
@@ -56,28 +65,34 @@ struct FastingView: View {
             }
 
             Section {
-                if marked == nil {
-                    Button {
-                        store.markFast(from: start, to: end, kind: kind)
-                    } label: {
-                        Label("Отметить голодание", systemImage: "moon.stars")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                    .listRowBackground(Color.clear)
-                    .accessibilityIdentifier("markFastDay")
-                } else if let marked {
+                // Кнопка одна и всегда живая: раньше у отмеченного поста её
+                // не было вовсе, и правка времени в пикерах никуда не
+                // сохранялась — экран возвращал прежние цифры.
+                Button {
+                    editing = store.markFast(from: start, to: end, kind: kind, replacing: editing)
+                } label: {
+                    Label(editing == nil ? "Отметить голодание" : "Сохранить изменения",
+                          systemImage: editing == nil ? "moon.stars" : "checkmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(editing != nil && !isEdited)
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listRowBackground(Color.clear)
+                .accessibilityIdentifier("markFastDay")
+
+                if let editing {
                     Label {
                         Text(verbatim: String(format: String(localized: "Отмечено: %1$@ — %2$@"),
-                                              marked.interval.start.formatted(date: .abbreviated, time: .shortened),
-                                              marked.interval.end.formatted(date: .abbreviated, time: .shortened)))
+                                              editing.interval.start.formatted(date: .abbreviated, time: .shortened),
+                                              editing.interval.end.formatted(date: .abbreviated, time: .shortened)))
                     } icon: {
                         Image(systemName: "checkmark.circle.fill")
                     }
                         .foregroundStyle(ProgressRing.kcalColors[0])
                     Button("Снять отметку", role: .destructive) {
-                        store.unmarkFastDay(marked.date)
+                        store.unmarkFastDay(editing.date)
+                        self.editing = nil
                     }
                 }
             } footer: {
@@ -99,14 +114,16 @@ struct FastingView: View {
         .navigationTitle("Голодание")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            if let existing = store.fastDay(on: start) {
+            // Открываем на том посте, который идёт или ближе всего к сегодня:
+            // чаще всего правят именно его.
+            if let existing = store.nearestFast() {
+                editing = existing
                 kind = existing.kind
                 start = existing.interval.start
                 end = existing.interval.end
             }
         }
         .onChange(of: start) { _, newValue in
-            if let existing = store.fastDay(on: newValue) { kind = existing.kind }
             // Конец не должен оказаться раньше начала.
             if end <= newValue { end = newValue.addingTimeInterval(25 * 3600) }
         }

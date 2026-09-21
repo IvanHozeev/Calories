@@ -84,12 +84,16 @@ struct ProgressRing: View {
     /// Насколько кольцо уже повернули, потянув список вниз, в градусах.
     /// Пока тянут, оно идёт за пальцем — вместо системного спиннера.
     var pullAngle: Double = 0
-    /// От чего показать заливку, когда вернулись на «Сегодня» с добавленной
-    /// едой. Еду записывают поверх закрытого экрана, и кольцо оказывалось уже
-    /// заполненным: самое заметное событие дня проходило молча.
-    var revealFrom: RingValues? = nil
-    /// Счётчик показов, а не флаг: два приёма пищи подряд — две заливки.
-    var revealTicket: Int = 0
+    /// Цифры, на которых кольцо держат, пока открыт экран добавления еды.
+    ///
+    /// Держать начинаем с открытия, а не с закрытия: еда записывается, пока
+    /// экран ещё сверху, и кольцо под ним успевало дойти до новых цифр. Когда
+    /// потом его откатывали назад, чтобы налить заново, получалось два
+    /// движения подряд — откат и заливка.
+    var pinned: RingValues? = nil
+    /// Показывать ли заливку, когда отпустили. Ничего не добавили — отпускаем
+    /// молча, без заливки и без галочки.
+    var revealOnRelease: Bool = true
     /// Показ нормы, а не дня: все дуги полные, в центре дневная норма. Для
     /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
     /// на что делится день.
@@ -97,11 +101,14 @@ struct ProgressRing: View {
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
-    /// Значения, которые кольцо показывает сейчас: во время заливки — прежние,
+    /// Значения, которые кольцо показывает сейчас: пока держим — прежние,
     /// в покое — настоящие.
     @State private var shown: RingValues?
-    /// Галочка в середине после заливки — короткое «записал».
-    @State private var showingCheck = false
+    /// Галочка в середине после заливки — короткое «записал». Рисуется, а не
+    /// всплывает: линия, идущая от угла, читается как жест, а не как значок,
+    /// который вдруг оказался на экране.
+    @State private var checkProgress: CGFloat = 0
+    @State private var checkOpacity: Double = 0
     /// Идёт заливка после приёма пищи. Пока идёт, встроенная пружина кольца
     /// выключена: иначе одно изменение анимировалось дважды — сперва пружиной,
     /// потом заливкой, — и дуги дёргались два раза подряд.
@@ -216,20 +223,16 @@ struct ProgressRing: View {
             .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownConsumed)
             .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownMacros)
 
-            // Число не подменяется галочкой рывком: оно гаснет, галочка
-            // всплывает поверх и тает, число возвращается на место.
+            // Число не подменяется галочкой рывком: оно гаснет, пока та
+            // рисуется, и возвращается, когда она растаяла.
             centerLabel
-                .opacity(showingCheck ? 0.12 : 1)
+                .opacity(1 - checkOpacity * 0.9)
 
-            if showingCheck {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 58, weight: .bold))
-                    .foregroundStyle(Self.kcalColors[0])
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.55).combined(with: .opacity),
-                        removal: .scale(scale: 1.15).combined(with: .opacity)
-                    ))
-            }
+            CheckStroke(progress: checkProgress)
+                .stroke(Self.kcalColors[0],
+                        style: StrokeStyle(lineWidth: 9, lineCap: .round, lineJoin: .round))
+                .frame(width: 74, height: 52)
+                .opacity(checkOpacity)
         }
         .frame(width: size, height: size)
         // Размер кольца фиксирован, текст внутри масштабировать некуда.
@@ -241,30 +244,43 @@ struct ProgressRing: View {
         // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе.
         .accessibilityIdentifier("addFromRing")
         .accessibilityAddTraits(.isButton)
-        // Заливка запускается на возврате из добавления еды: кольцо сначала
-        // показывает прежние цифры, потом наливается до новых.
-        .onChange(of: revealTicket) { _, _ in
-            guard let from = revealFrom else { return }
-            isRevealing = true
-            shown = from
-            // Отдельным проходом, а не следом: заданные подряд, оба изменения
-            // попадали в одну транзакцию и гасили друг друга. Пауза заодно
-            // пропускает уезжающий экран добавления — заливка, начатая сразу,
-            // проходила за ним, и на «Сегодня» кольцо было уже полным.
+        // Пока экран добавления сверху, кольцо держит прежние цифры; когда
+        // он уходит, они доливаются до новых одним движением.
+        .onChange(of: pinned) { _, values in
+            if let values {
+                var instant = Transaction()
+                instant.disablesAnimations = true
+                withTransaction(instant) {
+                    shown = values
+                    isRevealing = true
+                }
+                return
+            }
+            guard shown != nil else { return }
+            guard revealOnRelease else {
+                var instant = Transaction()
+                instant.disablesAnimations = true
+                withTransaction(instant) {
+                    shown = nil
+                    isRevealing = false
+                }
+                return
+            }
             Task { @MainActor in
-                try? await Task.sleep(for: .milliseconds(450))
-                withAnimation(.easeOut(duration: 0.85)) {
+                // Полглотка воздуха, пока лист доезжает вниз: заливка, начатая
+                // сразу, проходит за ним.
+                try? await Task.sleep(for: .milliseconds(280))
+                withAnimation(.easeOut(duration: 0.8)) {
                     shown = nil
                 } completion: {
-                    // Галочка встык к заливке: она и есть её концовка, и пауза
-                    // между ними читалась как сбой, а не как ответ.
                     isRevealing = false
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) {
-                        showingCheck = true
-                    }
+                    checkProgress = 0
+                    withAnimation(.easeOut(duration: 0.12)) { checkOpacity = 1 }
+                    withAnimation(.easeOut(duration: 0.34)) { checkProgress = 1 }
+                    UINotificationFeedbackGenerator().notificationOccurred(.success)
                     Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.7))
-                        withAnimation(.easeOut(duration: 0.3)) { showingCheck = false }
+                        try? await Task.sleep(for: .seconds(0.65))
+                        withAnimation(.easeIn(duration: 0.28)) { checkOpacity = 0 }
                     }
                 }
             }
@@ -553,4 +569,23 @@ struct RefreshSpin: ViewModifier {
         }
     }
 
+}
+
+/// Галочка, нарисованная линией. Трим по длине пути — значит, она
+/// прочерчивается от угла, как её рисуют рукой, а не появляется целиком.
+private struct CheckStroke: Shape {
+    var progress: CGFloat
+
+    var animatableData: CGFloat {
+        get { progress }
+        set { progress = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.minX + rect.width * 0.36, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path.trimmedPath(from: 0, to: max(0, min(1, progress)))
+    }
 }

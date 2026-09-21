@@ -43,6 +43,18 @@ struct AddWeightView: View {
     var body: some View {
         NavigationStack {
             Form {
+                // «Когда» первым: дату правят реже веса, но, если правят,
+                // искать её ниже колёс приходилось прокруткой — а лист
+                // открывается ровно под свою высоту.
+                Section {
+                    DatePicker(
+                        "Когда",
+                        selection: $date,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                }
+
                 Section {
                     HStack(spacing: 0) {
                         Picker("", selection: $wholeKg) {
@@ -51,7 +63,7 @@ struct AddWeightView: View {
                             }
                         }
                         .pickerStyle(.wheel)
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, maxHeight: 150)
                         .clipped()
 
                         Text(",")
@@ -63,7 +75,7 @@ struct AddWeightView: View {
                             }
                         }
                         .pickerStyle(.wheel)
-                        .frame(width: 70)
+                        .frame(width: 70, height: 150)
                         .clipped()
 
                         Text("кг")
@@ -73,17 +85,6 @@ struct AddWeightView: View {
                     }
                 }
 
-                Section {
-                    // Со временем, а не только с датой: утреннее и вечернее
-                    // взвешивание отличаются на килограмм воды, и задним
-                    // числом важно, какое из них записывают.
-                    DatePicker(
-                        "Когда",
-                        selection: $date,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                }
             }
             .glassRow()
             .navigationTitle("Взвешивание")

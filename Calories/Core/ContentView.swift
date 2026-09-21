@@ -31,12 +31,6 @@ struct ContentView: View {
     /// Запись, к которой добавляют ещё еды.
     @State private var appendingTo: FoodEntry?
     @State private var showingFasting = false
-    /// Съеденное на момент, когда экран был виден. От него кольцо наливается,
-    /// когда возвращаешься с добавленной едой.
-    /// Цифры, на которых держим кольцо и полоски, пока открыт экран добавления.
-    @State private var ringPinned: RingValues?
-    /// Показывать ли заливку на выходе: ничего не добавили — отпускаем молча.
-    @State private var ringRevealOnRelease = true
     @State private var mealSchedule = MealScheduleSettings()
     @State private var showingMealSchedule = false
     private let quickActions = QuickActionRouter.shared
@@ -59,13 +53,6 @@ struct ContentView: View {
         }
     }
 
-    /// Открыт ли поверх «Сегодня» экран добавления: пока он открыт, съеденное
-    /// меняется не на глазах, и базовую отметку трогать нельзя — иначе
-    /// наливаться будет не от чего.
-    private var isAddingFood: Bool {
-        showingAdd || appendingTo != nil || todaySheet != nil
-    }
-
     /// День по приёмам: окна, их калории и что уже съедено.
     private var todaySlots: [MealSchedule.Slot] {
         let now = Date()
@@ -77,14 +64,6 @@ struct ContentView: View {
             entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
             now: now
         ))
-    }
-
-    /// Отпустить кольцо: если за время, пока экран был сверху, еды прибавилось,
-    /// оно нальётся до новых цифр, иначе просто отпустится.
-    private func releaseRing() {
-        guard let pinned = ringPinned else { return }
-        ringRevealOnRelease = RingValues(consumed: store.consumedToday, macros: store.macrosToday) != pinned
-        ringPinned = nil
     }
 
     var body: some View {
@@ -101,8 +80,6 @@ struct ContentView: View {
                             carbsTarget: store.carbsTarget,
                             spinTicket: ringSpinTicket,
                             pullAngle: Double(ringPull) * 1.4,
-                            pinned: ringPinned,
-                            revealOnRelease: ringRevealOnRelease,
                             onOpen: {
                                 entryAction = nil
                                 showingAdd = true
@@ -130,9 +107,7 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
                             weightKg: store.weightKg,
-                            onOpen: { showingDayNutrition = true },
-                            pinned: ringPinned?.macros,
-                            revealOnRelease: ringRevealOnRelease
+                            onOpen: { showingDayNutrition = true }
                         )
                         
                         // Строка вместо карточки: план виден и открывается,
@@ -342,19 +317,6 @@ struct ContentView: View {
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
-            // Отметка снимается в момент открытия добавления, а не по ходу дела:
-            // запись еды и закрытие листа прилетают одной перерисовкой, и
-            // отметка, идущая за съеденным, успевала стать новой раньше, чем
-            // кольцо успевало от неё налиться.
-            // Держим кольцо с момента открытия добавления: еда записывается,
-            // пока экран сверху, и кольцо под ним успевало дойти до новых цифр.
-            .onChange(of: isAddingFood) { _, adding in
-                if adding {
-                    ringPinned = RingValues(consumed: store.consumedToday, macros: store.macrosToday)
-                } else {
-                    releaseRing()
-                }
-            }
             // Пока тянут вниз, кольцо делает оборот — тот же жест, что у знака на
             // запуске. Обновление мгновенное, поэтому ждём конца оборота, иначе
             // индикатор списка пропадал бы на полпути.
@@ -477,14 +439,14 @@ struct ContentView: View {
                 switch sheet {
                 case .weight:
                     AddWeightView(store: store)
-                        .presentationDetents([.height(320)])
+                        .presentationDetents([.height(340)])
                 case .quickCalories:
-                    QuickCaloriesSheet { calories in
-                        store.add(name: String(localized: "Приём пищи"), calories: calories)
+                    QuickCaloriesSheet { calories, date in
+                        store.add(name: String(localized: "Приём пищи"), calories: calories, date: date)
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         todaySheet = nil
                     }
-                    .presentationDetents([.height(260)])
+                    .presentationDetents([.height(300)])
                 case .newFood:
                     NewFoodSheet(store: store)
                         .presentationDetents([.large])

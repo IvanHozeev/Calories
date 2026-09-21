@@ -6,10 +6,13 @@ import SwiftUI
 /// Раньше это поле висело прямо на экране приёма пищи и мешало всё остальное
 /// время, поэтому теперь оно живёт отдельно и открывается из меню.
 struct QuickCaloriesSheet: View {
-    var onSave: (Int) -> Void
+    var onSave: (Int, Date) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
+    /// Когда съели. Записывают такое обычно постфактум — вечером за обед, —
+    /// и без времени запись уезжала в неправильный приём пищи.
+    @State private var date = Date()
     @FocusState private var focused: Bool
 
     private var calories: Int? {
@@ -26,6 +29,12 @@ struct QuickCaloriesSheet: View {
                         .font(.app(.title2, weight: .semibold))
                         .focused($focused)
                         .accessibilityIdentifier("quickCaloriesField")
+                    DatePicker(
+                        "Когда",
+                        selection: $date,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
                 } footer: {
                     Text("Без названия и макросов — в дневник уйдёт только число.")
                 }
@@ -42,7 +51,7 @@ struct QuickCaloriesSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Сохранить") {
                         guard let calories else { return }
-                        onSave(calories)
+                        onSave(calories, date)
                     }
                     .disabled(calories == nil)
                     .accessibilityIdentifier("saveQuickCalories")
@@ -54,5 +63,5 @@ struct QuickCaloriesSheet: View {
 }
 
 #Preview("QuickCaloriesSheet") {
-    QuickCaloriesSheet { _ in }
+    QuickCaloriesSheet { _, _ in }
 }

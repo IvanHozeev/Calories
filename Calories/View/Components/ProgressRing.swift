@@ -65,12 +65,6 @@ struct RingView<Label: View>: View {
 /// Нажатие открывает добавление приёма пищи. Еду записывают по нескольку раз
 /// в день, а на план смотрят раз в неделю: самая крупная мишень экрана должна
 /// обслуживать частое действие. Меню со сканером и камерой живёт на плюсе.
-/// Съеденное на момент времени — от чего кольцу заполняться.
-struct RingValues: Equatable {
-    let consumed: Int
-    let macros: Macros
-}
-
 struct ProgressRing: View {
     let consumed: Int
     let goal: Int
@@ -84,35 +78,12 @@ struct ProgressRing: View {
     /// Насколько кольцо уже повернули, потянув список вниз, в градусах.
     /// Пока тянут, оно идёт за пальцем — вместо системного спиннера.
     var pullAngle: Double = 0
-    /// Цифры, на которых кольцо держат, пока открыт экран добавления еды.
-    ///
-    /// Держать начинаем с открытия, а не с закрытия: еда записывается, пока
-    /// экран ещё сверху, и кольцо под ним успевало дойти до новых цифр. Когда
-    /// потом его откатывали назад, чтобы налить заново, получалось два
-    /// движения подряд — откат и заливка.
-    var pinned: RingValues? = nil
-    /// Показывать ли заливку, когда отпустили. Ничего не добавили — отпускаем
-    /// молча, без заливки и без галочки.
-    var revealOnRelease: Bool = true
     /// Показ нормы, а не дня: все дуги полные, в центре дневная норма. Для
     /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
     /// на что делится день.
     var showsTargets = false
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
-
-    /// Значения, которые кольцо показывает сейчас: пока держим — прежние,
-    /// в покое — настоящие.
-    @State private var shown: RingValues?
-    /// Галочка в середине после заливки — короткое «записал». Рисуется, а не
-    /// всплывает: линия, идущая от угла, читается как жест, а не как значок,
-    /// который вдруг оказался на экране.
-    @State private var checkProgress: CGFloat = 0
-    @State private var checkOpacity: Double = 0
-    /// Идёт заливка после приёма пищи. Пока идёт, встроенная пружина кольца
-    /// выключена: иначе одно изменение анимировалось дважды — сперва пружиной,
-    /// потом заливкой, — и дуги дёргались два раза подряд.
-    @State private var isRevealing = false
 
     /// Поворот как у знака на иконке: разрыв между концом калорий и началом
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
@@ -160,12 +131,9 @@ struct ProgressRing: View {
         return min(max(value / target, 0), 1)
     }
 
-    private var shownConsumed: Int { shown?.consumed ?? consumed }
-    private var shownMacros: Macros { shown?.macros ?? macros }
-
     private var segments: [Segment] {
-        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(shownConsumed) / Double(goal), 1) : 0)
-        let calorieColors: [Color] = shownConsumed > goal ? [.orange, .red] : Self.kcalColors
+        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0)
+        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : Self.kcalColors
 
         // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
@@ -178,9 +146,9 @@ struct ProgressRing: View {
         var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
                               progress: calorieProgress, colors: calorieColors)]
         let macroParts: [(String, Double, [Color])] = [
-            ("protein", showsTargets ? 1 : Self.ratio(shownMacros.protein, proteinTarget), Self.proteinColors),
-            ("fat", showsTargets ? 1 : Self.ratio(shownMacros.fat, fatTarget), Self.fatColors),
-            ("carbs", showsTargets ? 1 : Self.ratio(shownMacros.carbs, carbsTarget), Self.carbColors),
+            ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
+            ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
+            ("carbs", showsTargets ? 1 : Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
         ]
         var cursor = 180.0
         for (index, part) in macroParts.enumerated() {
@@ -201,16 +169,16 @@ struct ProgressRing: View {
                 RingArc(start: segment.start, end: segment.end)
                     .stroke(segment.colors[0].opacity(0.18),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                if segment.progress > 0 {
-                    RingArc(start: segment.start,
-                            end: segment.start + (segment.end - segment.start) * segment.progress)
-                        // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
-                        // в углу получала бы только один край градиента.
-                        .stroke(LinearGradient(colors: segment.colors,
-                                               startPoint: Self.point(at: segment.start),
-                                               endPoint: Self.point(at: segment.end)),
-                                style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                }
+                RingArc(start: segment.start,
+                        end: segment.start + (segment.end - segment.start) * segment.progress)
+                    // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
+                    // в углу получала бы только один край градиента.
+                    .stroke(LinearGradient(colors: segment.colors,
+                                           startPoint: Self.point(at: segment.start),
+                                           endPoint: Self.point(at: segment.end)),
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    // Скруглённые концы у нулевой длины дают точку — её и гасим.
+                    .opacity(segment.progress > 0 ? 1 : 0)
             }
             .padding(lineWidth / 2)
             // Одним слоем: каждая дуга крутилась отдельно,
@@ -218,21 +186,15 @@ struct ProgressRing: View {
             // поворачивается как цельная картинка.
             .compositingGroup()
             .modifier(RefreshSpin(baseRotation: Self.rotation, pullAngle: pullAngle, spinTicket: spinTicket))
-            // Пружина — только на обычные правки: удаление свайпом, правку
-            // записи. Заливку после приёма пищи ведёт свой easeOut.
-            .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownConsumed)
-            .animation(isRevealing ? nil : .spring(response: 0.65, dampingFraction: 0.85), value: shownMacros)
+            // Дуга доезжает до новой длины пружиной — на любое изменение
+            // съеденного, откуда бы оно ни пришло.
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
+            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 
-            // Число не подменяется галочкой рывком: оно гаснет, пока та
-            // рисуется, и возвращается, когда она растаяла.
             centerLabel
-                .opacity(1 - checkOpacity * 0.9)
-
-            CheckStroke(progress: checkProgress)
-                .stroke(Self.kcalColors[0],
-                        style: StrokeStyle(lineWidth: 9, lineCap: .round, lineJoin: .round))
-                .frame(width: 74, height: 52)
-                .opacity(checkOpacity)
+                // Без своей анимации contentTransition ничего не делает, и
+                // число подменялось за кадр, пока дуга ехала.
+                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
         }
         .frame(width: size, height: size)
         // Размер кольца фиксирован, текст внутри масштабировать некуда.
@@ -244,47 +206,6 @@ struct ProgressRing: View {
         // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе.
         .accessibilityIdentifier("addFromRing")
         .accessibilityAddTraits(.isButton)
-        // Пока экран добавления сверху, кольцо держит прежние цифры; когда
-        // он уходит, они доливаются до новых одним движением.
-        .onChange(of: pinned) { _, values in
-            if let values {
-                var instant = Transaction()
-                instant.disablesAnimations = true
-                withTransaction(instant) {
-                    shown = values
-                    isRevealing = true
-                }
-                return
-            }
-            guard shown != nil else { return }
-            guard revealOnRelease else {
-                var instant = Transaction()
-                instant.disablesAnimations = true
-                withTransaction(instant) {
-                    shown = nil
-                    isRevealing = false
-                }
-                return
-            }
-            Task { @MainActor in
-                // Полглотка воздуха, пока лист доезжает вниз: заливка, начатая
-                // сразу, проходит за ним.
-                try? await Task.sleep(for: .milliseconds(280))
-                withAnimation(.easeOut(duration: 0.8)) {
-                    shown = nil
-                } completion: {
-                    isRevealing = false
-                    checkProgress = 0
-                    withAnimation(.easeOut(duration: 0.12)) { checkOpacity = 1 }
-                    withAnimation(.easeOut(duration: 0.34)) { checkProgress = 1 }
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
-                    Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.65))
-                        withAnimation(.easeIn(duration: 0.28)) { checkOpacity = 0 }
-                    }
-                }
-            }
-        }
     }
 
     private var centerLabel: some View {
@@ -569,23 +490,4 @@ struct RefreshSpin: ViewModifier {
         }
     }
 
-}
-
-/// Галочка, нарисованная линией. Трим по длине пути — значит, она
-/// прочерчивается от угла, как её рисуют рукой, а не появляется целиком.
-private struct CheckStroke: Shape {
-    var progress: CGFloat
-
-    var animatableData: CGFloat {
-        get { progress }
-        set { progress = newValue }
-    }
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX, y: rect.midY))
-        path.addLine(to: CGPoint(x: rect.minX + rect.width * 0.36, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        return path.trimmedPath(from: 0, to: max(0, min(1, progress)))
-    }
 }

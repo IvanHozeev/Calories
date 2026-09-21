@@ -12,6 +12,14 @@ final class MealScheduleSettings {
     static let sleepKey = "meal_schedule_sleep"
     static let countKey = "meal_schedule_count"
 
+    /// Один экземпляр на всё приложение.
+    ///
+    /// Значения читаются из UserDefaults один раз, при создании, — поэтому
+    /// два экземпляра расходятся навсегда: тумблер в «Напоминаниях» писал в
+    /// свой, а «Сегодня» смотрело в своё, прочитанное на запуске, и строка
+    /// приёма не появлялась до перезапуска приложения.
+    @MainActor static let shared = MealScheduleSettings()
+
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {

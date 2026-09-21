@@ -31,7 +31,11 @@ struct ContentView: View {
     /// Запись, к которой добавляют ещё еды.
     @State private var appendingTo: FoodEntry?
     @State private var showingFasting = false
-    @State private var mealSchedule = MealScheduleSettings()
+    /// Общие настройки расписания, а не свой экземпляр: раньше «Сегодня» и
+    /// настройки читали каждый своё, и включённое деление дня не появлялось
+    /// до перезапуска. Держим в `@State`, чтобы вкладка перерисовывалась,
+    /// когда тумблер переключили на соседней.
+    @State private var mealSchedule = MealScheduleSettings.shared
     @State private var showingMealSchedule = false
     private let quickActions = QuickActionRouter.shared
 
@@ -125,6 +129,21 @@ struct ContentView: View {
                             MealScheduleStrip(slots: todaySlots) { showingMealSchedule = true }
                         }
 
+                        // Отмеченный день голодания — не строка в настройках, а
+                        // состояние сегодняшнего дня: пустой дневник в такой день
+                        // должен читаться как «так и задумано», а не как провал.
+                        // Голодание сегодня или в ближайшие три дня: подсказка к
+                        // месту — за пару дней про кофе, накануне про соль и воду,
+                        // в сам день про выход. Вся памятка — по нажатию.
+                        //
+                        // Выше недели: голодание — про сегодня и ближайшие дни,
+                        // а неделя про прошедшие. Внизу экрана, под неделей и
+                        // банком, подсказка про выход из поста попадалась на
+                        // глаза последней, когда она нужнее всего.
+                        if let hint = store.fastingHint() {
+                            FastingStrip(hint: hint) { showingFasting = true }
+                        }
+
                         // Неделя — под планом: сегодня в кольце, план объясняет его
                         // норму, прошедшие дни следом. Над кольцом она первой ловила
                         // взгляд, хотя прошлые дни открывают изредка.
@@ -197,7 +216,7 @@ struct ContentView: View {
                                 todaySheet = .weight
                             } label: {
                                 HStack(spacing: 8) {
-                                    Image(systemName: "scalemass")
+                                    Image(systemName: "figure.stand")
                                         .font(.app(.footnote))
                                     Text("Не забудь взвеситься сегодня")
                                         .font(.app(.caption))
@@ -214,18 +233,6 @@ struct ContentView: View {
                             .buttonStyle(.plain)
                         }
 
-                        // Единственный вход в план. Раньше их было два: компактная строка
-                        // здесь и карточка на «Прогрессе» — с разным видом и разным
-                        // содержанием, хотя вели в одно место.
-                        // Отмеченный день голодания — не строка в настройках, а
-                        // состояние сегодняшнего дня: пустой дневник в такой день
-                        // должен читаться как «так и задумано», а не как провал.
-                        // Голодание сегодня или в ближайшие три дня: подсказка к
-                        // месту — за пару дней про кофе, накануне про соль и воду,
-                        // в сам день про выход. Вся памятка — по нажатию.
-                        if let hint = store.fastingHint() {
-                            FastingStrip(hint: hint) { showingFasting = true }
-                        }
                     }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -399,7 +406,7 @@ struct ContentView: View {
                         Button {
                             todaySheet = .weight
                         } label: {
-                            Label("Взвеситься", systemImage: "scalemass")
+                            Label("Взвеситься", systemImage: "figure.stand")
                         }
                         Button {
                             showingMeasurements = true
@@ -439,7 +446,7 @@ struct ContentView: View {
                 switch sheet {
                 case .weight:
                     AddWeightView(store: store)
-                        .presentationDetents([.height(340)])
+                        .presentationDetents([.height(AddWeightView.sheetHeight)])
                 case .quickCalories:
                     QuickCaloriesSheet { calories, date in
                         store.add(name: String(localized: "Приём пищи"), calories: calories, date: date)

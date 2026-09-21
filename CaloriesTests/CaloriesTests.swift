@@ -2845,6 +2845,34 @@ struct MicronutrientDayTests {
         #expect(day.coveredCalories == 200)
     }
 
+    @Test func fiberIsCountedOnItsOwnCoverageNotTheVitaminOne() {
+        // Товар из Open Food Facts приносит одну клетчатку: витаминов там нет
+        // и не будет. Раньше такой день прятал клетчатку вместе с витаминами,
+        // хотя по ней он посчитан целиком.
+        let yogurt = FoodItem(name: "Йогурт из магазина", caloriesPer100g: 60, protein: 5, fat: 2, carbs: 4)
+        yogurt.micronutrients = Micronutrients([.fiber: 2])
+        container.mainContext.insert(yogurt)
+        store.refresh()
+        store.add(name: yogurt.name, calories: 600, macros: .zero, grams: 1000)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.fiberCoverage == 1, "Клетчатка известна у всего съеденного")
+        #expect(day.fiber == 20, "2 г на сто грамм при килограмме — двадцать грамм")
+        #expect(!day.isTrustworthy, "Витаминов у такой еды нет, и день по ним не покрыт")
+    }
+
+    @Test func fiberHidesWhenMostOfTheDayIsUnknown() {
+        let yogurt = FoodItem(name: "Йогурт из магазина", caloriesPer100g: 60, protein: 5, fat: 2, carbs: 4)
+        yogurt.micronutrients = Micronutrients([.fiber: 2])
+        container.mainContext.insert(yogurt)
+        store.refresh()
+        store.add(name: yogurt.name, calories: 100, macros: .zero, grams: 100)
+        store.add(name: "Шаурма у дома", calories: 900, macros: .zero, grams: 400)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.fiber == nil, "На десятой части дня число про клетчатку — выдумка")
+    }
+
     @Test func anEntryWithoutWeightCannotBeCounted() {
         // «Просто 300 ккал» — состав задан на сто грамм, а граммов нет.
         store.add(name: "Быстрая запись", calories: 300)
@@ -3490,6 +3518,26 @@ struct MealScheduleTests {
                        entries: [(Date, Int)] = [], now: Date? = nil) -> MealSchedule.Input {
         .init(wake: at(7), sleep: at(23), mealCount: count, dailyGoal: goal,
               entries: entries.map { (date: $0.0, calories: $0.1) }, now: now ?? at(7, 30))
+    }
+
+    /// Настройки расписания — одни на всё приложение.
+    ///
+    /// Их было два экземпляра: тумблер в настройках писал в свой, «Сегодня»
+    /// читало своё, прочитанное на запуске, — и включённое деление дня не
+    /// появлялось до перезапуска приложения. Значения читаются в `init`, так
+    /// что два экземпляра расходятся навсегда, и ловится это только так.
+    @MainActor
+    @Test func theScheduleSettingsAreShared() {
+        #expect(MealScheduleSettings.shared === MealScheduleSettings.shared)
+
+        let defaults = TestDefaults.make()
+        let one = MealScheduleSettings(defaults: defaults)
+        let another = MealScheduleSettings(defaults: defaults)
+        one.isEnabled = true
+        #expect(another.isEnabled == false,
+                "Второй экземпляр не узнаёт об изменении — поэтому он и должен быть один")
+        #expect(MealScheduleSettings(defaults: defaults).isEnabled,
+                "В хранилище значение всё же попало")
     }
 
     /// День раскладывается от подъёма до отбоя: первый через 45 минут после

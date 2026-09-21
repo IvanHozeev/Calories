@@ -4,6 +4,53 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Питание" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التغذية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ernährung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentation"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תזונה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentação"
+          }
+        }
+      }
+    },
     "—" : {
       "shouldTranslate" : false
     },
@@ -152,9 +199,7 @@
         }
       }
     },
-    "%" : {
-
-    },
+    "%" : {},
     "%.0f г при весе %.1f кг" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2038,9 +2083,7 @@
         }
       }
     },
-    "BMR %lld" : {
-
-    },
+    "BMR %lld" : {},
     "FFMI (индекс сухой массы)" : {
       "localizations" : {
         "ar" : {
@@ -8985,6 +9028,53 @@
         }
       }
     },
+    "Входит в углеводы, но калорий почти не даёт. Держит сытость и кишечник; на дефиците про неё забывают первой." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُحسب من الكربوهيدرات لكنها لا تضيف سعرات تقريبًا. تحافظ على الشبع وصحة الأمعاء؛ أول ما يُنسى في العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zählt zu den Kohlenhydraten, bringt aber fast keine Kalorien. Hält satt und den Darm gesund; im Defizit wird sie zuerst vergessen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Counts toward carbs but adds almost no calories. Keeps you full and your gut healthy; first thing forgotten on a deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta como carbohidrato pero casi no aporta calorías. Mantiene la saciedad y el intestino; en déficit es lo primero que se olvida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte dans les glucides mais n'apporte presque pas de calories. Elle tient au corps et fait marcher l'intestin ; en déficit, on l'oublie en premier."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נספרת לפחמימות אך כמעט לא מוסיפה קלוריות. שומרת על שובע ועל מעיים בריאים; הראשונה שנשכחת בגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conta como carboidrato, mas quase não traz calorias. Mantém a saciedade e o intestino; no déficit é a primeira esquecida."
+          }
+        }
+      }
+    },
     "Выбери продукт" : {
       "localizations" : {
         "ar" : {
@@ -9170,6 +9260,7 @@
       }
     },
     "Выключишь — строка с ближайшим приёмом пропадёт с «Сегодня», а норма останется дневной." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -27085,6 +27176,7 @@
       }
     },
     "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший. Время подъёма, отбоя и число приёмов правятся там же — по нажатию на строку приёма." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39056,9 +39148,7 @@
         }
       }
     },
-    "Расход по формуле" : {
-
-    },
+    "Расход по формуле" : {},
     "Расход с активностью (TDEE)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -43004,9 +43094,7 @@
         }
       }
     },
-    "Сохранить изменения" : {
-
-    },
+    "Сохранить изменения" : {},
     "Список" : {
       "localizations" : {
         "ar" : {

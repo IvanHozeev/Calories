@@ -137,7 +137,7 @@ struct PaywallView: View {
                 summaryRow("calendar", String(format: String(localized: "Дней с записями: %lld из %lld"),
                                               summary.loggedDays, CalorieStore.trialDays))
                 if let change = summary.weightChangeKg {
-                    summaryRow("scalemass", String(format: String(localized: "Вес по тренду: %+.1f кг"), change))
+                    summaryRow("figure.stand", String(format: String(localized: "Вес по тренду: %+.1f кг"), change))
                 }
                 if let status = store.planAdherence()?.status {
                     summaryRow(status.icon, status.title)

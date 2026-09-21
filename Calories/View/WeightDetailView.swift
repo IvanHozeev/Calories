@@ -152,7 +152,7 @@ struct WeightDetailView: View {
         // выбирать там, где выбора нет.
         .sheet(isPresented: $showingAddWeight) {
             AddWeightView(store: store)
-                .presentationDetents([.medium])
+                .presentationDetents([.height(AddWeightView.sheetHeight)])
         }
     }
 }

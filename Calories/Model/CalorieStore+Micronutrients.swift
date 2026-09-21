@@ -15,6 +15,14 @@ nonisolated struct MicronutrientDay: Equatable {
     let totals: Micronutrients
     /// Калории, пришедшие из еды, про которую известен состав.
     let coveredCalories: Int
+    /// То же самое, но про одну клетчатку.
+    ///
+    /// У неё своя доля, потому что источники разные: витамины знает только
+    /// встроенная база, а клетчатку отдаёт и Open Food Facts, и её вписывают
+    /// руками в свой продукт. День из магазинных этикеток для витаминов пуст,
+    /// а для клетчатки посчитан полностью — и прятать её за витаминным
+    /// порогом значит скрывать посчитанное число.
+    let fiberCoveredCalories: Int
     let totalCalories: Int
 
     /// Какая часть дня учтена. Ноль, если день пуст.
@@ -23,13 +31,26 @@ nonisolated struct MicronutrientDay: Equatable {
         return min(1, Double(coveredCalories) / Double(totalCalories))
     }
 
+    /// Какая часть дня учтена по клетчатке.
+    var fiberCoverage: Double {
+        guard totalCalories > 0 else { return 0 }
+        return min(1, Double(fiberCoveredCalories) / Double(totalCalories))
+    }
+
     /// Ниже этой доли число показывать нельзя: оно уже не «примерно», а просто
     /// неверно. Половина дня без данных — это не оценка, а другой день.
     static let trustworthyCoverage = 0.6
 
     var isTrustworthy: Bool { coverage >= Self.trustworthyCoverage }
 
-    static let empty = MicronutrientDay(totals: Micronutrients(), coveredCalories: 0, totalCalories: 0)
+    /// Съедено клетчатки за день, если про день известно достаточно.
+    var fiber: Double? {
+        guard fiberCoverage >= Self.trustworthyCoverage else { return nil }
+        return totals[.fiber] ?? 0
+    }
+
+    static let empty = MicronutrientDay(totals: Micronutrients(), coveredCalories: 0,
+                                        fiberCoveredCalories: 0, totalCalories: 0)
 }
 
 extension CalorieStore {
@@ -41,6 +62,7 @@ extension CalorieStore {
 
         var totals = Micronutrients()
         var covered = 0.0
+        var fiberCovered = 0.0
         var total = 0
         for entry in dayEntries {
             total += entry.calories
@@ -54,10 +76,21 @@ extension CalorieStore {
             // Долей, а не целиком: у блюда из трёх ингредиентов, где состав
             // известен у двух, покрыты не все его калории. Записать их все —
             // значит объявить день изученным сильнее, чем он изучен.
-            covered += Double(entry.calories) * profile.coverage
+            //
+            // Витаминное покрытие считаем по профилям, где витамины есть.
+            // Товар из Open Food Facts приходит с одной клетчаткой, и раньше
+            // он объявлял свои калории изученными — день выглядел посчитанным,
+            // а витамины по нему выходили заниженными.
+            if profile.hasVitamins {
+                covered += Double(entry.calories) * profile.coverage
+            }
+            if profile.per100g[.fiber] != nil {
+                fiberCovered += Double(entry.calories) * profile.coverage
+            }
         }
         return MicronutrientDay(totals: totals,
                                 coveredCalories: Int(covered.rounded()),
+                                fiberCoveredCalories: Int(fiberCovered.rounded()),
                                 totalCalories: total)
     }
 
@@ -117,6 +150,14 @@ nonisolated struct NutrientProfile: Equatable {
     /// еду. Показать значки по трети блюда — значит сказать, чего в нём нет,
     /// имея в виду всего лишь, что мы этого не видели.
     var isTrustworthy: Bool { coverage >= MicronutrientDay.trustworthyCoverage }
+
+    /// Есть ли здесь хоть один настоящий микронутриент.
+    ///
+    /// Клетчатка не в счёт: она приходит и оттуда, где витаминов нет вовсе,
+    /// и профиль с одной клетчаткой ничего не говорит о витаминах дня.
+    var hasVitamins: Bool {
+        Micronutrient.allCases.contains { $0 != .fiber && per100g[$0] != nil }
+    }
 }
 
 nonisolated enum DishNutrients {

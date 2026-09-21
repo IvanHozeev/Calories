@@ -101,7 +101,7 @@ struct CaloriesAppShortcuts: AppShortcutsProvider {
                 "Log weight in \(.applicationName)"
             ],
             shortTitle: "Записать вес",
-            systemImageName: "scalemass"
+            systemImageName: "figure.stand"
         )
     }
 }

@@ -3,7 +3,7 @@ import UserNotifications
 
 struct RemindersView: View {
     @State private var store = ReminderStore()
-    @State private var schedule = MealScheduleSettings()
+    private var schedule: MealScheduleSettings { .shared }
 
     private var notificationsBinding: Binding<Bool> {
         Binding(
@@ -34,21 +34,6 @@ struct RemindersView: View {
                 } else if store.authStatus == .notDetermined {
                     Text("Включи, чтобы получать напоминания записывать приёмы пищи.")
                 }
-            }
-
-            // Расписание приёмов пищи — про то, как делится день, а не про
-            // время уведомлений, поэтому оно выше и работает независимо от них.
-            Section {
-                Toggle("Делить день на приёмы", isOn: Binding(
-                    get: { schedule.isEnabled },
-                    set: { schedule.isEnabled = $0 }
-                ))
-                .accessibilityIdentifier("mealScheduleToggle")
-
-            } header: {
-                Text("Приёмы пищи")
-            } footer: {
-                Text("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший. Время подъёма, отбоя и число приёмов правятся там же — по нажатию на строку приёма.")
             }
 
             if store.appEnabled && store.authStatus == .authorized {

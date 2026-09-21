@@ -190,6 +190,47 @@ final class CaloriesUITests: XCTestCase {
                       "Вкладка должна открывать настройки")
     }
 
+    /// Включённое деление дня должно быть видно на «Сегодня».
+    ///
+    /// Фича была сделана целиком, но тумблер лежал в «Напоминаниях», а
+    /// «Сегодня» читало свой экземпляр настроек, прочитанный на запуске, —
+    /// то есть включить её было негде и незаметно.
+    @MainActor
+    func testMealScheduleStripShowsUpWhenTheDayIsSplit() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-AppleLanguages", "(en)",
+            "-AppleLocale", "en_US",
+            "-onboarding_completed", "YES",
+            "-show_launch_splash", "NO",
+            "-health_access_deferred", "YES",
+            "-meal_schedule_on", "YES",
+        ]
+        app.launch()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 30))
+
+        let strip = app.descendants(matching: .any).matching(identifier: "mealScheduleStrip").firstMatch
+        XCTAssertTrue(strip.waitForExistence(timeout: 10),
+                      "День делится на приёмы, а строки ближайшего приёма на «Сегодня» нет")
+    }
+
+    /// У приёмов пищи должен быть свой вход в настройках, а не закуток
+    /// внутри уведомлений, где его никто не искал.
+    @MainActor
+    func testSettingsHaveTheirOwnWayIntoMealSchedule() {
+        let app = launchApp()
+        let settings = app.tabBars.buttons["Settings"]
+        XCTAssertTrue(settings.waitForExistence(timeout: 10))
+        settings.tap()
+
+        let entrance = app.descendants(matching: .any).matching(identifier: "openMealSchedule").firstMatch
+        scrollTo(entrance, in: app)
+        XCTAssertTrue(entrance.exists, "В настройках нет своей строки приёмов пищи")
+        entrance.tap()
+        XCTAssertTrue(app.switches["mealScheduleToggle"].firstMatch.waitForExistence(timeout: 5),
+                      "Экран приёмов пищи не открылся")
+    }
+
     /// Вход в замеры должен быть виден на пустом экране, иначе фичу просто не найдут.
     @MainActor
     func testBodyTabOffersFirstMeasurement() {

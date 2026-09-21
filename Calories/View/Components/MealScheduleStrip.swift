@@ -66,6 +66,9 @@ struct MealScheduleSheet: View {
     let entries: [(date: Date, calories: Int)]
     let dailyGoal: Int
     @Bindable var settings: MealScheduleSettings
+    /// Показан переходом из настроек, а не листом: тогда свой навигационный
+    /// стек и кнопка закрытия не нужны — они уже есть снаружи.
+    var isEmbedded = false
     @Environment(\.dismiss) private var dismiss
 
     private var slots: [MealSchedule.Slot] {
@@ -81,8 +84,26 @@ struct MealScheduleSheet: View {
     }
 
     var body: some View {
-        NavigationStack {
+        if isEmbedded {
+            content
+        } else {
+            NavigationStack { content }
+        }
+    }
+
+    private var content: some View {
+        Group {
             List {
+                // Тумблер первым: он включает всё остальное на этом экране,
+                // и раньше лежал под расписанием — то есть под тем, чем
+                // управляет.
+                Section {
+                    Toggle("Делить день на приёмы", isOn: $settings.isEnabled)
+                        .accessibilityIdentifier("mealScheduleToggle")
+                } footer: {
+                    Text("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший.")
+                }
+
                 Section {
                     Stepper(value: $settings.count, in: MealSchedule.allowedCounts) {
                         HStack {
@@ -107,13 +128,6 @@ struct MealScheduleSheet: View {
                 } footer: {
                     Text("Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.")
                 }
-
-                Section {
-                    Toggle("Делить день на приёмы", isOn: $settings.isEnabled)
-                        .accessibilityIdentifier("mealScheduleToggle")
-                } footer: {
-                    Text("Выключишь — строка с ближайшим приёмом пропадёт с «Сегодня», а норма останется дневной.")
-                }
             }
             // Напоминания переставляются на выходе: пока крутят стрелки,
             // дёргать систему на каждый тик незачем.
@@ -122,9 +136,13 @@ struct MealScheduleSheet: View {
             .listStyle(.insetGrouped)
             .navigationTitle("Приёмы пищи")
             .navigationBarTitleDisplayMode(.inline)
+            // Закрывать нечего, когда экран открыт переходом: назад ведёт
+            // сам навигационный стек.
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    CheckmarkButton { dismiss() }
+                if !isEmbedded {
+                    ToolbarItem(placement: .confirmationAction) {
+                        CheckmarkButton { dismiss() }
+                    }
                 }
             }
         }

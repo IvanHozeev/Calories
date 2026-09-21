@@ -32,7 +32,7 @@ enum QuickAction: String, CaseIterable, Identifiable {
         case .meal:    "fork.knife"
         case .camera:  "camera.fill"
         case .scanner: "barcode.viewfinder"
-        case .weight:  "scalemass"
+        case .weight:  "figure.stand"
         case .measurements: "ruler"
         }
     }

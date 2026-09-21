@@ -34,7 +34,7 @@ struct DayNutritionView: View {
             isFast: store.isFastDay(date),
             // Сегодняшний день ещё идёт: недобор в обед — это не недобор.
             isInProgress: Calendar.current.isDateInToday(date),
-            fiber: micronutrients.isTrustworthy ? micronutrients.totals[.fiber] : nil
+            fiber: micronutrients.fiber
         ))
     }
 
@@ -67,6 +67,14 @@ struct DayNutritionView: View {
                 macroRow(.fat, value: macros.fat, target: store.fatTarget, color: MacroKind.fat.color)
                 macroRow(.carbs, value: macros.carbs,
                          target: store.carbsTarget ?? MacroTargets.carbsMinimum, color: MacroKind.carbs.color)
+                // Клетчатка живёт здесь, а не среди витаминов: она часть
+                // углеводов, её считают в граммах, как макрос, и знают о ней
+                // не только продукты встроенной базы — Open Food Facts отдаёт
+                // её тоже. Среди витаминов она пропадала вместе с ними, стоило
+                // дню собраться из магазинной еды.
+                if let fiber = micronutrients.fiber {
+                    fiberRow(fiber)
+                }
             } header: {
                 Text("Белки, жиры, углеводы")
             }
@@ -120,9 +128,11 @@ struct DayNutritionView: View {
                 }
             }
             .font(.app(.caption2))
-            .offset(y: 14)
+            // Ниже кольца, а не впритык к нему: на 14 подписи почти касались
+            // дуг и читались как их продолжение.
+            .offset(y: 30)
         }
-        .padding(.bottom, 18)
+        .padding(.bottom, 34)
     }
 
     private func adviceRow(_ item: DayAnalysis.Advice) -> some View {
@@ -191,6 +201,30 @@ struct DayNutritionView: View {
         .padding(.vertical, 2)
     }
 
+    /// Клетчатка той же строкой, что макросы: граммы, цель и зачем она.
+    private func fiberRow(_ amount: Double) -> some View {
+        let target = Micronutrient.fiber.dailyValue
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Клетчатка")
+                Spacer()
+                Text(String(format: "%.0f \(String(localized: "г"))", amount))
+                    .font(.app(.body, weight: .semibold))
+                    .foregroundStyle(MacroKind.carbs.color)
+                    .monospacedDigit()
+                Text(verbatim: "/ \(Int(target.rounded()))")
+                    .font(.app(.caption))
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+            }
+            Text("Входит в углеводы, но калорий почти не даёт. Держит сытость и кишечник; на дефиците про неё забывают первой.")
+                .font(.app(.caption2))
+                .foregroundStyle(.tertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(.vertical, 2)
+    }
+
     private func note(for kind: MacroKind) -> String {
         switch kind {
         case .protein:
@@ -222,7 +256,8 @@ struct DayNutritionView: View {
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                ForEach(Micronutrient.allCases) { nutrient in
+                // Клетчатка показана выше, вместе с макросами.
+                ForEach(Micronutrient.allCases.filter { $0 != .fiber }) { nutrient in
                     if let amount = day.totals[nutrient] {
                         nutrientRow(nutrient, amount: amount)
                     }

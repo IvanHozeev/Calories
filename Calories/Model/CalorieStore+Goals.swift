@@ -560,29 +560,16 @@ extension CalorieStore {
             ? actualWeightToday + observedWeeklyRate * remainingWeeksInPhase
             : nil as Double?
 
+        // Сам вердикт — у `PlanStatus`: это правила, а не расчёт, и проверять
+        // их удобнее отдельно от сборки всех чисел вокруг.
         let deviation = actualWeightToday - expectedWeightToday
-        // Допуск от того, сколько фаза вообще собиралась сдвинуть. У поддержания
-        // это ноль, и остаётся нижняя граница в 300 г — то есть шум весов.
         let phasePlannedChange = phaseTargetWeight - plan.weight(atStartOfPhaseAt: phaseIndex)
         let settling = plan.isSettling(on: today)
-        // Пока после подъёма калорий возвращаются гликоген и вода, допуск шире
-        // на эти самые пару килограммов. Иначе приложение объявит провалом
-        // ровно то, что само же и назначило переходом.
-        let threshold = settling
-            ? max(Plan.settlingToleranceKg, abs(phasePlannedChange) * 0.05)
-            : max(0.3, abs(phasePlannedChange) * 0.05)
-        let direction = phase.intent.direction
-        let status: PlanStatus
-        if abs(deviation) <= threshold {
-            status = .onTrack
-        } else if direction == 0 {
-            // Поддержание не бывает «впереди»: любой уход от нуля — уход в сторону.
-            status = .behind
-        } else if (direction < 0 && deviation > 0) || (direction > 0 && deviation < 0) {
-            status = .behind
-        } else {
-            status = .ahead
-        }
+        let status = PlanStatus.verdict(
+            deviationKg: deviation,
+            direction: phase.intent.direction,
+            tolerance: PlanStatus.tolerance(plannedChangeKg: phasePlannedChange, settling: settling)
+        )
 
         return PlanAdherence(
             expectedWeightToday: expectedWeightToday,

@@ -182,6 +182,32 @@ enum PlanStatus {
     case onTrack
     case ahead
     case behind
+
+    /// Допуск, внутри которого план считается выполняемым.
+    ///
+    /// Пропорционален тому, сколько фаза вообще собиралась сдвинуть: у
+    /// поддержания это ноль, и остаётся нижняя граница в 300 г — шум весов,
+    /// утренний стул и вчерашняя соль.
+    ///
+    /// После подъёма калорий допуск шире на пару килограммов: возвращаются
+    /// гликоген и вода, и без этого приложение объявило бы провалом ровно то,
+    /// что само же назначило переходом.
+    static func tolerance(plannedChangeKg: Double, settling: Bool) -> Double {
+        let proportional = abs(plannedChangeKg) * 0.05
+        return settling ? max(Plan.settlingToleranceKg, proportional) : max(0.3, proportional)
+    }
+
+    /// Вердикт по отклонению от прогноза.
+    ///
+    /// `direction` — куда фаза ведёт вес: меньше нуля вниз, больше нуля вверх,
+    /// ноль — поддержание. У поддержания «впереди» не бывает: любой уход от
+    /// нуля — уход в сторону, в какую бы сторону он ни был.
+    static func verdict(deviationKg: Double, direction: Double, tolerance: Double) -> PlanStatus {
+        if abs(deviationKg) <= tolerance { return .onTrack }
+        if direction == 0 { return .behind }
+        let movingAwayFromTarget = (direction < 0 && deviationKg > 0) || (direction > 0 && deviationKg < 0)
+        return movingAwayFromTarget ? .behind : .ahead
+    }
 }
 
 /// Чего именно не хватает для расчёта тренда. Нужно, чтобы вместо пассивных серых часов

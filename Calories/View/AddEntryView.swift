@@ -793,12 +793,20 @@ struct AddEntryView: View {
     private func saveDraft() {
         guard !draftItems.isEmpty else { return }
         let grams = draftItems.count == 1 ? draftItems[0].grams : nil
+        // Состав кладём всегда: по склеенному имени приём потом не разобрать,
+        // и всё, что считается по продуктам — «Недавнее», категории рациона,
+        // клетчатка, — теряет из виду половину съеденного.
+        let components = draftItems.map {
+            EntryComponent(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
+        }
         if let entry = appendingTo {
             store.updateEntry(entry, name: mealName, calories: draftTotalCalories,
-                              macros: draftTotalMacros, grams: grams, date: entryDate)
+                              macros: draftTotalMacros, grams: grams, date: entryDate,
+                              components: components)
         } else {
             store.add(name: mealName, calories: draftTotalCalories,
-                      macros: draftTotalMacros, grams: grams, date: entryDate)
+                      macros: draftTotalMacros, grams: grams, date: entryDate,
+                      components: components)
         }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
         finish()

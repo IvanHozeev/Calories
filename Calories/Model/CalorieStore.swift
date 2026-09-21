@@ -864,8 +864,10 @@ final class CalorieStore {
         startPlan(plan.rescheduled(toEnd: newEndDate))
     }
 
-    func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil, date: Date = Date()) {
-        let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date)
+    func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil,
+             date: Date = Date(), components: [EntryComponent] = []) {
+        let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date,
+                              components: components)
         context.insert(entry)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         entries = ([entry] + entries).sorted { $0.date > $1.date }
@@ -884,12 +886,16 @@ final class CalorieStore {
         // Удаление не может породить новый незалоченный день — лочить не нужно
     }
 
-    func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, grams: Double?, date: Date) {
+    func updateEntry(_ entry: FoodEntry, name: String, calories: Int, macros: Macros, grams: Double?, date: Date,
+                     components: [EntryComponent]? = nil) {
         entry.name = name
         entry.calories = calories
         entry.macros = macros
         entry.grams = grams
         entry.date = date
+        // nil — правка не знает про состав (меняли калории руками), и трогать
+        // его нельзя: иначе правка веса стирала бы, из чего собран приём.
+        if let components { entry.components = components }
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         entries.sort { $0.date > $1.date }
         rebuildCaches()
@@ -1062,42 +1068,50 @@ final class CalorieStore {
     /// подтормаживал на вводе.
     private func rebuildRecent() {
         let dishNames = Set(dishes.map(\.name))
-        var seen = Set<String>()
+        // Продукт по имени: свой перекрывает встроенный — его правили руками,
+        // значит он ближе к тому, что человек действительно ест.
+        var foodByName: [String: FoodItem] = [:]
+        for food in FoodDatabase.items { foodByName[food.name] = food }
+        for food in customFoods { foodByName[food.name] = food }
 
-        // Сперва только даты и ссылки: объекты дорого создавать, а нужны они
+        var seen = Set<String>()
+        // Сперва только даты и имена: объекты дорого создавать, а нужны они
         // лишь для верхушки списка.
-        var candidates: [(date: Date, entry: FoodEntry?, food: FoodItem?)] = []
-        for entry in entries {
-            guard let grams = entry.grams, grams > 0 else { continue }
-            guard !dishNames.contains(entry.name), !seen.contains(entry.name) else { continue }
-            seen.insert(entry.name)
-            candidates.append((entry.date, entry, nil))
+        var candidates: [(date: Date, food: FoodItem)] = []
+
+        // Записи уже отсортированы по убыванию даты, поэтому первое попавшееся
+        // имя — это последний раз, когда продукт ели.
+        for entry in entries where !dishNames.contains(entry.name) {
+            for component in entry.composition where !seen.contains(component.name) {
+                guard let food = recentFood(named: component.name, from: component, in: foodByName)
+                else { continue }
+                seen.insert(component.name)
+                candidates.append((entry.date, food))
+            }
+            // Записи, сделанные до того, как состав начали хранить: имя у них
+            // склеено из названий через запятую, и это всё, что от состава
+            // осталось. Разбираем — иначе продукт, который человек ест каждый
+            // день внутри приёма, в «Недавнем» не появится никогда.
+            guard entry.components.isEmpty else { continue }
+            for part in Self.joinedNameParts(entry.name) where !seen.contains(part) {
+                guard let food = foodByName[part] else { continue }
+                seen.insert(part)
+                candidates.append((entry.date, food))
+            }
         }
+
+        // Недавнее — это и съеденное, и заведённое: продукт заводят ровно
+        // тогда, когда собираются им пользоваться.
         for food in customFoods {
             guard let updatedAt = food.updatedAt, !seen.contains(food.name) else { continue }
             seen.insert(food.name)
-            candidates.append((updatedAt, nil, food))
+            candidates.append((updatedAt, food))
         }
 
         recentFoods = candidates
             .sorted { $0.date > $1.date }
             .prefix(Self.recentLimit)
-            .map { candidate in
-                if let food = candidate.food { return food }
-                let entry = candidate.entry!
-                let factor = 100 / (entry.grams ?? 100)
-                return FoodItem(
-                    name: entry.name,
-                    caloriesPer100g: Int((Double(entry.calories) * factor).rounded()),
-                    protein: entry.protein * factor,
-                    fat: entry.fat * factor,
-                    carbs: entry.carbs * factor,
-                    defaultGrams: entry.grams ?? 100,
-                    // Недавнее пересобирается из записей дневника, а они категорию
-                    // не хранят. Без этой строки весь список показывал «Другое».
-                    category: categoryByFoodName[entry.name] ?? .other
-                )
-            }
+            .map(\.food)
 
         var seenDishes = Set<String>()
         var dishCandidates: [(date: Date, dish: Dish)] = []
@@ -1115,6 +1129,78 @@ final class CalorieStore {
             .sorted { $0.date > $1.date }
             .prefix(Self.recentLimit)
             .map(\.dish)
+    }
+
+    /// Из каких категорий продуктов собран день.
+    ///
+    /// Считается по составу приёма, а не по имени записи: у приёма из
+    /// нескольких продуктов имя склеенное, и категории у него нет. Блюдо
+    /// раскладывается на ингредиенты — «гречка с тунцом» это крупа и рыба,
+    /// а не одна безымянная строка.
+    func categoryBreakdown(on date: Date) -> [DayCategories.Part] {
+        let day = Calendar.current.startOfDay(for: date)
+        var items: [(category: FoodCategory?, calories: Int)] = []
+        for entry in entriesByDay[day] ?? [] {
+            if entry.components.isEmpty {
+                items.append(contentsOf: split(named: entry.name, calories: entry.calories))
+            } else {
+                for component in entry.components {
+                    items.append(contentsOf: split(named: component.name, calories: component.calories))
+                }
+            }
+        }
+        return DayCategories.split(items)
+    }
+
+    /// Калории одного названия по категориям: продукт — своей категорией,
+    /// блюдо — по ингредиентам, всё остальное — в неизвестное.
+    private func split(named name: String, calories: Int) -> [(category: FoodCategory?, calories: Int)] {
+        if let category = categoryByFoodName[name] { return [(category, calories)] }
+        if let dish = dishes.first(where: { $0.name == name }) {
+            let total = dish.ingredients.reduce(0) { $0 + $1.calories }
+            guard total > 0 else { return [(FoodCategory.dishes, calories)] }
+            return dish.ingredients.map { ingredient in
+                let share = Double(ingredient.calories) / Double(total)
+                return (categoryByFoodName[ingredient.foodName],
+                        Int((Double(calories) * share).rounded()))
+            }
+        }
+        return [(nil, calories)]
+    }
+
+    /// Чем показать продукт в «Недавнем».
+    ///
+    /// Сначала настоящий продукт: у него есть категория, состав и порция по
+    /// умолчанию. Если такого нет (еду записали разово, руками), собираем
+    /// продукт из самой записи — для этого нужен вес, иначе пересчитать на
+    /// сто грамм не из чего.
+    private func recentFood(named name: String, from component: EntryComponent,
+                            in foodByName: [String: FoodItem]) -> FoodItem? {
+        if let food = foodByName[name] { return food }
+        guard let grams = component.grams, grams > 0 else { return nil }
+        let factor = 100 / grams
+        return FoodItem(
+            name: name,
+            caloriesPer100g: Int((Double(component.calories) * factor).rounded()),
+            protein: component.protein * factor,
+            fat: component.fat * factor,
+            carbs: component.carbs * factor,
+            defaultGrams: grams,
+            // Записи дневника категорию не хранят: без этой строки весь
+            // список показывал «Другое».
+            category: categoryByFoodName[name] ?? .other
+        )
+    }
+
+    /// Названия продуктов из склеенного имени приёма.
+    ///
+    /// Длинное имя обрезается многоточием, поэтому последний кусок может не
+    /// совпасть ни с чем — он просто не найдётся и будет пропущен.
+    static func joinedNameParts(_ name: String) -> [String] {
+        name.components(separatedBy: ", ")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines)
+                     .trimmingCharacters(in: CharacterSet(charactersIn: "…")) }
+            .filter { !$0.isEmpty }
     }
 
     /// Кому из своих продуктов каталог может одолжить витамины.
@@ -1136,7 +1222,7 @@ final class CalorieStore {
 
     /// Сколько строк держим в «Недавнем». Больше — это уже не «недавнее»,
     /// а второй список всего подряд, по которому снова надо искать глазами.
-    static let recentLimit = 8
+    static let recentLimit = 12
 
     /// Последняя по дате запись веса.
     var latestWeight: WeightEntry? {

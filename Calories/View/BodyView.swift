@@ -214,10 +214,12 @@ struct BodyView: View {
                     Text("Расчёт")
                 } footer: {
                     if let fact = store.adaptiveTDEE, store.usesAdaptiveTDEE {
-                        Text(String(format: String(localized: "Съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю — значит, тратится около %3$lld. Формула этого не видит: она не знает ни твоей работы, ни адаптации к дефициту."),
+                        // Само число расхода тут не повторяем: оно уже написано
+                        // крупно на карточке, и вторая его копия читалась как
+                        // ещё одна цифра, которую надо сверить с первой.
+                        Text(String(format: String(localized: "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
                                     Int(fact.meanIntake.rounded()),
-                                    String(format: "%+.2f", fact.weeklyRateKg),
-                                    Int((store.smoothedTDEE ?? fact.tdee).rounded())))
+                                    String(format: "%+.2f", fact.weeklyRateKg)))
                     } else {
                         Text(draftProfile.isNavyMethod(from: measurement)
                              ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
@@ -597,15 +599,21 @@ struct BodyView: View {
             Divider().opacity(0.4)
 
             HStack(alignment: .top, spacing: 8) {
+                // Норма, совпавшая с расходом, — это не второе число, а то же
+                // самое: на поддержании едят столько, сколько тратят. Писать
+                // его дважды значит заставлять сверять две одинаковые цифры.
+                let goalMatchesExpenditure = abs(Double(store.dailyGoal) - expenditure) < 5
+                let goalValue = goalMatchesExpenditure ? String(localized: "как расход") : "\(store.dailyGoal)"
+                let goalUnit: LocalizedStringKey = goalMatchesExpenditure ? "" : "ккал"
                 if store.plan != nil {
-                    miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                    miniStat("Норма", goalValue, unit: goalUnit, color: ProgressRing.kcalColors[0])
                         .accessibilityIdentifier("calorieTargetRow")
                 } else {
                     Button {
                         goalText = String(store.dailyGoal)
                         showingGoalEditor = true
                     } label: {
-                        miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                        miniStat("Норма", goalValue, unit: goalUnit, color: ProgressRing.kcalColors[0])
                     }
                     .buttonStyle(.plain)
                     .accessibilityIdentifier("calorieTargetRow")

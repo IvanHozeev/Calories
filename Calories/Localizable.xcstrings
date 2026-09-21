@@ -4,53 +4,6 @@
     "" : {
       "shouldTranslate" : false
     },
-    "Питание" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التغذية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ernährung"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Food"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alimentación"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alimentation"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תזונה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alimentação"
-          }
-        }
-      }
-    },
     "—" : {
       "shouldTranslate" : false
     },
@@ -13441,6 +13394,7 @@
       }
     },
     "Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13482,6 +13436,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As proporções são calculadas em calorias, não em gramas: um grama de gordura dá nove quilocalorias contra quatro de proteína e carboidratos."
+          }
+        }
+      }
+    },
+    "Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُحسب الحصص بالسعرات: هكذا يتّضح أين يذهب اليوم فعلاً، لا كم سطراً في المذكرة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anteile zählen Kalorien: so ist zu sehen, wohin der Tag wirklich geht — nicht, wie viele Zeilen im Tagebuch stehen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shares are counted in calories: that shows where the day actually goes, not how many lines are in the diary."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las proporciones se cuentan en calorías: así se ve en qué se va el día de verdad, no cuántas líneas hay en el diario."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les parts sont comptées en calories : on voit ainsi où part vraiment la journée, pas combien de lignes compte le journal."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלקים נספרים בקלוריות: כך רואים לאן היום באמת הולך, ולא כמה שורות יש ביומן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fatias são contadas em calorias: assim dá para ver para onde o dia vai mesmo, e não quantas linhas há no diário."
+          }
+        }
+      }
+    },
+    "Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُحسب الحصص بالسعرات. «غير معروف» هو طعام سُجِّل في سطر واحد: التطبيق لا يعرف مِمَّ يتكوّن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Anteile zählen Kalorien. „Unbekannt“ ist Essen, das als eine Zeile notiert wurde — woraus es bestand, weiß die App nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shares are counted in calories. “Unknown” is food logged as a single line — the app has no idea what went into it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las proporciones se cuentan en calorías. «Desconocido» es comida anotada en una sola línea: la app no sabe de qué se compone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les parts sont comptées en calories. « Inconnu », c'est ce qui a été noté en une seule ligne : l'app ignore ce qu'il y avait dedans."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלקים נספרים בקלוריות. «לא ידוע» הוא אוכל שנרשם בשורה אחת — האפליקציה לא יודעת ממה הוא מורכב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fatias são contadas em calorias. «Desconhecido» é comida registada numa só linha: o app não sabe do que é feita."
           }
         }
       }
@@ -26201,6 +26249,53 @@
         }
       }
     },
+    "Неизвестно" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير معروف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unbekannt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconocido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inconnu"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ידוע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconhecido"
+          }
+        }
+      }
+    },
     "нет взвешиваний" : {
       "localizations" : {
         "ar" : {
@@ -27129,7 +27224,6 @@
       }
     },
     "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший." : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -30893,6 +30987,53 @@
         }
       }
     },
+    "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من هنا يأتي الرقم: %1$lld سعرة يوميًا في المتوسط، واتجاه الوزن %2$@ كجم في الأسبوع. المعادلة لا ترى هذا — فهي لا تعرف عملك ولا تكيّفك مع العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daher kommt die Zahl: im Schnitt %1$lld kcal am Tag gegessen, Gewichtstrend %2$@ kg pro Woche. Eine Formel sieht das nicht — sie kennt weder deine Arbeit noch die Anpassung an das Defizit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That is where the number comes from: %1$lld kcal a day eaten on average, weight trending %2$@ kg a week. A formula cannot see this — it knows neither your job nor how you adapted to the deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De ahí sale el número: %1$lld kcal al día de media y un peso que tiende %2$@ kg por semana. La fórmula no ve esto: no conoce ni tu trabajo ni tu adaptación al déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'où vient le chiffre : %1$lld kcal par jour en moyenne, un poids qui évolue de %2$@ kg par semaine. La formule ne voit pas cela — elle ignore ton travail comme ton adaptation au déficit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מכאן מגיע המספר: %1$lld קלוריות ביום בממוצע, ומגמת משקל של %2$@ ק״ג בשבוע. נוסחה לא רואה את זה — היא לא מכירה לא את העבודה שלך ולא את ההסתגלות לגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "É daí que vem o número: %1$lld kcal por dia em média e o peso a variar %2$@ kg por semana. A fórmula não vê isto — não conhece o teu trabalho nem a adaptação ao défice."
+          }
+        }
+      }
+    },
     "Отчёт" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -32329,6 +32470,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cerveja"
+          }
+        }
+      }
+    },
+    "Питание" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التغذية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ernährung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentation"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תזונה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alimentação"
           }
         }
       }
@@ -44812,6 +45000,7 @@
       }
     },
     "Съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю — значит, тратится около %3$lld. Формула этого не видит: она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50309,6 +50498,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
+          }
+        }
+      }
+    },
+    "как расход" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مثل الإنفاق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "wie der Verbrauch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "same as spend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "igual al gasto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "égale à la dépense"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמו ההוצאה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "igual ao gasto"
           }
         }
       }

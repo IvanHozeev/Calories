@@ -147,6 +147,13 @@ nonisolated struct Micronutrients: Codable, Equatable {
         per100g[nutrient.rawValue]
     }
 
+    /// Копия с одним изменённым нутриентом.
+    func setting(_ nutrient: Micronutrient, to amount: Double) -> Micronutrients {
+        var result = self
+        result.per100g[nutrient.rawValue] = amount
+        return result
+    }
+
     /// Пересчёт на съеденную массу.
     func scaled(by grams: Double) -> Micronutrients {
         var result = Micronutrients()

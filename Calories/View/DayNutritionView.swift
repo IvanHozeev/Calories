@@ -20,6 +20,11 @@ struct DayNutritionView: View {
         store.micronutrients(on: date)
     }
 
+    /// Из каких категорий продуктов собран день.
+    private var categories: [DayCategories.Part] {
+        store.categoryBreakdown(on: date)
+    }
+
     private var analysis: [DayAnalysis.Advice] {
         let day = Calendar.current.startOfDay(for: date)
         let entries = store.entriesByDay[day] ?? []
@@ -40,15 +45,22 @@ struct DayNutritionView: View {
 
     var body: some View {
         List {
-            if !DayAnalysis.composition(macros).isEmpty {
+            if !categories.isEmpty {
                 Section {
                     compositionChart
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    compositionLegend
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 } header: {
                     Text("Состав рациона")
                 } footer: {
-                    Text("Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов.")
+                    if categories.contains(where: { $0.category == nil }) {
+                        Text("Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает.")
+                    } else {
+                        Text("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.")
+                    }
                 }
             }
 
@@ -90,21 +102,25 @@ struct DayNutritionView: View {
 
     // MARK: - Состав и разбор
 
-    /// Кольцо состава: те же цвета, что у макросов везде, в середине — калории.
+    /// Кольцо состава: по категориям продуктов, в середине — калории дня.
+    ///
+    /// Раньше здесь делились белки, жиры и углеводы — то же самое, что тремя
+    /// строками ниже, только кружком. Категории отвечают на другой вопрос:
+    /// чего в рационе не было вовсе.
     private var compositionChart: some View {
-        let parts = DayAnalysis.composition(macros)
-        return Chart(parts, id: \.kind) { part in
+        let parts = categories
+        return Chart(parts) { part in
             SectorMark(angle: .value("Калории", part.calories),
                        innerRadius: .ratio(0.62),
                        angularInset: 1.5)
                 .cornerRadius(4)
-                .foregroundStyle(part.kind.color)
+                .foregroundStyle(color(for: part))
         }
         .chartLegend(.hidden)
         .frame(height: 190)
         .overlay {
             VStack(spacing: 2) {
-                Text(verbatim: "\(Int((parts.reduce(0) { $0 + $1.calories }).rounded()))")
+                Text(verbatim: "\(parts.reduce(0) { $0 + $1.calories })")
                     .font(.app(size: 26, weight: .bold))
                     .monospacedDigit()
                 Text("ккал")
@@ -112,27 +128,37 @@ struct DayNutritionView: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .overlay(alignment: .bottom) {
-            HStack(spacing: 14) {
-                ForEach(parts, id: \.kind) { part in
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(part.kind.color)
-                            .frame(width: 6, height: 6)
-                        Text(LocalizedStringKey(part.kind.title))
-                            .foregroundStyle(.secondary)
-                        Text(verbatim: "\(Int((part.share * 100).rounded()))%")
-                            .foregroundStyle(.tertiary)
-                            .monospacedDigit()
-                    }
+        .padding(.bottom, 4)
+    }
+
+    /// Подписи под кольцом: сеткой, а не строкой — категорий бывает под
+    /// десяток, и в одну строку они не помещаются.
+    private var compositionLegend: some View {
+        let columns = [GridItem(.adaptive(minimum: 130), spacing: 8, alignment: .leading)]
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
+            ForEach(categories) { part in
+                HStack(spacing: 5) {
+                    Circle()
+                        .fill(color(for: part))
+                        .frame(width: 7, height: 7)
+                    Text(title(for: part))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                    Text(verbatim: "\(Int((part.share * 100).rounded()))%")
+                        .foregroundStyle(.tertiary)
+                        .monospacedDigit()
                 }
             }
-            .font(.app(.caption2))
-            // Ниже кольца, а не впритык к нему: на 14 подписи почти касались
-            // дуг и читались как их продолжение.
-            .offset(y: 30)
         }
-        .padding(.bottom, 34)
+        .font(.app(.caption2))
+    }
+
+    private func color(for part: DayCategories.Part) -> Color {
+        part.category?.color ?? Color.secondary.opacity(0.35)
+    }
+
+    private func title(for part: DayCategories.Part) -> String {
+        part.category?.title ?? String(localized: "Неизвестно")
     }
 
     private func adviceRow(_ item: DayAnalysis.Advice) -> some View {

@@ -107,8 +107,22 @@ final class FoodEntry: Identifiable {
     var carbs: Double
     var grams: Double?
     var date: Date
+    /// Из чего собран приём — по продуктам, как его собирали на экране.
+    ///
+    /// Приём из нескольких продуктов до этого хранился одной строкой со
+    /// склеенным именем («Хала, Молоко, Whey Protein») и без веса, и
+    /// восстановить по ней было нечего: ни «Недавнее» не видело протеина,
+    /// съеденного двенадцать раз, ни разбор дня не знал, из каких категорий
+    /// собран рацион, ни клетчатка не считалась.
+    ///
+    /// JSON в одном поле, а не связь SwiftData: состав — снимок на момент
+    /// записи, он не должен меняться вслед за продуктом и не нужен запросам.
+    /// Необязательное со значением по умолчанию — иначе уже сохранённые
+    /// записи не смигрируют.
+    var componentsData: Data?
 
-    init(id: UUID = UUID(), name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, date: Date = Date()) {
+    init(id: UUID = UUID(), name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil,
+         date: Date = Date(), components: [EntryComponent] = []) {
         self.id = id
         self.name = name
         self.calories = calories
@@ -117,6 +131,27 @@ final class FoodEntry: Identifiable {
         self.carbs = macros.carbs
         self.grams = grams
         self.date = date
+        self.components = components
+    }
+
+    /// Состав приёма. Пусто — значит запись из одного продукта либо сделана
+    /// до того, как состав начали хранить.
+    var components: [EntryComponent] {
+        get {
+            guard let componentsData else { return [] }
+            return (try? JSONDecoder().decode([EntryComponent].self, from: componentsData)) ?? []
+        }
+        set {
+            componentsData = newValue.isEmpty ? nil : try? JSONEncoder().encode(newValue)
+        }
+    }
+
+    /// Состав приёма, даже если он не записан: запись из одного продукта —
+    /// это он сам. Так считающему коду не приходится каждый раз разбирать
+    /// два случая.
+    var composition: [EntryComponent] {
+        if !components.isEmpty { return components }
+        return [EntryComponent(name: name, calories: calories, macros: macros, grams: grams)]
     }
 
     var macros: Macros {
@@ -192,6 +227,27 @@ final class Dish: Identifiable {
             carbs: totalMacros.carbs / totalGrams * 100
         )
     }
+}
+
+/// Один продукт внутри записи дневника: снимок на момент записи.
+nonisolated struct EntryComponent: Codable, Equatable, Hashable {
+    var name: String
+    var calories: Int
+    var protein: Double
+    var fat: Double
+    var carbs: Double
+    var grams: Double?
+
+    init(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil) {
+        self.name = name
+        self.calories = calories
+        self.protein = macros.protein
+        self.fat = macros.fat
+        self.carbs = macros.carbs
+        self.grams = grams
+    }
+
+    var macros: Macros { Macros(protein: protein, fat: fat, carbs: carbs) }
 }
 
 /// Одна позиция в черновике приёма пищи — до нажатия «Сохранить» нигде не хранится.

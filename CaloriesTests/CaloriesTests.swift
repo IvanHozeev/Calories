@@ -833,6 +833,107 @@ struct CalorieStoreTests {
                 "Без веса пересчитать на 100 г нельзя, такие записи в недавнем не нужны")
     }
 
+    /// Приём из нескольких продуктов раньше уходил в дневник одной строкой
+    /// со склеенным именем и без веса — и продукты внутри него в «Недавнем»
+    /// не появлялись вовсе. Протеин, съеденный двенадцать раз за месяц, не
+    /// показывался ни разу, потому что в одиночку его не записывали никогда.
+    @Test func recentFoods_seeProductsInsideAMealOfSeveral() {
+        store.add(name: "Хала, Молоко, Whey Protein", calories: 700,
+                  macros: Macros(protein: 40, fat: 15, carbs: 90), grams: nil,
+                  date: Date(), components: [
+                      EntryComponent(name: "Хала", calories: 300,
+                                     macros: Macros(protein: 9, fat: 5, carbs: 55), grams: 100),
+                      EntryComponent(name: "Молоко", calories: 100,
+                                     macros: Macros(protein: 6, fat: 3, carbs: 10), grams: 200),
+                      EntryComponent(name: "Whey Protein", calories: 300,
+                                     macros: Macros(protein: 25, fat: 7, carbs: 25), grams: 30),
+                  ])
+
+        let names = store.recentFoods.map(\.name)
+        #expect(names.contains("Whey Protein"), "Продукт внутри приёма — тоже недавний")
+        #expect(names.contains("Молоко"))
+        #expect(!names.contains("Хала, Молоко, Whey Protein"),
+                "Склеенное имя приёма — не продукт, добавить его заново нельзя")
+
+        // Пересчёт на сто грамм идёт по весу самого продукта, а не всего приёма.
+        let whey = store.recentFoods.first { $0.name == "Whey Protein" }
+        #expect(whey?.caloriesPer100g == 1000)
+        #expect(whey?.defaultGrams == 30)
+    }
+
+    /// Записи, сделанные до того, как состав начали хранить, — всё, что от
+    /// состава осталось, это склеенное имя. Разбираем его, иначе месяцы
+    /// истории так и останутся невидимыми для «Недавнего».
+    @Test func recentFoods_recoverProductsFromOldJoinedNames() {
+        store.addCustomFood(name: "Whey Protein", caloriesPer100g: 400,
+                            protein: 80, fat: 5, carbs: 10)
+        store.add(name: "Хала, Whey Protein", calories: 700,
+                  macros: Macros(protein: 40, fat: 15, carbs: 90))
+
+        #expect(store.recentFoods.map(\.name).contains("Whey Protein"),
+                "Продукт из старой склеенной записи должен найтись по имени")
+    }
+
+    // MARK: Состав рациона по категориям
+
+    /// Диаграмма состава должна брать категории из состава приёма: у приёма
+    /// из нескольких продуктов имя склеенное, и категории у него нет вовсе.
+    @Test func categoryBreakdown_readsTheMealsComposition() {
+        store.addCustomFood(name: "Хала", caloriesPer100g: 300, protein: 9, fat: 5, carbs: 55,
+                            category: .grains)
+        store.addCustomFood(name: "Молоко", caloriesPer100g: 50, protein: 3, fat: 2, carbs: 5,
+                            category: .dairy)
+        store.add(name: "Хала, Молоко", calories: 400, components: [
+            EntryComponent(name: "Хала", calories: 300, grams: 100),
+            EntryComponent(name: "Молоко", calories: 100, grams: 200),
+        ])
+
+        let parts = store.categoryBreakdown(on: Date())
+        #expect(parts.first?.category == .grains)
+        #expect(parts.first?.calories == 300)
+        #expect(abs((parts.first?.share ?? 0) - 0.75) < 0.001)
+        #expect(parts.contains { $0.category == .dairy && $0.calories == 100 })
+    }
+
+    /// Блюдо — не одна безымянная строка: «гречка с тунцом» это крупа и рыба,
+    /// и раскладывается она по ингредиентам, пропорционально их калориям.
+    @Test func categoryBreakdown_splitsADishIntoItsIngredients() {
+        store.addCustomFood(name: "Гречка", caloriesPer100g: 100, protein: 3, fat: 1, carbs: 20,
+                            category: .grains)
+        store.addCustomFood(name: "Тунец", caloriesPer100g: 100, protein: 25, fat: 1, carbs: 0,
+                            category: .fish)
+        let dish = Dish(name: "Гречка с тунцом", ingredients: [
+            DishIngredient(foodName: "Гречка", caloriesPer100g: 100, macrosPer100g: .zero, grams: 300),
+            DishIngredient(foodName: "Тунец", caloriesPer100g: 100, macrosPer100g: .zero, grams: 100),
+        ])
+        container.mainContext.insert(dish)
+        store.refresh()
+        store.add(name: dish.name, calories: 400, grams: 400)
+
+        let parts = store.categoryBreakdown(on: Date())
+        #expect(parts.first { $0.category == .grains }?.calories == 300)
+        #expect(parts.first { $0.category == .fish }?.calories == 100)
+    }
+
+    /// Еда, про которую состав неизвестен, не растворяется по остальным и не
+    /// прячется: это дыра в данных, и она должна быть видна как дыра — но
+    /// всегда последней, потому что частью рациона она не является.
+    @Test func categoryBreakdown_keepsTheUnknownLastAndHonest() {
+        store.addCustomFood(name: "Хала", caloriesPer100g: 300, protein: 9, fat: 5, carbs: 55,
+                            category: .grains)
+        store.add(name: "Хала", calories: 300, grams: 100)
+        store.add(name: "Шаурма у дома", calories: 900)
+
+        let parts = store.categoryBreakdown(on: Date())
+        #expect(parts.last?.category == nil)
+        #expect(parts.last?.calories == 900)
+        #expect(parts.first?.category == .grains, "Известное идёт первым, даже если его меньше")
+    }
+
+    @Test func categoryBreakdown_isEmptyForADayWithoutFood() {
+        #expect(store.categoryBreakdown(on: Date()).isEmpty)
+    }
+
     // MARK: Порядок приёмов пищи
 
     /// Ночной перекус идёт с 23:00 до 05:00, поэтому запись в 00:30 — самая ранняя за день,

@@ -289,8 +289,11 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.navigationBars["Day breakdown"].waitForExistence(timeout: 5),
                       "Карточка не открыла разбор дня")
-        XCTAssertTrue(app.staticTexts["Vitamins and minerals"].waitForExistence(timeout: 5),
-                      "В разборе дня должны быть витамины и минералы")
+        // Список стал длиннее: над витаминами теперь диаграмма состава с
+        // подписями, и заголовок секции уехал за нижнюю кромку.
+        let vitamins = app.staticTexts["Vitamins and minerals"]
+        scrollTo(vitamins, in: app)
+        XCTAssertTrue(vitamins.exists, "В разборе дня должны быть витамины и минералы")
     }
 
     /// Сквозная проверка микронутриентов: продукт встроенной базы приносит

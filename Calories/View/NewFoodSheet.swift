@@ -12,6 +12,12 @@ struct NewFoodSheet: View {
     @State private var name = ""
     @State private var caloriesPer100g = ""
     @State private var protein = ""
+    /// Клетчатка на 100 г — единственный микронутриент, который вводят руками.
+    ///
+    /// Её пишут на любой упаковке, и она нужна каждый день, а не «когда-нибудь
+    /// посмотрю витамины»: без этого поля клетчатки не было ни у одного своего
+    /// продукта, и считать её было не из чего.
+    @State private var fiber = ""
     @State private var fat = ""
     @State private var carbs = ""
     @State private var category = FoodCategory.other
@@ -21,7 +27,7 @@ struct NewFoodSheet: View {
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
     @State private var linkedSourceName: String?
-    private enum Field: Hashable { case search, name, calories, protein, fat, carbs }
+    private enum Field: Hashable { case search, name, calories, protein, fat, carbs, fiber }
     @FocusState private var focusedField: Field?
 
     @State private var searchQuery = ""
@@ -33,9 +39,19 @@ struct NewFoodSheet: View {
     /// Витамины и минералы показываем от источника: у своих продуктов их нет,
     /// у продуктов базы бывают. Вводить их руками негде и незачем.
     private var micronutrients: Micronutrients {
-        if !linkedMicronutrients.isEmpty { return linkedMicronutrients }
-        if let own = editingFood?.micronutrients, !own.isEmpty { return own }
-        return matchedInCatalog ?? Micronutrients()
+        var base = Micronutrients()
+        if !linkedMicronutrients.isEmpty {
+            base = linkedMicronutrients
+        } else if let own = editingFood?.micronutrients, !own.isEmpty {
+            base = own
+        } else {
+            base = matchedInCatalog ?? Micronutrients()
+        }
+        // Введённая руками клетчатка перекрывает найденную: человек смотрит
+        // на упаковку того, что купил, а совпадение по названию — догадка.
+        let entered = Double(fiber.replacingOccurrences(of: ",", with: ".")) ?? 0
+        guard entered > 0 else { return base }
+        return base.setting(.fiber, to: entered)
     }
 
     /// Состав продукта базы, чьё название совпало с введённым.
@@ -219,6 +235,10 @@ struct NewFoodSheet: View {
                                keyboard: .decimalPad, field: .fat)
                     macroField("Углеводы", text: $carbs, unit: "г",
                                keyboard: .decimalPad, field: .carbs)
+                    // Клетчатка следом за углеводами: она их часть, и на
+                    // упаковке стоит там же, с отступом под «в том числе».
+                    macroField("Клетчатка", text: $fiber, unit: "г",
+                               keyboard: .decimalPad, field: .fiber)
 
                     // Полоска рисует ровно те четыре числа, что введены выше,
                     // поэтому стоит сразу за ними.
@@ -379,6 +399,9 @@ struct NewFoodSheet: View {
                     name = food.name
                     caloriesPer100g = "\(food.caloriesPer100g)"
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
+                    if let own = food.micronutrients[.fiber], own > 0 {
+                        fiber = String(format: "%g", own)
+                    }
                     fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
                     carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
                     servingGrams = food.defaultGrams > 0 && food.defaultGrams != 100

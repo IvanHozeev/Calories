@@ -196,7 +196,8 @@ struct BarcodeScannerSheet: View {
                 caloriesPer100g: product.caloriesPer100g,
                 protein: product.protein,
                 fat: product.fat,
-                carbs: product.carbs
+                carbs: product.carbs,
+                micronutrients: product.micronutrients
             )
         }
         dismiss()
@@ -239,16 +240,6 @@ struct BarcodeScannerSheet: View {
             phase = .notFound
         }
     }
-}
-
-// MARK: - Model
-
-struct BarcodeProduct {
-    let name: String
-    let caloriesPer100g: Int
-    let protein: Double
-    let fat: Double
-    let carbs: Double
 }
 
 // MARK: - Camera view

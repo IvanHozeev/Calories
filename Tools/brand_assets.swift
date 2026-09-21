@@ -106,6 +106,41 @@ func freshMark(_ ctx: CGContext, width: CGFloat, outer: CGFloat, grayscale: [CGF
     }
 }
 
+/// Подмешать белого к цвету — для едва заметного перехода внутри дуги.
+func shade(_ color: CGColor, _ amount: CGFloat) -> CGColor {
+    let c = color.components ?? [0, 0, 0, 1]
+    func mix(_ v: CGFloat) -> CGFloat { v + (1 - v) * amount }
+    return CGColor(colorSpace: space, components: [mix(c[0]), mix(c[1]), mix(c[2]), c.count > 3 ? c[3] : 1])!
+}
+
+/// Знак в стиле иконок Google (Gemini, Maps, Photos): плоско и чисто.
+///
+/// Их приёмы, снятые с самих иконок: чисто белое поле без градиента; ни тени,
+/// ни блика — ни одного; каждая часть своего цвета, внутри почти ровного, с
+/// едва заметным переходом вдоль формы; концы скруглены; знак крупный и
+/// занимает большую часть поля. Объём там берётся не от света, а от плотной
+/// формы и насыщенного цвета — стоит добавить блик, и иконка сразу читается
+/// как глянец из 2010-го, а не как их.
+func googleMark(_ ctx: CGContext, width: CGFloat, outer: CGFloat, grayscale: [CGFloat]? = nil) {
+    for (index, spine) in spines(width: width, outer: outer).enumerated() {
+        let shape = outline(spine, width)
+        let bounds = shape.boundingBoxOfPath
+        ctx.saveGState()
+        ctx.addPath(shape); ctx.clip()
+        if let grayscale {
+            ctx.setFillColor(gray(grayscale[index]))
+            ctx.fill(bounds)
+        } else {
+            // Переход внутри дуги едва заметный: у них цвет почти ровный, и
+            // сильный градиент сразу выдаёт чужую руку.
+            let pair = palette[index]
+            linear(ctx, [shade(pair[0], 0.06), pair[1]],
+                   from: CGPoint(x: bounds.minX, y: bounds.maxY), to: CGPoint(x: bounds.maxX, y: bounds.minY))
+        }
+        ctx.restoreGState()
+    }
+}
+
 // MARK: - Иконка
 
 /// Толщина и размер «С» на иконке: крупно, но с воздухом до краёв.
@@ -115,22 +150,22 @@ let iconOuter: CGFloat = 372
 // Светлая: белое поле, чуть сереющее книзу.
 do {
     let ctx = context(1024, 1024)
-    linear(ctx, [rgb(0xFFFFFF), rgb(0xF1F3F7)], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
-    freshMark(ctx, width: iconWidth, outer: iconOuter)
+    ctx.setFillColor(gray(1)); ctx.fill(CGRect(x: 0, y: 0, width: S, height: S))
+    googleMark(ctx, width: iconWidth, outer: iconOuter)
     save(ctx, "AppIcon-light.png")
 }
 // Тёмная: то же на почти чёрном поле — как тёмная тема приложения.
 do {
     let ctx = context(1024, 1024)
     linear(ctx, [rgb(0x1C1C1F), rgb(0x0A0A0B)], from: CGPoint(x: 0, y: S), to: CGPoint(x: 0, y: 0))
-    freshMark(ctx, width: iconWidth, outer: iconOuter)
+    googleMark(ctx, width: iconWidth, outer: iconOuter)
     save(ctx, "AppIcon-dark.png")
 }
 // Tinted: оттенки серого на чёрном, цвет даёт система.
 do {
     let ctx = context(1024, 1024)
     ctx.setFillColor(gray(0)); ctx.fill(CGRect(x: 0, y: 0, width: S, height: S))
-    freshMark(ctx, width: iconWidth, outer: iconOuter, grayscale: [1, 0.85, 0.7])
+    googleMark(ctx, width: iconWidth, outer: iconOuter, grayscale: [1, 0.85, 0.7])
     save(ctx, "AppIcon-tinted.png")
 }
 

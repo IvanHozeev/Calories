@@ -69,6 +69,12 @@ enum OpenFoodService {
         guard let http = response as? HTTPURLResponse, 200..<300 ~= http.statusCode else {
             throw ServiceError.unavailable
         }
+        return try parseSearch(data)
+    }
+
+    /// Разбор ответа поиска — отдельно от запроса, чтобы его можно было
+    /// проверить тестом: у сетевого метода проверяема только подпись.
+    static func parseSearch(_ data: Data) throws -> [FoodItem] {
         let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
         return decoded.products.compactMap { product -> FoodItem? in
             let name = (product.productName ?? "").trimmingCharacters(in: .whitespaces)
@@ -95,28 +101,57 @@ enum OpenFoodService {
         }
         do {
             let (data, _) = try await session.data(from: url)
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  (json["status"] as? Int) == 1,
-                  let productDict = json["product"] as? [String: Any] else { return nil }
-
-            let name = (productDict["product_name"] as? String ?? "")
-                .trimmingCharacters(in: .whitespaces)
-            let nutriments = productDict["nutriments"] as? [String: Any] ?? [:]
-            let kcal = nutriments["energy-kcal_100g"] as? Double
-                    ?? nutriments["energy-kcal"] as? Double
-                    ?? 0
-            // Без калорийности продукт бесполезен: дневник считает именно её.
-            guard kcal > 0 else { return nil }
-
-            return BarcodeProduct(
-                name: name.isEmpty ? String(format: String(localized: "Продукт %@"), barcode) : name,
-                caloriesPer100g: Int(kcal.rounded()),
-                protein: nutriments["proteins_100g"] as? Double ?? 0,
-                fat: nutriments["fat_100g"] as? Double ?? 0,
-                carbs: nutriments["carbohydrates_100g"] as? Double ?? 0
-            )
+            return parseProduct(data, barcode: barcode)
         } catch {
             return nil
         }
     }
+
+    /// Разбор ответа по штрихкоду.
+    ///
+    /// Клетчатка забирается так же, как в поиске: она здесь и есть главный
+    /// источник — витаминов у Open Food Facts почти нет, а клетчатку он знает
+    /// у большинства товаров. Раньше её брал только текстовый поиск, и
+    /// отсканированный товар приходил в дневник без неё, хотя в ответе она
+    /// лежала.
+    static func parseProduct(_ data: Data, barcode: String) -> BarcodeProduct? {
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              (json["status"] as? Int) == 1,
+              let productDict = json["product"] as? [String: Any] else { return nil }
+
+        let name = (productDict["product_name"] as? String ?? "")
+            .trimmingCharacters(in: .whitespaces)
+        let nutriments = productDict["nutriments"] as? [String: Any] ?? [:]
+        let kcal = nutriments["energy-kcal_100g"] as? Double
+                ?? nutriments["energy-kcal"] as? Double
+                ?? 0
+        // Без калорийности продукт бесполезен: дневник считает именно её.
+        guard kcal > 0 else { return nil }
+
+        var micronutrients = Micronutrients()
+        if let fiber = nutriments["fiber_100g"] as? Double, fiber > 0 {
+            micronutrients = Micronutrients([.fiber: fiber])
+        }
+        return BarcodeProduct(
+            name: name.isEmpty ? String(format: String(localized: "Продукт %@"), barcode) : name,
+            caloriesPer100g: Int(kcal.rounded()),
+            protein: nutriments["proteins_100g"] as? Double ?? 0,
+            fat: nutriments["fat_100g"] as? Double ?? 0,
+            carbs: nutriments["carbohydrates_100g"] as? Double ?? 0,
+            micronutrients: micronutrients
+        )
+    }
+}
+
+/// Продукт, найденный по штрихкоду.
+///
+/// Живёт рядом с источником, а не во вьюхе сканера: его же разбирает и
+/// проверяет тест, а вьюха только показывает.
+struct BarcodeProduct {
+    let name: String
+    let caloriesPer100g: Int
+    let protein: Double
+    let fat: Double
+    let carbs: Double
+    var micronutrients: Micronutrients = Micronutrients()
 }

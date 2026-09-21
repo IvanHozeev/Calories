@@ -3605,6 +3605,74 @@ struct FoodTraitTests {
     }
 }
 
+// MARK: - Разбор ответов Open Food Facts
+
+/// Ответы источника разбираются чистыми функциями, отдельно от запроса:
+/// сетевой метод тестом не проверить, а разбор — единственное место, где
+/// теряются данные. Клетчатка именно так и терялась: текстовый поиск её брал,
+/// а ответ по штрихкоду — нет, хотя лежала она и там.
+struct OpenFoodParsingTests {
+
+    private func data(_ json: String) -> Data { Data(json.utf8) }
+
+    @Test func aScannedProductCarriesItsFiber() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Хлеб цельнозерновой",
+         "nutriments": {"energy-kcal_100g": 247, "proteins_100g": 9.5,
+                        "fat_100g": 3.2, "carbohydrates_100g": 41, "fiber_100g": 6.8}}}
+        """), barcode: "7290000000001")
+
+        #expect(product?.name == "Хлеб цельнозерновой")
+        #expect(product?.caloriesPer100g == 247)
+        #expect(product?.micronutrients[.fiber] == 6.8,
+                "Клетчатка из ответа по штрихкоду должна доезжать до продукта")
+    }
+
+    @Test func aScannedProductWithoutFiberKeepsAnEmptyComposition() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Кола",
+         "nutriments": {"energy-kcal_100g": 42, "carbohydrates_100g": 10.6}}}
+        """), barcode: "5449000000996")
+
+        #expect(product?.micronutrients.isEmpty == true,
+                "Нуля клетчатки в ответе не было — значит, и утверждать нечего")
+    }
+
+    @Test func aProductWithoutCaloriesIsNotAProduct() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Вода", "nutriments": {}}}
+        """), barcode: "1")
+        #expect(product == nil, "Дневник считает калории: без них запись бессмысленна")
+    }
+
+    @Test func anUnnamedProductIsNamedByItsBarcode() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "", "nutriments": {"energy-kcal_100g": 100}}}
+        """), barcode: "7290000000001")
+        #expect(product?.name.contains("7290000000001") == true)
+    }
+
+    @Test func aMissingProductIsNil() {
+        #expect(OpenFoodService.parseProduct(data("{\"status\": 0}"), barcode: "1") == nil)
+        #expect(OpenFoodService.parseProduct(data("<html>503</html>"), barcode: "1") == nil,
+                "База иногда отвечает HTML — это не продукт, а сбой")
+    }
+
+    @Test func searchResultsCarryFiberAndSkipTheUnusable() throws {
+        let items = try OpenFoodService.parseSearch(data("""
+        {"products": [
+          {"product_name": "Овсянка", "nutriments": {"energy-kcal_100g": 370, "proteins_100g": 13,
+                                                     "fat_100g": 7, "carbohydrates_100g": 60, "fiber_100g": 10}},
+          {"product_name": "", "nutriments": {"energy-kcal_100g": 100}},
+          {"product_name": "Без калорий", "nutriments": {"proteins_100g": 5}}
+        ]}
+        """))
+
+        #expect(items.count == 1, "Без имени или без калорий продукт в список не идёт")
+        #expect(items.first?.micronutrients[.fiber] == 10)
+    }
+}
+
 // MARK: - Расписание приёмов пищи
 
 struct MealScheduleTests {

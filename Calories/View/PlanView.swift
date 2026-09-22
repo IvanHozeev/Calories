@@ -281,9 +281,10 @@ struct PlanView: View {
 
     private func phaseVerdictColor(_ verdict: PhaseCompositionVerdict) -> Color {
         switch verdict {
-        case .worked:  return .green
-        case .costly:  return .orange
-        case .stalled: return .secondary
+        case .worked:        return .green
+        case .costly:        return .orange
+        case .stalled:       return .secondary
+        case .recomposition: return .green
         }
     }
 

@@ -46,20 +46,26 @@ enum PhaseCompositionVerdict {
     case costly
     /// Не сделала ничего — вес не сдвинулся дальше погрешности весов.
     case stalled
+    /// Жир ушёл, сухая масса прибавила. Лучшее, что может случиться, и
+    /// случается это независимо от того, какая фаза шла: вес при этом может
+    /// стоять, расти или падать — судить по нему тут бессмысленно.
+    case recomposition
 
     var title: String {
         switch self {
-        case .worked:  return String(localized: "Фаза отработала")
-        case .costly:  return String(localized: "Отработала дорого")
-        case .stalled: return String(localized: "Вес не сдвинулся")
+        case .worked:       return String(localized: "Фаза отработала")
+        case .costly:       return String(localized: "Отработала дорого")
+        case .stalled:      return String(localized: "Вес не сдвинулся")
+        case .recomposition: return String(localized: "Жир вниз, мышцы вверх")
         }
     }
 
     var icon: String {
         switch self {
-        case .worked:  return "checkmark.circle.fill"
-        case .costly:  return "exclamationmark.triangle.fill"
-        case .stalled: return "pause.circle.fill"
+        case .worked:        return "checkmark.circle.fill"
+        case .costly:        return "exclamationmark.triangle.fill"
+        case .stalled:       return "pause.circle.fill"
+        case .recomposition: return "arrow.up.arrow.down.circle.fill"
         }
     }
 }
@@ -71,12 +77,32 @@ extension CompositionChange {
     static let scaleNoiseKg = 0.5
 
     /// Какая часть изменения веса пришлась на жир. Ничего, если вес стоит.
+    ///
+    /// Ничего и тогда, когда жир с весом разошлись в разные стороны: вес вырос,
+    /// а жира стало меньше — это рекомпозиция, и «доля» тут выдаёт что-нибудь
+    /// вроде «−302% изменения веса», то есть арифметически верную бессмыслицу.
     var fatShareOfChange: Double? {
         guard abs(weightDeltaKg) > Self.scaleNoiseKg else { return nil }
+        guard (fatDeltaKg >= 0) == (weightDeltaKg >= 0) else { return nil }
         return fatDeltaKg / weightDeltaKg
     }
 
+    /// Жир ушёл, а сухая масса прибавила — заметнее, чем метод способен наврать.
+    ///
+    /// Требование строгое только к сухой массе: её прирост и есть новость.
+    /// От жира достаточно, чтобы он не вырос, — иначе «рекомпозицией» назвался
+    /// бы обычный набор, где выросло всё сразу.
+    var isRecomposition: Bool {
+        leanDeltaKg > noiseKg && fatDeltaKg <= 0
+    }
+
     func verdict(for intent: PlanIntent) -> PhaseCompositionVerdict {
+        // Рекомпозиция судится раньше намерения: жир вниз, мышцы вверх — это
+        // успех в любой фазе, и по весу его не увидеть вовсе. Раньше такой
+        // исход на поддержании объявлялся «дорогим» просто потому, что вес
+        // сдвинулся, — то есть лучший результат называли худшим.
+        if isRecomposition { return .recomposition }
+
         let moved = abs(weightDeltaKg) > Self.scaleNoiseKg
         switch intent {
         case .cut:
@@ -91,14 +117,24 @@ extension CompositionChange {
             // формально изменение сухой укладывается в погрешность.
             return weightDeltaKg > 0 ? .costly : .stalled
         case .maintenance:
-            // На поддержании успех — это когда ничего не произошло.
-            return moved ? .costly : .worked
+            // На поддержании смотрим не на то, сдвинулся ли вес, а на то, чем
+            // он сдвинулся: набранный жир — это разошедшаяся норма, а вода
+            // и гликоген на пару килограммов — обычная неделя.
+            if !moved { return .worked }
+            // Основную часть сдвига дал жир — норма разошлась с расходом.
+            // Если же вес прибавился водой и гликогеном, это обычная неделя,
+            // а не провал: в пределах погрешности весов такое бывает каждую.
+            let fatShare = fatDeltaKg / weightDeltaKg
+            return fatShare > 0.5 ? .costly : .worked
         }
     }
 
     /// Что с этим делать. Текст зависит и от вердикта, и от намерения: «ешь
     /// больше» на сушке и на наборе — противоположные советы.
     func advice(for intent: PlanIntent) -> String {
+        if verdict(for: intent) == .recomposition {
+            return String(localized: "Жир ушёл, а сухая масса прибавила — так бывает у новичков, после перерыва и на возврате к прежней форме. Вес при этом может стоять или даже расти: смотреть надо на состав.")
+        }
         switch (intent, verdict(for: intent)) {
         case (.cut, .worked):
             return String(localized: "Вес уходит жиром, сухая масса на месте — так дефицит и должен выглядеть.")
@@ -118,6 +154,9 @@ extension CompositionChange {
             return String(localized: "Вес поехал. На поддержании это значит, что норма разошлась с фактическим расходом.")
         case (.maintenance, .stalled):
             return String(localized: "Вес держится — поддержание делает ровно то, зачем нужно.")
+        case (_, .recomposition):
+            // Разобрано выше, до switch: совет у рекомпозиции один на все фазы.
+            return ""
         }
     }
 }

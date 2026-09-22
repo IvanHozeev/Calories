@@ -50640,6 +50640,100 @@
           }
         }
       }
+    },
+    "Жир вниз, мышцы вверх" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون إلى الأسفل والعضلات إلى الأعلى"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett runter, Muskeln rauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat down, muscle up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa abajo, músculo arriba"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gras en baisse, muscle en hausse"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן למטה, שריר למעלה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura para baixo, músculo para cima"
+          }
+        }
+      }
+    },
+    "Жир ушёл, а сухая масса прибавила — так бывает у новичков, после перерыва и на возврате к прежней форме. Вес при этом может стоять или даже расти: смотреть надо на состав." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انخفضت الدهون وزادت الكتلة الصافية — يحدث هذا للمبتدئين، وبعد انقطاع طويل، وعند العودة إلى لياقة سابقة. قد يثبت الوزن أو حتى يرتفع: المهم هنا هو التركيب."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett runter, fettfreie Masse rauf — das passiert Anfängern, nach einer langen Pause und auf dem Weg zurück in eine frühere Form. Das Gewicht darf dabei stehen oder sogar steigen: hier zählt die Zusammensetzung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat went down while lean mass went up — this happens to beginners, after a long break, and on the way back to a shape you once had. The scale may stand still or even climb: it is the composition that matters here."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grasa bajó y la masa magra subió: pasa en principiantes, tras un parón largo y al recuperar una forma que ya tuviste. El peso puede quedarse quieto o incluso subir; aquí lo que importa es la composición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le gras a baissé pendant que la masse maigre montait — cela arrive aux débutants, après une longue pause et quand on retrouve une forme déjà connue. Le poids peut stagner ou même monter : ici, c'est la composition qui compte."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השומן ירד והמסה הרזה עלתה — קורה למתחילים, אחרי הפסקה ארוכה ובחזרה לכושר שכבר היה. המשקל יכול לעמוד או אפילו לעלות: מה שחשוב כאן הוא ההרכב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gordura caiu e a massa magra subiu — acontece com iniciantes, depois de uma pausa longa e no regresso a uma forma que já tiveste. O peso pode ficar parado ou até subir: aqui o que conta é a composição."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

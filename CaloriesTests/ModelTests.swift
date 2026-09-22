@@ -366,6 +366,39 @@ struct PlanTests {
         #expect(change.verdict(for: .cut) == .costly)
     }
 
+    /// Настоящий случай с телефона: за диет-брейк вес +0.7 кг, жир −2.2,
+    /// сухая +3.0. Приложение объявляло это «отработала дорого» — то есть
+    /// называло худшим лучшее, что вообще может случиться.
+    @Test func fatDownAndMuscleUpIsTheBestOutcome() {
+        let change = composition(startKg: 76, deltaKg: 0.7, fatDeltaKg: -2.2)
+        #expect(change.isRecomposition)
+        #expect(change.verdict(for: .maintenance) == .recomposition)
+        #expect(change.verdict(for: .cut) == .recomposition, "И на сушке это она же")
+        #expect(change.verdict(for: .bulk) == .recomposition)
+    }
+
+    /// «Жиром — −302% изменения веса» — арифметически верная бессмыслица:
+    /// вес вырос, а жира стало меньше, и доли тут нет никакой.
+    @Test func thereIsNoFatShareWhenFatAndWeightWentOppositeWays() {
+        let change = composition(startKg: 76, deltaKg: 0.7, fatDeltaKg: -2.2)
+        #expect(change.fatShareOfChange == nil)
+
+        // А когда они идут в одну сторону, доля осмысленна.
+        let honest = composition(startKg: 76, deltaKg: -4, fatDeltaKg: -3)
+        #expect(honest.fatShareOfChange != nil)
+    }
+
+    /// На поддержании важно не то, сдвинулся ли вес, а чем он сдвинулся:
+    /// пара килограммов воды и гликогена — обычная неделя, набранный жир —
+    /// разошедшаяся с расходом норма.
+    @Test func maintenanceJudgesWhatTheWeightWasMadeOf() {
+        let water = composition(startKg: 76, deltaKg: 1.2, fatDeltaKg: 0.1)
+        #expect(water.verdict(for: .maintenance) == .worked)
+
+        let fat = composition(startKg: 76, deltaKg: 3.5, fatDeltaKg: 3.4)
+        #expect(fat.verdict(for: .maintenance) == .costly)
+    }
+
     @Test func aWeightThatDidNotMoveIsStalledOnEitherSide() {
         let change = composition(startKg: 77, deltaKg: 0.2, fatDeltaKg: 0.1)
         #expect(change.verdict(for: .cut) == .stalled)

@@ -391,6 +391,47 @@ struct BackupTests {
         #expect(store.dailyGoal == 2100)
     }
 
+    /// Копия обязана нести состав приёма: без него восстановление стирало бы
+    /// ровно то, ради чего состав и заводился — продукты внутри приёма для
+    /// «Недавнего» и категории рациона для разбора дня.
+    @Test func aBackupCarriesWhatTheMealWasMadeOf() throws {
+        store.add(name: "Хала, Молоко", calories: 400, components: [
+            EntryComponent(name: "Хала", calories: 300, grams: 100),
+            EntryComponent(name: "Молоко", calories: 100, grams: 200),
+        ])
+
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(CaloriesBackup.self, from: try encoder.encode(store.makeBackup()))
+
+        store.restore(from: decoded)
+
+        let restored = try #require(store.entries.first { $0.name == "Хала, Молоко" })
+        #expect(restored.components.map(\.name) == ["Хала", "Молоко"])
+        #expect(restored.components.first?.grams == 100)
+    }
+
+    /// Копии, снятые до того, как состав начали хранить, обязаны читаться
+    /// дальше: у человека их накоплено за месяцы.
+    @Test func anOldBackupWithoutCompositionStillRestores() throws {
+        let json = """
+        {"appVersion": "3", "dailyGoal": 2100, "exportedAt": "2026-09-01T10:00:00Z",
+         "entries": [{"name": "Овсянка", "calories": 300, "protein": 10, "fat": 5,
+                      "carbs": 50, "grams": 100, "date": "2026-09-01T08:00:00Z"}],
+         "weights": [], "products": [], "dishes": [], "goalHistory": [], "measurements": []}
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let backup = try decoder.decode(CaloriesBackup.self, from: Data(json.utf8))
+
+        store.restore(from: backup)
+
+        #expect(store.entries.count == 1)
+        #expect(store.entries.first?.components.isEmpty == true)
+    }
+
     @Test func restoringSurvivesAFullEncodeAndDecode() throws {
         fillDiary()
         let encoder = JSONEncoder()

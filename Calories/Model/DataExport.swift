@@ -15,6 +15,13 @@ struct CaloriesBackup: Codable {
         let carbs: Double
         let grams: Double?
         let date: Date
+        /// Из чего собран приём. Необязательное: в копиях, снятых до того, как
+        /// состав начали хранить, его нет, и старый файл обязан читаться дальше.
+        ///
+        /// Без него восстановление из копии стирало бы ровно то, ради чего
+        /// состав и заводился: «Недавнее» снова не видело бы продуктов внутри
+        /// приёма, а разбор дня — категорий рациона.
+        var components: [EntryComponent]?
     }
 
     struct Weight: Codable {
@@ -101,7 +108,8 @@ extension CalorieStore {
             dailyGoal: dailyGoal,
             entries: entries.map {
                 .init(name: $0.name, calories: $0.calories, protein: $0.protein,
-                      fat: $0.fat, carbs: $0.carbs, grams: $0.grams, date: $0.date)
+                      fat: $0.fat, carbs: $0.carbs, grams: $0.grams, date: $0.date,
+                      components: $0.components.isEmpty ? nil : $0.components)
             },
             weights: weightEntries.map { .init(weightKg: $0.weightKg, date: $0.date) },
             products: customFoods.map {

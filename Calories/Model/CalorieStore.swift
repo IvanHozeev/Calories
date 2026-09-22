@@ -733,7 +733,8 @@ final class CalorieStore {
             context.insert(FoodEntry(
                 name: item.name, calories: item.calories,
                 macros: Macros(protein: item.protein, fat: item.fat, carbs: item.carbs),
-                grams: item.grams, date: item.date))
+                grams: item.grams, date: item.date,
+                components: item.components ?? []))
         }
         for item in backup.weights {
             context.insert(WeightEntry(weightKg: item.weightKg, date: item.date))

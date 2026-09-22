@@ -19,8 +19,10 @@ struct BrandMark: View {
     /// Цвета дуг кольца «Сегодня» — те же, что на иконке.
     private static let colors: [[Color]] = [ProgressRing.carbColors, ProgressRing.fatColors, ProgressRing.proteinColors]
     private static let rotation: Double = 40
-    /// Толщина к внешнему радиусу — как на лаунч-скрине.
-    private static let widthToOuterRadius: Double = 90.0 / 372.0
+    /// Толщина к внешнему радиусу — как на лаунч-скрине, а тот повторяет
+    /// иконку. Плотнее прежнего: тонкий знак рядом с плотной иконкой читался
+    /// как другой.
+    private static let widthToOuterRadius: Double = 105.0 / 372.0
 
     private struct Arc: Identifiable {
         let id: Int

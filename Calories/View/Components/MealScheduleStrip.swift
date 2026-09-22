@@ -15,11 +15,13 @@ struct MealScheduleStrip: View {
 
     private var title: String {
         guard let next else { return String(localized: "День закрыт") }
-        let number = next.index + 1
+        // По названию, а не по номеру: «полдник» человек понимает сразу, а
+        // «приём 4 из 5» заставляет пересчитывать, что это за еда.
+        let name = String(localized: String.LocalizationValue(next.period.rawValue))
         if next.state == .current {
-            return String(format: String(localized: "Сейчас приём %1$lld из %2$lld"), number, slots.count)
+            return String(format: String(localized: "Сейчас %@"), name)
         }
-        return String(format: String(localized: "Приём %1$lld из %2$lld в %3$@"), number, slots.count,
+        return String(format: String(localized: "%1$@ в %2$@"), name,
                       next.start.formatted(date: .omitted, time: .shortened))
     }
 
@@ -155,10 +157,13 @@ struct MealScheduleSheet: View {
                 .foregroundStyle(color(slot.state))
                 .frame(width: 20)
             VStack(alignment: .leading, spacing: 2) {
+                Text(LocalizedStringKey(slot.period.rawValue))
+                    .font(.app(.subheadline, weight: .medium))
                 Text(verbatim: String(format: String(localized: "%1$@ – %2$@"),
                                       slot.start.formatted(date: .omitted, time: .shortened),
                                       slot.end.formatted(date: .omitted, time: .shortened)))
-                    .font(.app(.subheadline))
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
                 if slot.consumed > 0 {
                     Text(verbatim: String(format: String(localized: "съедено %lld ккал"), slot.consumed))
                         .font(.app(.caption2))

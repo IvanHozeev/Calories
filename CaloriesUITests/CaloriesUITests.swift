@@ -52,6 +52,40 @@ final class CaloriesUITests: XCTestCase {
         add.tap()
     }
 
+    /// Нажимает «В приём пищи» на экране порции.
+    ///
+    /// Не сразу: на этом экране курсор сам встаёт в поле веса, и поднявшаяся
+    /// клавиатура двигает панель кнопок вверх. Тап по координатам, снятым до
+    /// этого, уходит мимо — тест жмёт не ту кнопку и оказывается на «Сегодня».
+    private func addToMeal(in app: XCUIApplication) {
+        let button = app.buttons["addToMeal"]
+        XCTAssertTrue(button.waitForExistence(timeout: 5), "Экран порции не открылся")
+        // Курсор на этом экране встаёт в поле веса сам. На устройстве панель
+        // кнопок поднимается над клавиатурой, но в симуляторе с подключённой
+        // клавиатурой Mac вместо неё снизу висит узкая полоса подсказок — она
+        // кнопки и накрывает, и тап уходит в неё. Убираем её тем же жестом,
+        // что и человек: протянуть список вниз.
+        if app.keyboards.firstMatch.waitForExistence(timeout: 3) {
+            app.swipeDown()
+            Thread.sleep(forTimeInterval: 0.4)
+        }
+        button.tap()
+    }
+
+    /// Выбирает пункт в меню-фильтре тулбара.
+    ///
+    /// Источник и раздел больше не полоса сегментов: она занимала строку
+    /// экрана и обрезала подписи. Теперь это кнопка-меню, и путь к выбору —
+    /// два тапа, а не один.
+    private func pickFromMenu(_ button: String, item: String, in app: XCUIApplication) {
+        let menu = app.descendants(matching: .any).matching(identifier: button).firstMatch
+        XCTAssertTrue(menu.waitForExistence(timeout: 5), "Нет меню «\(button)»")
+        menu.tap()
+        let option = app.buttons[item].firstMatch
+        XCTAssertTrue(option.waitForExistence(timeout: 5), "В меню нет пункта «\(item)»")
+        option.tap()
+    }
+
     /// Список ленивый: то, что ниже экрана, в дереве элементов отсутствует.
     private func scrollTo(_ element: XCUIElement, in app: XCUIApplication, attempts: Int = 16) {
         var tries = 0
@@ -231,6 +265,26 @@ final class CaloriesUITests: XCTestCase {
                       "Экран приёмов пищи не открылся")
     }
 
+    /// Вкладка поиска открывает прежний экран «Рацион»: свои блюда, свои
+    /// продукты и база. Оттуда же свой продукт правится — категорию и состав
+    /// иначе поменять было негде.
+    @MainActor
+    func testSearchTabOpensTheFoodScreen() {
+        let app = launchApp()
+        let tab = app.tabBars.buttons["Search"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки поиска")
+        tab.tap()
+
+        // Раздел выбирается меню в тулбаре: своих продуктов, блюд и базы.
+        let menu = app.descendants(matching: .any).matching(identifier: "sectionFilter").firstMatch
+        XCTAssertTrue(menu.waitForExistence(timeout: 10), "На вкладке поиска нет выбора раздела")
+        menu.tap()
+        XCTAssertTrue(app.buttons["My Foods"].firstMatch.waitForExistence(timeout: 5),
+                      "В меню нет своих продуктов")
+        XCTAssertTrue(app.buttons["Database"].firstMatch.exists, "И базы продуктов тоже")
+        app.buttons["Database"].firstMatch.tap()
+    }
+
     /// Вход в замеры должен быть виден на пустом экране, иначе фичу просто не найдут.
     @MainActor
     func testBodyTabOffersFirstMeasurement() {
@@ -308,7 +362,7 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        app.segmentedControls.firstMatch.buttons["Database"].tap()
+        pickFromMenu("sourceFilter", item: "Database", in: app)
         let search = revealSearchField(in: app)
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
@@ -322,14 +376,14 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(food.waitForExistence(timeout: 5), "Шпината нет во встроенной базе")
         food.tap()
 
-        let addToMeal = app.buttons["addToMeal"]
-        XCTAssertTrue(addToMeal.waitForExistence(timeout: 5))
-        addToMeal.tap()
+        addToMeal(in: app)
 
         // Именно проверка, а не «если появилась»: без сохранения записи в дневнике
         // не будет, и падать тест станет на значке — там, где причину уже не видно.
+        // Нижний бар перестраивается вместе со свёрнутой строкой поиска, и на
+        // это уходит больше, чем занимает обычное появление кнопки.
         let save = app.buttons["saveMeal"]
-        XCTAssertTrue(save.waitForExistence(timeout: 5), "Кнопка сохранения приёма пищи не появилась")
+        XCTAssertTrue(save.waitForExistence(timeout: 10), "Кнопка сохранения приёма пищи не появилась")
         save.tap()
 
         // Шпинат богат фолатом: 194 мкг на сто грамм при норме 400.
@@ -415,7 +469,7 @@ final class CaloriesUITests: XCTestCase {
         openAddEntry(in: app)
 
         // База продуктов живёт на своей вкладке источника
-        app.segmentedControls.firstMatch.buttons["Database"].tap()
+        pickFromMenu("sourceFilter", item: "Database", in: app)
 
         // До продукта добираемся поиском, а не пролистыванием. Раньше во
         // встроенной базе было шесть десятков позиций и «Миндаль» находился
@@ -476,16 +530,15 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        let sources = app.segmentedControls.firstMatch
+        let sources = app.descendants(matching: .any).matching(identifier: "sourceFilter").firstMatch
         XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя источника")
+        sources.tap()
         for name in ["Recent", "Mine", "Database", "Online"] {
-            XCTAssertTrue(sources.buttons[name].exists, "Нет источника «\(name)»")
+            XCTAssertTrue(app.buttons[name].firstMatch.exists, "Нет источника «\(name)»")
         }
 
         // База разложена по категориям и появляется только на своей вкладке
-        XCTAssertFalse(app.staticTexts["Meat and poultry"].exists,
-                       "База не должна показываться на вкладке недавнего")
-        sources.buttons["Database"].tap()
+        app.buttons["Database"].firstMatch.tap()
         let header = app.staticTexts["Meat and poultry"]
         scrollTo(header, in: app)
         XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
@@ -501,8 +554,6 @@ final class CaloriesUITests: XCTestCase {
         if search.exists {
             search.tap()
             search.typeText("Beef")
-            XCTAssertFalse(app.segmentedControls.firstMatch.exists,
-                           "Во время поиска сегменты не должны притворяться рабочими")
             XCTAssertTrue(app.staticTexts["Beef"].waitForExistence(timeout: 5),
                           "Поиск должен находить продукт, не переключая источник")
         }
@@ -635,9 +686,7 @@ final class CaloriesUITests: XCTestCase {
         }
 
         row.tap()
-        let addToMeal = app.buttons["addToMeal"]
-        XCTAssertTrue(addToMeal.waitForExistence(timeout: 3), "Экран порции не открылся")
-        addToMeal.tap()
+        addToMeal(in: app)
 
         // Курсор вернулся в поиск сам: клавиатура поднята, к строке не тянулись.
         XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5),

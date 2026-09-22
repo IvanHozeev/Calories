@@ -92,6 +92,19 @@ struct AddEntryView: View {
             case .online:   return String(localized: "Онлайн")
             }
         }
+
+        /// Значок источника — он же значок кнопки в тулбаре: по нему видно,
+        /// где ищешь, не открывая меню.
+        var icon: String {
+            switch self {
+            // Не просто часы: часами на этом экране помечено время приёма,
+            // и две одинаковые иконки рядом читались бы как одно и то же.
+            case .recent:   return "clock.arrow.circlepath"
+            case .mine:     return "person.crop.circle"
+            case .database: return "books.vertical"
+            case .online:   return "globe"
+            }
+        }
     }
 
 
@@ -383,14 +396,17 @@ struct AddEntryView: View {
             // на светлой теме просвечивает белым сквозь матовые строки.
             .scrollContentBackground(.hidden)
             .background(Color(.systemGroupedBackground))
-            // Строка живёт под тулбаром и вытягивается скроллом вниз — так она не
-            // занимает место постоянно. Держать её всегда видимой пришлось раньше
-            // из-за того, что при другом размещении она уезжала вниз экрана, где её
-            // накрывала панель «Сохранить»; в навбаре этого не происходит.
+            // Строка живёт под тулбаром и вытягивается скроллом вниз.
+            //
+            // Внизу, как на вкладке еды, её поставить нельзя: системный
+            // элемент поиска в нижнем тулбаре внутри модального листа роняет
+            // весь лист — стоит добавить продукт с экрана порции, и приём
+            // закрывается целиком, не сохранившись. Проверено: без этого
+            // элемента тот же путь работает.
             .searchable(text: $searchText,
                         isPresented: $searchPresented,
                         placement: .navigationBarDrawer(displayMode: .automatic),
-                        prompt: "Поиск продукта")
+                        prompt: "Поиск еды")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
@@ -432,6 +448,26 @@ struct AddEntryView: View {
                 isSearchingOFF = false
             }
             .scrollDismissesKeyboard(.interactively)
+            // Строка поиска внизу, у большого пальца: собирая приём, к ней
+            // возвращаются после каждого добавленного продукта.
+            .toolbar {
+                // Источник — меню, а не полоса сегментов над списком: четыре
+                // подписи в сегментах обрезались, а строку экрана занимали
+                // всегда, хотя переключают источник редко.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Источник", selection: $source) {
+                            ForEach(FoodSource.allCases) { item in
+                                Label(item.title, systemImage: item.icon).tag(item)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: source.icon)
+                    }
+                    .accessibilityIdentifier("sourceFilter")
+                    .accessibilityLabel("Источник")
+                }
+            }
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -576,18 +612,6 @@ struct AddEntryView: View {
     /// Всё, из чего выбирают продукт: переключатель источника и секции с ними.
     @ViewBuilder
     private var browseSections: some View {
-        if !isSearching, !searchFocused {
-        Section {
-            Picker("Источник", selection: $source) {
-                ForEach(FoodSource.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .listRowInsets(EdgeInsets(top: 6, leading: 12, bottom: 6, trailing: 12))
-            .listRowBackground(Color.clear)
-        }
-        }
-
         if isSearching {
             topMatchesSection
         }
@@ -776,9 +800,18 @@ struct AddEntryView: View {
     /// добавлено, и следующий продукт ищут с чистого листа, а не стирают чужие
     /// буквы. Сбрасываем и debounced-копию, чтобы список вернулся сразу.
     private func addToDraft(_ item: MealItem) {
+        // Сначала закрываем экран порции: он показан из этого же состояния,
+        // и убрать его надо тем же, чем открыли.
+        serving = nil
         draftItems.append(item)
-        searchText = ""
-        debouncedSearch = ""
+        // Очистку запроса откладываем на следующий тик. Со строкой поиска,
+        // живущей в нижнем тулбаре, сброс текста прямо в момент закрытия
+        // экрана порции схлопывал весь лист приёма: SwiftUI пересобирал
+        // иерархию поиска под уезжающим экраном.
+        Task { @MainActor in
+            searchText = ""
+            debouncedSearch = ""
+        }
         resumeSearchAfterAdd = true
     }
 

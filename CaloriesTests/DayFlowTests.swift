@@ -40,6 +40,72 @@ struct MealScheduleTests {
                 "В хранилище значение всё же попало")
     }
 
+    /// Окна называются как приёмы в дневнике, а не «приём 4 из 5»: иначе
+    /// расписание и записи выглядят как разные вещи.
+    @Test func windowsAreNamedAfterRealMeals() {
+        #expect(MealSchedule.periods(count: 3) == [.breakfast, .lunch, .dinner])
+        #expect(MealSchedule.periods(count: 5) ==
+                [.breakfast, .secondBreakfast, .lunch, .afternoonSnack, .dinner])
+        #expect(MealSchedule.periods(count: 6).last == .secondDinner)
+    }
+
+    /// Едят не поровну: завтрак, обед и ужин — основа дня, между ними
+    /// перекусы. При равном делении «полдник на 550 ккал» выглядел как обед,
+    /// которого никто не ест.
+    @Test func mainMealsGetMoreThanSnacks() {
+        let slots = MealSchedule.slots(input(count: 5, goal: 3000, now: at(6)))
+        let byPeriod = Dictionary(uniqueKeysWithValues: slots.map { ($0.period, $0.calories) })
+
+        let lunch = try! #require(byPeriod[.lunch])
+        let snack = try! #require(byPeriod[.afternoonSnack])
+        #expect(lunch > snack, "Обед крупнее полдника")
+        #expect(Double(snack) / Double(lunch) < 0.7, "И заметно, а не на десяток калорий")
+        #expect(byPeriod[.breakfast] == lunch, "Основные приёмы между собой равны")
+        #expect(slots.reduce(0) { $0 + $1.calories } == 3000, "Но в сумме это всё равно дневная норма")
+    }
+
+    /// Настоящий случай: встал в пять, поел — а первый приём стоял на шесть,
+    /// и еда не попадала никуда. Калории из остатка вычитались, но в
+    /// расписании их не было: приём показывал «съедено 0» после завтрака.
+    @Test func foodBeforeTheFirstWindowStillCounts() {
+        let slots = MealSchedule.slots(input(entries: [(at(5), 600)], now: at(9)))
+
+        #expect(slots.first?.consumed == 600, "Завтрак в пять — это завтрак, а не ничей")
+        #expect(slots.reduce(0) { $0 + $1.consumed } == 600,
+                "Сумма по приёмам обязана сходиться со съеденным за день")
+    }
+
+    /// Ночной перекус после отбоя — та же история с другого конца суток.
+    @Test func foodAfterTheLastWindowStillCounts() {
+        let slots = MealSchedule.slots(input(entries: [(at(23, 40), 300)], now: at(23, 50)))
+        #expect(slots.reduce(0) { $0 + $1.consumed } == 300)
+    }
+
+    /// Времени будильника приложению взять неоткуда — в iOS такого доступа
+    /// нет. Зато первая еда дня говорит о подъёме не хуже: поел в пять —
+    /// значит день начался в пять, и окна раздвигаются от него.
+    @Test func theDayStartsWhenYouActuallyAte() {
+        let early = MealSchedule.slots(input(entries: [(at(5), 400)], now: at(9)))
+        let usual = MealSchedule.slots(input(entries: [], now: at(9)))
+
+        // Начало первого окна у обоих — начало суток (туда попадает всё, что
+        // съедено до расписания), поэтому смотрим, где окно кончается: у
+        // раннего подъёма приёмы разъезжаются по более длинному дню.
+        #expect(early.first!.end < usual.first!.end,
+                "Поел раньше — и день начался раньше")
+        #expect(early.count == usual.count, "Число приёмов от этого не меняется")
+    }
+
+    /// А вот перекус в полпервого ночи подъёмом не считается: иначе одна
+    /// булка ночью переставила бы весь следующий день.
+    @Test func aMidnightSnackDoesNotMoveTheWholeDay() {
+        let withSnack = MealSchedule.slots(input(entries: [(at(0, 30), 200)], now: at(9)))
+        let plain = MealSchedule.slots(input(entries: [], now: at(9)))
+
+        #expect(withSnack.first!.start == plain.first!.start)
+        #expect(withSnack.reduce(0) { $0 + $1.consumed } == 200, "Но съеденное всё равно учтено")
+    }
+
     /// День раскладывается от подъёма до отбоя: первый через 45 минут после
     /// подъёма, последний за час до сна, остальные — поровну между ними.
     @Test func theDayIsSplitBetweenWakingAndSleep() {

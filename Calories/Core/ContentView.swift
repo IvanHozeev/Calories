@@ -114,17 +114,12 @@ struct ContentView: View {
                             onOpen: { showingDayNutrition = true }
                         )
                         
-                        // Строка вместо карточки: план виден и открывается,
-                        // но не занимает полэкрана. Подробности — на его
-                        // собственном экране, куда ведёт и она, и кольцо.
-                        PlanStrip(
-                            store: store,
-                            onOpenPlan: { showingPlan = true },
-                            onShowPaywall: { showingPaywall = true }
-                        )
-
-                        // Расписание приёмов — сразу под планом: план говорит,
-                        // сколько есть за день, расписание — сколько прямо сейчас.
+                        // Экран читается как отъезд камеры: кольцо и макросы —
+                        // сегодняшний день, дальше ближайший приём (часы),
+                        // голодание (ближайшие дни), план (недели вперёд) и
+                        // неделя позади. Раньше план стоял выше приёмов, хотя
+                        // в него заходят раз в неделю, а на ближайший приём
+                        // смотрят по нескольку раз в день.
                         if mealSchedule.isEnabled, !todaySlots.isEmpty {
                             MealScheduleStrip(slots: todaySlots) { showingMealSchedule = true }
                         }
@@ -144,9 +139,17 @@ struct ContentView: View {
                             FastingStrip(hint: hint) { showingFasting = true }
                         }
 
-                        // Неделя — под планом: сегодня в кольце, план объясняет его
-                        // норму, прошедшие дни следом. Над кольцом она первой ловила
-                        // взгляд, хотя прошлые дни открывают изредка.
+                        // Строка вместо карточки: план виден и открывается,
+                        // но не занимает полэкрана. Подробности — на его
+                        // собственном экране, куда ведёт и она, и кольцо.
+                        PlanStrip(
+                            store: store,
+                            onOpenPlan: { showingPlan = true },
+                            onShowPaywall: { showingPaywall = true }
+                        )
+
+                        // Неделя последней: это уже прошедшие дни, и открывают
+                        // их реже всего.
                         WeekStrip(weeks: store.weekStripWeeks(),
                                   onSelect: { selectedHistoryDay = $0 },
                                   onShowAll: { showingActivity = true })

@@ -51,28 +51,34 @@ struct FoodQuantityView: View {
 
     var body: some View {
         Form {
+            // Карточка сжата по высоте намеренно: с поднятой клавиатурой
+            // экрану остаётся около половины, и раньше поле веса уезжало под
+            // неё — приходилось ждать автоподскролл, чтобы увидеть, что
+            // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
             Section {
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     Text(food.name)
-                        .font(.app(.title3, weight: .semibold))
+                        .font(.app(.subheadline, weight: .semibold))
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
                     Text("\(calories) ккал")
-                        .font(.app(size: 36, weight: .bold))
+                        .font(.app(size: 28, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
                     Text("\(food.caloriesPer100g) ккал / 100 г")
-                        .font(.app(.caption))
+                        .font(.app(.caption2))
                         .foregroundStyle(.secondary)
 
                     MacrosRow(macros: macros)
-                        .padding(.top, 4)
+                        .padding(.top, 2)
 
                     MacroSplitBar(macros: macros)
-                        .padding(.top, 8)
+                        .padding(.top, 4)
                         .padding(.horizontal, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 6)
             }
 
             Section("Количество, г") {
@@ -115,6 +121,15 @@ struct FoodQuantityView: View {
         )
         .sheet(isPresented: $showingMealTime) {
             if let mealDate { MealTimeSheet(date: mealDate) }
+        }
+        // Клавиатура сразу: на этот экран приходят ровно за одним — сказать,
+        // сколько съел. Ждать ещё одного тапа по полю незачем.
+        //
+        // Через `task`, а не `onAppear`: фокус, поставленный до конца перехода,
+        // система гасит вместе с анимацией push, и клавиатура не появляется.
+        .task {
+            try? await Task.sleep(for: .milliseconds(320))
+            gramsFocused = true
         }
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
@@ -163,8 +178,15 @@ struct FoodQuantityView: View {
             HStack(spacing: 10) {
                 Spacer(minLength: 0)
                 Button {
+                    // Клавиатуру убираем до ухода: иначе она остаётся поднятой
+                    // над вернувшимся списком и накрывает панель «Сохранить».
+                    gramsFocused = false
+                    // Закрывается экран сам, но через `dismiss` только когда
+                    // открыт листом. В стеке за это отвечает тот, кто его
+                    // открыл: со строкой поиска в нижнем тулбаре `dismiss`
+                    // отсюда уносил весь лист приёма пищи, а не одну порцию.
                     onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                    dismiss()
+                    if !isPushed { dismiss() }
                 } label: {
                     // По размеру подписи, а не во всю ширину: широкая плашка
                     // спорила с соседней кнопкой и выглядела тяжело.
@@ -223,11 +245,17 @@ struct DishQuantityView: View {
     var mealDate: Binding<Date>?
     @State private var showingMealTime = false
 
-    init(dish: Dish, onAddAndSave: ((MealItem) -> Void)? = nil,
+    /// Подпись основной кнопки: из приёма пищи блюдо кладут в него, а из
+    /// поиска — сразу в дневник.
+    private let addTitle: LocalizedStringKey
+
+    init(dish: Dish, addTitle: LocalizedStringKey = "В приём пищи",
+         onAddAndSave: ((MealItem) -> Void)? = nil,
          isPushed: Bool = false, mealDate: Binding<Date>? = nil, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
         self.mealDate = mealDate
         self.dish = dish
+        self.addTitle = addTitle
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
         let defaultGrams = dish.servingGrams
@@ -246,11 +274,11 @@ struct DishQuantityView: View {
     var body: some View {
         Form {
             Section {
-                VStack(spacing: 12) {
+                VStack(spacing: 8) {
                     Text(dish.name)
-                        .font(.app(.title3, weight: .semibold))
+                        .font(.app(.subheadline, weight: .semibold))
                     Text("\(calories) ккал")
-                        .font(.app(size: 36, weight: .bold))
+                        .font(.app(size: 28, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
@@ -261,7 +289,7 @@ struct DishQuantityView: View {
                         .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 6)
             }
 
             Section("Количество, г") {
@@ -318,6 +346,15 @@ struct DishQuantityView: View {
         .sheet(isPresented: $showingMealTime) {
             if let mealDate { MealTimeSheet(date: mealDate) }
         }
+        // Клавиатура сразу: на этот экран приходят ровно за одним — сказать,
+        // сколько съел. Ждать ещё одного тапа по полю незачем.
+        //
+        // Через `task`, а не `onAppear`: фокус, поставленный до конца перехода,
+        // система гасит вместе с анимацией push, и клавиатура не появляется.
+        .task {
+            try? await Task.sleep(for: .milliseconds(320))
+            gramsFocused = true
+        }
         .navigationTitle("Порция")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -342,10 +379,11 @@ struct DishQuantityView: View {
             HStack(spacing: 10) {
                 Spacer(minLength: 0)
                 Button {
+                    gramsFocused = false
                     onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
-                    dismiss()
+                    if !isPushed { dismiss() }
                 } label: {
-                    Text("В приём пищи")
+                    Text(addTitle)
                         .fontWeight(.semibold)
                         .padding(.horizontal, 6)
                 }

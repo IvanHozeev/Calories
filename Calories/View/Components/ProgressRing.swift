@@ -89,12 +89,15 @@ struct ProgressRing: View {
     /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
     private static let rotation: Double = -40
 
-    /// Тоньше прежних 18: рядом с тонкими полосками и стеклом толстое кольцо
-    /// было единственной тяжёлой формой на экране.
-    private let lineWidth: CGFloat = 14
+    /// Под знак иконки: там дуга плотная, и тонкое кольцо на «Сегодня»
+    /// читалось как другой знак, хотя это один и тот же. Толще прежних 14,
+    /// но всё ещё заметно тоньше иконки — в середине живёт крупная цифра
+    /// остатка, и у неё должен остаться воздух.
+    private let lineWidth: CGFloat = 17
     private let size: CGFloat = 230
     /// Зазор между дугами в градусах — с запасом на скруглённые концы.
-    private let gap: Double = 11
+    /// Растёт вместе с толщиной: у толстой дуги скругления съедают больше.
+    private let gap: Double = 12.5
 
     private struct Segment: Identifiable {
         let id: String
@@ -167,7 +170,10 @@ struct ProgressRing: View {
                 // макросов под кольцом. Вместо серой канавки: пустое кольцо
                 // уже показывает, на что делится день.
                 RingArc(start: segment.start, end: segment.end)
-                    .stroke(segment.colors[0].opacity(0.18),
+                    // Толще дуга — заметнее и дорожка, поэтому она бледнее
+                    // прежнего: на иконке дорожки нет вовсе, и здесь она
+                    // должна читаться как место под цвет, а не как второй знак.
+                    .stroke(segment.colors[0].opacity(0.15),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 RingArc(start: segment.start,
                         end: segment.start + (segment.end - segment.start) * segment.progress)

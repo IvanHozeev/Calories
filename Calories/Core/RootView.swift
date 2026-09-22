@@ -21,30 +21,42 @@ struct RootView: View {
     @State private var showingSplash = !UIAccessibility.isReduceMotionEnabled
         && UserDefaults.standard.object(forKey: "show_launch_splash") as? Bool ?? true
 
-    var body: some View {
+    /// Вкладки отдельным свойством: вместе с модификаторами тела компилятор
+    /// перестаёт справляться с выражением и валит сборку по таймауту.
+    private var tabs: some View {
         TabView(selection: $selectedTab) {
-            ContentView(store: store, stepStore: stepStore)
-                .tabItem { Label("Сегодня", image: "TodayTab") }
-                .tag(0)
-
-            NavigationStack {
-                BodyView(store: store)
+            Tab("Сегодня", image: "TodayTab", value: 0) {
+                ContentView(store: store, stepStore: stepStore)
             }
-            .tabItem { Label("Профиль", systemImage: "person.crop.circle") }
-            .tag(1)
+
+            Tab("Профиль", systemImage: "person.crop.circle", value: 1) {
+                NavigationStack {
+                    BodyView(store: store)
+                }
+            }
 
             // Своя вкладка, а не шестерёнка в тулбаре «Профиля»: после ухода
             // «Еды» внизу осталось две вкладки, а в настройки ходят сами по себе.
-            NavigationStack {
-                SettingsView(store: store)
-                    // Как на остальных вкладках: название и так в таббаре.
-                    // Здесь, а не в самом экране: с «Сегодня» в него заходят
-                    // переходом, и там заголовок нужен.
-                    .navigationBarTitleDisplayMode(.inline)
-                    .hiddenNavigationTitle()
+            Tab("Настройки", systemImage: "gearshape", value: 2) {
+                NavigationStack {
+                    SettingsView(store: store)
+                        // Как на остальных вкладках: название и так в таббаре.
+                        // Здесь, а не в самом экране: с «Сегодня» в него заходят
+                        // переходом, и там заголовок нужен.
+                        .navigationBarTitleDisplayMode(.inline)
+                        .hiddenNavigationTitle()
+                }
             }
-            .tabItem { Label("Настройки", systemImage: "gearshape") }
-            .tag(2)
+
+            // Поиск — системной ролью, а не обычной вкладкой: тогда система
+            // сама ставит его отдельно справа и превращает таббар в строку
+            // поиска, когда его открывают. Внутри — прежний экран «Еда»: свои
+            // продукты, блюда и база с фильтром по категориям.
+            Tab("Поиск", systemImage: "magnifyingglass", value: 3, role: .search) {
+                NavigationStack {
+                    MyFoodView(store: store)
+                }
+            }
         }
         // Один цвет на всё приложение, выбранный в настройках.
         .tint((AppAccent(rawValue: appAccent) ?? .system).color)
@@ -62,6 +74,10 @@ struct RootView: View {
                     .allowsHitTesting(false)
             }
         }
+    }
+
+    var body: some View {
+        tabs
         .environment(purchases)
         // Меню на иконке пересобираем на каждом подъёме: камера в нём появляется
         // только вместе с ключом, а его вводят прямо во время работы приложения.

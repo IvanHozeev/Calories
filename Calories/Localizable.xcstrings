@@ -152,7 +152,9 @@
         }
       }
     },
-    "%" : {},
+    "%" : {
+
+    },
     "%.0f г при весе %.1f кг" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -433,6 +435,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ · %2$lld dias"
+          }
+        }
+      }
+    },
+    "%1$@ в %2$@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ في %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ um %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ at %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ a las %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ à %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ב-%2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ às %2$@"
           }
         }
       }
@@ -2036,7 +2085,9 @@
         }
       }
     },
-    "BMR %lld" : {},
+    "BMR %lld" : {
+
+    },
     "FFMI (индекс сухой массы)" : {
       "localizations" : {
         "ar" : {
@@ -5547,6 +5598,53 @@
         }
       }
     },
+    "В дневник" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تسجيل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintragen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noter"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לרשום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registar"
+          }
+        }
+      }
+    },
     "В классическом бодибилдинге эти три обхвата держат равными. Отстающее звено обычно икра." : {
       "localizations" : {
         "ar" : {
@@ -8748,7 +8846,6 @@
       }
     },
     "Все категории" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -14460,6 +14557,53 @@
         }
       }
     },
+    "Жир вниз, мышцы вверх" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون إلى الأسفل والعضلات إلى الأعلى"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett runter, Muskeln rauf"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat down, muscle up"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa abajo, músculo arriba"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gras en baisse, muscle en hausse"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן למטה, שריר למעלה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura para baixo, músculo para cima"
+          }
+        }
+      }
+    },
     "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор." : {
       "localizations" : {
         "ar" : {
@@ -14686,6 +14830,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A gordura usa a fórmula de Deurenberg a partir do IMC, precisão ±5%: não distingue músculo de gordura. Meça o pescoço e o umbigo e o método por circunferências assume."
+          }
+        }
+      }
+    },
+    "Жир ушёл, а сухая масса прибавила — так бывает у новичков, после перерыва и на возврате к прежней форме. Вес при этом может стоять или даже расти: смотреть надо на состав." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "انخفضت الدهون وزادت الكتلة الصافية — يحدث هذا للمبتدئين، وبعد انقطاع طويل، وعند العودة إلى لياقة سابقة. قد يثبت الوزن أو حتى يرتفع: المهم هنا هو التركيب."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett runter, fettfreie Masse rauf — das passiert Anfängern, nach einer langen Pause und auf dem Weg zurück in eine frühere Form. Das Gewicht darf dabei stehen oder sogar steigen: hier zählt die Zusammensetzung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat went down while lean mass went up — this happens to beginners, after a long break, and on the way back to a shape you once had. The scale may stand still or even climb: it is the composition that matters here."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La grasa bajó y la masa magra subió: pasa en principiantes, tras un parón largo y al recuperar una forma que ya tuviste. El peso puede quedarse quieto o incluso subir; aquí lo que importa es la composición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le gras a baissé pendant que la masse maigre montait — cela arrive aux débutants, après une longue pause et quand on retrouve une forme déjà connue. Le poids peut stagner ou même monter : ici, c'est la composition qui compte."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השומן ירד והמסה הרזה עלתה — קורה למתחילים, אחרי הפסקה ארוכה ובחזרה לכושר שכבר היה. המשקל יכול לעמוד או אפילו לעלות: מה שחשוב כאן הוא ההרכב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A gordura caiu e a massa magra subiu — acontece com iniciantes, depois de uma pausa longa e no regresso a uma forma que já tiveste. O peso pode ficar parado ou até subir: aqui o que conta é a composição."
           }
         }
       }
@@ -17669,6 +17860,7 @@
       }
     },
     "ИМТ" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -17710,6 +17902,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "IMC"
+          }
+        }
+      }
+    },
+    "ИМТ %.1f" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مؤشر كتلة الجسم %.1f"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BMI %.1f"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BMI %.1f"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IMC %.1f"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IMC %.1f"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BMI %.1f"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "IMC %.1f"
           }
         }
       }
@@ -17760,6 +17999,53 @@
         }
       }
     },
+    "Интернет" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإنترنت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אינטרנט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Internet"
+          }
+        }
+      }
+    },
     "Искать в базе USDA" : {
       "localizations" : {
         "ar" : {
@@ -17802,6 +18088,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buscar na base do USDA"
+          }
+        }
+      }
+    },
+    "Искать в интернете" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البحث في الإنترنت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search online"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar en internet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher sur Internet"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לחפש באינטרנט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procurar na internet"
           }
         }
       }
@@ -18268,7 +18601,6 @@
       }
     },
     "Ищем…" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18587,6 +18919,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progresso do plano"
+          }
+        }
+      }
+    },
+    "как расход" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مثل الإنفاق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "wie der Verbrauch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "same as spend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "igual al gasto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "égale à la dépense"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמו ההוצאה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "igual ao gasto"
           }
         }
       }
@@ -26573,6 +26952,53 @@
         }
       }
     },
+    "Нет сети. Свои продукты и база работают без неё." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا يوجد اتصال. أطعمتك وقاعدة البيانات المدمجة تعمل بدونه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Verbindung. Eigene Lebensmittel und die eingebaute Datenbank gehen auch ohne."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No connection. Your own foods and the built-in database work without one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin conexión. Tus alimentos y la base integrada funcionan sin ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de connexion. Tes aliments et la base intégrée fonctionnent sans."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין חיבור. המוצרים שלך ומסד הנתונים המובנה עובדים גם בלעדיו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem ligação. Os teus alimentos e a base integrada funcionam sem ela."
+          }
+        }
+      }
+    },
     "нет цели" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -26800,6 +27226,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nada encontrado"
+          }
+        }
+      }
+    },
+    "Ничего не нашлось. Попробуй другое название или заведи свой продукт." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُعثر على شيء. جرّب اسمًا آخر أو أضفه كمنتج خاص بك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts gefunden. Versuch einen anderen Namen oder leg es als eigenes Lebensmittel an."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing found. Try another name, or add it as your own food."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró nada. Prueba otro nombre o créalo como alimento propio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien trouvé. Essaie un autre nom, ou crée-le comme ton aliment."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נמצא כלום. נסה שם אחר או הוסף אותו כמוצר משלך."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada encontrado. Tenta outro nome ou cria-o como alimento teu."
           }
         }
       }
@@ -30385,7 +30858,6 @@
       }
     },
     "Открытая база продуктов" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34188,6 +34660,53 @@
         }
       }
     },
+    "Поиск еды" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ابحث عن طعام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essen suchen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search food"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar comida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chercher un aliment"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיפוש מזון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procurar comida"
+          }
+        }
+      }
+    },
     "Поиск продукта" : {
       "localizations" : {
         "ar" : {
@@ -34466,7 +34985,6 @@
       }
     },
     "Пока нет своих блюд" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -34513,7 +35031,6 @@
       }
     },
     "Пока нет своих продуктов" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36831,6 +37348,7 @@
       }
     },
     "Приём %1$lld из %2$lld в %3$@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -38690,7 +39208,6 @@
       }
     },
     "Раздел" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -39524,7 +40041,6 @@
       }
     },
     "Рацион" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40922,6 +41438,53 @@
         }
       }
     },
+    "Свои продукты" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أطعمتي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Lebensmittel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My foods"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis alimentos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes aliments"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המוצרים שלי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os meus alimentos"
+          }
+        }
+      }
+    },
     "Свой продукт" : {
       "localizations" : {
         "ar" : {
@@ -41198,6 +41761,53 @@
         }
       }
     },
+    "Сейчас %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الآن: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt: %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Now: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenant : %@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עכשיו: %@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agora: %@"
+          }
+        }
+      }
+    },
     "сейчас %@ кг" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41246,6 +41856,7 @@
       }
     },
     "Сейчас приём %1$lld из %2$lld" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50590,147 +51201,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
-          }
-        }
-      }
-    },
-    "как расход" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مثل الإنفاق"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "wie der Verbrauch"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "same as spend"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "igual al gasto"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "égale à la dépense"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "כמו ההוצאה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "igual ao gasto"
-          }
-        }
-      }
-    },
-    "Жир вниз, мышцы вверх" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الدهون إلى الأسفل والعضلات إلى الأعلى"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fett runter, Muskeln rauf"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fat down, muscle up"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grasa abajo, músculo arriba"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gras en baisse, muscle en hausse"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שומן למטה, שריר למעלה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gordura para baixo, músculo para cima"
-          }
-        }
-      }
-    },
-    "Жир ушёл, а сухая масса прибавила — так бывает у новичков, после перерыва и на возврате к прежней форме. Вес при этом может стоять или даже расти: смотреть надо на состав." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انخفضت الدهون وزادت الكتلة الصافية — يحدث هذا للمبتدئين، وبعد انقطاع طويل، وعند العودة إلى لياقة سابقة. قد يثبت الوزن أو حتى يرتفع: المهم هنا هو التركيب."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fett runter, fettfreie Masse rauf — das passiert Anfängern, nach einer langen Pause und auf dem Weg zurück in eine frühere Form. Das Gewicht darf dabei stehen oder sogar steigen: hier zählt die Zusammensetzung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fat went down while lean mass went up — this happens to beginners, after a long break, and on the way back to a shape you once had. The scale may stand still or even climb: it is the composition that matters here."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La grasa bajó y la masa magra subió: pasa en principiantes, tras un parón largo y al recuperar una forma que ya tuviste. El peso puede quedarse quieto o incluso subir; aquí lo que importa es la composición."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le gras a baissé pendant que la masse maigre montait — cela arrive aux débutants, après une longue pause et quand on retrouve une forme déjà connue. Le poids peut stagner ou même monter : ici, c'est la composition qui compte."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "השומן ירד והמסה הרזה עלתה — קורה למתחילים, אחרי הפסקה ארוכה ובחזרה לכושר שכבר היה. המשקל יכול לעמוד או אפילו לעלות: מה שחשוב כאן הוא ההרכב."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A gordura caiu e a massa magra subiu — acontece com iniciantes, depois de uma pausa longa e no regresso a uma forma que já tiveste. O peso pode ficar parado ou até subir: aqui o que conta é a composição."
           }
         }
       }

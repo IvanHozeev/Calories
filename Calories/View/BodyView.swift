@@ -559,7 +559,7 @@ struct BodyView: View {
     private func calculationCard(_ profile: UserProfile) -> some View {
         let fat = profile.bodyFatPercentage(from: measurement)
         let expenditure = usesFact ? (store.smoothedTDEE ?? profile.tdee) : profile.tdee
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 10) {
             Button {
                 showingBasis = true
             } label: {
@@ -570,7 +570,7 @@ struct BodyView: View {
                             .foregroundStyle(.tertiary)
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             Text(verbatim: "\(Int(expenditure.rounded()))")
-                                .font(.app(size: 30, weight: .bold))
+                                .font(.app(size: 26, weight: .bold))
                                 .monospacedDigit()
                                 .foregroundStyle(Color.primary)
                             Text("ккал")
@@ -599,31 +599,36 @@ struct BodyView: View {
             Divider().opacity(0.4)
 
             HStack(alignment: .top, spacing: 8) {
-                // Норма, совпавшая с расходом, — это не второе число, а то же
-                // самое: на поддержании едят столько, сколько тратят. Писать
-                // его дважды значит заставлять сверять две одинаковые цифры.
+                // Норма, совпавшая с расходом, не показывается вовсе: на
+                // поддержании едят столько, сколько тратят, и это то же самое
+                // число, что крупно стоит выше. Писать его дважды — заставлять
+                // сверять две одинаковые цифры.
+                //
+                // Белка здесь больше нет: он не про расход, а про то, как
+                // набрать день, и живёт в макросах на «Сегодня» и в разборе.
                 let goalMatchesExpenditure = abs(Double(store.dailyGoal) - expenditure) < 5
-                let goalValue = goalMatchesExpenditure ? String(localized: "как расход") : "\(store.dailyGoal)"
-                let goalUnit: LocalizedStringKey = goalMatchesExpenditure ? "" : "ккал"
-                if store.plan != nil {
-                    miniStat("Норма", goalValue, unit: goalUnit, color: ProgressRing.kcalColors[0])
+                if !goalMatchesExpenditure {
+                    if store.plan != nil {
+                        miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                            .accessibilityIdentifier("calorieTargetRow")
+                    } else {
+                        Button {
+                            goalText = String(store.dailyGoal)
+                            showingGoalEditor = true
+                        } label: {
+                            miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
+                        }
+                        .buttonStyle(.plain)
                         .accessibilityIdentifier("calorieTargetRow")
-                } else {
-                    Button {
-                        goalText = String(store.dailyGoal)
-                        showingGoalEditor = true
-                    } label: {
-                        miniStat("Норма", goalValue, unit: goalUnit, color: ProgressRing.kcalColors[0])
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("calorieTargetRow")
                 }
-                miniStat("Белок", "\(Int(profile.proteinTargetGrams(from: measurement).rounded()))",
-                         unit: "г", color: MacroKind.protein.color)
+                // ИМТ убран: он не различает мышцы и жир и на тренированном
+                // теле показывает «избыточный вес» рядом с честными двадцатью
+                // процентами жира. Там, где он всё же участвует в расчёте —
+                // в формуле Дойренберга, — он остался в серой подписи.
                 miniStat("Жир %", String(format: "%.1f", fat), unit: "%",
                          color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)))
                     .accessibilityIdentifier("bodyFatRow")
-                miniStat("ИМТ", String(format: "%.1f", profile.bmi), unit: "", color: bmiColor(profile.bmi))
             }
 
             Text(verbatim: basisCaption(profile))
@@ -632,14 +637,29 @@ struct BodyView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
-        .padding(14)
-        .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
+        .padding(12)
+        // Обычная подложка карточки списка, а не стекло: у стекла своя тень,
+        // и на светлой теме она ложилась под карточкой грязным пятном. Здесь
+        // карточка и так лежит на сером фоне списка — ей хватает заливки.
+        .background(Color(.secondarySystemGroupedBackground),
+                    in: RoundedRectangle(cornerRadius: 16))
     }
 
     /// Откуда взялись числа — одной серой строкой.
     private func basisCaption(_ profile: UserProfile) -> String {
-        var parts = [String(format: String(localized: "по формуле %lld"), Int(profile.tdee.rounded())),
-                     String(format: String(localized: "BMR %lld"), Int(profile.bmr.rounded()))]
+        var parts: [String] = []
+        // Формульный расход в подписи нужен только рядом с измеренным — как
+        // то, с чем его сравнивают. Когда считаем по формуле, он уже написан
+        // крупно выше, и второй раз это просто то же число.
+        if usesFact {
+            parts.append(String(format: String(localized: "по формуле %lld"), Int(profile.tdee.rounded())))
+        }
+        parts.append(String(format: String(localized: "BMR %lld"), Int(profile.bmr.rounded())))
+        // ИМТ — только когда жир считается от него: тогда он объясняет,
+        // откуда взялся процент. При замерах по обхватам он ни при чём.
+        if !profile.isNavyMethod(from: measurement) {
+            parts.append(String(format: String(localized: "ИМТ %.1f"), profile.bmi))
+        }
         if let fact = store.adaptiveTDEE, usesFact {
             parts.append(String(format: String(localized: "%lld дн. данных"), fact.loggedDays))
         }

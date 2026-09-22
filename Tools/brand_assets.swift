@@ -93,19 +93,6 @@ func outline(_ spine: CGPath, _ width: CGFloat) -> CGPath {
     spine.copy(strokingWithWidth: width, lineCap: .round, lineJoin: .round, miterLimit: 10)
 }
 
-/// Плоская «С»: у каждой дуги лёгкий градиент своей пары по диагонали, и всё.
-func freshMark(_ ctx: CGContext, width: CGFloat, outer: CGFloat, grayscale: [CGFloat]? = nil) {
-    for (index, spine) in spines(width: width, outer: outer).enumerated() {
-        let shape = outline(spine, width)
-        let colors = grayscale.map { [gray($0[index]), gray($0[index])] } ?? palette[index]
-        ctx.saveGState()
-        ctx.addPath(shape); ctx.clip()
-        let bounds = shape.boundingBoxOfPath
-        linear(ctx, colors, from: CGPoint(x: bounds.minX, y: bounds.maxY), to: CGPoint(x: bounds.maxX, y: bounds.minY))
-        ctx.restoreGState()
-    }
-}
-
 /// Подмешать белого к цвету — для едва заметного перехода внутри дуги.
 func shade(_ color: CGColor, _ amount: CGFloat) -> CGColor {
     let c = color.components ?? [0, 0, 0, 1]
@@ -175,7 +162,13 @@ do {
 // иконки: на весь экран толщина иконки тяжелела. Фон — LaunchBackground,
 // заставка (SplashView) продолжает этот кадр тем же знаком. Картинка одна на
 // обе темы: плоские дуги одинаково читаются на светлом и на чёрном.
-let launchMarkWidth: CGFloat = 90
+//
+// Рисуется тем же знаком, что иконка: если на запуске цвет ведёт себя иначе,
+// чем на иконке, с которой только что нажали, это замечают — переход с
+// домашнего экрана в приложение читается как один кадр.
+// Плотнее прежних 90: рядом с иконкой, откуда только что нажали, тонкий знак
+// читался как другой. Всё ещё легче иконки — он тут один на весь экран.
+let launchMarkWidth: CGFloat = 105
 
 func launch(scale: CGFloat, name: String) {
     let side = 270 * scale
@@ -184,7 +177,7 @@ func launch(scale: CGFloat, name: String) {
     ctx.translateBy(x: side / 2, y: side / 2)
     ctx.scaleBy(x: factor, y: factor)
     ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
-    freshMark(ctx, width: launchMarkWidth, outer: iconOuter)
+    googleMark(ctx, width: launchMarkWidth, outer: iconOuter)
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {

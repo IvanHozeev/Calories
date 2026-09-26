@@ -67,15 +67,20 @@ extension CalorieStore {
         }
         return (0..<window).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            // День поста в расчёт не идёт вовсе — ни едой, ни весом.
+            //
+            // Он не говорит о привычном расходе: съедено почти ничего, а вес в
+            // эти сутки живёт своей жизнью. Настоящий случай — Йом Кипур: вес
+            // накануне 79.0 при обычных 75–76, потому что перед постом едят
+            // плотно и солено, а к вечеру следующего дня 75.0. Три килограмма
+            // воды туда-обратно ломают наклон, по которому считается расход, а
+            // пустой день тянул вниз ещё и среднее съеденное: сразу после
+            // поста оценка падала на шестьсот килокалорий и не возвращалась
+            // неделю — ровно то, что человек видит как «оно каждый день
+            // срезает мне норму».
+            guard !isFastDay(date) else { return nil }
             let entries = entriesByDay[date] ?? []
-            let calories: Int?
-            if !entries.isEmpty {
-                calories = entries.reduce(0) { $0 + $1.calories }
-            } else if isFastDay(date) {
-                calories = 0
-            } else {
-                calories = nil
-            }
+            let calories: Int? = entries.isEmpty ? nil : entries.reduce(0) { $0 + $1.calories }
             return AdaptiveTDEE.Day(date: date, weightKg: weightByDay[date], calories: calories)
         }
     }

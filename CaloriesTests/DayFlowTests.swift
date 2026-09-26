@@ -271,7 +271,7 @@ struct AdaptiveTDEETests {
     }
 
     /// Случай, ради которого всё и затевалось: две недели по 3300 ккал, а вес
-    /// уходит по 100 г в день. Значит, тратится около 4070, а не 3300.
+    /// всё равно уходит вниз — значит тратится заметно больше, чем 3300.
     @Test func twoWeeksOfLosingOn3300_showsAboutFourThousand() throws {
         let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3300, startWeight: 80, perDay: -0.1)))
         #expect(abs(result.tdee - 4070) < 30)
@@ -402,6 +402,33 @@ struct AdaptiveTDEEStoreTests {
         store.updateProfile(UserProfile(weightKg: 80, heightCm: 175, age: 25, sex: .male,
                                         activityLevel: .moderate, goal: .maintenance,
                                         proteinPerKg: 1.7, fatPerKg: 0.8))
+    }
+
+    /// День поста в расчёт расхода не идёт совсем.
+    ///
+    /// Настоящий Йом Кипур: накануне вес 79.0 при обычных 75–76 (перед постом
+    /// едят плотно и солено), к вечеру следующего дня 75.0. Три килограмма
+    /// воды туда-обратно ломают наклон, а почти пустой день тянет вниз среднее
+    /// съеденное — после поста оценка падала на шестьсот килокалорий.
+    @MainActor
+    @Test func aFastDayIsLeftOutOfTheExpenditure() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        for offset in (0..<14).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
+            store.add(name: "День", calories: 3300, date: date.addingTimeInterval(12 * 3600))
+            store.addWeight(76, date: date.addingTimeInterval(7 * 3600))
+        }
+        let withoutFast = try #require(store.computeAdaptiveTDEE())
+
+        // Ставим пост на середину окна — с выбросом веса накануне.
+        let fastDay = try #require(calendar.date(byAdding: .day, value: -7, to: today))
+        store.addWeight(79, date: fastDay.addingTimeInterval(7 * 3600))
+        store.markFast(from: fastDay, to: fastDay.addingTimeInterval(20 * 3600), kind: .dry)
+
+        let withFast = try #require(store.computeAdaptiveTDEE())
+        #expect(abs(withFast.tdee - withoutFast.tdee) < 150,
+                "Пост не должен сдвигать оценку расхода")
     }
 
     /// Две недели по 3300 ккал с уходящим весом: приложение должно понять, что

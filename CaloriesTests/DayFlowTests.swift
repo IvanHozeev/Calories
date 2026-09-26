@@ -379,6 +379,95 @@ struct AdaptiveTDEETests {
     }
 }
 
+// MARK: - Поправка на активность
+
+/// Неделя у живого человека не ровная: смена на ногах и выходной на диване
+/// отличаются в разы. Недельный расход об этом молчит, и без поправки один
+/// день требует дефицита, которого нет, а другой прощает перебор.
+struct StepAdjustmentTests {
+
+    private let calendar = Calendar.current
+    private var today: Date { calendar.startOfDay(for: Date()) }
+
+    private func history(_ steps: [Int], endingDaysAgo: Int = 1) -> [StepDay] {
+        steps.enumerated().map { index, value in
+            let offset = endingDaysAgo + (steps.count - 1 - index)
+            return StepDay(date: calendar.date(byAdding: .day, value: -offset, to: today)!, steps: value)
+        }
+    }
+
+    /// Период привыкания: пока приложение не видело двух недель, оно не знает,
+    /// что для этого человека обычный день, и не гадает.
+    @Test func thereIsNoBaselineUntilTwoWeeksAreLogged() {
+        #expect(StepAdjustment.baseline(from: history(Array(repeating: 9_000, count: 13))) == nil)
+        #expect(StepAdjustment.baseline(from: history(Array(repeating: 9_000, count: 14))) == 9_000)
+    }
+
+    /// Сегодняшний день ещё идёт, и в среднее он бы попал огрызком.
+    @Test func todayDoesNotDragTheBaselineDown() {
+        var days = history(Array(repeating: 10_000, count: 20))
+        days.append(StepDay(date: today, steps: 300))
+        #expect(StepAdjustment.baseline(from: days) == 10_000)
+    }
+
+    /// День без шагов — это не «лежал», а «браслет остался на зарядке».
+    @Test func daysWithoutStepsStayOutOfTheAverage() {
+        var days = history(Array(repeating: 10_000, count: 20))
+        days.append(contentsOf: history(Array(repeating: 0, count: 3), endingDaysAgo: 22))
+        #expect(StepAdjustment.baseline(from: days) == 10_000)
+    }
+
+    @Test func aBusyDayRaisesTheDayAndAQuietOneLowersIt() {
+        let busy = StepAdjustment.adjustment(steps: 20_000, baseline: 10_000,
+                                             weightKg: 76, expenditure: 3_200)
+        let quiet = StepAdjustment.adjustment(steps: 2_000, baseline: 10_000,
+                                              weightKg: 76, expenditure: 3_200)
+        // Десять тысяч шагов сверх обычного — около трёхсот килокалорий.
+        #expect(busy > 250 && busy < 320)
+        #expect(quiet < -200 && quiet > -260)
+    }
+
+    /// Утром шагов нет ни у кого. Срезать за это норму — значит требовать
+    /// голодать за то, чего человек ещё не успел сделать.
+    @Test func theDayInProgressNeverLosesCalories() {
+        let morning = StepAdjustment.adjustment(steps: 400, baseline: 10_000, weightKg: 76,
+                                                expenditure: 3_200, partialDay: true)
+        #expect(morning == 0)
+        let walked = StepAdjustment.adjustment(steps: 18_000, baseline: 10_000, weightKg: 76,
+                                               expenditure: 3_200, partialDay: true)
+        #expect(walked > 200)
+    }
+
+    /// Потолок нужен не ради шагов, а ради ошибок в них: телефон, проехавший
+    /// день в машине, не должен переписать норму в полтора раза.
+    @Test func anAbsurdReadingCannotRewriteTheDay() {
+        let absurd = StepAdjustment.adjustment(steps: 90_000, baseline: 10_000,
+                                               weightKg: 76, expenditure: 3_200)
+        #expect(absurd == 3_200 * StepAdjustment.maxShareOfExpenditure)
+    }
+
+    @Test func withoutDataThereIsNoAdjustment() {
+        #expect(StepAdjustment.adjustment(steps: nil, baseline: 10_000,
+                                          weightKg: 76, expenditure: 3_200) == 0)
+        #expect(StepAdjustment.adjustment(steps: 20_000, baseline: nil,
+                                          weightKg: 76, expenditure: 3_200) == 0)
+        #expect(StepAdjustment.adjustment(steps: 20_000, baseline: 10_000,
+                                          weightKg: nil, expenditure: 3_200) == 0)
+    }
+
+    /// Поправки считаются от личного среднего, поэтому за неделю они гасят
+    /// друг друга — иначе они бы поехали в оценку расхода и та бы поплыла.
+    @Test func aWholeWeekOfAdjustmentsCancelsOut() {
+        let steps = [4_000, 8_000, 10_000, 12_000, 16_000, 6_000, 17_500]
+        let baseline = steps.reduce(0, +) / steps.count
+        let total = steps.reduce(0.0) {
+            $0 + StepAdjustment.adjustment(steps: $1, baseline: baseline,
+                                           weightKg: 76, expenditure: 3_200)
+        }
+        #expect(abs(total) < 30)
+    }
+}
+
 // MARK: - Расход по факту в сторе
 
 @MainActor
@@ -429,6 +518,33 @@ struct AdaptiveTDEEStoreTests {
         let withFast = try #require(store.computeAdaptiveTDEE())
         #expect(abs(withFast.tdee - withoutFast.tdee) < 150,
                 "Пост не должен сдвигать оценку расхода")
+    }
+
+    /// Норма ходячего дня должна быть выше нормы дня на диване — иначе
+    /// суббота с залом и баскетболом выглядит как срыв, а не как работа.
+    @MainActor
+    @Test func aBusyDayGetsMoreThanAQuietOne() throws {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        feedLosingWeeks()
+
+        var history = (1...20).map {
+            StepDay(date: calendar.date(byAdding: .day, value: -$0, to: today)!, steps: 10_000)
+        }
+        let busy = try #require(calendar.date(byAdding: .day, value: -2, to: today))
+        let quiet = try #require(calendar.date(byAdding: .day, value: -3, to: today))
+        history = history.map {
+            if calendar.isDate($0.date, inSameDayAs: busy) { return StepDay(date: $0.date, steps: 22_000) }
+            if calendar.isDate($0.date, inSameDayAs: quiet) { return StepDay(date: $0.date, steps: 2_000) }
+            return $0
+        }
+        StepHistory(defaults: defaults).replace(with: history)
+        store.refresh()
+
+        #expect(store.stepBaseline != nil, "Двадцати дней хватает, чтобы выйти из периода привыкания")
+        let busyGoal = store.effectiveGoal(for: busy)
+        let quietGoal = store.effectiveGoal(for: quiet)
+        #expect(busyGoal > quietGoal + 300)
     }
 
     /// Две недели по 3300 ккал с уходящим весом: приложение должно понять, что

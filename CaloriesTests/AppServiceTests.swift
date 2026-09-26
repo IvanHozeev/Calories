@@ -4,6 +4,99 @@ import Foundation
 import SwiftData
 @testable import Calories
 
+// MARK: - StepHistory
+
+/// «Здоровье» отдаёт шаги на запрос и ничего не хранит за нас. Пока приложение
+/// читало их на лету, активность не переживала ни перезапуск, ни переезд на
+/// новый телефон — а это единственная косвенная метрика, по которой видно, в
+/// какой день нагрузка была выше по факту.
+@MainActor
+struct StepHistoryTests {
+
+    private let defaults = TestDefaults.make()
+
+    private func day(_ offset: Int) -> Date {
+        Calendar.current.startOfDay(for: Calendar.current.date(byAdding: .day, value: offset, to: Date())!)
+    }
+
+    @Test func historyStartsEmpty() {
+        #expect(StepHistory(defaults: defaults).days.isEmpty)
+    }
+
+    @Test func rememberedDaysSurviveAndStaySorted() {
+        let history = StepHistory(defaults: defaults)
+        history.remember([StepDay(date: day(-1), steps: 8_000)])
+        history.remember([StepDay(date: day(-3), steps: 5_000)])
+
+        #expect(history.days.map(\.steps) == [5_000, 8_000])
+    }
+
+    /// «Здоровье» отдаёт последние тридцать дней, а хранить надо дольше:
+    /// иначе каждый новый ответ стирал бы всё, что было до него.
+    @Test func afreshReadingDoesNotWipeOlderDays() {
+        let history = StepHistory(defaults: defaults)
+        history.remember([StepDay(date: day(-60), steps: 11_000)])
+        history.remember([StepDay(date: day(-1), steps: 7_000), StepDay(date: day(0), steps: 3_000)])
+
+        #expect(history.days.count == 3)
+        #expect(history.steps(on: day(-60)) == 11_000)
+    }
+
+    /// Сегодняшний день ещё идёт: вечерний замер больше утреннего, и утренний
+    /// не должен его затирать — иначе день бы «шагал назад».
+    @Test func todayKeepsTheLargerReading() {
+        let history = StepHistory(defaults: defaults)
+        history.remember([StepDay(date: day(0), steps: 9_000)])
+        history.remember([StepDay(date: day(0), steps: 4_000)])
+
+        #expect(history.steps(on: day(0)) == 9_000)
+    }
+
+    /// Активные калории приходят отдельным запросом, и ответ про шаги их не
+    /// знает. Записать шаги и потерять калории — значит потерять половину
+    /// смысла.
+    @Test func activeCaloriesSurviveAStepsOnlyReading() {
+        let history = StepHistory(defaults: defaults)
+        history.remember([StepDay(date: day(0), steps: 9_000, activeCalories: 500)])
+        history.remember([StepDay(date: day(0), steps: 9_500)])
+
+        #expect(history.days.first?.activeCalories == 500)
+        #expect(history.days.first?.steps == 9_500)
+    }
+
+    @Test func historyKeepsAtMostAYear() {
+        let history = StepHistory(defaults: defaults)
+        history.remember((0..<(StepHistory.limit + 20)).map { StepDay(date: day(-$0), steps: 1_000 + $0) })
+
+        #expect(history.days.count == StepHistory.limit)
+        // Обрезается старое, свежее остаётся.
+        #expect(history.steps(on: day(0)) == 1_000)
+        #expect(history.steps(on: day(-(StepHistory.limit + 10))) == nil)
+    }
+
+    @Test func replaceDropsWhateverWasThere() {
+        let history = StepHistory(defaults: defaults)
+        history.remember([StepDay(date: day(-1), steps: 8_000)])
+        history.replace(with: [StepDay(date: day(-2), steps: 2_000)])
+
+        #expect(history.days.map(\.steps) == [2_000])
+    }
+
+    /// Доступ к «Здоровью» может быть не дан или ещё не отвечен, а показать
+    /// уже есть что: история лежит своя.
+    @Test func stepStoreShowsStoredHistoryWithoutHealthKit() {
+        StepHistory(defaults: defaults).remember([
+            StepDay(date: day(-1), steps: 8_000),
+            StepDay(date: day(0), steps: 6_000)
+        ])
+        let store = StepStore(defaults: defaults, groupDefaults: nil)
+
+        #expect(store.storedHistory.count == 2)
+        #expect(store.weekHistory.map(\.steps) == [8_000, 6_000])
+        #expect(store.stepsToday == 6_000)
+    }
+}
+
 // MARK: - StepStore
 
 @MainActor
@@ -333,6 +426,7 @@ struct StepWidgetRefreshTests {
 struct BackupTests {
     private let container: ModelContainer
     private let store: CalorieStore
+    private let defaults: UserDefaults
 
     init() async throws {
         container = try ModelContainer(
@@ -340,8 +434,9 @@ struct BackupTests {
             BodyMeasurement.self, FastDay.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
+        defaults = TestDefaults.make()
         store = CalorieStore(context: container.mainContext,
-                             defaults: TestDefaults.make(), groupDefaults: nil)
+                             defaults: defaults, groupDefaults: nil)
         store.dailyGoal = 2100
     }
 
@@ -367,6 +462,35 @@ struct BackupTests {
         #expect(backup.measurements?.count == 1)
         #expect(backup.fastDays?.count == 1)
         #expect(backup.fastDays?.first?.kind == FastKind.dry.rawValue)
+    }
+
+    @Test func aBackupCarriesTheStepHistory() {
+        let day = Calendar.current.startOfDay(for: Date())
+        StepHistory(defaults: defaults).remember([StepDay(date: day, steps: 12_000, activeCalories: 620)])
+
+        let backup = store.makeBackup()
+
+        #expect(backup.steps?.count == 1)
+        #expect(backup.steps?.first?.steps == 12_000)
+        #expect(backup.steps?.first?.activeCalories == 620)
+    }
+
+    /// Шаги приходят из «Здоровья», и на новом телефоне оно их отдаст — но
+    /// только за последний месяц. История в копии хранится дольше, и терять её
+    /// при восстановлении значило бы терять единственный след нагрузки за
+    /// прошлые месяцы.
+    @Test func restoringBringsTheStepHistoryBack() throws {
+        let history = StepHistory(defaults: defaults)
+        let day = Calendar.current.date(byAdding: .day, value: -100, to: Date())!
+        history.remember([StepDay(date: day, steps: 9_000)])
+        let backup = store.makeBackup()
+
+        history.replace(with: [])
+        #expect(history.days.isEmpty)
+
+        store.restore(from: backup)
+        #expect(history.days.count == 1)
+        #expect(history.days.first?.steps == 9_000)
     }
 
     @Test func restoringReplacesWhateverIsThereNow() {

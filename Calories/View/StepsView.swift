@@ -104,6 +104,25 @@ struct StepsNavigationView: View {
         .scrollIndicators(.hidden)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            // Выбор источника появляется только когда выбирать есть из чего:
+            // у большинства шаги пишет один телефон, и меню с единственным
+            // пунктом было бы вопросом без смысла.
+            if store.sources.count > 1 {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Источник шагов", selection: sourceBinding) {
+                            Text("Все источники").tag(String?.none)
+                            ForEach(store.sources) { source in
+                                Text(source.name).tag(String?.some(source.id))
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "dot.radiowaves.left.and.right")
+                    }
+                    .accessibilityIdentifier("stepSource")
+                    .accessibilityLabel("Источник шагов")
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
@@ -119,6 +138,12 @@ struct StepsNavigationView: View {
         }) {
             GoalPickerSheet(goal: $selectedGoal)
         }
+    }
+
+    /// Выбранный источник живёт в хранилище, а не в экране: по нему идут
+    /// запросы, и менять его надо там, где их задают.
+    private var sourceBinding: Binding<String?> {
+        Binding(get: { store.preferredSourceID }, set: { store.preferredSourceID = $0 })
     }
 
     /// HealthKit намеренно не сообщает, дали ли доступ на чтение: запрос возвращает success

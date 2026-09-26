@@ -758,6 +758,13 @@ private struct CalculationBasisSheet: View {
     @Binding var activityLevel: ActivityLevel
     @Environment(\.dismiss) private var dismiss
 
+    /// Сегодняшняя поправка человеческими словами: «+180 ккал», «как обычно».
+    private var todayAdjustment: String {
+        let delta = Int(store.stepAdjustment(on: Date()).rounded())
+        guard delta != 0 else { return String(localized: "Как обычно") }
+        return String(format: String(localized: "%+lld ккал"), delta)
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -775,6 +782,29 @@ private struct CalculationBasisSheet: View {
                                     Int((store.profile?.tdee ?? 0).rounded())))
                     } else {
                         Text("Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле.")
+                    }
+                }
+
+                Section {
+                    LabeledContent("Обычный день") {
+                        if let baseline = store.stepBaseline {
+                            Text(String(format: String(localized: "%lld шагов"), baseline))
+                        } else {
+                            Text("Копим данные")
+                        }
+                    }
+                    if store.stepBaseline != nil {
+                        LabeledContent("Сегодня") {
+                            Text(todayAdjustment)
+                        }
+                    }
+                } header: {
+                    Text("Активность")
+                } footer: {
+                    if store.stepBaseline == nil {
+                        Text("Пока не наберётся две недели шагов, приложение не знает, какой день для вас обычный, и норму за активность не двигает.")
+                    } else {
+                        Text("Норма дня сдвигается на разницу с обычным днём: находил больше — ешь больше. Пока день идёт, вниз она не уходит.")
                     }
                 }
 

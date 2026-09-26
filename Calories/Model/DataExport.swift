@@ -94,6 +94,15 @@ struct CaloriesBackup: Codable {
     /// раньше, должна восстанавливаться, а не отвергаться целиком.
     let measurements: [Measurement]?
     let fastDays: [Fast]?
+    /// История активности: шаги и активные калории по дням. Необязательная по
+    /// той же причине, что и остальное новое здесь.
+    ///
+    /// Шаги приложение не заводит само — они приходят из «Здоровья», и на новом
+    /// телефоне «Здоровье» их отдаст. Но история в копии всё равно нужна: она
+    /// хранится дольше тех тридцати дней, что отдаёт запрос, и это косвенная
+    /// метрика нагрузки — по ней видно, в какой день человек реально
+    /// наработался, а в какой просто съел больше.
+    let steps: [StepDay]?
 }
 
 extension CalorieStore {
@@ -134,7 +143,8 @@ extension CalorieStore {
             },
             fastDays: fastDays.map {
                 .init(date: $0.date, kind: $0.kindRaw, startedAt: $0.startedAt, endedAt: $0.endedAt)
-            }
+            },
+            steps: stepHistory.isEmpty ? nil : stepHistory
         )
     }
 

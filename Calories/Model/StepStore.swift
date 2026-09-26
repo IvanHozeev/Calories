@@ -3,10 +3,11 @@ import Foundation
 import Observation
 import WidgetKit
 
-struct StepDay: Identifiable {
-    let date: Date
-    let steps: Int
-    var id: Date { date }
+/// Откуда «Здоровье» берёт шаги: сам айфон, браслет, часы, стороннее приложение.
+struct StepSource: Identifiable, Hashable, Sendable {
+    /// Идентификатор приложения-источника — он же устойчивое имя в настройках.
+    let id: String
+    let name: String
 }
 
 @Observable
@@ -17,6 +18,9 @@ final class StepStore {
     @ObservationIgnored private let defaults: UserDefaults
     /// Общий с виджетом контейнер. Тесты передают nil, чтобы не переписывать боевые данные виджета.
     @ObservationIgnored private let groupDefaults: UserDefaults?
+    /// Куда складывается прочитанное из «Здоровья», чтобы оно пережило запуск
+    /// и попало в резервную копию.
+    @ObservationIgnored private let history: StepHistory
 
     private(set) var stepsToday: Int = 0
     private(set) var distanceTodayKm: Double = 0
@@ -27,6 +31,29 @@ final class StepStore {
     private(set) var goalStreak: Int = 0
     private(set) var weeklyTotal: Int = 0
     private(set) var prevWeekAverage: Int = 0
+    /// Источники шагов, которые есть в «Здоровье» у этого человека.
+    private(set) var sources: [StepSource] = []
+
+    /// Выбранный источник. nil — считать всё подряд, как было раньше.
+    ///
+    /// Выбор нужен потому, что HealthKit, в отличие от приложения «Здоровье»,
+    /// источники не разводит: запрос суммы складывает и шаги айфона, и шаги
+    /// браслета за один и тот же день. У человека с браслетом в кармане и
+    /// телефоном там же день получался в полтора раза длиннее, чем был.
+    /// «Здоровье» такое схлопывает по приоритету источников, а нам этот
+    /// приоритет не отдают — значит, спрашиваем сами.
+    var preferredSourceID: String? {
+        didSet {
+            guard preferredSourceID != oldValue else { return }
+            defaults.set(preferredSourceID, forKey: Self.sourceKey)
+            fetchAll()
+        }
+    }
+
+    static let sourceKey = "step_source"
+
+    /// Источники, попавшие в выборку, в «здоровьевом» виде — для предикатов.
+    @ObservationIgnored private var healthSources: [HKSource] = []
 
     /// Что и когда мы в последний раз отдали виджету. Нужно, чтобы не дёргать
     /// его на каждое обновление HealthKit: у виджетов системный бюджет
@@ -51,6 +78,8 @@ final class StepStore {
     ) {
         self.defaults = defaults
         self.groupDefaults = groupDefaults
+        self.history = StepHistory(defaults: defaults)
+        self.preferredSourceID = defaults.string(forKey: Self.sourceKey)
         let goal = defaults.object(forKey: "step_goal") as? Int ?? 10_000
         self.stepGoal = goal
         groupDefaults?.set(goal, forKey: "widget_step_goal")
@@ -61,6 +90,19 @@ final class StepStore {
         // показывает, а только поднимает чтение, если доступ дали. Кроме случая,
         // когда в онбординге ответили «не сейчас», — тогда ждём, пока человек
         // сам откроет шаги.
+        // Показывать есть что ещё до ответа «Здоровья»: сохранённая история
+        // не зависит ни от доступа, ни от сети. Свежие цифры её потом
+        // перекроют, а пустой экран в ожидании запроса никому не нужен.
+        let stored = history.days
+        if !stored.isEmpty {
+            monthHistory = Array(stored.suffix(30))
+            weekHistory = Array(stored.suffix(7))
+            stepsToday = stored.last.flatMap {
+                Calendar.current.isDateInToday($0.date) ? $0.steps : nil
+            } ?? 0
+            updateDerivedStats()
+            updateGoalStreak()
+        }
         if defaults.bool(forKey: "onboarding_completed"), !defaults.bool(forKey: Self.deferredKey) {
             requestAuthorization()
         }
@@ -109,10 +151,27 @@ final class StepStore {
     }
 
     func fetchAll() {
+        fetchSources()
         fetchStepsToday()
         fetchDistanceToday()
         fetchActiveCaloriesToday()
-        fetchHistory(days: 30)
+        // Читаем заметно больше, чем показываем. Данные с браслета доезжают в
+        // «Здоровье» с опозданием и задним числом: спросив только последний
+        // месяц, мы бы так и не увидели дни, которые синхронизировались уже
+        // после того, как их прочитали нулями.
+        fetchHistory(days: 90)
+    }
+
+    /// Вся сохранённая активность — для экрана и для копии.
+    var storedHistory: [StepDay] { history.days }
+
+    /// Запоминает активные калории за сегодня: их «Здоровье» отдаёт отдельным
+    /// запросом, и в истории шагов их нет.
+    private func rememberActiveCaloriesToday(_ calories: Int) {
+        guard calories > 0 else { return }
+        let today = Calendar.current.startOfDay(for: Date())
+        let steps = history.steps(on: today) ?? stepsToday
+        history.remember([StepDay(date: today, steps: steps, activeCalories: calories)])
     }
 
     private func updateDerivedStats() {
@@ -144,10 +203,41 @@ final class StepStore {
         goalStreak = streak
     }
 
+    /// Отбор проб за отрезок — с оглядкой на выбранный источник.
+    private func samplePredicate(from start: Date, to end: Date) -> NSPredicate {
+        let period = HKQuery.predicateForSamples(withStart: start, end: end)
+        guard let preferredSourceID,
+              let source = healthSources.first(where: { $0.bundleIdentifier == preferredSourceID })
+        else { return period }
+        return NSCompoundPredicate(andPredicateWithSubpredicates: [
+            period, HKQuery.predicateForObjects(from: [source])
+        ])
+    }
+
+    /// Спрашивает «Здоровье», кто вообще пишет сюда шаги.
+    private func fetchSources() {
+        let query = HKSourceQuery(sampleType: HKQuantityType(.stepCount),
+                                  samplePredicate: nil) { [weak self] _, found, _ in
+            let sources = (found ?? []).sorted { $0.name < $1.name }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                self.healthSources = sources
+                self.sources = sources.map { StepSource(id: $0.bundleIdentifier, name: $0.name) }
+                // Источник мог пропасть — переставили телефон, снесли
+                // приложение браслета. Молча считать после этого ноль нельзя:
+                // возвращаемся к «всем источникам».
+                if let id = self.preferredSourceID, !sources.contains(where: { $0.bundleIdentifier == id }) {
+                    self.preferredSourceID = nil
+                }
+            }
+        }
+        healthStore.execute(query)
+    }
+
     private func fetchStepsToday() {
         let type = HKQuantityType(.stepCount)
         let start = Calendar.current.startOfDay(for: Date())
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date())
+        let predicate = samplePredicate(from: start, to: Date())
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
@@ -219,7 +309,7 @@ final class StepStore {
     private func fetchActiveCaloriesToday() {
         let type = HKQuantityType(.activeEnergyBurned)
         let start = Calendar.current.startOfDay(for: Date())
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date())
+        let predicate = samplePredicate(from: start, to: Date())
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
@@ -228,6 +318,7 @@ final class StepStore {
             let kcal = Int(result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0)
             Task { @MainActor [weak self] in
                 self?.activeCaloriesToday = kcal
+                self?.rememberActiveCaloriesToday(kcal)
             }
         }
         healthStore.execute(query)
@@ -236,7 +327,7 @@ final class StepStore {
     private func fetchDistanceToday() {
         let type = HKQuantityType(.distanceWalkingRunning)
         let start = Calendar.current.startOfDay(for: Date())
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date())
+        let predicate = samplePredicate(from: start, to: Date())
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
@@ -260,7 +351,7 @@ final class StepStore {
         interval.day = 1
         let query = HKStatisticsCollectionQuery(
             quantityType: type,
-            quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: end),
+            quantitySamplePredicate: samplePredicate(from: start, to: end),
             options: .cumulativeSum,
             anchorDate: start,
             intervalComponents: interval
@@ -273,10 +364,11 @@ final class StepStore {
             }
             let finalDays = days
             Task { @MainActor [weak self] in
-                self?.monthHistory = finalDays
+                self?.monthHistory = Array(finalDays.suffix(30))
                 self?.weekHistory = Array(finalDays.suffix(7))
                 self?.updateDerivedStats()
                 self?.updateGoalStreak()
+                self?.history.remember(finalDays)
             }
         }
         healthStore.execute(query)

@@ -121,6 +121,9 @@ final class CalorieStore {
     private(set) var adaptiveTDEE: AdaptiveTDEE.Result?
     /// Он же, сглаженный между днями: цель не должна прыгать за каждым всплеском.
     private(set) var smoothedTDEE: Double?
+    /// Сколько шагов у этого человека «обычный день». nil — данных ещё мало,
+    /// идёт период привыкания, и поправка на активность не работает.
+    private(set) var stepBaseline: Int?
     /// Считать ли норму от факта, а не от формулы. Включено, пока человек
     /// не выключил: формула ошибается на сотни калорий, и дефицит, в котором
     /// сидят, думая, что едят вдоволь, — цена этой ошибки.
@@ -186,6 +189,9 @@ final class CalorieStore {
         static let adaptiveTDEEDay = "adaptive_tdee_day"
         /// Расход по дням: каким он был в тот день, а не какой он сегодня.
         static let tdeeHistory = "adaptive_tdee_history"
+        /// «Обычный день» в шагах и когда его в последний раз считали.
+        static let stepBaseline = "step_baseline"
+        static let stepBaselineDay = "step_baseline_day"
         static let usesAdaptiveTDEE = "use_adaptive_tdee"
         static let goalSyncedTDEE = "goal_synced_tdee"
         static let phaseHistory = "phase_history"
@@ -420,6 +426,12 @@ final class CalorieStore {
     /// Как часто пересматривается измеренный расход, в днях.
     static let expenditureUpdateDays = 7
 
+    /// Сохранённая активность по дням. Дневник её не собирает — она приходит
+    /// из «Здоровья» через `StepStore`, — но знать о ней ему надо: она едет в
+    /// резервную копию вместе с записями, а дальше по ней же будет видно, в
+    /// какой день нагрузка была выше.
+    var stepHistory: [StepDay] { StepHistory(defaults: defaults).days }
+
     /// Расход за день — тот, что действовал в этот день.
     ///
     /// Без истории вчерашний день считался сегодняшним расходом: стоило
@@ -427,9 +439,32 @@ final class CalorieStore {
     /// съеденного — зелёный день перекрашивался в оранжевый, хотя человек
     /// ничего не менял.
     func expenditure(on date: Date) -> Double? {
+        guard let base = baseExpenditure(on: date) else { return nil }
+        return base + stepAdjustment(on: date, expenditure: base)
+    }
+
+    /// Недельный расход без оглядки на активность этого дня.
+    private func baseExpenditure(on date: Date) -> Double? {
         let day = Calendar.current.startOfDay(for: date)
         guard day < Calendar.current.startOfDay(for: Date()) else { return smoothedTDEE }
         return tdeeHistory[Self.historyKey(day)] ?? smoothedTDEE
+    }
+
+    /// Поправка за активность этого дня: насколько он был подвижнее обычного.
+    ///
+    /// Ноль, пока не набралось двух недель шагов, — и это не заглушка, а
+    /// ответ: не зная обычного дня, сравнивать не с чем.
+    func stepAdjustment(on date: Date, expenditure: Double? = nil) -> Double {
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: date)
+        guard let base = expenditure ?? baseExpenditure(on: day) else { return 0 }
+        let steps = stepHistory.first { calendar.isDate($0.date, inSameDayAs: day) }?.steps
+        return StepAdjustment.adjustment(
+            steps: steps,
+            baseline: stepBaseline,
+            weightKg: latestWeight?.weightKg ?? profile?.weightKg,
+            expenditure: base,
+            partialDay: day >= calendar.startOfDay(for: Date()))
     }
 
     /// История расхода по дням, как она лежит в настройках.
@@ -488,11 +523,38 @@ final class CalorieStore {
             smoothedTDEE = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
         }
 
+        refreshStepBaseline(calendar, today: today)
         syncGoalWithExpenditure()
 
         let adapted = computeAdaptedTodayGoal()
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
+    }
+
+    /// Пересматривает «обычный день» — раз в неделю, как и сам расход.
+    ///
+    /// Чаще не нужно: среднее за четыре недели от одного дня почти не меняется,
+    /// зато цель ползла бы каждый день. Реже — плохо: человек меняет работу,
+    /// покупает велосипед, ложится с травмой, и привычная активность у него
+    /// становится другой. Раз в неделю и подстраивается, и не дёргает.
+    private func refreshStepBaseline(_ calendar: Calendar, today: Date) {
+        let storedDay = defaults.object(forKey: Keys.stepBaselineDay) as? Date
+        let stored = defaults.object(forKey: Keys.stepBaseline) as? Int
+        let daysSince = storedDay.map { calendar.dateComponents([.day], from: $0, to: today).day ?? 0 }
+        if let stored, let daysSince, daysSince < Self.expenditureUpdateDays {
+            stepBaseline = stored
+            return
+        }
+        guard let fresh = StepAdjustment.baseline(from: stepHistory, now: today, calendar: calendar) else {
+            // Период привыкания ещё идёт. Прошлое значение при этом не стираем:
+            // если шаги пропали на неделю (браслет на зарядке, отпуск без
+            // телефона), лучше держать прежнюю картину, чем выключать поправку.
+            stepBaseline = stored
+            return
+        }
+        stepBaseline = fresh
+        defaults.set(fresh, forKey: Keys.stepBaseline)
+        defaults.set(today, forKey: Keys.stepBaselineDay)
     }
 
     /// Числа для виджета — в общие настройки группы.
@@ -843,6 +905,7 @@ final class CalorieStore {
             defaults.removeObject(forKey: Keys.plan)
         }
         dailyGoal = backup.dailyGoal
+        if let steps = backup.steps { StepHistory(defaults: defaults).replace(with: steps) }
 
         refresh()
     }

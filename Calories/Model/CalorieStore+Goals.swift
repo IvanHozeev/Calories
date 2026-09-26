@@ -226,7 +226,11 @@ extension CalorieStore {
         if let plan, profile != nil, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
             return plan.dailyCalorieTarget(for: date, tdee: tdee)
         }
-        return dailyGoal
+        // Без плана норма — записанное число, и расход в неё не входит. Но
+        // активность этого дня входить обязана: иначе суббота с залом и
+        // баскетболом судится по той же мерке, что вторник за столом.
+        // В ветках с планом поправка уже сидит внутри `tdee`.
+        return dailyGoal + Int(stepAdjustment(on: date).rounded())
     }
 
     /// Зафиксированная цель на дату (из снапшота) — иначе живой расчёт. O(1) через goalsByDay.

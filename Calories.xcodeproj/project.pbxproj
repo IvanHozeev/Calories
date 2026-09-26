@@ -610,8 +610,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Шаги, потраченные калории, тренировки, сон, пульс и вес нужны, чтобы считать расход по дням и объяснять дни, когда вес или голод ведут себя странно";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение ничего не записывает в «Здоровье» — доступ нужен только на чтение";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
@@ -654,8 +654,8 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Calories;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования штрихкодов и съёмки еды";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "Приложение читает количество шагов для отображения активности";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение читает количество шагов для отображения активности";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Шаги, потраченные калории, тренировки, сон, пульс и вес нужны, чтобы считать расход по дням и объяснять дни, когда вес или голод ведут себя странно";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Приложение ничего не записывает в «Здоровье» — доступ нужен только на чтение";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";

@@ -1,0 +1,165 @@
+{
+  "sourceLanguage" : "ru",
+  "strings" : {
+    "NSCameraUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لمسح الباركود وتصوير الطعام"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zum Scannen von Barcodes und Fotografieren von Essen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To scan barcodes and photograph food"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para escanear códigos de barras y fotografiar comida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour scanner les codes-barres et photographier les aliments"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לסריקת ברקודים ולצילום אוכל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para ler códigos de barras e fotografar comida"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для сканирования штрихкодов и съёмки еды"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطوات والسعرات النشطة والتمارين والنوم والنبض والوزن تُستخدم لحساب الصرف يومًا بيوم ولتفسير الأيام التي يتصرف فيها الوزن أو الجوع بشكل غريب"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schritte, aktive Kalorien, Trainings, Schlaf, Herzfrequenz und Gewicht dienen dazu, den Verbrauch tageweise zu berechnen und Tage zu erklären, an denen Gewicht oder Hunger sich seltsam verhalten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps, active calories, workouts, sleep, heart rate and weight are used to work out a day-by-day expenditure and to explain the days when weight or hunger behaves oddly"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pasos, las calorías activas, los entrenamientos, el sueño, el pulso y el peso sirven para calcular el gasto por días y explicar los días en que el peso o el hambre se comportan raro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pas, les calories actives, les séances, le sommeil, la fréquence cardiaque et le poids servent à calculer la dépense jour par jour et à expliquer les journées où le poids ou la faim se comportent bizarrement"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צעדים, קלוריות פעילות, אימונים, שינה, דופק ומשקל משמשים לחישוב ההוצאה יום־יום ולהסבר ימים שבהם המשקל או הרעב מתנהגים מוזר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passos, calorias ativas, treinos, sono, frequência cardíaca e peso servem para calcular o gasto por dia e explicar os dias em que o peso ou a fome se comportam de forma estranha"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаги, потраченные калории, тренировки, сон, пульс и вес нужны, чтобы считать расход по дням и объяснять дни, когда вес или голод ведут себя странно"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التطبيق لا يكتب شيئًا في تطبيق الصحة — يحتاج إلى صلاحية القراءة فقط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App schreibt nichts in „Health“ – sie braucht nur Lesezugriff"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app writes nothing to Health — it only needs read access"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app no escribe nada en Salud: solo necesita acceso de lectura"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app n’écrit rien dans Santé — elle n’a besoin que d’un accès en lecture"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האפליקציה לא כותבת דבר ל«בריאות» — היא זקוקה להרשאת קריאה בלבד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app não escreve nada no Saúde — precisa apenas de acesso de leitura"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Приложение ничего не записывает в «Здоровье» — доступ нужен только на чтение"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

@@ -540,7 +540,9 @@ struct HealthInventoryView: View {
                     }
                     if let latest = row.latest {
                         LabeledContent(String(localized: "Последние")) {
-                            Text(latest.formatted(date: .abbreviated, time: .shortened))
+                            Text(row.isDaily
+                                 ? latest.formatted(date: .abbreviated, time: .omitted)
+                                 : latest.formatted(date: .abbreviated, time: .shortened))
                         }
                     }
                     if let sample = row.sample {

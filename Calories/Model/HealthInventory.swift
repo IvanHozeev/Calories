@@ -25,6 +25,8 @@ final class HealthInventory {
         let days: Int
         /// Последний день с данными.
         let latest: Date?
+        /// Данные посуточные: у времени в `latest` смысла нет, это начало суток.
+        var isDaily: Bool = false
         /// Пример значения — чтобы видеть не только «есть», но и «похоже на правду».
         let sample: String?
         /// Кто пишет: имена источников.
@@ -46,8 +48,10 @@ final class HealthInventory {
             ("activeEnergy", String(localized: "Активные калории")),
             ("workouts", String(localized: "Тренировки")),
             ("restingHeartRate", String(localized: "Пульс в покое")),
+            ("heartRate", String(localized: "Пульс")),
             ("sleep", String(localized: "Сон")),
             ("hrv", String(localized: "Вариабельность пульса")),
+            ("weight", String(localized: "Вес")),
             ("bodyFat", String(localized: "Процент жира"))
         ]
     }
@@ -56,6 +60,8 @@ final class HealthInventory {
         HKQuantityType(.stepCount),
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.restingHeartRate),
+        HKQuantityType(.heartRate),
+        HKQuantityType(.bodyMass),
         HKQuantityType(.heartRateVariabilitySDNN),
         HKQuantityType(.bodyFatPercentage),
         HKCategoryType(.sleepAnalysis),
@@ -76,7 +82,11 @@ final class HealthInventory {
             failure = error.localizedDescription
             return
         }
-        let start = Calendar.current.date(byAdding: .day, value: -Self.window, to: Date()) ?? Date()
+        // Ровно столько суток, сколько обещано: окно начинается с начала дня,
+        // иначе суточных корзин выходит на одну больше, чем дней в окне, и
+        // отчёт показывает «31 / 30».
+        let today = Calendar.current.startOfDay(for: Date())
+        let start = Calendar.current.date(byAdding: .day, value: -(Self.window - 1), to: today) ?? today
         var found: [Row] = []
         for probe in probes {
             found.append(await row(for: probe.id, title: probe.title, since: start))
@@ -85,22 +95,81 @@ final class HealthInventory {
     }
 
     private func row(for id: String, title: String, since start: Date) async -> Row {
-        let samples: [HKSample]
+        // Пульс браслет пишет непрерывно — за месяц это десятки тысяч проб, и
+        // тащить их в память ради одного «есть или нет» незачем. Числовые
+        // величины считаем посуточной статистикой, а пробы читаем только там,
+        // где иначе нельзя: у сна и тренировок важна длительность каждой.
         switch id {
-        case "steps":            samples = await fetch(HKQuantityType(.stepCount), since: start)
-        case "activeEnergy":     samples = await fetch(HKQuantityType(.activeEnergyBurned), since: start)
-        case "restingHeartRate": samples = await fetch(HKQuantityType(.restingHeartRate), since: start)
-        case "hrv":              samples = await fetch(HKQuantityType(.heartRateVariabilitySDNN), since: start)
-        case "bodyFat":          samples = await fetch(HKQuantityType(.bodyFatPercentage), since: start)
-        case "sleep":            samples = await fetch(HKCategoryType(.sleepAnalysis), since: start)
-        default:                 samples = await fetch(HKObjectType.workoutType(), since: start)
+        case "steps":
+            return await quantityRow(id, title, HKQuantityType(.stepCount), .cumulativeSum,
+                                     unit: .count(), format: { String(format: String(localized: "%lld шагов"), Int($0)) }, since: start)
+        case "activeEnergy":
+            return await quantityRow(id, title, HKQuantityType(.activeEnergyBurned), .cumulativeSum,
+                                     unit: .kilocalorie(), format: { String(format: String(localized: "%lld ккал"), Int($0)) }, since: start)
+        case "restingHeartRate", "heartRate":
+            let type = id == "heartRate" ? HKQuantityType(.heartRate) : HKQuantityType(.restingHeartRate)
+            return await quantityRow(id, title, type, .discreteAverage,
+                                     unit: HKUnit.count().unitDivided(by: .minute()),
+                                     format: { String(format: String(localized: "%lld уд/мин"), Int($0)) }, since: start)
+        case "hrv":
+            return await quantityRow(id, title, HKQuantityType(.heartRateVariabilitySDNN), .discreteAverage,
+                                     unit: .secondUnit(with: .milli),
+                                     format: { String(format: String(localized: "%lld мс"), Int($0)) }, since: start)
+        case "weight":
+            return await quantityRow(id, title, HKQuantityType(.bodyMass), .discreteAverage,
+                                     unit: .gramUnit(with: .kilo),
+                                     format: { String(format: String(localized: "%@ кг"), String(format: "%.1f", $0)) }, since: start)
+        case "bodyFat":
+            return await quantityRow(id, title, HKQuantityType(.bodyFatPercentage), .discreteAverage,
+                                     unit: .percent(),
+                                     format: { String(format: String(localized: "%lld%%"), Int(($0 * 100).rounded())) }, since: start)
+        default:
+            let type: HKSampleType = id == "sleep" ? HKCategoryType(.sleepAnalysis) : HKObjectType.workoutType()
+            let samples = await fetch(type, since: start)
+            let calendar = Calendar.current
+            return Row(id: id, title: title,
+                       days: Set(samples.map { calendar.startOfDay(for: $0.startDate) }).count,
+                       latest: samples.map(\.startDate).max(),
+                       sample: Self.sample(from: samples),
+                       sources: Array(Set(samples.map(\.sourceRevision.source.name))).sorted())
         }
+    }
+
+    /// Строка отчёта по числовой величине: посуточная статистика за окно.
+    private func quantityRow(_ id: String, _ title: String, _ type: HKQuantityType,
+                             _ options: HKStatisticsOptions, unit: HKUnit,
+                             format: @escaping (Double) -> String, since start: Date) async -> Row {
         let calendar = Calendar.current
-        let days = Set(samples.map { calendar.startOfDay(for: $0.startDate) }).count
-        let sources = Array(Set(samples.map(\.sourceRevision.source.name))).sorted()
-        return Row(id: id, title: title, days: days,
-                   latest: samples.map(\.startDate).max(),
-                   sample: Self.sample(from: samples), sources: sources)
+        let anchor = calendar.startOfDay(for: start)
+        var interval = DateComponents()
+        interval.day = 1
+        let collection: HKStatisticsCollection? = await withCheckedContinuation { continuation in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: type,
+                quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: Date()),
+                // Без разделения по источникам HealthKit не заполняет `sources`
+                // вовсе, и отчёт отвечал «никто не пишет» при живых данных.
+                options: options.union(.separateBySource),
+                anchorDate: anchor,
+                intervalComponents: interval
+            )
+            query.initialResultsHandler = { _, results, _ in continuation.resume(returning: results) }
+            healthStore.execute(query)
+        }
+        var days = 0
+        var latest: Date?
+        var latestValue: Double?
+        var sources: Set<String> = []
+        collection?.enumerateStatistics(from: start, to: Date()) { stats, _ in
+            let quantity = options == .cumulativeSum ? stats.sumQuantity() : stats.averageQuantity()
+            guard let quantity else { return }
+            days += 1
+            latest = stats.startDate
+            latestValue = quantity.doubleValue(for: unit)
+            for source in stats.sources ?? [] { sources.insert(source.name) }
+        }
+        return Row(id: id, title: title, days: days, latest: latest,
+                   isDaily: true, sample: latestValue.map(format), sources: sources.sorted())
     }
 
     private func fetch(_ type: HKSampleType, since start: Date) async -> [HKSample] {
@@ -123,20 +192,6 @@ final class HealthInventory {
         if let workout = last as? HKWorkout {
             let minutes = Int((workout.duration / 60).rounded())
             return String(format: String(localized: "%lld мин"), minutes)
-        }
-        if let quantity = last as? HKQuantitySample {
-            if quantity.quantityType == HKQuantityType(.restingHeartRate) {
-                return String(format: String(localized: "%lld уд/мин"),
-                              Int(quantity.quantity.doubleValue(for: HKUnit.count().unitDivided(by: .minute()))))
-            }
-            if quantity.quantityType == HKQuantityType(.heartRateVariabilitySDNN) {
-                return String(format: String(localized: "%lld мс"),
-                              Int(quantity.quantity.doubleValue(for: .secondUnit(with: .milli))))
-            }
-            if quantity.quantityType == HKQuantityType(.bodyFatPercentage) {
-                return String(format: String(localized: "%lld%%"),
-                              Int((quantity.quantity.doubleValue(for: .percent()) * 100).rounded()))
-            }
         }
         if let category = last as? HKCategorySample {
             let hours = category.endDate.timeIntervalSince(category.startDate) / 3600

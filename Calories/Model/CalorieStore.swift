@@ -184,6 +184,8 @@ final class CalorieStore {
         static let goal = "daily_goal"
         static let adaptiveTDEE = "adaptive_tdee"
         static let adaptiveTDEEDay = "adaptive_tdee_day"
+        /// Расход по дням: каким он был в тот день, а не какой он сегодня.
+        static let tdeeHistory = "adaptive_tdee_history"
         static let usesAdaptiveTDEE = "use_adaptive_tdee"
         static let goalSyncedTDEE = "goal_synced_tdee"
         static let phaseHistory = "phase_history"
@@ -415,6 +417,43 @@ final class CalorieStore {
         }
     }
 
+    /// Как часто пересматривается измеренный расход, в днях.
+    static let expenditureUpdateDays = 7
+
+    /// Расход за день — тот, что действовал в этот день.
+    ///
+    /// Без истории вчерашний день считался сегодняшним расходом: стоило
+    /// оценке поехать вниз, и вчерашняя норма задним числом становилась ниже
+    /// съеденного — зелёный день перекрашивался в оранжевый, хотя человек
+    /// ничего не менял.
+    func expenditure(on date: Date) -> Double? {
+        let day = Calendar.current.startOfDay(for: date)
+        guard day < Calendar.current.startOfDay(for: Date()) else { return smoothedTDEE }
+        return tdeeHistory[Self.historyKey(day)] ?? smoothedTDEE
+    }
+
+    /// История расхода по дням, как она лежит в настройках.
+    private var tdeeHistory: [String: Double] {
+        defaults.dictionary(forKey: Keys.tdeeHistory) as? [String: Double] ?? [:]
+    }
+
+    static func historyKey(_ date: Date) -> String {
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
+
+    /// Запоминает сегодняшний расход и подчищает старое: больше года истории
+    /// не нужно никому, а словарь в настройках лучше не растить бесконечно.
+    private func rememberTodayExpenditure(_ value: Double?, on day: Date) {
+        guard let value else { return }
+        var history = tdeeHistory
+        history[Self.historyKey(day)] = value
+        if history.count > 400 {
+            for key in history.keys.sorted().prefix(history.count - 400) { history[key] = nil }
+        }
+        defaults.set(history, forKey: Keys.tdeeHistory)
+    }
+
     /// Измеренный расход и то, что из него считается: сглаженное значение,
     /// цель на сегодня и банк калорий.
     private func rebuildExpenditure(_ calendar: Calendar) {
@@ -426,14 +465,25 @@ final class CalorieStore {
         if let estimate = adaptiveTDEE?.tdee {
             let storedDay = defaults.object(forKey: Keys.adaptiveTDEEDay) as? Date
             let stored = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
-            if storedDay == today {
-                smoothedTDEE = stored ?? estimate
+            // Норма пересматривается раз в неделю, а не каждый день.
+            //
+            // Ежедневный пересчёт человек видит как «оно опять срезало мне
+            // калории»: окно на две недели сдвигается каждый день, оценка
+            // каждый день чуть другая, и цель ползёт. Раз в неделю — и шаг
+            // заметен, и понятно, к чему он относится; так же поступают те,
+            // кто считает расход по факту дольше всех.
+            let daysSinceUpdate = storedDay.map {
+                calendar.dateComponents([.day], from: $0, to: today).day ?? 0
+            }
+            if let stored, let daysSinceUpdate, daysSinceUpdate < Self.expenditureUpdateDays {
+                smoothedTDEE = stored
             } else {
                 let next = AdaptiveTDEE.smoothed(previous: stored, estimate: estimate)
                 smoothedTDEE = next
                 defaults.set(next, forKey: Keys.adaptiveTDEE)
                 defaults.set(today, forKey: Keys.adaptiveTDEEDay)
             }
+            rememberTodayExpenditure(smoothedTDEE, on: today)
         } else {
             smoothedTDEE = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
         }

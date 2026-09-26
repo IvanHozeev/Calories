@@ -248,14 +248,14 @@ final class CaloriesUITests: XCTestCase {
                       "День делится на приёмы, а строки ближайшего приёма на «Сегодня» нет")
     }
 
-    /// У приёмов пищи должен быть свой вход в настройках, а не закуток
-    /// внутри уведомлений, где его никто не искал.
+    /// Вход в приёмы пищи живёт в профиле: это про режим человека — подъём,
+    /// отбой, число приёмов, — а не про то, как выглядит приложение.
     @MainActor
-    func testSettingsHaveTheirOwnWayIntoMealSchedule() {
+    func testProfileHasTheWayIntoMealSchedule() {
         let app = launchApp()
-        let settings = app.tabBars.buttons["Settings"]
-        XCTAssertTrue(settings.waitForExistence(timeout: 10))
-        settings.tap()
+        let profile = app.tabBars.buttons["Profile"]
+        XCTAssertTrue(profile.waitForExistence(timeout: 10))
+        profile.tap()
 
         let entrance = app.descendants(matching: .any).matching(identifier: "openMealSchedule").firstMatch
         scrollTo(entrance, in: app)
@@ -679,7 +679,7 @@ final class CaloriesUITests: XCTestCase {
 
         // Найденное — выше секции приёма пищи. Сравниваем координаты, а не
         // порядок в дереве: дерево у списка не обязано совпадать с тем, что видно.
-        let mealHeader = app.staticTexts["Meal"].firstMatch
+        let mealHeader = app.collectionViews.staticTexts["Meal"].firstMatch
         if mealHeader.exists {
             XCTAssertGreaterThan(mealHeader.frame.minY, row.frame.minY,
                                  "Пока идёт поиск, приём пищи должен быть ниже найденного")

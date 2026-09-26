@@ -246,6 +246,23 @@ struct BodyView: View {
                 }
             }
             
+            // Приёмы пищи — в профиле, а не в настройках приложения: это про
+            // режим человека, как подъём, отбой и число приёмов, а не про то,
+            // как приложение выглядит и куда кладёт копии.
+            Section("Питание") {
+                NavigationLink {
+                    MealScheduleSheet(
+                        entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+                        dailyGoal: store.adaptedTodayGoal,
+                        settings: .shared,
+                        isEmbedded: true
+                    )
+                } label: {
+                    Label("Приёмы пищи", systemImage: "fork.knife")
+                }
+                .accessibilityIdentifier("openMealSchedule")
+            }
+
             Section("Параметры тела") {
                 Picker("Пол", selection: $sex) {
                     ForEach(Sex.allCases) { Text($0.title).tag($0) }

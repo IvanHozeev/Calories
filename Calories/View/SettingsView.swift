@@ -109,24 +109,6 @@ struct SettingsView: View {
                 }
             }
             
-            // Приёмы пищи — про то, как делится день, а не про время
-            // уведомлений. В «Напоминаниях» этот тумблер нельзя было найти,
-            // не зная, что он там: уведомления ищут, когда хотят настроить
-            // уведомления.
-            Section("Питание") {
-                NavigationLink {
-                    MealScheduleSheet(
-                        entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-                        dailyGoal: store.adaptedTodayGoal,
-                        settings: .shared,
-                        isEmbedded: true
-                    )
-                } label: {
-                    Label("Приёмы пищи", systemImage: "fork.knife")
-                }
-                .accessibilityIdentifier("openMealSchedule")
-            }
-
             // Системное сразу после подписки: оформление, шрифт и язык ищут
             // чаще, чем выгрузку копий, а та нужна раз в жизни телефона.
             // Оформление отдельной секцией: тема, шрифт и цвет — это про вид,

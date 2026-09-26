@@ -28,6 +28,15 @@ enum AdaptiveTDEE {
     /// на сотни калорий из-за одного праздника или одного солёного ужина.
     static let estimateBeta: Double = 0.25
 
+    /// Ниже какого недельного темпа вес считается стоящим на месте.
+    ///
+    /// Сто пятьдесят грамм в неделю — это меньше, чем весы врут от соли, воды
+    /// и времени взвешивания. Без этой мёртвой зоны шум читался как профицит:
+    /// «вес подрос на 200 г» превращалось в «минус 220 ккал расхода», человек
+    /// ел меньше, окно помнило прежний рост — и норма ползла вниз день за
+    /// днём, хотя он держал поддержание.
+    static let steadyWeeklyRateKg: Double = 0.15
+
     /// Один день истории. `calories` nil — день не записан: такой день не
     /// говорит ни о чём, кроме того, что дневник забыли.
     struct Day: Equatable {
@@ -110,7 +119,9 @@ enum AdaptiveTDEE {
         // это наклон по воде.
         guard let span = weighIns.last.map({ $0.0 - weighIns[0].0 }), span >= 6 else { return nil }
 
-        let slopePerDay = regressionSlope(weighIns)
+        let rawSlope = regressionSlope(weighIns)
+        // Шум весов трендом не считаем: иначе расход уезжает вслед за водой.
+        let slopePerDay = abs(rawSlope * 7) < steadyWeeklyRateKg ? 0 : rawSlope
         let meanIntake = Double(logged.reduce(0, +)) / Double(logged.count)
         let tdee = meanIntake - slopePerDay * kcalPerKg
 
@@ -125,7 +136,7 @@ enum AdaptiveTDEE {
         }
 
         return Result(tdee: tdee,
-                      weeklyRateKg: slopePerDay * 7,
+                      weeklyRateKg: rawSlope * 7,
                       meanIntake: meanIntake,
                       loggedDays: logged.count,
                       weighIns: weighIns.count,

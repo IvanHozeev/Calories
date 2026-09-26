@@ -7,6 +7,20 @@ import SwiftData
 // файла, а private в Swift ограничен файлом. Это чистые вычисления без побочных эффектов.
 extension CalorieStore {
 
+    /// Уложился ли день в норму.
+    ///
+    /// С допуском, а не впритык: перебор на десяток калорий — это не срыв, а
+    /// округление веса порции. В реальных днях так и выходило — 3317 против
+    /// 3304, и день красился оранжевым, хотя человек попал в норму с точностью
+    /// до трети процента.
+    ///
+    /// Два процента или пятьдесят калорий, что больше: процент держит допуск
+    /// соразмерным норме, а нижняя граница спасает маленькие цели вроде дня
+    /// с рефидом наоборот.
+    func isWithinGoal(total: Int, goal: Int) -> Bool {
+        total <= goal + max(50, Int((Double(goal) * 0.02).rounded()))
+    }
+
     func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
@@ -17,7 +31,7 @@ extension CalorieStore {
             if isFastDay(date) { return (date, true, true) }
             let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
             let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            return (date, dayTotal > 0, dayTotal > 0 && dayTotal <= dayGoal)
+            return (date, dayTotal > 0, dayTotal > 0 && isWithinGoal(total: dayTotal, goal: dayGoal))
         }
     }
 
@@ -103,7 +117,7 @@ extension CalorieStore {
         let day = Calendar.current.startOfDay(for: date)
         let total = (entriesByDay[day] ?? []).reduce(0) { $0 + $1.calories }
         guard total > 0 else { return false }
-        return total <= (goalsByDay[day] ?? effectiveGoal(for: day))
+        return isWithinGoal(total: total, goal: goalsByDay[day] ?? effectiveGoal(for: day))
     }
 
     /// Есть ли за день записи — или он отмечен голоданием, что тоже ведение дневника.
@@ -195,13 +209,17 @@ extension CalorieStore {
     }
 
     private func baseGoal(for date: Date) -> Int {
+        // Расход берём тот, что действовал в этот день: пересчитывать прошлое
+        // сегодняшним числом значит задним числом менять норму, по которой
+        // человек уже ел.
+        let tdee = expenditure(on: date) ?? workingTDEE
         if let plan, plan.cyclingEnabled, profile != nil {
-            return plan.calorieTarget(for: date, tdee: workingTDEE)
+            return plan.calorieTarget(for: date, tdee: tdee)
         }
         // Число действует в фазе, под которую записано. В другой фазе, в том
         // числе в неделю брейка, — формула плана, см. `dailyGoalPhaseID`.
         if let plan, profile != nil, let phase = plan.phase(on: date), phase.id != dailyGoalPhaseID {
-            return plan.dailyCalorieTarget(for: date, tdee: workingTDEE)
+            return plan.dailyCalorieTarget(for: date, tdee: tdee)
         }
         return dailyGoal
     }

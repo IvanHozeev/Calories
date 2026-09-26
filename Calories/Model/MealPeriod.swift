@@ -14,6 +14,22 @@ enum MealPeriod: String, CaseIterable {
     case secondDinner = "Второй ужин"
     case nightSnack = "Перекус"
 
+    /// Подпись идущего сейчас окна: «Время завтрака», «Время обеда».
+    ///
+    /// Отдельной строкой на каждый приём, а не подстановкой в шаблон: по-русски
+    /// нужен родительный падеж, и «Время завтрак» из склейки не спасти.
+    var timeTitle: String {
+        switch self {
+        case .breakfast:       return String(localized: "Время завтрака")
+        case .secondBreakfast: return String(localized: "Время второго завтрака")
+        case .lunch:           return String(localized: "Время обеда")
+        case .afternoonSnack:  return String(localized: "Время полдника")
+        case .dinner:          return String(localized: "Время ужина")
+        case .secondDinner:    return String(localized: "Время второго ужина")
+        case .nightSnack:      return String(localized: "Перекус")
+        }
+    }
+
     /// Диапазон часов приёма. Ночной перекус переходит через полночь,
     /// поэтому его границы проверяются отдельно.
     var hours: Range<Int> {

@@ -70,7 +70,6 @@ struct MealScheduleTests {
     @Test func foodBeforeTheFirstWindowStillCounts() {
         let slots = MealSchedule.slots(input(entries: [(at(5), 600)], now: at(9)))
 
-        #expect(slots.first?.consumed == 600, "Завтрак в пять — это завтрак, а не ничей")
         #expect(slots.reduce(0) { $0 + $1.consumed } == 600,
                 "Сумма по приёмам обязана сходиться со съеденным за день")
     }
@@ -79,6 +78,60 @@ struct MealScheduleTests {
     @Test func foodAfterTheLastWindowStillCounts() {
         let slots = MealSchedule.slots(input(entries: [(at(23, 40), 300)], now: at(23, 50)))
         #expect(slots.reduce(0) { $0 + $1.consumed } == 300)
+    }
+
+    /// Перебор в отдельном приёме виден: закрытое окно знает не только
+    /// съеденное, но и то, сколько на него отводилось.
+    @Test func aWindowKnowsHowMuchItWentOver() {
+        // На завтрак при норме 3000 и пяти приёмах приходится около 700.
+        let slots = MealSchedule.slots(input(count: 5, goal: 3000,
+                                             entries: [(at(8), 1100)], now: at(13)))
+        let breakfast = try! #require(slots.first { $0.period == .breakfast })
+
+        #expect(breakfast.planned > 0, "План на окно известен")
+        #expect(breakfast.overeaten == breakfast.consumed - breakfast.planned)
+        #expect(breakfast.overeaten > 300, "Съел больше плана — это и показываем")
+    }
+
+    /// Уложился — никакого перебора, даже если день в целом перебран.
+    @Test func aWindowWithinItsShareHasNoOvershoot() {
+        let slots = MealSchedule.slots(input(count: 5, goal: 3000,
+                                             entries: [(at(8), 400)], now: at(13)))
+        let breakfast = try! #require(slots.first { $0.period == .breakfast })
+        #expect(breakfast.overeaten == 0)
+    }
+
+    /// Съеденное мимо окон идёт отдельной строкой «Перекус», а не растворяется
+    /// в первом приёме: «завтрак с 00:00» — это не завтрак, а свалка.
+    @Test func foodOutsideTheWindowsBecomesASnack() {
+        // Полвторого ночи: подъёмом это не считается (раньше четырёх утра),
+        // и ни в одно окно дня не попадает.
+        let slots = MealSchedule.slots(input(entries: [(at(1, 30), 250)], now: at(9)))
+
+        let snack = try! #require(slots.last)
+        #expect(snack.period == .nightSnack)
+        #expect(snack.consumed == 250)
+        #expect(slots.first?.period == .breakfast, "Завтрак остаётся завтраком")
+        #expect(slots.first?.consumed == 0)
+    }
+
+    /// Без еды мимо расписания лишней строки не появляется.
+    @Test func withoutStraysThereIsNoSnackRow() {
+        let slots = MealSchedule.slots(input(entries: [(at(8), 500)], now: at(9)))
+        #expect(!slots.contains { $0.period == .nightSnack })
+    }
+
+    /// Окна стоят от подъёма и до часа перед отбоем, а не от полуночи.
+    @Test func theFirstWindowStartsAtWakingNotAtMidnight() {
+        let slots = MealSchedule.slots(input(now: at(9)))
+        let calendar = Calendar.current
+
+        let first = try! #require(slots.first)
+        #expect(calendar.component(.hour, from: first.start) >= 6,
+                "Завтрак начинается с подъёма, а не в полночь")
+        let last = try! #require(slots.last)
+        #expect(calendar.component(.hour, from: last.end) <= 23,
+                "Последнее окно закрывается к отбою")
     }
 
     /// Времени будильника приложению взять неоткуда — в iOS такого доступа
@@ -227,6 +280,39 @@ struct AdaptiveTDEETests {
     }
 
     /// Держит вес — значит, ест ровно свой расход.
+    /// Шум весов — не тренд. Двести грамм в неделю это соль, вода и час
+    /// взвешивания; читая их как профицит, приложение срезало норму, человек
+    /// ел меньше, окно помнило прежний рост — и норма ползла вниз каждый день.
+    @Test func scaleNoiseDoesNotMoveTheExpenditure() throws {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: Date()).addingTimeInterval(-13 * 86_400)
+        // Вес гуляет в пределах двухсот грамм, съедено ровно 3000 каждый день.
+        let wobble: [Double] = [80.0, 80.1, 79.9, 80.05, 80.1, 79.95, 80.0,
+                                80.05, 80.1, 80.0, 79.95, 80.05, 80.1, 80.05]
+        let days = (0..<14).map { offset in
+            AdaptiveTDEE.Day(date: start.addingTimeInterval(Double(offset) * 86_400),
+                             weightKg: wobble[offset], calories: 3000)
+        }
+
+        let result = try #require(AdaptiveTDEE.estimate(days))
+        #expect(abs(result.tdee - 3000) < 1,
+                "Вес стоит — значит тратится ровно столько, сколько съедено")
+    }
+
+    /// Настоящий тренд мёртвую зону проходит и расход двигает.
+    @Test func arealTrendStillCounts() throws {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: Date()).addingTimeInterval(-13 * 86_400)
+        let days = (0..<14).map { offset in
+            // Полкило в неделю вниз — это уже не шум.
+            AdaptiveTDEE.Day(date: start.addingTimeInterval(Double(offset) * 86_400),
+                             weightKg: 80 - Double(offset) * 0.5 / 7, calories: 2500)
+        }
+
+        let result = try #require(AdaptiveTDEE.estimate(days))
+        #expect(result.tdee > 3000, "Теряя полкило в неделю на 2500, тратишь заметно больше")
+    }
+
     @Test func steadyWeight_meansIntakeIsTheExpenditure() throws {
         let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 2700, startWeight: 80, perDay: 0)))
         #expect(abs(result.tdee - 2700) < 10)

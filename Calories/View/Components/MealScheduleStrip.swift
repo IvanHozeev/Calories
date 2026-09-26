@@ -19,7 +19,7 @@ struct MealScheduleStrip: View {
         // «приём 4 из 5» заставляет пересчитывать, что это за еда.
         let name = String(localized: String.LocalizationValue(next.period.rawValue))
         if next.state == .current {
-            return String(format: String(localized: "Сейчас %@"), name)
+            return next.period.timeTitle
         }
         return String(format: String(localized: "%1$@ в %2$@"), name,
                       next.start.formatted(date: .omitted, time: .shortened))
@@ -159,16 +159,36 @@ struct MealScheduleSheet: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(LocalizedStringKey(slot.period.rawValue))
                     .font(.app(.subheadline, weight: .medium))
-                Text(verbatim: String(format: String(localized: "%1$@ – %2$@"),
-                                      slot.start.formatted(date: .omitted, time: .shortened),
-                                      slot.end.formatted(date: .omitted, time: .shortened)))
-                    .font(.app(.caption))
-                    .foregroundStyle(.secondary)
+                // У перекуса часов нет: это не окно расписания, а всё, что
+                // съедено мимо окон.
+                if slot.period == .nightSnack {
+                    Text("Мимо расписания")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(verbatim: String(format: String(localized: "%1$@ – %2$@"),
+                                          slot.start.formatted(date: .omitted, time: .shortened),
+                                          slot.end.formatted(date: .omitted, time: .shortened)))
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                }
                 if slot.consumed > 0 {
-                    Text(verbatim: String(format: String(localized: "съедено %lld ккал"), slot.consumed))
-                        .font(.app(.caption2))
-                        .foregroundStyle(.tertiary)
-                        .monospacedDigit()
+                    // Перебор называем вслух: иначе закрытое окно показывает
+                    // «съедено 900» и молчит о том, что отводилось 700.
+                    // Пересчитывать в уме, глядя на вчерашний день, человек
+                    // не станет — он просто не узнает, где именно ушёл вверх.
+                    if slot.overeaten > 0 {
+                        Text(verbatim: String(format: String(localized: "съедено %1$lld ккал · на %2$lld больше"),
+                                              slot.consumed, slot.overeaten))
+                            .font(.app(.caption2))
+                            .foregroundStyle(.orange)
+                            .monospacedDigit()
+                    } else {
+                        Text(verbatim: String(format: String(localized: "съедено %lld ккал"), slot.consumed))
+                            .font(.app(.caption2))
+                            .foregroundStyle(.tertiary)
+                            .monospacedDigit()
+                    }
                 }
             }
             Spacer()

@@ -74,11 +74,21 @@ enum MealSchedule {
         /// Сколько калорий на него отведено сейчас — с учётом уже съеденного
         /// и пропущенных окон.
         let calories: Int
+        /// Сколько отводилось по расписанию — доля дневной нормы по весу
+        /// приёма, без оглядки на съеденное.
+        ///
+        /// Нужно, чтобы закрытое окно могло сказать не только «съедено 900»,
+        /// но и «на 200 больше, чем планировалось»: в `calories` у прошедшего
+        /// окна лежит факт, и план оттуда уже не достать.
+        let planned: Int
         /// Съедено внутри окна.
         let consumed: Int
         let state: State
 
         var id: Int { index }
+
+        /// Насколько съедено больше, чем отводилось. Ноль — уложился.
+        var overeaten: Int { max(0, consumed - planned) }
 
         enum State: String, Equatable {
             /// Окно ещё впереди.
@@ -152,27 +162,34 @@ enum MealSchedule {
             bounds.append((start, end))
         }
 
-        // Крайние окна дотягиваются до краёв суток: иначе съеденное до первого
-        // окна и после последнего не попадало никуда. Калории при этом из
-        // остатка вычитались — то есть еда была, а в расписании её не было, и
-        // первый приём показывал «съедено 0» после настоящего завтрака.
-        let dayEnd = calendar.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86_400)
-        bounds[0].0 = min(bounds[0].0, dayStart)
-        bounds[bounds.count - 1].1 = max(bounds[bounds.count - 1].1, dayEnd)
-
+        // Окна стоят там, где им место: первое — от подъёма, последнее
+        // кончается за час до отбоя. Растягивать их до краёв суток нельзя:
+        // «завтрак с 00:00» — это не завтрак, а строка, в которую свалили
+        // всё подряд.
         let consumed = bounds.map { bound in
             input.entries.filter { $0.date >= bound.0 && $0.date < bound.1 }
                 .reduce(0) { $0 + $1.calories }
         }
 
-        // Съеденное за день считается целиком — теперь оно всё лежит внутри
-        // окон, потому что крайние дотянуты до краёв суток.
         let total = input.entries.reduce(0) { $0 + $1.calories }
+        // Съеденное мимо окон — до подъёма, после отбоя, между приёмами —
+        // никуда не пропадает: оно идёт отдельной строкой «Перекус» и
+        // считается за день наравне с остальным.
+        let outside = total - consumed.reduce(0, +)
         var remaining = max(0, input.dailyGoal - total)
 
         var result: [Slot] = []
         // Впереди столько окон, на сколько делить остаток.
         let periods = periods(count: input.mealCount)
+        // План на окно — доля дневной нормы по весу приёма. Считается один
+        // раз и не зависит от того, сколько уже съедено: иначе «планировалось»
+        // менялось бы по ходу дня вслед за фактом.
+        let totalWeight = periods.reduce(0.0) { $0 + weight(of: $1) }
+        let planned = periods.map { period in
+            totalWeight > 0
+                ? Int((Double(input.dailyGoal) * weight(of: period) / totalWeight).rounded())
+                : 0
+        }
         let upcoming = bounds.enumerated().filter { $0.element.1 > input.now }.map(\.offset)
         // Остаток делится не поровну, а по весу приёма: на обед отводится
         // больше, чем на полдник.
@@ -204,9 +221,20 @@ enum MealSchedule {
                 calories = eaten
             }
             result.append(Slot(index: index, period: periods[index], start: bound.0, end: bound.1,
-                               calories: calories, consumed: eaten, state: state))
+                               calories: calories, planned: planned[index],
+                               consumed: eaten, state: state))
         }
         remaining -= handed
+
+        // Перекус — последней строкой и только если было что перекусить.
+        // Своего времени у него нет: это не окно расписания, а всё, что мимо.
+        if outside > 0 {
+            // Планом перекус не предусмотрен вовсе — потому он и перекус.
+            result.append(Slot(index: result.count, period: .nightSnack,
+                               start: input.now, end: input.now,
+                               calories: outside, planned: 0,
+                               consumed: outside, state: .done))
+        }
         return result
     }
 

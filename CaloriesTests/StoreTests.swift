@@ -40,6 +40,24 @@ struct CalorieStoreTests {
         store.dailyGoal = 2000
     }
 
+    /// Перебор на десяток калорий — не срыв дня.
+    ///
+    /// Из настоящих данных: 3317 съедено при норме 3304, и день красился
+    /// оранжевым. Попасть в норму точнее трети процента нельзя — вес порции
+    /// округляется сильнее.
+    @Test func aDayIsKeptEvenWithATinyOvershoot() {
+        #expect(store.isWithinGoal(total: 3317, goal: 3304))
+        #expect(store.isWithinGoal(total: 3608, goal: 3596))
+    }
+
+    /// А настоящий перебор остаётся перебором.
+    @Test func aRealOvershootStillCounts() {
+        // Шестьсот калорий сверх трёх тысяч — это не округление.
+        #expect(!store.isWithinGoal(total: 3828, goal: 3200))
+        // И сотня с лишним тоже: два процента от 3230 — это 65.
+        #expect(!store.isWithinGoal(total: 3344, goal: 3230))
+    }
+
     @Test func trialGivesPremiumForTwoWeeks() {
         #expect(!store.isPremium)
         store.startTrialIfNeeded()

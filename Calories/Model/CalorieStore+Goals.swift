@@ -230,7 +230,7 @@ extension CalorieStore {
         // активность этого дня входить обязана: иначе суббота с залом и
         // баскетболом судится по той же мерке, что вторник за столом.
         // В ветках с планом поправка уже сидит внутри `tdee`.
-        return dailyGoal + Int(stepAdjustment(on: date).rounded())
+        return dailyGoal + Int(activityAdjustment(on: date).rounded())
     }
 
     /// Зафиксированная цель на дату (из снапшота) — иначе живой расчёт. O(1) через goalsByDay.

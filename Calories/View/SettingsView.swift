@@ -491,6 +491,18 @@ struct DeveloperSettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    HealthInventoryView()
+                } label: {
+                    Label("Что есть в «Здоровье»", systemImage: "heart.text.square")
+                }
+            } header: {
+                Text("Данные браслета")
+            } footer: {
+                Text("Отчёт о том, какие данные реально доезжают в «Здоровье» и от кого. Нужен перед тем, как строить на них расчёты.")
+            }
+
+            Section {
                 TextField("Ключ USDA", text: $fdcAPIKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -507,6 +519,56 @@ struct DeveloperSettingsView: View {
         .listStyle(.insetGrouped)
         .navigationTitle("Отладка")
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+/// Разведка перед работой: что из обещанного браслетом реально лежит в
+/// «Здоровье». Пока не увидишь ответ, любой расчёт по сну или пульсу — гадание.
+struct HealthInventoryView: View {
+    @State private var inventory = HealthInventory()
+
+    var body: some View {
+        List {
+            if let failure = inventory.failure {
+                Section { Text(failure).foregroundStyle(.secondary) }
+            }
+            ForEach(inventory.rows) { row in
+                Section {
+                    LabeledContent(String(localized: "Дней с данными")) {
+                        Text(verbatim: "\(row.days) / \(HealthInventory.window)")
+                            .foregroundStyle(HealthInventory.isDense(days: row.days) ? Color.primary : .secondary)
+                    }
+                    if let latest = row.latest {
+                        LabeledContent(String(localized: "Последние")) {
+                            Text(latest.formatted(date: .abbreviated, time: .shortened))
+                        }
+                    }
+                    if let sample = row.sample {
+                        LabeledContent(String(localized: "Пример")) { Text(verbatim: sample) }
+                    }
+                    if row.sources.isEmpty {
+                        Text("Никто не пишет").foregroundStyle(.secondary)
+                    } else {
+                        LabeledContent(String(localized: "Источники")) {
+                            Text(verbatim: row.sources.joined(separator: ", "))
+                        }
+                    }
+                } header: {
+                    Text(verbatim: row.title)
+                }
+            }
+        }
+        .glassRow()
+        .listStyle(.insetGrouped)
+        .navigationTitle("Что есть в «Здоровье»")
+        .navigationBarTitleDisplayMode(.inline)
+        .overlay {
+            if inventory.isChecking { ProgressView() }
+            else if inventory.rows.isEmpty && inventory.failure == nil {
+                ContentUnavailableView("Смотрим", systemImage: "heart.text.square")
+            }
+        }
+        .task { await inventory.check() }
     }
 }
 #endif

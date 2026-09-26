@@ -4,7 +4,7 @@ import Foundation
 import SwiftData
 @testable import Calories
 
-// MARK: - StepHistory
+// MARK: - ActivityHistory
 
 /// «Здоровье» отдаёт шаги на запрос и ничего не хранит за нас. Пока приложение
 /// читало их на лету, активность не переживала ни перезапуск, ни переезд на
@@ -20,13 +20,13 @@ struct StepHistoryTests {
     }
 
     @Test func historyStartsEmpty() {
-        #expect(StepHistory(defaults: defaults).days.isEmpty)
+        #expect(ActivityHistory(defaults: defaults).days.isEmpty)
     }
 
     @Test func rememberedDaysSurviveAndStaySorted() {
-        let history = StepHistory(defaults: defaults)
-        history.remember([StepDay(date: day(-1), steps: 8_000)])
-        history.remember([StepDay(date: day(-3), steps: 5_000)])
+        let history = ActivityHistory(defaults: defaults)
+        history.remember([ActivityDay(date: day(-1), steps: 8_000)])
+        history.remember([ActivityDay(date: day(-3), steps: 5_000)])
 
         #expect(history.days.map(\.steps) == [5_000, 8_000])
     }
@@ -34,9 +34,9 @@ struct StepHistoryTests {
     /// «Здоровье» отдаёт последние тридцать дней, а хранить надо дольше:
     /// иначе каждый новый ответ стирал бы всё, что было до него.
     @Test func afreshReadingDoesNotWipeOlderDays() {
-        let history = StepHistory(defaults: defaults)
-        history.remember([StepDay(date: day(-60), steps: 11_000)])
-        history.remember([StepDay(date: day(-1), steps: 7_000), StepDay(date: day(0), steps: 3_000)])
+        let history = ActivityHistory(defaults: defaults)
+        history.remember([ActivityDay(date: day(-60), steps: 11_000)])
+        history.remember([ActivityDay(date: day(-1), steps: 7_000), ActivityDay(date: day(0), steps: 3_000)])
 
         #expect(history.days.count == 3)
         #expect(history.steps(on: day(-60)) == 11_000)
@@ -45,9 +45,9 @@ struct StepHistoryTests {
     /// Сегодняшний день ещё идёт: вечерний замер больше утреннего, и утренний
     /// не должен его затирать — иначе день бы «шагал назад».
     @Test func todayKeepsTheLargerReading() {
-        let history = StepHistory(defaults: defaults)
-        history.remember([StepDay(date: day(0), steps: 9_000)])
-        history.remember([StepDay(date: day(0), steps: 4_000)])
+        let history = ActivityHistory(defaults: defaults)
+        history.remember([ActivityDay(date: day(0), steps: 9_000)])
+        history.remember([ActivityDay(date: day(0), steps: 4_000)])
 
         #expect(history.steps(on: day(0)) == 9_000)
     }
@@ -56,28 +56,28 @@ struct StepHistoryTests {
     /// знает. Записать шаги и потерять калории — значит потерять половину
     /// смысла.
     @Test func activeCaloriesSurviveAStepsOnlyReading() {
-        let history = StepHistory(defaults: defaults)
-        history.remember([StepDay(date: day(0), steps: 9_000, activeCalories: 500)])
-        history.remember([StepDay(date: day(0), steps: 9_500)])
+        let history = ActivityHistory(defaults: defaults)
+        history.remember([ActivityDay(date: day(0), steps: 9_000, activeCalories: 500)])
+        history.remember([ActivityDay(date: day(0), steps: 9_500)])
 
         #expect(history.days.first?.activeCalories == 500)
         #expect(history.days.first?.steps == 9_500)
     }
 
     @Test func historyKeepsAtMostAYear() {
-        let history = StepHistory(defaults: defaults)
-        history.remember((0..<(StepHistory.limit + 20)).map { StepDay(date: day(-$0), steps: 1_000 + $0) })
+        let history = ActivityHistory(defaults: defaults)
+        history.remember((0..<(ActivityHistory.limit + 20)).map { ActivityDay(date: day(-$0), steps: 1_000 + $0) })
 
-        #expect(history.days.count == StepHistory.limit)
+        #expect(history.days.count == ActivityHistory.limit)
         // Обрезается старое, свежее остаётся.
         #expect(history.steps(on: day(0)) == 1_000)
-        #expect(history.steps(on: day(-(StepHistory.limit + 10))) == nil)
+        #expect(history.steps(on: day(-(ActivityHistory.limit + 10))) == nil)
     }
 
     @Test func replaceDropsWhateverWasThere() {
-        let history = StepHistory(defaults: defaults)
-        history.remember([StepDay(date: day(-1), steps: 8_000)])
-        history.replace(with: [StepDay(date: day(-2), steps: 2_000)])
+        let history = ActivityHistory(defaults: defaults)
+        history.remember([ActivityDay(date: day(-1), steps: 8_000)])
+        history.replace(with: [ActivityDay(date: day(-2), steps: 2_000)])
 
         #expect(history.days.map(\.steps) == [2_000])
     }
@@ -85,9 +85,9 @@ struct StepHistoryTests {
     /// Доступ к «Здоровью» может быть не дан или ещё не отвечен, а показать
     /// уже есть что: история лежит своя.
     @Test func stepStoreShowsStoredHistoryWithoutHealthKit() {
-        StepHistory(defaults: defaults).remember([
-            StepDay(date: day(-1), steps: 8_000),
-            StepDay(date: day(0), steps: 6_000)
+        ActivityHistory(defaults: defaults).remember([
+            ActivityDay(date: day(-1), steps: 8_000),
+            ActivityDay(date: day(0), steps: 6_000)
         ])
         let store = StepStore(defaults: defaults, groupDefaults: nil)
 
@@ -466,7 +466,7 @@ struct BackupTests {
 
     @Test func aBackupCarriesTheStepHistory() {
         let day = Calendar.current.startOfDay(for: Date())
-        StepHistory(defaults: defaults).remember([StepDay(date: day, steps: 12_000, activeCalories: 620)])
+        ActivityHistory(defaults: defaults).remember([ActivityDay(date: day, steps: 12_000, activeCalories: 620)])
 
         let backup = store.makeBackup()
 
@@ -480,9 +480,9 @@ struct BackupTests {
     /// при восстановлении значило бы терять единственный след нагрузки за
     /// прошлые месяцы.
     @Test func restoringBringsTheStepHistoryBack() throws {
-        let history = StepHistory(defaults: defaults)
+        let history = ActivityHistory(defaults: defaults)
         let day = Calendar.current.date(byAdding: .day, value: -100, to: Date())!
-        history.remember([StepDay(date: day, steps: 9_000)])
+        history.remember([ActivityDay(date: day, steps: 9_000)])
         let backup = store.makeBackup()
 
         history.replace(with: [])

@@ -760,9 +760,29 @@ private struct CalculationBasisSheet: View {
 
     /// Сегодняшняя поправка человеческими словами: «+180 ккал», «как обычно».
     private var todayAdjustment: String {
-        let delta = Int(store.stepAdjustment(on: Date()).rounded())
+        let delta = Int(store.activityAdjustment(on: Date()).rounded())
         guard delta != 0 else { return String(localized: "Как обычно") }
         return String(format: String(localized: "%+lld ккал"), delta)
+    }
+
+    /// Чем сегодня занимался, если это записано: «Баскетбол, 70 мин».
+    private var todayWorkout: String? {
+        guard let day = store.activity(on: Date()), let minutes = day.workoutMinutes, minutes > 0 else { return nil }
+        let title = day.workoutTitle ?? String(localized: "Тренировка")
+        return String(format: String(localized: "%1$@, %2$lld мин"), title, minutes)
+    }
+
+    /// «Обычный день» словами: приложение считает по калориям, если браслет их
+    /// пишет, и по шагам, если нет. Показываем то, по чему считает.
+    private var usualDay: String? {
+        guard let baseline = store.activityBaseline else { return nil }
+        if let kcal = baseline.activeCalories {
+            return String(format: String(localized: "%lld ккал активности"), kcal)
+        }
+        if let steps = baseline.steps {
+            return String(format: String(localized: "%lld шагов"), steps)
+        }
+        return nil
     }
 
     var body: some View {
@@ -787,21 +807,20 @@ private struct CalculationBasisSheet: View {
 
                 Section {
                     LabeledContent("Обычный день") {
-                        if let baseline = store.stepBaseline {
-                            Text(String(format: String(localized: "%lld шагов"), baseline))
-                        } else {
-                            Text("Копим данные")
-                        }
+                        Text(usualDay ?? String(localized: "Копим данные"))
                     }
-                    if store.stepBaseline != nil {
+                    if usualDay != nil {
                         LabeledContent("Сегодня") {
                             Text(todayAdjustment)
                         }
                     }
+                    if let workout = todayWorkout {
+                        LabeledContent("Тренировка") { Text(verbatim: workout) }
+                    }
                 } header: {
                     Text("Активность")
                 } footer: {
-                    if store.stepBaseline == nil {
+                    if usualDay == nil {
                         Text("Пока не наберётся две недели шагов, приложение не знает, какой день для вас обычный, и норму за активность не двигает.")
                     } else {
                         Text("Норма дня сдвигается на разницу с обычным днём: находил больше — ешь больше. Пока день идёт, вниз она не уходит.")

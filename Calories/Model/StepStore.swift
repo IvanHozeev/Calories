@@ -20,13 +20,13 @@ final class StepStore {
     @ObservationIgnored private let groupDefaults: UserDefaults?
     /// Куда складывается прочитанное из «Здоровья», чтобы оно пережило запуск
     /// и попало в резервную копию.
-    @ObservationIgnored private let history: StepHistory
+    @ObservationIgnored private let history: ActivityHistory
 
     private(set) var stepsToday: Int = 0
     private(set) var distanceTodayKm: Double = 0
     private(set) var activeCaloriesToday: Int = 0
-    private(set) var weekHistory: [StepDay] = []
-    private(set) var monthHistory: [StepDay] = []
+    private(set) var weekHistory: [ActivityDay] = []
+    private(set) var monthHistory: [ActivityDay] = []
     private(set) var isAuthorized: Bool = false
     private(set) var goalStreak: Int = 0
     private(set) var weeklyTotal: Int = 0
@@ -78,7 +78,7 @@ final class StepStore {
     ) {
         self.defaults = defaults
         self.groupDefaults = groupDefaults
-        self.history = StepHistory(defaults: defaults)
+        self.history = ActivityHistory(defaults: defaults)
         self.preferredSourceID = defaults.string(forKey: Self.sourceKey)
         let goal = defaults.object(forKey: "step_goal") as? Int ?? 10_000
         self.stepGoal = goal
@@ -121,7 +121,10 @@ final class StepStore {
         let types: Set<HKObjectType> = [
             HKQuantityType(.stepCount),
             HKQuantityType(.distanceWalkingRunning),
-            HKQuantityType(.activeEnergyBurned)
+            HKQuantityType(.activeEnergyBurned),
+            // Тренировки — ради объяснения, а не ради арифметики: их калории
+            // уже сидят в активных, и складывать одно с другим нельзя.
+            HKObjectType.workoutType()
         ]
         healthStore.requestAuthorization(toShare: nil, read: types) { [weak self] success, _ in
             Task { @MainActor [weak self] in
@@ -160,10 +163,11 @@ final class StepStore {
         // месяц, мы бы так и не увидели дни, которые синхронизировались уже
         // после того, как их прочитали нулями.
         fetchHistory(days: 90)
+        fetchWorkouts(days: 90)
     }
 
     /// Вся сохранённая активность — для экрана и для копии.
-    var storedHistory: [StepDay] { history.days }
+    var storedHistory: [ActivityDay] { history.days }
 
     /// Запоминает активные калории за сегодня: их «Здоровье» отдаёт отдельным
     /// запросом, и в истории шагов их нет.
@@ -171,7 +175,7 @@ final class StepStore {
         guard calories > 0 else { return }
         let today = Calendar.current.startOfDay(for: Date())
         let steps = history.steps(on: today) ?? stepsToday
-        history.remember([StepDay(date: today, steps: steps, activeCalories: calories)])
+        history.remember([ActivityDay(date: today, steps: steps, activeCalories: calories)])
     }
 
     private func updateDerivedStats() {
@@ -342,6 +346,71 @@ final class StepStore {
         healthStore.execute(query)
     }
 
+    /// Записанные тренировки: чем человек занимался и сколько это длилось.
+    ///
+    /// Шаги не видят ни штангу, ни велотренажёр, ни баскетбол — день с залом
+    /// выглядит в них как обычный. Калории тренировки при этом уже посчитаны в
+    /// активных, поэтому прибавлять их ещё раз нельзя: отсюда тренировка идёт
+    /// в историю названием и минутами, а не килокалориями.
+    private func fetchWorkouts(days: Int) {
+        let calendar = Calendar.current
+        let end = Date()
+        guard let start = calendar.date(byAdding: .day, value: -(days - 1), to: calendar.startOfDay(for: end)) else { return }
+        let query = HKSampleQuery(
+            sampleType: HKObjectType.workoutType(),
+            predicate: HKQuery.predicateForSamples(withStart: start, end: end),
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+        ) { [weak self] _, samples, _ in
+            let workouts = (samples as? [HKWorkout]) ?? []
+            // За день их может быть несколько: минуты складываем, а называем
+            // день по самой длинной — «Баскетбол» понятнее, чем «Тренировки».
+            var minutes: [Date: Int] = [:]
+            var longest: [Date: (title: String, seconds: TimeInterval)] = [:]
+            for workout in workouts {
+                let day = calendar.startOfDay(for: workout.startDate)
+                minutes[day, default: 0] += Int((workout.duration / 60).rounded())
+                let title = Self.title(of: workout.workoutActivityType)
+                if workout.duration > (longest[day]?.seconds ?? 0) {
+                    longest[day] = (title, workout.duration)
+                }
+            }
+            let days = minutes.map { day, total in
+                ActivityDay(date: day, steps: 0, workoutMinutes: total, workoutTitle: longest[day]?.title)
+            }
+            guard !days.isEmpty else { return }
+            Task { @MainActor [weak self] in
+                self?.history.remember(days)
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    /// Человеческое название вида тренировки.
+    ///
+    /// Разбираем только то, чем занимаются с браслетом; остальное — общее
+    /// «Тренировка», потому что «HKWorkoutActivityType(rawValue: 63)» в
+    /// интерфейсе не объяснение, а отговорка.
+    nonisolated static func title(of type: HKWorkoutActivityType) -> String {
+        switch type {
+        case .running:                    return String(localized: "Бег")
+        case .walking, .hiking:           return String(localized: "Ходьба")
+        case .cycling:                    return String(localized: "Велосипед")
+        case .swimming:                   return String(localized: "Плавание")
+        case .traditionalStrengthTraining, .functionalStrengthTraining:
+                                          return String(localized: "Силовая")
+        case .basketball:                 return String(localized: "Баскетбол")
+        case .soccer:                     return String(localized: "Футбол")
+        case .tennis:                     return String(localized: "Теннис")
+        case .yoga:                       return String(localized: "Йога")
+        case .highIntensityIntervalTraining:
+                                          return String(localized: "Интервальная")
+        case .elliptical, .rowing, .stairClimbing:
+                                          return String(localized: "Кардио")
+        default:                          return String(localized: "Тренировка")
+        }
+    }
+
     private func fetchHistory(days: Int) {
         let type = HKQuantityType(.stepCount)
         let calendar = Calendar.current
@@ -357,10 +426,10 @@ final class StepStore {
             intervalComponents: interval
         )
         query.initialResultsHandler = { [weak self] _, results, _ in
-            var days: [StepDay] = []
+            var days: [ActivityDay] = []
             results?.enumerateStatistics(from: start, to: end) { stats, _ in
                 let steps = Int(stats.sumQuantity()?.doubleValue(for: .count()) ?? 0)
-                days.append(StepDay(date: stats.startDate, steps: steps))
+                days.append(ActivityDay(date: stats.startDate, steps: steps))
             }
             let finalDays = days
             Task { @MainActor [weak self] in

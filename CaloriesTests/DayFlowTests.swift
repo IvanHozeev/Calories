@@ -389,39 +389,45 @@ struct StepAdjustmentTests {
     private let calendar = Calendar.current
     private var today: Date { calendar.startOfDay(for: Date()) }
 
-    private func history(_ steps: [Int], endingDaysAgo: Int = 1) -> [StepDay] {
+    private func history(_ steps: [Int], endingDaysAgo: Int = 1) -> [ActivityDay] {
         steps.enumerated().map { index, value in
             let offset = endingDaysAgo + (steps.count - 1 - index)
-            return StepDay(date: calendar.date(byAdding: .day, value: -offset, to: today)!, steps: value)
+            return ActivityDay(date: calendar.date(byAdding: .day, value: -offset, to: today)!, steps: value)
         }
     }
 
     /// Период привыкания: пока приложение не видело двух недель, оно не знает,
     /// что для этого человека обычный день, и не гадает.
     @Test func thereIsNoBaselineUntilTwoWeeksAreLogged() {
-        #expect(StepAdjustment.baseline(from: history(Array(repeating: 9_000, count: 13))) == nil)
-        #expect(StepAdjustment.baseline(from: history(Array(repeating: 9_000, count: 14))) == 9_000)
+        #expect(ActivityAdjustment.baseline(from: history(Array(repeating: 9_000, count: 13))) == nil)
+        #expect(ActivityAdjustment.baseline(from: history(Array(repeating: 9_000, count: 14)))?.steps == 9_000)
     }
 
     /// Сегодняшний день ещё идёт, и в среднее он бы попал огрызком.
     @Test func todayDoesNotDragTheBaselineDown() {
         var days = history(Array(repeating: 10_000, count: 20))
-        days.append(StepDay(date: today, steps: 300))
-        #expect(StepAdjustment.baseline(from: days) == 10_000)
+        days.append(ActivityDay(date: today, steps: 300))
+        #expect(ActivityAdjustment.baseline(from: days)?.steps == 10_000)
     }
 
     /// День без шагов — это не «лежал», а «браслет остался на зарядке».
     @Test func daysWithoutStepsStayOutOfTheAverage() {
         var days = history(Array(repeating: 10_000, count: 20))
         days.append(contentsOf: history(Array(repeating: 0, count: 3), endingDaysAgo: 22))
-        #expect(StepAdjustment.baseline(from: days) == 10_000)
+        #expect(ActivityAdjustment.baseline(from: days)?.steps == 10_000)
     }
 
+    private func steps(_ count: Int) -> ActivityDay { ActivityDay(date: today, steps: count) }
+    private func spent(_ kcal: Int) -> ActivityDay {
+        ActivityDay(date: today, steps: 10_000, activeCalories: kcal)
+    }
+    private let stepsOnly = ActivityAdjustment.Baseline(steps: 10_000, activeCalories: nil)
+
     @Test func aBusyDayRaisesTheDayAndAQuietOneLowersIt() {
-        let busy = StepAdjustment.adjustment(steps: 20_000, baseline: 10_000,
-                                             weightKg: 76, expenditure: 3_200)
-        let quiet = StepAdjustment.adjustment(steps: 2_000, baseline: 10_000,
-                                              weightKg: 76, expenditure: 3_200)
+        let busy = ActivityAdjustment.adjustment(day: steps(20_000), baseline: stepsOnly,
+                                                 weightKg: 76, expenditure: 3_200)
+        let quiet = ActivityAdjustment.adjustment(day: steps(2_000), baseline: stepsOnly,
+                                                  weightKg: 76, expenditure: 3_200)
         // Десять тысяч шагов сверх обычного — около трёхсот килокалорий.
         #expect(busy > 250 && busy < 320)
         #expect(quiet < -200 && quiet > -260)
@@ -430,39 +436,60 @@ struct StepAdjustmentTests {
     /// Утром шагов нет ни у кого. Срезать за это норму — значит требовать
     /// голодать за то, чего человек ещё не успел сделать.
     @Test func theDayInProgressNeverLosesCalories() {
-        let morning = StepAdjustment.adjustment(steps: 400, baseline: 10_000, weightKg: 76,
-                                                expenditure: 3_200, partialDay: true)
+        let morning = ActivityAdjustment.adjustment(day: steps(400), baseline: stepsOnly,
+                                                    weightKg: 76, expenditure: 3_200, partialDay: true)
         #expect(morning == 0)
-        let walked = StepAdjustment.adjustment(steps: 18_000, baseline: 10_000, weightKg: 76,
-                                               expenditure: 3_200, partialDay: true)
+        let walked = ActivityAdjustment.adjustment(day: steps(18_000), baseline: stepsOnly,
+                                                   weightKg: 76, expenditure: 3_200, partialDay: true)
         #expect(walked > 200)
+    }
+
+    /// Браслет считает и зал, и велосипед — всё, чего шаги не видят. Если он
+    /// пишет калории, считать надо по ним, а не по шагам.
+    @Test func spentCaloriesWinOverStepsWhenTheBandWritesThem() {
+        let baseline = ActivityAdjustment.Baseline(steps: 10_000, activeCalories: 700)
+        // Шагов ровно как обычно, но потрачено на триста больше — был зал.
+        let gym = ActivityAdjustment.adjustment(day: spent(1_000), baseline: baseline,
+                                                weightKg: 76, expenditure: 3_200)
+        #expect(gym == 300)
+    }
+
+    /// Пока браслета нет, считаем по шагам — молчать из-за отсутствия калорий
+    /// было бы хуже, чем считать косвенно.
+    @Test func stepsStillWorkWhenThereAreNoSpentCalories() {
+        let baseline = ActivityAdjustment.Baseline(steps: 10_000, activeCalories: nil)
+        let busy = ActivityAdjustment.adjustment(day: steps(20_000), baseline: baseline,
+                                                 weightKg: 76, expenditure: 3_200)
+        #expect(busy > 250)
     }
 
     /// Потолок нужен не ради шагов, а ради ошибок в них: телефон, проехавший
     /// день в машине, не должен переписать норму в полтора раза.
     @Test func anAbsurdReadingCannotRewriteTheDay() {
-        let absurd = StepAdjustment.adjustment(steps: 90_000, baseline: 10_000,
-                                               weightKg: 76, expenditure: 3_200)
-        #expect(absurd == 3_200 * StepAdjustment.maxShareOfExpenditure)
+        let absurd = ActivityAdjustment.adjustment(day: steps(90_000), baseline: stepsOnly,
+                                                   weightKg: 76, expenditure: 3_200)
+        #expect(absurd == 3_200 * ActivityAdjustment.maxShareOfExpenditure)
     }
 
     @Test func withoutDataThereIsNoAdjustment() {
-        #expect(StepAdjustment.adjustment(steps: nil, baseline: 10_000,
-                                          weightKg: 76, expenditure: 3_200) == 0)
-        #expect(StepAdjustment.adjustment(steps: 20_000, baseline: nil,
-                                          weightKg: 76, expenditure: 3_200) == 0)
-        #expect(StepAdjustment.adjustment(steps: 20_000, baseline: 10_000,
-                                          weightKg: nil, expenditure: 3_200) == 0)
+        #expect(ActivityAdjustment.adjustment(day: nil, baseline: stepsOnly,
+                                              weightKg: 76, expenditure: 3_200) == 0)
+        #expect(ActivityAdjustment.adjustment(day: steps(20_000), baseline: nil,
+                                              weightKg: 76, expenditure: 3_200) == 0)
+        // Без веса шаги в килокалории не перевести.
+        #expect(ActivityAdjustment.adjustment(day: steps(20_000), baseline: stepsOnly,
+                                              weightKg: nil, expenditure: 3_200) == 0)
     }
 
     /// Поправки считаются от личного среднего, поэтому за неделю они гасят
     /// друг друга — иначе они бы поехали в оценку расхода и та бы поплыла.
     @Test func aWholeWeekOfAdjustmentsCancelsOut() {
-        let steps = [4_000, 8_000, 10_000, 12_000, 16_000, 6_000, 17_500]
-        let baseline = steps.reduce(0, +) / steps.count
-        let total = steps.reduce(0.0) {
-            $0 + StepAdjustment.adjustment(steps: $1, baseline: baseline,
-                                           weightKg: 76, expenditure: 3_200)
+        let week = [4_000, 8_000, 10_000, 12_000, 16_000, 6_000, 17_500]
+        let baseline = ActivityAdjustment.Baseline(steps: week.reduce(0, +) / week.count,
+                                                   activeCalories: nil)
+        let total = week.reduce(0.0) {
+            $0 + ActivityAdjustment.adjustment(day: steps($1), baseline: baseline,
+                                               weightKg: 76, expenditure: 3_200)
         }
         #expect(abs(total) < 30)
     }
@@ -529,19 +556,19 @@ struct AdaptiveTDEEStoreTests {
         feedLosingWeeks()
 
         var history = (1...20).map {
-            StepDay(date: calendar.date(byAdding: .day, value: -$0, to: today)!, steps: 10_000)
+            ActivityDay(date: calendar.date(byAdding: .day, value: -$0, to: today)!, steps: 10_000)
         }
         let busy = try #require(calendar.date(byAdding: .day, value: -2, to: today))
         let quiet = try #require(calendar.date(byAdding: .day, value: -3, to: today))
         history = history.map {
-            if calendar.isDate($0.date, inSameDayAs: busy) { return StepDay(date: $0.date, steps: 22_000) }
-            if calendar.isDate($0.date, inSameDayAs: quiet) { return StepDay(date: $0.date, steps: 2_000) }
+            if calendar.isDate($0.date, inSameDayAs: busy) { return ActivityDay(date: $0.date, steps: 22_000) }
+            if calendar.isDate($0.date, inSameDayAs: quiet) { return ActivityDay(date: $0.date, steps: 2_000) }
             return $0
         }
-        StepHistory(defaults: defaults).replace(with: history)
+        ActivityHistory(defaults: defaults).replace(with: history)
         store.refresh()
 
-        #expect(store.stepBaseline != nil, "Двадцати дней хватает, чтобы выйти из периода привыкания")
+        #expect(store.activityBaseline?.steps != nil, "Двадцати дней хватает, чтобы выйти из периода привыкания")
         let busyGoal = store.effectiveGoal(for: busy)
         let quietGoal = store.effectiveGoal(for: quiet)
         #expect(busyGoal > quietGoal + 300)

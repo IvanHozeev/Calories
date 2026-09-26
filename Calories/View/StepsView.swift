@@ -25,7 +25,7 @@ final class StepsViewModel {
         self.store = store
     }
 
-    var history: [StepDay] {
+    var history: [ActivityDay] {
         period == .week ? store.weekHistory : store.monthHistory
     }
 
@@ -34,7 +34,7 @@ final class StepsViewModel {
         return nonZero.isEmpty ? 0 : nonZero.reduce(0) { $0 + $1.steps } / nonZero.count
     }
 
-    var best: StepDay? {
+    var best: ActivityDay? {
         history.max(by: { $0.steps < $1.steps })
     }
 

@@ -1,0 +1,109 @@
+import Foundation
+
+/// Насколько этот день был подвижнее или ленивее обычного — в килокалориях.
+///
+/// Измеренный расход считается по неделям: он говорит, сколько человек тратит
+/// в среднем, и молчит о том, что среда со сменой на ногах и воскресенье на
+/// диване — это не один и тот же день. У живого человека разброс огромный:
+/// от полутора тысяч шагов до двадцати шести за месяц, то есть почти
+/// двадцатикратный. Размазывать такую неделю ровным слоем — значит в один день
+/// требовать дефицита, которого нет, а в другой прощать перебор.
+///
+/// Считать это можно двумя способами, и они не равны:
+///
+/// - **По активным калориям**, если браслет их пишет. Они уже знают и ходьбу,
+///   и зал, и велосипед — всё, чего шаги не видят. Браслеты их систематически
+///   завышают, но нас интересует только отклонение от собственного среднего, а
+///   в вычитании систематическая ошибка сокращается.
+/// - **По шагам**, когда калорий нет. Метрика косвенная: она не знает ни про
+///   штангу, ни про велосипед. Зато телефон считает шаги каждый день без
+///   просьб, и как признак «сегодня наработался больше обычного» они работают.
+///
+/// В обоих случаях поправка считается от **личного** среднего, а не от
+/// абсолютного числа: среднее уже сидит внутри измеренного расхода, и
+/// прибавлять его второй раз нельзя. Прибавляется только отклонение — и за
+/// неделю такие поправки в сумме дают почти ноль, поэтому оценка расхода от
+/// них не едет.
+enum ActivityAdjustment {
+    /// Сколько дней с данными нужно, чтобы поправка включилась.
+    ///
+    /// Это и есть период привыкания: пока приложение не видело двух недель
+    /// активности, оно не знает, что для этого человека «обычный день», и
+    /// молчит вместо того, чтобы гадать.
+    static let minimumDays = 14
+    /// По какому окну считается «обычный день».
+    static let baselineWindow = 28
+    /// Нетто-стоимость шага на килограмм веса.
+    ///
+    /// Ходьба стоит примерно половину килокалории на килограмм на километр
+    /// сверх покоя; в километре около 1330 шагов. Для семидесяти шести
+    /// килограммов это ≈0.029 ккал на шаг, то есть привычные «десять тысяч
+    /// шагов — около трёхсот килокалорий».
+    static let kcalPerStepPerKg = 0.000375
+    /// Насколько поправка вправе сдвинуть день.
+    ///
+    /// Потолок нужен не ради активности, а ради ошибок в ней: браслет,
+    /// забытый на зарядке, или телефон, проехавший день в машине, не должны
+    /// переписать норму в полтора раза.
+    static let maxShareOfExpenditure = 0.15
+
+    /// «Обычный день» этого человека.
+    struct Baseline: Codable, Equatable, Sendable {
+        /// Среднее число шагов. nil — данных мало.
+        var steps: Int?
+        /// Средние активные калории. nil — браслет их не пишет или пишет редко.
+        var activeCalories: Int?
+
+        var isEmpty: Bool { steps == nil && activeCalories == nil }
+    }
+
+    /// Считает «обычный день» по истории.
+    ///
+    /// Сегодняшний день не в счёт: он ещё идёт и среднее бы занижал.
+    /// nil — данных пока мало ни там ни там, поправка не включается.
+    static func baseline(from history: [ActivityDay],
+                         now: Date = Date(),
+                         window: Int = baselineWindow,
+                         calendar: Calendar = .current) -> Baseline? {
+        let today = calendar.startOfDay(for: now)
+        guard let from = calendar.date(byAdding: .day, value: -window, to: today) else { return nil }
+        let days = history.filter { $0.date >= from && $0.date < today }
+
+        let steps = days.map(\.steps).filter { $0 > 0 }
+        let energy = days.compactMap(\.activeCalories).filter { $0 > 0 }
+        let result = Baseline(steps: mean(steps), activeCalories: mean(energy))
+        return result.isEmpty ? nil : result
+    }
+
+    private static func mean(_ values: [Int]) -> Int? {
+        guard values.count >= minimumDays else { return nil }
+        return Int((Double(values.reduce(0, +)) / Double(values.count)).rounded())
+    }
+
+    /// Поправка к расходу за день, в килокалориях.
+    ///
+    /// - Parameter partialDay: день ещё идёт. Тогда поправка не уходит в минус:
+    ///   утром ни шагов, ни потраченного нет ни у кого, и срезать за это норму
+    ///   — значит требовать от человека голодать за то, чего он ещё не успел
+    ///   сделать. Вверх она при этом работает: сходил в зал — ешь.
+    static func adjustment(day: ActivityDay?,
+                           baseline: Baseline?,
+                           weightKg: Double?,
+                           expenditure: Double,
+                           partialDay: Bool = false) -> Double {
+        guard let day, let baseline, expenditure > 0 else { return 0 }
+        let raw: Double
+        if let spent = day.activeCalories, let usual = baseline.activeCalories, usual > 0 {
+            // Килокалории сравниваются с килокалориями — никаких коэффициентов
+            // и никакого веса: браслет уже всё посчитал.
+            raw = Double(spent - usual)
+        } else if let usual = baseline.steps, usual > 0, let weightKg {
+            raw = Double(day.steps - usual) * weightKg * kcalPerStepPerKg
+        } else {
+            return 0
+        }
+        let limit = expenditure * maxShareOfExpenditure
+        let capped = min(max(raw, -limit), limit)
+        return partialDay ? max(0, capped) : capped
+    }
+}

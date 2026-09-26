@@ -102,7 +102,7 @@ struct CaloriesBackup: Codable {
     /// хранится дольше тех тридцати дней, что отдаёт запрос, и это косвенная
     /// метрика нагрузки — по ней видно, в какой день человек реально
     /// наработался, а в какой просто съел больше.
-    let steps: [StepDay]?
+    let steps: [ActivityDay]?
 }
 
 extension CalorieStore {

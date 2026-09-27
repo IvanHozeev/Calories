@@ -62,10 +62,14 @@ enum PhaseAdvice {
     /// Выше этого сушиться пора независимо от того, чего хочется.
     static let cutCeilingBodyFat = 20.0
 
+    /// - Parameter brief: человек выбрал короткие объяснения — совет тот же,
+    ///   но без разъяснения, зачем телу отдых.
     static func recommend(history: [PhaseRecord],
                           maintenanceSince: Date?,
                           bodyFatPercent: Double?,
-                          today: Date = Date()) -> Recommendation {
+                          today: Date = Date(),
+                          brief: Bool = false) -> Recommendation {
+        func pick(_ detailed: String, _ short: String) -> String { brief ? short : detailed }
         let maintenanceWeeks = maintenanceSince.map {
             max(0, Int(today.timeIntervalSince($0) / (7 * 86_400)))
         } ?? 0
@@ -80,7 +84,8 @@ enum PhaseAdvice {
                 return Recommendation(
                     kind: .maintain,
                     headline: String(format: String(localized: "Поддержание ещё %lld нед."), left),
-                    detail: String(format: String(localized: "Прошлая сушка длилась %1$lld нед., на поддержании ты %2$lld. Дай телу вернуть расход и гормоны — обычно это половина длины сушки, но не меньше месяца. Тогда следующий дефицит снова будет работать."), lastCut.weeks, maintenanceWeeks),
+                    detail: String(format: pick(String(localized: "Прошлая сушка длилась %1$lld нед., на поддержании ты %2$lld. Дай телу вернуть расход и гормоны — обычно это половина длины сушки, но не меньше месяца. Тогда следующий дефицит снова будет работать."),
+                                                String(localized: "Сушка длилась %1$lld нед., поддержания пока %2$lld. Нужно не меньше половины от сушки.")), lastCut.weeks, maintenanceWeeks),
                     weeks: left,
                     weeklyRatePercent: nil)
             }
@@ -90,7 +95,8 @@ enum PhaseAdvice {
             return Recommendation(
                 kind: .maintain,
                 headline: String(localized: "Сними замеры"),
-                detail: String(localized: "Без процента жира советовать нечего: от него зависит, что выгоднее — сушиться или набирать. Сними шею и пояс в замерах, и приложение посчитает."),
+                detail: pick(String(localized: "Без процента жира советовать нечего: от него зависит, что выгоднее — сушиться или набирать. Сними шею и пояс в замерах, и приложение посчитает."),
+                             String(localized: "Нужен процент жира: сними шею и пояс в замерах.")),
                 weeks: nil,
                 weeklyRatePercent: nil)
         }
@@ -99,7 +105,8 @@ enum PhaseAdvice {
             return Recommendation(
                 kind: .cut,
                 headline: String(localized: "Можно сушиться"),
-                detail: String(format: String(localized: "Жир около %.0f%%. На таком проценте набор уходит в жир, а не в мышцы: сушка сейчас выгоднее. Темп 0.5%% массы в неделю — быстрее значит терять мышцы."), fat),
+                detail: String(format: pick(String(localized: "Жир около %.0f%%. На таком проценте набор уходит в жир, а не в мышцы: сушка сейчас выгоднее. Темп 0.5%% массы в неделю — быстрее значит терять мышцы."),
+                                            String(localized: "Жир около %.0f%% — выгоднее сушка, темп 0.5%% массы в неделю.")), fat),
                 weeks: 12,
                 weeklyRatePercent: 0.5)
         }
@@ -107,14 +114,16 @@ enum PhaseAdvice {
             return Recommendation(
                 kind: .bulk,
                 headline: String(localized: "Можно набирать"),
-                detail: String(format: String(localized: "Жир около %.0f%%. Есть куда набирать: на этом проценте прибавка идёт в мышцы охотнее всего. Темп 0.25%% массы в неделю — быстрее набирается жир, а не сила."), fat),
+                detail: String(format: pick(String(localized: "Жир около %.0f%%. Есть куда набирать: на этом проценте прибавка идёт в мышцы охотнее всего. Темп 0.25%% массы в неделю — быстрее набирается жир, а не сила."),
+                                            String(localized: "Жир около %.0f%% — можно набирать, темп 0.25%% массы в неделю.")), fat),
                 weeks: 16,
                 weeklyRatePercent: 0.25)
         }
         return Recommendation(
             kind: .maintain,
             headline: String(localized: "Можно и то, и другое"),
-            detail: String(format: String(localized: "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор."), fat),
+            detail: String(format: pick(String(localized: "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор."),
+                                        String(localized: "Жир около %.0f%% — работает и сушка, и набор. Решает цель.")), fat),
             weeks: nil,
             weeklyRatePercent: nil)
     }

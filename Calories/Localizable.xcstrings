@@ -2012,9 +2012,7 @@
         }
       }
     },
-    "%lld%%" : {
-
-    },
+    "%lld%%" : {},
     "+%lld" : {
       "localizations" : {
         "en" : {
@@ -51088,9 +51086,7 @@
         }
       }
     },
-    "уд/мин" : {
-
-    },
+    "уд/мин" : {},
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -52814,9 +52810,7 @@
         }
       }
     },
-    "ч" : {
-
-    },
+    "ч" : {},
     "Через 30–60 минут" : {
       "localizations" : {
         "ar" : {
@@ -54627,6 +54621,1181 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
+          }
+        }
+      }
+    },
+    "«Вручную» — брейк по требованию, «4 : 1» — неделя поддержания после каждых четырёх недель дефицита. Срок фазы считается без брейков." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«يدوي» يعني استراحة عند الطلب، و«4 : 1» تضيف أسبوع تثبيت بعد كل أربعة أسابيع عجز. ومدة المرحلة لا تشمل الاستراحات."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Manuell“ heißt Pause nach Bedarf; „4 : 1“ fügt nach je vier Defizitwochen eine Erhaltungswoche ein. Die Phasenlänge zählt Pausen nicht mit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\"Manual\" means a break on demand; \"4 : 1\" adds a maintenance week after every four weeks of deficit. The phase length excludes breaks."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Manual»: descanso cuando quieras; «4 : 1»: una semana de mantenimiento tras cada cuatro de déficit. La duración de la fase no incluye los descansos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« Manuel » : pause à la demande ; « 4 : 1 » : une semaine de maintien après quatre semaines de déficit. La durée de la phase exclut les pauses."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«ידני» — הפסקה לפי דרישה; «4 : 1» — שבוע תחזוקה אחרי כל ארבעה שבועות גירעון. משך השלב אינו כולל הפסקות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«Manual» é pausa quando quiser; «4 : 1» acrescenta uma semana de manutenção a cada quatro de déficit. A duração da fase não conta pausas."
+          }
+        }
+      }
+    },
+    "В процентах массы за неделю — одно число для любого веса." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بنسبة من كتلة الجسم أسبوعيًا — رقم واحد لأي وزن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Prozent der Masse pro Woche – eine Zahl für jedes Gewicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In percent of body mass per week — one number for any weight."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En porcentaje de masa por semana: un número para cualquier peso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En pourcentage de masse par semaine — un chiffre pour tout poids."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "באחוזים מהמסה לשבוע — מספר אחד לכל משקל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em porcentagem da massa por semana — um número para qualquer peso."
+          }
+        }
+      }
+    },
+    "Вес стоит при дефиците — перепроверь норму в профиле." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن ثابت رغم العجز — راجع الهدف في الملف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gewicht steht im Defizit – Ziel im Profil prüfen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weight is flat on a deficit — recheck the target in the profile."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso no baja en déficit: revisa el objetivo en el perfil."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids stagne en déficit — revoyez l’objectif dans le profil."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל תקוע בגירעון — בדוק את היעד בפרופיל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso parou em déficit — revise a meta no perfil."
+          }
+        }
+      }
+    },
+    "Данные только на этом устройстве, синхронизации нет." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "البيانات على هذا الجهاز فقط؛ ولا توجد مزامنة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daten bleiben nur auf diesem Gerät; keine Synchronisierung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Data lives on this device only; there is no sync."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los datos solo están en este dispositivo; no hay sincronización."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données restent sur cet appareil ; pas de synchronisation."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הנתונים רק במכשיר הזה; אין סנכרון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados ficam só neste aparelho; não há sincronização."
+          }
+        }
+      }
+    },
+    "Доли — в калориях. «Неизвестно» — записи без состава." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحصص بالسعرات. و«غير معروف» تعني سجلات بلا تكوين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anteile in Kalorien. „Unbekannt“ sind Einträge ohne Zusammensetzung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shares are in calories. \"Unknown\" is entries without a composition."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las partes son en calorías. «Desconocido» son entradas sin composición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les parts sont en calories. « Inconnu » : des entrées sans composition."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החלקים בקלוריות. «לא ידוע» הן רשומות בלי הרכב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As partes são em calorias. «Desconhecido» são itens sem composição."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%% — выгоднее сушка, темп 0.5%% массы в неделю." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%% — التنشيف أجدى، بمعدل 0.5%% من الكتلة أسبوعيًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Körperfett etwa %.0f%% – Diät lohnt sich, 0,5%% der Masse pro Woche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Body fat about %.0f%% — cutting pays off, at 0.5%% of mass per week."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa cerca del %.0f%%: conviene definir, a 0,5%% de masa por semana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graisse autour de %.0f%% — la sèche est préférable, à 0,5%% de masse par semaine."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן סביב %.0f%% — עדיף חיטוב, בקצב 0.5%% מהמסה בשבוע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura perto de %.0f%% — vale cortar, a 0,5%% da massa por semana."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%% — можно набирать, темп 0.25%% массы в неделю." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%% — يمكن التضخيم، بمعدل 0.25%% من الكتلة أسبوعيًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Körperfett etwa %.0f%% – Aufbau möglich, 0,25%% der Masse pro Woche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Body fat about %.0f%% — you can bulk, at 0.25%% of mass per week."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa cerca del %.0f%%: puedes ganar, a 0,25%% de masa por semana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graisse autour de %.0f%% — la prise est possible, à 0,25%% de masse par semaine."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן סביב %.0f%% — אפשר לעלות, בקצב 0.25%% מהמסה בשבוע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura perto de %.0f%% — dá para ganhar, a 0,25%% da massa por semana."
+          }
+        }
+      }
+    },
+    "Жир около %.0f%% — работает и сушка, и набор. Решает цель." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الدهون نحو %.0f%% — التنشيف والتضخيم كلاهما يعمل. الهدف يحسم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Körperfett etwa %.0f%% – Diät und Aufbau funktionieren. Das Ziel entscheidet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Body fat about %.0f%% — both cutting and bulking work. The goal decides."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa cerca del %.0f%%: sirven definición y volumen. Decide el objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graisse autour de %.0f%% — sèche et prise fonctionnent. L’objectif tranche."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שומן סביב %.0f%% — גם חיטוב וגם עלייה עובדים. המטרה מכריעה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura perto de %.0f%% — cortar e ganhar funcionam. A meta decide."
+          }
+        }
+      }
+    },
+    "Копия раз в сутки в выбранную папку. Бери папку в iCloud Drive: она переживёт удаление приложения." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نسخة يومية إلى المجلد المختار. اختر مجلدًا في iCloud Drive فهو يبقى بعد حذف التطبيق."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Täglich eine Kopie in den gewählten Ordner. Nimm einen in iCloud Drive: er überlebt das Löschen der App."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A daily copy into the chosen folder. Pick one in iCloud Drive: it outlives the app's deletion."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una copia diaria en la carpeta elegida. Elige una en iCloud Drive: sobrevive al borrado de la app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une copie par jour dans le dossier choisi. Prenez-en un dans iCloud Drive : il survit à la suppression de l’app."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עותק יומי לתיקייה שנבחרה. בחר תיקייה ב־iCloud Drive: היא שורדת מחיקה של האפליקציה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma cópia diária na pasta escolhida. Escolha uma no iCloud Drive: ela sobrevive à exclusão do app."
+          }
+        }
+      }
+    },
+    "Неделя-две на поддержании. Финиш сдвигается на длину брейка, целевой вес прежний." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع أو اثنان على التثبيت. تتأخر النهاية بمقدار الاستراحة، والوزن المستهدف كما هو."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein bis zwei Wochen Erhaltung. Das Ende verschiebt sich um die Pausenlänge; das Zielgewicht bleibt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A week or two at maintenance. The finish moves by the break's length; the target weight stays."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una o dos semanas de mantenimiento. El final se desplaza lo que dure el descanso; el peso objetivo no cambia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une ou deux semaines de maintien. La fin recule de la durée de la pause ; le poids cible ne change pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע-שבועיים בתחזוקה. הסיום נדחה באורך ההפסקה, ומשקל היעד נשאר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma ou duas semanas de manutenção. O fim desloca pelo tempo da pausa; o peso-alvo fica."
+          }
+        }
+      }
+    },
+    "Норма держит дефицит плана, пока он не закрыт. Заверши или продли срок." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحافظ الهدف على عجز الخطة حتى إغلاقها. أنهِها أو مدّد المدة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel hält das Defizit des Plans, bis er geschlossen ist. Beenden oder Frist verlängern."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target holds the plan's deficit until the plan is closed. Finish it or extend the term."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo mantiene el déficit del plan hasta cerrarlo. Termínalo o amplía el plazo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif tient le déficit du plan tant qu’il n’est pas clos. Terminez-le ou prolongez le délai."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד מחזיק את גירעון התוכנית עד לסגירתה. סיים או הארך את המועד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta segura o déficit do plano até ele ser fechado. Conclua ou amplie o prazo."
+          }
+        }
+      }
+    },
+    "Нужен процент жира: сними шею и пояс в замерах." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نحتاج نسبة الدهون: قِس الرقبة والخصر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Körperfettwert wird gebraucht: Hals und Taille messen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A body-fat figure is needed: measure neck and waist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace falta el porcentaje de grasa: mide cuello y cintura."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il faut un taux de graisse : mesurez le cou et la taille."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נדרש אחוז שומן: מדוד צוואר ומותן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "É preciso o percentual de gordura: meça pescoço e cintura."
+          }
+        }
+      }
+    },
+    "Одинаковая норма каждый день." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف نفسه كل يوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Tag dasselbe Ziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The same target every day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El mismo objetivo cada día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le même objectif chaque jour."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אותו יעד בכל יום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mesma meta todo dia."
+          }
+        }
+      }
+    },
+    "Оценка по фото приблизительная — это черновик, а не измерение." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقدير بالصورة تقريبي — مسودة لا قياس."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Foto-Schätzung ist grob – ein Entwurf, keine Messung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A photo estimate is rough — a draft, not a measurement."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La estimación por foto es aproximada: un borrador, no una medición."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’estimation par photo est approximative — un brouillon, pas une mesure."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הערכה מתמונה היא גסה — טיוטה, לא מדידה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A estimativa por foto é aproximada — um rascunho, não uma medição."
+          }
+        }
+      }
+    },
+    "Привычная порция подставится при добавлении; числа ниже — на неё." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُدرج الحصة المعتادة عند الإضافة، والأرقام أدناه تخصها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die übliche Portion wird beim Hinzufügen eingesetzt; die Zahlen unten gelten für sie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The usual serving is filled in when adding; the numbers below are for it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ración habitual se rellena al añadir; los números de abajo son para ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La portion habituelle est préremplie à l’ajout ; les chiffres ci-dessous la concernent."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המנה הרגילה נכנסת בהוספה; המספרים למטה מתייחסים אליה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A porção habitual entra ao adicionar; os números abaixo são dela."
+          }
+        }
+      }
+    },
+    "Резкий выход из дефицита возвращает воду и гликоген: пара килограммов на весах — не жир." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخروج المفاجئ من العجز يعيد الماء والجليكوجين: كيلوغرامان على الميزان ليسا دهنًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein abrupter Ausstieg aus dem Defizit bringt Wasser und Glykogen zurück: zwei Kilo auf der Waage sind kein Fett."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaving a deficit abruptly restores water and glycogen: a couple of kilos on the scale are not fat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salir del déficit de golpe devuelve agua y glucógeno: un par de kilos en la báscula no son grasa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sortir brusquement du déficit ramène eau et glycogène : deux kilos sur la balance ne sont pas de la graisse."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יציאה חדה מגירעון מחזירה מים וגליקוגן: שני קילו במשקל אינם שומן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do déficit de repente devolve água e glicogênio: dois quilos na balança não são gordura."
+          }
+        }
+      }
+    },
+    "Рефид меняется местами с ближайшим сытным днём недели; недельный дефицит тот же." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُبدَّل وجبة الشحن مع أقرب يوم مرتفع في الأسبوع، والعجز الأسبوعي كما هو."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Refeed tauscht mit dem nächsten hohen Tag der Woche; das Wochendefizit bleibt gleich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The refeed swaps with the nearest high day of the week; the weekly deficit is unchanged."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recarga se intercambia con el día alto más cercano de la semana; el déficit semanal no cambia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La recharge permute avec le jour haut le plus proche de la semaine ; le déficit hebdomadaire ne change pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הריפיד מתחלף עם היום הגבוה הקרוב בשבוע; הגירעון השבועי נשאר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O refeed troca com o dia alto mais próximo da semana; o déficit semanal não muda."
+          }
+        }
+      }
+    },
+    "Сеанс — полный снимок; незаполненное берётся из прошлого. Ошибся — удали свайпом." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجلسة لقطة كاملة؛ والفراغات تُنقل من السابقة. أخطأت؟ اسحب للحذف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Sitzung ist eine vollständige Aufnahme; Leeres kommt aus der vorigen. Vertan? Zum Löschen wischen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A session is a full snapshot; blanks carry over from the last one. Got it wrong — swipe to delete."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una sesión es una foto completa; lo vacío se toma de la anterior. ¿Te equivocaste? Desliza para borrar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une séance est un instantané complet ; les vides viennent de la précédente. Erreur ? Balayez pour supprimer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מפגש הוא תצלום מלא; מה שריק נלקח מהקודם. טעית? החלק כדי למחוק."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma sessão é um retrato completo; o que falta vem da anterior. Errou? Deslize para apagar."
+          }
+        }
+      }
+    },
+    "Серое — ожидаемое по пропорциям, ориентир. В данные идёт только введённое тобой." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرمادي هو ما توحي به النِّسَب — دليل تقريبي. ولا يدخل البيانات إلا ما تُدخله بنفسك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grau ist, was die Proportionen nahelegen – ein Anhalt. In die Daten geht nur, was du eingibst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grey is what proportions suggest — a guide. Only what you enter goes into the data."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El gris es lo que sugieren las proporciones: una guía. Solo lo que escribes entra en los datos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le gris est ce que suggèrent les proportions — un repère. Seul ce que vous saisissez entre dans les données."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האפור הוא מה שהפרופורציות מציעות — כיוון בלבד. לנתונים נכנס רק מה שהזנת."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O cinza é o que as proporções sugerem — um guia. Só o que você digita entra nos dados."
+          }
+        }
+      }
+    },
+    "Состав взят из базы по совпадению названия." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التكوين مأخوذ من القاعدة بمطابقة الاسم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zusammensetzung stammt aus der Datenbank über einen Namenstreffer."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The composition comes from the database by a name match."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composición viene de la base por coincidencia de nombre."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composition vient de la base par correspondance de nom."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההרכב נלקח מהמאגר לפי התאמת שם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A composição vem da base por coincidência de nome."
+          }
+        }
+      }
+    },
+    "Сушка длилась %1$lld нед., поддержания пока %2$lld. Нужно не меньше половины от сушки." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استمر التنشيف %1$lld أسبوعًا والتثبيت %2$lld. يلزم نصف مدة التنشيف على الأقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Diät lief %1$lld Wo., Erhaltung bisher %2$lld. Nötig ist mindestens die halbe Diätlänge."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cut ran %1$lld wk, maintenance so far %2$lld. At least half the cut's length is needed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El déficit duró %1$lld sem., mantenimiento %2$lld. Hace falta al menos la mitad del déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La sèche a duré %1$lld sem., maintien %2$lld. Il faut au moins la moitié de la sèche."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החיטוב נמשך %1$lld שב׳, תחזוקה %2$lld. נדרש לפחות חצי מאורך החיטוב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O corte durou %1$lld sem., manutenção %2$lld. É preciso ao menos metade do corte."
+          }
+        }
+      }
+    },
+    "Фазы переставляются перетаскиванием; темп каждой считается от её стартового веса." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُرتَّب المراحل بالسحب، ويُحسب إيقاع كل مرحلة من وزن بدايتها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phasen lassen sich per Ziehen umordnen; jedes Tempo rechnet ab ihrem Startgewicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Phases reorder by dragging; each rate is figured from the weight it starts at."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las fases se reordenan arrastrando; cada ritmo se calcula desde su peso inicial."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les phases se réordonnent par glissement ; chaque rythme part de son poids de départ."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השלבים מסודרים בגרירה; קצב כל שלב מחושב מהמשקל שבו הוא מתחיל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fases se reordenam arrastando; cada ritmo parte do peso inicial dela."
+          }
+        }
+      }
+    },
+    "Часть углеводов, калорий почти не даёт; держит сытость." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء من الكربوهيدرات بلا سعرات تقريبًا؛ يحافظ على الشبع."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teil der Kohlenhydrate, kaum Kalorien; hält satt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part of carbs, nearly no calories; it holds fullness."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte de los carbohidratos, casi sin calorías; sostiene la saciedad."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une part des glucides, presque sans calories ; elle tient la satiété."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלק מהפחמימות, כמעט בלי קלוריות; מחזיק שובע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte dos carboidratos, quase sem calorias; segura a saciedade."
+          }
+        }
+      }
+    },
+    "Что и от кого приходит в «Здоровье»." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما الذي يصل إلى تطبيق الصحة وممن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was in „Health“ ankommt und von wem."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What arrives in Health, and from whom."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué llega a Salud y de quién."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui arrive dans Santé, et de qui."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה מגיע ל«בריאות» וממי."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que chega ao Saúde e de quem."
+          }
+        }
+      }
+    },
+    "Щелчки при потягивании экрана вниз." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نقرات عند سحب الشاشة للأسفل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Klicks beim Herunterziehen des Bildschirms."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clicks when you pull the screen down."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clics al tirar de la pantalla hacia abajo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des clics quand on tire l’écran vers le bas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נקישות במשיכת המסך מטה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cliques ao puxar a tela para baixo."
           }
         }
       }

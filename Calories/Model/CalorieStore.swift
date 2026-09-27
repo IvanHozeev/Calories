@@ -991,7 +991,8 @@ final class CalorieStore {
         PhaseAdvice.recommend(history: phaseHistory,
                               maintenanceSince: maintenanceSince,
                               bodyFatPercent: bodyFatPercent,
-                              today: now)
+                              today: now,
+                              brief: ExplanationSettings.shared.level == .expert)
     }
 
     /// Записать закончившийся план в историю. Вызывается при завершении плана,

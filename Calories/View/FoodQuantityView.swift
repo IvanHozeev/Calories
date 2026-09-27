@@ -23,14 +23,11 @@ struct FoodQuantityView: View {
 
     /// Время приёма пищи, в который добавляют продукт. Кнопка с часами — здесь,
     /// на экране продукта: время решают, когда уже выбрали, что съели.
-    var mealDate: Binding<Date>?
-    @State private var showingMealTime = false
 
     init(food: FoodItem, grams initialGrams: Double? = nil, addTitle: LocalizedStringKey = "В приём пищи",
          onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
-         isPushed: Bool = false, mealDate: Binding<Date>? = nil, onAdd: @escaping (MealItem) -> Void) {
+         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
-        self.mealDate = mealDate
         self.food = food
         self.addTitle = addTitle
         self.onSave = onSave
@@ -119,9 +116,6 @@ struct FoodQuantityView: View {
                 if drag.translation.height > 40 { gramsFocused = false }
             }
         )
-        .sheet(isPresented: $showingMealTime) {
-            if let mealDate { MealTimeSheet(date: mealDate) }
-        }
         // Клавиатура сразу: на этот экран приходят ровно за одним — сказать,
         // сколько съел. Ждать ещё одного тапа по полю незачем.
         //
@@ -139,17 +133,6 @@ struct FoodQuantityView: View {
             if !isPushed {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
-                }
-            }
-            if mealDate != nil {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingMealTime = true
-                    } label: {
-                        Image(systemName: "clock")
-                    }
-                    .accessibilityLabel("Время приёма")
-                    .accessibilityIdentifier("mealTime")
                 }
             }
             // Пополнение справочника не должно закрывать экран: порцию ещё
@@ -242,8 +225,6 @@ struct DishQuantityView: View {
 
     var isPushed: Bool = false
 
-    var mealDate: Binding<Date>?
-    @State private var showingMealTime = false
 
     /// Подпись основной кнопки: из приёма пищи блюдо кладут в него, а из
     /// поиска — сразу в дневник.
@@ -251,9 +232,8 @@ struct DishQuantityView: View {
 
     init(dish: Dish, addTitle: LocalizedStringKey = "В приём пищи",
          onAddAndSave: ((MealItem) -> Void)? = nil,
-         isPushed: Bool = false, mealDate: Binding<Date>? = nil, onAdd: @escaping (MealItem) -> Void) {
+         isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
-        self.mealDate = mealDate
         self.dish = dish
         self.addTitle = addTitle
         self.onAddAndSave = onAddAndSave
@@ -343,9 +323,6 @@ struct DishQuantityView: View {
                 if drag.translation.height > 40 { gramsFocused = false }
             }
         )
-        .sheet(isPresented: $showingMealTime) {
-            if let mealDate { MealTimeSheet(date: mealDate) }
-        }
         // Клавиатура сразу: на этот экран приходят ровно за одним — сказать,
         // сколько съел. Ждать ещё одного тапа по полю незачем.
         //
@@ -361,17 +338,6 @@ struct DishQuantityView: View {
             if !isPushed {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }
-                }
-            }
-            if mealDate != nil {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingMealTime = true
-                    } label: {
-                        Image(systemName: "clock")
-                    }
-                    .accessibilityLabel("Время приёма")
-                    .accessibilityIdentifier("mealTime")
                 }
             }
         }

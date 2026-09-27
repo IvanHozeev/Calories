@@ -502,24 +502,12 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        // Время приёма — кнопка с часами на экране продукта: его решают, уже
-        // выбрав, что съели.
-        let search = revealSearchField(in: app)
-        XCTAssertTrue(search.exists, "Строка поиска не вытянулась из-под тулбара")
-        search.tap()
-        search.typeText("Beef")
-        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
-        XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
-        row.tap()
-
-        let clock = app.buttons["mealTime"]
-        XCTAssertTrue(clock.waitForExistence(timeout: 5), "На экране продукта нет часов")
-        clock.tap()
-
-        // В пикере есть и дата, и время — иначе поправить час невозможно
-        let when = app.datePickers.firstMatch
-        XCTAssertTrue(when.waitForExistence(timeout: 5), "Не открылся выбор времени приёма")
-        XCTAssertGreaterThanOrEqual(when.buttons.count, 2,
+        // Время приёма живёт на самом экране: за переходом его не видно, и
+        // ошибку замечали уже в дневнике.
+        let picker = app.descendants(matching: .any).matching(identifier: "mealTimePicker").firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 5), "На экране приёма пищи нет выбора времени")
+        // И дата, и время: поправить один только час невозможно.
+        XCTAssertGreaterThanOrEqual(picker.buttons.count, 2,
                                     "У записи должны настраиваться и день, и время")
     }
 

@@ -594,15 +594,20 @@ final class CalorieStore {
             try? JSONDecoder().decode(ActivityAdjustment.Baseline.self, from: $0)
         }
         let daysSince = storedDay.map { calendar.dateComponents([.day], from: $0, to: today).day ?? 0 }
-        if let stored, let daysSince, daysSince < Self.expenditureUpdateDays {
-            activityBaseline = stored
+        // Среднее, посчитанное по другому источнику, — не мерка: браслет
+        // считает щедрее телефона, и обычный день по чужой линейке выглядит
+        // нагруженным. Пока новое не набралось, честнее не иметь никакого.
+        let current = ActivityAdjustment.currentSource(in: stepHistory)
+        let usable = stored.flatMap { $0.source == current ? $0 : nil }
+        if let usable, let daysSince, daysSince < Self.expenditureUpdateDays {
+            activityBaseline = usable
             return
         }
         guard let fresh = ActivityAdjustment.baseline(from: stepHistory, now: today, calendar: calendar) else {
             // Период привыкания ещё идёт. Прошлое значение при этом не стираем:
             // если данные пропали на неделю (браслет на зарядке, отпуск без
             // телефона), лучше держать прежнюю картину, чем выключать поправку.
-            activityBaseline = stored
+            activityBaseline = usable
             return
         }
         activityBaseline = fresh

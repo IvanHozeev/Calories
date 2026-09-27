@@ -48,6 +48,7 @@ final class HealthInventory {
             ("activeEnergy", String(localized: "Активные калории")),
             ("restingHeartRate", String(localized: "Пульс в покое")),
             ("heartRate", String(localized: "Пульс")),
+            ("workouts", String(localized: "Тренировки")),
             ("sleep", String(localized: "Сон")),
             ("weight", String(localized: "Вес")),
             ("bodyFat", String(localized: "Процент жира"))
@@ -61,7 +62,8 @@ final class HealthInventory {
         HKQuantityType(.heartRate),
         HKQuantityType(.bodyMass),
         HKQuantityType(.bodyFatPercentage),
-        HKCategoryType(.sleepAnalysis)
+        HKCategoryType(.sleepAnalysis),
+        HKObjectType.workoutType()
     ]
 
     func check() async {
@@ -135,7 +137,21 @@ final class HealthInventory {
                        },
                        sources: Array(Set(samples.map(\.sourceRevision.source.name))).sorted())
         default:
-            return Row(id: id, title: title, days: 0, latest: nil, sample: nil, sources: [])
+            // Тренировки — пробами: у каждой своя длительность, и посуточной
+            // статистики для них нет. Приоритет источников «Здоровье» для них
+            // выставить не даёт, поэтому читаем всё подряд и просто
+            // показываем, кто пишет.
+            let samples = await fetch(HKObjectType.workoutType(), since: start)
+            let calendar = Calendar.current
+            // Пробы отсортированы от свежих к старым — пример берём первый.
+            let minutes = (samples.first as? HKWorkout).map {
+                String(format: String(localized: "%lld мин"), Int(($0.duration / 60).rounded()))
+            }
+            return Row(id: id, title: title,
+                       days: Set(samples.map { calendar.startOfDay(for: $0.startDate) }).count,
+                       latest: samples.map(\.startDate).max(),
+                       sample: minutes,
+                       sources: Array(Set(samples.map(\.sourceRevision.source.name))).sorted())
         }
     }
 

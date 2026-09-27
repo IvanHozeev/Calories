@@ -390,6 +390,19 @@ struct StepAdjustmentTests {
         #expect(ActivityAdjustment.baseline(from: days)?.steps == nil)
     }
 
+    /// Среднее помнит, по чьим шагам оно посчитано.
+    ///
+    /// Без этого прежняя мерка переживала смену источника: телефонные 10 652
+    /// против браслетных шагов, которых на четверть больше, — и обычный день
+    /// получал полторы сотни килокалорий сверху ни за что.
+    @Test func theBaselineRemembersWhoseStepsItIs() throws {
+        var days = history(Array(repeating: 10_000, count: 20))
+        days = days.map { var day = $0; day.stepSource = "phone"; return day }
+        let baseline = try #require(ActivityAdjustment.baseline(from: days))
+        #expect(baseline.source == "phone")
+        #expect(ActivityAdjustment.currentSource(in: days) == "phone")
+    }
+
     @Test func aBusyDayRaisesTheDayAndAQuietOneLowersIt() {
         let busy = ActivityAdjustment.adjustment(day: steps(20_000), baseline: stepsOnly,
                                                  weightKg: 76, expenditure: 3_200)

@@ -13,7 +13,6 @@ struct AddEntryView: View {
     @State private var debouncedSearch = ""
     @State private var draftItems: [MealItem] = []
 
-    @State private var showingMealTime = false
     /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
     /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
     /// про это надо сказать, иначе приём пищи молча уедет в чужой день.
@@ -97,9 +96,10 @@ struct AddEntryView: View {
         /// где ищешь, не открывая меню.
         var icon: String {
             switch self {
-            // Не просто часы: часами на этом экране помечено время приёма,
-            // и две одинаковые иконки рядом читались бы как одно и то же.
-            case .recent:   return "clock.arrow.circlepath"
+            // Не часы в любом виде: часами на этом экране помечено время
+            // приёма, и две похожие иконки рядом читались бы как одно и то же.
+            // Стрелка назад — про «что было», а не про «который час».
+            case .recent:   return "arrow.uturn.backward"
             case .mine:     return "person.crop.circle"
             case .database: return "books.vertical"
             case .online:   return "globe"
@@ -349,23 +349,25 @@ struct AddEntryView: View {
             // строк в диф — хуже, чем этот отступ.
             ScrollViewReader { scroll in
             List {
-                // Появляется, только когда время сдвинули руками, и оранжевым:
-                // это не поле для заполнения, а предупреждение, что запись уйдёт
-                // не в текущий момент.
-                if timeAdjusted, !isSearching, !searchFocused {
+                // Время приёма — на самом экране, а не за переходом.
+                //
+                // Оно жило в отдельном листе, потому что «меняют это редко»:
+                // еда обычно записывается тогда же, когда съедена. Но редко —
+                // не значит никогда, а за переходом его не видно вовсе, и
+                // человек замечал ошибку уже в дневнике. Строка занимает одну
+                // высоту и молчит, пока время сегодняшнее; сдвинутое время
+                // подсвечивается оранжевым — это уже предупреждение.
+                if !isSearching, !searchFocused {
                     Section {
-                        Button {
-                            showingMealTime = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "clock")
-                                Text(selectedDate.formatted(date: .abbreviated, time: .shortened))
-                                Spacer()
-                            }
-                            .font(.app(.footnote))
-                            .foregroundStyle(.orange)
+                        DatePicker(selection: $selectedDate, in: ...Date(),
+                                   displayedComponents: [.date, .hourAndMinute]) {
+                            Label("Когда", systemImage: "clock")
+                                .font(.app(.footnote))
+                                .foregroundStyle(timeAdjusted ? Color.orange : .secondary)
                         }
-                        .listRowInsets(EdgeInsets(top: 2, leading: 16, bottom: 2, trailing: 16))
+                        .font(.app(.footnote))
+                        .accessibilityIdentifier("mealTimePicker")
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                         .listRowBackground(Color.clear)
                     }
                 }
@@ -521,9 +523,6 @@ struct AddEntryView: View {
                 BarcodeScannerSheet(store: store) { item in
                     draftItems.append(item)
                 }
-            }
-            .sheet(isPresented: $showingMealTime) {
-                MealTimeSheet(date: $selectedDate)
             }
             .onChange(of: selectedDate) { _, _ in timeAdjusted = true }
             .sheet(item: $editingFood) { food in
@@ -806,18 +805,17 @@ struct AddEntryView: View {
                 onSave: saveAction(for: food, enabled: savable),
                 onAddAndSave: quickAction(enabled: quickSave),
                 isPushed: true,
-                mealDate: $selectedDate
             ) { item in
                 addToDraft(item)
             }
         case .dish(let dish):
-            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true, mealDate: $selectedDate) { item in
+            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true) { item in
                 addToDraft(item)
             }
         case .edit(let itemID):
             if let item = draftItems.first(where: { $0.id == itemID }), let grams = item.grams, grams > 0 {
                 FoodQuantityView(food: per100g(item, grams: grams), grams: grams,
-                                 addTitle: "Готово", isPushed: true, mealDate: $selectedDate) { edited in
+                                 addTitle: "Готово", isPushed: true) { edited in
                     if let index = draftItems.firstIndex(where: { $0.id == itemID }) {
                         draftItems[index] = edited
                     }

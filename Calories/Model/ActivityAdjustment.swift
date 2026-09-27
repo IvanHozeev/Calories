@@ -53,8 +53,20 @@ enum ActivityAdjustment {
         var steps: Int?
         /// Средние активные калории. nil — браслет их не пишет или пишет редко.
         var activeCalories: Int?
+        /// По чьим шагам оно посчитано.
+        ///
+        /// Без этого прежнее среднее переживало смену источника и служило
+        /// меркой для чужих цифр: телефонные 10 652 против браслетных шагов,
+        /// которых на четверть больше, — и обычный день выглядел нагруженным
+        /// на полторы сотни килокалорий.
+        var source: String?
 
         var isEmpty: Bool { steps == nil && activeCalories == nil }
+    }
+
+    /// Чьи шаги пишутся сейчас — по последнему дню с шагами.
+    static func currentSource(in history: [ActivityDay]) -> String? {
+        history.last { $0.steps > 0 }?.stepSource
     }
 
     /// Считает «обычный день» по истории.
@@ -75,10 +87,10 @@ enum ActivityAdjustment {
         // телефонных дней, наполовину из браслетных, не описывает ни то ни
         // другое. После смены источника счёт начинается заново — это честнее,
         // чем сравнивать сегодняшний день с чужой меркой.
-        let current = history.last { $0.steps > 0 }?.stepSource
+        let current = currentSource(in: history)
         let steps = days.filter { $0.stepSource == current }.map(\.steps).filter { $0 > 0 }
         let energy = days.compactMap(\.activeCalories).filter { $0 > 0 }
-        let result = Baseline(steps: mean(steps), activeCalories: mean(energy))
+        let result = Baseline(steps: mean(steps), activeCalories: mean(energy), source: current)
         return result.isEmpty ? nil : result
     }
 

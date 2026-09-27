@@ -63,6 +63,7 @@ struct ContentView: View {
         return MealSchedule.slots(.init(
             wake: mealSchedule.today(mealSchedule.wake, now: now),
             sleep: mealSchedule.today(mealSchedule.sleep, now: now),
+            measuredWake: stepStore.wakeTime(on: now),
             mealCount: mealSchedule.count,
             dailyGoal: store.adaptedTodayGoal,
             entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },

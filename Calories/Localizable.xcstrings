@@ -53696,6 +53696,53 @@
           }
         }
       }
+    },
+    "%1$@ ч — на %2$@ ч меньше обычного" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ س — أقل بـ %2$@ س من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Std. – %2$@ Std. weniger als sonst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h less than usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h: %2$@ h menos de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h de moins que d’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ש׳ — %2$@ ש׳ פחות מהרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h a menos que o normal"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

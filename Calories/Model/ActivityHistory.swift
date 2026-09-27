@@ -14,16 +14,28 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
     var workoutMinutes: Int?
     /// Чем занимался — «Баскетбол», «Силовая». Для объяснения, не для счёта.
     var workoutTitle: String?
+    /// Сколько спал ночью перед этим днём.
+    var sleepHours: Double?
+    /// Когда в этот день встал. Ради этого сон и читается: время будильника
+    /// iOS не отдаёт, и расписание приёмов пищи до сих пор угадывало подъём по
+    /// первой еде.
+    var wakeTime: Date?
+    /// Когда лёг накануне.
+    var bedTime: Date?
 
     var id: Date { date }
 
     init(date: Date, steps: Int, activeCalories: Int? = nil,
-         workoutMinutes: Int? = nil, workoutTitle: String? = nil) {
+         workoutMinutes: Int? = nil, workoutTitle: String? = nil,
+         sleepHours: Double? = nil, wakeTime: Date? = nil, bedTime: Date? = nil) {
         self.date = date
         self.steps = steps
         self.activeCalories = activeCalories
         self.workoutMinutes = workoutMinutes
         self.workoutTitle = workoutTitle
+        self.sleepHours = sleepHours
+        self.wakeTime = wakeTime
+        self.bedTime = bedTime
     }
 }
 
@@ -80,7 +92,12 @@ struct ActivityHistory: Sendable {
                 steps: max(day.steps, stored?.steps ?? 0),
                 activeCalories: max(day.activeCalories ?? 0, stored?.activeCalories ?? 0).nonZero,
                 workoutMinutes: max(day.workoutMinutes ?? 0, stored?.workoutMinutes ?? 0).nonZero,
-                workoutTitle: day.workoutTitle ?? stored?.workoutTitle)
+                workoutTitle: day.workoutTitle ?? stored?.workoutTitle,
+                // Сон приходит отдельным запросом: запись про шаги о нём не
+                // знает и стирать его не должна.
+                sleepHours: day.sleepHours ?? stored?.sleepHours,
+                wakeTime: day.wakeTime ?? stored?.wakeTime,
+                bedTime: day.bedTime ?? stored?.bedTime)
         }
         let kept = byDay.values.sorted { $0.date < $1.date }.suffix(Self.limit)
         guard let data = try? JSONEncoder().encode(Array(kept)) else { return }
@@ -92,6 +109,19 @@ struct ActivityHistory: Sendable {
         let kept = days.sorted { $0.date < $1.date }.suffix(Self.limit)
         guard let data = try? JSONEncoder().encode(Array(kept)) else { return }
         defaults.set(data, forKey: Self.key)
+    }
+
+    /// Обычная продолжительность сна — среднее за окно. nil, когда ночей мало.
+    ///
+    /// По нему судят, была ли ночь короткой: «восемь часов» — чужая цифра, а
+    /// недосып у каждого свой относительно собственной привычки.
+    func usualSleepHours(window: Int = 28, minimumNights: Int = 7, now: Date = Date()) -> Double? {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        guard let from = calendar.date(byAdding: .day, value: -window, to: today) else { return nil }
+        let hours = days.filter { $0.date >= from }.compactMap(\.sleepHours)
+        guard hours.count >= minimumNights else { return nil }
+        return hours.reduce(0, +) / Double(hours.count)
     }
 
     /// Шаги за конкретный день, если они записаны.

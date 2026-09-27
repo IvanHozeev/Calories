@@ -15,9 +15,33 @@ struct MealScheduleTests {
     }
 
     private func input(count: Int = 4, goal: Int = 2800,
-                       entries: [(Date, Int)] = [], now: Date? = nil) -> MealSchedule.Input {
-        .init(wake: at(7), sleep: at(23), mealCount: count, dailyGoal: goal,
+                       entries: [(Date, Int)] = [], now: Date? = nil,
+                       measuredWake: Date? = nil) -> MealSchedule.Input {
+        .init(wake: at(7), sleep: at(23), measuredWake: measuredWake,
+              mealCount: count, dailyGoal: goal,
               entries: entries.map { (date: $0.0, calories: $0.1) }, now: now ?? at(7, 30))
+    }
+
+    /// Настройка — это намерение, а встают люди иначе. Пока приложение не
+    /// знало настоящего подъёма, человек, поднявшийся в пять, получал завтрак
+    /// в 7:45 и «перекус» вместо первого приёма.
+    @Test func theMeasuredWakeBeatsTheSetting() {
+        let early = MealSchedule.slots(input(now: at(6), measuredWake: at(5)))
+        let bySetting = MealSchedule.slots(input(now: at(6)))
+        let firstEarly = try! #require(early.first)
+        let firstBySetting = try! #require(bySetting.first)
+        #expect(firstEarly.start < firstBySetting.start)
+        // Подъём в пять — первый приём через сорок пять минут.
+        #expect(abs(firstEarly.start.timeIntervalSince(at(5))) < 60)
+    }
+
+    /// Еда важнее и настройки, и браслета: поел раньше, чем засчиталось
+    /// пробуждение, — значит день уже начался.
+    @Test func anEarlierMealStillMovesTheDay() {
+        let slots = MealSchedule.slots(input(entries: [(at(4, 30), 400)],
+                                             now: at(6), measuredWake: at(6)))
+        let first = try! #require(slots.first)
+        #expect(first.start <= at(4, 30))
     }
 
     /// Настройки расписания — одни на всё приложение.
@@ -376,6 +400,70 @@ struct AdaptiveTDEETests {
         let spike = try #require(trend[spikeDay])
         #expect(spike < 80.5, "Тренд не должен прыгать за одним взвешиванием")
         #expect(trend[gapDay] == spike, "День без взвешивания держит последний тренд")
+    }
+}
+
+// MARK: - Сон
+
+/// Браслет пишет каждую фазу отдельной записью, а человеку нужна ночь целиком.
+/// Собрать из десятка отрезков «лёг, встал, спал столько-то» — работа
+/// приложения; от неё же зависит подъём, по которому строится день.
+struct SleepAnalysisTests {
+
+    private let calendar = Calendar.current
+
+    private func at(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
+        let base = calendar.startOfDay(for: Date())
+        return calendar.date(byAdding: .init(day: day, hour: hour, minute: minute), to: base)!
+    }
+
+    private func segment(_ from: Date, _ to: Date) -> SleepAnalysis.Segment {
+        .init(start: from, end: to)
+    }
+
+    @Test func phasesOfOneNightBecomeOneNight() throws {
+        let night = try #require(SleepAnalysis.nights(from: [
+            segment(at(-1, 23, 40), at(0, 1, 20)),
+            segment(at(0, 1, 25), at(0, 3, 50)),
+            segment(at(0, 4, 0), at(0, 7, 10))
+        ]).first)
+
+        #expect(night.bed == at(-1, 23, 40))
+        #expect(night.wake == at(0, 7, 10))
+        // Пробуждения посреди ночи в часы сна не идут.
+        #expect(abs(night.hours - 7.25) < 0.01)
+    }
+
+    /// Встать в туалет — не подъём, а доспать через полтора часа — уже другой
+    /// сон, и подъёмом надо считать первое пробуждение.
+    @Test func aLongBreakStartsANewNight() {
+        let nights = SleepAnalysis.nights(from: [
+            segment(at(-1, 23, 0), at(0, 6, 30)),
+            segment(at(0, 9, 0), at(0, 12, 30))
+        ])
+        #expect(nights.count == 2)
+        #expect(nights.first?.wake == at(0, 6, 30))
+    }
+
+    /// Дневная дрёма не должна объявлять подъёмом четыре часа дня.
+    @Test func aNapIsNotANight() {
+        let nights = SleepAnalysis.nights(from: [segment(at(0, 14, 0), at(0, 15, 30))])
+        #expect(nights.isEmpty)
+    }
+
+    @Test func aNightBelongsToTheDayItEndedOn() throws {
+        let nights = SleepAnalysis.nights(from: [segment(at(-1, 23, 0), at(0, 7, 0))])
+        #expect(SleepAnalysis.night(for: at(0, 12), in: nights) != nil)
+        #expect(SleepAnalysis.night(for: at(-1, 12), in: nights) == nil)
+        let night = try #require(nights.first)
+        #expect(night.hours == 8)
+    }
+
+    /// Недосып считается от собственной привычки, а не от «восьми часов» из
+    /// учебника: у каждого своя норма, и чужая цифра здесь только мешает.
+    @Test func theShortfallIsMeasuredAgainstYourOwnAverage() {
+        #expect(SleepAnalysis.shortfall(hours: 5, usual: 7.5) == 2.5)
+        #expect(SleepAnalysis.shortfall(hours: 9, usual: 7.5) == 0)
     }
 }
 

@@ -105,6 +105,12 @@ enum MealSchedule {
     struct Input {
         let wake: Date
         let sleep: Date
+        /// Когда человек встал на самом деле, если «Здоровье» это знает.
+        ///
+        /// Настройка — это намерение, а встают люди иначе. Раньше подъём
+        /// угадывался по первой еде дня: поел в пять — значит встал в пять. С
+        /// браслетом гадать не нужно, конец сна известен точно.
+        var measuredWake: Date? = nil
         let mealCount: Int
         let dailyGoal: Int
         /// Что уже съедено за день: время и калории.
@@ -145,7 +151,10 @@ enum MealSchedule {
         let dayStart = calendar.startOfDay(for: input.wake)
         let earliest = calendar.date(byAdding: .hour, value: earliestWakeHour, to: dayStart) ?? dayStart
         let firstMealToday = input.entries.map(\.date).filter { $0 >= earliest }.min()
-        let wake = min(input.wake, firstMealToday ?? input.wake)
+        // Измеренный подъём важнее настройки, но еда важнее обоих: если человек
+        // поел раньше, чем браслет засчитал пробуждение, день всё равно начался.
+        let claimed = input.measuredWake ?? input.wake
+        let wake = min(claimed, firstMealToday ?? claimed)
 
         let times = times(wake: wake, sleep: input.sleep, count: input.mealCount)
         guard !times.isEmpty, input.dailyGoal > 0 else { return [] }

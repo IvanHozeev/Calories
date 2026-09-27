@@ -124,7 +124,10 @@ final class StepStore {
             HKQuantityType(.activeEnergyBurned),
             // Тренировки — ради объяснения, а не ради арифметики: их калории
             // уже сидят в активных, и складывать одно с другим нельзя.
-            HKObjectType.workoutType()
+            HKObjectType.workoutType(),
+            // Сон — ради подъёма: время будильника iOS не отдаёт, а конец сна
+            // отдаёт.
+            HKCategoryType(.sleepAnalysis)
         ]
         healthStore.requestAuthorization(toShare: nil, read: types) { [weak self] success, _ in
             Task { @MainActor [weak self] in
@@ -164,6 +167,7 @@ final class StepStore {
         // после того, как их прочитали нулями.
         fetchHistory(days: 90)
         fetchWorkouts(days: 90)
+        fetchSleep(days: 90)
     }
 
     /// Вся сохранённая активность — для экрана и для копии.
@@ -384,6 +388,56 @@ final class StepStore {
             }
         }
         healthStore.execute(query)
+    }
+
+    /// Сон за последние дни: во сколько лёг, во сколько встал, сколько спал.
+    private func fetchSleep(days: Int) {
+        let calendar = Calendar.current
+        let end = Date()
+        guard let start = calendar.date(byAdding: .day, value: -(days - 1), to: calendar.startOfDay(for: end)) else { return }
+        let query = HKSampleQuery(
+            sampleType: HKCategoryType(.sleepAnalysis),
+            predicate: HKQuery.predicateForSamples(withStart: start, end: end),
+            limit: HKObjectQueryNoLimit,
+            sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
+        ) { [weak self] _, samples, _ in
+            let asleep: Set<Int> = [
+                HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+                HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+                HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+                HKCategoryValueSleepAnalysis.asleepREM.rawValue
+            ]
+            // «В постели» не считаем сном: листать телефон полтора часа — не
+            // отдых, и подъёмом это время называть тоже нельзя.
+            let segments = ((samples as? [HKCategorySample]) ?? [])
+                .filter { asleep.contains($0.value) }
+                .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }
+            let nights = SleepAnalysis.nights(from: segments)
+            guard !nights.isEmpty else { return }
+            let days = nights.map { night in
+                ActivityDay(date: calendar.startOfDay(for: night.wake), steps: 0,
+                            sleepHours: night.hours, wakeTime: night.wake, bedTime: night.bed)
+            }
+            Task { @MainActor [weak self] in
+                self?.history.remember(days)
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    /// Во сколько человек встал в этот день, если «Здоровье» это знает.
+    func wakeTime(on date: Date) -> Date? {
+        let calendar = Calendar.current
+        return history.days.first { calendar.isDate($0.date, inSameDayAs: date) }?.wakeTime
+    }
+
+    /// Сколько спал перед этим днём и насколько это меньше обычного.
+    func sleep(on date: Date) -> (hours: Double, shortfall: Double)? {
+        let calendar = Calendar.current
+        guard let hours = history.days.first(where: { calendar.isDate($0.date, inSameDayAs: date) })?.sleepHours
+        else { return nil }
+        let usual = history.usualSleepHours() ?? hours
+        return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual))
     }
 
     /// Человеческое название вида тренировки.

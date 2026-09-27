@@ -772,6 +772,18 @@ private struct CalculationBasisSheet: View {
         return String(format: String(localized: "%1$@, %2$lld мин"), title, minutes)
     }
 
+    /// Сон этой ночью и насколько он короче привычного.
+    ///
+    /// На норму дня сон не влияет — влияет на то, как этот день читать: после
+    /// короткой ночи и вес скачет, и голод сильнее.
+    private var todaySleep: String? {
+        guard let sleep = store.sleep(on: Date()) else { return nil }
+        let hours = String(format: "%.1f", sleep.hours)
+        guard sleep.shortfall >= 1 else { return String(format: String(localized: "%@ ч"), hours) }
+        return String(format: String(localized: "%1$@ ч — на %2$@ ч меньше обычного"),
+                      hours, String(format: "%.1f", sleep.shortfall))
+    }
+
     /// «Обычный день» словами: приложение считает по калориям, если браслет их
     /// пишет, и по шагам, если нет. Показываем то, по чему считает.
     private var usualDay: String? {
@@ -816,6 +828,9 @@ private struct CalculationBasisSheet: View {
                     }
                     if let workout = todayWorkout {
                         LabeledContent("Тренировка") { Text(verbatim: workout) }
+                    }
+                    if let sleep = todaySleep {
+                        LabeledContent("Сон") { Text(verbatim: sleep) }
                     }
                 } header: {
                     Text("Активность")

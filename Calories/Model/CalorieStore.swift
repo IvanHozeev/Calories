@@ -466,6 +466,18 @@ final class CalorieStore {
             partialDay: day >= calendar.startOfDay(for: Date()))
     }
 
+    /// Сколько человек спал перед этим днём и насколько это меньше обычного.
+    ///
+    /// Дневнику это нужно не для арифметики, а для объяснений: после короткой
+    /// ночи и вес скачет, и голод сильнее, и шагов меньше — без этой строчки
+    /// такой день выглядит просто сорванным.
+    func sleep(on date: Date) -> (hours: Double, shortfall: Double)? {
+        guard let hours = activity(on: date)?.sleepHours else { return nil }
+        let history = ActivityHistory(defaults: defaults)
+        let usual = history.usualSleepHours() ?? hours
+        return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual))
+    }
+
     /// Что известно про активность этого дня.
     func activity(on date: Date) -> ActivityDay? {
         let calendar = Calendar.current

@@ -55,6 +55,19 @@ struct DayDetailView: View {
                                 Image(systemName: "trash")
                             }
                         }
+                        // Повтор прошлого приёма — сюда же, где его видно.
+                        // Люди едят одно и то же, и вчерашний обед чаще
+                        // повторяют, чем собирают заново.
+                        .swipeActions(edge: .leading) {
+                            Button {
+                                store.add(name: entry.name, calories: entry.calories,
+                                          macros: entry.macros, grams: entry.grams,
+                                          components: entry.components)
+                            } label: {
+                                Image(systemName: "plus.square.on.square")
+                            }
+                            .tint(.blue)
+                        }
                     }
                 }
             }

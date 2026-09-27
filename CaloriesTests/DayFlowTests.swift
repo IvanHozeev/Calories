@@ -120,6 +120,73 @@ struct MealScheduleTests {
     }
 }
 
+// MARK: - Повтор приёма
+
+/// Люди едят одно и то же: та же овсянка с теми же добавками по утрам, тот же
+/// обед на работе. Собирать такой приём заново из пяти позиций — пять поисков
+/// и пять экранов порции вместо одного нажатия.
+@MainActor
+@Suite(.serialized)
+struct RecentMealsTests {
+
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    private func parts(_ names: [String]) -> [EntryComponent] {
+        names.map { EntryComponent(name: $0, calories: 200, macros: Macros(protein: 10, fat: 5, carbs: 20), grams: 100) }
+    }
+
+    @Test func mealsOfSeveralItemsComeBackForRepeating() throws {
+        store.add(name: "Овсянка, банан, мёд", calories: 600, components: parts(["Овсянка", "Банан", "Мёд"]))
+        let meal = try #require(store.recentMeals().first)
+        #expect(meal.components.count == 3)
+    }
+
+    /// Запись из одного продукта в этот список не идёт: для неё уже есть
+    /// «Недавнее», и вторая строка о том же только засоряет экран.
+    @Test func aSingleProductIsNotAMeal() {
+        store.add(name: "Творог", calories: 180)
+        #expect(store.recentMeals().isEmpty)
+    }
+
+    /// Один и тот же приём, съеденный пять раз за неделю, — одна строка.
+    @Test func theSameMealAppearsOnce() {
+        for _ in 0..<3 {
+            store.add(name: "Овсянка, банан", calories: 500, components: parts(["Овсянка", "Банан"]))
+        }
+        #expect(store.recentMeals().count == 1)
+    }
+
+    /// Съеденное полгода назад — уже не «недавнее».
+    @Test func oldMealsFallOutOfTheList() {
+        let longAgo = Calendar.current.date(byAdding: .day, value: -90, to: Date())!
+        store.add(name: "Плов, салат", calories: 800, date: longAgo, components: parts(["Плов", "Салат"]))
+        #expect(store.recentMeals().isEmpty)
+    }
+
+    /// Копия приёма сохраняет состав: без него приём из пяти продуктов
+    /// превращается в строку без начинки, и разбор дня перестаёт видеть, из
+    /// каких категорий он собран.
+    @Test func copyingAMealKeepsItsComposition() throws {
+        store.add(name: "Гречка, курица", calories: 700, components: parts(["Гречка", "Курица"]))
+        let original = try #require(store.entries.first)
+        store.add(name: original.name, calories: original.calories,
+                  macros: original.macros, grams: original.grams, components: original.components)
+        #expect(store.entries.count == 2)
+        #expect(store.entries.allSatisfy { $0.components.count == 2 })
+    }
+}
+
 // MARK: - Сон
 
 /// Браслет пишет каждую фазу отдельной записью, а человеку нужна ночь целиком.

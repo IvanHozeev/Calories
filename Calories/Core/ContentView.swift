@@ -266,20 +266,10 @@ struct ContentView: View {
                                              icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
                                              micros: store.notableMicronutrients(for: entry))
                                 }
-                                // Дополнение первым: к приёму пищи добавляют чаще,
-                                // чем копируют его целиком, а первая кнопка — та,
-                                // что срабатывает на полном свайпе.
+                                // Копия первой: на полном свайпе срабатывает
+                                // первая кнопка, а повторить съеденное просят
+                                // чаще, чем дописать в него забытое.
                                 .swipeActions(edge: .leading) {
-                                    // Дополнить, а не переписать: приём пищи хранится
-                                    // одной строкой с итогами, разобрать его обратно
-                                    // на продукты нельзя — поэтому он становится
-                                    // первой строкой черновика, а новое досыпается.
-                                    Button {
-                                        appendingTo = entry
-                                    } label: {
-                                        Image(systemName: "plus.circle")
-                                    }
-                                    .tint(.indigo)
                                     Button {
                                         // Копия получает время «сейчас», а секции
                                         // отсортированы по последней записи — значит
@@ -288,13 +278,31 @@ struct ContentView: View {
                                         // половина экрана переставляется за кадр,
                                         // и понять, что произошло, невозможно.
                                         withAnimation(.snappy) {
+                                            // Вместе с составом: приём из пяти
+                                            // продуктов, скопированный одной
+                                            // строкой без начинки, теряет и
+                                            // разбор дня по категориям, и
+                                            // возможность дополнить его потом.
                                             store.add(name: entry.name, calories: entry.calories,
-                                                      macros: entry.macros, grams: entry.grams)
+                                                      macros: entry.macros, grams: entry.grams,
+                                                      components: entry.components)
                                         }
                                     } label: {
                                         Image(systemName: "plus.square.on.square")
                                     }
                                     .tint(.blue)
+                                    // Дополнить — это правка того же приёма, а не
+                                    // добавление нового: приём пищи хранится одной
+                                    // строкой с итогами, поэтому он становится
+                                    // первой строкой черновика, а новое досыпается.
+                                    // Значок карандаша об этом и говорит; плюс
+                                    // читался как «добавить ещё один приём».
+                                    Button {
+                                        appendingTo = entry
+                                    } label: {
+                                        Image(systemName: "pencil")
+                                    }
+                                    .tint(.indigo)
                                 }
                                 .swipeActions(edge: .trailing) {
                                     Button(role: .destructive) {

@@ -608,11 +608,70 @@ struct AddEntryView: View {
         }
     }
 
+    /// Недавние приёмы пищи целиком — из нескольких продуктов.
+    private var recentMeals: [FoodEntry] {
+        store.recentMeals()
+    }
+
+    /// Строка приёма: чем он был и во сколько обошёлся.
+    private func mealRow(_ meal: FoodEntry) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: meal.name)
+                    .font(.app(.subheadline))
+                    .lineLimit(2)
+                Text(verbatim: String(format: String(localized: "%1$lld позиций · %2$@"),
+                                      meal.components.count,
+                                      meal.date.formatted(date: .abbreviated, time: .omitted)))
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+            }
+            Spacer(minLength: 8)
+            Text(verbatim: "\(meal.calories)")
+                .font(.app(.subheadline, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// Кладёт приём в черновик целиком — позициями, а не одной строкой.
+    ///
+    /// Позициями потому, что дальше его обычно правят: вчера была ложка мёда,
+    /// сегодня нет. Одной строкой такой приём пришлось бы удалять и собирать
+    /// заново — то есть ровно то, от чего это и избавляет.
+    private func repeatMeal(_ meal: FoodEntry) {
+        withAnimation(.snappy) {
+            draftItems.append(contentsOf: meal.composition.map {
+                MealItem(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
+            })
+        }
+        scrollToTopTicket += 1
+    }
+
     /// Всё, из чего выбирают продукт: переключатель источника и секции с ними.
     @ViewBuilder
     private var browseSections: some View {
         if isSearching {
             topMatchesSection
+        }
+
+        // Приёмы — выше отдельных продуктов: если человек ест то же, что вчера,
+        // он хочет повторить весь приём, а не собирать его заново из пяти
+        // позиций. Только в «Недавнем» и только без поиска: в поиске ищут
+        // продукт, а не вчерашний день.
+        if source == .recent, !isSearching, !recentMeals.isEmpty {
+            Section {
+                ForEach(recentMeals) { meal in
+                    mealRow(meal)
+                        .contentShape(Rectangle())
+                        .onTapGesture { repeatMeal(meal) }
+                }
+            } header: {
+                Text("Приёмы целиком")
+            } footer: {
+                Text("Нажатие кладёт в черновик весь приём — состав можно править и дополнять, как обычно.")
+            }
         }
 
         if isSearching || source == .recent, !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {

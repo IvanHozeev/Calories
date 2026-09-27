@@ -1272,6 +1272,29 @@ final class CalorieStore {
     /// историю дневника и создавало объекты SwiftData на каждую перерисовку —
     /// то есть на каждое нажатие клавиши в поиске, и экран добавления заметно
     /// подтормаживал на вводе.
+    /// Недавние приёмы пищи — те, что собраны из нескольких продуктов.
+    ///
+    /// Люди едят одно и то же: та же овсянка с теми же добавками по утрам, тот
+    /// же обед на работе. Собирать такой приём заново из пяти позиций — пять
+    /// поисков и пять экранов порции вместо одного нажатия.
+    ///
+    /// Из одного продукта приёмы сюда не идут: для них уже есть «Недавнее»,
+    /// и дублировать их второй строкой значит засорять список тем же самым.
+    func recentMeals(limit: Int = 10, days: Int = 30) -> [FoodEntry] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
+        var seen = Set<String>()
+        var result: [FoodEntry] = []
+        // `entries` уже отсортированы по убыванию даты — значит первое
+        // встреченное имя и есть последний раз, когда это ели.
+        for entry in entries where entry.date >= cutoff && entry.components.count >= 2 {
+            guard !seen.contains(entry.name) else { continue }
+            seen.insert(entry.name)
+            result.append(entry)
+            if result.count == limit { break }
+        }
+        return result
+    }
+
     private func rebuildRecent() {
         let dishNames = Set(dishes.map(\.name))
         // Продукт по имени: свой перекрывает встроенный — его правили руками,

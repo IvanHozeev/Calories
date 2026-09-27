@@ -161,12 +161,16 @@ enum DayAnalysis {
     /// Насколько вес должен уйти выше тренда, чтобы об этом говорить.
     static let notableWeightRise = 0.5
 
-    static func context(_ input: Context) -> [Advice] {
+    /// - Parameter brief: человек выбрал короткие объяснения. Тогда та же
+    ///   мысль без разжёвывания: он знает, почему вес утром скачет.
+    static func context(_ input: Context, brief: Bool = false) -> [Advice] {
         var result: [Advice] = []
+        func pick(_ detailed: String, _ short: String) -> String { brief ? short : detailed }
 
         if let title = input.workoutTitle, let minutes = input.workoutMinutes, minutes > 0 {
             result.append(Advice(id: "workout", tone: .good,
-                                 text: String(format: String(localized: "Тренировка: %1$@, %2$lld мин. Её калории уже посчитаны браслетом и учтены в норме дня — второй раз их прибавлять не надо."), title, minutes)))
+                                 text: String(format: pick(String(localized: "Тренировка: %1$@, %2$lld мин. Её калории уже посчитаны браслетом и учтены в норме дня — второй раз их прибавлять не надо."),
+                                                           String(localized: "Тренировка: %1$@, %2$lld мин — уже в норме дня.")), title, minutes)))
         }
 
         if abs(input.activityAdjustment) >= notableAdjustment {
@@ -174,8 +178,10 @@ enum DayAnalysis {
                 let diff = steps - usual
                 result.append(Advice(id: "activity", tone: .info,
                                      text: diff >= 0
-                                     ? String(format: String(localized: "Шагов %1$lld — на %2$lld больше обычного, и норма дня выше на %3$lld ккал. Это не бонус, а плата за работу."), steps, diff, input.activityAdjustment)
-                                     : String(format: String(localized: "Шагов %1$lld — на %2$lld меньше обычного, и норма дня ниже на %3$lld ккал. День был тише, значит и потрачено меньше."), steps, -diff, -input.activityAdjustment)))
+                                     ? String(format: pick(String(localized: "Шагов %1$lld — на %2$lld больше обычного, и норма дня выше на %3$lld ккал. Это не бонус, а плата за работу."),
+                                                           String(localized: "Шагов %1$lld, на %2$lld больше обычного: +%3$lld ккал к норме.")), steps, diff, input.activityAdjustment)
+                                     : String(format: pick(String(localized: "Шагов %1$lld — на %2$lld меньше обычного, и норма дня ниже на %3$lld ккал. День был тише, значит и потрачено меньше."),
+                                                           String(localized: "Шагов %1$lld, на %2$lld меньше обычного: −%3$lld ккал к норме.")), steps, -diff, -input.activityAdjustment)))
             } else {
                 result.append(Advice(id: "activity-plain", tone: .info,
                                      text: String(format: String(localized: "Норма дня сдвинута на %lld ккал за активность."), input.activityAdjustment)))
@@ -185,30 +191,36 @@ enum DayAnalysis {
         if let hours = input.sleepHours {
             if input.sleepShortfall >= 1 {
                 result.append(Advice(id: "sleep-short", tone: .warning,
-                                     text: String(format: String(localized: "Спал %1$@ ч — на %2$@ ч меньше обычного. После короткой ночи голод сильнее, а вес утром выше: это вода и кортизол, а не жир. Такой день честнее считать обычным, а не сорванным."),
+                                     text: String(format: pick(String(localized: "Спал %1$@ ч — на %2$@ ч меньше обычного. После короткой ночи голод сильнее, а вес утром выше: это вода и кортизол, а не жир. Такой день честнее считать обычным, а не сорванным."),
+                                                               String(localized: "Спал %1$@ ч — на %2$@ ч меньше обычного: жди голода и воды на весах.")),
                                                   String(format: "%.1f", hours), String(format: "%.1f", input.sleepShortfall))))
             } else if hours >= 7 {
                 result.append(Advice(id: "sleep-ok", tone: .good,
-                                     text: String(format: String(localized: "Спал %@ ч — норма. На дефиците сон держит и аппетит, и силовые."), String(format: "%.1f", hours))))
+                                     text: String(format: pick(String(localized: "Спал %@ ч — норма. На дефиците сон держит и аппетит, и силовые."),
+                                                               String(localized: "Спал %@ ч — норма.")), String(format: "%.1f", hours))))
             }
         }
 
         if let rise = input.restingPulseRise, isNotablePulse(rise) {
             result.append(Advice(id: "pulse", tone: .warning,
-                                 text: String(format: String(localized: "Пульс в покое на %lld удара выше привычного и держится так не первый день. Обычно это недосып или накопленная усталость; если вес при этом встал, отдых сдвинет его вернее, чем ещё меньше еды."), rise)))
+                                 text: String(format: pick(String(localized: "Пульс в покое на %lld удара выше привычного и держится так не первый день. Обычно это недосып или накопленная усталость; если вес при этом встал, отдых сдвинет его вернее, чем ещё меньше еды."),
+                                                           String(localized: "Пульс в покое на %lld выше привычного не первый день — недовосстановление.")), rise)))
         }
 
         if let weight = input.weightKg, let above = input.weightAboveTrend, above >= notableWeightRise {
             let sleepy = input.sleepShortfall >= 1
             result.append(Advice(id: "weight-spike", tone: .info,
                                  text: sleepy
-                                 ? String(format: String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Ночь была короткой, и это обычная реакция: вода задерживается. Тренд важнее одного утра."), String(format: "%.1f", weight), String(format: "%.1f", above))
-                                 : String(format: String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Одно утро ничего не значит: соль, углеводы накануне и вода дают больше килограмма разброса."), String(format: "%.1f", weight), String(format: "%.1f", above))))
+                                 ? String(format: pick(String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Ночь была короткой, и это обычная реакция: вода задерживается. Тренд важнее одного утра."),
+                                                       String(localized: "Вес утром %1$@ кг, +%2$@ к тренду — после короткой ночи это вода.")), String(format: "%.1f", weight), String(format: "%.1f", above))
+                                 : String(format: pick(String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Одно утро ничего не значит: соль, углеводы накануне и вода дают больше килограмма разброса."),
+                                                       String(localized: "Вес утром %1$@ кг, +%2$@ к тренду — в пределах разброса.")), String(format: "%.1f", weight), String(format: "%.1f", above))))
         }
 
         if let meal = input.overeatenMeal, input.overeatenBy > 0 {
             result.append(Advice(id: "meal-overshoot", tone: .info,
-                                 text: String(format: String(localized: "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму."), meal, input.overeatenBy)))
+                                 text: String(format: pick(String(localized: "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму."),
+                                                           String(localized: "Перебор на приёме «%1$@»: %2$lld ккал.")), meal, input.overeatenBy)))
         }
 
         return result

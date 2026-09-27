@@ -174,6 +174,22 @@ struct SettingsView: View {
                 .accessibilityIdentifier("openRingSound")
             }
 
+            Section {
+                Picker(selection: Binding(
+                    get: { ExplanationSettings.shared.level },
+                    set: { ExplanationSettings.shared.level = $0 }
+                )) {
+                    ForEach(ExplanationLevel.allCases) { level in
+                        Text(verbatim: level.title).tag(level)
+                    }
+                } label: {
+                    Label("Объяснения", systemImage: "text.alignleft")
+                }
+                .accessibilityIdentifier("explanationLevel")
+            } footer: {
+                Text(verbatim: ExplanationSettings.shared.level.summary)
+            }
+
             Section("Системное") {
                 // Единицы одной строкой: «Метрическая» и «Американская» не
                 // помещались рядом с подписью и переносились.

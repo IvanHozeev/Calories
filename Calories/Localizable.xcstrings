@@ -2494,6 +2494,53 @@
         }
       }
     },
+    "8:00, 13:00, 19:00; промежуточные — ровно между ними." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00 و13:00 و19:00؛ والباقي في المنتصف تمامًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00; die übrigen genau dazwischen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00; the others exactly in between."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00; las demás justo en medio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00 ; les autres pile entre."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00; השאר בדיוק באמצע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "8:00, 13:00, 19:00; as outras exatamente no meio."
+          }
+        }
+      }
+    },
     "14 дней подряд в пределах дневной нормы калорий." : {
       "localizations" : {
         "ar" : {
@@ -3187,53 +3234,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cópia automática"
-          }
-        }
-      }
-    },
-    "Автоматический пересчёт темпа и предупреждение, если он слишком агрессивный" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إعادة حساب تلقائية للوتيرة مع تنبيه عندما تصبح حادّة أكثر من اللازم"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatische Neuberechnung des Tempos, mit Warnung, wenn es zu aggressiv wird"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatic pace recalculation, with a warning when it gets too aggressive"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recálculo automático del ritmo, con aviso si resulta demasiado agresivo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recalcul automatique du rythme, avec une alerte s'il devient trop agressif"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "חישוב מחדש אוטומטי של הקצב, עם אזהרה כשהוא נעשה אגרסיבי מדי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recálculo automático do ritmo, com aviso quando ele fica agressivo demais"
           }
         }
       }
@@ -8031,6 +8031,100 @@
         }
       }
     },
+    "Вес утром %1$@ кг, +%2$@ к тренду — в пределах разброса." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن الصباح %1$@ كجم، +%2$@ فوق الاتجاه — ضمن التذبذب."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgengewicht %1$@ kg, +%2$@ über Trend – im Rauschen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning weight %1$@ kg, +%2$@ over trend — within the noise."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso matinal %1$@ kg, +%2$@ sobre la tendencia: dentro del ruido."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids du matin %1$@ kg, +%2$@ sur la tendance — dans le bruit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל בוקר %1$@ ק״ג, +%2$@ מעל המגמה — בתוך הרעש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso da manhã %1$@ kg, +%2$@ sobre a tendência — dentro do ruído."
+          }
+        }
+      }
+    },
+    "Вес утром %1$@ кг, +%2$@ к тренду — после короткой ночи это вода." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن الصباح %1$@ كجم، +%2$@ فوق الاتجاه — ماء بعد ليلة قصيرة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgengewicht %1$@ kg, +%2$@ über Trend – Wasser nach kurzer Nacht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning weight %1$@ kg, +%2$@ over trend — water after a short night."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso matinal %1$@ kg, +%2$@ sobre la tendencia: agua tras una noche corta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids du matin %1$@ kg, +%2$@ sur la tendance — de l’eau après une nuit courte."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל בוקר %1$@ ק״ג, +%2$@ מעל המגמה — מים אחרי לילה קצר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso da manhã %1$@ kg, +%2$@ sobre a tendência — água após noite curta."
+          }
+        }
+      }
+    },
     "Вес уходит жиром, сухая масса на месте — так дефицит и должен выглядеть." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10725,53 +10819,6 @@
         }
       }
     },
-    "Выключишь — строка с ближайшим приёмом пропадёт с «Сегодня», а норма останется дневной." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عند الإيقاف يختفي سطر الوجبة القادمة من «اليوم»، ويبقى الهدف يوميًا."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schaltest du es aus, verschwindet die Zeile mit der nächsten Mahlzeit aus „Heute“, und das Ziel bleibt ein Tagesziel."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Turn it off and the next-meal line leaves Today; the target stays a daily one."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Si lo desactivas, la línea de la próxima comida desaparece de Hoy y el objetivo vuelve a ser diario."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Désactive-le et la ligne du prochain repas disparaît d’Aujourd’hui ; l’objectif redevient journalier."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תכבה — שורת הארוחה הקרובה תיעלם מ«היום», והיעד יישאר יומי."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se desativar, a linha da próxima refeição some de Hoje e a meta volta a ser diária."
-          }
-        }
-      }
-    },
     "Выраженный V-силуэт" : {
       "localizations" : {
         "ar" : {
@@ -11793,100 +11840,6 @@
         }
       }
     },
-    "Готовят обычно на несколько раз. Укажи привычную порцию — она и подставится при добавлении, вместо веса всей кастрюли." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يُطهى الطبق عادةً لعدة وجبات. حدّد حصتك المعتادة لتُدرج بدلًا من وزن القدر كاملًا."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Gericht kocht man meist für mehrere Mahlzeiten. Gib die übliche Portion an – sie wird eingesetzt statt des Gewichts des ganzen Topfes."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A dish is usually cooked for several meals. Set the portion you normally eat and it will be filled in instead of the weight of the whole batch."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un plato suele cocinarse para varias comidas. Indica la ración habitual y será la que se rellene, en vez del peso de toda la olla."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un plat se cuisine souvent pour plusieurs repas. Indique la portion habituelle : c'est elle qui sera proposée, plutôt que le poids de toute la casserole."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מנה מבשלים בדרך כלל לכמה ארוחות. ציין את המנה הרגילה שלך והיא תוצג במקום משקל כל הסיר."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um prato costuma ser feito para várias refeições. Informe a porção habitual e será ela a ser preenchida, em vez do peso da panela toda."
-          }
-        }
-      }
-    },
-    "Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа выше посчитаны на неё." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تُطبخ الأطباق عادة لعدة وجبات. حدّد حصتك المعتادة — ستُستخدم عند الإضافة، والأرقام أعلاه محسوبة لها."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gekocht wird meist für mehrere Mahlzeiten. Gib deine übliche Portion an — sie wird beim Hinzufügen übernommen, und die Zahlen oben gelten für sie."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dishes are usually cooked for several meals. Set your usual serving — it fills in when adding, and the numbers above are counted for it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los platos suelen cocinarse para varias comidas. Indica tu ración habitual: se usará al añadir, y los números de arriba están calculados para ella."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On cuisine en général pour plusieurs repas. Indique ta portion habituelle : elle sera reprise à l'ajout, et les chiffres ci-dessus sont calculés pour elle."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בדרך כלל מבשלים לכמה ארוחות. ציין את המנה הרגילה שלך — היא תיכנס בהוספה, והמספרים למעלה מחושבים לפיה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pratos costumam render várias refeições. Indique a porção habitual — ela é usada ao adicionar, e os números acima são calculados para ela."
-          }
-        }
-      }
-    },
     "Готовят обычно на несколько раз. Укажи привычную порцию — она подставится при добавлении, и числа ниже посчитаны на неё." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12255,53 +12208,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pera"
-          }
-        }
-      }
-    },
-    "Давай настроим твою персональную норму калорий — займёт меньше минуты." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "دعنا نضبط هدف السعرات الشخصي — سيستغرق أقل من دقيقة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Richten wir Ihr persönliches Kalorienziel ein — dauert weniger als eine Minute."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Let's set up your personal calorie goal — it'll take less than a minute."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configuremos tu meta de calorías personalizada — tomará menos de un minuto."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configurons votre objectif calorique personnel — cela prendra moins d'une minute."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בוא נגדיר את יעד הקלוריות האישי שלך — ייקח פחות מדקה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vamos configurar sua meta calórica pessoal — levará menos de um minuto."
           }
         }
       }
@@ -12857,55 +12763,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dividir o dia em refeições"
-          }
-        }
-      }
-    },
-    "Демо-заглушка: без реальной оплаты, просто включает Premium." : {
-      "comment" : "A description of a demo version that doesn't require an actual payment but still enables Premium features.",
-      "extractionState" : "stale",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عرض توضيحي: بدون دفع حقيقي، فقط يفعّل Premium."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demo: ohne echte Zahlung, aktiviert einfach Premium."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demo stub: no real payment, just enables Premium."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demo: sin pago real, solo activa Premium."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Démo : sans paiement réel, active simplement le Premium."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הדגמה: ללא תשלום אמיתי, פשוט מפעיל Premium."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demo: sem pagamento real, apenas ativa o Premium."
           }
         }
       }
@@ -15000,49 +14857,49 @@
         }
       }
     },
-    "Доли считаются в калориях, а не в граммах: грамм жира даёт девять килокалорий против четырёх у белка и углеводов." : {
-      "extractionState" : "stale",
+    "Доли — в калориях, не в позициях." : {
+      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تُحسب الحصص بالسعرات، لا بالجرامات: الجرام من الدهون يمنح تسع كيلوسعرات مقابل أربع للبروتين والكربوهيدرات."
+            "value" : "الحصص بالسعرات لا بعدد الأصناف."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Anteile werden in Kalorien berechnet, nicht in Gramm: ein Gramm Fett liefert neun Kilokalorien gegenüber vier bei Eiweiß und Kohlenhydraten."
+            "value" : "Anteile in Kalorien, nicht in Einträgen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shares are counted in calories, not grams: a gram of fat gives nine kilocalories against four for protein and carbs."
+            "value" : "Shares are in calories, not entries."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las proporciones se calculan en calorías, no en gramos: un gramo de grasa aporta nueve kilocalorías frente a cuatro de proteína e hidratos."
+            "value" : "Las partes son en calorías, no en entradas."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les parts sont calculées en calories, pas en grammes : un gramme de lipides donne neuf kilocalories contre quatre pour les protéines et les glucides."
+            "value" : "Les parts sont en calories, pas en lignes."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "החלקים נספרים בקלוריות, לא בגרמים: גרם שומן נותן תשע קילוקלוריות לעומת ארבע בחלבון ובפחמימות."
+            "value" : "החלקים בקלוריות, לא בפריטים."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As proporções são calculadas em calorias, não em gramas: um grama de gordura dá nove quilocalorias contra quatro de proteína e carboidratos."
+            "value" : "As partes são em calorias, não em itens."
           }
         }
       }
@@ -15183,53 +15040,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Percentual do valor diário na porção. No sódio é parte do limite, não de uma meta."
-          }
-        }
-      }
-    },
-    "Доля суточной нормы на 100 г. У натрия это доля потолка, а не цели." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "نسبة من القيمة اليومية لكل 100 غرام. أما الصوديوم فهي نسبة من الحد الأعلى لا من هدف."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anteil am Tagesbedarf je 100 g. Bei Natrium ist das ein Anteil der Obergrenze, nicht eines Ziels."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share of the daily value per 100 g. For sodium that is a share of the ceiling, not of a goal."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Porcentaje del valor diario por 100 g. En el sodio es parte del límite, no de una meta."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Part de l'apport quotidien pour 100 g. Pour le sodium, c'est une part du plafond, pas d'un objectif."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אחוז מהערך היומי ל־100 גרם. בנתרן זה אחוז מהתקרה, לא מיעד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Percentual do valor diário por 100 g. No sódio é parte do limite, não de uma meta."
           }
         }
       }
@@ -16994,6 +16804,7 @@
       }
     },
     "За этот день ещё ничего не записано." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18071,53 +17882,6 @@
         }
       }
     },
-    "Заполни параметры тела ниже — план считается по твоим BMR и TDEE." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "املأ قياسات جسمك بالأسفل — تُحسب الخطة وفق BMR وTDEE الخاصين بك."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trage unten deine Körperdaten ein – der Plan wird aus deinem BMR und TDEE berechnet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fill in your body metrics below — the plan is calculated from your BMR and TDEE."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Completa tus parámetros corporales abajo: el plan se calcula con tu BMR y TDEE."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renseigne tes paramètres corporels ci-dessous : le plan se calcule à partir de ton BMR et de ton TDEE."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מלא את נתוני הגוף שלך למטה — התוכנית מחושבת לפי ה-BMR וה-TDEE שלך."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preencha seus parâmetros corporais abaixo — o plano é calculado com base no seu BMR e TDEE."
-          }
-        }
-      }
-    },
     "Заполните профиль, чтобы рассчитать цель" : {
       "localizations" : {
         "ar" : {
@@ -19000,6 +18764,53 @@
         }
       }
     },
+    "Из чего собран" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مما تتكوّن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woraus es besteht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What it is made of"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De qué se compone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quoi il est fait"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממה היא מורכבת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do que é feita"
+          }
+        }
+      }
+    },
     "Из чего состоит вес" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19279,6 +19090,7 @@
       }
     },
     "Изменить" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19416,53 +19228,6 @@
         }
       }
     },
-    "Йогурт натуральный" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "زبادي طبيعي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Naturjoghurt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plain yogurt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yogur natural"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yaourt nature"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יוגורט טבעי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Iogurte natural"
-          }
-        }
-      }
-    },
     "ИМТ" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -19506,53 +19271,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "IMC"
-          }
-        }
-      }
-    },
-    "Йога" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اليوغا"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yoga"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yoga"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yoga"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yoga"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יוגה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ioga"
           }
         }
       }
@@ -20438,6 +20156,100 @@
         }
       }
     },
+    "Йога" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اليوغا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yoga"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יוגה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ioga"
+          }
+        }
+      }
+    },
+    "Йогурт натуральный" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زبادي طبيعي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naturjoghurt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plain yogurt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yogur natural"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaourt nature"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יוגורט טבעי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iogurte natural"
+          }
+        }
+      }
+    },
     "Каждый сеанс — полный снимок: незаполненное переносится из прошлого. Промахнулся колёсиком — удали сеанс свайпом, иначе он останется последним и по нему посчитаются выводы." : {
       "localizations" : {
         "ar" : {
@@ -20664,6 +20476,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progresso do plano"
+          }
+        }
+      }
+    },
+    "Как объяснять?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كم نشرح؟"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie viel erklären?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much explaining?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuánto explicamos?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel niveau d’explication ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמה להסביר?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quanto explicar?"
           }
         }
       }
@@ -22713,6 +22572,53 @@
         }
       }
     },
+    "Коротко" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مختصر"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurz"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brief"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breve"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bref"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בקצרה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breve"
+          }
+        }
+      }
+    },
     "Костяк (запястье)" : {
       "localizations" : {
         "ar" : {
@@ -23174,53 +23080,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esquerda"
-          }
-        }
-      }
-    },
-    "Левая и правая стороны — отдельно, по ним считается симметрия." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يُدخل الجانبان الأيسر والأيمن كلٌّ على حدة، ومنهما يُحسب التناظر."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links und rechts werden getrennt eingetragen – daraus ergibt sich die Symmetrie."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left and right are entered separately — symmetry is worked out from them."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Izquierda y derecha se introducen por separado: de ahí se calcula la simetría."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gauche et droite se saisissent séparément : c'est de là que vient la symétrie."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שמאל וימין מוזנים בנפרד — מהם מחושבת הסימטריה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esquerda e direita são inseridas separadamente: daí se calcula a simetria."
           }
         }
       }
@@ -24292,53 +24151,6 @@
         }
       }
     },
-    "Меряй утром натощак сантиметровой лентой. Талия — на уровне пупка, шея — под кадыком." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "قس في الصباح على معدة فارغة بشريط قياس. الخصر — عند مستوى السرة، الرقبة — تحت تفاحة آدم."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Messen Sie morgens nüchtern mit einem Maßband. Taille — auf Nabelhöhe, Hals — unterhalb des Adamsapfels."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Measure in the morning on an empty stomach. Waist — at navel level, neck — below the Adam's apple."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mide por la mañana en ayunas con cinta métrica. Cintura — a la altura del ombligo, cuello — bajo la nuez."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mesurez le matin à jeun avec un mètre ruban. Taille — au niveau du nombril, cou — sous la pomme d'Adam."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מדוד בבוקר על קיבה ריקה עם סרט מידה. מותן — בגובה הטבור, צוואר — מתחת לגרגרת."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meça de manhã em jejum com fita métrica. Cintura — na altura do umbigo, pescoço — abaixo do pomo de adão."
-          }
-        }
-      }
-    },
     "Месяц" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24382,60 +24194,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mês"
-          }
-        }
-      }
-    },
-    "Метод ВМС США: расчёт по обхватам талии и шеи. Точность ±2–3%. Меряй в одном месте каждый раз." : {
-      "comment" : "Literal percentage in explanatory text, not a format specifier.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "طريقة البحرية الأمريكية: حسابات محيط الخصر والرقبة. دقة ±2–3%. قس في نفس المكان دائماً."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "US-Navy-Methode: Berechnung über Taillen- und Halsumfang. Genauigkeit ±2–3%. Immer an derselben Stelle messen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "US Navy method: waist and neck measurements. Accuracy ±2–3%. Always measure at the same spot."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Método Navy: cálculo por medidas de cintura y cuello. Precisión ±2–3%. Mide siempre en el mismo lugar."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Méthode de la Marine américaine : calcul par tour de taille et de cou. Précision ±2–3%. Mesurez toujours au même endroit."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שיטת חיל הים האמריקאי: מדידות מותן וצוואר. דיוק ±2–3%. מדוד באותו מקום בכל פעם."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Método da Marinha dos EUA: cálculo por circunferência da cintura e pescoço. Precisão ±2–3%. Meça sempre no mesmo lugar."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Метод ВМС США: расчёт по обхватам талии и шеи. Точность ±2–3%. Меряй в одном месте каждый раз."
           }
         }
       }
@@ -29398,53 +29156,6 @@
         }
       }
     },
-    "Ничего не нашлось. Попробуй другое название или заведи свой продукт." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لم يُعثر على شيء. جرّب اسمًا آخر أو أضفه كمنتج خاص بك."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nichts gefunden. Versuch einen anderen Namen oder leg es als eigenes Lebensmittel an."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nothing found. Try another name, or add it as your own food."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se encontró nada. Prueba otro nombre o créalo como alimento propio."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rien trouvé. Essaie un autre nom, ou crée-le comme ton aliment."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לא נמצא כלום. נסה שם אחר או הוסף אותו כמוצר משלך."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nada encontrado. Tenta outro nome ou cria-o como alimento teu."
-          }
-        }
-      }
-    },
     "Новое блюдо" : {
       "localizations" : {
         "ar" : {
@@ -29910,49 +29621,49 @@
         }
       }
     },
-    "Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший. Время подъёма, отбоя и число приёмов правятся там же — по нажатию на строку приёма." : {
-      "extractionState" : "stale",
+    "Норма делится по приёмам; на «Сегодня» видно ближайший." : {
+      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "يُقسَّم الهدف على وجبات متساوية، و«اليوم» يعرض نصيب الوجبة القادمة. وقت الاستيقاظ والنوم وعدد الوجبات تُعدَّل هناك نفسه — المس سطر الوجبة."
+            "value" : "يُقسم الهدف على الوجبات؛ و«اليوم» يعرض الوجبة القادمة."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Ziel wird auf gleiche Mahlzeiten verteilt, und „Heute“ zeigt, was auf die nächste entfällt. Aufstehen, Schlafen und die Anzahl der Mahlzeiten stellst du dort ein — tippe auf die Mahlzeit-Zeile."
+            "value" : "Das Ziel verteilt sich auf Mahlzeiten; Heute zeigt die nächste."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The target is split into equal meals, and Today shows what the nearest one is worth. Wake-up, bedtime and the number of meals are edited there too — tap the meal line."
+            "value" : "The target splits across meals; Today shows the next one."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El objetivo se divide en comidas iguales y Hoy muestra cuánto queda para la próxima. La hora de despertar, la de dormir y el número de comidas se editan ahí mismo: toca la línea de la comida."
+            "value" : "El objetivo se reparte entre comidas; Hoy muestra la próxima."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’objectif est réparti en repas égaux, et Aujourd’hui montre ce qui revient au prochain. Le lever, le coucher et le nombre de repas se règlent au même endroit — touche la ligne du repas."
+            "value" : "L’objectif se répartit entre les repas ; Aujourd’hui montre le prochain."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "היעד מתחלק לארוחות שוות, ו«היום» מראה כמה נשאר לקרובה. שעת היקיצה, השינה ומספר הארוחות נערכים שם — הקש על שורת הארוחה."
+            "value" : "היעד מתחלק בין ארוחות; ב«היום» רואים את הקרובה."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A meta é dividida em refeições iguais e Hoje mostra quanto cabe na próxima. Hora de acordar, de dormir e o número de refeições editam-se ali mesmo — toque na linha da refeição."
+            "value" : "A meta se divide entre refeições; Hoje mostra a próxima."
           }
         }
       }
@@ -30000,100 +29711,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta do dia muda conforme a diferença para um dia normal: trabalhou mais, come mais. Enquanto o dia corre, ela nunca cai. Sono e pulso não mudam nada — eles explicam o dia."
-          }
-        }
-      }
-    },
-    "Норма дня сдвигается на разницу с обычным днём: находил больше — ешь больше. Пока день идёт, вниз она не уходит." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يتحرك هدف اليوم بمقدار الفرق عن اليوم المعتاد: مشيت أكثر، فكل أكثر. وما دام اليوم جاريًا فلا ينخفض أبدًا."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Tagesziel verschiebt sich um den Unterschied zu einem gewöhnlichen Tag: mehr gelaufen, mehr gegessen. Solange der Tag läuft, sinkt es nie."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The day's target shifts by the difference from a usual day: walk more, eat more. While the day is still running it never drops."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El objetivo del día se mueve según la diferencia con un día normal: si andas más, comes más. Mientras el día sigue, nunca baja."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’objectif du jour bouge selon l’écart avec une journée habituelle : plus vous marchez, plus vous mangez. Tant que la journée continue, il ne baisse jamais."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יעד היום זז לפי ההפרש מיום רגיל: הלכת יותר, תאכל יותר. כל עוד היום נמשך הוא לא יורד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A meta do dia muda conforme a diferença para um dia normal: andou mais, come mais. Enquanto o dia corre, ela nunca cai."
-          }
-        }
-      }
-    },
-    "Норма дня сдвигается на разницу с обычным днём. Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости; если вес при этом встал, отдых поможет вернее, чем ещё меньше еды." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يتحرك هدف اليوم بمقدار الفرق عن اليوم المعتاد. نبض الراحة أعلى من المعتاد — يحدث ذلك مع قلة النوم والتعب المتراكم؛ وإذا توقف الوزن أيضًا فالراحة أجدى من الأكل أقل."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Tagesziel verschiebt sich um den Unterschied zu einem gewöhnlichen Tag. Der Ruhepuls liegt über dem Üblichen – das kommt von kurzen Nächten und angesammelter Müdigkeit; wenn das Gewicht dazu stehenbleibt, hilft Erholung sicherer als noch weniger zu essen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The day's target shifts by the difference from a usual day. Resting heart rate is staying above its usual level — that happens with short nights and accumulated fatigue; if weight has stalled as well, rest will help more surely than eating even less."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El objetivo del día se mueve según la diferencia con un día normal. La frecuencia en reposo se mantiene por encima de lo habitual: pasa con el poco sueño y el cansancio acumulado; si además el peso se ha estancado, descansar ayudará más que comer aún menos."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’objectif du jour bouge selon l’écart avec une journée habituelle. La fréquence au repos reste au-dessus de son niveau habituel — cela arrive avec le manque de sommeil et la fatigue accumulée ; si le poids stagne aussi, le repos aidera plus sûrement que manger encore moins."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יעד היום זז לפי ההפרש מיום רגיל. הדופק במנוחה נשאר מעל הרגיל — זה קורה מחוסר שינה ומעייפות מצטברת; ואם גם המשקל נתקע, מנוחה תעזור יותר מלאכול עוד פחות."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A meta do dia muda conforme a diferença para um dia normal. A frequência em repouso está acima do normal — isso acontece com noites curtas e cansaço acumulado; se o peso também parou, descansar ajuda mais do que comer ainda menos."
           }
         }
       }
@@ -30422,6 +30039,53 @@
         }
       }
     },
+    "Норма сдвигается на разницу с обычным днём; пока день идёт — только вверх." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتحرك الهدف بفارق اليوم المعتاد؛ وما دام اليوم جاريًا فللأعلى فقط."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel verschiebt sich um den Unterschied zum gewöhnlichen Tag; solange der Tag läuft, nur nach oben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target shifts by the difference from a usual day; while the day runs, only upward."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo se mueve según la diferencia con un día normal; mientras corre el día, solo hacia arriba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif bouge selon l’écart avec une journée habituelle ; tant que la journée court, vers le haut seulement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד זז לפי ההפרש מיום רגיל; כל עוד היום נמשך — רק כלפי מעלה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta muda conforme a diferença para um dia normal; enquanto o dia corre, só para cima."
+          }
+        }
+      }
+    },
     "Норма сегодня выше — заправить гликоген перед постом" : {
       "localizations" : {
         "ar" : {
@@ -30556,53 +30220,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta é calculada com os seus próprios dados, e esses dados precisam ser registrados com algo."
-          }
-        }
-      }
-    },
-    "Норму задаёт план — он пересчитывает её на каждый день фазы. Чтобы поменять, правь план." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الخطة تحدّد الهدف وتعيد حسابه لكل يوم من المرحلة. لتغييره، عدّل الخطة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Plan setzt das Ziel und berechnet es für jeden Tag der Phase neu. Zum Ändern bearbeite den Plan."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The plan sets the target and recalculates it for every day of the phase. To change it, edit the plan."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El plan fija la meta y la recalcula cada día de la fase. Para cambiarla, edita el plan."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le plan fixe l'objectif et le recalcule chaque jour de la phase. Pour le changer, modifie le plan."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "התוכנית קובעת את היעד ומחשבת אותו מחדש לכל יום בשלב. כדי לשנות, ערוך את התוכנית."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O plano define a meta e a recalcula a cada dia da fase. Para mudá-la, edite o plano."
           }
         }
       }
@@ -30979,49 +30596,143 @@
         }
       }
     },
-    "Обхваты снимают раз в неделю-две, вес — каждый день. Поэтому они разведены по разным экранам." : {
-      "extractionState" : "stale",
+    "Объяснения" : {
+      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تُقاس المحيطات كل أسبوع أو أسبوعين، والوزن يوميًا. لذلك وُضعا في شاشتين منفصلتين."
+            "value" : "الشروح"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Umfänge misst man alle ein bis zwei Wochen, das Gewicht täglich. Darum liegen sie auf getrennten Bildschirmen."
+            "value" : "Erklärungen"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Girths are taken every week or two, weight every day. That is why they live on separate screens."
+            "value" : "Explanations"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los contornos se miden cada una o dos semanas; el peso, a diario. Por eso están en pantallas distintas."
+            "value" : "Explicaciones"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les tours se prennent toutes les une à deux semaines, le poids chaque jour. D'où deux écrans distincts."
+            "value" : "Explications"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "היקפים נמדדים כל שבוע-שבועיים, משקל כל יום. לכן הם במסכים נפרדים."
+            "value" : "הסברים"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As circunferências são medidas a cada uma ou duas semanas; o peso, todo dia. Por isso ficam em telas separadas."
+            "value" : "Explicações"
+          }
+        }
+      }
+    },
+    "Объясняем, откуда берутся числа и что с ними делать" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نشرح من أين تأتي الأرقام وماذا تفعل بها"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wir erklären, woher die Zahlen kommen und was damit zu tun ist"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We explain where the numbers come from and what to do with them"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explicamos de dónde salen los números y qué hacer con ellos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous expliquons d’où viennent les chiffres et quoi en faire"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מסבירים מאיפה מגיעים המספרים ומה לעשות איתם"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explicamos de onde vêm os números e o que fazer com eles"
+          }
+        }
+      }
+    },
+    "Объясняют день, а не оценивают его." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تفسّر اليوم ولا تقيّمه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie erklären den Tag, sie benoten ihn nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "They explain the day rather than grade it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explican el día, no lo califican."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ils expliquent la journée, ils ne la notent pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הם מסבירים את היום, לא מדרגים אותו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explicam o dia, não o avaliam."
           }
         }
       }
@@ -31162,53 +30873,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "normalmente %lld passos"
-          }
-        }
-      }
-    },
-    "Обычно 1.6–2.2 г на кг веса при цели набора массы или похудения с сохранением мышц." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عادةً 1.6–2.2 جم لكل كجم لبناء العضلات أو فقدان الوزن مع الحفاظ عليها."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Normalerweise 1.6–2.2 g pro kg für Muskelaufbau oder Gewichtsverlust unter Erhalt der Muskeln."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Usually 1.6–2.2 g per kg for muscle gain or fat loss with muscle retention."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generalmente 1.6–2.2 g por kg para ganar músculo o perder peso conservando masa muscular."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Généralement 1.6–2.2 g par kg pour la prise de masse ou la perte de poids en préservant les muscles."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בדרך כלל 1.6–2.2 ג' לק\"ג למטרות עלייה בשריר או ירידה במשקל עם שמירה על שריר."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geralmente 1.6–2.2 g por kg para ganho muscular ou perda de peso preservando músculos."
           }
         }
       }
@@ -31394,6 +31058,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um dia normal"
+          }
+        }
+      }
+    },
+    "Обычный день считается по двум неделям. Сон и пульс норму не двигают." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُعرف اليوم المعتاد خلال أسبوعين. النوم والنبض لا يحركان الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein gewöhnlicher Tag ergibt sich aus zwei Wochen. Schlaf und Puls verschieben nichts."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A usual day is learned over two weeks. Sleep and heart rate move no target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un día normal se aprende en dos semanas. El sueño y el pulso no mueven el objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une journée habituelle s’apprend en deux semaines. Sommeil et pouls ne déplacent rien."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום רגיל נלמד בשבועיים. שינה ודופק לא מזיזים את היעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um dia normal se aprende em duas semanas. Sono e pulso não mudam a meta."
           }
         }
       }
@@ -34791,100 +34502,6 @@
         }
       }
     },
-    "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الوجبة الأولى بعد 45 دقيقة من الاستيقاظ، والأخيرة قبل النوم بساعة، والباقي موزّع بالتساوي بينهما."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die erste Mahlzeit 45 Minuten nach dem Aufstehen, die letzte eine Stunde vor dem Schlafen, der Rest gleichmäßig dazwischen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The first meal comes 45 minutes after you wake up, the last one an hour before bed, the rest spaced evenly between."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La primera comida 45 minutos después de despertar, la última una hora antes de dormir, y el resto repartidas por igual."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le premier repas 45 minutes après le réveil, le dernier une heure avant le coucher, les autres répartis également."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הארוחה הראשונה 45 דקות אחרי היקיצה, האחרונה שעה לפני השינה, והשאר בפער שווה ביניהן."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A primeira refeição 45 minutos após acordar, a última uma hora antes de dormir, e as demais igualmente espaçadas."
-          }
-        }
-      }
-    },
-    "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أول وجبة تبدأ بعد 45 دقيقة من الاستيقاظ، والأخيرة قبل النوم بساعة، وما بينهما يتوزّع بالتساوي. النافذة الفائتة لا تضيع: تتوزّع سعراتها على الوجبات المتبقية."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die erste Mahlzeit kommt 45 Minuten nach dem Aufstehen, die letzte eine Stunde vor dem Schlafengehen, die übrigen verteilen sich gleichmäßig dazwischen. Ein verpasstes Fenster verfällt nicht: Seine Kalorien verteilen sich auf die restlichen Mahlzeiten."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The first meal comes 45 minutes after wake-up, the last one an hour before bedtime, and the rest are spaced evenly between them. A missed window isn't wasted: its calories spread across the remaining meals."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La primera comida llega 45 minutos después de despertar, la última una hora antes de dormir, y el resto se reparte por igual entre ambas. Una ventana que te saltas no se pierde: sus calorías se reparten entre las comidas restantes."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le premier repas arrive 45 minutes après le réveil, le dernier une heure avant le coucher, et les autres se répartissent également entre eux. Une fenêtre manquée n'est pas perdue : ses calories se répartissent entre les repas restants."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הארוחה הראשונה מתחילה 45 דקות אחרי ההתעוררות, האחרונה שעה לפני השינה, והשאר מתחלקות ביניהן באופן שווה. חלון שהוחמץ לא הולך לאיבוד: הקלוריות שלו מתחלקות בין הארוחות שנותרו."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A primeira refeição chega 45 minutos depois de despertar, a última uma hora antes de dormir, e as demais se dividem igualmente entre elas. Uma janela perdida não se perde: as calorias dela se distribuem pelas refeições restantes."
-          }
-        }
-      }
-    },
     "Перебор" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35021,6 +34638,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Excesso de %lld kcal. Um dia não faz diferença — o que importa é o que a semana disser."
+          }
+        }
+      }
+    },
+    "Перебор на приёме «%1$@»: %2$lld ккал." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تجاوز في %1$@: %2$lld سعرة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überschuss beim %1$@: %2$lld kcal."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overshoot at %1$@: %2$lld kcal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exceso en %1$@: %2$lld kcal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépassement au %1$@ : %2$lld kcal."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חריגה ב%1$@: %2$lld קלוריות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excesso em %1$@: %2$lld kcal."
           }
         }
       }
@@ -35393,53 +35057,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um plano de calorias personalizado para os seus objetivos"
-          }
-        }
-      }
-    },
-    "Персональный план: срок в неделях, целевой вес, точная дневная норма калорий" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطة شخصية: مدة بالأسابيع، ووزن مستهدف، وهدف يومي دقيق من السعرات"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Persönlicher Plan: Dauer in Wochen, Zielgewicht und exaktes tägliches Kalorienziel"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Personal plan: a length in weeks, a goal weight and an exact daily calorie target"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan personal: duración en semanas, peso objetivo y objetivo diario exacto de calorías"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan personnalisé : une durée en semaines, un poids cible et un objectif calorique quotidien précis"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תוכנית אישית: משך בשבועות, משקל יעד ויעד קלוריות יומי מדויק"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plano pessoal: duração em semanas, peso-alvo e meta diária exata de calorias"
           }
         }
       }
@@ -37113,6 +36730,53 @@
         }
       }
     },
+    "Подробно" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مفصّل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausführlich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detailed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detallado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détaillé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מפורט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhado"
+          }
+        }
+      }
+    },
     "Подъём" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -37435,53 +37099,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Buscar online"
-          }
-        }
-      }
-    },
-    "Пока не наберётся две недели шагов, приложение не знает, какой день для вас обычный, и норму за активность не двигает." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إلى أن تتجمع خطوات أسبوعين، لا يعرف التطبيق شكل يومك المعتاد، فيترك الهدف كما هو."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solange keine zwei Wochen an Schritten zusammenkommen, weiß die App nicht, wie ein gewöhnlicher Tag bei dir aussieht, und lässt das Ziel unverändert."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Until two weeks of steps add up, the app doesn't know what a usual day looks like for you, so it leaves the target alone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hasta reunir dos semanas de pasos, la app no sabe cómo es un día normal para ti y no mueve el objetivo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tant que deux semaines de pas ne sont pas réunies, l’app ignore à quoi ressemble votre journée habituelle et ne touche pas à l’objectif."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עד שייאספו שבועיים של צעדים, האפליקציה לא יודעת איך נראה אצלך יום רגיל, ולכן לא מזיזה את היעד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Até juntar duas semanas de passos, o app não sabe como é um dia normal para você e não mexe na meta."
           }
         }
       }
@@ -38876,53 +38493,6 @@
         }
       }
     },
-    "Поставь целевой вес и срок — дневная норма пересчитается под них." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حدّد وزنًا مستهدفًا ومدة، وسيُعاد حساب هدفك اليومي وفقًا لهما."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lege Zielgewicht und Zeitraum fest – dein Tagesziel wird entsprechend neu berechnet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set a goal weight and a timeframe — your daily target is recalculated to match."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Define un peso objetivo y un plazo: tu objetivo diario se recalculará en consecuencia."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fixe un poids cible et un délai : ton objectif quotidien sera recalculé en conséquence."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קבע משקל יעד ותקופה — היעד היומי יחושב מחדש בהתאם."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Defina um peso-alvo e um prazo — sua meta diária será recalculada de acordo."
-          }
-        }
-      }
-    },
     "Посчитано по %d%% массы блюда — у остальных ингредиентов состава нет. Значит это нижняя граница, а не итог." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -40077,53 +39647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Refeição %1$lld de %2$lld às %3$@"
-          }
-        }
-      }
-    },
-    "Приём закрывается едой, а не часами: пока не поел, он остаётся ближайшим. Съеденное сверх него идёт в него же перебором, а оставшаяся норма делится между теми, что впереди." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تُغلق الوجبة بالأكل لا بالساعة: ما لم تأكلها تبقى هي التالية. وما يُؤكل فوقها يُحسب لها زيادةً، والهدف المتبقي يُقسم على الوجبات القادمة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine Mahlzeit wird durchs Essen geschlossen, nicht durch die Uhr: solange sie nicht gegessen ist, bleibt sie die nächste. Was darüber hinaus gegessen wird, zählt als Überschuss zu ihr, und das restliche Ziel verteilt sich auf die noch kommenden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A meal is closed by eating, not by the clock: until you have eaten it, it stays the next one. Anything eaten beyond it counts into it as an overshoot, and the remaining target is split between the meals still ahead."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una comida se cierra al comerla, no por el reloj: hasta que no la comes, sigue siendo la próxima. Lo que comas de más cuenta en ella como exceso, y el objetivo restante se reparte entre las que quedan."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un repas se ferme quand on le mange, pas à l’horloge : tant que vous ne l’avez pas pris, il reste le prochain. Ce qui est mangé en plus y compte comme dépassement, et l’objectif restant se partage entre ceux à venir."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ארוחה נסגרת באכילה ולא בשעון: כל עוד לא אכלת אותה היא נשארת הקרובה. מה שנאכל מעבר לה נספר אליה כחריגה, והיעד שנותר מתחלק בין הארוחות שלפנינו."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma refeição se fecha ao ser comida, não pelo relógio: até você comê-la, ela continua sendo a próxima. O que comer além disso conta nela como excesso, e a meta restante é dividida entre as que faltam."
           }
         }
       }
@@ -41761,6 +41284,53 @@
         }
       }
     },
+    "Пульс в покое выше привычного — стоит отдохнуть." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبض الراحة أعلى من المعتاد — يُستحسن الراحة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ruhepuls liegt über dem Üblichen – Erholung lohnt sich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resting heart rate is above usual — worth resting."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El pulso en reposo está por encima de lo habitual: conviene descansar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fréquence au repos est au-dessus de l’habitude — mieux vaut se reposer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדופק במנוחה מעל הרגיל — כדאי לנוח."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A frequência em repouso está acima do normal — vale descansar."
+          }
+        }
+      }
+    },
     "Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости. Если вес при этом встал, отдых поможет вернее, чем ещё меньше еды." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41804,6 +41374,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A frequência em repouso está acima do normal — isso acontece com noites curtas e cansaço acumulado. Se o peso também parou, descansar ajuda mais do que comer ainda menos."
+          }
+        }
+      }
+    },
+    "Пульс в покое на %lld выше привычного не первый день — недовосстановление." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبض الراحة أعلى بـ %lld من المعتاد منذ أيام — نقص تعافٍ."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruhepuls seit Tagen %lld über dem Üblichen – mangelnde Erholung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resting heart rate %lld above usual for days — under-recovery."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pulso en reposo %lld por encima de lo habitual varios días: falta de recuperación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence au repos %lld au-dessus de l’habitude depuis des jours — récupération insuffisante."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דופק במנוחה %lld מעל הרגיל כבר ימים — חוסר התאוששות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frequência em repouso %lld acima do normal há dias — falta de recuperação."
           }
         }
       }
@@ -42917,53 +42534,6 @@
         }
       }
     },
-    "Расход по факту: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Значит, тратится около %3$lld. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الإنفاق الفعلي: %1$lld سعرة يوميًا في المتوسط، ووزن الاتجاه %2$@ كجم أسبوعيًا. أي نحو %3$lld محروقة. المعادلة لا ترى ذلك — لا تعرف عملك ولا تكيّفك مع العجز."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tatsächlicher Verbrauch: im Schnitt %1$lld kcal am Tag gegessen, Trendgewicht %2$@ kg pro Woche. Das ergibt etwa %3$lld verbrannt. Die Formel sieht das nicht — sie kennt weder deine Arbeit noch die Anpassung an das Defizit."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Actual expenditure: %1$lld kcal a day eaten on average, trend weight %2$@ kg a week. That works out to about %3$lld burned. The formula cannot see this — it knows neither your job nor how you adapted to the deficit."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gasto real: %1$lld kcal al día de media, peso por tendencia %2$@ kg por semana. Eso son unas %3$lld quemadas. La fórmula no ve esto: no conoce tu trabajo ni tu adaptación al déficit."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dépense réelle : %1$lld kcal par jour en moyenne, poids en tendance %2$@ kg par semaine. Cela fait environ %3$lld brûlées. La formule ne le voit pas : elle ignore votre travail comme votre adaptation au déficit."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הוצאה בפועל: %1$lld קלוריות ביום בממוצע, משקל לפי מגמה %2$@ ק״ג בשבוע. יוצא בערך %3$lld שנשרפות. הנוסחה לא רואה את זה — היא לא מכירה את העבודה שלך ולא את ההסתגלות לגירעון."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gasto real: %1$lld kcal por dia em média, peso pela tendência %2$@ kg por semana. Isso dá cerca de %3$lld gastas. A fórmula não vê isso — não conhece seu trabalho nem a adaptação ao déficit."
-          }
-        }
-      }
-    },
     "Расход по формуле" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -43054,53 +42624,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gasto energético com atividade (TDEE)"
-          }
-        }
-      }
-    },
-    "Расходится с введёнными калориями — проверь данные с упаковки." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لا يتطابق مع السعرات المُدخلة — تحقّق من الملصق."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passt nicht zu den eingegebenen Kalorien – prüfe die Verpackung."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Does not match the calories you entered — check the label."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No coincide con las calorías introducidas: revisa la etiqueta."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ne correspond pas aux calories saisies — vérifie l'étiquette."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "לא תואם לקלוריות שהזנת — בדוק את התווית."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não bate com as calorias informadas — confira o rótulo."
           }
         }
       }
@@ -46033,53 +45556,6 @@
         }
       }
     },
-    "Слева/справа и расхождение. До 1 см — погрешность ленты, свыше 2 см стоит смотреть." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يسار/يمين والفارق. أقل من 1 سم خطأ قياس، وأكثر من 2 سم يستحق الانتباه."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Links/rechts und die Differenz. Unter 1 cm ist Messfehler, über 2 cm lohnt ein Blick."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left/right and the gap. Under 1 cm is tape error; over 2 cm is worth a look."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Izquierda/derecha y la diferencia. Menos de 1 cm es error de cinta; más de 2 cm merece atención."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gauche/droite et l'écart. Moins d'1 cm, c'est l'erreur du mètre ; au-delà de 2 cm, ça mérite un œil."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שמאל/ימין והפער. פחות מ-1 ס״מ הוא טעות מדידה, מעל 2 ס״מ שווה בדיקה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esquerda/direita e a diferença. Menos de 1 cm é erro da fita; mais de 2 cm merece atenção."
-          }
-        }
-      }
-    },
     "Следующий по плану" : {
       "localizations" : {
         "ar" : {
@@ -46127,6 +45603,7 @@
       }
     },
     "Слишком мало известно о составе съеденного, чтобы считать. Витамины есть у продуктов встроенной базы; у своей еды и товаров из Open Food Facts их нет." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -46589,53 +46066,6 @@
         }
       }
     },
-    "Сними обхваты лентой — приложение посчитает симметрию, пропорции и покажет, что растёт, а что отстаёт." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خُذ محيطاتك بالشريط، وسيحسب التطبيق التناظر والنسب ويُظهر ما ينمو وما يتأخر."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Miss deine Umfänge mit dem Band – die App berechnet Symmetrie und Proportionen und zeigt, was wächst und was hinterherhinkt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Take your girths with a tape — the app works out symmetry and proportions and shows what is growing and what is lagging."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Toma tus contornos con cinta: la app calcula simetría y proporciones y muestra qué crece y qué se queda atrás."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prends tes tours au mètre : l'app calcule symétrie et proportions et montre ce qui progresse et ce qui traîne."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מדוד את ההיקפים בסרט — האפליקציה תחשב סימטריה ופרופורציות ותראה מה גדל ומה מפגר."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meça suas circunferências com fita: o app calcula simetria e proporções e mostra o que cresce e o que fica para trás."
-          }
-        }
-      }
-    },
     "Снять" : {
       "localizations" : {
         "ar" : {
@@ -47053,6 +46483,53 @@
         }
       }
     },
+    "Состав записан как есть и не правится здесь: числа ниже относятся к приёму целиком. Чтобы поменять состав, добавь приём заново." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُحفظ التكوين كما سُجّل ولا يُعدّل هنا: الأرقام أدناه تخص الوجبة كاملة. ولتغييره أضف الوجبة من جديد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zusammensetzung bleibt, wie sie erfasst wurde, und wird hier nicht bearbeitet: die Zahlen unten gelten für die ganze Mahlzeit. Zum Ändern die Mahlzeit erneut hinzufügen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The composition is kept as recorded and is not edited here: the numbers below apply to the meal as a whole. To change what is in it, add the meal again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composición se guarda tal cual y no se edita aquí: los números de abajo son de la comida entera. Para cambiarla, añade la comida de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composition est conservée telle quelle et ne se modifie pas ici : les chiffres ci-dessous portent sur le repas entier. Pour la changer, ajoutez le repas à nouveau."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההרכב נשמר כפי שנרשם ואינו נערך כאן: המספרים למטה מתייחסים לארוחה כולה. כדי לשנות, הוסף את הארוחה מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A composição fica como foi registrada e não se edita aqui: os números abaixo valem para a refeição inteira. Para mudar, adicione a refeição de novo."
+          }
+        }
+      }
+    },
     "Состав рациона" : {
       "localizations" : {
         "ar" : {
@@ -47095,6 +46572,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Composição da dieta"
+          }
+        }
+      }
+    },
+    "Состав только для справки; числа ниже — на приём целиком." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التكوين للاطلاع فقط؛ والأرقام أدناه للوجبة كاملة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zusammensetzung dient der Info; die Zahlen unten gelten für die ganze Mahlzeit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composition is for reference; the numbers below cover the whole meal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composición es informativa; los números de abajo son de la comida entera."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La composition est indicative ; les chiffres ci-dessous portent sur tout le repas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההרכב לעיון בלבד; המספרים למטה לכל הארוחה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A composição é apenas informativa; os números abaixo são da refeição inteira."
           }
         }
       }
@@ -47332,6 +46856,53 @@
         }
       }
     },
+    "Спал %@ ч — норма." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمت %@ س — طبيعي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Std. geschlafen – normal."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %@ h — normal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiste %@ h: normal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormi %@ h — normal."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ישנת %@ ש׳ — תקין."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiu %@ h — normal."
+          }
+        }
+      }
+    },
     "Спал %@ ч — норма. На дефиците сон держит и аппетит, и силовые." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -47375,6 +46946,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dormiu %@ h — normal. No déficit o sono segura o apetite e a força."
+          }
+        }
+      }
+    },
+    "Спал %1$@ ч — на %2$@ ч меньше обычного: жди голода и воды на весах." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمت %1$@ س — أقل بـ %2$@ س من المعتاد: توقع جوعًا وماءً على الميزان."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Std. geschlafen – %2$@ Std. unter dem Üblichen: Hunger und Wasser auf der Waage erwarten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %1$@ h — %2$@ h under usual: expect hunger and water on the scale."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiste %1$@ h: %2$@ h menos de lo habitual; espera hambre y agua en la báscula."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormi %1$@ h — %2$@ h de moins que d’habitude : attendez-vous à la faim et à l’eau sur la balance."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ישנת %1$@ ש׳ — %2$@ ש׳ פחות מהרגיל: צפה לרעב ולמים במשקל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiu %1$@ h — %2$@ h a menos que o normal: espere fome e água na balança."
           }
         }
       }
@@ -47653,53 +47271,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Planejar definição ou ganho"
-          }
-        }
-      }
-    },
-    "Спланируй сушку или набор: приложение само посчитает дневную норму калорий под целевой вес и срок." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطّط لمرحلة تنشيف أو زيادة: يحسب التطبيق هدفك اليومي من السعرات وفق الوزن المستهدف والمدة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plane eine Diät- oder Aufbauphase: Die App berechnet dein tägliches Kalorienziel aus Zielgewicht und Zeitraum."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan a cut or a bulk: the app works out your daily calorie target from your goal weight and timeframe."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planifica una definición o un volumen: la app calcula tu objetivo diario de calorías según tu peso objetivo y el plazo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planifie une sèche ou une prise de masse : l'app calcule ton objectif calorique quotidien selon ton poids cible et ton délai."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תכנן חיטוב או מסה: האפליקציה תחשב את יעד הקלוריות היומי לפי משקל היעד והתקופה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planeje um cutting ou bulking: o app calcula sua meta diária de calorias a partir do peso-alvo e do prazo."
           }
         }
       }
@@ -49096,6 +48667,53 @@
         }
       }
     },
+    "Съеденный приём закрывается сразу, пропущенный отдаёт калории следующим." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة المأكولة تُغلق فورًا، والفائتة تمرّر سعراتها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine gegessene Mahlzeit schließt sofort; eine verpasste gibt ihre Kalorien weiter."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meal eaten closes at once; a missed one hands its calories on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una comida hecha se cierra enseguida; una perdida cede sus calorías."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un repas pris se ferme aussitôt ; un repas manqué cède ses calories."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחה שנאכלה נסגרת מיד; שהוחמצה מעבירה את הקלוריות הלאה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma refeição feita fecha na hora; uma perdida passa suas calorias adiante."
+          }
+        }
+      }
+    },
     "съедено %1$lld ккал · на %2$lld больше" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -49232,53 +48850,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld kcal consumidas"
-          }
-        }
-      }
-    },
-    "Съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю — значит, тратится около %3$lld. Формула этого не видит: она не знает ни твоей работы, ни адаптации к дефициту." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تناولت بمعدل %1$lld سعرة حرارية في اليوم، ووزن الاتجاه يتغير %2$@ كجم في الأسبوع — أي أنك تحرق نحو %3$lld. المعادلة لا ترى ذلك: فهي لا تعرف عملك ولا تكيّفك مع العجز."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du hast im Schnitt %1$lld kcal am Tag gegessen, und dein Trendgewicht ändert sich um %2$@ kg pro Woche — das heißt, du verbrauchst etwa %3$lld. Die Formel sieht das nicht: Sie kennt weder deine Arbeit noch deine Anpassung ans Defizit."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You've averaged %1$lld kcal a day, and your trend weight is moving %2$@ kg a week — so you're burning about %3$lld. The formula can't see that: it doesn't know your work or your adaptation to the deficit."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Has comido en promedio %1$lld kcal al día, y tu peso de tendencia cambia %2$@ kg por semana; eso significa que gastas unas %3$lld. La fórmula no ve esto: no conoce ni tu trabajo ni tu adaptación al déficit."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu as mangé en moyenne %1$lld kcal par jour, et ton poids de tendance varie de %2$@ kg par semaine — donc tu dépenses environ %3$lld. La formule ne voit pas ça : elle ne connaît ni ton travail ni ton adaptation au déficit."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אכלת בממוצע %1$lld קק״ל ביום, ומשקל המגמה שלך משתנה ב-%2$@ ק״ג בשבוע — כלומר אתה שורף בערך %3$lld. הנוסחה לא רואה את זה: היא לא מכירה את העבודה שלך ולא את ההסתגלות לגירעון."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Você comeu em média %1$lld kcal por dia, e seu peso de tendência varia %2$@ kg por semana — ou seja, você gasta cerca de %3$lld. A fórmula não vê isso: ela não conhece seu trabalho nem sua adaptação ao déficit."
           }
         }
       }
@@ -49933,60 +49504,6 @@
         }
       }
     },
-    "Темп выше ~1% веса в неделю — довольно агрессивно. Можно смягчить, увеличив срок или скорректировав целевой вес." : {
-      "comment" : "Literal percentage in explanatory text, not a format specifier.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "وتيرة أعلى من ~1% من وزن الجسم أسبوعياً — عدواني جداً. يمكن تخفيفه بزيادة المدة أو تعديل الوزن المستهدف."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tempo über ~1% des Körpergewichts pro Woche — ziemlich aggressiv. Abmildern durch Verlängerung der Dauer oder Anpassen des Zielgewichts."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rate above ~1% of body weight per week — quite aggressive. Ease it by increasing the duration or adjusting the target weight."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritmo superior al ~1% del peso por semana — bastante agresivo. Puedes suavizarlo aumentando la duración o ajustando el peso objetivo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rythme supérieur à ~1% du poids par semaine — assez agressif. Adoucissez en augmentant la durée ou en ajustant le poids cible."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קצב מעל ~1% ממשקל הגוף בשבוע — די אגרסיבי. ניתן להפחית על ידי הארכת המשך או התאמת משקל היעד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritmo acima de ~1% do peso corporal por semana — bastante agressivo. Pode suavizar aumentando a duração ou ajustando o peso-alvo."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Темп выше ~1% веса в неделю — довольно агрессивно. Можно смягчить, увеличив срок или скорректировав целевой вес."
-          }
-        }
-      }
-    },
     "Теннис" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -50168,6 +49685,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Somente calorias"
+          }
+        }
+      }
+    },
+    "Только суть, без разъяснений" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأساسيات فقط بلا شروح"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur das Wesentliche, ohne Erklärungen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Just the essentials, no explanations"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo lo esencial, sin explicaciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’essentiel, sans explications"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "רק העיקר, בלי הסברים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só o essencial, sem explicações"
           }
         }
       }
@@ -50584,6 +50148,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Treino"
+          }
+        }
+      }
+    },
+    "Тренировка: %1$@, %2$lld мин — уже в норме дня." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمرين: %1$@، %2$lld د — مُحتسب في هدف اليوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Training: %1$@, %2$lld Min. – schon im Tagesziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout: %1$@, %2$lld min — already in the day's target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrenamiento: %1$@, %2$lld min: ya está en el objetivo del día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance : %1$@, %2$lld min — déjà dans l’objectif du jour."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אימון: %1$@, %2$lld דק׳ — כבר ביעד היום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treino: %1$@, %2$lld min — já está na meta do dia."
           }
         }
       }
@@ -51757,53 +51368,6 @@
         }
       }
     },
-    "Умеренно, без острого и очень солёного. Переевший начинает пост с жажды, а не с сытости." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "باعتدال، دون حار أو شديد الملوحة. من يُفرط يبدأ الصيام عطشان لا شبعان."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maßvoll, nichts Scharfes und nichts sehr Salziges. Wer sich überisst, startet das Fasten durstig statt satt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Moderate, nothing spicy or very salty. Overeat and you start the fast thirsty rather than full."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Con moderación, nada picante ni muy salado. Quien se pasa empieza el ayuno con sed, no saciado."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modérément, rien d'épicé ni de très salé. Celui qui mange trop commence le jeûne assoiffé, pas rassasié."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "במידה, בלי חריף ובלי מלוח מאוד. מי שמגזים מתחיל את הצום צמא, לא שבע."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Com moderação, nada picante nem muito salgado. Quem come demais começa o jejum com sede, não saciado."
-          }
-        }
-      }
-    },
     "Уровень активности" : {
       "localizations" : {
         "ar" : {
@@ -52364,107 +51928,6 @@
         }
       }
     },
-    "Формула Дойренберга: расчёт по ИМТ. Не различает мышцы и жир — у спортивных людей завышает на 3–5%. Для точности укажи обхваты ниже." : {
-      "comment" : "Literal percentage in explanatory text, not a format specifier.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "معادلة دورنبرغ: حساب بناءً على مؤشر كتلة الجسم. لا تفرق بين العضلات والدهون — قد تبالغ في التقدير للرياضيين بنسبة 3–5%. لمزيد من الدقة أدخل القياسات."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deurenberg-Formel: Berechnung per BMI. Unterscheidet nicht zwischen Muskeln und Fett — überschätzt bei Sportlern um 3–5%. Für mehr Genauigkeit Maße eingeben."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deurenberg formula: calculation based on BMI. Doesn't distinguish muscle from fat — overestimates by 3–5% for athletic people. For accuracy, enter measurements below."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fórmula Deurenberg: cálculo por IMC. No distingue músculo de grasa — en deportistas puede sobrestimar un 3–5%. Para mayor precisión ingresa medidas."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Formule Deurenberg : calcul par IMC. Ne distingue pas muscles et graisse — surestime de 3–5% chez les sportifs. Pour plus de précision, saisissez les mensurations."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נוסחת דורנברג: חישוב לפי BMI. לא מבדיל בין שריר לשומן — אצל ספורטאים עשוי להיות גבוה בטעות ב-3–5%. לדיוק רב יותר ציין מדידות."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fórmula Deurenberg: cálculo pelo IMC. Não distingue músculo de gordura — em atletas pode superestimar em 3–5%. Para mais precisão, insira as medidas."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Формула Дойренберга: расчёт по ИМТ. Не различает мышцы и жир — у спортивных людей завышает на 3–5%. Для точности укажи обхваты ниже."
-          }
-        }
-      }
-    },
-    "Формула МакКаллума от запястья %.1f см. Ориентир пропорций, а не цель любой ценой." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "معادلة مكالوم لمعصم %.1f سم. مرجع للنسب لا هدف بأي ثمن."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "McCallum-Formel für ein %.1f cm Handgelenk. Ein Proportionsrichtwert, kein Ziel um jeden Preis."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "McCallum's formula from a %.1f cm wrist. A proportion reference, not a goal at any cost."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fórmula de McCallum para una muñeca de %.1f cm. Referencia de proporciones, no una meta a toda costa."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Formule de McCallum pour un poignet de %.1f cm. Un repère de proportions, pas un objectif à tout prix."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נוסחת מקאלום לשורש כף יד של %.1f ס״מ. אמת מידה לפרופורציות, לא יעד בכל מחיר."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fórmula de McCallum para um punho de %.1f cm. Referência de proporções, não uma meta a qualquer custo."
-          }
-        }
-      }
-    },
     "Фото еды" : {
       "localizations" : {
         "ar" : {
@@ -52839,53 +52302,6 @@
         }
       }
     },
-    "Цвет кнопок, ссылок и кольца шагов. Дуги — те же, что на «Сегодня»: калории, белки, жиры, углеводы и системный синий." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "لون الأزرار والروابط وحلقة الخطوات. الأقواس نفسها الموجودة في «اليوم»: السعرات، البروتين، الدهون، الكربوهيدرات، والأزرق النظامي."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Farbe für Buttons, Links und den Schritte-Ring. Die Bögen entsprechen Heute: Kalorien, Eiweiß, Fett, Kohlenhydrate und Systemblau."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Color for buttons, links, and the steps ring. The arcs match Today: calories, protein, fat, carbs, and system blue."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Color de los botones, enlaces y el anillo de pasos. Los arcos son los mismos que en Hoy: calorías, proteínas, grasas, carbohidratos y azul del sistema."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couleur des boutons, des liens et de l'anneau de pas. Les arcs sont les mêmes que sur Aujourd'hui : calories, protéines, lipides, glucides et bleu système."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "צבע הכפתורים, הקישורים וטבעת הצעדים. הקשתות זהות לאלה שב'היום': קלוריות, חלבון, שומן, פחמימות וכחול המערכת."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cor dos botões, links e do anel de passos. Os arcos são os mesmos de Hoje: calorias, proteínas, gorduras, carboidratos e azul do sistema."
-          }
-        }
-      }
-    },
     "Целевой белок" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -53162,53 +52578,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meta atingida"
-          }
-        }
-      }
-    },
-    "Цель взята. Заверши план, чтобы норма вернулась к расчёту по профилю." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تحقق الهدف. أنهِ الخطة ليعود السقف إلى الحساب حسب الملف الشخصي."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ziel erreicht. Schließe den Plan ab, damit das Ziel wieder nach Profil gerechnet wird."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Target reached. Finish the plan so the goal goes back to the profile calculation."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objetivo alcanzado. Termina el plan para que la meta vuelva al cálculo por perfil."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Objectif atteint. Termine le plan pour que l'objectif repasse au calcul du profil."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "היעד הושג. סיים את התוכנית כדי שהיעד יחזור לחישוב לפי הפרופיל."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meta atingida. Conclua o plano para que a meta volte ao cálculo pelo perfil."
           }
         }
       }
@@ -53774,53 +53143,6 @@
         }
       }
     },
-    "Чтобы увидеть цель, укажи вес — в профиле или на экране «Вес»." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "حدد وزنك — في الملف الشخصي أو شاشة 'الوزن' — لرؤية الهدف."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Geben Sie Ihr Gewicht an — im Profil oder im Gewicht-Bildschirm — um das Ziel zu sehen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Specify your weight in the profile or on the Weight screen to see your goal."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Indica tu peso — en el perfil o en la pantalla 'Peso' — para ver la meta."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Indiquez votre poids — dans le profil ou l'écran 'Poids' — pour voir l'objectif."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ציין משקל — בפרופיל או במסך 'משקל' — כדי לראות את היעד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Indique seu peso — no perfil ou na tela 'Peso' — para ver a meta."
-          }
-        }
-      }
-    },
     "Чтобы успеть к %@:" : {
       "localizations" : {
         "ar" : {
@@ -54096,6 +53418,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lld passos — %2$lld a menos que o normal, e a meta do dia cai %3$lld kcal. Dia mais parado, gasto menor."
+          }
+        }
+      }
+    },
+    "Шагов %1$lld, на %2$lld больше обычного: +%3$lld ккал к норме." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld خطوة، أكثر بـ %2$lld من المعتاد: +%3$lld سعرة على الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld Schritte, %2$lld über dem Üblichen: +%3$lld kcal aufs Ziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld steps, %2$lld above usual: +%3$lld kcal to the target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pasos, %2$lld más de lo habitual: +%3$lld kcal al objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pas, %2$lld de plus que d’habitude : +%3$lld kcal à l’objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld צעדים, %2$lld מעל הרגיל: +%3$lld קלוריות ליעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld passos, %2$lld acima do normal: +%3$lld kcal na meta."
+          }
+        }
+      }
+    },
+    "Шагов %1$lld, на %2$lld меньше обычного: −%3$lld ккал к норме." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld خطوة، أقل بـ %2$lld من المعتاد: −%3$lld سعرة من الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld Schritte, %2$lld unter dem Üblichen: −%3$lld kcal vom Ziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld steps, %2$lld below usual: −%3$lld kcal from the target."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pasos, %2$lld menos de lo habitual: −%3$lld kcal del objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pas, %2$lld de moins que d’habitude : −%3$lld kcal sur l’objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld צעדים, %2$lld מתחת לרגיל: −%3$lld קלוריות מהיעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld passos, %2$lld abaixo do normal: −%3$lld kcal da meta."
           }
         }
       }
@@ -54840,6 +54256,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este valor será usado ao adicionar este alimento a uma refeição."
+          }
+        }
+      }
+    },
+    "Это можно поменять в настройках в любой момент" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك تغيير ذلك في الإعدادات متى شئت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das lässt sich jederzeit in den Einstellungen ändern"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can change this in settings at any time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes cambiarlo en ajustes cuando quieras"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous pourrez le changer dans les réglages à tout moment"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לשנות את זה בהגדרות בכל רגע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dá para mudar nos ajustes a qualquer momento"
           }
         }
       }

@@ -343,11 +343,13 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.navigationBars["Day breakdown"].waitForExistence(timeout: 5),
                       "Карточка не открыла разбор дня")
-        // Список стал длиннее: над витаминами теперь диаграмма состава с
-        // подписями, и заголовок секции уехал за нижнюю кромку.
-        let vitamins = app.staticTexts["Vitamins and minerals"]
-        scrollTo(vitamins, in: app)
-        XCTAssertTrue(vitamins.exists, "В разборе дня должны быть витамины и минералы")
+        // Макросы есть всегда: они считаются по любой записи, чем бы она ни
+        // была. А витамины — только у продуктов встроенной базы, и секция
+        // показывается, лишь когда есть что показать: раньше она стояла
+        // всегда и чаще объясняла, почему чисел нет.
+        let macros = app.staticTexts["Protein, fat, carbs"]
+        scrollTo(macros, in: app)
+        XCTAssertTrue(macros.exists, "В разборе дня должны быть макросы")
     }
 
     /// Сквозная проверка микронутриентов: продукт встроенной базы приносит
@@ -509,6 +511,42 @@ final class CaloriesUITests: XCTestCase {
         // И дата, и время: поправить один только час невозможно.
         XCTAssertGreaterThanOrEqual(picker.buttons.count, 2,
                                     "У записи должны настраиваться и день, и время")
+    }
+
+    /// Правка позиции в собранном приёме: по нажатию на строку, и после
+    /// «Готово» экран возвращается к приёму, а не в пустоту.
+    ///
+    /// Был чёрный экран с одной стрелкой назад: правка подменяла элемент
+    /// целиком, у нового элемента был новый идентификатор, и открытый по
+    /// старому экран порции переставал что-либо находить.
+    @MainActor
+    func testEditingADraftItemReturnsToTheMeal() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let search = revealSearchField(in: app)
+        search.tap()
+        search.typeText("Beef")
+        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
+        row.tap()
+        let add = app.buttons["addToMeal"]
+        XCTAssertTrue(add.waitForExistence(timeout: 5))
+        add.tap()
+
+        // Строка приёма пищи открывает правку по обычному нажатию.
+        let draftRow = app.staticTexts.matching(identifier: "Beef").firstMatch
+        XCTAssertTrue(draftRow.waitForExistence(timeout: 5), "Продукт не попал в приём пищи")
+        draftRow.tap()
+
+        let done = app.buttons["addToMeal"]
+        XCTAssertTrue(done.waitForExistence(timeout: 5), "Правка не открылась по нажатию на строку")
+        done.tap()
+
+        // Вернулись к приёму пищи, а не в пустоту: кнопка сохранения на месте.
+        XCTAssertTrue(app.buttons["saveMeal"].waitForExistence(timeout: 5),
+                      "После «Готово» экран приёма пищи не вернулся")
     }
 
     /// Источники разведены сегментами, чтобы поиск шёл по одному, а не по всем сразу.

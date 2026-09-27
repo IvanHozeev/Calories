@@ -158,8 +158,11 @@ struct FoodQuantityView: View {
         // плашкой. Кнопки заметны сами по себе, а safeAreaInset и без неё не даёт
         // содержимому под ними застревать.
         .safeAreaInset(edge: .bottom) {
+            // Кнопки во всю ширину и делят её поровну. Раньше они были по
+            // размеру подписи и стояли по центру между распорками: одинокое
+            // «Готово» при правке висело маленькой плашкой посреди экрана над
+            // клавиатурой и не читалось как главное действие.
             HStack(spacing: 10) {
-                Spacer(minLength: 0)
                 Button {
                     // Клавиатуру убираем до ухода: иначе она остаётся поднятой
                     // над вернувшимся списком и накрывает панель «Сохранить».
@@ -171,11 +174,9 @@ struct FoodQuantityView: View {
                     onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
                     if !isPushed { dismiss() }
                 } label: {
-                    // По размеру подписи, а не во всю ширину: широкая плашка
-                    // спорила с соседней кнопкой и выглядела тяжело.
                     Text(addTitle)
                         .fontWeight(.semibold)
-                        .padding(.horizontal, 6)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
@@ -188,7 +189,7 @@ struct FoodQuantityView: View {
                     } label: {
                         Text("Сохранить")
                             .fontWeight(.semibold)
-                            .padding(.horizontal, 6)
+                            .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
@@ -196,7 +197,6 @@ struct FoodQuantityView: View {
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
-                Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -343,7 +343,6 @@ struct DishQuantityView: View {
         }
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {
-                Spacer(minLength: 0)
                 Button {
                     gramsFocused = false
                     onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
@@ -351,7 +350,7 @@ struct DishQuantityView: View {
                 } label: {
                     Text(addTitle)
                         .fontWeight(.semibold)
-                        .padding(.horizontal, 6)
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
@@ -371,7 +370,6 @@ struct DishQuantityView: View {
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
-                Spacer(minLength: 0)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)

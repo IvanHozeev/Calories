@@ -45,7 +45,8 @@ struct DayNutritionView: View {
 
     /// Обстоятельства дня: почему он получился таким.
     private var context: [DayAnalysis.Advice] {
-        DayAnalysis.context(store.dayContext(on: date, schedule: MealScheduleSettings.shared))
+        DayAnalysis.context(store.dayContext(on: date, schedule: MealScheduleSettings.shared),
+                            brief: ExplanationSettings.shared.level == .expert)
     }
 
     var body: some View {
@@ -64,7 +65,8 @@ struct DayNutritionView: View {
                     if categories.contains(where: { $0.category == nil }) {
                         Text("Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает.")
                     } else {
-                        Text("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.")
+                        Text(explain("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.",
+                                     short: "Доли — в калориях, не в позициях."))
                     }
                 }
             }
@@ -77,7 +79,8 @@ struct DayNutritionView: View {
                 } header: {
                     Text("Как прошёл день")
                 } footer: {
-                    Text("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.")
+                    Text(explain("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.",
+                                 short: "Объясняют день, а не оценивают его."))
                 }
             }
 
@@ -283,33 +286,26 @@ struct DayNutritionView: View {
 
     // MARK: - Витамины и минералы
 
+    /// Витамины показываются, только когда есть что показать.
+    ///
+    /// Раньше секция стояла всегда и чаще всего объясняла, почему чисел нет:
+    /// у своей еды и товаров из Open Food Facts микронутриентов не бывает.
+    /// Человек, который ест в основном свои продукты, видел этот абзац каждый
+    /// день — то есть экран разбора заканчивался извинением вместо разбора.
     @ViewBuilder
     private var micronutrientSection: some View {
         let day = micronutrients
-        Section {
-            if day.totalCalories == 0 {
-                Text("За этот день ещё ничего не записано.")
-                    .font(.app(.footnote))
-                    .foregroundStyle(.secondary)
-            } else if !day.isTrustworthy {
-                // Показать числа тут было бы враньём умолчанием: они посчитаны
-                // по такой части дня, что означают что угодно.
-                Text("Слишком мало известно о составе съеденного, чтобы считать. Витамины есть у продуктов встроенной базы; у своей еды и товаров из Open Food Facts их нет.")
-                    .font(.app(.footnote))
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            } else {
+        if day.totalCalories > 0, day.isTrustworthy {
+            Section {
                 // Клетчатка показана выше, вместе с макросами.
                 ForEach(Micronutrient.allCases.filter { $0 != .fiber }) { nutrient in
                     if let amount = day.totals[nutrient] {
                         nutrientRow(nutrient, amount: amount)
                     }
                 }
-            }
-        } header: {
-            Text("Витамины и минералы")
-        } footer: {
-            if day.totalCalories > 0 {
+            } header: {
+                Text("Витамины и минералы")
+            } footer: {
                 Text(String(format: String(localized: "Посчитано по %lld%% съеденного за день."),
                             Int((day.coverage * 100).rounded())))
             }

@@ -793,6 +793,19 @@ struct DayContextTests {
         #expect(ids(result).contains("meal-overshoot"))
     }
 
+    /// На коротком уровне мысль та же, а слов меньше — иначе это был бы
+    /// другой текст, а не тот же, сжатый.
+    @Test func theBriefLevelSaysTheSameThingShorter() throws {
+        let input = DayAnalysis.Context(activityAdjustment: 290, steps: 20_000, usualSteps: 10_000,
+                                        sleepHours: 5, sleepShortfall: 2, restingPulseRise: 5)
+        let detailed = DayAnalysis.context(input)
+        let brief = DayAnalysis.context(input, brief: true)
+        #expect(detailed.map(\.id) == brief.map(\.id))
+        for (full, short) in zip(detailed, brief) {
+            #expect(short.text.count < full.text.count, "«\(full.id)» не стал короче")
+        }
+    }
+
     /// День без данных не должен выдавать пустые строки.
     @Test func aDayWithoutDataSaysNothing() {
         #expect(DayAnalysis.context(.init()).isEmpty)

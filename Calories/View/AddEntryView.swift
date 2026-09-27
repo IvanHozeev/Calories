@@ -567,22 +567,23 @@ struct AddEntryView: View {
                             ?? String(localized: "порция"),
                         macros: item.macros
                     )
+                    // Правка — по нажатию на строку, как везде в приложении.
+                    // За свайпом её не искали: человек видит неверный вес и
+                    // тыкает в него, а не пробует жесты.
+                    //
+                    // Вес без граммов не поправить: у распознанного по фото
+                    // или записанного порцией менять нечего — такая строка
+                    // просто не отзывается.
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        guard item.grams != nil else { return }
+                        openServing(.edit(itemID: item.id))
+                    }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             draftItems.removeAll { $0.id == item.id }
                         } label: {
                             Image(systemName: "trash")
-                        }
-                        // Вес без граммов не поправить: у распознанного по фото
-                        // или записанного порцией менять нечего.
-                        if item.grams != nil {
-                            Button {
-                                serving = .edit(itemID: item.id)
-                            } label: {
-                                Image(systemName: "pencil")
-                            }
-                            .tint(.blue)
-                            .accessibilityLabel("Изменить")
                         }
                     }
                 }
@@ -816,9 +817,20 @@ struct AddEntryView: View {
             if let item = draftItems.first(where: { $0.id == itemID }), let grams = item.grams, grams > 0 {
                 FoodQuantityView(food: per100g(item, grams: grams), grams: grams,
                                  addTitle: "Готово", isPushed: true) { edited in
+                    // Правим поля на месте, а не подменяем элемент целиком: у
+                    // нового `MealItem` новый идентификатор, экран порции
+                    // открыт по старому — и после «Готово» он оставался
+                    // показанным, но уже ничего не находил. Получался чёрный
+                    // экран с одной стрелкой назад.
                     if let index = draftItems.firstIndex(where: { $0.id == itemID }) {
-                        draftItems[index] = edited
+                        draftItems[index].name = edited.name
+                        draftItems[index].calories = edited.calories
+                        draftItems[index].macros = edited.macros
+                        draftItems[index].grams = edited.grams
                     }
+                    // И закрываем сами: экран показан из этого состояния,
+                    // убрать его надо тем же, чем открыли.
+                    serving = nil
                 }
             }
         }

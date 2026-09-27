@@ -117,6 +117,37 @@ struct EditEntrySheet: View {
             }
             .listRowBackground(Color.clear)
 
+            // Из чего собран приём — до полей правки: сначала «что я съел», а
+            // потом «сколько это было». Раньше от приёма из пяти продуктов
+            // оставалась строка «Овсянка, Банан, Мёд, Творог, Орехи» в поле
+            // названия и одно общее число: понять, что и сколько, было нельзя.
+            if entry.components.count > 1 {
+                Section {
+                    ForEach(Array(entry.components.enumerated()), id: \.offset) { _, part in
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(verbatim: part.name)
+                                .font(.app(.subheadline))
+                            Spacer(minLength: 8)
+                            if let grams = part.grams, grams > 0 {
+                                Text(verbatim: String(format: "%.0f \(String(localized: "г"))", grams))
+                                    .font(.app(.caption))
+                                    .foregroundStyle(.tertiary)
+                                    .monospacedDigit()
+                            }
+                            Text(verbatim: "\(part.calories)")
+                                .font(.app(.subheadline, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                } header: {
+                    Text("Из чего собран")
+                } footer: {
+                    Text(explain("Состав записан как есть и не правится здесь: числа ниже относятся к приёму целиком. Чтобы поменять состав, добавь приём заново.",
+                                 short: "Состав только для справки; числа ниже — на приём целиком."))
+                }
+            }
+
             Section {
                 TextField("Название", text: $name)
                     .focused($focusedField, equals: .name)

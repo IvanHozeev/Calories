@@ -36,7 +36,7 @@ struct OnboardingView: View {
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
 
     enum Step: Int, CaseIterable {
-        case welcome, sex, age, height, weight, activity, goal, cutOptions, macros, gear, health, result
+        case welcome, explanations, sex, age, height, weight, activity, goal, cutOptions, macros, gear, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -99,7 +99,8 @@ struct OnboardingView: View {
 
             Group {
                 switch step {
-                case .welcome:    welcomeStep
+                case .welcome:      welcomeStep
+                case .explanations: explanationsStep
                 case .sex:        sexStep
                 case .age:        ageStep
                 case .height:     heightStep
@@ -182,6 +183,47 @@ struct OnboardingView: View {
             }
             Spacer()
             primaryButton(title: "Начать") { go(1) }
+        }
+    }
+
+    /// Насколько подробно объяснять. Спрашиваем сразу и один раз: дальше на
+    /// этом уровне говорит весь онбординг и всё приложение.
+    ///
+    /// Спрашиваем прямо, а не угадываем по возрасту: и двадцатилетний, и
+    /// сорокалетний могут считать макросы третий год или не считать никогда.
+    private var explanationsStep: some View {
+        stepShell(title: "Как объяснять?", subtitle: "Это можно поменять в настройках в любой момент") {
+            VStack(spacing: 12) {
+                ForEach(ExplanationLevel.allCases) { level in
+                    Button {
+                        ExplanationSettings.shared.level = level
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(verbatim: level.title)
+                                .font(.app(.body, weight: .medium))
+                                .foregroundStyle(.primary)
+                            Text(verbatim: level.summary)
+                                .font(.app(.footnote))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(ExplanationSettings.shared.level == level
+                                      ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(ExplanationSettings.shared.level == level ? Color.green : Color.clear,
+                                        lineWidth: 1.5)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .accessibilityIdentifier("explanationChoice")
         }
     }
 

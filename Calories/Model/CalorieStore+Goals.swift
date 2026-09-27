@@ -475,6 +475,55 @@ extension CalorieStore {
         return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
     }
 
+    /// Обстоятельства дня для разбора: нагрузка, сон, пульс, вес и перебор.
+    ///
+    /// Собирается здесь, а не в экране: это данные, а не оформление, и
+    /// проверять их надо тестами, а не глазами.
+    func dayContext(on date: Date, schedule: MealScheduleSettings) -> DayAnalysis.Context {
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: date)
+        var context = DayAnalysis.Context()
+
+        let activity = self.activity(on: day)
+        context.activityAdjustment = Int(activityAdjustment(on: day).rounded())
+        context.steps = activity?.steps
+        context.usualSteps = activityBaseline?.steps
+        context.workoutTitle = activity?.workoutTitle
+        context.workoutMinutes = activity?.workoutMinutes
+
+        if let sleep = sleep(on: day) {
+            context.sleepHours = sleep.hours
+            context.sleepShortfall = sleep.shortfall
+        }
+        context.restingPulseRise = restingPulse(now: max(day, Date()))?.rise
+
+        // Вес утром против тренда: одно утро ничего не значит, и сказать об
+        // этом стоит именно тогда, когда оно выбилось.
+        if let morning = weightEntries.filter({ calendar.isDate($0.date, inSameDayAs: day) })
+            .min(by: { $0.date < $1.date })?.weightKg {
+            context.weightKg = morning
+            if let trend = weightTrend(on: day) { context.weightAboveTrend = morning - trend }
+        }
+
+        // Самый крупный перебор по приёму — но только когда день разбит на
+        // приёмы: без расписания говорить не о чем.
+        if schedule.isEnabled {
+            let entries = (entriesByDay[day] ?? []).map { (date: $0.date, calories: $0.calories) }
+            // Разбираем прожитый день целиком: «сейчас» — его последняя минута.
+            let end = calendar.isDateInToday(day) ? Date() : day.addingTimeInterval(86_399)
+            let slots = MealSchedule.slots(.init(
+                wake: schedule.today(schedule.wake, now: day),
+                sleep: schedule.today(schedule.sleep, now: day),
+                mealCount: schedule.count, dailyGoal: goal(for: day),
+                entries: entries, now: end))
+            if let worst = slots.max(by: { $0.overeaten < $1.overeaten }), worst.overeaten > 0 {
+                context.overeatenMeal = String(localized: String.LocalizationValue(worst.period.rawValue))
+                context.overeatenBy = worst.overeaten
+            }
+        }
+        return context
+    }
+
     /// Взвешивание, ближайшее к дате. Замеры и весы живут по своим расписаниям,
     /// и требовать, чтобы они совпали день в день, значит не показать ничего.
     func weight(nearest date: Date) -> Double? {

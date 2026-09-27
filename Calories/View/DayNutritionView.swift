@@ -43,6 +43,11 @@ struct DayNutritionView: View {
         ))
     }
 
+    /// Обстоятельства дня: почему он получился таким.
+    private var context: [DayAnalysis.Advice] {
+        DayAnalysis.context(store.dayContext(on: date, schedule: MealScheduleSettings.shared))
+    }
+
     var body: some View {
         List {
             if !categories.isEmpty {
@@ -61,6 +66,18 @@ struct DayNutritionView: View {
                     } else {
                         Text("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.")
                     }
+                }
+            }
+
+            if !context.isEmpty {
+                Section {
+                    ForEach(context) { item in
+                        adviceRow(item)
+                    }
+                } header: {
+                    Text("Как прошёл день")
+                } footer: {
+                    Text("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.")
                 }
             }
 

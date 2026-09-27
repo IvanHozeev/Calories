@@ -23,9 +23,22 @@ import Foundation
 /// часа: столько раз белковая порция успевает отработать, и столько раз
 /// человек реально готов есть.
 enum MealSchedule {
-    /// Через сколько после подъёма первый приём.
-    static let firstMealAfterWake: TimeInterval = 45 * 60
-    /// За сколько до отбоя последний.
+    /// Часы основных приёмов — те же, что у всех.
+    ///
+    /// Завтрак в восемь, обед в час, ужин в семь. Это середины тех окон,
+    /// которые советует Роспотребнадзор: завтрак с семи до девяти, обед с
+    /// часа до двух, ужин с шести до восьми и не позже чем за два-три часа до
+    /// сна.
+    ///
+    /// Раньше время считалось от подъёма — сорок пять минут после него и час
+    /// до отбоя, — и у вставшего в пять завтрак приходился на без четверти
+    /// шесть, а обед на десять утра. Формально стройно, на деле бесполезно:
+    /// завтрак у людей в восемь, а не «через сорок пять минут после того, как
+    /// открыл глаза».
+    static let breakfastHour = 8
+    static let lunchHour = 13
+    static let dinnerHour = 19
+    /// За сколько до отбоя последний приём.
     static let lastMealBeforeSleep: TimeInterval = 60 * 60
     /// Разумные границы числа приёмов.
     static let allowedCounts = 2...6
@@ -114,12 +127,6 @@ enum MealSchedule {
     struct Input {
         let wake: Date
         let sleep: Date
-        /// Когда человек встал на самом деле, если «Здоровье» это знает.
-        ///
-        /// Настройка — это намерение, а встают люди иначе. Раньше подъём
-        /// угадывался по первой еде дня: поел в пять — значит встал в пять. С
-        /// браслетом гадать не нужно, конец сна известен точно.
-        var measuredWake: Date? = nil
         let mealCount: Int
         let dailyGoal: Int
         /// Что уже съедено за день: время и калории.
@@ -127,16 +134,42 @@ enum MealSchedule {
         let now: Date
     }
 
-    /// Времена приёмов: от первого до последнего, равными промежутками.
+    /// Времена приёмов на этот день.
+    ///
+    /// Основные стоят на своих часах и не двигаются. Промежуточные ровно
+    /// посередине между соседями: второй завтрак между завтраком и обедом,
+    /// полдник между обедом и ужином, второй ужин между ужином и отбоем.
     static func times(wake: Date, sleep: Date, count: Int) -> [Date] {
-        let count = min(max(count, allowedCounts.lowerBound), allowedCounts.upperBound)
-        let first = wake.addingTimeInterval(firstMealAfterWake)
-        var last = sleep.addingTimeInterval(-lastMealBeforeSleep)
-        // Сутки перевёрнуты (ложится за полночь) — переносим отбой на завтра.
-        if last <= first { last = last.addingTimeInterval(86_400) }
-        guard count > 1 else { return [first] }
-        let step = last.timeIntervalSince(first) / Double(count - 1)
-        return (0..<count).map { first.addingTimeInterval(step * Double($0)) }
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: wake)
+        func at(_ hour: Int) -> Date {
+            calendar.date(byAdding: .hour, value: hour, to: day) ?? day
+        }
+        let breakfast = at(breakfastHour)
+        let lunch = at(lunchHour)
+        let dinner = at(dinnerHour)
+        // Отбой — единственное, что человек задаёт сам: второй ужин вешается
+        // между ужином и сном. Легли за полночь — переносим на завтра.
+        var bedtime = calendar.date(bySettingHour: calendar.component(.hour, from: sleep),
+                                    minute: calendar.component(.minute, from: sleep),
+                                    second: 0, of: day) ?? dinner
+        if bedtime <= dinner { bedtime = bedtime.addingTimeInterval(86_400) }
+        let lastAllowed = bedtime.addingTimeInterval(-lastMealBeforeSleep)
+
+        return periods(count: count).map { period in
+            switch period {
+            case .breakfast:       return breakfast
+            case .secondBreakfast: return middle(breakfast, lunch)
+            case .lunch:           return lunch
+            case .afternoonSnack:  return middle(lunch, dinner)
+            case .dinner:          return dinner
+            default:               return middle(dinner, lastAllowed)
+            }
+        }
+    }
+
+    private static func middle(_ from: Date, _ to: Date) -> Date {
+        from.addingTimeInterval(to.timeIntervalSince(from) / 2)
     }
 
     /// Расписание с учётом съеденного и текущего времени.
@@ -144,35 +177,21 @@ enum MealSchedule {
     /// Калории пропущенных окон не сгорают и не копятся молча: они сразу же
     /// раскладываются по оставшимся приёмам, и человек видит новую цифру, а не
     /// узнаёт вечером, что «должен» ещё полторы тысячи.
-    /// Раньше какого часа еда считается не завтраком, а хвостом вчерашнего дня.
-    ///
-    /// По этой границе расписание решает, вставать ему раньше или нет: поел в
-    /// пять утра — значит день начался в пять; поел в полпервого ночи — это
-    /// ночной перекус, а не подъём, и двигать по нему весь день нельзя.
-    static let earliestWakeHour = 4
 
     static func slots(_ input: Input) -> [Slot] {
-        let calendar = Calendar.current
-        // День начинается по факту, а не по настройке: если человек встал в
-        // пять и поел, расписание встаёт вместе с ним. Узнать время будильника
-        // приложение не может — в iOS такого доступа нет, — но первая еда дня
-        // говорит о подъёме не хуже.
-        let dayStart = calendar.startOfDay(for: input.wake)
-        let earliest = calendar.date(byAdding: .hour, value: earliestWakeHour, to: dayStart) ?? dayStart
-        let firstMealToday = input.entries.map(\.date).filter { $0 >= earliest }.min()
-        // Измеренный подъём важнее настройки, но еда важнее обоих: если человек
-        // поел раньше, чем браслет засчитал пробуждение, день всё равно начался.
-        let claimed = input.measuredWake ?? input.wake
-        let wake = min(claimed, firstMealToday ?? claimed)
-
+        let wake = input.wake
         let times = times(wake: wake, sleep: input.sleep, count: input.mealCount)
         guard !times.isEmpty, input.dailyGoal > 0 else { return [] }
 
         // Границы окон — середины между соседними приёмами.
         var bounds: [(Date, Date)] = []
         for (index, time) in times.enumerated() {
+            // Границы окон — середины между соседними приёмами, а у крайних
+            // зеркально: столько же до первого, сколько до его соседа.
             let start = index == 0
-                ? time.addingTimeInterval(-firstMealAfterWake)
+                ? time.addingTimeInterval(-(times.count > 1
+                                            ? times[1].timeIntervalSince(time) / 2
+                                            : 3600))
                 : times[index - 1].addingTimeInterval(times[index].timeIntervalSince(times[index - 1]) / 2)
             let end = index == times.count - 1
                 ? time.addingTimeInterval(lastMealBeforeSleep)

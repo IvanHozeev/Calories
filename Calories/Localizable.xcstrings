@@ -1965,9 +1965,7 @@
         }
       }
     },
-    "%lld%%" : {
-
-    },
+    "%lld%%" : {},
     "+%lld" : {
       "localizations" : {
         "en" : {
@@ -17077,6 +17075,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Café da manhã"
+          }
+        }
+      }
+    },
+    "Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفطور 8:00، الغداء 13:00، العشاء 19:00. الفطور الثاني ووجبة العصر في المنتصف تمامًا، والعشاء الثاني بين العشاء وموعد النوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frühstück um 8:00, Mittagessen um 13:00, Abendessen um 19:00. Zweites Frühstück und Zwischenmahlzeit liegen genau dazwischen, das zweite Abendessen zwischen Abendessen und Schlafenszeit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breakfast at 8:00, lunch at 13:00, dinner at 19:00. Second breakfast and the afternoon snack sit exactly between them, the second dinner between dinner and bedtime."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desayuno a las 8:00, comida a las 13:00, cena a las 19:00. El segundo desayuno y la merienda van justo en medio, y la segunda cena entre la cena y la hora de dormir."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petit-déjeuner à 8:00, déjeuner à 13:00, dîner à 19:00. Le second petit-déjeuner et le goûter tombent pile entre eux, le second dîner entre le dîner et le coucher."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחת בוקר ב־8:00, צהריים ב־13:00, ערב ב־19:00. ארוחת בוקר שנייה וארוחת ארבע בדיוק באמצע, וארוחת ערב שנייה בין הערב לשעת השינה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Café da manhã às 8:00, almoço às 13:00, jantar às 19:00. O segundo café e o lanche ficam exatamente no meio, e a segunda ceia entre o jantar e a hora de dormir."
           }
         }
       }
@@ -34415,6 +34460,7 @@
       }
     },
     "Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -36736,6 +36782,7 @@
       }
     },
     "Подъём" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50816,9 +50863,7 @@
         }
       }
     },
-    "уд/мин" : {
-
-    },
+    "уд/мин" : {},
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -52784,9 +52829,7 @@
         }
       }
     },
-    "ч" : {
-
-    },
+    "ч" : {},
     "Через 30–60 минут" : {
       "localizations" : {
         "ar" : {
@@ -54409,6 +54452,570 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
+          }
+        }
+      }
+    },
+    "Как прошёл день" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف مرّ اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie der Tag lief"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How the day went"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo fue el día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment la journée s’est passée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "איך עבר היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como foi o dia"
+          }
+        }
+      }
+    },
+    "Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النوم والحمل والنبض والوزن لا تحكم على الهدف — إنها تفسّر لماذا جاء اليوم هكذا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlaf, Belastung, Puls und Gewicht bewerten das Ziel nicht – sie erklären, warum der Tag so ausfiel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep, load, heart rate and weight do not judge the target — they explain why the day turned out the way it did."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El sueño, la carga, el pulso y el peso no juzgan el objetivo: explican por qué el día salió así."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le sommeil, la charge, le pouls et le poids ne jugent pas l’objectif — ils expliquent pourquoi la journée s’est passée ainsi."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שינה, עומס, דופק ומשקל לא שופטים את היעד — הם מסבירים למה היום יצא כמו שיצא."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sono, carga, pulso e peso não julgam a meta — eles explicam por que o dia saiu assim."
+          }
+        }
+      }
+    },
+    "Тренировка: %1$@, %2$lld мин. Её калории уже посчитаны браслетом и учтены в норме дня — второй раз их прибавлять не надо." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمرين: %1$@، %2$lld د. سعراته محسوبة أصلًا من السوار وداخلة في هدف اليوم — لا داعي لإضافتها مرة أخرى."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Training: %1$@, %2$lld Min. Seine Kalorien zählt das Armband bereits und sie stecken im Tagesziel – ein zweites Mal hinzufügen muss man sie nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workout: %1$@, %2$lld min. Its calories are already counted by the band and included in the day's target — there is no need to add them again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrenamiento: %1$@, %2$lld min. Sus calorías ya las cuenta la pulsera y están en el objetivo del día: no hay que sumarlas otra vez."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séance : %1$@, %2$lld min. Ses calories sont déjà comptées par le bracelet et incluses dans l’objectif du jour — inutile de les ajouter une seconde fois."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אימון: %1$@, %2$lld דק׳. הקלוריות שלו כבר נספרו על ידי הצמיד ונכללות ביעד היום — אין צורך להוסיף אותן שוב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treino: %1$@, %2$lld min. Suas calorias já foram contadas pela pulseira e entram na meta do dia — não é preciso somá-las de novo."
+          }
+        }
+      }
+    },
+    "Шагов %1$lld — на %2$lld больше обычного, и норма дня выше на %3$lld ккал. Это не бонус, а плата за работу." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld خطوة — أكثر بـ %2$lld من المعتاد، وهدف اليوم أعلى بـ %3$lld سعرة. ليست مكافأة بل أجر العمل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld Schritte – %2$lld mehr als sonst, und das Tagesziel liegt %3$lld kcal höher. Kein Bonus, sondern Lohn für die Arbeit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld steps — %2$lld more than usual, and the day's target is %3$lld kcal higher. Not a bonus: payment for work done."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pasos: %2$lld más de lo habitual, y el objetivo del día sube %3$lld kcal. No es un premio, es el pago del trabajo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pas — %2$lld de plus que d’habitude, et l’objectif du jour monte de %3$lld kcal. Pas un bonus : le paiement du travail."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld צעדים — %2$lld יותר מהרגיל, ויעד היום גבוה ב־%3$lld קלוריות. לא בונוס אלא תשלום על עבודה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld passos — %2$lld a mais que o normal, e a meta do dia sobe %3$lld kcal. Não é bônus: é o pagamento do trabalho."
+          }
+        }
+      }
+    },
+    "Шагов %1$lld — на %2$lld меньше обычного, и норма дня ниже на %3$lld ккал. День был тише, значит и потрачено меньше." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld خطوة — أقل بـ %2$lld من المعتاد، وهدف اليوم أقل بـ %3$lld سعرة. يوم أهدأ يعني صرفًا أقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld Schritte – %2$lld weniger als sonst, und das Tagesziel liegt %3$lld kcal niedriger. Ruhigerer Tag, weniger verbraucht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld steps — %2$lld fewer than usual, and the day's target is %3$lld kcal lower. A quieter day means less spent."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pasos: %2$lld menos de lo habitual, y el objetivo del día baja %3$lld kcal. Día más tranquilo, menos gasto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld pas — %2$lld de moins que d’habitude, et l’objectif du jour baisse de %3$lld kcal. Journée plus calme, dépense moindre."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld צעדים — %2$lld פחות מהרגיל, ויעד היום נמוך ב־%3$lld קלוריות. יום שקט יותר, הוצאה קטנה יותר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld passos — %2$lld a menos que o normal, e a meta do dia cai %3$lld kcal. Dia mais parado, gasto menor."
+          }
+        }
+      }
+    },
+    "Норма дня сдвинута на %lld ккал за активность." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف اليوم مُزاح بمقدار %lld سعرة بسبب النشاط."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tagesziel ist um %lld kcal für Aktivität verschoben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day's target is shifted by %lld kcal for activity."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo del día se mueve %lld kcal por la actividad."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif du jour est décalé de %lld kcal pour l’activité."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד היום זז ב־%lld קלוריות בגלל פעילות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta do dia muda em %lld kcal pela atividade."
+          }
+        }
+      }
+    },
+    "Спал %1$@ ч — на %2$@ ч меньше обычного. После короткой ночи голод сильнее, а вес утром выше: это вода и кортизол, а не жир. Такой день честнее считать обычным, а не сорванным." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمت %1$@ س — أقل بـ %2$@ س من المعتاد. بعد ليلة قصيرة يشتد الجوع ويرتفع وزن الصباح: ذلك ماء وكورتيزول لا دهون. من الأصدق اعتبار هذا اليوم عاديًا لا فاشلًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Std. geschlafen – %2$@ Std. weniger als sonst. Nach einer kurzen Nacht ist der Hunger lauter und das Morgengewicht höher: das ist Wasser und Cortisol, kein Fett. So ein Tag zählt ehrlicher als gewöhnlich denn als vermasselt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %1$@ h — %2$@ h less than usual. After a short night hunger is louder and morning weight is higher: that is water and cortisol, not fat. Such a day is more honestly counted as ordinary than as blown."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiste %1$@ h: %2$@ h menos de lo habitual. Tras una noche corta el hambre aprieta y el peso matinal sube: es agua y cortisol, no grasa. Ese día es más honesto contarlo como normal que como arruinado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormi %1$@ h — %2$@ h de moins que d’habitude. Après une nuit courte la faim est plus forte et le poids du matin plus haut : c’est de l’eau et du cortisol, pas de la graisse. Une telle journée est plus honnêtement comptée comme ordinaire que comme ratée."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ישנת %1$@ ש׳ — %2$@ ש׳ פחות מהרגיל. אחרי לילה קצר הרעב חזק יותר והמשקל בבוקר גבוה יותר: זה מים וקורטיזול, לא שומן. יום כזה הוגן יותר לספור כרגיל ולא כהרוס."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiu %1$@ h — %2$@ h a menos que o normal. Depois de uma noite curta a fome é maior e o peso da manhã sobe: é água e cortisol, não gordura. Esse dia é mais honesto contar como comum do que como perdido."
+          }
+        }
+      }
+    },
+    "Спал %@ ч — норма. На дефиците сон держит и аппетит, и силовые." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمت %@ س — هذا هو المعتاد. في العجز ينظّم النوم الشهية والقوة معًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Std. geschlafen – das ist normal. Im Defizit hält Schlaf Appetit und Kraft zusammen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slept %@ h — that is the norm. On a deficit sleep holds both appetite and strength."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiste %@ h: normal. En déficit el sueño sostiene el apetito y la fuerza."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormi %@ h — c’est la norme. En déficit le sommeil tient l’appétit comme la force."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ישנת %@ ש׳ — זו הנורמה. בגירעון השינה מחזיקה גם את התיאבון וגם את הכוח."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dormiu %@ h — normal. No déficit o sono segura o apetite e a força."
+          }
+        }
+      }
+    },
+    "Пульс в покое на %lld удара выше привычного и держится так не первый день. Обычно это недосып или накопленная усталость; если вес при этом встал, отдых сдвинет его вернее, чем ещё меньше еды." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبض الراحة أعلى بـ %lld نبضة من المعتاد ومستمر هكذا منذ أيام. غالبًا سببه قلة النوم أو التعب المتراكم؛ وإذا توقف الوزن أيضًا فالراحة تحركه أكثر من الأكل أقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ruhepuls liegt %lld Schläge über dem Üblichen, und das seit Tagen. Meist steckt zu wenig Schlaf oder angesammelte Müdigkeit dahinter; steht das Gewicht dazu still, bewegt Erholung es sicherer als noch weniger Essen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resting heart rate is %lld beats above usual and has been for days. Usually that is short sleep or accumulated fatigue; if weight has stalled too, rest will move it more surely than eating even less."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La frecuencia en reposo está %lld pulsaciones por encima de lo habitual y lleva días así. Suele ser falta de sueño o cansancio acumulado; si además el peso se ha parado, descansar lo moverá antes que comer aún menos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fréquence au repos est %lld battements au-dessus de l’habitude depuis plusieurs jours. C’est en général le manque de sommeil ou la fatigue accumulée ; si le poids stagne aussi, le repos le fera bouger plus sûrement que manger encore moins."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדופק במנוחה גבוה ב־%lld פעימות מהרגיל וכך כבר כמה ימים. בדרך כלל זה חוסר שינה או עייפות מצטברת; ואם גם המשקל נתקע, מנוחה תזיז אותו יותר מאכילה מועטה עוד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A frequência em repouso está %lld batimentos acima do normal e já faz dias. Costuma ser falta de sono ou cansaço acumulado; se o peso também parou, descansar move mais do que comer ainda menos."
+          }
+        }
+      }
+    },
+    "Вес утром %1$@ кг — на %2$@ выше тренда. Ночь была короткой, и это обычная реакция: вода задерживается. Тренд важнее одного утра." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن الصباح %1$@ كجم — أعلى بـ %2$@ من الاتجاه. كانت الليلة قصيرة وهذه استجابة معتادة: يُحتجز الماء. الاتجاه أهم من صباح واحد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgengewicht %1$@ kg – %2$@ über dem Trend. Die Nacht war kurz, und das ist die übliche Reaktion: Wasser wird gehalten. Der Trend zählt mehr als ein Morgen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning weight %1$@ kg — %2$@ above the trend. The night was short, and this is the usual response: water is held. The trend matters more than one morning."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso matinal %1$@ kg: %2$@ por encima de la tendencia. La noche fue corta y es la reacción habitual: se retiene agua. La tendencia importa más que una mañana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids du matin %1$@ kg — %2$@ au-dessus de la tendance. La nuit a été courte, et c’est la réaction habituelle : l’eau est retenue. La tendance compte plus qu’un matin."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל בבוקר %1$@ ק״ג — %2$@ מעל המגמה. הלילה היה קצר וזו תגובה רגילה: נאגרים מים. המגמה חשובה מבוקר אחד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso da manhã %1$@ kg — %2$@ acima da tendência. A noite foi curta e essa é a reação usual: retém-se água. A tendência vale mais que uma manhã."
+          }
+        }
+      }
+    },
+    "Вес утром %1$@ кг — на %2$@ выше тренда. Одно утро ничего не значит: соль, углеводы накануне и вода дают больше килограмма разброса." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن الصباح %1$@ كجم — أعلى بـ %2$@ من الاتجاه. صباح واحد لا يعني شيئًا: الملح وكربوهيدرات الأمس والماء تُحدث فرقًا يتجاوز الكيلوغرام."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morgengewicht %1$@ kg – %2$@ über dem Trend. Ein Morgen sagt nichts: Salz, die Kohlenhydrate von gestern und Wasser machen mehr als ein Kilo aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning weight %1$@ kg — %2$@ above the trend. One morning means nothing: salt, yesterday's carbs and water swing it by more than a kilo."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso matinal %1$@ kg: %2$@ por encima de la tendencia. Una mañana no dice nada: la sal, los carbohidratos de ayer y el agua mueven más de un kilo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poids du matin %1$@ kg — %2$@ au-dessus de la tendance. Un matin ne veut rien dire : le sel, les glucides de la veille et l’eau font varier de plus d’un kilo."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל בבוקר %1$@ ק״ג — %2$@ מעל המגמה. בוקר אחד לא אומר כלום: מלח, פחמימות מאתמול ומים מזיזים יותר מקילוגרם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peso da manhã %1$@ kg — %2$@ acima da tendência. Uma manhã não diz nada: sal, os carboidratos de ontem e água variam mais de um quilo."
+          }
+        }
+      }
+    },
+    "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أكبر تجاوز كان في %1$@ — بمقدار %2$lld سعرة. الأجدى النظر إلى تلك الوجبة لا إلى اليوم كله: هناك يُحسم بلوغ الهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der größte Überschuss lag beim %1$@ – um %2$lld kcal. Lohnender ist der Blick auf diese Mahlzeit statt auf den ganzen Tag: dort entscheidet sich das Ziel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The biggest overshoot was at %1$@ — by %2$lld kcal. It is worth looking at that meal rather than the whole day: that is where hitting the target is decided."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El mayor exceso fue en %1$@: %2$lld kcal. Conviene mirar esa comida y no el día entero: ahí se decide si entras en el objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plus gros dépassement est au %1$@ — de %2$lld kcal. C’est ce repas qu’il faut regarder, pas la journée entière : c’est là que se joue l’objectif."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "החריגה הגדולה ביותר הייתה ב%1$@ — ב־%2$lld קלוריות. כדאי להסתכל על הארוחה הזו ולא על כל היום: שם נקבע אם תעמוד ביעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O maior excesso foi em %1$@ — %2$lld kcal. Vale olhar essa refeição, não o dia inteiro: é ali que se decide se você bate a meta."
           }
         }
       }

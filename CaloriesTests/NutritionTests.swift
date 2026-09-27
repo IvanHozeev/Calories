@@ -718,3 +718,83 @@ struct FoodDataCentralParsingTests {
                 "Отсутствие данных — это не ноль: ноль утверждал бы дефицит")
     }
 }
+
+// MARK: - Обстоятельства дня
+
+/// Цифры дневника отвечают, что человек съел. Почему день получился таким —
+/// не отвечают вовсе, и человек сам сопоставляет оранжевый день с тем, что в
+/// ту ночь не спал. Чаще не сопоставляет и решает, что сорвался.
+struct DayContextTests {
+
+    private func ids(_ advice: [DayAnalysis.Advice]) -> [String] { advice.map(\.id) }
+
+    /// Норма выше не «в подарок», а потому что человек наработал.
+    @Test func aBusyDayExplainsItsHigherTarget() {
+        let result = DayAnalysis.context(.init(activityAdjustment: 290, steps: 20_000, usualSteps: 10_000))
+        #expect(ids(result).contains("activity"))
+        #expect(try! #require(result.first).text.contains("20"))
+    }
+
+    /// Мелкая поправка — шум: о ней молчим.
+    @Test func aTinyAdjustmentIsNotWorthAWord() {
+        let result = DayAnalysis.context(.init(activityAdjustment: 40, steps: 11_000, usualSteps: 10_000))
+        #expect(!ids(result).contains("activity"))
+    }
+
+    /// Калории тренировки уже посчитаны браслетом — надо сказать об этом
+    /// прямо, иначе человек прибавит их второй раз руками.
+    @Test func aWorkoutIsNamedButNotAddedTwice() {
+        let result = DayAnalysis.context(.init(workoutTitle: "Баскетбол", workoutMinutes: 70))
+        #expect(ids(result).contains("workout"))
+    }
+
+    /// Короткая ночь объясняет и голод, и вес — такой день честнее считать
+    /// обычным, а не сорванным.
+    @Test func aShortNightExplainsTheDay() {
+        let result = DayAnalysis.context(.init(sleepHours: 5.2, sleepShortfall: 2.1))
+        #expect(ids(result).contains("sleep-short"))
+    }
+
+    @Test func aFullNightIsWorthAGoodWord() {
+        let result = DayAnalysis.context(.init(sleepHours: 7.8, sleepShortfall: 0))
+        #expect(ids(result).contains("sleep-ok"))
+    }
+
+    /// Неделя с высоким пульсом покоя — повод отдохнуть, а не резать калории.
+    @Test func aRaisedRestingPulseIsSaidOutLoud() {
+        #expect(ids(DayAnalysis.context(.init(restingPulseRise: 5))).contains("pulse"))
+        // Пара ударов — погрешность датчика.
+        #expect(!ids(DayAnalysis.context(.init(restingPulseRise: 2))).contains("pulse"))
+    }
+
+    /// Вес выше тренда после короткой ночи — вода, а не жир, и сказать надо
+    /// именно это.
+    @Test func aWeightSpikeAfterAShortNightIsExplainedByTheNight() throws {
+        let afterShortNight = try #require(DayAnalysis.context(
+            .init(sleepHours: 5, sleepShortfall: 2, weightKg: 77.4, weightAboveTrend: 0.9))
+            .first { $0.id == "weight-spike" })
+        let afterNormalNight = try #require(DayAnalysis.context(
+            .init(sleepHours: 8, sleepShortfall: 0, weightKg: 77.4, weightAboveTrend: 0.9))
+            .first { $0.id == "weight-spike" })
+        // Сравниваем не слова, а то, что объяснение разное: набор идёт на
+        // английской локали, и русский литерал в нём не найдётся.
+        #expect(afterShortNight.text != afterNormalNight.text)
+    }
+
+    /// А ровный вес объяснять нечем — и молчать об этом правильно.
+    @Test func aWeightOnTrendIsNotMentioned() {
+        let result = DayAnalysis.context(.init(weightKg: 76, weightAboveTrend: 0.1))
+        #expect(!ids(result).contains("weight-spike"))
+    }
+
+    /// Смотреть стоит не на день целиком, а на приём, где ушло вверх.
+    @Test func theWorstMealIsNamed() {
+        let result = DayAnalysis.context(.init(overeatenMeal: "Ужин", overeatenBy: 400))
+        #expect(ids(result).contains("meal-overshoot"))
+    }
+
+    /// День без данных не должен выдавать пустые строки.
+    @Test func aDayWithoutDataSaysNothing() {
+        #expect(DayAnalysis.context(.init()).isEmpty)
+    }
+}

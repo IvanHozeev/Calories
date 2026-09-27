@@ -124,6 +124,98 @@ enum DayAnalysis {
         return result
     }
 
+    /// Обстоятельства дня: нагрузка, сон, пульс, вес и самый крупный перебор.
+    ///
+    /// Цифры дневника отвечают, что человек съел. На вопрос «почему день
+    /// вышел таким» они не отвечают вовсе, и человек сам сопоставляет
+    /// оранжевый день с тем, что в ту ночь не спал, — а чаще не сопоставляет
+    /// и решает, что сорвался.
+    ///
+    /// Поэтому здесь не оценки, а связи: норма выше, потому что много ходил;
+    /// вес утром выше, потому что ночь была короткой; неделя с высоким пульсом
+    /// покоя — повод отдохнуть, а не резать калории.
+    struct Context {
+        /// На сколько норма этого дня сдвинута за активность.
+        var activityAdjustment: Int = 0
+        /// Шаги за день и обычные шаги, если известны.
+        var steps: Int? = nil
+        var usualSteps: Int? = nil
+        /// Записанная тренировка.
+        var workoutTitle: String? = nil
+        var workoutMinutes: Int? = nil
+        /// Сон перед этим днём и насколько он короче привычного.
+        var sleepHours: Double? = nil
+        var sleepShortfall: Double = 0
+        /// Насколько пульс в покое выше привычного.
+        var restingPulseRise: Int? = nil
+        /// Вес утром и отклонение от тренда.
+        var weightKg: Double? = nil
+        var weightAboveTrend: Double? = nil
+        /// Самый крупный перебор по приёму: название и на сколько.
+        var overeatenMeal: String? = nil
+        var overeatenBy: Int = 0
+    }
+
+    /// Сколько килокалорий поправки стоит называть вслух: меньше — шум.
+    static let notableAdjustment = 80
+    /// Насколько вес должен уйти выше тренда, чтобы об этом говорить.
+    static let notableWeightRise = 0.5
+
+    static func context(_ input: Context) -> [Advice] {
+        var result: [Advice] = []
+
+        if let title = input.workoutTitle, let minutes = input.workoutMinutes, minutes > 0 {
+            result.append(Advice(id: "workout", tone: .good,
+                                 text: String(format: String(localized: "Тренировка: %1$@, %2$lld мин. Её калории уже посчитаны браслетом и учтены в норме дня — второй раз их прибавлять не надо."), title, minutes)))
+        }
+
+        if abs(input.activityAdjustment) >= notableAdjustment {
+            if let steps = input.steps, let usual = input.usualSteps {
+                let diff = steps - usual
+                result.append(Advice(id: "activity", tone: .info,
+                                     text: diff >= 0
+                                     ? String(format: String(localized: "Шагов %1$lld — на %2$lld больше обычного, и норма дня выше на %3$lld ккал. Это не бонус, а плата за работу."), steps, diff, input.activityAdjustment)
+                                     : String(format: String(localized: "Шагов %1$lld — на %2$lld меньше обычного, и норма дня ниже на %3$lld ккал. День был тише, значит и потрачено меньше."), steps, -diff, -input.activityAdjustment)))
+            } else {
+                result.append(Advice(id: "activity-plain", tone: .info,
+                                     text: String(format: String(localized: "Норма дня сдвинута на %lld ккал за активность."), input.activityAdjustment)))
+            }
+        }
+
+        if let hours = input.sleepHours {
+            if input.sleepShortfall >= 1 {
+                result.append(Advice(id: "sleep-short", tone: .warning,
+                                     text: String(format: String(localized: "Спал %1$@ ч — на %2$@ ч меньше обычного. После короткой ночи голод сильнее, а вес утром выше: это вода и кортизол, а не жир. Такой день честнее считать обычным, а не сорванным."),
+                                                  String(format: "%.1f", hours), String(format: "%.1f", input.sleepShortfall))))
+            } else if hours >= 7 {
+                result.append(Advice(id: "sleep-ok", tone: .good,
+                                     text: String(format: String(localized: "Спал %@ ч — норма. На дефиците сон держит и аппетит, и силовые."), String(format: "%.1f", hours))))
+            }
+        }
+
+        if let rise = input.restingPulseRise, isNotablePulse(rise) {
+            result.append(Advice(id: "pulse", tone: .warning,
+                                 text: String(format: String(localized: "Пульс в покое на %lld удара выше привычного и держится так не первый день. Обычно это недосып или накопленная усталость; если вес при этом встал, отдых сдвинет его вернее, чем ещё меньше еды."), rise)))
+        }
+
+        if let weight = input.weightKg, let above = input.weightAboveTrend, above >= notableWeightRise {
+            let sleepy = input.sleepShortfall >= 1
+            result.append(Advice(id: "weight-spike", tone: .info,
+                                 text: sleepy
+                                 ? String(format: String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Ночь была короткой, и это обычная реакция: вода задерживается. Тренд важнее одного утра."), String(format: "%.1f", weight), String(format: "%.1f", above))
+                                 : String(format: String(localized: "Вес утром %1$@ кг — на %2$@ выше тренда. Одно утро ничего не значит: соль, углеводы накануне и вода дают больше килограмма разброса."), String(format: "%.1f", weight), String(format: "%.1f", above))))
+        }
+
+        if let meal = input.overeatenMeal, input.overeatenBy > 0 {
+            result.append(Advice(id: "meal-overshoot", tone: .info,
+                                 text: String(format: String(localized: "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму."), meal, input.overeatenBy)))
+        }
+
+        return result
+    }
+
+    private static func isNotablePulse(_ rise: Int) -> Bool { rise >= 3 }
+
     /// Доли макросов в калориях — для круговой диаграммы состава.
     ///
     /// Именно в калориях, а не в граммах: в граммах жир всегда выглядит

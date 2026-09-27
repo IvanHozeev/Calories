@@ -128,10 +128,9 @@ struct MealScheduleSheet: View {
                         }
                     }
                     .accessibilityIdentifier("mealCountStepper")
-                    DatePicker("Подъём", selection: $settings.wake, displayedComponents: .hourAndMinute)
                     DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
                 } footer: {
-                    Text("Первый приём через 45 минут после подъёма, последний за час до отбоя, остальные поровну между ними.")
+                    Text("Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.")
                 }
 
                 Section {

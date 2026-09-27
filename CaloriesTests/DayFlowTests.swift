@@ -15,10 +15,8 @@ struct MealScheduleTests {
     }
 
     private func input(count: Int = 4, goal: Int = 2800,
-                       entries: [(Date, Int)] = [], now: Date? = nil,
-                       measuredWake: Date? = nil) -> MealSchedule.Input {
-        .init(wake: at(7), sleep: at(23), measuredWake: measuredWake,
-              mealCount: count, dailyGoal: goal,
+                       entries: [(Date, Int)] = [], now: Date? = nil) -> MealSchedule.Input {
+        .init(wake: at(7), sleep: at(23), mealCount: count, dailyGoal: goal,
               entries: entries.map { (date: $0.0, calories: $0.1) }, now: now ?? at(7, 30))
     }
 
@@ -33,44 +31,56 @@ struct MealScheduleTests {
         #expect(MealScheduleSettings.shared === MealScheduleSettings.shared)
     }
 
-    /// Первый приём — не в момент пробуждения, последний — не в момент отбоя.
+    /// Завтрак в восемь, обед в час, ужин в семь — у всех одинаково.
     ///
-    /// Сорок пять минут после подъёма и час до отбоя в расчёте были всегда, но
-    /// на экран шли края окон, и человек читал «завтрак в 7:00» при подъёме в
-    /// семь и «ужин в 23:00» при отбое в одиннадцать.
-    @Test func theMealTimeIsNotTheEdgeOfItsWindow() throws {
-        let slots = MealSchedule.slots(input(now: at(7, 10)))
-        let first = try #require(slots.first)
-        let last = try #require(slots.last)
-        #expect(first.time == at(7, 45))
-        #expect(first.start == at(7))
-        #expect(last.time == at(22))
+    /// Время считалось от подъёма, и у вставшего в пять завтрак приходился на
+    /// без четверти шесть, а обед на десять утра. Формально стройно, на деле
+    /// бесполезно: люди завтракают в восемь.
+    @Test func theMainMealsStandOnTheirOwnHours() throws {
+        let slots = MealSchedule.slots(input(count: 3, now: at(7)))
+        #expect(try #require(slots.first).time == at(8))
+        #expect(try #require(slots.first { $0.period == .lunch }).time == at(13))
+        #expect(try #require(slots.first { $0.period == .dinner }).time == at(19))
     }
 
-    /// Съеденный приём закрыт сразу, не дожидаясь конца своего окна: человек
-    /// позавтракал — звать его завтракать ещё час бессмысленно.
+    /// Промежуточные — ровно посередине между соседями.
+    @Test func theInBetweenMealsSitInTheMiddle() throws {
+        let slots = MealSchedule.slots(input(count: 6, now: at(7)))
+        #expect(try #require(slots.first { $0.period == .secondBreakfast }).time == at(10, 30))
+        #expect(try #require(slots.first { $0.period == .afternoonSnack }).time == at(16))
+        // Второй ужин — между ужином и последним сроком (за час до отбоя в 23:00).
+        #expect(try #require(slots.first { $0.period == .secondDinner }).time == at(20, 30))
+    }
+
+    /// Отбой — единственное, что человек задаёт сам, и двигает он только
+    /// второй ужин.
+    @Test func onlyTheLastMealFollowsBedtime() throws {
+        let early = MealSchedule.slots(.init(wake: at(7), sleep: at(21), mealCount: 6,
+                                             dailyGoal: 2800, entries: [], now: at(7)))
+        #expect(try #require(early.first).time == at(8))
+        #expect(try #require(early.first { $0.period == .secondDinner }).time == at(19, 30))
+    }
+
+    /// Съеденный приём закрыт сразу, не дожидаясь конца окна: позавтракал —
+    /// звать его завтракать ещё час бессмысленно.
     @Test func eatingClosesTheMealRightAway() throws {
-        let slots = MealSchedule.slots(input(entries: [(at(8), 700)], now: at(8, 30)))
-        let breakfast = try #require(slots.first)
-        #expect(breakfast.state == .done)
-
-        let next = try #require(MealSchedule.nextSlot(slots, now: at(8, 30)))
-        #expect(next.period == .lunch)
-        #expect(next.time == at(12, 30))
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 700)], now: at(8, 30)))
+        #expect(try #require(slots.first).state == .done)
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(8, 30))).period == .lunch)
     }
 
-    /// А несъеденный всё-таки истекает по времени: завтракать в обед никто не
-    /// станет, и вечное «время завтрака» было бы враньём не меньшим.
+    /// А несъеденный истекает по времени: завтракать в обед никто не станет.
     @Test func anUneatenMealStillExpiresWithItsWindow() throws {
-        let slots = MealSchedule.slots(input(now: at(11)))
+        let slots = MealSchedule.slots(input(count: 3, now: at(12)))
         #expect(try #require(slots.first).state == .missed)
-        #expect(try #require(MealSchedule.nextSlot(slots, now: at(11))).period == .lunch)
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(12))).period == .lunch)
     }
 
     /// Съеденное внутри окна продолжает считаться в тот же приём — перебором,
-    /// а не в никуда: человек съел это вместо того, чтобы отложить.
+    /// а не в никуда.
     @Test func foodInsideTheWindowKeepsAddingAsAnOvershoot() throws {
-        let slots = MealSchedule.slots(input(entries: [(at(8), 700), (at(9, 30), 400)], now: at(9, 45)))
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 700), (at(9, 30), 400)],
+                                             now: at(9, 45)))
         let breakfast = try #require(slots.first)
         #expect(breakfast.consumed == 1100)
         #expect(breakfast.overeaten > 0)
@@ -79,7 +89,8 @@ struct MealScheduleTests {
     /// Остаток нормы делится между приёмами, что впереди, — по весу: на обед
     /// отводится больше, чем на полдник.
     @Test func whatIsLeftIsSplitByTheWeightOfTheMealsAhead() throws {
-        let slots = MealSchedule.slots(input(count: 4, goal: 2800, entries: [(at(8), 800)], now: at(8, 30)))
+        let slots = MealSchedule.slots(input(count: 4, goal: 2800, entries: [(at(8), 800)],
+                                             now: at(8, 30)))
         let ahead = slots.filter { $0.state == .current || $0.state == .upcoming }
         #expect(ahead.reduce(0) { $0 + $1.calories } == 2000)
         let lunch = try #require(ahead.first { $0.period == .lunch })
@@ -87,36 +98,14 @@ struct MealScheduleTests {
         #expect(lunch.calories > snack.calories)
     }
 
-    /// Съеденное мимо всех окон — ночью или до подъёма — не пропадает: оно
+    /// Съеденное мимо всех окон — ночью или на рассвете — не пропадает: оно
     /// идёт отдельной строкой и считается за день наравне с остальным.
     @Test func foodOutsideEveryWindowBecomesASnack() throws {
-        let slots = MealSchedule.slots(input(entries: [(at(2), 300)], now: at(8)))
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(2), 300)], now: at(7)))
         let snack = try #require(slots.last)
         #expect(snack.period == .nightSnack)
         #expect(snack.consumed == 300)
-        // И ближайшим приёмом перекус не становится: своего времени у него нет.
-        #expect(try #require(MealSchedule.nextSlot(slots, now: at(8))).period == .breakfast)
-    }
-
-    /// Настройка — это намерение, а встают люди иначе. Пока приложение не
-    /// знало настоящего подъёма, человек, поднявшийся в пять, получал завтрак
-    /// в 7:45.
-    @Test func theMeasuredWakeBeatsTheSetting() throws {
-        let early = try #require(MealSchedule.slots(input(now: at(6), measuredWake: at(5))).first)
-        let bySetting = try #require(MealSchedule.slots(input(now: at(6))).first)
-        #expect(early.time < bySetting.time)
-        #expect(early.time == at(5, 45))
-    }
-
-    /// Еда важнее и настройки, и браслета: поел раньше, чем засчиталось
-    /// пробуждение, — значит день уже начался.
-    @Test func anEarlierMealStillMovesTheDay() throws {
-        let slots = MealSchedule.slots(input(entries: [(at(4, 30), 400)],
-                                             now: at(6), measuredWake: at(6)))
-        let first = try #require(slots.first)
-        // Подъём встал по еде, а приём — через сорок пять минут после него.
-        #expect(first.start == at(4, 30))
-        #expect(first.time == at(5, 15))
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(7))).period == .breakfast)
     }
 
     /// Названия приёмов — не номера: «полдник» человек понимает сразу.

@@ -428,9 +428,21 @@ final class CalorieStore {
 
     /// Сохранённая активность по дням. Дневник её не собирает — она приходит
     /// из «Здоровья» через `StepStore`, — но знать о ней ему надо: она едет в
-    /// резервную копию вместе с записями, а дальше по ней же будет видно, в
-    /// какой день нагрузка была выше.
-    var stepHistory: [ActivityDay] { ActivityHistory(defaults: defaults).days }
+    /// резервную копию вместе с записями, а по ней же видно, в какой день
+    /// нагрузка была выше.
+    ///
+    /// Держится в памяти, а не читается из настроек по требованию. Разбор
+    /// четырёхсот дней из JSON стоит недёшево, а спрашивают её на каждый день
+    /// недельной полоски и на каждую строку истории — то есть десятки раз за
+    /// один экран.
+    private(set) var stepHistory: [ActivityDay] = []
+
+    /// Та же история, но прочитанная заново.
+    ///
+    /// Для резервной копии: её снимают раз в месяц, зато она обязана содержать
+    /// всё, что записано к этой минуте, а не то, что лежало в памяти с
+    /// последней перестройки.
+    var storedActivity: [ActivityDay] { ActivityHistory(defaults: defaults).days }
 
     /// Расход за день — тот, что действовал в этот день.
     ///
@@ -473,9 +485,30 @@ final class CalorieStore {
     /// такой день выглядит просто сорванным.
     func sleep(on date: Date) -> (hours: Double, shortfall: Double)? {
         guard let hours = activity(on: date)?.sleepHours else { return nil }
-        let history = ActivityHistory(defaults: defaults)
-        let usual = history.usualSleepHours() ?? hours
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let from = calendar.date(byAdding: .day, value: -28, to: today) ?? today
+        let nights = stepHistory.filter { $0.date >= from }.compactMap(\.sleepHours)
+        let usual = nights.count >= 7 ? nights.reduce(0, +) / Double(nights.count) : hours
         return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual))
+    }
+
+    /// Пульс в покое сейчас и насколько он выше привычного.
+    ///
+    /// Нужен не для нормы, а для ответа на «почему вес встал, хотя я всё делаю
+    /// правильно»: неделя подряд с повышенным пульсом покоя говорит, что пора
+    /// отдохнуть, а не резать калории ещё.
+    func restingPulse(now: Date = Date()) -> (value: Int, rise: Int?)? {
+        let recent = pulses(lastDays: 7, now: now)
+        guard let latest = recent.last else { return nil }
+        return (latest, RestingPulse.rise(recent: recent, usual: pulses(lastDays: 28, now: now)))
+    }
+
+    private func pulses(lastDays count: Int, now: Date) -> [Int] {
+        let calendar = Calendar.current
+        guard let from = calendar.date(byAdding: .day, value: -count, to: calendar.startOfDay(for: now))
+        else { return [] }
+        return stepHistory.filter { $0.date >= from }.compactMap(\.restingPulse)
     }
 
     /// Что известно про активность этого дня.
@@ -540,6 +573,7 @@ final class CalorieStore {
             smoothedTDEE = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
         }
 
+        stepHistory = ActivityHistory(defaults: defaults).days
         refreshActivityBaseline(calendar, today: today)
         syncGoalWithExpenditure()
 

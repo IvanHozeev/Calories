@@ -1,6 +1,30 @@
 {
   "sourceLanguage" : "ru",
   "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Calories"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Calories"
+          }
+        }
+      }
+    },
     "NSCameraUsageDescription" : {
       "extractionState" : "manual",
       "localizations" : {

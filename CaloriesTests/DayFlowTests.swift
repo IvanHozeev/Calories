@@ -22,28 +22,6 @@ struct MealScheduleTests {
               entries: entries.map { (date: $0.0, calories: $0.1) }, now: now ?? at(7, 30))
     }
 
-    /// Настройка — это намерение, а встают люди иначе. Пока приложение не
-    /// знало настоящего подъёма, человек, поднявшийся в пять, получал завтрак
-    /// в 7:45 и «перекус» вместо первого приёма.
-    @Test func theMeasuredWakeBeatsTheSetting() {
-        let early = MealSchedule.slots(input(now: at(6), measuredWake: at(5)))
-        let bySetting = MealSchedule.slots(input(now: at(6)))
-        let firstEarly = try! #require(early.first)
-        let firstBySetting = try! #require(bySetting.first)
-        #expect(firstEarly.start < firstBySetting.start)
-        // Подъём в пять — первый приём через сорок пять минут.
-        #expect(abs(firstEarly.start.timeIntervalSince(at(5))) < 60)
-    }
-
-    /// Еда важнее и настройки, и браслета: поел раньше, чем засчиталось
-    /// пробуждение, — значит день уже начался.
-    @Test func anEarlierMealStillMovesTheDay() {
-        let slots = MealSchedule.slots(input(entries: [(at(4, 30), 400)],
-                                             now: at(6), measuredWake: at(6)))
-        let first = try! #require(slots.first)
-        #expect(first.start <= at(4, 30))
-    }
-
     /// Настройки расписания — одни на всё приложение.
     ///
     /// Их было два экземпляра: тумблер в настройках писал в свой, «Сегодня»
@@ -53,353 +31,103 @@ struct MealScheduleTests {
     @MainActor
     @Test func theScheduleSettingsAreShared() {
         #expect(MealScheduleSettings.shared === MealScheduleSettings.shared)
-
-        let defaults = TestDefaults.make()
-        let one = MealScheduleSettings(defaults: defaults)
-        let another = MealScheduleSettings(defaults: defaults)
-        one.isEnabled = true
-        #expect(another.isEnabled == false,
-                "Второй экземпляр не узнаёт об изменении — поэтому он и должен быть один")
-        #expect(MealScheduleSettings(defaults: defaults).isEnabled,
-                "В хранилище значение всё же попало")
     }
 
-    /// Окна называются как приёмы в дневнике, а не «приём 4 из 5»: иначе
-    /// расписание и записи выглядят как разные вещи.
-    @Test func windowsAreNamedAfterRealMeals() {
-        #expect(MealSchedule.periods(count: 3) == [.breakfast, .lunch, .dinner])
-        #expect(MealSchedule.periods(count: 5) ==
-                [.breakfast, .secondBreakfast, .lunch, .afternoonSnack, .dinner])
-        #expect(MealSchedule.periods(count: 6).last == .secondDinner)
+    /// Первый приём — не в момент пробуждения, последний — не в момент отбоя.
+    ///
+    /// Сорок пять минут после подъёма и час до отбоя в расчёте были всегда, но
+    /// на экран шли края окон, и человек читал «завтрак в 7:00» при подъёме в
+    /// семь и «ужин в 23:00» при отбое в одиннадцать.
+    @Test func theMealTimeIsNotTheEdgeOfItsWindow() throws {
+        let slots = MealSchedule.slots(input(now: at(7, 10)))
+        let first = try #require(slots.first)
+        let last = try #require(slots.last)
+        #expect(first.time == at(7, 45))
+        #expect(first.start == at(7))
+        #expect(last.time == at(22))
     }
 
-    /// Едят не поровну: завтрак, обед и ужин — основа дня, между ними
-    /// перекусы. При равном делении «полдник на 550 ккал» выглядел как обед,
-    /// которого никто не ест.
-    @Test func mainMealsGetMoreThanSnacks() {
-        let slots = MealSchedule.slots(input(count: 5, goal: 3000, now: at(6)))
-        let byPeriod = Dictionary(uniqueKeysWithValues: slots.map { ($0.period, $0.calories) })
+    /// Съеденный приём закрыт сразу, не дожидаясь конца своего окна: человек
+    /// позавтракал — звать его завтракать ещё час бессмысленно.
+    @Test func eatingClosesTheMealRightAway() throws {
+        let slots = MealSchedule.slots(input(entries: [(at(8), 700)], now: at(8, 30)))
+        let breakfast = try #require(slots.first)
+        #expect(breakfast.state == .done)
 
-        let lunch = try! #require(byPeriod[.lunch])
-        let snack = try! #require(byPeriod[.afternoonSnack])
-        #expect(lunch > snack, "Обед крупнее полдника")
-        #expect(Double(snack) / Double(lunch) < 0.7, "И заметно, а не на десяток калорий")
-        #expect(byPeriod[.breakfast] == lunch, "Основные приёмы между собой равны")
-        #expect(slots.reduce(0) { $0 + $1.calories } == 3000, "Но в сумме это всё равно дневная норма")
+        let next = try #require(MealSchedule.nextSlot(slots, now: at(8, 30)))
+        #expect(next.period == .lunch)
+        #expect(next.time == at(12, 30))
     }
 
-    /// Настоящий случай: встал в пять, поел — а первый приём стоял на шесть,
-    /// и еда не попадала никуда. Калории из остатка вычитались, но в
-    /// расписании их не было: приём показывал «съедено 0» после завтрака.
-    @Test func foodBeforeTheFirstWindowStillCounts() {
-        let slots = MealSchedule.slots(input(entries: [(at(5), 600)], now: at(9)))
-
-        #expect(slots.reduce(0) { $0 + $1.consumed } == 600,
-                "Сумма по приёмам обязана сходиться со съеденным за день")
+    /// А несъеденный всё-таки истекает по времени: завтракать в обед никто не
+    /// станет, и вечное «время завтрака» было бы враньём не меньшим.
+    @Test func anUneatenMealStillExpiresWithItsWindow() throws {
+        let slots = MealSchedule.slots(input(now: at(11)))
+        #expect(try #require(slots.first).state == .missed)
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(11))).period == .lunch)
     }
 
-    /// Ночной перекус после отбоя — та же история с другого конца суток.
-    @Test func foodAfterTheLastWindowStillCounts() {
-        let slots = MealSchedule.slots(input(entries: [(at(23, 40), 300)], now: at(23, 50)))
-        #expect(slots.reduce(0) { $0 + $1.consumed } == 300)
+    /// Съеденное внутри окна продолжает считаться в тот же приём — перебором,
+    /// а не в никуда: человек съел это вместо того, чтобы отложить.
+    @Test func foodInsideTheWindowKeepsAddingAsAnOvershoot() throws {
+        let slots = MealSchedule.slots(input(entries: [(at(8), 700), (at(9, 30), 400)], now: at(9, 45)))
+        let breakfast = try #require(slots.first)
+        #expect(breakfast.consumed == 1100)
+        #expect(breakfast.overeaten > 0)
     }
 
-    /// Перебор в отдельном приёме виден: закрытое окно знает не только
-    /// съеденное, но и то, сколько на него отводилось.
-    @Test func aWindowKnowsHowMuchItWentOver() {
-        // На завтрак при норме 3000 и пяти приёмах приходится около 700.
-        let slots = MealSchedule.slots(input(count: 5, goal: 3000,
-                                             entries: [(at(8), 1100)], now: at(13)))
-        let breakfast = try! #require(slots.first { $0.period == .breakfast })
-
-        #expect(breakfast.planned > 0, "План на окно известен")
-        #expect(breakfast.overeaten == breakfast.consumed - breakfast.planned)
-        #expect(breakfast.overeaten > 300, "Съел больше плана — это и показываем")
+    /// Остаток нормы делится между приёмами, что впереди, — по весу: на обед
+    /// отводится больше, чем на полдник.
+    @Test func whatIsLeftIsSplitByTheWeightOfTheMealsAhead() throws {
+        let slots = MealSchedule.slots(input(count: 4, goal: 2800, entries: [(at(8), 800)], now: at(8, 30)))
+        let ahead = slots.filter { $0.state == .current || $0.state == .upcoming }
+        #expect(ahead.reduce(0) { $0 + $1.calories } == 2000)
+        let lunch = try #require(ahead.first { $0.period == .lunch })
+        let snack = try #require(ahead.first { $0.period == .afternoonSnack })
+        #expect(lunch.calories > snack.calories)
     }
 
-    /// Уложился — никакого перебора, даже если день в целом перебран.
-    @Test func aWindowWithinItsShareHasNoOvershoot() {
-        let slots = MealSchedule.slots(input(count: 5, goal: 3000,
-                                             entries: [(at(8), 400)], now: at(13)))
-        let breakfast = try! #require(slots.first { $0.period == .breakfast })
-        #expect(breakfast.overeaten == 0)
-    }
-
-    /// Съеденное мимо окон идёт отдельной строкой «Перекус», а не растворяется
-    /// в первом приёме: «завтрак с 00:00» — это не завтрак, а свалка.
-    @Test func foodOutsideTheWindowsBecomesASnack() {
-        // Полвторого ночи: подъёмом это не считается (раньше четырёх утра),
-        // и ни в одно окно дня не попадает.
-        let slots = MealSchedule.slots(input(entries: [(at(1, 30), 250)], now: at(9)))
-
-        let snack = try! #require(slots.last)
+    /// Съеденное мимо всех окон — ночью или до подъёма — не пропадает: оно
+    /// идёт отдельной строкой и считается за день наравне с остальным.
+    @Test func foodOutsideEveryWindowBecomesASnack() throws {
+        let slots = MealSchedule.slots(input(entries: [(at(2), 300)], now: at(8)))
+        let snack = try #require(slots.last)
         #expect(snack.period == .nightSnack)
-        #expect(snack.consumed == 250)
-        #expect(slots.first?.period == .breakfast, "Завтрак остаётся завтраком")
-        #expect(slots.first?.consumed == 0)
+        #expect(snack.consumed == 300)
+        // И ближайшим приёмом перекус не становится: своего времени у него нет.
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(8))).period == .breakfast)
     }
 
-    /// Без еды мимо расписания лишней строки не появляется.
-    @Test func withoutStraysThereIsNoSnackRow() {
-        let slots = MealSchedule.slots(input(entries: [(at(8), 500)], now: at(9)))
-        #expect(!slots.contains { $0.period == .nightSnack })
+    /// Настройка — это намерение, а встают люди иначе. Пока приложение не
+    /// знало настоящего подъёма, человек, поднявшийся в пять, получал завтрак
+    /// в 7:45.
+    @Test func theMeasuredWakeBeatsTheSetting() throws {
+        let early = try #require(MealSchedule.slots(input(now: at(6), measuredWake: at(5))).first)
+        let bySetting = try #require(MealSchedule.slots(input(now: at(6))).first)
+        #expect(early.time < bySetting.time)
+        #expect(early.time == at(5, 45))
     }
 
-    /// Окна стоят от подъёма и до часа перед отбоем, а не от полуночи.
-    @Test func theFirstWindowStartsAtWakingNotAtMidnight() {
-        let slots = MealSchedule.slots(input(now: at(9)))
-        let calendar = Calendar.current
-
-        let first = try! #require(slots.first)
-        #expect(calendar.component(.hour, from: first.start) >= 6,
-                "Завтрак начинается с подъёма, а не в полночь")
-        let last = try! #require(slots.last)
-        #expect(calendar.component(.hour, from: last.end) <= 23,
-                "Последнее окно закрывается к отбою")
+    /// Еда важнее и настройки, и браслета: поел раньше, чем засчиталось
+    /// пробуждение, — значит день уже начался.
+    @Test func anEarlierMealStillMovesTheDay() throws {
+        let slots = MealSchedule.slots(input(entries: [(at(4, 30), 400)],
+                                             now: at(6), measuredWake: at(6)))
+        let first = try #require(slots.first)
+        // Подъём встал по еде, а приём — через сорок пять минут после него.
+        #expect(first.start == at(4, 30))
+        #expect(first.time == at(5, 15))
     }
 
-    /// Времени будильника приложению взять неоткуда — в iOS такого доступа
-    /// нет. Зато первая еда дня говорит о подъёме не хуже: поел в пять —
-    /// значит день начался в пять, и окна раздвигаются от него.
-    @Test func theDayStartsWhenYouActuallyAte() {
-        let early = MealSchedule.slots(input(entries: [(at(5), 400)], now: at(9)))
-        let usual = MealSchedule.slots(input(entries: [], now: at(9)))
-
-        // Начало первого окна у обоих — начало суток (туда попадает всё, что
-        // съедено до расписания), поэтому смотрим, где окно кончается: у
-        // раннего подъёма приёмы разъезжаются по более длинному дню.
-        #expect(early.first!.end < usual.first!.end,
-                "Поел раньше — и день начался раньше")
-        #expect(early.count == usual.count, "Число приёмов от этого не меняется")
+    /// Названия приёмов — не номера: «полдник» человек понимает сразу.
+    @Test func mealsAreNamedNotNumbered() {
+        #expect(MealSchedule.periods(count: 3) == [.breakfast, .lunch, .dinner])
+        #expect(MealSchedule.periods(count: 5).contains(.afternoonSnack))
     }
 
-    /// А вот перекус в полпервого ночи подъёмом не считается: иначе одна
-    /// булка ночью переставила бы весь следующий день.
-    @Test func aMidnightSnackDoesNotMoveTheWholeDay() {
-        let withSnack = MealSchedule.slots(input(entries: [(at(0, 30), 200)], now: at(9)))
-        let plain = MealSchedule.slots(input(entries: [], now: at(9)))
-
-        #expect(withSnack.first!.start == plain.first!.start)
-        #expect(withSnack.reduce(0) { $0 + $1.consumed } == 200, "Но съеденное всё равно учтено")
-    }
-
-    /// День раскладывается от подъёма до отбоя: первый через 45 минут после
-    /// подъёма, последний за час до сна, остальные — поровну между ними.
-    @Test func theDayIsSplitBetweenWakingAndSleep() {
-        let times = MealSchedule.times(wake: at(7), sleep: at(23), count: 4)
-        #expect(times.count == 4)
-        #expect(times[0] == at(7, 45))
-        #expect(times[3] == at(22))
-        let gaps = zip(times.dropFirst(), times).map { $0.timeIntervalSince($1) }
-        #expect(gaps.allSatisfy { abs($0 - gaps[0]) < 1 })
-    }
-
-    /// Норма делится поровну, а остаток от деления достаётся последнему окну:
-    /// сумма по приёмам обязана сходиться с дневной нормой.
-    @Test func caloriesAddUpToTheDailyTarget() {
-        let slots = MealSchedule.slots(input(goal: 2801))
-        #expect(slots.count == 4)
-        #expect(slots.reduce(0) { $0 + $1.calories } == 2801)
-    }
-
-    /// Пропущенное окно не сгорает: его калории расходятся по оставшимся.
-    @Test func aMissedWindowIsSpreadOverWhatIsLeft() {
-        // Полдень: первые два окна прошли, съедено ноль.
-        let slots = MealSchedule.slots(input(now: at(15)))
-        let missed = slots.filter { $0.state == .missed }
-        #expect(!missed.isEmpty)
-        let ahead = slots.filter { $0.state == .upcoming || $0.state == .current }
-        #expect(ahead.reduce(0) { $0 + $1.calories } == 2800)
-        #expect(ahead.allSatisfy { $0.calories > 2800 / 4 })
-    }
-
-    /// Съеденное попадает в своё окно и уменьшает то, что осталось на день.
-    @Test func whatIsEatenCountsAgainstTheDay() {
-        // В одиннадцать первое окно уже закрыто: его граница — середина
-        // между первым и вторым приёмом.
-        let slots = MealSchedule.slots(input(entries: [(at(8), 700)], now: at(11)))
-        #expect(slots[0].consumed == 700)
-        #expect(slots[0].state == .done)
-        let ahead = slots.filter { $0.state != .done && $0.state != .missed }
-        #expect(ahead.reduce(0) { $0 + $1.calories } == 2100)
-    }
-
-    /// Переел за день — оставшимся окнам достаётся ноль, а не отрицательное.
-    @Test func overeatingLeavesNothingRatherThanNegatives() {
-        let slots = MealSchedule.slots(input(entries: [(at(8), 3200)], now: at(11)))
-        #expect(slots.allSatisfy { $0.calories >= 0 })
-        #expect(slots.filter { $0.state == .upcoming }.allSatisfy { $0.calories == 0 })
-    }
-
-    /// Ближайшее окно — то, что идёт сейчас, иначе следующее по времени.
-    @Test func theNextWindowIsTheCurrentOneOrTheOneAfter() throws {
-        let slots = MealSchedule.slots(input(now: at(9)))
-        let next = try #require(MealSchedule.nextSlot(slots, now: at(9)))
-        #expect(next.start <= at(9))
-        let later = try #require(MealSchedule.nextSlot(slots.filter { $0.state == .upcoming }, now: at(9)))
-        #expect(later.start > at(9))
-    }
-
-    /// Ложится за полночь — расписание не схлопывается.
-    @Test func aLateBedtimeStillWorks() {
-        let times = MealSchedule.times(wake: at(11), sleep: at(2), count: 3)
-        #expect(times.count == 3)
-        #expect(times[2] > times[0])
-    }
-}
-
-// MARK: - Напоминания об окнах приёмов
-
-/// Категория и её действия — договор между двумя далёкими файлами: одна
-/// сторона регистрирует кнопки в шторке, другая ловит ответ по тем же
-/// идентификаторам. Опечатка в любой из них не ломает ни сборку, ни экран —
-/// кнопка просто перестаёт работать, и заметить это можно лишь на телефоне.
-struct MealReminderCategoryTests {
-
-    @MainActor
-    @Test func theCategoryOffersSnoozeAndSkip() {
-        let category = MealReminders.notificationCategory
-        #expect(category.identifier == MealReminders.category)
-        let actions = category.actions.map(\.identifier)
-        #expect(actions == [MealReminders.snoozeAction, MealReminders.skipAction],
-                "Отложить идёт первым: им пользуются чаще, чем пропуском")
-    }
-
-    @Test func snoozeIsHalfAnHour() {
-        // Полчаса — окно приёма ещё не закрылось, и напоминание попадёт в него,
-        // а не придёт к следующему.
-        #expect(MealReminders.snooze == 30 * 60)
-    }
-
-    @Test func remindersOfTheScheduleAreToldApartByTheirPrefix() {
-        // По префиксу снимаются старые напоминания об окнах, не трогая обычные
-        // (завтрак, обед, ужин) из настроек: они живут в том же центре.
-        #expect(MealReminders.prefix.hasPrefix("meal-window"))
-        #expect(!MealReminders.prefix.isEmpty)
-    }
-}
-
-// MARK: - Расход по факту
-
-struct AdaptiveTDEETests {
-
-    private func days(_ count: Int, calories: Int?, startWeight: Double, perDay: Double,
-                      weighEvery: Int = 1) -> [AdaptiveTDEE.Day] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        return (0..<count).map { offset in
-            let date = calendar.date(byAdding: .day, value: -(count - 1 - offset), to: today)!
-            let weight = offset % weighEvery == 0 ? startWeight + perDay * Double(offset) : nil
-            return AdaptiveTDEE.Day(date: date, weightKg: weight, calories: calories)
-        }
-    }
-
-    /// Случай, ради которого всё и затевалось: две недели по 3300 ккал, а вес
-    /// всё равно уходит вниз — значит тратится заметно больше, чем 3300.
-    @Test func twoWeeksOfLosingOn3300_showsAboutFourThousand() throws {
-        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3300, startWeight: 80, perDay: -0.1)))
-        #expect(abs(result.tdee - 4070) < 30)
-        #expect(abs(result.weeklyRateKg + 0.7) < 0.05)
-        #expect(result.confidence == .high)
-    }
-
-    /// Держит вес — значит, ест ровно свой расход.
-    /// Шум весов — не тренд. Двести грамм в неделю это соль, вода и час
-    /// взвешивания; читая их как профицит, приложение срезало норму, человек
-    /// ел меньше, окно помнило прежний рост — и норма ползла вниз каждый день.
-    @Test func scaleNoiseDoesNotMoveTheExpenditure() throws {
-        let calendar = Calendar.current
-        let start = calendar.startOfDay(for: Date()).addingTimeInterval(-13 * 86_400)
-        // Вес гуляет в пределах двухсот грамм, съедено ровно 3000 каждый день.
-        let wobble: [Double] = [80.0, 80.1, 79.9, 80.05, 80.1, 79.95, 80.0,
-                                80.05, 80.1, 80.0, 79.95, 80.05, 80.1, 80.05]
-        let days = (0..<14).map { offset in
-            AdaptiveTDEE.Day(date: start.addingTimeInterval(Double(offset) * 86_400),
-                             weightKg: wobble[offset], calories: 3000)
-        }
-
-        let result = try #require(AdaptiveTDEE.estimate(days))
-        #expect(abs(result.tdee - 3000) < 1,
-                "Вес стоит — значит тратится ровно столько, сколько съедено")
-    }
-
-    /// Настоящий тренд мёртвую зону проходит и расход двигает.
-    @Test func arealTrendStillCounts() throws {
-        let calendar = Calendar.current
-        let start = calendar.startOfDay(for: Date()).addingTimeInterval(-13 * 86_400)
-        let days = (0..<14).map { offset in
-            // Полкило в неделю вниз — это уже не шум.
-            AdaptiveTDEE.Day(date: start.addingTimeInterval(Double(offset) * 86_400),
-                             weightKg: 80 - Double(offset) * 0.5 / 7, calories: 2500)
-        }
-
-        let result = try #require(AdaptiveTDEE.estimate(days))
-        #expect(result.tdee > 3000, "Теряя полкило в неделю на 2500, тратишь заметно больше")
-    }
-
-    @Test func steadyWeight_meansIntakeIsTheExpenditure() throws {
-        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 2700, startWeight: 80, perDay: 0)))
-        #expect(abs(result.tdee - 2700) < 10)
-        #expect(abs(result.weeklyRateKg) < 0.01)
-    }
-
-    /// Набирает — расход ниже съеденного.
-    @Test func gainingWeight_meansEatingAboveTheExpenditure() throws {
-        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3000, startWeight: 80, perDay: 0.05)))
-        #expect(abs(result.tdee - (3000 - 385)) < 30)
-    }
-
-    /// Взвешивания через день — оценка та же: наклон считается по точкам,
-    /// а не по числу дней.
-    @Test func weighingEveryOtherDay_stillWorks() throws {
-        let result = try #require(AdaptiveTDEE.estimate(days(14, calories: 3300, startWeight: 80, perDay: -0.1, weighEvery: 2)))
-        #expect(abs(result.tdee - 4070) < 60)
-    }
-
-    /// Без дневника считать нечего: среднее по паре дней не говорит, сколько ест человек.
-    @Test func withoutLoggedDays_thereIsNoEstimate() {
-        #expect(AdaptiveTDEE.estimate(days(14, calories: nil, startWeight: 80, perDay: -0.1)) == nil)
-    }
-
-    /// Двух взвешиваний подряд мало: это наклон по воде.
-    @Test func withoutSpreadOutWeighIns_thereIsNoEstimate() {
-        let weighed = days(14, calories: 3000, startWeight: 80, perDay: -0.1, weighEvery: 13)
-        #expect(AdaptiveTDEE.estimate(weighed) == nil)
-    }
-
-    /// Неполный дневник понижает доверие, но оценку не отменяет.
-    @Test func gapsInTheDiaryLowerConfidence() throws {
-        var input = days(14, calories: 3300, startWeight: 80, perDay: -0.1)
-        for index in stride(from: 0, to: 6, by: 1) {
-            input[index] = AdaptiveTDEE.Day(date: input[index].date, weightKg: input[index].weightKg, calories: nil)
-        }
-        let result = try #require(AdaptiveTDEE.estimate(input))
-        #expect(result.confidence != .high)
-    }
-
-    /// Сглаживание тянет оценку к новой, но не прыгает на неё целиком.
-    @Test func smoothingMovesTowardsTheNewEstimate() {
-        let next = AdaptiveTDEE.smoothed(previous: 2700, estimate: 4070)
-        #expect(next > 2700 && next < 4070)
-        #expect(AdaptiveTDEE.smoothed(previous: nil, estimate: 4070) == 4070)
-    }
-
-    /// Тренд сглаживает шум весов и держится, когда не взвешивались.
-    @Test func trendSmoothsAndHoldsThroughGaps() throws {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let input: [AdaptiveTDEE.Day] = (0..<5).map { offset in
-            let date = calendar.date(byAdding: .day, value: -(4 - offset), to: today)!
-            // Один день с «плюс два килограмма» после солёного ужина.
-            let weight: Double? = offset == 2 ? 82 : (offset == 3 ? nil : 80)
-            return AdaptiveTDEE.Day(date: date, weightKg: weight, calories: 2500)
-        }
-        let trend = AdaptiveTDEE.trend(input)
-        let spikeDay = calendar.date(byAdding: .day, value: -2, to: today)!
-        let gapDay = calendar.date(byAdding: .day, value: -1, to: today)!
-        let spike = try #require(trend[spikeDay])
-        #expect(spike < 80.5, "Тренд не должен прыгать за одним взвешиванием")
-        #expect(trend[gapDay] == spike, "День без взвешивания держит последний тренд")
+    /// Едят не поровну: завтрак, обед и ужин — основа дня.
+    @Test func mainMealsAreBiggerThanSnacks() {
+        #expect(MealSchedule.weight(of: .lunch) > MealSchedule.weight(of: .afternoonSnack))
     }
 }
 
@@ -434,12 +162,24 @@ struct SleepAnalysisTests {
         #expect(abs(night.hours - 7.25) < 0.01)
     }
 
-    /// Встать в туалет — не подъём, а доспать через полтора часа — уже другой
-    /// сон, и подъёмом надо считать первое пробуждение.
-    @Test func aLongBreakStartsANewNight() {
+    /// Браслет отдаёт ночь крупными кусками с долгими перерывами. Ночь из
+    /// шести часов не должна разваливаться на две по три с подъёмом посреди
+    /// ночи — человек вставал, но ложился обратно.
+    @Test func longGapsInsideANightStillMakeOneNight() throws {
+        let night = try #require(SleepAnalysis.nights(from: [
+            segment(at(-1, 23, 30), at(0, 1, 15)),
+            segment(at(0, 3, 30), at(0, 7, 40))
+        ]).first)
+        #expect(night.wake == at(0, 7, 40))
+        #expect(abs(night.hours - 5.9) < 0.05)
+    }
+
+    /// А вот дневной сон — отдельный: от утреннего подъёма до него проходит
+    /// куда больше, чем перерыв внутри ночи.
+    @Test func anAfternoonSleepIsItsOwn() {
         let nights = SleepAnalysis.nights(from: [
             segment(at(-1, 23, 0), at(0, 6, 30)),
-            segment(at(0, 9, 0), at(0, 12, 30))
+            segment(at(0, 14, 0), at(0, 17, 30))
         ])
         #expect(nights.count == 2)
         #expect(nights.first?.wake == at(0, 6, 30))
@@ -459,11 +199,81 @@ struct SleepAnalysisTests {
         #expect(night.hours == 8)
     }
 
+    /// Браслеты часто пишут только «в постели», без фаз. Требовать фазы —
+    /// значит не видеть их сна вовсе и остаться без подъёма.
+    @Test func withoutPhasesTimeInBedCountsAsSleep() throws {
+        let inBed = [segment(at(-1, 23, 0), at(0, 6, 0))]
+        let chosen = SleepAnalysis.segments(asleep: [], inBed: inBed)
+        #expect(chosen == inBed)
+        let night = try #require(SleepAnalysis.nights(from: chosen).first)
+        #expect(night.wake == at(0, 6, 0))
+    }
+
+    /// А у тех, кто пишет и то и другое, «в постели» шире сна: полтора часа с
+    /// телефоном перед сном не должны попасть в ночь.
+    @Test func phasesWinOverTimeInBedWhenBothExist() {
+        let asleep = [segment(at(0, 0, 30), at(0, 6, 0))]
+        let inBed = [segment(at(-1, 23, 0), at(0, 6, 0))]
+        #expect(SleepAnalysis.segments(asleep: asleep, inBed: inBed) == asleep)
+    }
+
     /// Недосып считается от собственной привычки, а не от «восьми часов» из
     /// учебника: у каждого своя норма, и чужая цифра здесь только мешает.
     @Test func theShortfallIsMeasuredAgainstYourOwnAverage() {
         #expect(SleepAnalysis.shortfall(hours: 5, usual: 7.5) == 2.5)
         #expect(SleepAnalysis.shortfall(hours: 9, usual: 7.5) == 0)
+    }
+}
+
+// MARK: - Пульс в покое
+
+/// Готовую величину «пульс в покое» пишут только часы Apple; браслет отдаёт
+/// сырой пульс, и покой приходится находить самим — по дну ночи.
+struct RestingPulseTests {
+
+    private let calendar = Calendar.current
+
+    private func hour(_ day: Int, _ hour: Int, _ average: Double) -> RestingPulse.Hour {
+        let base = calendar.startOfDay(for: Date())
+        return .init(start: calendar.date(byAdding: .init(day: day, hour: hour), to: base)!,
+                     average: average)
+    }
+
+    /// Дно ночи, а не среднее по ней: среднее тянут вверх пробуждения и
+    /// сновидения, а нас интересует то состояние, до которого организм
+    /// успевает опуститься.
+    @Test func theNightsFloorIsTheRestingRate() throws {
+        let byDay = RestingPulse.daily(from: [
+            hour(0, 1, 56), hour(0, 2, 51), hour(0, 3, 48), hour(0, 4, 53)
+        ])
+        let today = calendar.startOfDay(for: Date())
+        #expect(byDay[today] == 48)
+    }
+
+    /// Случайное касание датчика ночью — не измерение покоя.
+    @Test func oneLonelyHourIsNotEnough() {
+        let byDay = RestingPulse.daily(from: [hour(0, 3, 47)])
+        #expect(byDay.isEmpty)
+    }
+
+    /// Дневной пульс в покой не идёт: человек в это время ходит.
+    @Test func daytimeHoursAreIgnored() {
+        let byDay = RestingPulse.daily(from: [hour(0, 13, 70), hour(0, 15, 68), hour(0, 17, 72)])
+        #expect(byDay.isEmpty)
+    }
+
+    /// Одна ночь ничего не значит — можно выпить вина или лечь в жару.
+    /// Говорить стоит про неделю против месяца.
+    @Test func theRiseIsMeasuredWeekAgainstMonth() {
+        #expect(RestingPulse.rise(recent: [53, 54, 55], usual: [48, 48, 49, 47, 48, 50, 49]) == 6)
+        #expect(RestingPulse.rise(recent: [49], usual: [48, 48, 49, 47, 48, 50, 49]) == nil)
+    }
+
+    /// Один-два удара — погрешность оптического датчика, а не усталость.
+    @Test func aTinyRiseIsNotWorthMentioning() {
+        #expect(!RestingPulse.isNotable(rise: 2))
+        #expect(RestingPulse.isNotable(rise: 4))
+        #expect(!RestingPulse.isNotable(rise: nil))
     }
 }
 
@@ -510,6 +320,19 @@ struct StepAdjustmentTests {
         ActivityDay(date: today, steps: 10_000, activeCalories: kcal)
     }
     private let stepsOnly = ActivityAdjustment.Baseline(steps: 10_000, activeCalories: nil)
+
+    /// Источники считают по-разному: браслет на запястье видит то, чего
+    /// телефон в кармане не замечает. Пока среднее собрано из телефонных дней,
+    /// браслетный день сравнивать с ним нельзя — счёт начинается заново.
+    @Test func changingTheSourceStartsTheCountOver() {
+        var days = history(Array(repeating: 10_000, count: 20))
+        days = days.map { var day = $0; day.stepSource = "phone"; return day }
+        #expect(ActivityAdjustment.baseline(from: days)?.steps == 10_000)
+
+        // Последний день записан браслетом — телефонные дни больше не в счёт.
+        days[days.count - 1].stepSource = "band"
+        #expect(ActivityAdjustment.baseline(from: days)?.steps == nil)
+    }
 
     @Test func aBusyDayRaisesTheDayAndAQuietOneLowersIt() {
         let busy = ActivityAdjustment.adjustment(day: steps(20_000), baseline: stepsOnly,

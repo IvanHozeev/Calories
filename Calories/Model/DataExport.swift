@@ -144,7 +144,7 @@ extension CalorieStore {
             fastDays: fastDays.map {
                 .init(date: $0.date, kind: $0.kindRaw, startedAt: $0.startedAt, endedAt: $0.endedAt)
             },
-            steps: stepHistory.isEmpty ? nil : stepHistory
+            steps: storedActivity.isEmpty ? nil : storedActivity
         )
     }
 

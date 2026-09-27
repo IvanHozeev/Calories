@@ -71,6 +71,15 @@ enum MealSchedule {
         /// Начало и конец окна, в котором этот приём ждут.
         let start: Date
         let end: Date
+        /// Время самого приёма — середина окна по расписанию.
+        ///
+        /// Раньше на экран шли края окна, и человек видел «завтрак в 7:00» при
+        /// подъёме в семь и «ужин в 23:00» при отбое в одиннадцать: то есть еду
+        /// ровно когда открыл глаза и ровно перед сном. Сорок пять минут после
+        /// подъёма и час до отбоя в расчёте были всегда — просто не доходили до
+        /// экрана. Окно и приём — разные вещи: по окну решают, куда засчитать
+        /// съеденное, а человеку показывают приём.
+        let time: Date
         /// Сколько калорий на него отведено сейчас — с учётом уже съеденного
         /// и пропущенных окон.
         let calories: Int
@@ -93,7 +102,7 @@ enum MealSchedule {
         enum State: String, Equatable {
             /// Окно ещё впереди.
             case upcoming
-            /// Идёт прямо сейчас.
+            /// Идёт прямо сейчас и ещё не съеден.
             case current
             /// Закрыто и съедено.
             case done
@@ -199,7 +208,12 @@ enum MealSchedule {
                 ? Int((Double(input.dailyGoal) * weight(of: period) / totalWeight).rounded())
                 : 0
         }
-        let upcoming = bounds.enumerated().filter { $0.element.1 > input.now }.map(\.offset)
+        // Делим остаток между теми, до кого ещё не дошли: съеденное окно в
+        // дележе не участвует, даже если его время ещё не кончилось. Иначе
+        // позавтракавший видел бы, что на завтрак ему «осталось» ещё шестьсот.
+        let upcoming = bounds.enumerated()
+            .filter { $0.element.1 > input.now && consumed[$0.offset] == 0 }
+            .map(\.offset)
         // Остаток делится не поровну, а по весу приёма: на обед отводится
         // больше, чем на полдник.
         let weightAhead = upcoming.reduce(0.0) { $0 + weight(of: periods[$1]) }
@@ -207,9 +221,16 @@ enum MealSchedule {
 
         for (index, bound) in bounds.enumerated() {
             let eaten = consumed[index]
+            // Съеденный приём закрыт сразу, не дожидаясь конца окна: человек
+            // позавтракал — значит завтрак позади, и звать его завтракать ещё
+            // час бессмысленно. А несъеденный всё-таки истекает по времени:
+            // завтракать в обед никто не станет, и вечное «время завтрака»
+            // было бы враньём не меньшим.
             let state: Slot.State
-            if bound.1 <= input.now {
-                state = eaten > 0 ? .done : .missed
+            if eaten > 0 {
+                state = .done
+            } else if bound.1 <= input.now {
+                state = .missed
             } else if bound.0 <= input.now {
                 state = .current
             } else {
@@ -230,7 +251,7 @@ enum MealSchedule {
                 calories = eaten
             }
             result.append(Slot(index: index, period: periods[index], start: bound.0, end: bound.1,
-                               calories: calories, planned: planned[index],
+                               time: times[index], calories: calories, planned: planned[index],
                                consumed: eaten, state: state))
         }
         remaining -= handed
@@ -240,15 +261,21 @@ enum MealSchedule {
         if outside > 0 {
             // Планом перекус не предусмотрен вовсе — потому он и перекус.
             result.append(Slot(index: result.count, period: .nightSnack,
-                               start: input.now, end: input.now,
+                               start: input.now, end: input.now, time: input.now,
                                calories: outside, planned: 0,
                                consumed: outside, state: .done))
         }
         return result
     }
 
-    /// Ближайшее окно, ради которого стоит будить напоминание.
-    static func nextSlot(_ slots: [Slot], now: Date) -> Slot? {
-        slots.first { $0.state == .current } ?? slots.first { $0.start > now }
+    /// Ближайший приём: тот, до которого ещё не дошли.
+    ///
+    /// Съеденное окно пропускается, даже если его время ещё не кончилось, —
+    /// приложение должно показывать то, что человек сделал, а не то, что
+    /// написано в расписании. Поел в девять — и на экране сразу следующий
+    /// приём со своим сроком, а не «время завтрака» до половины одиннадцатого.
+    static func nextSlot(_ slots: [Slot], now: Date = Date()) -> Slot? {
+        slots.first { $0.state == .current }
+            ?? slots.first { $0.state == .upcoming && $0.period != .nightSnack }
     }
 }

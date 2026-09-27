@@ -74,6 +74,40 @@ struct StepHistoryTests {
         #expect(history.steps(on: day(-(ActivityHistory.limit + 10))) == nil)
     }
 
+    /// Телефон считает щедрее браслета, и пока слияние брало большее из двух,
+    /// переключение источника ничего не меняло: телефонные цифры навсегда
+    /// перекрывали браслетные.
+    @Test func switchingTheSourceReplacesTheDayInsteadOfKeepingTheBiggerNumber() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberSteps([ActivityDay(date: day(-1), steps: 12_000)], source: nil)
+        history.rememberSteps([ActivityDay(date: day(-1), steps: 9_000)], source: "band")
+
+        #expect(history.days.first?.steps == 9_000)
+        #expect(history.days.first?.stepSource == "band")
+    }
+
+    /// Внутри одного источника правило прежнее: день ещё идёт, и вечерний
+    /// замер больше утреннего.
+    @Test func withinOneSourceTheDayStillOnlyGrows() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberSteps([ActivityDay(date: day(0), steps: 9_000)], source: "band")
+        history.rememberSteps([ActivityDay(date: day(0), steps: 4_000)], source: "band")
+
+        #expect(history.days.first?.steps == 9_000)
+    }
+
+    /// Сон и пульс приходят отдельными запросами и о шагах ничего не знают —
+    /// затирать их они не должны.
+    @Test func rememberingSleepKeepsTheStepsAndTheirSource() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberSteps([ActivityDay(date: day(0), steps: 9_000)], source: "band")
+        history.remember([ActivityDay(date: day(0), steps: 0, sleepHours: 6.5)])
+
+        #expect(history.days.first?.steps == 9_000)
+        #expect(history.days.first?.stepSource == "band")
+        #expect(history.days.first?.sleepHours == 6.5)
+    }
+
     @Test func replaceDropsWhateverWasThere() {
         let history = ActivityHistory(defaults: defaults)
         history.remember([ActivityDay(date: day(-1), steps: 8_000)])

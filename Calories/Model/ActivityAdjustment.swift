@@ -69,7 +69,14 @@ enum ActivityAdjustment {
         guard let from = calendar.date(byAdding: .day, value: -window, to: today) else { return nil }
         let days = history.filter { $0.date >= from && $0.date < today }
 
-        let steps = days.map(\.steps).filter { $0 > 0 }
+        // Шаги считаем только по тому источнику, который считает их сейчас.
+        // Браслет на запястье видит то, чего телефон в кармане не замечает, и
+        // разница доходит до четверти: среднее, собранное наполовину из
+        // телефонных дней, наполовину из браслетных, не описывает ни то ни
+        // другое. После смены источника счёт начинается заново — это честнее,
+        // чем сравнивать сегодняшний день с чужой меркой.
+        let current = history.last { $0.steps > 0 }?.stepSource
+        let steps = days.filter { $0.stepSource == current }.map(\.steps).filter { $0 > 0 }
         let energy = days.compactMap(\.activeCalories).filter { $0 > 0 }
         let result = Baseline(steps: mean(steps), activeCalories: mean(energy))
         return result.isEmpty ? nil : result

@@ -46,11 +46,9 @@ final class HealthInventory {
         [
             ("steps", String(localized: "Шаги")),
             ("activeEnergy", String(localized: "Активные калории")),
-            ("workouts", String(localized: "Тренировки")),
             ("restingHeartRate", String(localized: "Пульс в покое")),
             ("heartRate", String(localized: "Пульс")),
             ("sleep", String(localized: "Сон")),
-            ("hrv", String(localized: "Вариабельность пульса")),
             ("weight", String(localized: "Вес")),
             ("bodyFat", String(localized: "Процент жира"))
         ]
@@ -62,10 +60,8 @@ final class HealthInventory {
         HKQuantityType(.restingHeartRate),
         HKQuantityType(.heartRate),
         HKQuantityType(.bodyMass),
-        HKQuantityType(.heartRateVariabilitySDNN),
         HKQuantityType(.bodyFatPercentage),
-        HKCategoryType(.sleepAnalysis),
-        HKObjectType.workoutType()
+        HKCategoryType(.sleepAnalysis)
     ]
 
     func check() async {
@@ -111,10 +107,6 @@ final class HealthInventory {
             return await quantityRow(id, title, type, .discreteAverage,
                                      unit: HKUnit.count().unitDivided(by: .minute()),
                                      format: { String(format: String(localized: "%lld уд/мин"), Int($0)) }, since: start)
-        case "hrv":
-            return await quantityRow(id, title, HKQuantityType(.heartRateVariabilitySDNN), .discreteAverage,
-                                     unit: .secondUnit(with: .milli),
-                                     format: { String(format: String(localized: "%lld мс"), Int($0)) }, since: start)
         case "weight":
             return await quantityRow(id, title, HKQuantityType(.bodyMass), .discreteAverage,
                                      unit: .gramUnit(with: .kilo),
@@ -123,15 +115,27 @@ final class HealthInventory {
             return await quantityRow(id, title, HKQuantityType(.bodyFatPercentage), .discreteAverage,
                                      unit: .percent(),
                                      format: { String(format: String(localized: "%lld%%"), Int(($0 * 100).rounded())) }, since: start)
-        default:
-            let type: HKSampleType = id == "sleep" ? HKCategoryType(.sleepAnalysis) : HKObjectType.workoutType()
-            let samples = await fetch(type, since: start)
+        case "sleep":
+            let samples = await fetch(HKCategoryType(.sleepAnalysis), since: start)
             let calendar = Calendar.current
+            // Показываем ночь, а не последний отрезок: «Здоровье» хранит сон
+            // кусками по фазам, и «3,3 ч» из одного куска читается как «спал
+            // три часа», хотя ночь была шесть.
+            let found = samples as? [HKCategorySample] ?? []
+            let nights = SleepAnalysis.nights(from: SleepAnalysis.segments(
+                asleep: found.filter { StepStore.asleepValues.contains($0.value) }
+                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) },
+                inBed: found.filter { $0.value == HKCategoryValueSleepAnalysis.inBed.rawValue }
+                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }))
             return Row(id: id, title: title,
-                       days: Set(samples.map { calendar.startOfDay(for: $0.startDate) }).count,
-                       latest: samples.map(\.startDate).max(),
-                       sample: Self.sample(from: samples),
+                       days: Set(nights.map { calendar.startOfDay(for: $0.wake) }).count,
+                       latest: nights.last?.wake,
+                       sample: nights.last.map {
+                           String(format: String(localized: "%@ ч"), String(format: "%.1f", $0.hours))
+                       },
                        sources: Array(Set(samples.map(\.sourceRevision.source.name))).sorted())
+        default:
+            return Row(id: id, title: title, days: 0, latest: nil, sample: nil, sources: [])
         }
     }
 
@@ -186,19 +190,6 @@ final class HealthInventory {
         }
     }
 
-    /// Пример последнего значения человеческими словами.
-    private static func sample(from samples: [HKSample]) -> String? {
-        guard let last = samples.first else { return nil }
-        if let workout = last as? HKWorkout {
-            let minutes = Int((workout.duration / 60).rounded())
-            return String(format: String(localized: "%lld мин"), minutes)
-        }
-        if let category = last as? HKCategorySample {
-            let hours = category.endDate.timeIntervalSince(category.startDate) / 3600
-            return String(format: String(localized: "%@ ч"), String(format: "%.1f", hours))
-        }
-        return nil
-    }
 
     /// Насколько этому виду данных можно доверять как ежедневному.
     ///

@@ -18,11 +18,24 @@ struct MealScheduleStrip: View {
         // По названию, а не по номеру: «полдник» человек понимает сразу, а
         // «приём 4 из 5» заставляет пересчитывать, что это за еда.
         let name = String(localized: String.LocalizationValue(next.period.rawValue))
+        // Черёд приёма настал — зовём есть. Пока не съеден, он и остаётся
+        // текущим, сколько бы времени ни прошло.
         if next.state == .current {
             return next.period.timeTitle
         }
-        return String(format: String(localized: "%1$@ в %2$@"), name,
-                      next.start.formatted(date: .omitted, time: .shortened))
+        // А до тех пор — через сколько. Час в этом месте бесполезен: «обед в
+        // 13:20» надо вычитать из текущего времени в уме.
+        return String(format: String(localized: "%1$@ через %2$@"), name,
+                      MealScheduleStrip.countdown(to: next.time, from: now))
+    }
+
+    /// «2 ч 40 мин» или «25 мин» — сколько ждать.
+    static func countdown(to date: Date, from now: Date) -> String {
+        let minutes = max(0, Int(date.timeIntervalSince(now) / 60))
+        let hours = minutes / 60
+        guard hours > 0 else { return String(format: String(localized: "%lld мин"), minutes) }
+        guard minutes % 60 > 0 else { return String(format: String(localized: "%lld ч"), hours) }
+        return String(format: String(localized: "%1$lld ч %2$lld мин"), hours, minutes % 60)
     }
 
     var body: some View {
@@ -35,9 +48,7 @@ struct MealScheduleStrip: View {
                     Text(verbatim: title)
                         .font(.app(.subheadline, weight: .semibold))
                     if let next {
-                        Text(verbatim: String(format: String(localized: "%1$lld ккал · окно до %2$@"),
-                                              next.calories,
-                                              next.end.formatted(date: .omitted, time: .shortened)))
+                        Text(verbatim: String(format: String(localized: "%lld ккал"), next.calories))
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }
@@ -128,7 +139,7 @@ struct MealScheduleSheet: View {
                         row(slot)
                     }
                 } footer: {
-                    Text("Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.")
+                    Text("Съеденный приём закрывается сразу, не дожидаясь конца окна. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.")
                 }
             }
             // Напоминания переставляются на выходе: пока крутят стрелки,
@@ -166,9 +177,12 @@ struct MealScheduleSheet: View {
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 } else {
-                    Text(verbatim: String(format: String(localized: "%1$@ – %2$@"),
-                                          slot.start.formatted(date: .omitted, time: .shortened),
-                                          slot.end.formatted(date: .omitted, time: .shortened)))
+                    // Время приёма, а не края окна: край первого совпадает с
+                    // подъёмом, край последнего — с отбоем, и человек читал
+                    // это как «поешь ровно когда проснёшься» и «ровно перед
+                    // сном».
+                    Text(verbatim: String(format: String(localized: "в %@"),
+                                          slot.time.formatted(date: .omitted, time: .shortened)))
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }

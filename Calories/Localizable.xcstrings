@@ -347,6 +347,53 @@
         }
       }
     },
+    "%@ кг" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ كجم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ק״ג"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ kg"
+          }
+        }
+      }
+    },
     "%@ осталось" : {
       "localizations" : {
         "ar" : {
@@ -488,6 +535,7 @@
       }
     },
     "%1$@ – %2$@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -529,6 +577,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ – %2$@"
+          }
+        }
+      }
+    },
+    "%1$@ — на %2$lld выше обычного" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — أعلى بـ %2$lld من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ – %2$lld über dem Üblichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — %2$lld above usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$lld por encima de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — %2$lld de plus que d’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — %2$lld מעל הרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ — %2$lld acima do normal"
           }
         }
       }
@@ -627,6 +722,100 @@
         }
       }
     },
+    "%1$@ ч — на %2$@ ч меньше обычного" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ س — أقل بـ %2$@ س من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ Std. – %2$@ Std. weniger als sonst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h less than usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h: %2$@ h menos de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h de moins que d’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ש׳ — %2$@ ש׳ פחות מהרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ h — %2$@ h a menos que o normal"
+          }
+        }
+      }
+    },
+    "%1$@ через %2$@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ بعد %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ in %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ in %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ en %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ dans %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ בעוד %2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ em %2$@"
+          }
+        }
+      }
+    },
     "%1$@, %2$lld мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -675,6 +864,7 @@
       }
     },
     "%1$lld ккал · окно до %2$@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1775,7 +1965,9 @@
         }
       }
     },
-    "%lld%%" : {},
+    "%lld%%" : {
+
+    },
     "+%lld" : {
       "localizations" : {
         "en" : {
@@ -5974,6 +6166,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Adição rápida"
+          }
+        }
+      }
+    },
+    "в %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "um %@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "at %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a las %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "à %@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ב־%@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "às %@"
           }
         }
       }
@@ -25312,6 +25551,53 @@
         }
       }
     },
+    "на %@ ч меньше обычного" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أقل بـ %@ س من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Std. weniger als sonst"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ h less than usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ h menos de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ h de moins que d’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ש׳ פחות מהרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ h a menos que o normal"
+          }
+        }
+      }
+    },
     "На 1 неделю" : {
       "localizations" : {
         "ar" : {
@@ -25910,6 +26196,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recompensas"
+          }
+        }
+      }
+    },
+    "Нагрузка двигает норму дня, но сначала нужно узнать, какой день для тебя обычный, — на это уходит две недели. Сон и пульс норму не двигают: они объясняют день." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحمل يحرّك هدف اليوم، لكن يجب أولًا معرفة شكل يومك المعتاد — وهذا يستغرق أسبوعين. النوم والنبض لا يحركان شيئًا: إنهما يفسّران اليوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Belastung verschiebt das Tagesziel, doch zuerst muss klar sein, was für dich ein gewöhnlicher Tag ist – das dauert zwei Wochen. Schlaf und Puls verschieben nichts: sie erklären den Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Load moves the day's target, but first the app has to learn what a usual day is for you — that takes two weeks. Sleep and heart rate move nothing: they explain the day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La carga mueve el objetivo del día, pero antes hay que saber cómo es un día normal para ti: eso lleva dos semanas. El sueño y el pulso no mueven nada: explican el día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La charge déplace l’objectif du jour, mais il faut d’abord savoir à quoi ressemble votre journée habituelle — cela prend deux semaines. Le sommeil et le pouls ne déplacent rien : ils expliquent la journée."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "העומס מזיז את יעד היום, אבל קודם צריך ללמוד איך נראה אצלך יום רגיל — זה לוקח שבועיים. שינה ודופק לא מזיזים כלום: הם מסבירים את היום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A carga muda a meta do dia, mas antes é preciso saber como é um dia normal para você — isso leva duas semanas. Sono e pulso não mudam nada: eles explicam o dia."
           }
         }
       }
@@ -29294,6 +29627,53 @@
         }
       }
     },
+    "Норма дня сдвигается на разницу с обычным днём: наработал больше — ешь больше. Пока день идёт, вниз она не уходит. Сон и пульс норму не двигают — они объясняют день." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتحرك هدف اليوم بمقدار الفرق عن اليوم المعتاد: بذلت أكثر، فكل أكثر. وما دام اليوم جاريًا فلا ينخفض. النوم والنبض لا يحركان شيئًا — إنهما يفسّران اليوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tagesziel verschiebt sich um den Unterschied zu einem gewöhnlichen Tag: mehr geleistet, mehr gegessen. Solange der Tag läuft, sinkt es nie. Schlaf und Puls verschieben nichts – sie erklären den Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day's target shifts by the difference from a usual day: work more, eat more. While the day is still running it never drops. Sleep and heart rate move nothing — they explain the day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo del día se mueve según la diferencia con un día normal: si te mueves más, comes más. Mientras el día sigue, nunca baja. El sueño y el pulso no mueven nada: explican el día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif du jour bouge selon l’écart avec une journée habituelle : plus vous en faites, plus vous mangez. Tant que la journée continue, il ne baisse jamais. Le sommeil et le pouls ne déplacent rien — ils expliquent la journée."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד היום זז לפי ההפרש מיום רגיל: עשית יותר, תאכל יותר. כל עוד היום נמשך הוא לא יורד. שינה ודופק לא מזיזים כלום — הם מסבירים את היום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta do dia muda conforme a diferença para um dia normal: trabalhou mais, come mais. Enquanto o dia corre, ela nunca cai. Sono e pulso não mudam nada — eles explicam o dia."
+          }
+        }
+      }
+    },
     "Норма дня сдвигается на разницу с обычным днём: находил больше — ешь больше. Пока день идёт, вниз она не уходит." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -29337,6 +29717,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A meta do dia muda conforme a diferença para um dia normal: andou mais, come mais. Enquanto o dia corre, ela nunca cai."
+          }
+        }
+      }
+    },
+    "Норма дня сдвигается на разницу с обычным днём. Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости; если вес при этом встал, отдых поможет вернее, чем ещё меньше еды." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يتحرك هدف اليوم بمقدار الفرق عن اليوم المعتاد. نبض الراحة أعلى من المعتاد — يحدث ذلك مع قلة النوم والتعب المتراكم؛ وإذا توقف الوزن أيضًا فالراحة أجدى من الأكل أقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tagesziel verschiebt sich um den Unterschied zu einem gewöhnlichen Tag. Der Ruhepuls liegt über dem Üblichen – das kommt von kurzen Nächten und angesammelter Müdigkeit; wenn das Gewicht dazu stehenbleibt, hilft Erholung sicherer als noch weniger zu essen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The day's target shifts by the difference from a usual day. Resting heart rate is staying above its usual level — that happens with short nights and accumulated fatigue; if weight has stalled as well, rest will help more surely than eating even less."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo del día se mueve según la diferencia con un día normal. La frecuencia en reposo se mantiene por encima de lo habitual: pasa con el poco sueño y el cansancio acumulado; si además el peso se ha estancado, descansar ayudará más que comer aún menos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’objectif du jour bouge selon l’écart avec une journée habituelle. La fréquence au repos reste au-dessus de son niveau habituel — cela arrive avec le manque de sommeil et la fatigue accumulée ; si le poids stagne aussi, le repos aidera plus sûrement que manger encore moins."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד היום זז לפי ההפרש מיום רגיל. הדופק במנוחה נשאר מעל הרגיל — זה קורה מחוסר שינה ומעייפות מצטברת; ואם גם המשקל נתקע, מנוחה תעזור יותר מלאכול עוד פחות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta do dia muda conforme a diferença para um dia normal. A frequência em repouso está acima do normal — isso acontece com noites curtas e cansaço acumulado; se o peso também parou, descansar ajuda mais do que comer ainda menos."
           }
         }
       }
@@ -30264,6 +30691,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Comida comum. Não um banquete gorduroso e salgado logo de cara — o abatimento depois do jejum vem mais dele do que do jejum."
+          }
+        }
+      }
+    },
+    "обычно %lld ккал активности" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادة %lld سعرة نشاط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sonst %lld kcal Aktivität"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "usually %lld kcal of activity"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalmente %lld kcal de actividad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "d’habitude %lld kcal d’activité"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל %lld קלוריות פעילות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalmente %lld kcal de atividade"
+          }
+        }
+      }
+    },
+    "обычно %lld шагов" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادة %lld خطوة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sonst %lld Schritte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "usually %lld steps"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalmente %lld pasos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "d’habitude %lld pas"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל %lld צעדים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "normalmente %lld passos"
           }
         }
       }
@@ -39181,6 +39702,53 @@
         }
       }
     },
+    "Приём закрывается едой, а не часами: пока не поел, он остаётся ближайшим. Съеденное сверх него идёт в него же перебором, а оставшаяся норма делится между теми, что впереди." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُغلق الوجبة بالأكل لا بالساعة: ما لم تأكلها تبقى هي التالية. وما يُؤكل فوقها يُحسب لها زيادةً، والهدف المتبقي يُقسم على الوجبات القادمة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Mahlzeit wird durchs Essen geschlossen, nicht durch die Uhr: solange sie nicht gegessen ist, bleibt sie die nächste. Was darüber hinaus gegessen wird, zählt als Überschuss zu ihr, und das restliche Ziel verteilt sich auf die noch kommenden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meal is closed by eating, not by the clock: until you have eaten it, it stays the next one. Anything eaten beyond it counts into it as an overshoot, and the remaining target is split between the meals still ahead."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una comida se cierra al comerla, no por el reloj: hasta que no la comes, sigue siendo la próxima. Lo que comas de más cuenta en ella como exceso, y el objetivo restante se reparte entre las que quedan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un repas se ferme quand on le mange, pas à l’horloge : tant que vous ne l’avez pas pris, il reste le prochain. Ce qui est mangé en plus y compte comme dépassement, et l’objectif restant se partage entre ceux à venir."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחה נסגרת באכילה ולא בשעון: כל עוד לא אכלת אותה היא נשארת הקרובה. מה שנאכל מעבר לה נספר אליה כחריגה, והיעד שנותר מתחלק בין הארוחות שלפנינו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma refeição se fecha ao ser comida, não pelo relógio: até você comê-la, ela continua sendo a próxima. O que comer além disso conta nela como excesso, e a meta restante é dividida entre as que faltam."
+          }
+        }
+      }
+    },
     "приём пищи" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -40441,6 +41009,7 @@
       }
     },
     "Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -40672,6 +41241,53 @@
         }
       }
     },
+    "Пульс" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النبض"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Herzfrequenz"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heart rate"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frecuencia cardíaca"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence cardiaque"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דופק"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frequência cardíaca"
+          }
+        }
+      }
+    },
     "Пульс в покое" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -40715,6 +41331,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Frequência em repouso"
+          }
+        }
+      }
+    },
+    "Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости. Если вес при этом встал, отдых поможет вернее, чем ещё меньше еды." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبض الراحة أعلى من المعتاد — يحدث ذلك مع قلة النوم والتعب المتراكم. وإذا توقف الوزن أيضًا فالراحة أجدى من الأكل أقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Ruhepuls liegt über dem Üblichen – das kommt von kurzen Nächten und angesammelter Müdigkeit. Wenn das Gewicht dazu stehenbleibt, hilft Erholung sicherer als noch weniger zu essen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resting heart rate is staying above its usual level — that happens with short nights and accumulated fatigue. If weight has stalled as well, rest will help more surely than eating even less."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La frecuencia en reposo se mantiene por encima de lo habitual: pasa con el poco sueño y el cansancio acumulado. Si además el peso se ha estancado, descansar ayudará más que comer aún menos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fréquence au repos reste au-dessus de son niveau habituel — cela arrive avec le manque de sommeil et la fatigue accumulée. Si le poids stagne aussi, le repos aidera plus sûrement que manger encore moins."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדופק במנוחה נשאר מעל הרגיל — זה קורה מחוסר שינה ומעייפות מצטברת. ואם גם המשקל נתקע, מנוחה תעזור יותר מלאכול עוד פחות."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A frequência em repouso está acima do normal — isso acontece com noites curtas e cansaço acumulado. Se o peso também parou, descansar ajuda mais do que comer ainda menos."
+          }
+        }
+      }
+    },
+    "пульс на %lld выше обычного" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النبض أعلى بـ %lld من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puls %lld über dem Üblichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "heart rate %lld above usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pulso %lld por encima de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pouls %lld au-dessus de l’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "דופק %lld מעל הרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pulso %lld acima do normal"
           }
         }
       }
@@ -45869,6 +46579,53 @@
         }
       }
     },
+    "Состояние" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الحالة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zustand"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "State"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "État"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מצב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        }
+      }
+    },
     "Сохранить" : {
       "localizations" : {
         "ar" : {
@@ -47674,6 +48431,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Usar dados reais"
+          }
+        }
+      }
+    },
+    "Съеденный приём закрывается сразу, не дожидаясь конца окна. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوجبة التي أكلتها تُغلق فورًا دون انتظار نهاية نافذتها. والنافذة الفائتة لا تضيع: سعراتها تتوزع على الوجبات المتبقية."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine gegessene Mahlzeit schließt sofort, ohne das Ende ihres Fensters abzuwarten. Ein verpasstes Fenster geht nicht verloren: seine Kalorien verteilen sich auf die übrigen Mahlzeiten."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meal you have eaten closes at once, without waiting for its window to end. A missed window is not lost: its calories spread over the meals that remain."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una comida ya hecha se cierra enseguida, sin esperar a que acabe su franja. Una franja perdida no se pierde: sus calorías se reparten entre las comidas restantes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un repas déjà pris se ferme aussitôt, sans attendre la fin de sa plage. Une plage manquée n’est pas perdue : ses calories se répartissent sur les repas restants."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחה שאכלת נסגרת מיד, בלי לחכות לסוף החלון. חלון שהוחמץ לא נעלם: הקלוריות שלו מתפזרות על הארוחות שנותרו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma refeição já feita se fecha na hora, sem esperar o fim da janela. Uma janela perdida não some: suas calorias se espalham pelas refeições restantes."
           }
         }
       }
@@ -50012,6 +50816,9 @@
         }
       }
     },
+    "уд/мин" : {
+
+    },
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -51977,6 +52784,9 @@
         }
       }
     },
+    "ч" : {
+
+    },
     "Через 30–60 минут" : {
       "localizations" : {
         "ar" : {
@@ -53599,147 +54409,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
-          }
-        }
-      }
-    },
-    "Пульс" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "النبض"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Herzfrequenz"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Heart rate"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Frecuencia cardíaca"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fréquence cardiaque"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "דופק"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Frequência cardíaca"
-          }
-        }
-      }
-    },
-    "%@ кг" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ كجم"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ ק״ג"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ kg"
-          }
-        }
-      }
-    },
-    "%1$@ ч — на %2$@ ч меньше обычного" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ س — أقل بـ %2$@ س من المعتاد"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ Std. – %2$@ Std. weniger als sonst"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ h — %2$@ h less than usual"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ h: %2$@ h menos de lo habitual"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ h — %2$@ h de moins que d’habitude"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ ש׳ — %2$@ ש׳ פחות מהרגיל"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ h — %2$@ h a menos que o normal"
           }
         }
       }

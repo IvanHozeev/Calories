@@ -127,7 +127,10 @@ final class StepStore {
             HKObjectType.workoutType(),
             // Сон — ради подъёма: время будильника iOS не отдаёт, а конец сна
             // отдаёт.
-            HKCategoryType(.sleepAnalysis)
+            HKCategoryType(.sleepAnalysis),
+            // Сырой пульс — чтобы посчитать покой самим: готовую величину
+            // пишут только часы Apple.
+            HKQuantityType(.heartRate)
         ]
         healthStore.requestAuthorization(toShare: nil, read: types) { [weak self] success, _ in
             Task { @MainActor [weak self] in
@@ -168,6 +171,7 @@ final class StepStore {
         fetchHistory(days: 90)
         fetchWorkouts(days: 90)
         fetchSleep(days: 90)
+        fetchRestingPulse(days: 30)
     }
 
     /// Вся сохранённая активность — для экрана и для копии.
@@ -390,6 +394,14 @@ final class StepStore {
         healthStore.execute(query)
     }
 
+    /// Записи, которые «Здоровье» считает сном, а не пребыванием в постели.
+    nonisolated static let asleepValues: Set<Int> = [
+        HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+        HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+        HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+        HKCategoryValueSleepAnalysis.asleepREM.rawValue
+    ]
+
     /// Сон за последние дни: во сколько лёг, во сколько встал, сколько спал.
     private func fetchSleep(days: Int) {
         let calendar = Calendar.current
@@ -401,18 +413,12 @@ final class StepStore {
             limit: HKObjectQueryNoLimit,
             sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
         ) { [weak self] _, samples, _ in
-            let asleep: Set<Int> = [
-                HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
-                HKCategoryValueSleepAnalysis.asleepCore.rawValue,
-                HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
-                HKCategoryValueSleepAnalysis.asleepREM.rawValue
-            ]
-            // «В постели» не считаем сном: листать телефон полтора часа — не
-            // отдых, и подъёмом это время называть тоже нельзя.
-            let segments = ((samples as? [HKCategorySample]) ?? [])
-                .filter { asleep.contains($0.value) }
-                .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }
-            let nights = SleepAnalysis.nights(from: segments)
+            let found = (samples as? [HKCategorySample]) ?? []
+            let nights = SleepAnalysis.nights(from: SleepAnalysis.segments(
+                asleep: found.filter { Self.asleepValues.contains($0.value) }
+                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) },
+                inBed: found.filter { $0.value == HKCategoryValueSleepAnalysis.inBed.rawValue }
+                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }))
             guard !nights.isEmpty else { return }
             let days = nights.map { night in
                 ActivityDay(date: calendar.startOfDay(for: night.wake), steps: 0,
@@ -420,6 +426,52 @@ final class StepStore {
             }
             Task { @MainActor [weak self] in
                 self?.history.remember(days)
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    /// Пульс в покое по ночам — из часовых средних сырого пульса.
+    ///
+    /// Часами, а не пробами: браслет меряет пульс постоянно, и за месяц это
+    /// десятки тысяч записей. Часовые средние HealthKit считает у себя, отдаёт
+    /// семь сотен чисел, и дно ночи по ним видно не хуже.
+    private func fetchRestingPulse(days: Int) {
+        let calendar = Calendar.current
+        let end = Date()
+        guard let start = calendar.date(byAdding: .day, value: -(days - 1), to: calendar.startOfDay(for: end)) else { return }
+        var interval = DateComponents()
+        interval.hour = 1
+        let query = HKStatisticsCollectionQuery(
+            quantityType: HKQuantityType(.heartRate),
+            quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: end),
+            options: .discreteAverage,
+            anchorDate: calendar.startOfDay(for: start),
+            intervalComponents: interval
+        )
+        let unit = HKUnit.count().unitDivided(by: .minute())
+        query.initialResultsHandler = { [weak self] _, results, _ in
+            var hours: [RestingPulse.Hour] = []
+            results?.enumerateStatistics(from: start, to: end) { stats, _ in
+                guard let average = stats.averageQuantity()?.doubleValue(for: unit) else { return }
+                hours.append(RestingPulse.Hour(start: stats.startDate, average: average))
+            }
+            guard !hours.isEmpty else { return }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                // Окно сна, если оно известно: тогда считаем дно именно по нему,
+                // а не по формальной полуночи — люди ложатся по-разному.
+                var windows: [Date: (bed: Date, wake: Date)] = [:]
+                for day in self.history.days {
+                    if let bed = day.bedTime, let wake = day.wakeTime {
+                        windows[calendar.startOfDay(for: day.date)] = (bed, wake)
+                    }
+                }
+                let byDay = RestingPulse.daily(from: hours, sleep: windows, calendar: calendar)
+                guard !byDay.isEmpty else { return }
+                self.history.remember(byDay.map {
+                    ActivityDay(date: $0.key, steps: 0, restingPulse: $0.value)
+                })
             }
         }
         healthStore.execute(query)
@@ -491,7 +543,7 @@ final class StepStore {
                 self?.weekHistory = Array(finalDays.suffix(7))
                 self?.updateDerivedStats()
                 self?.updateGoalStreak()
-                self?.history.remember(finalDays)
+                self?.history.rememberSteps(finalDays, source: self?.preferredSourceID)
             }
         }
         healthStore.execute(query)

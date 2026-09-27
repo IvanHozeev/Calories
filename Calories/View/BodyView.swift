@@ -228,6 +228,23 @@ struct BodyView: View {
                 }
             }
 
+            // Состояние — отдельной карточкой, а не строчками внутри объяснения
+            // расхода. «Как считаем» открывают раз в месяц, чтобы проверить
+            // формулу, а на сон и пульс смотрят вместе с весом и замерами:
+            // это про себя, а не про арифметику.
+            if hasStateCard {
+                Section {
+                    stateCard
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                } header: {
+                    Text("Состояние")
+                } footer: {
+                    Text(stateFooter)
+                }
+            }
+
             // Выбор цели — только без премиума. С премиумом режим задаётся
             // планом: вне плана идёт поддержание, и множитель из профиля
             // означал бы вечный дефицит по настройке, о которой забыли.
@@ -662,6 +679,88 @@ struct BodyView: View {
                     in: RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Есть ли что показывать: карточка из трёх прочерков хуже, чем её
+    /// отсутствие.
+    private var hasStateCard: Bool {
+        store.sleep(on: Date()) != nil || store.restingPulse() != nil || store.activityBaseline != nil
+    }
+
+    /// Сон, пульс и нагрузка — три числа и серая строка под ними.
+    private var stateCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
+                if let sleep = store.sleep(on: Date()) {
+                    miniStat("Сон", String(format: "%.1f", sleep.hours), unit: "ч",
+                             color: sleep.shortfall >= 1 ? ProgressRing.kcalColors[0] : Color.primary)
+                        .accessibilityIdentifier("sleepRow")
+                }
+                if let pulse = store.restingPulse() {
+                    miniStat("Пульс в покое", "\(pulse.value)", unit: "уд/мин",
+                             color: RestingPulse.isNotable(rise: pulse.rise)
+                                 ? ProgressRing.kcalColors[0] : Color.primary)
+                        .accessibilityIdentifier("restingPulseRow")
+                }
+                if let today = todayActivity {
+                    miniStat("Сегодня", today.value, unit: today.unit, color: Color.primary)
+                        .accessibilityIdentifier("activityRow")
+                }
+            }
+            if let caption = stateCaption {
+                Text(verbatim: caption)
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(12)
+        .background(Color(.secondarySystemGroupedBackground),
+                    in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// Нагрузка сегодня: поправка в килокалориях, а пока базы нет — просто шаги.
+    private var todayActivity: (value: String, unit: LocalizedStringKey)? {
+        let delta = Int(store.activityAdjustment(on: Date()).rounded())
+        if store.activityBaseline != nil, delta != 0 {
+            return (String(format: "%+d", delta), "ккал")
+        }
+        guard let steps = store.activity(on: Date())?.steps, steps > 0 else { return nil }
+        return ("\(steps)", "шагов")
+    }
+
+    /// Серая строка под числами: то, что объясняет их, а не повторяет.
+    private var stateCaption: String? {
+        var parts: [String] = []
+        if let sleep = store.sleep(on: Date()), sleep.shortfall >= 1 {
+            parts.append(String(format: String(localized: "на %@ ч меньше обычного"),
+                                String(format: "%.1f", sleep.shortfall)))
+        }
+        if let pulse = store.restingPulse(), let rise = pulse.rise, RestingPulse.isNotable(rise: pulse.rise) {
+            parts.append(String(format: String(localized: "пульс на %lld выше обычного"), rise))
+        }
+        if let day = store.activity(on: Date()), let minutes = day.workoutMinutes, minutes > 0 {
+            parts.append(String(format: String(localized: "%1$@, %2$lld мин"),
+                                day.workoutTitle ?? String(localized: "Тренировка"), minutes))
+        }
+        if let baseline = store.activityBaseline {
+            if let kcal = baseline.activeCalories {
+                parts.append(String(format: String(localized: "обычно %lld ккал активности"), kcal))
+            } else if let steps = baseline.steps {
+                parts.append(String(format: String(localized: "обычно %lld шагов"), steps))
+            }
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// Подпись под карточкой: зачем эти числа тут.
+    private var stateFooter: LocalizedStringKey {
+        if store.activityBaseline == nil {
+            return "Нагрузка двигает норму дня, но сначала нужно узнать, какой день для тебя обычный, — на это уходит две недели. Сон и пульс норму не двигают: они объясняют день."
+        }
+        if RestingPulse.isNotable(rise: store.restingPulse()?.rise) {
+            return "Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости. Если вес при этом встал, отдых поможет вернее, чем ещё меньше еды."
+        }
+        return "Норма дня сдвигается на разницу с обычным днём: наработал больше — ешь больше. Пока день идёт, вниз она не уходит. Сон и пульс норму не двигают — они объясняют день."
+    }
+
     /// Откуда взялись числа — одной серой строкой.
     private func basisCaption(_ profile: UserProfile) -> String {
         var parts: [String] = []
@@ -758,44 +857,10 @@ private struct CalculationBasisSheet: View {
     @Binding var activityLevel: ActivityLevel
     @Environment(\.dismiss) private var dismiss
 
-    /// Сегодняшняя поправка человеческими словами: «+180 ккал», «как обычно».
-    private var todayAdjustment: String {
-        let delta = Int(store.activityAdjustment(on: Date()).rounded())
-        guard delta != 0 else { return String(localized: "Как обычно") }
-        return String(format: String(localized: "%+lld ккал"), delta)
-    }
 
-    /// Чем сегодня занимался, если это записано: «Баскетбол, 70 мин».
-    private var todayWorkout: String? {
-        guard let day = store.activity(on: Date()), let minutes = day.workoutMinutes, minutes > 0 else { return nil }
-        let title = day.workoutTitle ?? String(localized: "Тренировка")
-        return String(format: String(localized: "%1$@, %2$lld мин"), title, minutes)
-    }
 
-    /// Сон этой ночью и насколько он короче привычного.
-    ///
-    /// На норму дня сон не влияет — влияет на то, как этот день читать: после
-    /// короткой ночи и вес скачет, и голод сильнее.
-    private var todaySleep: String? {
-        guard let sleep = store.sleep(on: Date()) else { return nil }
-        let hours = String(format: "%.1f", sleep.hours)
-        guard sleep.shortfall >= 1 else { return String(format: String(localized: "%@ ч"), hours) }
-        return String(format: String(localized: "%1$@ ч — на %2$@ ч меньше обычного"),
-                      hours, String(format: "%.1f", sleep.shortfall))
-    }
 
-    /// «Обычный день» словами: приложение считает по калориям, если браслет их
-    /// пишет, и по шагам, если нет. Показываем то, по чему считает.
-    private var usualDay: String? {
-        guard let baseline = store.activityBaseline else { return nil }
-        if let kcal = baseline.activeCalories {
-            return String(format: String(localized: "%lld ккал активности"), kcal)
-        }
-        if let steps = baseline.steps {
-            return String(format: String(localized: "%lld шагов"), steps)
-        }
-        return nil
-    }
+
 
     var body: some View {
         NavigationStack {
@@ -814,31 +879,6 @@ private struct CalculationBasisSheet: View {
                                     Int((store.profile?.tdee ?? 0).rounded())))
                     } else {
                         Text("Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле.")
-                    }
-                }
-
-                Section {
-                    LabeledContent("Обычный день") {
-                        Text(usualDay ?? String(localized: "Копим данные"))
-                    }
-                    if usualDay != nil {
-                        LabeledContent("Сегодня") {
-                            Text(todayAdjustment)
-                        }
-                    }
-                    if let workout = todayWorkout {
-                        LabeledContent("Тренировка") { Text(verbatim: workout) }
-                    }
-                    if let sleep = todaySleep {
-                        LabeledContent("Сон") { Text(verbatim: sleep) }
-                    }
-                } header: {
-                    Text("Активность")
-                } footer: {
-                    if usualDay == nil {
-                        Text("Пока не наберётся две недели шагов, приложение не знает, какой день для вас обычный, и норму за активность не двигает.")
-                    } else {
-                        Text("Норма дня сдвигается на разницу с обычным днём: находил больше — ешь больше. Пока день идёт, вниз она не уходит.")
                     }
                 }
 

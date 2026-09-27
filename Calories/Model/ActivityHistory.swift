@@ -7,7 +7,7 @@ import Foundation
 /// вовсе. Старая запись обязана читаться дальше.
 struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
     let date: Date
-    let steps: Int
+    var steps: Int
     /// Активные калории — то, что «Здоровье» считает сверх покоя.
     var activeCalories: Int?
     /// Сколько минут в этот день шла записанная тренировка.
@@ -22,12 +22,24 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
     var wakeTime: Date?
     /// Когда лёг накануне.
     var bedTime: Date?
+    /// Пульс в покое этой ночью — считается по ночным замерам, потому что
+    /// готовой величины браслет не пишет.
+    var restingPulse: Int?
+    /// Чьи это шаги: идентификатор выбранного источника или nil, если считались
+    /// все подряд.
+    ///
+    /// Нужен, потому что источники считают по-разному: браслет на запястье
+    /// видит то, чего телефон в кармане не замечает, и разница доходит до
+    /// четверти. Среднее, собранное наполовину из телефонных дней, наполовину
+    /// из браслетных, не описывает ни то ни другое.
+    var stepSource: String?
 
     var id: Date { date }
 
     init(date: Date, steps: Int, activeCalories: Int? = nil,
          workoutMinutes: Int? = nil, workoutTitle: String? = nil,
-         sleepHours: Double? = nil, wakeTime: Date? = nil, bedTime: Date? = nil) {
+         sleepHours: Double? = nil, wakeTime: Date? = nil, bedTime: Date? = nil,
+         restingPulse: Int? = nil, stepSource: String? = nil) {
         self.date = date
         self.steps = steps
         self.activeCalories = activeCalories
@@ -36,6 +48,8 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
         self.sleepHours = sleepHours
         self.wakeTime = wakeTime
         self.bedTime = bedTime
+        self.restingPulse = restingPulse
+        self.stepSource = stepSource
     }
 }
 
@@ -97,7 +111,35 @@ struct ActivityHistory: Sendable {
                 // знает и стирать его не должна.
                 sleepHours: day.sleepHours ?? stored?.sleepHours,
                 wakeTime: day.wakeTime ?? stored?.wakeTime,
-                bedTime: day.bedTime ?? stored?.bedTime)
+                bedTime: day.bedTime ?? stored?.bedTime,
+                restingPulse: day.restingPulse ?? stored?.restingPulse,
+                stepSource: stored?.stepSource)
+        }
+        let kept = byDay.values.sorted { $0.date < $1.date }.suffix(Self.limit)
+        guard let data = try? JSONEncoder().encode(Array(kept)) else { return }
+        defaults.set(data, forKey: Self.key)
+    }
+
+    /// Записывает шаги, помня, кто их считал.
+    ///
+    /// Отдельно от `remember`, потому что правило слияния здесь другое. Внутри
+    /// одного источника берётся большее: день ещё идёт, и вечерний замер
+    /// больше утреннего. А вот при смене источника большее брать нельзя —
+    /// иначе телефонные цифры, которые выше, навсегда перекрыли бы браслетные,
+    /// и переключение источника ничего бы не меняло.
+    func rememberSteps(_ incoming: [ActivityDay], source: String?) {
+        guard !incoming.isEmpty else { return }
+        let calendar = Calendar.current
+        var byDay: [Date: ActivityDay] = [:]
+        for day in days { byDay[calendar.startOfDay(for: day.date)] = day }
+        for day in incoming {
+            let key = calendar.startOfDay(for: day.date)
+            var merged = byDay[key] ?? ActivityDay(date: key, steps: 0)
+            merged.steps = byDay[key]?.stepSource == source
+                ? max(day.steps, byDay[key]?.steps ?? 0)
+                : day.steps
+            merged.stepSource = source
+            byDay[key] = merged
         }
         let kept = byDay.values.sorted { $0.date < $1.date }.suffix(Self.limit)
         guard let data = try? JSONEncoder().encode(Array(kept)) else { return }
@@ -122,6 +164,14 @@ struct ActivityHistory: Sendable {
         let hours = days.filter { $0.date >= from }.compactMap(\.sleepHours)
         guard hours.count >= minimumNights else { return nil }
         return hours.reduce(0, +) / Double(hours.count)
+    }
+
+    /// Пульс в покое за последние дни — для сравнения недели с месяцем.
+    func restingPulses(lastDays count: Int, now: Date = Date()) -> [Int] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        guard let from = calendar.date(byAdding: .day, value: -count, to: today) else { return [] }
+        return days.filter { $0.date >= from }.compactMap(\.restingPulse)
     }
 
     /// Шаги за конкретный день, если они записаны.

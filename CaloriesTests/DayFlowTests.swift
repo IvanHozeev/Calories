@@ -187,6 +187,72 @@ struct RecentMealsTests {
     }
 }
 
+// MARK: - Сигнал к рефиду
+
+/// Дефицит работает, пока тело его терпит. Дальше вес встаёт, пульс в покое
+/// ползёт вверх, сон портится — и человек обычно режет калории ещё, получая
+/// ровно обратное. Здесь приложение говорит об этом вслух.
+struct RecoverySignalTests {
+
+    private func input(weeks: Int = 3, change: Double? = -0.4, planned: Double? = 0.4,
+                       pulse: Int? = nil, sleep: Double = 0,
+                       sinceBreak: Int? = nil) -> RecoverySignal.Input {
+        .init(isCutting: true, weeksInDeficit: weeks, weeklyChangeKg: change,
+              plannedWeeklyKg: planned, pulseRise: pulse, sleepShortfall: sleep,
+              weeksSinceBreak: sinceBreak)
+    }
+
+    /// Всё идёт по плану — молчим. Совет, который повторяется каждый день,
+    /// перестают читать.
+    @Test func aPlanThatWorksGetsNoAdvice() {
+        #expect(RecoverySignal.verdict(input()) == .fine)
+        #expect(RecoverySignal.reason(input()) == nil)
+    }
+
+    /// Вне дефицита советовать нечего: на поддержании и наборе «подъесть» —
+    /// это просто «поесть».
+    @Test func outsideADeficitThereIsNothingToAdvise() {
+        var quiet = input(weeks: 20, change: 0, pulse: 9, sleep: 3)
+        quiet.isCutting = false
+        #expect(RecoverySignal.verdict(quiet) == .fine)
+    }
+
+    /// Один признак — совпадение. Вес может встать на неделю от соли и воды.
+    @Test func oneSignIsNotEnough() {
+        #expect(RecoverySignal.verdict(input(change: -0.05)) == .fine)
+    }
+
+    /// Два — уже сигнал: сдвинуть рефид, а не резать дальше.
+    @Test func twoSignsAskForARefeed() {
+        #expect(RecoverySignal.verdict(input(change: -0.05, pulse: 4)) == .refeed)
+    }
+
+    /// Три — это накопленная усталость, и одним сытым днём она не лечится.
+    @Test func threeSignsAskForABreak() {
+        #expect(RecoverySignal.verdict(input(change: -0.05, pulse: 4, sleep: 1.5)) == .dietBreak)
+    }
+
+    /// Долгий дефицит — повод для брейка сам по себе: организм устаёт и тогда,
+    /// когда человек этого ещё не чувствует.
+    @Test func eightWeeksOfDeficitIsEnoughOnItsOwn() {
+        #expect(RecoverySignal.verdict(input(weeks: 9)) == .dietBreak)
+    }
+
+    /// Только что с брейка — второй подряд не предлагаем.
+    @Test func aRecentBreakSilencesTheAdvice() {
+        #expect(RecoverySignal.verdict(input(weeks: 9, sinceBreak: 1)) != .dietBreak)
+        #expect(RecoverySignal.verdict(input(change: -0.05, pulse: 4, sleep: 1.5, sinceBreak: 1)) == .refeed)
+    }
+
+    /// Совет называет причину: без неё это гадание, а не совет.
+    @Test func theAdviceNamesWhatItSaw() throws {
+        let text = try #require(RecoverySignal.reason(input(change: -0.05, pulse: 4)))
+        #expect(text.contains("4"))
+        let brief = try #require(RecoverySignal.reason(input(change: -0.05, pulse: 4), brief: true))
+        #expect(brief.count < text.count)
+    }
+}
+
 // MARK: - Сон
 
 /// Браслет пишет каждую фазу отдельной записью, а человеку нужна ночь целиком.

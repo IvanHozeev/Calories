@@ -55799,6 +55799,664 @@
           }
         }
       }
+    },
+    "Дефицит идёт %lld недель подряд — пора на неделю-две поддержания." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استمر العجز %lld أسبوعًا متتاليًا — حان وقت أسبوع أو اثنين من التثبيت."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Defizit läuft seit %lld Wochen – Zeit für ein bis zwei Wochen Erhaltung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The deficit has run %lld weeks straight — time for a week or two at maintenance."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El déficit lleva %lld semanas seguidas: toca una o dos semanas de mantenimiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le déficit dure depuis %lld semaines — le temps d’une ou deux semaines de maintien."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגירעון נמשך %lld שבועות ברציפות — הגיע הזמן לשבוע-שבועיים תחזוקה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O déficit já dura %lld semanas seguidas — hora de uma ou duas semanas de manutenção."
+          }
+        }
+      }
+    },
+    "Дефицит идёт %lld недель подряд. Дальше он покупается всё дороже: расход падает, тренировки тяжелеют, а вес всё равно стоит. Неделя-две поддержания вернут и то, и другое — жир за сушку уходит так же." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "استمر العجز %lld أسبوعًا متتاليًا. وبعدها يصبح ثمنه أغلى: ينخفض الصرف وتثقل التمارين ويظل الوزن ثابتًا. أسبوع أو اثنان من التثبيت يعيدان الأمرين — والدهون تذهب كما هي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Defizit läuft seit %lld Wochen. Ab hier wird es immer teurer: der Verbrauch sinkt, das Training wird schwerer, und das Gewicht steht trotzdem. Ein bis zwei Wochen Erhaltung geben beides zurück – das Fett geht genauso weg."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The deficit has run %lld weeks straight. From here it costs more and more: expenditure falls, training gets heavier, and the weight stands still anyway. A week or two at maintenance restores both — the fat still comes off over the cut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El déficit lleva %lld semanas seguidas. A partir de aquí sale cada vez más caro: el gasto baja, entrenar cuesta más y el peso igual no se mueve. Una o dos semanas de mantenimiento devuelven ambas cosas: la grasa se pierde igual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le déficit dure depuis %lld semaines. Ensuite il coûte de plus en plus cher : la dépense baisse, les séances pèsent, et le poids stagne quand même. Une ou deux semaines de maintien rendent les deux — la graisse part pareil."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגירעון נמשך %lld שבועות ברציפות. מכאן הוא נעשה יקר יותר: ההוצאה יורדת, האימונים מכבידים, והמשקל תקוע בכל זאת. שבוע-שבועיים תחזוקה מחזירים את שניהם — השומן יורד באותה מידה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O déficit já dura %lld semanas seguidas. Daqui em diante ele custa cada vez mais: o gasto cai, o treino pesa e o peso empaca mesmo assim. Uma ou duas semanas de manutenção devolvem os dois — a gordura sai igual."
+          }
+        }
+      }
+    },
+    "Похоже, тело просит передышки: %@. Сдвинь рефид на сегодня — дневной дефицит от этого не изменится, он просто переедет с другого дня." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يبدو أن الجسم يطلب استراحة: %@. انقل وجبة الشحن إلى اليوم — العجز الأسبوعي لا يتغير، بل ينتقل من يوم آخر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Körper scheint eine Pause zu verlangen: %@. Verschiebe den Refeed auf heute – das Wochendefizit bleibt, es wandert nur von einem anderen Tag."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The body seems to be asking for a breather: %@. Move the refeed to today — the weekly deficit does not change, it just shifts from another day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parece que el cuerpo pide respiro: %@. Mueve la recarga a hoy: el déficit semanal no cambia, solo se traslada de otro día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le corps semble demander une pause : %@. Déplacez la recharge à aujourd’hui — le déficit hebdomadaire ne change pas, il se décale simplement."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נראה שהגוף מבקש הפוגה: %@. העבר את הריפיד להיום — הגירעון השבועי לא משתנה, הוא רק עובר מיום אחר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O corpo parece pedir uma folga: %@. Mova o refeed para hoje — o déficit semanal não muda, só troca de dia."
+          }
+        }
+      }
+    },
+    "Признаки усталости: %@. Нужен брейк, а не рефид." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "علامات إرهاق: %@. المطلوب استراحة لا وجبة شحن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anzeichen von Müdigkeit: %@. Nötig ist eine Pause, kein Refeed."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signs of fatigue: %@. This calls for a break, not a refeed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Señales de cansancio: %@. Hace falta un descanso, no una recarga."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signes de fatigue : %@. Il faut une pause, pas une recharge."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סימני עייפות: %@. צריך הפסקה, לא ריפיד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sinais de cansaço: %@. É preciso uma pausa, não um refeed."
+          }
+        }
+      }
+    },
+    "Сразу несколько признаков усталости: %@. Одним сытым днём это не лечится — возьми неделю-две поддержания, дефицит после них снова начнёт работать." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عدة علامات إرهاق معًا: %@. ولا يعالجها يوم واحد من الأكل الوفير — خذ أسبوعًا أو اثنين من التثبيت ليعود العجز إلى العمل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehrere Ermüdungszeichen auf einmal: %@. Ein satter Tag heilt das nicht – nimm ein bis zwei Wochen Erhaltung, danach wirkt das Defizit wieder."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Several signs of fatigue at once: %@. One well-fed day does not fix this — take a week or two at maintenance, and the deficit will work again afterwards."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varias señales de cansancio a la vez: %@. Un día de comer bien no lo arregla: tómate una o dos semanas de mantenimiento y el déficit volverá a funcionar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plusieurs signes de fatigue à la fois : %@. Une journée bien nourrie n’y suffit pas — prenez une ou deux semaines de maintien, le déficit refonctionnera ensuite."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "כמה סימני עייפות בבת אחת: %@. יום אחד של אכילה טובה לא פותר — קח שבוע-שבועיים תחזוקה, ואחריהם הגירעון יעבוד שוב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vários sinais de cansaço ao mesmo tempo: %@. Um dia comendo bem não resolve — tire uma ou duas semanas de manutenção e o déficit volta a funcionar."
+          }
+        }
+      }
+    },
+    "Тело просит передышки: %@. Сдвинь рефид на сегодня." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الجسم يطلب استراحة: %@. انقل وجبة الشحن إلى اليوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Körper verlangt eine Pause: %@. Verschiebe den Refeed auf heute."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The body is asking for a breather: %@. Move the refeed to today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El cuerpo pide respiro: %@. Mueve la recarga a hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le corps demande une pause : %@. Déplacez la recharge à aujourd’hui."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגוף מבקש הפוגה: %@. העבר את הריפיד להיום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O corpo pede uma folga: %@. Mova o refeed para hoje."
+          }
+        }
+      }
+    },
+    "вес за неделю почти не двинулся" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوزن لم يتغير تقريبًا هذا الأسبوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "das Gewicht hat sich diese Woche kaum bewegt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "the weight barely moved this week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el peso apenas se movió esta semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le poids a à peine bougé cette semaine"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל כמעט לא זז השבוע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "o peso quase não mudou nesta semana"
+          }
+        }
+      }
+    },
+    "пульс в покое выше обычного на %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نبض الراحة أعلى بـ %lld من المعتاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "der Ruhepuls liegt %lld über dem Üblichen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "resting heart rate is %lld above usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el pulso en reposo está %lld por encima de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "la fréquence au repos est %lld au-dessus de l’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הדופק במנוחה גבוה ב־%lld מהרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "a frequência em repouso está %lld acima do normal"
+          }
+        }
+      }
+    },
+    "сон короче привычного на %@ ч" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النوم أقصر من المعتاد بـ %@ س"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "der Schlaf ist %@ Std. kürzer als üblich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sleep is %@ h shorter than usual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "el sueño es %@ h más corto de lo habitual"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le sommeil est plus court de %@ h que d’habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השינה קצרה ב־%@ ש׳ מהרגיל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "o sono está %@ h mais curto que o normal"
+          }
+        }
+      }
+    },
+    "Неделя поддержания после каждых N недель дефицита." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع تثبيت بعد كل N أسابيع عجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Erhaltungswoche nach je N Defizitwochen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A maintenance week after every N weeks of deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una semana de mantenimiento tras cada N semanas de déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une semaine de maintien après chaque N semaines de déficit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע תחזוקה אחרי כל N שבועות גירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma semana de manutenção a cada N semanas de déficit."
+          }
+        }
+      }
+    },
+    "В рефид-дни больше, в остальные меньше; среднее то же." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أكثر في أيام الشحن وأقل في غيرها؛ والمتوسط نفسه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mehr an Refeed-Tagen, weniger an den übrigen; der Schnitt bleibt gleich."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More on refeed days, less on the rest; the average is the same."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más en los días de recarga, menos en el resto; el promedio es el mismo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus les jours de recharge, moins les autres ; la moyenne ne change pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יותר בימי ריפיד, פחות בשאר; הממוצע זהה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais nos dias de refeed, menos nos outros; a média é a mesma."
+          }
+        }
+      }
+    },
+    "Взвешивания каждое утро: по их тренду считается расход." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وزن كل صباح: يُقرأ الصرف من اتجاهه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden Morgen wiegen: der Verbrauch ergibt sich aus dem Trend."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weigh-ins every morning: expenditure is read from their trend."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesajes cada mañana: el gasto se lee de su tendencia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesées chaque matin : la dépense se lit dans leur tendance."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שקילה כל בוקר: ההוצאה נקראת מהמגמה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesagens toda manhã: o gasto vem da tendência delas."
+          }
+        }
+      }
+    },
+    "«На глаз» — ошибка в сотни калорий в день." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التقدير بالنظر يخطئ بمئات السعرات يوميًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Nach Augenmaß“ liegt um Hunderte Kalorien pro Tag daneben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eyeballing is off by hundreds of calories a day."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«A ojo» falla en cientos de calorías al día."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "« À l’œil » se trompe de centaines de calories par jour."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«בעין» טועה במאות קלוריות ביום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "«No olho» erra por centenas de calorias por dia."
+          }
+        }
+      }
+    },
+    "Не обязательно: шаги и активные калории придут из «Здоровья»." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اختياري: تأتي الخطوات والسعرات النشطة من تطبيق الصحة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional: Schritte und aktive Kalorien kommen aus „Health“."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional: steps and active calories come from Health."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional: los pasos y las calorías activas vienen de Salud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facultatif : les pas et les calories actives viennent de Santé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא חובה: צעדים וקלוריות פעילות מגיעים מ«בריאות»."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opcional: passos e calorias ativas vêm do Saúde."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

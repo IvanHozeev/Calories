@@ -475,6 +475,58 @@ extension CalorieStore {
         return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
     }
 
+    /// Не пора ли подъесть: признаки того, что дефицит перестал работать.
+    ///
+    /// Собирается здесь, потому что нужны все четыре угла картины сразу —
+    /// план, весы, пульс и сон, — а лежат они в разных местах.
+    func recoveryInput(now: Date = Date()) -> RecoverySignal.Input {
+        var input = RecoverySignal.Input()
+        guard let plan, let index = plan.phaseIndex(on: now), index < plan.timeline.count else { return input }
+        let phase = plan.timeline[index]
+        input.isCutting = phase.intent == .cut && !phase.isDietBreak
+        guard input.isCutting else { return input }
+
+        let calendar = Calendar.current
+        // Недели подряд в дефиците: считаем назад по цепочке, пока идут
+        // фазы дефицита, — брейк посередине счёт обнуляет.
+        var weeks = calendar.dateComponents([.day], from: plan.startDate(ofPhaseAt: index), to: now).day ?? 0
+        weeks /= 7
+        var cursor = index - 1
+        while cursor >= 0, plan.timeline[cursor].intent == .cut, !plan.timeline[cursor].isDietBreak {
+            weeks += plan.timeline[cursor].durationWeeks
+            cursor -= 1
+        }
+        input.weeksInDeficit = max(0, weeks)
+        if cursor >= 0, plan.timeline[cursor].isDietBreak {
+            let ended = plan.startDate(ofPhaseAt: cursor + 1)
+            input.weeksSinceBreak = max(0, (calendar.dateComponents([.day], from: ended, to: now).day ?? 0) / 7)
+        }
+
+        // Движется ли вес: тренд сегодня против тренда неделю назад. Тренд, а
+        // не два взвешивания: одно утро ничего не значит.
+        if let today = weightTrend(on: now),
+           let weekAgo = calendar.date(byAdding: .day, value: -7, to: now).flatMap({ weightTrend(on: $0) }) {
+            input.weeklyChangeKg = today - weekAgo
+        }
+        input.plannedWeeklyKg = plan.weight(atStartOfPhaseAt: index) * phase.weeklyRatePercent / 100
+
+        input.pulseRise = restingPulse(now: now)?.rise
+        // Недосып берём средний за неделю: одна короткая ночь бывает у всех.
+        let week = (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: -offset, to: now).flatMap { sleep(on: $0)?.shortfall }
+        }
+        if !week.isEmpty { input.sleepShortfall = week.reduce(0, +) / Double(week.count) }
+        return input
+    }
+
+    /// Совет одной строкой — или nil, когда всё идёт как задумано.
+    func recoveryAdvice(now: Date = Date()) -> (verdict: RecoverySignal.Verdict, text: String)? {
+        let input = recoveryInput(now: now)
+        guard let text = RecoverySignal.reason(input, brief: ExplanationSettings.shared.level == .expert)
+        else { return nil }
+        return (RecoverySignal.verdict(input), text)
+    }
+
     /// Обстоятельства дня для разбора: нагрузка, сон, пульс, вес и перебор.
     ///
     /// Собирается здесь, а не в экране: это данные, а не оформление, и

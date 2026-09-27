@@ -78,7 +78,10 @@ enum WidgetRingLayout {
     static func today(consumed: Int, goal: Int,
                       protein: Double, fat: Double, carbs: Double,
                       proteinTarget: Double, fatTarget: Double, carbsTarget: Double) -> [WidgetRingSegment] {
-        let gap = 11.0
+        // Те же 12.5, что у кольца «Сегодня»: зазор между дугами читается как
+        // часть рисунка, и разница в полтора градуса делала виджет чуть более
+        // плотным, чем экран, с которого его узнают.
+        let gap = 12.5
         let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
         var result = [WidgetRingSegment(id: "kcal", start: gap / 2, end: 180 - gap / 2, progress: calorieProgress,
                                         colors: consumed > goal ? [.orange, .red] : WidgetPalette.kcal)]
@@ -150,7 +153,7 @@ struct WidgetRing: View {
                 // Дорожка цветом дуги, приглушённым, — как кольцо в приложении.
                 // На тонированном экране цвета нет, там дорожка просто тусклая.
                 WidgetArc(start: segment.start, end: segment.end)
-                    .stroke(renderingMode == .fullColor ? segment.colors[0].opacity(0.2) : Color.white.opacity(0.25),
+                    .stroke(renderingMode == .fullColor ? segment.colors[0].opacity(0.15) : Color.white.opacity(0.25),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 if segment.progress > 0 {
                     let span = (segment.end - segment.start) * segment.progress

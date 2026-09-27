@@ -682,7 +682,8 @@ struct BodyView: View {
     /// Есть ли что показывать: карточка из трёх прочерков хуже, чем её
     /// отсутствие.
     private var hasStateCard: Bool {
-        store.sleep(on: Date()) != nil || store.restingPulse() != nil || store.activityBaseline != nil
+        store.sleep(on: Date()) != nil || store.restingPulse() != nil
+            || store.activityBaseline != nil || store.recoveryAdvice() != nil
     }
 
     /// Сон, пульс и нагрузка — три числа и серая строка под ними.
@@ -709,6 +710,22 @@ struct BodyView: View {
                 Text(verbatim: caption)
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
+            }
+            // Совет — под числами и отдельной строкой: числа описывают, а он
+            // предлагает сделать. Без него сон и пульс остаются тем, на что
+            // смотрят и ничего не меняют.
+            if let advice = store.recoveryAdvice() {
+                Divider().opacity(0.4)
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: advice.verdict == .dietBreak ? "pause.circle" : "arrow.up.forward.circle")
+                        .font(.app(.footnote))
+                        .foregroundStyle(ProgressRing.kcalColors[0])
+                    Text(verbatim: advice.text)
+                        .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .accessibilityIdentifier("recoveryAdvice")
             }
         }
         .padding(12)

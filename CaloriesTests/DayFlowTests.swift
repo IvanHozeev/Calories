@@ -61,12 +61,51 @@ struct MealScheduleTests {
         #expect(try #require(early.first { $0.period == .secondDinner }).time == at(19, 30))
     }
 
-    /// Съеденный приём закрыт сразу, не дожидаясь конца окна: позавтракал —
-    /// звать его завтракать ещё час бессмысленно.
-    @Test func eatingClosesTheMealRightAway() throws {
-        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 700)], now: at(8, 30)))
+    /// Приём закрывают съеденные калории, а не сам факт еды: позавтракал на
+    /// свою долю — звать его завтракать ещё час бессмысленно.
+    @Test func eatingTheWholeMealClosesItRightAway() throws {
+        // Три приёма из 2800: на завтрак отведено около 930.
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 950)], now: at(8, 30)))
         #expect(try #require(slots.first).state == .done)
         #expect(try #require(MealSchedule.nextSlot(slots, now: at(8, 30))).period == .lunch)
+    }
+
+    /// А половина порции приём не закрывает: еда в окно попала, но доедать
+    /// ещё есть что — и звать к следующему приёму рано.
+    @Test func halfAMealLeavesItOpen() throws {
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 300)], now: at(8, 30)))
+        let breakfast = try #require(slots.first)
+        #expect(breakfast.state == .current)
+        #expect(breakfast.consumed == 300)
+        // И на него отведён именно недоеденный кусок: было 930, съел 300 —
+        // осталось 630. Раньше начатый приём попадал в общий делёж и получал
+        // свежую полную долю, то есть приложение звало съесть порцию заново.
+        #expect(breakfast.calories == breakfast.planned - 300)
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(8, 30))).period == .breakfast)
+    }
+
+    /// Недоеденное одним приёмом не удваивает день: остальные приёмы делят
+    /// то, что осталось после его куска.
+    @Test func theRestOfTheDayIsSplitAfterTheLeftover() throws {
+        let slots = MealSchedule.slots(input(count: 3, goal: 2800, entries: [(at(8), 300)], now: at(8, 30)))
+        let open = slots.filter { $0.state != .done && $0.period != .nightSnack }
+        // Съедено 300 из 2800 — значит на всё открытое вместе остаётся 2500.
+        #expect(open.reduce(0) { $0 + $1.calories } == 2500)
+    }
+
+    /// Попасть в план до килокалории нельзя: приём на 890 из 930 закрыт.
+    @Test func almostTheWholeMealCountsAsEaten() throws {
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 890)], now: at(8, 30)))
+        #expect(try #require(slots.first).state == .done)
+    }
+
+    /// Кончилось время — закрываем как есть: съеденное остаётся съеденным,
+    /// недобор уходит следующим приёмам.
+    @Test func timeClosesAPartlyEatenMeal() throws {
+        let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 300)], now: at(12)))
+        let breakfast = try #require(slots.first)
+        #expect(breakfast.state == .done)
+        #expect(try #require(MealSchedule.nextSlot(slots, now: at(12))).period == .lunch)
     }
 
     /// А несъеденный истекает по времени: завтракать в обед никто не станет.

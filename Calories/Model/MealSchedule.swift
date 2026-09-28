@@ -178,6 +178,16 @@ enum MealSchedule {
     /// раскладываются по оставшимся приёмам, и человек видит новую цифру, а не
     /// узнаёт вечером, что «должен» ещё полторы тысячи.
 
+    /// Сколько нужно съесть, чтобы приём считался закрытым.
+    ///
+    /// Не ровно столько, сколько отведено: попасть в план до килокалории
+    /// невозможно, и приём на 690 из 700 закрыт ничуть не меньше. Допуск тот
+    /// же по смыслу, что у дневной нормы, — процент от плана, но не меньше
+    /// полусотни, иначе у маленького полдника он вырождался бы в ноль.
+    static func closingCalories(_ planned: Int) -> Int {
+        max(0, planned - max(50, Int((Double(planned) * 0.05).rounded())))
+    }
+
     static func slots(_ input: Input) -> [Slot] {
         let wake = input.wake
         let times = times(wake: wake, sleep: input.sleep, count: input.mealCount)
@@ -213,7 +223,7 @@ enum MealSchedule {
         // никуда не пропадает: оно идёт отдельной строкой «Перекус» и
         // считается за день наравне с остальным.
         let outside = total - consumed.reduce(0, +)
-        var remaining = max(0, input.dailyGoal - total)
+        let remaining = max(0, input.dailyGoal - total)
 
         var result: [Slot] = []
         // Впереди столько окон, на сколько делить остаток.
@@ -231,25 +241,41 @@ enum MealSchedule {
         // дележе не участвует, даже если его время ещё не кончилось. Иначе
         // позавтракавший видел бы, что на завтрак ему «осталось» ещё шестьсот.
         let upcoming = bounds.enumerated()
-            .filter { $0.element.1 > input.now && consumed[$0.offset] == 0 }
+            .filter { $0.element.1 > input.now && consumed[$0.offset] < closingCalories(planned[$0.offset]) }
             .map(\.offset)
-        // Остаток делится не поровну, а по весу приёма: на обед отводится
+        // Начатый приём доедают, а не начинают заново.
+        //
+        // Ему отводится его же недоеденный кусок: съел 380 из 558 — осталось
+        // 178. Раньше он попадал в общий делёж и получал свежую полную долю
+        // от остатка дня, то есть приложение звало съесть всю порцию ещё раз.
+        var leftovers: [Int: Int] = [:]
+        for index in upcoming where consumed[index] > 0 {
+            leftovers[index] = max(0, planned[index] - consumed[index])
+        }
+        // Остальное делится не поровну, а по весу приёма: на обед отводится
         // больше, чем на полдник.
-        let weightAhead = upcoming.reduce(0.0) { $0 + weight(of: periods[$1]) }
+        let sharing = upcoming.filter { leftovers[$0] == nil }
+        let weightAhead = sharing.reduce(0.0) { $0 + weight(of: periods[$1]) }
+        var remainingToShare = max(0, remaining - leftovers.values.reduce(0, +))
         var handed = 0
 
         for (index, bound) in bounds.enumerated() {
             let eaten = consumed[index]
-            // Съеденный приём закрыт сразу, не дожидаясь конца окна: человек
-            // позавтракал — значит завтрак позади, и звать его завтракать ещё
-            // час бессмысленно. А несъеденный всё-таки истекает по времени:
-            // завтракать в обед никто не станет, и вечное «время завтрака»
-            // было бы враньём не меньшим.
+            // Приём закрывается съеденными калориями, а не самим фактом еды.
+            //
+            // Сначала закрывало любое попадание в окно: положил половину
+            // порции — и приложение считало приём законченным, звало к
+            // следующему, а недоеденное молча расходилось по остатку дня.
+            // Теперь окно остаётся открытым, пока в нём есть что доесть.
+            //
+            // Кончилось время — закрываем как есть: съеденное остаётся
+            // съеденным, недобор уходит следующим приёмам. А несъеденное
+            // вовсе всё так же истекает: завтракать в обед никто не станет.
             let state: Slot.State
-            if eaten > 0 {
+            if eaten >= closingCalories(planned[index]) {
                 state = .done
             } else if bound.1 <= input.now {
-                state = .missed
+                state = eaten > 0 ? .done : .missed
             } else if bound.0 <= input.now {
                 state = .current
             } else {
@@ -257,14 +283,16 @@ enum MealSchedule {
             }
 
             let calories: Int
-            if upcoming.contains(index) {
+            if let leftover = leftovers[index] {
+                calories = leftover
+            } else if sharing.contains(index) {
                 // Последнему окну достаётся остаток от деления, чтобы сумма
                 // сходилась с дневной нормой.
-                let isLastUpcoming = index == upcoming.last
+                let isLast = index == sharing.last
                 let share = weightAhead > 0
-                    ? Int((Double(remaining) * weight(of: periods[index]) / weightAhead).rounded())
+                    ? Int((Double(remainingToShare) * weight(of: periods[index]) / weightAhead).rounded())
                     : 0
-                calories = isLastUpcoming ? max(0, remaining - handed) : share
+                calories = isLast ? max(0, remainingToShare - handed) : share
                 handed += calories
             } else {
                 calories = eaten
@@ -273,7 +301,6 @@ enum MealSchedule {
                                time: times[index], calories: calories, planned: planned[index],
                                consumed: eaten, state: state))
         }
-        remaining -= handed
 
         // Перекус — последней строкой и только если было что перекусить.
         // Своего времени у него нет: это не окно расписания, а всё, что мимо.

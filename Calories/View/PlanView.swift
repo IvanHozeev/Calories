@@ -69,16 +69,12 @@ struct PlanView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .confirmationDialog(
-            "Завершить план?",
-            isPresented: $confirmingCancel,
-            titleVisibility: .visible
-        ) {
+        .alert("Завершить план?", isPresented: $confirmingCancel) {
+            Button("Отмена", role: .cancel) {}
             Button("Завершить план", role: .destructive) {
                 store.cancelPlan()
                 dismiss()
             }
-            Button("Отмена", role: .cancel) {}
         } message: {
             Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
         }

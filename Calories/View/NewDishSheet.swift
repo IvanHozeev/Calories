@@ -229,9 +229,11 @@ struct NewDishSheet: View {
         .navigationTitle(editingDish == nil ? "Новое блюдо" : "Редактировать блюдо")
         .navigationBarTitleDisplayMode(.inline)
         .interactiveDismissDisabled(!isEmbedded && hasChanges)
-        .confirmationDialog("Отменить изменения?", isPresented: $showDiscardAlert, titleVisibility: .visible) {
-            Button("Отменить изменения", role: .destructive) { dismiss() }
+        // Окном, а не «диалогом действий»: на iOS 26 тот всплывает пузырём у
+        // края экрана и прячет собственный заголовок.
+        .alert("Отменить изменения?", isPresented: $showDiscardAlert) {
             Button("Продолжить", role: .cancel) {}
+            Button("Отменить изменения", role: .destructive) { dismiss() }
         }
         .toolbar {
             if !isEmbedded {

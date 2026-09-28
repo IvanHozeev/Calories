@@ -264,12 +264,18 @@ struct EditEntrySheet: View {
             }
         }
         .glassRow()
-        .confirmationDialog("Удалить запись?", isPresented: $confirmingDelete, titleVisibility: .visible) {
+        // Обычное окно подтверждения, а не «диалог действий»: последний на
+        // iOS 26 всплывает пузырём у края экрана — с одной кнопкой «Удалить»,
+        // без видимой отмены и поверх собственного заголовка. Для одного
+        // вопроса с двумя ответами правильное место — по центру.
+        .alert("Удалить запись?", isPresented: $confirmingDelete) {
+            Button("Отмена", role: .cancel) {}
             Button("Удалить", role: .destructive) {
                 store.delete(entry: entry)
                 dismiss()
             }
-            Button("Отмена", role: .cancel) {}
+        } message: {
+            Text("Запись исчезнет из дневника, и день пересчитается без неё.")
         }
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)

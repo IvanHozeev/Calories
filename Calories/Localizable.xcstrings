@@ -56410,6 +56410,100 @@
           }
         }
       }
+    },
+    "Запись исчезнет из дневника, и день пересчитается без неё." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يختفي السجل من اليوميات ويُعاد حساب اليوم بدونه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Eintrag verschwindet aus dem Tagebuch, und der Tag wird ohne ihn neu gerechnet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The entry leaves the diary and the day is recounted without it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La entrada desaparece del diario y el día se recalcula sin ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’entrée quitte le journal et la journée est recalculée sans elle."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשומה תיעלם מהיומן והיום יחושב מחדש בלעדיה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O item sai do diário e o dia é recalculado sem ele."
+          }
+        }
+      }
+    },
+    "ещё %lld ккал" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بقي %lld سعرة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "noch %lld kcal"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal left"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "quedan %lld kcal"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "encore %lld kcal"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עוד %lld קלוריות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "faltam %lld kcal"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

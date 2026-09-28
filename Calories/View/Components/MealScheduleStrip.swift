@@ -48,7 +48,12 @@ struct MealScheduleStrip: View {
                     Text(verbatim: title)
                         .font(.app(.subheadline, weight: .semibold))
                     if let next {
-                        Text(verbatim: String(format: String(localized: "%lld ккал"), next.calories))
+                        // Начатый приём показывает остаток, а не порцию целиком:
+                        // человек уже что-то съел, и «700 ккал» он прочитает как
+                        // «ещё 700», хотя четырёхсот из них уже нет.
+                        Text(verbatim: next.consumed > 0
+                             ? String(format: String(localized: "ещё %lld ккал"), next.calories)
+                             : String(format: String(localized: "%lld ккал"), next.calories))
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                     }

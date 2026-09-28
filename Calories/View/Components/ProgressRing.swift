@@ -112,10 +112,30 @@ struct ProgressRing: View {
     // дугами прежние мягкие цвета смотрелись лучше.
     // Открыты для карточки макросов: цифры под кольцом должны быть того же
     // цвета, что дуги, а не системных синего, оранжевого и фиолетового.
-    static let kcalColors = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
-    static let proteinColors = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
-    static let fatColors = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
-    static let carbColors = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
+    // Базовые оттенки. На экран они выходят через `tuned` — с поправкой на
+    // выбранную человеком насыщенность.
+    private static let kcalBase = [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)]
+    private static let proteinBase = [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)]
+    private static let fatBase = [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)]
+    private static let carbBase = [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)]
+
+    private static func tuned(_ colors: [Color]) -> [Color] {
+        let factor = PaletteIntensity.current
+        return colors.map { $0.intensified(factor) }
+    }
+
+    static var kcalColors: [Color] { tuned(kcalBase) }
+    static var proteinColors: [Color] { tuned(proteinBase) }
+    static var fatColors: [Color] { tuned(fatBase) }
+    static var carbColors: [Color] { tuned(carbBase) }
+    /// Перебор — глубокий красный.
+    ///
+    /// Системные оранжевый с красным брать больше нельзя: жиры стали мягким
+    /// персиком, и системный оранжевый оказывался их соседом по тону — дуга
+    /// перебора читалась как ещё один макрос, а не как тревога. Этот темнее и
+    /// насыщеннее всего, что есть в кольце.
+    private static let overBase = [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)]
+    static var overColors: [Color] { tuned(overBase) }
 
     /// Путь кольца до остановки перед финишем.
     static let spinDuration = RingTicks.duration
@@ -136,7 +156,7 @@ struct ProgressRing: View {
 
     private var segments: [Segment] {
         let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0)
-        let calorieColors: [Color] = consumed > goal ? [.orange, .red] : Self.kcalColors
+        let calorieColors: [Color] = consumed > goal ? Self.overColors : Self.kcalColors
 
         // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
@@ -237,7 +257,10 @@ struct ProgressRing: View {
             // остаётся обычным — красная цифра во весь круг кричала.
             Text(overGoal ? "Перебор" : "Остаток")
                 .font(.app(.caption))
-                .foregroundStyle(overGoal ? Color.orange : Color.secondary)
+                // Тем же цветом, что и дуга перебора: подпись и дуга говорят
+                // об одном, а системный оранжевый рядом с персиковыми жирами
+                // читался третьим, ничего не значащим оттенком.
+                .foregroundStyle(overGoal ? Self.overColors[0] : Color.secondary)
             Text("\(abs(remaining))")
                 .font(.app(size: 42, weight: .bold))
                 .foregroundStyle(Color.primary)

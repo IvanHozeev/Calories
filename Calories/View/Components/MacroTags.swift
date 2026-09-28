@@ -19,12 +19,15 @@ struct MacroTags: View {
         // Без цветных капсул: в стиле плашек под кольцом цвет несёт только
         // буква, и это цвет дуги макроса. Ряд капсул под каждой строкой
         // списка был самым пёстрым местом экрана.
-        HStack(spacing: 2) {
+        // Крупнее подписи: в списке съеденного и в поиске это второе по
+        // важности число после калорий, а мелким шрифтом оно читалось как
+        // сноска — приходилось вглядываться, чтобы понять, чем богат продукт.
+        HStack(spacing: 3) {
             Text(letter)
-                .font(.app(.caption2, weight: .bold))
+                .font(.app(.footnote, weight: .bold))
                 .foregroundStyle(color)
             Text(verbatim: "\(Int(value.rounded()))")
-                .font(.app(.caption2))
+                .font(.app(.footnote, weight: .medium))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
         }

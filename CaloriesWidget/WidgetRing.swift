@@ -8,10 +8,29 @@ import WidgetKit
 /// `ProgressRing` или знак в `BrandMark`, загляни и сюда — доли, поворот и цвета
 /// должны совпадать, иначе виджет перестанет узнаваться как то же кольцо.
 enum WidgetPalette {
-    static let kcal = [Color(hex: 0x3FD673), Color(hex: 0x21C45A)]
-    static let protein = [Color(hex: 0x4C9BFF), Color(hex: 0x2F7BFF)]
-    static let fat = [Color(hex: 0xFFA23D), Color(hex: 0xFF8A1F)]
-    static let carbs = [Color(hex: 0xB85CFF), Color(hex: 0xA63BFF)]
+    // Базовые оттенки; на экран идут с поправкой на выбранную насыщенность —
+    // её приложение кладёт в общий контейнер группы.
+    private static let kcalBase = [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)]
+    private static let proteinBase = [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)]
+    private static let fatBase = [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)]
+    private static let carbsBase = [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)]
+
+    private static var intensity: Double {
+        PaletteIntensity.current(groupDefaults: UserDefaults(suiteName: "group.calories.shared"))
+    }
+    private static func tuned(_ colors: [Color]) -> [Color] {
+        let factor = intensity
+        return colors.map { $0.intensified(factor) }
+    }
+
+    static var kcal: [Color] { tuned(kcalBase) }
+    static var protein: [Color] { tuned(proteinBase) }
+    static var fat: [Color] { tuned(fatBase) }
+    static var carbs: [Color] { tuned(carbsBase) }
+    /// Перебор — тот же красно-коралловый, что и в приложении: системный
+    /// оранжевый спорил бы по тону с новым цветом жиров.
+    private static let overBase = [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)]
+    static var over: [Color] { tuned(overBase) }
     /// Шаги красятся цветом акцента из настроек приложения: у этого кольца
     /// цвет ничего не означает, и пусть он будет тем, который человек выбрал.
     /// Приложение кладёт выбор в общие настройки группы.
@@ -21,7 +40,10 @@ enum WidgetPalette {
         case "protein": return protein
         case "fat":     return fat
         case "carbs":   return carbs
-        default:        return [Color(hex: 0x5AC8FF), Color(hex: 0x2F7BFF)]
+        // Системный цвет — тот же, что рисует приложение: обычный синий iOS.
+        // Своя пара «небесный → морской» здесь осталась от прежней палитры и
+        // с кольцом шагов на экране больше не совпадала.
+        default:        return [.blue, .blue]
         }
     }
 
@@ -47,6 +69,34 @@ extension Color {
                   red: Double((hex >> 16) & 0xFF) / 255,
                   green: Double((hex >> 8) & 0xFF) / 255,
                   blue: Double(hex & 0xFF) / 255)
+    }
+}
+
+/// Насыщенность палитры — копия из приложения по той же причине, что и само
+/// кольцо: файлы приложения в таргет виджета не попадают. Правишь там —
+/// правь и здесь.
+enum PaletteIntensity {
+    static let key = "palette_intensity"
+    static let range: ClosedRange<Double> = 0.6...1.35
+    static let standard: Double = 1
+
+    static func current(groupDefaults: UserDefaults?) -> Double {
+        let stored = groupDefaults?.object(forKey: key) as? Double ?? standard
+        return min(max(stored, range.lowerBound), range.upperBound)
+    }
+}
+
+extension Color {
+    /// Тот же цвет, но насыщеннее или бледнее.
+    func intensified(_ factor: Double) -> Color {
+        guard abs(factor - 1) > 0.001 else { return self }
+        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
+        guard UIColor(self).getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        else { return self }
+        let newSaturation = min(max(saturation * CGFloat(factor), 0), 1)
+        let newBrightness = min(max(brightness * CGFloat(1 + (1 - factor) * 0.25), 0), 1)
+        return Color(hue: Double(hue), saturation: Double(newSaturation),
+                     brightness: Double(newBrightness), opacity: Double(alpha))
     }
 }
 
@@ -84,7 +134,7 @@ enum WidgetRingLayout {
         let gap = 12.5
         let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
         var result = [WidgetRingSegment(id: "kcal", start: gap / 2, end: 180 - gap / 2, progress: calorieProgress,
-                                        colors: consumed > goal ? [.orange, .red] : WidgetPalette.kcal)]
+                                        colors: consumed > goal ? WidgetPalette.over : WidgetPalette.kcal)]
         let parts: [(String, Double, [Color])] = [
             ("protein", ratio(protein, proteinTarget), WidgetPalette.protein),
             ("fat", ratio(fat, fatTarget), WidgetPalette.fat),

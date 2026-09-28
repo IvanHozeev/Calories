@@ -175,7 +175,7 @@ struct StepsNavigationView: View {
         VStack(spacing: 16) {
             Image(systemName: "figure.walk.circle")
                 .font(.app(size: 64))
-                .foregroundStyle(AppAccent.current.color)
+                .foregroundStyle(AppAccent.current.color(focus: AppAccent.storedFocusMacro))
             Text("Доступ к шагам")
                 .font(.app(.title2, weight: .semibold))
             Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
@@ -284,7 +284,13 @@ private struct StepsContentView: View {
     /// Шаги красятся цветом акцента, выбранным в настройках: это единственное
     /// кольцо без своего смысла у цвета. Цель взята — зелёным кольца калорий,
     /// как «в норме» везде в приложении.
-    private static var stepsColors: [Color] { [AppAccent.current.color, AppAccent.current.color] }
+    /// Цвет кольца шагов — общий акцент приложения. У шагов он ничего не
+    /// означает, поэтому пусть будет тем, который человек выбрал; при выборе
+    /// «По макросу» цвет берётся уже разрешённым — его кладёт дневник.
+    private static var stepsColors: [Color] {
+        let color = AppAccent.current.color(focus: AppAccent.storedFocusMacro)
+        return [color, color]
+    }
 
     private var ringColors: [Color] {
         viewModel.stepGoalAchieved ? ProgressRing.kcalColors : Self.stepsColors

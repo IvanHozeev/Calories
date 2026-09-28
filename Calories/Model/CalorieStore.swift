@@ -158,6 +158,14 @@ final class CalorieStore {
     /// перерисовку — тот же капкан, что уже подтормаживал ввод в поиске.
     /// Своих продуктов немного, поэтому раз на изменение данных это дёшево.
     @ObservationIgnored private(set) var foodsOfferedVitamins: Set<UUID> = []
+    /// Какой макрос сегодня ведущий — тот, что ещё не закрыт.
+    ///
+    /// Порядок закрытия: белок, потом жир, потом углеводы. По нему красится
+    /// акцент приложения, если человек выбрал «По макросу»: цвет ведёт к тому,
+    /// что осталось добрать, а не украшает экран.
+    ///
+    /// nil — закрыто всё.
+    private(set) var focusMacro: MacroKind?
     private(set) var adaptedTodayGoal: Int = 0
     private(set) var calorieBankBonus: Int = 0
 
@@ -575,6 +583,7 @@ final class CalorieStore {
 
         stepHistory = ActivityHistory(defaults: defaults).days
         refreshActivityBaseline(calendar, today: today)
+        rebuildFocusMacro()
         syncGoalWithExpenditure()
 
         let adapted = computeAdaptedTodayGoal()
@@ -615,6 +624,23 @@ final class CalorieStore {
             defaults.set(data, forKey: Keys.activityBaseline)
             defaults.set(today, forKey: Keys.activityBaselineDay)
         }
+    }
+
+    /// Ведущий макрос: первый недобранный по порядку «белок → жир → углеводы».
+    private func rebuildFocusMacro() {
+        let targets: [MacroKind: Double?] = [
+            .protein: proteinTarget, .fat: fatTarget, .carbs: carbsTarget
+        ]
+        let eaten: [MacroKind: Double] = [
+            .protein: macrosToday.protein, .fat: macrosToday.fat, .carbs: macrosToday.carbs
+        ]
+        focusMacro = AppAccent.focusOrder.first { kind in
+            guard let target = targets[kind] ?? nil, target > 0 else { return false }
+            return (eaten[kind] ?? 0) < target
+        }
+        // Виджет живёт в своём процессе и до дневника не дотягивается —
+        // кладём ему готовый ответ.
+        defaults.set(focusMacro?.rawValue ?? AppAccent.kcal.rawValue, forKey: "focus_macro")
     }
 
     /// Числа для виджета — в общие настройки группы.

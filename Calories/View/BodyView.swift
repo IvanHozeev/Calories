@@ -183,6 +183,9 @@ struct BodyView: View {
 
     
     
+    /// Лист взвешивания с кнопки в тулбаре.
+    @State private var showingWeighIn = false
+
     private var draftProfile: UserProfile? {
         UserProfile(
             weightKg: Double(weightTenths) / 10.0,
@@ -350,6 +353,23 @@ struct BodyView: View {
                     .pickerStyle(.wheel)
                     .frame(height: 160)
                 }
+                // Замеры — пятой строкой, рядом с ростом и весом: это такой же
+                // параметр тела, просто снимаемый лентой. В тулбаре их искали
+                // глазами, потому что иконка линейки ничего не обещает.
+                NavigationLink {
+                    MeasurementsView(store: store)
+                } label: {
+                    HStack {
+                        Text("Замеры")
+                        Spacer()
+                        if let last = store.latestMeasurement {
+                            Text(last.date.formatted(date: .abbreviated, time: .omitted))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .accessibilityIdentifier("openMeasurementsRow")
             }
             
             // Пока норма идёт от факта, множитель активности ни на что не
@@ -533,17 +553,23 @@ struct BodyView: View {
         .hiddenNavigationTitle()
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                // Замеры — не строка в параметрах тела: туда заходят смотреть
-                // выводы, а не править число, и лежать это должно там же, где
-                // остальные входы на свои экраны.
-                NavigationLink {
-                    MeasurementsView(store: store)
+                // Взвешивание — самое частое действие на этом экране: вес
+                // пишут каждое утро, а замеры снимают раз в месяц. Замеры
+                // переехали строкой в параметры тела, к росту и весу.
+                Button {
+                    showingWeighIn = true
                 } label: {
-                    Image(systemName: "ruler")
+                    Image(systemName: "figure.stand")
                 }
-                .accessibilityLabel("Замеры")
-                .accessibilityIdentifier("openMeasurementsRow")
+                .accessibilityLabel("Взвеситься")
+                .accessibilityIdentifier("openWeighIn")
             }
+        }
+        .sheet(isPresented: $showingWeighIn) {
+            AddWeightView(store: store)
+                // Тем же ростом, что и с «Сегодня»: лист взвешивания везде
+                // одинаковый, и полноэкранный на одно колесо веса — перебор.
+                .presentationDetents([.height(AddWeightView.sheetHeight)])
         }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }

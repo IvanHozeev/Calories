@@ -59,7 +59,9 @@ struct RootView: View {
             }
         }
         // Один цвет на всё приложение, выбранный в настройках.
-        .tint((AppAccent(rawValue: appAccent) ?? .system).color)
+        // Цвет спрашиваем с оглядкой на день: при выборе «По макросу» он ведёт
+        // к тому, что ещё не закрыто.
+        .tint((AppAccent(rawValue: appAccent) ?? .system).color(focus: store.focusMacro))
         .fullScreenCover(isPresented: Binding(
             get: { !onboardingCompleted },
             set: { _ in }

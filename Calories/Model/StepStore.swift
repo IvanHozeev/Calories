@@ -265,7 +265,9 @@ final class StepStore {
                 self?.groupDefaults?.set(Calendar.current.startOfDay(for: Date()), forKey: "widget_steps_day")
                 self?.groupDefaults?.set(steps, forKey: "widget_steps_today")
                 // Цвет акцента виджету: он в своём процессе и настроек не видит.
-                self?.groupDefaults?.set(AppAccent.current.rawValue, forKey: "widget_accent")
+                // Виджету кладём уже разрешённый цвет: он в своём процессе и
+                // про недобранный макрос ничего не знает.
+                self?.groupDefaults?.set(StepStore.widgetAccent(), forKey: "widget_accent")
                 self?.refreshStepsWidgetIfWorthIt(steps: steps)
             }
         }
@@ -392,6 +394,17 @@ final class StepStore {
             }
         }
         healthStore.execute(query)
+    }
+
+    /// Какой цвет отдать виджету.
+    ///
+    /// «По макросу» виджет посчитать не может — макросы живут в дневнике, а не
+    /// в общем контейнере, — поэтому приложение кладёт туда уже выбранный
+    /// макрос. Пока дневник не пересобрался, остаётся прежнее значение.
+    nonisolated static func widgetAccent(defaults: UserDefaults = .standard) -> String {
+        let accent = defaults.string(forKey: AppAccent.defaultsKey).flatMap(AppAccent.init(rawValue:)) ?? .system
+        guard accent == .focus else { return accent.rawValue }
+        return defaults.string(forKey: "focus_macro") ?? AppAccent.kcal.rawValue
     }
 
     /// Записи, которые «Здоровье» считает сном, а не пребыванием в постели.

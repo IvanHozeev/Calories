@@ -48,7 +48,10 @@ struct MeasurementsView: View {
                 Button {
                     showingEntry = true
                 } label: {
-                    Image(systemName: "plus")
+                    // Линейка, а не плюс: на этом экране добавляют не запись
+                    // вообще, а снятые лентой обхваты — и иконка называет
+                    // именно это.
+                    Image(systemName: "ruler")
                 }
                 .accessibilityIdentifier("openMeasurementEntry")
             }

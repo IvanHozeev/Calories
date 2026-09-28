@@ -300,13 +300,18 @@ final class CaloriesUITests: XCTestCase {
                       "Параметры тела должны быть на вкладке, а не за ячейкой профиля")
         XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
-        // Замеры — линейка в тулбаре «Тела», а не строка в параметрах
-        app.buttons["openMeasurementsRow"].tap()
+        // Замеры — пятой строкой в параметрах тела, рядом с ростом и весом:
+        // это такой же параметр, просто снимаемый лентой. В тулбаре теперь
+        // взвешивание — то, что делают каждое утро.
+        XCTAssertTrue(app.buttons["openWeighIn"].exists, "В тулбаре «Тела» нет взвешивания")
+        let measurements = app.buttons["openMeasurementsRow"]
+        scrollTo(measurements, in: app)
+        measurements.tap()
         XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 5),
-                      "Линейка в тулбаре не открыла «Замеры»")
+                      "Строка в параметрах тела не открыла «Замеры»")
         // Сам экран показывает выводы, а ввод живёт за плюсом в его тулбаре
         XCTAssertTrue(app.buttons["openMeasurementEntry"].exists,
-                      "Ввод замеров должен открываться плюсом в тулбаре")
+                      "Ввод замеров должен открываться линейкой в тулбаре")
     }
 
     @MainActor
@@ -427,7 +432,9 @@ final class CaloriesUITests: XCTestCase {
     func testMeasurementsSuggestMissingSites() {
         let app = launchApp(resetMeasurements: true)
         app.tabBars.buttons["Profile"].tap()
-        app.buttons["openMeasurementsRow"].tap()
+        let measurements = app.buttons["openMeasurementsRow"]
+        scrollTo(measurements, in: app)
+        measurements.tap()
         app.buttons["openMeasurementEntry"].tap()
 
         // Ввод только колесом: раскрываем строку правого бицепса и выбираем 40.

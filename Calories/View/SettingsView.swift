@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @AppStorage(RingSound.defaultsKey) private var ringSound = RingSound.wheel.rawValue
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
+    @AppStorage(PaletteIntensity.key) private var paletteIntensity = PaletteIntensity.standard
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -113,65 +114,16 @@ struct SettingsView: View {
             // чаще, чем выгрузку копий, а та нужна раз в жизни телефона.
             // Оформление отдельной секцией: тема, шрифт и цвет — это про вид,
             // а не про то, как приложение считает.
-            Section("Оформление") {
-                Picker(selection: $appTheme) {
-                    ForEach(AppTheme.allCases) { theme in
-                        Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
-                    }
-                } label: {
-                    Label("Тема", systemImage: "circle.lefthalf.filled")
-                }
-
-                NavigationLink {
-                    FontSettingsView()
-                } label: {
-                    HStack {
-                        Label("Шрифт и размер", systemImage: "textformat")
-                        Spacer()
-                        Text(AppFont(rawValue: appFont)?.title ?? "")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityIdentifier("openFontSettings")
-
-                // Цвета кружками и без названий: «Белки» в строке про цвет
-                // читались как настройка макросов, а кружок говорит всё сам.
-                HStack {
-                    Label("Цвет", systemImage: "paintpalette")
-                    Spacer(minLength: 12)
-                    HStack(spacing: 10) {
-                        ForEach(AppAccent.allCases) { accent in
-                            Button {
-                                appAccent = accent.rawValue
-                            } label: {
-                                Circle()
-                                    .fill(accent.color)
-                                    .frame(width: 22, height: 22)
-                                    .overlay {
-                                        Circle()
-                                            .strokeBorder(Color.primary.opacity(appAccent == accent.rawValue ? 0.7 : 0),
-                                                          lineWidth: 2)
-                                            .padding(-3)
-                                    }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(Text(verbatim: accent.rawValue))
-                        }
-                    }
-                }
-                .accessibilityIdentifier("accentColor")
-
-                NavigationLink {
-                    RingSoundSettingsView()
-                } label: {
-                    HStack {
-                        Label("Звук кольца", systemImage: "speaker.wave.2")
-                        Spacer()
-                        Text(verbatim: (RingSound(rawValue: ringSound) ?? .wheel).title)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityIdentifier("openRingSound")
+            Section {
+                themeRow
+                fontRow
+                accentRow
+                intensityRow
+                ringSoundRow
+            } header: {
+                Text("Оформление")
+            } footer: {
+                accentFooter
             }
 
             Section {
@@ -594,6 +546,150 @@ struct HealthInventoryView: View {
     }
 }
 #endif
+
+/// Ползунок насыщенности палитры.
+private extension SettingsView {
+    var intensityRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Label("Насыщенность", systemImage: "drop.halffull")
+                Spacer()
+                // Образец рядом с ползунком: цифры процентов тут ничего не
+                // говорят, а три точки макросов меняются на глазах.
+                HStack(spacing: 6) {
+                    Circle().fill(ProgressRing.proteinColors[0]).frame(width: 14, height: 14)
+                    Circle().fill(ProgressRing.fatColors[0]).frame(width: 14, height: 14)
+                    Circle().fill(ProgressRing.carbColors[0]).frame(width: 14, height: 14)
+                }
+            }
+            Slider(value: $paletteIntensity,
+                   in: PaletteIntensity.range.lowerBound...PaletteIntensity.range.upperBound)
+                .accessibilityIdentifier("paletteIntensity")
+                .accessibilityLabel("Насыщенность")
+        }
+        .onChange(of: paletteIntensity) { _, value in
+            // Виджет читает общий контейнер группы: он в своём процессе и до
+            // настроек приложения не дотягивается.
+            UserDefaults(suiteName: CalorieStore.appGroup)?.set(value, forKey: PaletteIntensity.key)
+        }
+    }
+}
+
+/// Строки секции «Оформление» по одной.
+///
+/// Секция разрослась, и компилятор перестал укладываться в отведённое время на
+/// проверке типов её тела. Разложенная на свойства, она собирается мгновенно.
+private extension SettingsView {
+    var themeRow: some View {
+        Picker(selection: $appTheme) {
+            ForEach(AppTheme.allCases) { theme in
+                Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
+            }
+        } label: {
+            Label("Тема", systemImage: "circle.lefthalf.filled")
+        }
+    }
+
+    var fontRow: some View {
+        NavigationLink {
+            FontSettingsView()
+        } label: {
+            HStack {
+                Label("Шрифт и размер", systemImage: "textformat")
+                Spacer()
+                Text(AppFont(rawValue: appFont)?.title ?? "")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityIdentifier("openFontSettings")
+    }
+
+    var ringSoundRow: some View {
+        NavigationLink {
+            RingSoundSettingsView()
+        } label: {
+            HStack {
+                Label("Звук кольца", systemImage: "speaker.wave.2")
+                Spacer()
+                Text(verbatim: (RingSound(rawValue: ringSound) ?? .wheel).title)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityIdentifier("openRingSound")
+    }
+}
+
+/// Строка выбора цвета целиком.
+///
+/// Секция «Вид» стала большой, и компилятор перестал укладываться в проверку
+/// типов — всё, что можно, вынесено из её тела отдельными свойствами.
+private extension SettingsView {
+    var accentRow: some View {
+        // Цвета кружками и без названий: «Белки» в строке про цвет читались
+        // как настройка макросов, а кружок говорит всё сам.
+        HStack {
+            Label("Цвет", systemImage: "paintpalette")
+            Spacer(minLength: 12)
+            HStack(spacing: 10) {
+                ForEach(AppAccent.allCases) { accent in
+                    accentDot(accent)
+                }
+            }
+        }
+        .accessibilityIdentifier("accentColor")
+    }
+}
+
+/// Подпись под выбором цвета — своим свойством, а не выражением в списке:
+/// у большого тела секции компилятор перестаёт справляться с проверкой типов.
+private extension SettingsView {
+    @ViewBuilder
+    var accentFooter: some View {
+        if appAccent == AppAccent.focus.rawValue {
+            Text(explain("Цвет ведёт к тому, что ещё не закрыто: пока недобран белок — синий, дальше оранжевый на жиры и фиолетовый на углеводы. Закрыто всё — цвет калорий.",
+                         short: "Цвет идёт за недобранным макросом: белок, жиры, углеводы."))
+        }
+    }
+}
+
+/// Кружок выбора цвета.
+///
+/// Вынесен из тела списка: с тернарником и градиентом прямо в `ForEach`
+/// компилятор перестаёт укладываться в отведённое время на проверке типов —
+/// та же ловушка, что уже была с опциональными замыканиями.
+private extension SettingsView {
+    @ViewBuilder
+    func accentDot(_ accent: AppAccent) -> some View {
+        Button {
+            appAccent = accent.rawValue
+        } label: {
+            accentShape(accent)
+                .frame(width: 22, height: 22)
+                .overlay {
+                    Circle()
+                        .strokeBorder(Color.primary.opacity(appAccent == accent.rawValue ? 0.7 : 0),
+                                      lineWidth: 2)
+                        .padding(-3)
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: accent.title))
+    }
+
+    /// «По макросу» — кружок из трёх цветов сразу: это не один цвет, а
+    /// правило, и одноцветной точкой его не объяснить.
+    @ViewBuilder
+    func accentShape(_ accent: AppAccent) -> some View {
+        if accent == .focus {
+            Circle().fill(AngularGradient(
+                colors: [MacroKind.protein.color, MacroKind.fat.color,
+                         MacroKind.carbs.color, MacroKind.protein.color],
+                center: .center))
+        } else {
+            Circle().fill(accent.color)
+        }
+    }
+}
 
 /// Строка-действие в стиле остальных экранов: текст обычным цветом, акцент —
 /// только у значка. Синие подписи на всех строках спорили с тихими плашками.

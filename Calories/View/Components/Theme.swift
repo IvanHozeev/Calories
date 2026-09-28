@@ -248,12 +248,67 @@ enum BodyFatStyle {
 ///
 /// Сначала вкладки подсвечивались каждая своим макросом, но низ экрана от
 /// этого мельтешил. Цвет теперь один на всё приложение, и его выбирает человек.
+/// Насыщенность палитры — общий множитель для всех цветов кольца.
+///
+/// Один и тот же набор оттенков одним людям кажется блёклым, другим кричащим,
+/// и спорить тут не о чем: вкус. Поэтому тон и порядок цветов заданы в
+/// приложении, а сочность человек выбирает сам — от пастели до плаката.
+///
+/// Меняется только насыщенность и чуть-чуть яркость: тон остаётся прежним,
+/// иначе мята уехала бы в салат, а сирень в синеву, и цвета перестали бы
+/// узнаваться на разных экранах.
+enum PaletteIntensity {
+    static let key = "palette_intensity"
+    /// Границы: ниже — выцветает до серого, выше — начинает светиться.
+    static let range: ClosedRange<Double> = 0.6...1.35
+    static let standard: Double = 1
+
+    static var current: Double {
+        let stored = UserDefaults.standard.object(forKey: key) as? Double ?? standard
+        return min(max(stored, range.lowerBound), range.upperBound)
+    }
+
+    /// То же число для виджета — он читает общий контейнер группы.
+    static func current(groupDefaults: UserDefaults?) -> Double {
+        let stored = groupDefaults?.object(forKey: key) as? Double ?? standard
+        return min(max(stored, range.lowerBound), range.upperBound)
+    }
+}
+
+extension Color {
+    /// Тот же цвет, но насыщеннее или бледнее.
+    ///
+    /// Яркость ведём в противоход насыщенности и слабее её: чистый рост
+    /// насыщенности делает светлые оттенки ядовитыми, а падение — грязными.
+    func intensified(_ factor: Double) -> Color {
+        guard abs(factor - 1) > 0.001 else { return self }
+        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
+        guard UIColor(self).getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
+        else { return self }
+        let newSaturation = min(max(saturation * CGFloat(factor), 0), 1)
+        let newBrightness = min(max(brightness * CGFloat(1 + (1 - factor) * 0.25), 0), 1)
+        return Color(hue: Double(hue), saturation: Double(newSaturation),
+                     brightness: Double(newBrightness), opacity: Double(alpha))
+    }
+}
+
 enum AppAccent: String, CaseIterable, Identifiable {
+    /// Цвет ведёт к тому, что ещё не закрыто.
+    ///
+    /// Порядок не произвольный: белок решает, уходит жир или мышцы, поэтому он
+    /// первый; жир — про гормоны, у него есть нижняя граница, поэтому второй;
+    /// углеводы закрывают остаток нормы и терпят. Пока белок недобран, всё
+    /// приложение синее; закрыл — стало оранжевым, значит очередь жира.
+    /// Закрыто всё — цвет калорий, и это тоже сообщение: день собран.
+    case focus
     case system, kcal, protein, fat, carbs
 
     static let defaultsKey = "app_accent"
 
     var id: String { rawValue }
+
+    /// Макросы в том порядке, в каком их закрывают.
+    static let focusOrder: [MacroKind] = [.protein, .fat, .carbs]
 
     /// Выбранный цвет. Читается напрямую там, где своего окружения нет:
     /// кольцо шагов и графики красятся им же, а не системным синим.
@@ -263,11 +318,40 @@ enum AppAccent: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
+        // Без контекста ведущий макрос неизвестен — показываем цвет калорий.
+        // Контекст есть у `color(focus:)`, и все экраны зовут именно его.
+        case .focus:   return ProgressRing.kcalColors[0]
         case .system:  return .blue
         case .kcal:    return ProgressRing.kcalColors[0]
         case .protein: return MacroKind.protein.color
         case .fat:     return MacroKind.fat.color
         case .carbs:   return MacroKind.carbs.color
+        }
+    }
+
+    /// Ведущий макрос, как его посчитал дневник.
+    ///
+    /// Экранам без стора — кольцу шагов, графикам — ходить за ним в дневник
+    /// незачем: `CalorieStore` кладёт ответ в настройки на каждой перестройке.
+    static var storedFocusMacro: MacroKind? {
+        UserDefaults.standard.string(forKey: "focus_macro").flatMap(MacroKind.init(rawValue:))
+    }
+
+    /// Цвет с оглядкой на то, какой макрос сегодня ведущий.
+    func color(focus: MacroKind?) -> Color {
+        guard self == .focus else { return color }
+        guard let focus else { return ProgressRing.kcalColors[0] }
+        return focus.color
+    }
+
+    var title: String {
+        switch self {
+        case .focus:   return String(localized: "По макросу")
+        case .system:  return String(localized: "Системный")
+        case .kcal:    return String(localized: "Калории")
+        case .protein: return String(localized: "Белки")
+        case .fat:     return String(localized: "Жиры")
+        case .carbs:   return String(localized: "Углеводы")
         }
     }
 }

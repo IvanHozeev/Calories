@@ -570,7 +570,10 @@ private struct StepsChip: View {
 
     // Цвет акцента, выбранный в настройках: кольцо шагов у него единственное
     // без своего смысла у цвета. Цель взята — зелёным, как «в норме» везде.
-    private var tint: Color { progress >= 1 ? ProgressRing.kcalColors[0] : AppAccent.current.color }
+    private var tint: Color {
+        progress >= 1 ? ProgressRing.kcalColors[0]
+                      : AppAccent.current.color(focus: AppAccent.storedFocusMacro)
+    }
 
     var body: some View {
         Button {

@@ -23,12 +23,18 @@ nonisolated struct Macros: Codable, Hashable {
         )
     }
 
-    func scaled(by grams: Double) -> Macros {
-        Macros(
-            protein: protein * grams / 100,
-            fat: fat * grams / 100,
-            carbs: carbs * grams / 100
-        )
+    /// Макросы порции по составу на сто грамм.
+    ///
+    /// Имя обязано говорить про сотню: под «умножить на» здесь уже ошибались —
+    /// множитель передавали как есть и получали порцию в сто раз больше.
+    /// Умножение на число, не связанное с массой, называется `times(_:)`.
+    func portion(grams: Double) -> Macros {
+        times(grams / 100)
+    }
+
+    /// Просто умножить: когда значения уже абсолютные, а не на сто грамм.
+    func times(_ factor: Double) -> Macros {
+        Macros(protein: protein * factor, fat: fat * factor, carbs: carbs * factor)
     }
 
     /// Макрос, которым продукт богат, — если такой есть.
@@ -172,7 +178,7 @@ struct DishIngredient: Codable, Identifiable {
     var grams: Double
 
     var calories: Int { Int((Double(caloriesPer100g) * grams / 100).rounded()) }
-    var macros: Macros { macrosPer100g.scaled(by: grams) }
+    var macros: Macros { macrosPer100g.portion(grams: grams) }
 }
 
 /// Пользовательское блюдо — собирается из нескольких продуктов. Модель SwiftData.

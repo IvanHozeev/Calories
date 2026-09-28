@@ -154,10 +154,15 @@ nonisolated struct Micronutrients: Codable, Equatable {
         return result
     }
 
-    /// Пересчёт на съеденную массу.
-    func scaled(by grams: Double) -> Micronutrients {
+    /// Нутриенты порции по составу на сто грамм.
+    func portion(grams: Double) -> Micronutrients {
+        times(grams / 100)
+    }
+
+    /// Просто умножить: когда значения уже абсолютные, а не на сто грамм.
+    func times(_ factor: Double) -> Micronutrients {
         var result = Micronutrients()
-        result.per100g = per100g.mapValues { $0 * grams / 100 }
+        result.per100g = per100g.mapValues { $0 * factor }
         return result
     }
 
@@ -169,7 +174,7 @@ nonisolated struct Micronutrients: Codable, Equatable {
     /// превратились бы в шум на каждой строке.
     func notable(inGrams grams: Double, threshold: Double = 0.2) -> [Micronutrient] {
         guard grams > 0, !isEmpty else { return [] }
-        let portion = scaled(by: grams)
+        let portion = portion(grams: grams)
         return Micronutrient.allCases
             .compactMap { nutrient -> (nutrient: Micronutrient, share: Double)? in
                 guard let amount = portion[nutrient] else { return nil }

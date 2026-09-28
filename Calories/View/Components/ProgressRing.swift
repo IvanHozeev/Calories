@@ -112,30 +112,24 @@ struct ProgressRing: View {
     // дугами прежние мягкие цвета смотрелись лучше.
     // Открыты для карточки макросов: цифры под кольцом должны быть того же
     // цвета, что дуги, а не системных синего, оранжевого и фиолетового.
-    // Базовые оттенки. На экран они выходят через `tuned` — с поправкой на
-    // выбранную человеком насыщенность.
-    private static let kcalBase = [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)]
-    private static let proteinBase = [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)]
-    private static let fatBase = [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)]
-    private static let carbBase = [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)]
-
-    private static func tuned(_ colors: [Color]) -> [Color] {
-        let factor = PaletteIntensity.current
-        return colors.map { $0.intensified(factor) }
+    // Сами оттенки лежат в общей палитре: те же цвета рисует виджет, и держать
+    // их в двух местах — значит однажды показать рядом два разных приложения.
+    // На экран они выходят с поправкой на выбранную человеком насыщенность.
+    private static func tuned(_ ramp: Palette.Ramp) -> [Color] {
+        Palette.colors(ramp, intensity: PaletteIntensity.current)
     }
 
-    static var kcalColors: [Color] { tuned(kcalBase) }
-    static var proteinColors: [Color] { tuned(proteinBase) }
-    static var fatColors: [Color] { tuned(fatBase) }
-    static var carbColors: [Color] { tuned(carbBase) }
+    static var kcalColors: [Color] { tuned(Palette.kcal) }
+    static var proteinColors: [Color] { tuned(Palette.protein) }
+    static var fatColors: [Color] { tuned(Palette.fat) }
+    static var carbColors: [Color] { tuned(Palette.carbs) }
     /// Перебор — глубокий красный.
     ///
     /// Системные оранжевый с красным брать больше нельзя: жиры стали мягким
     /// персиком, и системный оранжевый оказывался их соседом по тону — дуга
     /// перебора читалась как ещё один макрос, а не как тревога. Этот темнее и
     /// насыщеннее всего, что есть в кольце.
-    private static let overBase = [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)]
-    static var overColors: [Color] { tuned(overBase) }
+    static var overColors: [Color] { tuned(Palette.over) }
 
     /// Путь кольца до остановки перед финишем.
     static let spinDuration = RingTicks.duration
@@ -295,15 +289,6 @@ private struct RingArc: Shape {
                     endAngle: .degrees(end - 90),
                     clockwise: false)
         return path
-    }
-}
-
-extension Color {
-    init(hex: UInt32) {
-        self.init(.displayP3,
-                  red: Double((hex >> 16) & 0xFF) / 255,
-                  green: Double((hex >> 8) & 0xFF) / 255,
-                  blue: Double(hex & 0xFF) / 255)
     }
 }
 

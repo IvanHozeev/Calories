@@ -475,6 +475,30 @@ extension CalorieStore {
         return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
     }
 
+    /// Окна приёмов за день по дневнику: и сегодняшние, и прожитые.
+    ///
+    /// Норму берём ту, что была в силе: на сегодня — с поправкой на активность,
+    /// на прошедший день — сохранённую, иначе разбор дня считал бы вчерашний
+    /// перебор по сегодняшней цифре.
+    func slots(on date: Date = Date(), schedule: MealScheduleSettings,
+               now: Date = Date()) -> [MealSchedule.Slot] {
+        let calendar = Calendar.current
+        let day = calendar.startOfDay(for: date)
+        // Прожитый день разбираем целиком: «сейчас» для него — последняя минута.
+        let moment = calendar.isDateInToday(day) ? now : day.addingTimeInterval(86_399)
+        return MealSchedule.slots(
+            settings: schedule,
+            entries: (entriesByDay[day] ?? []).map { (date: $0.date, calories: $0.calories) },
+            dailyGoal: calendar.isDateInToday(day) ? adaptedTodayGoal : goal(for: day),
+            now: moment)
+    }
+
+    /// Приёмы сегодняшнего дня по общим настройкам расписания.
+    @MainActor
+    var todaySlots: [MealSchedule.Slot] {
+        slots(schedule: MealScheduleSettings.shared)
+    }
+
     /// Данные для итога недели: последние семь дней целиком.
     ///
     /// Неделя, а не «с понедельника»: разбор открывают в любой день, и
@@ -606,14 +630,7 @@ extension CalorieStore {
         // Самый крупный перебор по приёму — но только когда день разбит на
         // приёмы: без расписания говорить не о чем.
         if schedule.isEnabled {
-            let entries = (entriesByDay[day] ?? []).map { (date: $0.date, calories: $0.calories) }
-            // Разбираем прожитый день целиком: «сейчас» — его последняя минута.
-            let end = calendar.isDateInToday(day) ? Date() : day.addingTimeInterval(86_399)
-            let slots = MealSchedule.slots(.init(
-                wake: schedule.today(schedule.wake, now: day),
-                sleep: schedule.today(schedule.sleep, now: day),
-                mealCount: schedule.count, dailyGoal: goal(for: day),
-                entries: entries, now: end))
+            let slots = slots(on: day, schedule: schedule)
             if let worst = slots.max(by: { $0.overeaten < $1.overeaten }), worst.overeaten > 0 {
                 context.overeatenMeal = String(localized: String.LocalizationValue(worst.period.rawValue))
                 context.overeatenBy = worst.overeaten

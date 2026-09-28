@@ -218,7 +218,7 @@ struct BodyAnalysisTests {
 
     @Test func micronutrients_scaleAndAddUp() {
         let per100g = Micronutrients([.iron: 2.0, .calcium: 120])
-        let eaten = per100g.scaled(by: 250)
+        let eaten = per100g.portion(grams: 250)
         #expect(eaten[.iron] == 5.0)
         #expect(eaten[.calcium] == 300)
 

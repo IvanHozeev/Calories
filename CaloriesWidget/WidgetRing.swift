@@ -3,39 +3,31 @@ import WidgetKit
 
 /// Кольцо «Сегодня» и знак «С» для виджетов.
 ///
-/// Копия по устройству, а не общий код: папки проекта синхронизированы с файловой
-/// системой, и файл приложения в таргет виджета не попадает. Если правишь кольцо в
-/// `ProgressRing` или знак в `BrandMark`, загляни и сюда — доли, поворот и цвета
-/// должны совпадать, иначе виджет перестанет узнаваться как то же кольцо.
+/// Рисунок здесь свой: у виджета нет анимации, жестов и звука, а доли, поворот и
+/// толщина дуг должны совпадать с `ProgressRing` — правишь там, загляни и сюда.
+/// А вот цвета общие: они лежат в `Shared/Palette.swift`, который входит в оба
+/// таргета, и расходиться им больше нечем.
 enum WidgetPalette {
-    // Базовые оттенки; на экран идут с поправкой на выбранную насыщенность —
-    // её приложение кладёт в общий контейнер группы.
-    private static let kcalBase = [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)]
-    private static let proteinBase = [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)]
-    private static let fatBase = [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)]
-    private static let carbsBase = [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)]
-
-    private static var intensity: Double {
-        PaletteIntensity.current(groupDefaults: UserDefaults(suiteName: "group.calories.shared"))
-    }
-    private static func tuned(_ colors: [Color]) -> [Color] {
-        let factor = intensity
-        return colors.map { $0.intensified(factor) }
+    /// Насыщенность человек выбирает в приложении, а оно кладёт её в общий
+    /// контейнер группы — своих настроек у виджета нет.
+    private static func tuned(_ ramp: Palette.Ramp) -> [Color] {
+        Palette.colors(ramp, intensity: PaletteIntensity.current(groupDefaults: groupDefaults))
     }
 
-    static var kcal: [Color] { tuned(kcalBase) }
-    static var protein: [Color] { tuned(proteinBase) }
-    static var fat: [Color] { tuned(fatBase) }
-    static var carbs: [Color] { tuned(carbsBase) }
-    /// Перебор — тот же красно-коралловый, что и в приложении: системный
-    /// оранжевый спорил бы по тону с новым цветом жиров.
-    private static let overBase = [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)]
-    static var over: [Color] { tuned(overBase) }
+    private static var groupDefaults: UserDefaults? {
+        UserDefaults(suiteName: "group.calories.shared")
+    }
+
+    static var kcal: [Color] { tuned(Palette.kcal) }
+    static var protein: [Color] { tuned(Palette.protein) }
+    static var fat: [Color] { tuned(Palette.fat) }
+    static var carbs: [Color] { tuned(Palette.carbs) }
+    static var over: [Color] { tuned(Palette.over) }
     /// Шаги красятся цветом акцента из настроек приложения: у этого кольца
     /// цвет ничего не означает, и пусть он будет тем, который человек выбрал.
     /// Приложение кладёт выбор в общие настройки группы.
     static var steps: [Color] {
-        switch UserDefaults(suiteName: "group.calories.shared")?.string(forKey: "widget_accent") {
+        switch groupDefaults?.string(forKey: "widget_accent") {
         case "kcal":    return kcal
         case "protein": return protein
         case "fat":     return fat
@@ -60,43 +52,6 @@ enum WidgetPalette {
         Color(uiColor: UIColor { traits in
             UIColor(Color(hex: traits.userInterfaceStyle == .dark ? dark : light))
         })
-    }
-}
-
-extension Color {
-    init(hex: UInt32) {
-        self.init(.displayP3,
-                  red: Double((hex >> 16) & 0xFF) / 255,
-                  green: Double((hex >> 8) & 0xFF) / 255,
-                  blue: Double(hex & 0xFF) / 255)
-    }
-}
-
-/// Насыщенность палитры — копия из приложения по той же причине, что и само
-/// кольцо: файлы приложения в таргет виджета не попадают. Правишь там —
-/// правь и здесь.
-enum PaletteIntensity {
-    static let key = "palette_intensity"
-    static let range: ClosedRange<Double> = 0.6...1.35
-    static let standard: Double = 1
-
-    static func current(groupDefaults: UserDefaults?) -> Double {
-        let stored = groupDefaults?.object(forKey: key) as? Double ?? standard
-        return min(max(stored, range.lowerBound), range.upperBound)
-    }
-}
-
-extension Color {
-    /// Тот же цвет, но насыщеннее или бледнее.
-    func intensified(_ factor: Double) -> Color {
-        guard abs(factor - 1) > 0.001 else { return self }
-        var hue: CGFloat = 0, saturation: CGFloat = 0, brightness: CGFloat = 0, alpha: CGFloat = 0
-        guard UIColor(self).getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha)
-        else { return self }
-        let newSaturation = min(max(saturation * CGFloat(factor), 0), 1)
-        let newBrightness = min(max(brightness * CGFloat(1 + (1 - factor) * 0.25), 0), 1)
-        return Color(hue: Double(hue), saturation: Double(newSaturation),
-                     brightness: Double(newBrightness), opacity: Double(alpha))
     }
 }
 

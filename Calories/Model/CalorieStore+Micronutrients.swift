@@ -72,7 +72,7 @@ extension CalorieStore {
             guard let grams = entry.grams, grams > 0,
                   let profile = nutrientProfilesByName[entry.name]
             else { continue }
-            totals = totals + profile.per100g.scaled(by: grams)
+            totals = totals + profile.per100g.portion(grams: grams)
             // Долей, а не целиком: у блюда из трёх ингредиентов, где состав
             // известен у двух, покрыты не все его калории. Записать их все —
             // значит объявить день изученным сильнее, чем он изучен.
@@ -177,15 +177,14 @@ nonisolated enum DishNutrients {
         var knownGrams = 0.0
         for ingredient in ingredients {
             guard ingredient.grams > 0, let per100g = composition(ingredient.foodName) else { continue }
-            totals = totals + per100g.scaled(by: ingredient.grams)
+            totals = totals + per100g.portion(grams: ingredient.grams)
             knownGrams += ingredient.grams
         }
         guard knownGrams > 0 else { return nil }
 
         // Обратно на сотню грамм блюда: суммы выше уже в единицах нутриента на
-        // всю массу, а словарь везде хранит «на 100 г». `scaled(by:)` делит на
-        // сотню, поэтому множитель — не 100/вес, а вдесятеро тысячный.
-        let per100gOfDish = totals.scaled(by: 10_000 / totalGrams)
+        // всю массу, а словарь везде хранит «на 100 г».
+        let per100gOfDish = totals.times(100 / totalGrams)
         return NutrientProfile(per100g: per100gOfDish, coverage: knownGrams / totalGrams)
     }
 }

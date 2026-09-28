@@ -43,7 +43,7 @@ struct FoodQuantityView: View {
     }
 
     private var macros: Macros {
-        food.macrosPer100g.scaled(by: grams)
+        food.macrosPer100g.portion(grams: grams)
     }
 
     var body: some View {
@@ -248,7 +248,7 @@ struct DishQuantityView: View {
     }
 
     private var macros: Macros {
-        dish.macrosPer100g.scaled(by: grams)
+        dish.macrosPer100g.portion(grams: grams)
     }
 
     var body: some View {

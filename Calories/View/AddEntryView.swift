@@ -613,17 +613,8 @@ struct AddEntryView: View {
     /// Ноль, когда расписание выключено: без окон «остаток приёма» не
     /// существует, и подсказывать не от чего.
     private var mealRemaining: Int {
-        let settings = MealScheduleSettings.shared
-        guard settings.isEnabled else { return 0 }
-        let now = Date()
-        let slots = MealSchedule.slots(.init(
-            wake: settings.today(settings.wake, now: now),
-            sleep: settings.today(settings.sleep, now: now),
-            mealCount: settings.count,
-            dailyGoal: store.adaptedTodayGoal,
-            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-            now: now))
-        guard let next = MealSchedule.nextSlot(slots, now: now) else { return 0 }
+        guard MealScheduleSettings.shared.isEnabled else { return 0 }
+        guard let next = MealSchedule.nextSlot(store.todaySlots) else { return 0 }
         return max(0, next.calories - draftTotalCalories)
     }
 
@@ -633,17 +624,8 @@ struct AddEntryView: View {
 
     /// Какой приём сейчас ближайший — его именем и подписаны подсказки.
     private var nextMealPeriod: MealPeriod? {
-        let settings = MealScheduleSettings.shared
-        guard settings.isEnabled else { return nil }
-        let now = Date()
-        let slots = MealSchedule.slots(.init(
-            wake: settings.today(settings.wake, now: now),
-            sleep: settings.today(settings.sleep, now: now),
-            mealCount: settings.count,
-            dailyGoal: store.adaptedTodayGoal,
-            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-            now: now))
-        return MealSchedule.nextSlot(slots, now: now)?.period
+        guard MealScheduleSettings.shared.isEnabled else { return nil }
+        return MealSchedule.nextSlot(store.todaySlots)?.period
     }
 
     /// Заголовок подсказок: какой это приём и сколько на него осталось.

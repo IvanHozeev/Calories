@@ -80,7 +80,7 @@ struct MacrosTests {
 
     @Test func scaled() {
         let m = Macros(protein: 20, fat: 10, carbs: 40)
-        let s = m.scaled(by: 200)
+        let s = m.portion(grams: 200)
         #expect(s.protein == 40)
         #expect(s.fat == 20)
         #expect(s.carbs == 80)
@@ -88,7 +88,7 @@ struct MacrosTests {
 
     @Test func scaledByZero() {
         let m = Macros(protein: 20, fat: 10, carbs: 40)
-        let s = m.scaled(by: 0)
+        let s = m.portion(grams: 0)
         #expect(s.protein == 0)
         #expect(s.fat == 0)
         #expect(s.carbs == 0)

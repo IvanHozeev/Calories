@@ -22,7 +22,7 @@ struct NewDishSheet: View {
 
     private var portionMacros: Macros {
         guard totalGrams > 0 else { return .zero }
-        return totalMacros.scaled(by: portionGrams / totalGrams * 100)
+        return totalMacros.times(portionGrams / totalGrams)
     }
 
     private var servingGramsValue: Double {
@@ -349,7 +349,7 @@ struct IngredientPickerSheet: View {
 
     private func gramsEntryView(for food: FoodItem) -> some View {
         let cal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
-        let m = food.macrosPer100g.scaled(by: grams)
+        let m = food.macrosPer100g.portion(grams: grams)
         return List {
             Section(food.name) {
                 HStack {

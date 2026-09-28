@@ -23,7 +23,7 @@ struct CatalogFoodView: View {
         Int((Double(food.caloriesPer100g) * grams / 100).rounded())
     }
 
-    private var portionMacros: Macros { food.macrosPer100g.scaled(by: grams) }
+    private var portionMacros: Macros { food.macrosPer100g.portion(grams: grams) }
 
     var body: some View {
         List {

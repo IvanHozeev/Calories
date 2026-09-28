@@ -273,7 +273,7 @@ struct NewFoodSheet: View {
                                 .font(.app(.body, weight: .medium))
                                 .monospacedDigit()
                         }
-                        MacroTags(macros: draftMacros.scaled(by: servingToSave))
+                        MacroTags(macros: draftMacros.portion(grams: servingToSave))
                     }
                 } header: {
                     Text("Порция по умолчанию")

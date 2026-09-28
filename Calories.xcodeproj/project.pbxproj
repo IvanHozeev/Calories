@@ -108,6 +108,11 @@
 			path = CaloriesUITests;
 			sourceTree = "<group>";
 		};
+		54AA01010000000000000001 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,6 +169,7 @@
 				547895D7302B3D4E00C36433 /* CaloriesTests */,
 				547895E1302B3D4E00C36433 /* CaloriesUITests */,
 				544F0657303723AC00D4693B /* CaloriesWidget */,
+				54AA01010000000000000001 /* Shared */,
 				544F064B3037207C00D4693B /* Frameworks */,
 				547895C6302B3D4C00C36433 /* Products */,
 			);
@@ -197,6 +203,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				544F0657303723AC00D4693B /* CaloriesWidget */,
+				54AA01010000000000000001 /* Shared */,
 			);
 			name = CaloriesWidgetExtension;
 			packageProductDependencies = (
@@ -221,6 +228,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				547895C7302B3D4C00C36433 /* Calories */,
+				54AA01010000000000000001 /* Shared */,
 			);
 			name = Calories;
 			packageProductDependencies = (

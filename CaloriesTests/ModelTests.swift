@@ -2,6 +2,8 @@ import Testing
 import UIKit
 import Foundation
 import SwiftData
+// SwiftUI ради `UnitPoint` у общей дуги: она рисуется и в приложении, и в виджете.
+import SwiftUI
 @testable import Calories
 
 // MARK: - Macros
@@ -583,5 +585,47 @@ struct PlanTests {
         let breakdown = p.weeklyCalorieBreakdown(tdee: 2500)
         let calories = breakdown.map(\.calories)
         #expect(Set(calories).count > 1)
+    }
+}
+
+/// Мелочи, которые перестали быть копиями.
+///
+/// Каждая из них жила в двух-трёх местах и там же расходилась: дуга считалась
+/// по-разному у кольца, знака и виджета, группировка продуктов — в двух
+/// экранах. Тесты закрепляют не вёрстку, а правила, из-за которых копии и были
+/// опасны.
+@MainActor
+struct SharedPiecesTests {
+    /// Ноль градусов — верх кольца, дальше по часовой.
+    ///
+    /// Именно из-за этого у дуги свой поворот на четверть оборота: у системных
+    /// углов ноль справа, а кольцо читается с двенадцати часов.
+    @Test func zeroDegreesIsTheTopOfTheRing() {
+        let top = CircleArc.point(at: 0)
+        #expect(abs(top.x - 0.5) < 0.001)
+        #expect(abs(top.y - 0) < 0.001)
+
+        let right = CircleArc.point(at: 90)
+        #expect(abs(right.x - 1) < 0.001)
+        #expect(abs(right.y - 0.5) < 0.001)
+
+        let bottom = CircleArc.point(at: 180)
+        #expect(abs(bottom.y - 1) < 0.001)
+    }
+
+    /// Продукты группируются в порядке категорий, а не в порядке словаря:
+    /// список должен открываться одинаково каждый раз.
+    @Test func groupingFollowsTheOrderOfCategories() {
+        let foods = [
+            FoodItem(name: "Творог", caloriesPer100g: 121, protein: 18, fat: 5, carbs: 3, category: .dairy),
+            FoodItem(name: "Гречка", caloriesPer100g: 110, protein: 4, fat: 1, carbs: 21, category: .grains),
+            FoodItem(name: "Кефир", caloriesPer100g: 40, protein: 3, fat: 1, carbs: 4, category: .dairy),
+        ]
+        let grouped = FoodCategory.grouped(foods)
+        let order = FoodCategory.allCases
+        let positions = grouped.map { order.firstIndex(of: $0.0) ?? -1 }
+        #expect(positions == positions.sorted(), "Категории идут в своём порядке")
+        #expect(grouped.count == 2, "Пустые категории в список не идут")
+        #expect(grouped.first { $0.0 == .dairy }?.1.count == 2)
     }
 }

@@ -70,8 +70,17 @@ struct ContentView: View {
         ))
     }
 
+    /// Копия, к которой надо прокрутить список. Сбрасывается сразу после
+    /// прокрутки: это событие, а не состояние.
+    @State private var copiedEntryID: UUID?
+
     var body: some View {
         NavigationStack {
+            // Ридер ради одного: показать, куда уехала копия приёма. Копия
+            // получает время «сейчас», а значит попадает в текущий приём —
+            // он же первый в списке, и с середины дневника новая строка
+            // появляется за верхней кромкой, то есть будто бы нигде.
+            ScrollViewReader { scroll in
             List {
                 Section {
                     VStack(spacing: 24) {
@@ -277,7 +286,14 @@ struct ContentView: View {
                                         // Без явной анимации это происходит рывком:
                                         // половина экрана переставляется за кадр,
                                         // и понять, что произошло, невозможно.
-                                        withAnimation(.snappy) {
+                                        // Явной транзакцией, а не `withAnimation`:
+                                        // мутация стора уезжает в наблюдение, и
+                                        // из обработчика свайпа анимация до
+                                        // списка доходила не всегда — строка
+                                        // появлялась рывком.
+                                        var transaction = Transaction(animation: .snappy)
+                                        transaction.disablesAnimations = false
+                                        withTransaction(transaction) {
                                             // Вместе с составом: приём из пяти
                                             // продуктов, скопированный одной
                                             // строкой без начинки, теряет и
@@ -287,10 +303,17 @@ struct ContentView: View {
                                                       macros: entry.macros, grams: entry.grams,
                                                       components: entry.components)
                                         }
+                                        // И показываем, куда она встала: копия
+                                        // получает время «сейчас» и уходит в
+                                        // текущий приём, а он может быть в
+                                        // другом конце дневника.
+                                        copiedEntryID = store.todayEntries.first?.id
                                     } label: {
                                         Image(systemName: "plus.square.on.square")
                                     }
                                     .tint(.blue)
+                                    .accessibilityIdentifier("copyEntry")
+                                    .accessibilityLabel("Повторить")
                                     // Дополнить — это правка того же приёма, а не
                                     // добавление нового: приём пищи хранится одной
                                     // строкой с итогами, поэтому он становится
@@ -335,6 +358,11 @@ struct ContentView: View {
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
+            .onChange(of: copiedEntryID) { _, id in
+                guard let id else { return }
+                withAnimation(.snappy) { scroll.scrollTo(id, anchor: .center) }
+                copiedEntryID = nil
+            }
             // Пока тянут вниз, кольцо делает оборот — тот же жест, что у знака на
             // запуске. Обновление мгновенное, поэтому ждём конца оборота, иначе
             // индикатор списка пропадал бы на полпути.
@@ -519,6 +547,7 @@ struct ContentView: View {
                 if oldValue < goal && newValue >= goal {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                 }
+            }
             }
         }
     }

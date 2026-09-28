@@ -73,6 +73,7 @@ struct ContentView: View {
     /// Копия, к которой надо прокрутить список. Сбрасывается сразу после
     /// прокрутки: это событие, а не состояние.
     @State private var copiedEntryID: UUID?
+    @State private var showingWeekReview = false
 
     var body: some View {
         NavigationStack {
@@ -161,7 +162,8 @@ struct ContentView: View {
                         // их реже всего.
                         WeekStrip(weeks: store.weekStripWeeks(),
                                   onSelect: { selectedHistoryDay = $0 },
-                                  onShowAll: { showingActivity = true })
+                                  onShowAll: { showingActivity = true },
+                                  onShowWeek: { showingWeekReview = true })
 
                         if store.calorieBankBonus != 0 {
                             Button { showingBankInfo = true } label: {
@@ -307,7 +309,9 @@ struct ContentView: View {
                                         // получает время «сейчас» и уходит в
                                         // текущий приём, а он может быть в
                                         // другом конце дневника.
-                                        copiedEntryID = store.todayEntries.first?.id
+                                        // Самая свежая запись — последняя:
+                                        // день теперь идёт по порядку.
+                                        copiedEntryID = store.todayEntries.max { $0.date < $1.date }?.id
                                     } label: {
                                         Image(systemName: "plus.square.on.square")
                                     }
@@ -528,6 +532,9 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingActivity) {
                 ActivityView(store: store)
+            }
+            .navigationDestination(isPresented: $showingWeekReview) {
+                WeekReviewView(store: store)
             }
             .navigationDestination(item: $selectedHistoryDay) { date in
                 DayDetailView(store: store, date: date)

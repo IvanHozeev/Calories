@@ -45,7 +45,14 @@ enum MealReminders {
     /// а не тем, что съедено, поэтому пересчитывать их ежедневно незачем.
     /// Сколько калорий на окно, известно только в момент показа — поэтому
     /// текст говорит про приём, а число человек видит в приложении.
-    static func reschedule(settings: MealScheduleSettings, center: UNUserNotificationCenter = .current()) {
+    @MainActor
+    static func reschedule(settings: MealScheduleSettings,
+                           store: CalorieStore? = nil,
+                           center: UNUserNotificationCenter = .current()) {
+        // Всё, что зависит от дневника, считаем здесь и сейчас: внутрь
+        // замыкания центра уведомлений главный актор не заходит.
+        let plan = store.map { plannedMeals(settings: settings, store: $0) } ?? []
+
         center.getPendingNotificationRequests { pending in
             let ours = pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
             center.removePendingNotificationRequests(withIdentifiers: ours)
@@ -57,9 +64,12 @@ enum MealReminders {
             let calendar = Calendar.current
             for (index, time) in times.enumerated() {
                 let content = UNMutableNotificationContent()
-                content.title = String(format: String(localized: "Приём %1$lld из %2$lld"),
-                                       index + 1, times.count)
-                content.body = String(localized: "Окно открылось — запиши, что ешь.")
+                let meal = index < plan.count ? plan[index] : nil
+                // Имя приёма, а не «приём 3 из 5»: человек знает, что такое
+                // полдник, и не считает приёмы по номерам.
+                content.title = meal?.title ?? String(format: String(localized: "Приём %1$lld из %2$lld"),
+                                                      index + 1, times.count)
+                content.body = meal.map(body(for:)) ?? String(localized: "Окно открылось — запиши, что ешь.")
                 content.sound = .default
                 content.categoryIdentifier = category
                 let parts = calendar.dateComponents([.hour, .minute], from: time)
@@ -68,6 +78,44 @@ enum MealReminders {
                                                  content: content, trigger: trigger))
             }
             logger.info("расписание приёмов: \(times.count) напоминаний")
+        }
+    }
+
+    /// Что известно о приёме заранее: как он называется, сколько на него
+    /// отведено по плану и что человек обычно ест на такие калории.
+    struct PlannedMeal {
+        let title: String
+        let calories: Int
+        let suggestion: String?
+    }
+
+    /// Текст напоминания: число и пример.
+    ///
+    /// Число берём плановое, а не остаток на момент показа: остаток зависит от
+    /// того, что уже съедено, а содержимое уведомления фиксируется при
+    /// постановке — и назавтра показывало бы вчерашнюю арифметику. Доля приёма
+    /// от дневной нормы такой беды не знает: она одна и та же изо дня в день.
+    static func body(for meal: PlannedMeal) -> String {
+        guard let suggestion = meal.suggestion else {
+            return String(format: String(localized: "%lld ккал по плану"), meal.calories)
+        }
+        return String(format: String(localized: "%1$lld ккал по плану. Например: %2$@"),
+                      meal.calories, suggestion)
+    }
+
+    /// Плановые приёмы дня: сколько отведено каждому и чем его обычно закрывают.
+    @MainActor
+    static func plannedMeals(settings: MealScheduleSettings, store: CalorieStore) -> [PlannedMeal] {
+        let periods = MealSchedule.periods(count: settings.count)
+        let totalWeight = periods.reduce(0.0) { $0 + MealSchedule.weight(of: $1) }
+        guard totalWeight > 0, store.adaptedTodayGoal > 0 else { return [] }
+
+        return periods.map { period in
+            let calories = Int((Double(store.adaptedTodayGoal) * MealSchedule.weight(of: period) / totalWeight).rounded())
+            return PlannedMeal(
+                title: String(localized: String.LocalizationValue(period.rawValue)),
+                calories: calories,
+                suggestion: store.mealSuggestions(remaining: calories).first?.name)
         }
     }
 

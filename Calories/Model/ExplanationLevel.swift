@@ -66,20 +66,24 @@ final class ExplanationSettings {
     }
 }
 
-/// Пояснение на выбранном уровне.
+/// Пояснение — или ничего.
 ///
-/// Оба текста пишутся рядом, в одном месте кода: так видно, что короткий
-/// вариант — это та же мысль, сжатая, а не другая мысль. Подробный обязателен,
-/// короткий — нет: часть подписей коротка сама по себе, и сокращать в них
-/// нечего.
+/// На коротком уровне подписи не сокращаются, а исчезают: человек, который
+/// выбрал «Коротко», просил не объяснять, а не объяснять помельче. Поэтому
+/// функция возвращает `nil`, и вызывающий просто не рисует строку.
+///
+/// Короткий вариант всё же можно передать — для мест, где строка несёт число
+/// или правило, без которого экран становится загадкой. Таких мало, и каждое
+/// такое место видно по наличию `short:`.
 @MainActor
-func explain(_ detailed: String, short: String? = nil) -> String {
-    guard ExplanationSettings.shared.level == .expert, let short else { return detailed }
+func explain(_ detailed: String, short: String? = nil) -> String? {
+    guard ExplanationSettings.shared.level == .expert else { return detailed }
     return short
 }
 
 /// То же для подписей, которые задаются ключом локализации.
 @MainActor
-func explain(_ detailed: LocalizedStringKey, short: LocalizedStringKey) -> LocalizedStringKey {
-    ExplanationSettings.shared.level == .expert ? short : detailed
+func explain(_ detailed: LocalizedStringKey, short: LocalizedStringKey? = nil) -> LocalizedStringKey? {
+    guard ExplanationSettings.shared.level == .expert else { return detailed }
+    return short
 }

@@ -18,9 +18,13 @@ struct MealScheduleStrip: View {
         // По названию, а не по номеру: «полдник» человек понимает сразу, а
         // «приём 4 из 5» заставляет пересчитывать, что это за еда.
         let name = String(localized: String.LocalizationValue(next.period.rawValue))
-        // Черёд приёма настал — зовём есть. Пока не съеден, он и остаётся
-        // текущим, сколько бы времени ни прошло.
-        if next.state == .current {
+        // Зовём есть по времени приёма, а не по началу его окна.
+        //
+        // Окно открывается на середине пути от прошлого приёма — у полдника в
+        // 16:00 это половина третьего, — и строка звала полдничать за час
+        // двадцать до него. Окно нужно, чтобы решить, куда засчитать
+        // съеденное; человеку показываем сам приём.
+        if next.state == .current, now >= next.time {
             return next.period.timeTitle
         }
         // А до тех пор — через сколько. Час в этом месте бесполезен: «обед в
@@ -84,6 +88,9 @@ struct MealScheduleSheet: View {
     let entries: [(date: Date, calories: Int)]
     let dailyGoal: Int
     @Bindable var settings: MealScheduleSettings
+    /// Дневник — чтобы напоминания знали, чем человек обычно закрывает приём.
+    /// Необязательный: экран показывают и из настроек, где дневника нет.
+    var store: CalorieStore? = nil
     /// Показан переходом из настроек, а не листом: тогда свой навигационный
     /// стек и кнопка закрытия не нужны — они уже есть снаружи.
     var isEmbedded = false
@@ -119,8 +126,7 @@ struct MealScheduleSheet: View {
                     Toggle("Делить день на приёмы", isOn: $settings.isEnabled)
                         .accessibilityIdentifier("mealScheduleToggle")
                 } footer: {
-                    Text(explain("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший.",
-                                 short: "Норма делится по приёмам; на «Сегодня» видно ближайший."))
+                    explain("Норма делится на равные приёмы, и на «Сегодня» видно, сколько осталось на ближайший.").map { Text($0) }
                 }
 
                 Section {
@@ -136,8 +142,7 @@ struct MealScheduleSheet: View {
                     .accessibilityIdentifier("mealCountStepper")
                     DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
                 } footer: {
-                    Text(explain("Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.",
-                                 short: "8:00, 13:00, 19:00; промежуточные — ровно между ними."))
+                    explain("Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.").map { Text($0) }
                 }
 
                 Section {
@@ -145,13 +150,12 @@ struct MealScheduleSheet: View {
                         row(slot)
                     }
                 } footer: {
-                    Text(explain("Съеденный приём закрывается сразу, не дожидаясь конца окна. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.",
-                                 short: "Съеденный приём закрывается сразу, пропущенный отдаёт калории следующим."))
+                    explain("Съеденный приём закрывается сразу, не дожидаясь конца окна. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.").map { Text($0) }
                 }
             }
             // Напоминания переставляются на выходе: пока крутят стрелки,
             // дёргать систему на каждый тик незачем.
-            .onDisappear { MealReminders.reschedule(settings: settings) }
+            .onDisappear { MealReminders.reschedule(settings: settings, store: store) }
             .glassRow()
             .listStyle(.insetGrouped)
             .navigationTitle("Приёмы пищи")

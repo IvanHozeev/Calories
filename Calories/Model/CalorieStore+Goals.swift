@@ -475,6 +475,52 @@ extension CalorieStore {
         return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
     }
 
+    /// Данные для итога недели: последние семь дней целиком.
+    ///
+    /// Неделя, а не «с понедельника»: разбор открывают в любой день, и
+    /// обрезанная неделя показывала бы в понедельник один день и ноль выводов.
+    func weekReviewInput(now: Date = Date()) -> WeekReview.Input {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        var input = WeekReview.Input()
+        var days: [Date] = []
+        for offset in (0..<7).reversed() {
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
+            days.append(date)
+        }
+
+        for date in days {
+            let entries = entriesByDay[date] ?? []
+            // Пустой день в среднее не идёт: забытый дневник — не голодание.
+            guard !entries.isEmpty else { continue }
+            input.eaten.append(entries.reduce(0) { $0 + $1.calories })
+            input.goals.append(goal(for: date))
+        }
+        input.loggedDays = input.eaten.count
+
+        input.weightStart = days.first.flatMap { weightTrend(on: $0) }
+        input.weightEnd = weightTrend(on: today)
+        if let plan, let index = plan.phaseIndex(on: today), index < plan.timeline.count {
+            let phase = plan.timeline[index]
+            if phase.intent != .maintenance, !phase.isDietBreak {
+                input.plannedWeeklyKg = plan.weight(atStartOfPhaseAt: index) * phase.weeklyRatePercent / 100
+            }
+        }
+
+        input.expenditureStart = days.first.flatMap { expenditure(on: $0) }
+        input.expenditureEnd = smoothedTDEE
+
+        let nights = days.compactMap { sleep(on: $0)?.hours }
+        if !nights.isEmpty { input.sleepHours = nights.reduce(0, +) / Double(nights.count) }
+        let walked = days.compactMap { activity(on: $0)?.steps }.filter { $0 > 0 }
+        if !walked.isEmpty { input.steps = walked.reduce(0, +) / walked.count }
+        if let pulse = restingPulse(now: now) {
+            input.restingPulse = pulse.value
+            input.pulseRise = pulse.rise
+        }
+        return input
+    }
+
     /// Не пора ли подъесть: признаки того, что дефицит перестал работать.
     ///
     /// Собирается здесь, потому что нужны все четыре угла картины сразу —

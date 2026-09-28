@@ -408,7 +408,10 @@ struct CalorieStoreTests {
     /// Ночной перекус идёт с 23:00 до 05:00, поэтому запись в 00:30 — самая ранняя за день,
     /// хотя её приём пищи стоит последним в MealPeriod. Порядок групп должен идти
     /// от свежей записи к старой по фактическому времени.
-    @Test func groupedTodayEntries_orderedByActualTime() {
+    /// Порядок приёмов — порядок суток, а «Перекус» всегда в конце: его
+    /// записи приходят и в полночь, и под утро, но человек считает их хвостом
+    /// дня, а не его началом.
+    @Test func groupedTodayEntries_followTheOrderOfTheDay() {
         let calendar = Calendar.current
         func today(hour: Int, minute: Int) -> Date {
             calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()
@@ -419,11 +422,13 @@ struct CalorieStoreTests {
         store.add(name: "Ужин", calories: 300, date: today(hour: 19, minute: 0))
 
         let periods = store.groupedTodayEntries.map(\.period)
-        #expect(periods == [.dinner, .breakfast, .nightSnack],
-                "Группы должны идти от поздней записи к ранней, а не в порядке перечисления")
+        #expect(periods == [.breakfast, .dinner, .nightSnack],
+                "День должен читаться сверху вниз, а перекус — стоять последним")
     }
 
-    @Test func groupedTodayEntries_newestFirstInsideGroup() {
+    /// День читается сверху вниз, как он и прожит: внутри приёма записи идут
+    /// по времени, а не с конца.
+    @Test func groupedTodayEntries_chronologicalInsideGroup() {
         let calendar = Calendar.current
         func today(hour: Int) -> Date {
             calendar.date(bySettingHour: hour, minute: 0, second: 0, of: Date()) ?? Date()
@@ -433,7 +438,7 @@ struct CalorieStoreTests {
         store.add(name: "Позже", calories: 200, date: today(hour: 20))
 
         let dinner = store.groupedTodayEntries.first { $0.period == .dinner }
-        #expect(dinner?.entries.map(\.name) == ["Позже", "Раньше"])
+        #expect(dinner?.entries.map(\.name) == ["Раньше", "Позже"])
     }
 
     // MARK: Add entries

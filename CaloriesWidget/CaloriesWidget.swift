@@ -174,18 +174,31 @@ struct CaloriesWidgetEntryView: View {
     }
 
     private var mediumView: some View {
-        HStack(spacing: 18) {
-            ringWithRemaining(lineWidth: 10, number: 22)
-                .frame(width: 118, height: 118)
+        // Кольцо на половину виджета: раньше оно занимало треть и читалось
+        // мелкой картинкой рядом с текстом, хотя ради него виджет и ставят.
+        // Размер берём от самого виджета, а не числом в точках: средний
+        // виджет на разных айфонах разной ширины.
+        GeometryReader { geometry in
+            // Кольцо квадратное и по центру своей половины: считать его сторону
+            // только от ширины нельзя — на узких экранах квадрат выше виджета,
+            // и кольцо прижималось к верху, оставляя пустую полосу снизу.
+            let side = min(geometry.size.height, geometry.size.width * 0.46)
+            HStack(spacing: 16) {
+                ringWithRemaining(lineWidth: side * 0.085, number: side * 0.2)
+                    .frame(width: side, height: side)
 
-            // Как плашка макросов под кольцом: число с целью мелко и тонкая
-            // полоска цветом дуги. Калории уже в кольце.
-            VStack(alignment: .leading, spacing: 9) {
-                statRow(letter: "Б", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
-                statRow(letter: "Ж", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)
-                statRow(letter: "У", color: WidgetPalette.carbs[0], value: entry.carbs, target: entry.carbsTarget)
+                // Как плашка макросов под кольцом: число с целью и тонкая
+                // полоска цветом дуги. Калории уже в кольце.
+                VStack(alignment: .leading, spacing: 14) {
+                    statRow(letter: "Б", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
+                    statRow(letter: "Ж", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)
+                    statRow(letter: "У", color: WidgetPalette.carbs[0], value: entry.carbs, target: entry.carbsTarget)
+                }
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+            // По центру в обе стороны: с прижатым влево содержимым кольцо
+            // вставало вплотную к краю, а справа оставался воздух.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .containerBackground(for: .widget) { WidgetPalette.surface }
     }
@@ -195,17 +208,19 @@ struct CaloriesWidgetEntryView: View {
     /// на любом языке системы.
     private func statRow(letter: LocalizedStringKey, color: Color, value: Double, target: Double) -> some View {
         VStack(alignment: .leading, spacing: 3) {
+            // Крупнее прежнего: на виджете это второе по важности число после
+            // остатка, а одиннадцатым кеглем его приходилось разглядывать.
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(letter)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(color)
                 Text(verbatim: "\(Int(value.rounded()))")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.system(size: 17, weight: .semibold))
                     .monospacedDigit()
                     .foregroundStyle(.primary)
                 if target > 0 {
                     Text(verbatim: "/ \(Int(target.rounded()))")
-                        .font(.system(size: 11))
+                        .font(.system(size: 13))
                         .monospacedDigit()
                         .foregroundStyle(.tertiary)
                 }

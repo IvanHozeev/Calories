@@ -108,6 +108,18 @@ struct MealScheduleTests {
         #expect(try #require(MealSchedule.nextSlot(slots, now: at(12))).period == .lunch)
     }
 
+    /// Окно открывается раньше самого приёма — на середине пути от прошлого.
+    /// Это нужно для засчёта съеденного, но звать к полднику за час двадцать
+    /// до него нельзя.
+    @Test func theWindowOpensBeforeTheMealItself() throws {
+        let slots = MealSchedule.slots(input(count: 5, entries: [(at(8), 500), (at(13), 800)],
+                                             now: at(14, 40)))
+        let snack = try #require(slots.first { $0.period == .afternoonSnack })
+        #expect(snack.time == at(16))
+        #expect(snack.start < at(16))
+        #expect(snack.state == .current)
+    }
+
     /// А несъеденный истекает по времени: завтракать в обед никто не станет.
     @Test func anUneatenMealStillExpiresWithItsWindow() throws {
         let slots = MealSchedule.slots(input(count: 3, now: at(12)))
@@ -257,6 +269,69 @@ struct EntryComponentScalingTests {
 
     @Test func zeroIsNotAWeight() {
         #expect(curd.scaled(toGrams: 0) == curd)
+    }
+}
+
+// MARK: - Подсказки под остаток приёма
+
+/// Человек открывает добавление, зная одно: у него полдник на 400 ккал.
+/// Дальше он ищет продукт, подбирает граммы и правит — работу, которую
+/// приложение может сделать за него.
+struct MealSuggestionTests {
+
+    private func part(_ name: String, _ calories: Int, grams: Double, protein: Double = 0) -> EntryComponent {
+        EntryComponent(name: name, calories: calories,
+                       macros: Macros(protein: protein, fat: 0, carbs: 0), grams: grams)
+    }
+
+    private func option(_ name: String, parts: [EntryComponent], times: Int = 1) -> MealSuggestions.Option {
+        MealSuggestions.Option(name: name, parts: parts,
+                               calories: parts.reduce(0) { $0 + $1.calories },
+                               macros: parts.reduce(Macros.zero) { $0 + $1.macros },
+                               timesEaten: times)
+    }
+
+    /// Приём подгоняется под остаток: съел его вчера на 520, сегодня осталось
+    /// 450 — тот же набор, порции поменьше.
+    @Test func aMealIsScaledToWhatIsLeft() throws {
+        let meal = option("Творог с бананом", parts: [part("Творог", 300, grams: 200),
+                                                      part("Банан", 220, grams: 200)])
+        let suggestion = try #require(MealSuggestions.suggest(remaining: 450, from: [meal]).first)
+        #expect(abs(suggestion.calories - 450) < 60)
+        #expect(suggestion.parts.count == 2)
+        // Порции уменьшились вместе с приёмом.
+        #expect((suggestion.parts.first?.grams ?? 0) < 200)
+    }
+
+    /// Растягивать сильно нельзя: половина порции — это уже другая еда.
+    @Test func aMealTooFarFromTheTargetIsNotOffered() {
+        let meal = option("Плов", parts: [part("Плов", 900, grams: 400)])
+        #expect(MealSuggestions.suggest(remaining: 300, from: [meal]).isEmpty)
+    }
+
+    /// На сотню килокалорий осмысленной порции не подобрать.
+    @Test func thereIsNothingToSuggestForCrumbs() {
+        let meal = option("Творог", parts: [part("Творог", 300, grams: 200)])
+        #expect(MealSuggestions.suggest(remaining: 90, from: [meal]).isEmpty)
+    }
+
+    /// Готовый приём ценнее одиночного продукта: он и есть ответ на вопрос
+    /// «что съесть».
+    @Test func aWholeMealOutranksASingleProduct() throws {
+        let single = option("Банан", parts: [part("Банан", 400, grams: 400)])
+        let composed = option("Творог с бананом", parts: [part("Творог", 200, grams: 130),
+                                                          part("Банан", 200, grams: 180)])
+        let first = try #require(MealSuggestions.suggest(remaining: 400, from: [single, composed]).first)
+        #expect(first.isComposed)
+    }
+
+    /// Пока не закрыт белок, белковое предложение идёт первым.
+    @Test func theLeadingMacroDecidesTheOrder() throws {
+        let carbs = option("Банан", parts: [part("Банан", 400, grams: 400)])
+        let protein = option("Творог", parts: [part("Творог", 400, grams: 260, protein: 70)])
+        let first = try #require(MealSuggestions.suggest(remaining: 400, from: [carbs, protein],
+                                                        leadingMacro: .protein).first)
+        #expect(first.name == "Творог")
     }
 }
 

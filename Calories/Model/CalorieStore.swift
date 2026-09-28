@@ -378,16 +378,32 @@ final class CalorieStore {
         macrosToday = todayEntries.reduce(Macros.zero) { $0 + $1.macros }
 
         let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
-        // Группы упорядочены по реальному времени последней записи, а не по порядку
-        // в MealPeriod. Иначе «Перекус» (23:00–05:00) уезжает в начало списка, хотя
-        // записи в нём — с раннего утра, и день читается вперемешку.
+        // День читается сверху вниз, как он и прожит: завтрак, обед, ужин.
+        //
+        // Раньше список был перевёрнут — сначала свежее, — и это спорило и с
+        // жанром (все дневники еды идут хронологически), и с нашим же экраном
+        // расписания, где приёмы стоят по времени. Хуже того, секции
+        // сортировались по времени последней записи: добавил еду — и секция
+        // уезжала наверх, то есть анимировалась перестановка секций, а её
+        // список делает рывком. При неподвижном порядке остаётся чистая
+        // вставка строки, которую SwiftUI анимирует гладко.
+        //
+        // Внутри приёма — тоже по времени: порядок, в котором ели.
         groupedTodayEntries = MealPeriod.allCases.compactMap { period in
             guard let entries = grouped[period], !entries.isEmpty else { return nil }
-            return (period, entries.sorted { $0.date > $1.date })
+            return (period, entries.sorted { $0.date < $1.date })
         }
         .sorted { lhs, rhs in
-            (lhs.entries.first?.date ?? .distantPast) > (rhs.entries.first?.date ?? .distantPast)
+            // «Перекус» (23:00–05:00) — в конце дня: его записи приходят и
+            // ночью, и под утро, но человек считает их хвостом суток.
+            order(of: lhs.period) < order(of: rhs.period)
         }
+    }
+
+    /// Место приёма в дне. Порядок объявления `MealPeriod` и есть порядок
+    /// суток, кроме ночного перекуса — он всегда последний.
+    private func order(of period: MealPeriod) -> Int {
+        period == .nightSnack ? Int.max : (MealPeriod.allCases.firstIndex(of: period) ?? 0)
     }
 
     /// Дневные сводки: все дни, последняя неделя и история.
@@ -1304,6 +1320,32 @@ final class CalorieStore {
     /// историю дневника и создавало объекты SwiftData на каждую перерисовку —
     /// то есть на каждое нажатие клавиши в поиске, и экран добавления заметно
     /// подтормаживал на вводе.
+    /// Что предложить на оставшиеся калории ближайшего приёма.
+    ///
+    /// Берём то, что человек уже ел за последний месяц: чужие рекомендации
+    /// читаются как навязчивый совет, а собственный вчерашний творог — как
+    /// подсказка. Порядок решают точность попадания, привычная порция и
+    /// недобранный макрос.
+    func mealSuggestions(remaining: Int, days: Int = 30) -> [MealSuggestions.Candidate] {
+        guard remaining >= MealSuggestions.minimumRemaining else { return [] }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
+
+        // Берём приёмы целиком: полдник на 400 ккал — это «творог с бананом»,
+        // как человек его и ест, а не «творог 180 г». Одинаковые приёмы
+        // считаем одним и помним, сколько раз он их ел.
+        var byName: [String: (parts: [EntryComponent], calories: Int, macros: Macros, times: Int)] = [:]
+        for entry in entries where entry.date >= cutoff {
+            let existing = byName[entry.name]
+            byName[entry.name] = (entry.composition, entry.calories, entry.macros, (existing?.times ?? 0) + 1)
+        }
+
+        let options = byName.map { name, value in
+            MealSuggestions.Option(name: name, parts: value.parts, calories: value.calories,
+                                   macros: value.macros, timesEaten: value.times)
+        }
+        return MealSuggestions.suggest(remaining: remaining, from: options, leadingMacro: focusMacro)
+    }
+
     /// Недавние приёмы пищи — те, что собраны из нескольких продуктов.
     ///
     /// Люди едят одно и то же: та же овсянка с теми же добавками по утрам, тот

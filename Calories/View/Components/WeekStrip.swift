@@ -15,6 +15,9 @@ struct WeekStrip: View {
     let weeks: [[(date: Date, hasEntries: Bool, onGoal: Bool)]]
     var onSelect: (Date) -> Void
     var onShowAll: () -> Void
+    /// Итог недели — то, ради чего полоску и читают: семь кружков человек
+    /// иначе складывает в голове сам.
+    var onShowWeek: (() -> Void)? = nil
 
     private let calendar = Calendar.current
 
@@ -44,11 +47,23 @@ struct WeekStrip: View {
                     Image(systemName: "calendar")
                         .font(.app(.subheadline))
                         .foregroundStyle(.tertiary)
-                        .frame(width: 34, height: 44)
+                        .frame(width: 30, height: 44)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Все дни")
                 .accessibilityIdentifier("allDays")
+
+                if let onShowWeek {
+                    Button(action: onShowWeek) {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.tertiary)
+                            .frame(width: 30, height: 44)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Итог недели")
+                    .accessibilityIdentifier("openWeekReview")
+                }
         }
     }
 

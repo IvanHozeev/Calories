@@ -361,8 +361,7 @@ struct OnboardingView: View {
                         }
                     }
                     .pickerStyle(.segmented)
-                    Text(explain("Неделя поддержания после каждых N недель дефицита. Жир уходит так же, а голод и тяга сорваться заметно меньше.",
-                                 short: "Неделя поддержания после каждых N недель дефицита."))
+                    explain("Неделя поддержания после каждых N недель дефицита. Жир уходит так же, а голод и тяга сорваться заметно меньше.").map { Text($0) }
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
@@ -376,8 +375,7 @@ struct OnboardingView: View {
                         }
                         .pickerStyle(.menu)
                     }
-                    Text(explain("В будни чуть меньше, в рефид-дни больше. Среднее за неделю то же, а рефид переносится на праздник одной кнопкой.",
-                                 short: "В рефид-дни больше, в остальные меньше; среднее то же."))
+                    explain("В будни чуть меньше, в рефид-дни больше. Среднее за неделю то же, а рефид переносится на праздник одной кнопкой.").map { Text($0) }
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
@@ -424,19 +422,18 @@ struct OnboardingView: View {
         stepShell(title: "Что понадобится", subtitle: "Норма считается по твоим данным, а данные нужно чем-то снимать") {
             VStack(alignment: .leading, spacing: 18) {
                 gearLine(icon: "scalemass", title: "Напольные весы",
-                         text: explain("Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы.",
-                                       short: "Взвешивания каждое утро: по их тренду считается расход."))
+                         text: explain("Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы."))
                 gearLine(icon: "square.stack.3d.up", title: "Кухонные весы",
-                         text: explain("«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно».",
-                                       short: "«На глаз» — ошибка в сотни калорий в день."))
+                         text: explain("«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно»."))
                 gearLine(icon: "applewatch", title: "Браслет или часы",
-                         text: explain("Не обязательно. Шаги и активные калории подтянутся из «Здоровья» сами, и активность перестанет быть догадкой.",
-                                       short: "Не обязательно: шаги и активные калории придут из «Здоровья»."))
+                         text: explain("Не обязательно. Шаги и активные калории подтянутся из «Здоровья» сами, и активность перестанет быть догадкой."))
             }
         }
     }
 
-    private func gearLine(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
+    /// Строка списка снаряжения. Пояснение необязательное: на коротком уровне
+    /// его нет вовсе, и остаётся только название.
+    private func gearLine(icon: String, title: LocalizedStringKey, text: LocalizedStringKey?) -> some View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .font(.app(.title3))
@@ -445,7 +442,7 @@ struct OnboardingView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.app(.body, weight: .semibold))
-                Text(text)
+                text.map { Text($0) }
                     .font(.app(.footnote))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

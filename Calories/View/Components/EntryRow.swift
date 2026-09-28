@@ -23,35 +23,46 @@ struct EntryRow: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
+        // Два уровня вместо трёх: название с калориями сверху, всё остальное
+        // одной серой строкой под ним.
+        //
+        // Раньше уровней было три — название, подписи, макросы, — плюс
+        // «ккал» отдельной строкой справа: ячейка занимала вдвое больше, чем
+        // в ней было смысла, и в день помещалось четыре записи вместо восьми.
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(entry.name)
                     .font(.app(.subheadline))
-                    .lineLimit(2)
+                    .lineLimit(1)
 
-                // Значки идут в одну строку со временем и граммовкой: это всё
-                // подписи к продукту, и разносить их по разным уровням незачем.
+                // Время, порция, значки и макросы — всё это подписи к еде, и
+                // разносить их по уровням незачем.
                 HStack(spacing: 6) {
                     Text(entry.date, format: .dateTime.hour().minute())
+                        .foregroundStyle(.tertiary)
                     if let portionText {
-                        Text(verbatim: "·")
                         Text(verbatim: portionText)
+                            .foregroundStyle(.tertiary)
                     }
                     if !icons.isEmpty {
-                        Text(verbatim: "·")
                         // Больше трёх не показываем: дальше они съедают строку,
                         // а различать приёмы пищи по четвёртой иконке не выходит.
-                        HStack(spacing: 4) {
+                        HStack(spacing: 3) {
                             ForEach(icons.prefix(3), id: \.self) { icon in
                                 Image(systemName: icon)
                             }
                         }
+                        .foregroundStyle(.tertiary)
                         .accessibilityHidden(true)
                     }
                 }
                 .font(.app(.caption))
-                .foregroundStyle(.tertiary)
+                .lineLimit(1)
 
+                // Макросы — своей строкой. В одну кучу с временем и порцией
+                // они слипались: это числа, которые читают, а не подпись,
+                // которую пробегают глазом. Место экономим на пустоте, а не
+                // на том, ради чего в строку и смотрят.
                 if hasMacros || !micros.isEmpty {
                     HStack(spacing: 8) {
                         if hasMacros {
@@ -66,7 +77,9 @@ struct EntryRow: View {
 
             Spacer(minLength: 0)
 
-            VStack(alignment: .trailing, spacing: 1) {
+            // «ккал» строчной подписью рядом с числом, а не под ним: слово
+            // одно на весь список и повторять его столбиком незачем.
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(verbatim: "\(entry.calories)")
                     .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
@@ -75,6 +88,6 @@ struct EntryRow: View {
                     .foregroundStyle(.tertiary)
             }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
     }
 }

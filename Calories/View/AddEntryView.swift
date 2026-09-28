@@ -96,10 +96,10 @@ struct AddEntryView: View {
         /// где ищешь, не открывая меню.
         var icon: String {
             switch self {
-            // Не часы в любом виде: часами на этом экране помечено время
-            // приёма, и две похожие иконки рядом читались бы как одно и то же.
-            // Стрелка назад — про «что было», а не про «который час».
-            case .recent:   return "arrow.uturn.backward"
+            // Часы со стрелкой — привычный знак недавнего. Чтобы он ни с чем
+            // не спорил, у строки времени приёма своей иконки больше нет:
+            // подпись «Когда» и так всё говорит.
+            case .recent:   return "clock.arrow.circlepath"
             case .mine:     return "person.crop.circle"
             case .database: return "books.vertical"
             case .online:   return "globe"
@@ -361,7 +361,7 @@ struct AddEntryView: View {
                     Section {
                         DatePicker(selection: $selectedDate, in: ...Date(),
                                    displayedComponents: [.date, .hourAndMinute]) {
-                            Label("Когда", systemImage: "clock")
+                            Text("Когда")
                                 .font(.app(.footnote))
                                 .foregroundStyle(timeAdjusted ? Color.orange : .secondary)
                         }
@@ -608,6 +608,93 @@ struct AddEntryView: View {
         }
     }
 
+    /// Сколько осталось на ближайший приём.
+    ///
+    /// Ноль, когда расписание выключено: без окон «остаток приёма» не
+    /// существует, и подсказывать не от чего.
+    private var mealRemaining: Int {
+        let settings = MealScheduleSettings.shared
+        guard settings.isEnabled else { return 0 }
+        let now = Date()
+        let slots = MealSchedule.slots(.init(
+            wake: settings.today(settings.wake, now: now),
+            sleep: settings.today(settings.sleep, now: now),
+            mealCount: settings.count,
+            dailyGoal: store.adaptedTodayGoal,
+            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+            now: now))
+        guard let next = MealSchedule.nextSlot(slots, now: now) else { return 0 }
+        return max(0, next.calories - draftTotalCalories)
+    }
+
+    private var suggestions: [MealSuggestions.Candidate] {
+        store.mealSuggestions(remaining: mealRemaining)
+    }
+
+    /// Какой приём сейчас ближайший — его именем и подписаны подсказки.
+    private var nextMealPeriod: MealPeriod? {
+        let settings = MealScheduleSettings.shared
+        guard settings.isEnabled else { return nil }
+        let now = Date()
+        let slots = MealSchedule.slots(.init(
+            wake: settings.today(settings.wake, now: now),
+            sleep: settings.today(settings.sleep, now: now),
+            mealCount: settings.count,
+            dailyGoal: store.adaptedTodayGoal,
+            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+            now: now))
+        return MealSchedule.nextSlot(slots, now: now)?.period
+    }
+
+    /// Заголовок подсказок: какой это приём и сколько на него осталось.
+    ///
+    /// Имя приёма, а не «под остаток»: человек и так знает, что сейчас
+    /// полдник, — ему нужно число, к которому подбирать.
+    private var suggestionsTitle: String {
+        guard let period = nextMealPeriod else {
+            return String(format: String(localized: "Осталось %lld ккал"), mealRemaining)
+        }
+        return String(format: String(localized: "%1$@: %2$lld ккал"),
+                      String(localized: String.LocalizationValue(period.rawValue)), mealRemaining)
+    }
+
+    /// Строка подсказки: что взять и сколько.
+    private func suggestionRow(_ item: MealSuggestions.Candidate) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: item.name)
+                    .font(.app(.subheadline))
+                    .lineLimit(2)
+                Text(verbatim: item.parts.compactMap { part in
+                    part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+                }.joined(separator: " · "))
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            MacroTags(macros: item.macros, compact: true)
+            Text(verbatim: "\(item.calories)")
+                .font(.app(.subheadline, weight: .semibold))
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// Кладёт подсказку в черновик — уже с подобранным весом.
+    private func addSuggestion(_ item: MealSuggestions.Candidate) {
+        // Частями, а не одной строкой: дальше приём обычно правят — вчера был
+        // мёд, сегодня нет.
+        withAnimation(.snappy) {
+            draftItems.append(contentsOf: item.parts.map {
+                MealItem(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
+            })
+        }
+        scrollToTopTicket += 1
+    }
+
     /// Недавние приёмы пищи целиком — из нескольких продуктов.
     private var recentMeals: [FoodEntry] {
         store.recentMeals()
@@ -656,21 +743,22 @@ struct AddEntryView: View {
             topMatchesSection
         }
 
-        // Приёмы — выше отдельных продуктов: если человек ест то же, что вчера,
-        // он хочет повторить весь приём, а не собирать его заново из пяти
-        // позиций. Только в «Недавнем» и только без поиска: в поиске ищут
-        // продукт, а не вчерашний день.
-        if source == .recent, !isSearching, !recentMeals.isEmpty {
+        // Подсказка под остаток приёма — самой первой строкой и только на
+        // пустом поиске.
+        //
+        // Пришла на место «приёмов целиком»: повторять вчерашний приём
+        // полностью нужно редко, а попасть в оставшиеся 400 ккал полдника —
+        // каждый день. Приложение знает и остаток, и что человек обычно ест,
+        // поэтому подбирает порцию само: «Творог 5%, 180 г».
+        if source == .recent, !isSearching, !suggestions.isEmpty {
             Section {
-                ForEach(recentMeals) { meal in
-                    mealRow(meal)
+                ForEach(suggestions) { item in
+                    suggestionRow(item)
                         .contentShape(Rectangle())
-                        .onTapGesture { repeatMeal(meal) }
+                        .onTapGesture { addSuggestion(item) }
                 }
             } header: {
-                Text("Приёмы целиком")
-            } footer: {
-                Text("Нажатие кладёт в черновик весь приём — состав можно править и дополнять, как обычно.")
+                Text(verbatim: suggestionsTitle)
             }
         }
 

@@ -162,16 +162,16 @@ struct PlanEditorView: View {
 
                 if let draftPlan {
                     Section("Расчёт") {
-                        resultRow("Дата окончания", draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
-                        resultRow("Всего недель", "\(draftPlan.durationWeeks)")
+                        ResultRow(title: "Дата окончания", value: draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
+                        ResultRow(title: "Всего недель", value: "\(draftPlan.durationWeeks)")
                         // Прогноз, а не цель: целевой вес у цепочки не задают,
                         // его считают по темпам, которые готов держать.
-                        resultRow("Вес к финишу", String(format: "%.1f \(String(localized: "кг"))", draftPlan.targetWeightKg))
+                        ResultRow(title: "Вес к финишу", value: String(format: "%.1f \(String(localized: "кг"))", draftPlan.targetWeightKg))
                         if draftPlan.cyclingEnabled {
-                            resultRow("В среднем за день", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))")
-                            resultRow("Сегодня", "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
+                            ResultRow(title: "В среднем за день", value: "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))")
+                            ResultRow(title: "Сегодня", value: "\(draftPlan.calorieTarget(for: Date(), tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
                         } else {
-                            resultRow("Дневная цель", "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
+                            ResultRow(title: "Дневная цель", value: "\(draftPlan.dailyCalorieTarget(tdee: tdee)) \(String(localized: "ккал"))", highlighted: true)
                         }
 
                         if draftPlan.hasAggressivePhase {
@@ -267,14 +267,4 @@ struct PlanEditorView: View {
         }
     }
 
-    private func resultRow(_ title: LocalizedStringKey, _ value: String, highlighted: Bool = false) -> some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(highlighted ? .primary : .secondary)
-            Spacer()
-            Text(value)
-                .font(highlighted ? .body.weight(.semibold) : .body)
-                .foregroundStyle(highlighted ? .green : .primary)
-        }
-    }
 }

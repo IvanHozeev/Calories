@@ -26,16 +26,6 @@ struct WeeklyChartView: View {
         return ""
     }
 
-    private var useWeekdayLabels: Bool {
-        days.count <= 7
-    }
-
-    /// Шаг между подписями на оси X — чтобы при 30/90 днях подписи не наезжали друг на друга,
-    /// показываем примерно 5-6 подписей независимо от длины диапазона.
-    private var axisStride: Int {
-        max(1, days.count / 6)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
@@ -76,18 +66,7 @@ struct WeeklyChartView: View {
                     AxisValueLabel()
                 }
             }
-            .chartXAxis {
-                if useWeekdayLabels {
-                    AxisMarks(values: .stride(by: .day)) { _ in
-                        AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
-                    }
-                } else {
-                    AxisMarks(values: .stride(by: .day, count: axisStride)) { _ in
-                        AxisGridLine()
-                        AxisValueLabel(format: .dateTime.day().month(.defaultDigits))
-                    }
-                }
-            }
+            .dayAxis(points: days.count)
             .frame(height: 200)
         }
         .padding()

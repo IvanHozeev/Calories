@@ -148,8 +148,8 @@ struct WidgetRing: View {
             return LinearGradient(colors: segment.colors, startPoint: .topLeading, endPoint: .bottomTrailing)
         }
         return LinearGradient(colors: segment.colors,
-                              startPoint: WidgetArc.point(at: segment.start),
-                              endPoint: WidgetArc.point(at: segment.end))
+                              startPoint: CircleArc.point(at: segment.start),
+                              endPoint: CircleArc.point(at: segment.end))
     }
 
     var body: some View {
@@ -157,14 +157,14 @@ struct WidgetRing: View {
             ForEach(segments) { segment in
                 // Дорожка цветом дуги, приглушённым, — как кольцо в приложении.
                 // На тонированном экране цвета нет, там дорожка просто тусклая.
-                WidgetArc(start: segment.start, end: segment.end)
+                CircleArc(start: segment.start, end: segment.end)
                     .stroke(renderingMode == .fullColor ? segment.colors[0].opacity(0.15) : Color.white.opacity(0.25),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 if segment.progress > 0 {
                     let span = (segment.end - segment.start) * segment.progress
                     let arc = fillsFromEnd
-                        ? WidgetArc(start: segment.end - span, end: segment.end)
-                        : WidgetArc(start: segment.start, end: segment.start + span)
+                        ? CircleArc(start: segment.end - span, end: segment.end)
+                        : CircleArc(start: segment.start, end: segment.start + span)
                     if renderingMode == .fullColor {
                         arc.stroke(gradient(for: segment),
                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
@@ -180,22 +180,3 @@ struct WidgetRing: View {
     }
 }
 
-/// Дуга: углы в градусах от 12 часов по часовой стрелке.
-struct WidgetArc: Shape {
-    let start: Double
-    let end: Double
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY),
-                    radius: min(rect.width, rect.height) / 2,
-                    startAngle: .degrees(start - 90), endAngle: .degrees(end - 90), clockwise: false)
-        return path
-    }
-
-    /// Точка на окружности в долях рамки — для градиента вдоль дуги.
-    static func point(at degrees: Double) -> UnitPoint {
-        let radians = degrees * .pi / 180
-        return UnitPoint(x: 0.5 + 0.5 * sin(radians), y: 0.5 - 0.5 * cos(radians))
-    }
-}

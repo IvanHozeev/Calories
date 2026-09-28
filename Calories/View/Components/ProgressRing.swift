@@ -270,8 +270,9 @@ struct ProgressRing: View {
     }
 }
 
-/// Дуга кольца. Углы — в градусах от 12 часов по часовой стрелке.
-/// Анимируется по концу, чтобы заливка росла, а не перескакивала.
+/// Дуга кольца — общая `CircleArc` плюс анимация по концу, чтобы заливка
+/// росла, а не перескакивала. Своим типом именно ради этого: у общей дуги
+/// анимируемых данных нет, и знаку «С» с виджетом они не нужны.
 private struct RingArc: Shape {
     var start: Double
     var end: Double
@@ -282,13 +283,7 @@ private struct RingArc: Shape {
     }
 
     func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY),
-                    radius: min(rect.width, rect.height) / 2,
-                    startAngle: .degrees(start - 90),
-                    endAngle: .degrees(end - 90),
-                    clockwise: false)
-        return path
+        CircleArc(start: start, end: end).path(in: rect)
     }
 }
 

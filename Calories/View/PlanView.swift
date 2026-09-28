@@ -219,10 +219,10 @@ struct PlanView: View {
     /// говорим, где заканчивается точность метода.
     private func compositionSection(_ change: CompositionChange, intent: PlanIntent?) -> some View {
         Section {
-            resultRow("Вес", String(format: "%.1f → %.1f \(String(localized: "кг"))", change.startWeightKg, change.endWeightKg))
-            resultRow("Жир", String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
+            ResultRow(title: "Вес", value: String(format: "%.1f → %.1f \(String(localized: "кг"))", change.startWeightKg, change.endWeightKg))
+            ResultRow(title: "Жир", value: String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
                                     change.startFatKg, change.endFatKg, change.fatDeltaKg))
-            resultRow("Сухая масса", String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
+            ResultRow(title: "Сухая масса", value: String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
                                             change.startLeanKg, change.endLeanKg, change.leanDeltaKg),
                       highlighted: change.verdict != .leanLoss)
 
@@ -306,11 +306,11 @@ struct PlanView: View {
     @ViewBuilder
     private func outcomeSection(_ outcome: PlanOutcome) -> some View {
         Section {
-            resultRow("Старт плана", String(format: "%.1f \(String(localized: "кг"))", outcome.plan.startWeightKg))
+            ResultRow(title: "Старт плана", value: String(format: "%.1f \(String(localized: "кг"))", outcome.plan.startWeightKg))
             if let final = outcome.finalWeightKg {
-                resultRow("Финиш", String(format: "%.1f \(String(localized: "кг"))", final))
+                ResultRow(title: "Финиш", value: String(format: "%.1f \(String(localized: "кг"))", final))
             }
-            resultRow("Цель", String(format: "%.1f \(String(localized: "кг"))", outcome.plan.targetWeightKg))
+            ResultRow(title: "Цель", value: String(format: "%.1f \(String(localized: "кг"))", outcome.plan.targetWeightKg))
 
             if let shortfall = outcome.shortfallKg {
                 if outcome.reachedTarget {
@@ -504,7 +504,7 @@ struct PlanView: View {
                     .foregroundStyle(.green)
                     .fixedSize(horizontal: false, vertical: true)
                 if let actual = adherence.actualWeightToday {
-                    resultRow("Фактический вес (тренд)", String(format: "%.1f \(String(localized: "кг"))", actual))
+                    ResultRow(title: "Фактический вес (тренд)", value: String(format: "%.1f \(String(localized: "кг"))", actual))
                 }
             } else {
             statusRow(adherence.status)
@@ -520,12 +520,12 @@ struct PlanView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            resultRow("Ожидаемый вес сегодня", String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
+            ResultRow(title: "Ожидаемый вес сегодня", value: String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
             if let actual = adherence.actualWeightToday {
-                resultRow("Фактический вес (тренд)", String(format: "%.1f \(String(localized: "кг"))", actual))
+                ResultRow(title: "Фактический вес (тренд)", value: String(format: "%.1f \(String(localized: "кг"))", actual))
             }
             if let deviation = adherence.deviationKg {
-                resultRow("Отклонение", String(format: "%+.1f \(String(localized: "кг"))", deviation))
+                ResultRow(title: "Отклонение", value: String(format: "%+.1f \(String(localized: "кг"))", deviation))
             }
 
             if adherence.status == .insufficientData {
@@ -549,7 +549,7 @@ struct PlanView: View {
                     .foregroundStyle(.secondary)
             } else {
                 if let projectedEndDate = adherence.projectedEndDate {
-                    resultRow("При текущем темпе цель — к", projectedEndDate.formatted(.dateTime.day().month(.wide)))
+                    ResultRow(title: "При текущем темпе цель — к", value: projectedEndDate.formatted(.dateTime.day().month(.wide)))
                 }
 
                 if adherence.status == .ahead {
@@ -640,14 +640,4 @@ struct PlanView: View {
             .font(.app(.subheadline, weight: .semibold))
     }
 
-    private func resultRow(_ title: LocalizedStringKey, _ value: String, highlighted: Bool = false) -> some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(highlighted ? .primary : .secondary)
-            Spacer()
-            Text(value)
-                .font(highlighted ? .body.weight(.semibold) : .body)
-                .foregroundStyle(highlighted ? .green : .primary)
-        }
-    }
 }

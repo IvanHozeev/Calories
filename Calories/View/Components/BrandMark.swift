@@ -91,7 +91,7 @@ struct BrandMark: View {
         let arcs = Self.arcs(radiusInWidths: radius / lineWidth)
         return ZStack {
             ForEach(arcs) { arc in
-                MarkArc(start: arc.start, end: arc.end)
+                CircleArc(start: arc.start, end: arc.end)
                     .trim(from: from, to: to)
                     .stroke(Self.gradient(for: arc, radius: radius, lineWidth: lineWidth, inset: inset, side: side),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
@@ -117,19 +117,6 @@ struct BrandMark: View {
         return LinearGradient(colors: colors[arc.id],
                               startPoint: UnitPoint(x: (minX - pad) / span, y: (minY - pad) / span),
                               endPoint: UnitPoint(x: (maxX + pad) / span, y: (maxY + pad) / span))
-    }
-}
-
-private struct MarkArc: Shape {
-    let start: Double
-    let end: Double
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY),
-                    radius: min(rect.width, rect.height) / 2,
-                    startAngle: .degrees(start - 90), endAngle: .degrees(end - 90), clockwise: false)
-        return path
     }
 }
 

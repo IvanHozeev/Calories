@@ -47,4 +47,19 @@ enum FoodCategory: String, CaseIterable, Identifiable {
         case .other:     return "square.grid.2x2"
         }
     }
+
+    /// Продукты по категориям, в порядке самих категорий.
+    ///
+    /// Порядок берётся у `allCases`, а не у словаря: список продуктов должен
+    /// открываться одинаково каждый раз, а перебор словаря случаен. Пустые
+    /// категории выпадают — заголовок без строк говорит только о том, что мы
+    /// умеем группировать.
+    static func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
+        let buckets = Dictionary(grouping: foods, by: \.foodCategory)
+        return allCases.compactMap { category in
+            guard let items = buckets[category], !items.isEmpty else { return nil }
+            return (category, items)
+        }
+    }
+
 }

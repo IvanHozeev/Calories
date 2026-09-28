@@ -29,15 +29,6 @@ struct WeightChartView: View {
         trend.isEmpty ? "Динамика веса" : "Динамика веса — линия тренда"
     }
 
-    private var useWeekdayLabels: Bool {
-        entries.count <= 7
-    }
-
-    /// Шаг между подписями на оси X — как в WeeklyChartView, чтобы подписи не наезжали друг на друга.
-    private var axisStride: Int {
-        max(1, entries.count / 6)
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(caption)
@@ -63,18 +54,7 @@ struct WeightChartView: View {
                 }
             }
             .chartYScale(domain: minWeight...maxWeight)
-            .chartXAxis {
-                if useWeekdayLabels {
-                    AxisMarks(values: .stride(by: .day)) { _ in
-                        AxisValueLabel(format: .dateTime.weekday(.abbreviated), centered: true)
-                    }
-                } else {
-                    AxisMarks(values: .stride(by: .day, count: axisStride)) { _ in
-                        AxisGridLine()
-                        AxisValueLabel(format: .dateTime.day().month(.defaultDigits))
-                    }
-                }
-            }
+            .dayAxis(points: entries.count)
             .frame(height: 200)
         }
         .padding()

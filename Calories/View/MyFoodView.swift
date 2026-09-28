@@ -353,7 +353,7 @@ struct MyFoodView: View {
                 }
             }
         } else {
-            ForEach(grouped(filteredDatabase), id: \.0) { category, foods in
+            ForEach(FoodCategory.grouped(filteredDatabase), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
                         // Строку каталога изменить нельзя — она лежит файлом в
@@ -378,14 +378,6 @@ struct MyFoodView: View {
 
     /// Порядок берём из самого перечисления — он осмысленный (мясо, рыба,
     /// молочное...), в отличие от алфавитного.
-    private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
-        let buckets = Dictionary(grouping: foods, by: \.foodCategory)
-        return FoodCategory.allCases.compactMap { category in
-            guard let items = buckets[category], !items.isEmpty else { return nil }
-            return (category, items)
-        }
-    }
-
     @ViewBuilder
     private func productsSection(_ filteredProducts: [FoodItem]) -> some View {
         if filteredProducts.isEmpty {
@@ -399,7 +391,7 @@ struct MyFoodView: View {
         } else {
             // Свои продукты разложены так же, как база: список копится и без
             // заголовков читается ничуть не лучше встроенного.
-            ForEach(grouped(filteredProducts), id: \.0) { category, foods in
+            ForEach(FoodCategory.grouped(filteredProducts), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
                         // Свой продукт открывается сразу редактируемым — как блюдо.

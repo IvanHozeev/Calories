@@ -18762,53 +18762,6 @@
         }
       }
     },
-    "Из чего собран" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مما تتكوّن"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Woraus es besteht"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What it is made of"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De qué se compone"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "De quoi il est fait"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ממה היא מורכבת"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Do que é feita"
-          }
-        }
-      }
-    },
     "Из чего состоит вес" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -46481,53 +46434,6 @@
         }
       }
     },
-    "Состав записан как есть и не правится здесь: числа ниже относятся к приёму целиком. Чтобы поменять состав, добавь приём заново." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يُحفظ التكوين كما سُجّل ولا يُعدّل هنا: الأرقام أدناه تخص الوجبة كاملة. ولتغييره أضف الوجبة من جديد."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Zusammensetzung bleibt, wie sie erfasst wurde, und wird hier nicht bearbeitet: die Zahlen unten gelten für die ganze Mahlzeit. Zum Ändern die Mahlzeit erneut hinzufügen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The composition is kept as recorded and is not edited here: the numbers below apply to the meal as a whole. To change what is in it, add the meal again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La composición se guarda tal cual y no se edita aquí: los números de abajo son de la comida entera. Para cambiarla, añade la comida de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La composition est conservée telle quelle et ne se modifie pas ici : les chiffres ci-dessous portent sur le repas entier. Pour la changer, ajoutez le repas à nouveau."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההרכב נשמר כפי שנרשם ואינו נערך כאן: המספרים למטה מתייחסים לארוחה כולה. כדי לשנות, הוסף את הארוחה מחדש."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A composição fica como foi registrada e não se edita aqui: os números abaixo valem para a refeição inteira. Para mudar, adicione a refeição de novo."
-          }
-        }
-      }
-    },
     "Состав рациона" : {
       "localizations" : {
         "ar" : {
@@ -46570,53 +46476,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Composição da dieta"
-          }
-        }
-      }
-    },
-    "Состав только для справки; числа ниже — на приём целиком." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "التكوين للاطلاع فقط؛ والأرقام أدناه للوجبة كاملة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Zusammensetzung dient der Info; die Zahlen unten gelten für die ganze Mahlzeit."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Composition is for reference; the numbers below cover the whole meal."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La composición es informativa; los números de abajo son de la comida entera."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La composition est indicative ; les chiffres ci-dessous portent sur tout le repas."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ההרכב לעיון בלבד; המספרים למטה לכל הארוחה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A composição é apenas informativa; os números abaixo são da refeição inteira."
           }
         }
       }
@@ -56454,6 +56313,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opcional: passos e calorias ativas vêm do Saúde."
+          }
+        }
+      }
+    },
+    "Вес каждой части правится отдельно: калории и БЖУ этой части пересчитываются пропорционально, а итог складывается заново." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُعدَّل وزن كل جزء على حدة: تتغير سعراته وماكروزه تناسبيًا ويُعاد جمع الإجمالي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht jedes Teils wird einzeln bearbeitet: dessen Kalorien und Makros skalieren mit, und die Summe wird neu gebildet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each part's weight is edited on its own: that part's calories and macros scale with it, and the total is added up again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso de cada parte se edita por separado: sus calorías y macros se escalan, y el total se suma de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids de chaque part se modifie à part : ses calories et macros suivent, et le total est recalculé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המשקל של כל חלק נערך בנפרד: הקלוריות והמאקרו שלו משתנים ביחס, והסכום מחושב מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso de cada parte é editado à parte: as calorias e macros dela mudam proporcionalmente e o total é somado de novo."
+          }
+        }
+      }
+    },
+    "Вес части правится отдельно; итог складывается заново." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُعدَّل وزن الجزء على حدة، ويُعاد جمع الإجمالي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Gewicht eines Teils wird einzeln bearbeitet; die Summe wird neu gebildet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A part's weight is edited on its own; the total is added up again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El peso de la parte se edita aparte; el total se vuelve a sumar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le poids d’une part se modifie à part ; le total est recalculé."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "משקל החלק נערך בנפרד; הסכום מחושב מחדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O peso da parte é editado à parte; o total é somado de novo."
           }
         }
       }

@@ -247,6 +247,26 @@ nonisolated struct EntryComponent: Codable, Equatable, Hashable {
     }
 
     var macros: Macros { Macros(protein: protein, fat: fat, carbs: carbs) }
+
+    /// Та же еда, но другого веса: калории и макросы пересчитаны пропорционально.
+    ///
+    /// Нужна, когда правят съеденное: «творога было не 200, а 150». Считается
+    /// от исходных чисел этой части, а не от чисел всего приёма, — иначе
+    /// правка одного продукта растаскивала бы остальные.
+    ///
+    /// Без граммов пересчитывать нечего: у записанного порцией или
+    /// распознанного по фото веса нет, и выдумывать его нельзя.
+    func scaled(toGrams newGrams: Double) -> EntryComponent {
+        guard let grams, grams > 0, newGrams > 0 else { return self }
+        let factor = newGrams / grams
+        var copy = self
+        copy.calories = Int((Double(calories) * factor).rounded())
+        copy.protein = protein * factor
+        copy.fat = fat * factor
+        copy.carbs = carbs * factor
+        copy.grams = newGrams
+        return copy
+    }
 }
 
 /// Одна позиция в черновике приёма пищи — до нажатия «Сохранить» нигде не хранится.

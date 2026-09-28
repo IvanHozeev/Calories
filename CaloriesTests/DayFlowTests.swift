@@ -187,6 +187,40 @@ struct RecentMealsTests {
     }
 }
 
+// MARK: - Правка части приёма
+
+/// Приём пищи правят не целиком, а по частям: «творога было не 200, а 150».
+/// Считать это в уме — значит не считать вовсе.
+struct EntryComponentScalingTests {
+
+    private let curd = EntryComponent(name: "Творог", calories: 200,
+                                      macros: Macros(protein: 34, fat: 2, carbs: 6), grams: 200)
+
+    @Test func weighingLessScalesEverythingDown() {
+        let less = curd.scaled(toGrams: 150)
+        #expect(less.calories == 150)
+        #expect(abs(less.protein - 25.5) < 0.01)
+        #expect(less.grams == 150)
+    }
+
+    /// Считается от чисел самой части, а не от приёма целиком: иначе правка
+    /// одного продукта растаскивала бы остальные.
+    @Test func scalingTwiceFromTheOriginalIsStable() {
+        let once = curd.scaled(toGrams: 150).scaled(toGrams: 200)
+        #expect(once.calories == 200)
+    }
+
+    /// У записанного порцией веса нет, и выдумывать его нельзя.
+    @Test func withoutGramsThereIsNothingToScale() {
+        let portion = EntryComponent(name: "Суп", calories: 300, grams: nil)
+        #expect(portion.scaled(toGrams: 150) == portion)
+    }
+
+    @Test func zeroIsNotAWeight() {
+        #expect(curd.scaled(toGrams: 0) == curd)
+    }
+}
+
 // MARK: - Сигнал к рефиду
 
 /// Дефицит работает, пока тело его терпит. Дальше вес встаёт, пульс в покое

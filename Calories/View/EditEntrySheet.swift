@@ -21,15 +21,33 @@ struct EditEntrySheet: View {
     /// Исходная порция — от неё считаем пропорцию при правке веса.
     private let originalGrams: Double?
 
+    /// Составной приём правится по частям: у каждой свой вес, и калории с БЖУ
+    /// пересчитываются по ней одной.
+    ///
+    /// Раньше состав показывался справкой, а правились общие числа приёма —
+    /// то есть съел на сто граммов меньше творога, а поправить мог только
+    /// итог, пересчитав его в уме. Теперь правится то, что человек менял в
+    /// реальности: сколько чего он съел.
+    @State private var parts: [EntryComponent]
+    @State private var partGrams: [String]
+    /// Сколько каждая часть весила и стоила изначально — база для пропорции.
+    private let basis: [EntryComponent]
+    @FocusState private var focusedPart: Int?
+
+    private var isComposed: Bool { parts.count > 1 }
+
+    private var partsCalories: Int { parts.reduce(0) { $0 + $1.calories } }
+    private var partsMacros: Macros { parts.reduce(Macros.zero) { $0 + $1.macros } }
+
     private func number(_ text: String) -> Double {
         text.decimalValueOrZero
     }
 
     private var draftMacros: Macros {
-        Macros(protein: number(protein), fat: number(fat), carbs: number(carbs))
+        isComposed ? partsMacros : Macros(protein: number(protein), fat: number(fat), carbs: number(carbs))
     }
 
-    private var draftCalories: Int { Int(number(calories)) }
+    private var draftCalories: Int { isComposed ? partsCalories : Int(number(calories)) }
 
     /// Пусто вместо нуля: подсказка «0» понятнее введённого нуля, который не
     /// отличить от намеренно указанного.
@@ -64,6 +82,11 @@ struct EditEntrySheet: View {
         _grams = State(initialValue: entry.grams.map { String(format: "%g", $0) } ?? "")
         _date = State(initialValue: entry.date)
         originalGrams = entry.grams
+        basis = entry.components
+        _parts = State(initialValue: entry.components)
+        _partGrams = State(initialValue: entry.components.map { part in
+            part.grams.map { String(format: "%g", $0) } ?? ""
+        })
     }
 
     /// Поле макроса с постоянными подписями: какой это макрос и в чём измеряется.
@@ -95,6 +118,46 @@ struct EditEntrySheet: View {
         }
     }
 
+    /// Строка части приёма: что это и сколько его было.
+    private func partRow(_ index: Int) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(verbatim: parts[index].name)
+                .font(.app(.subheadline))
+                .lineLimit(2)
+            Spacer(minLength: 8)
+            Text(verbatim: "\(parts[index].calories)")
+                .font(.app(.caption))
+                .foregroundStyle(.tertiary)
+                .monospacedDigit()
+            // Вес правится, только если он известен: у распознанного по фото
+            // или записанного порцией менять нечего.
+            if basis[index].grams != nil {
+                TextField("Вес", text: Binding(
+                    get: { partGrams[index] },
+                    set: { partGrams[index] = $0; rescalePart(index, to: $0.decimalValueOrZero) }
+                ))
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 64)
+                .focused($focusedPart, equals: index)
+                Text("г")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("порция")
+                    .font(.app(.caption))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+    }
+
+    /// Пересчитывает одну часть под новый вес — пропорционально её исходным
+    /// числам, а не числам приёма целиком.
+    private func rescalePart(_ index: Int, to newGrams: Double) {
+        guard newGrams > 0 else { return }
+        parts[index] = basis[index].scaled(toGrams: newGrams)
+    }
+
     private var formContent: some View {
         Form {
             Section {
@@ -117,84 +180,79 @@ struct EditEntrySheet: View {
             }
             .listRowBackground(Color.clear)
 
-            // Из чего собран приём — до полей правки: сначала «что я съел», а
-            // потом «сколько это было». Раньше от приёма из пяти продуктов
-            // оставалась строка «Овсянка, Банан, Мёд, Творог, Орехи» в поле
-            // названия и одно общее число: понять, что и сколько, было нельзя.
-            if entry.components.count > 1 {
+            // Составной приём правится по частям: строка на продукт, у каждой
+            // свой вес. Общие поля калорий и БЖУ для него не показываются —
+            // они складываются из частей, и править их отдельно значило бы
+            // разойтись с составом.
+            if isComposed {
                 Section {
-                    ForEach(Array(entry.components.enumerated()), id: \.offset) { _, part in
-                        HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text(verbatim: part.name)
-                                .font(.app(.subheadline))
-                            Spacer(minLength: 8)
-                            if let grams = part.grams, grams > 0 {
-                                Text(verbatim: String(format: "%.0f \(String(localized: "г"))", grams))
-                                    .font(.app(.caption))
-                                    .foregroundStyle(.tertiary)
-                                    .monospacedDigit()
-                            }
-                            Text(verbatim: "\(part.calories)")
-                                .font(.app(.subheadline, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
+                    ForEach(parts.indices, id: \.self) { index in
+                        partRow(index)
                     }
                 } header: {
-                    Text("Из чего собран")
+                    Text("Приём пищи")
                 } footer: {
-                    Text(explain("Состав записан как есть и не правится здесь: числа ниже относятся к приёму целиком. Чтобы поменять состав, добавь приём заново.",
-                                 short: "Состав только для справки; числа ниже — на приём целиком."))
+                    Text(explain("Вес каждой части правится отдельно: калории и БЖУ этой части пересчитываются пропорционально, а итог складывается заново.",
+                                 short: "Вес части правится отдельно; итог складывается заново."))
                 }
-            }
 
-            Section {
-                TextField("Название", text: $name)
-                    .focused($focusedField, equals: .name)
-                // Единицы подписями справа от каждого поля, а не в подсказке:
-                // подсказка исчезает на первом символе, и в строке остаются
-                // голые числа — какое из них граммы, а какое килокалории,
-                // приходится вспоминать.
-                HStack {
-                    TextField("Калории", text: $calories)
-                        .keyboardType(.numberPad)
-                        .focused($focusedField, equals: .calories)
-                    Text("ккал")
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                    Divider()
-                    TextField("Вес", text: $grams)
-                        .keyboardType(.decimalPad)
-                        .focused($focusedField, equals: .grams)
-                        .foregroundStyle(.secondary)
-                        .onChange(of: grams) { _, newValue in
-                            guard focusedField == .grams else { return }
-                            rescale(to: number(newValue))
-                        }
-                    Text("г")
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
+                Section {
+                    DatePicker(
+                        "Дата и время",
+                        selection: $date,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
                 }
-                // Разделитель без этого начинается от подписи с единицей: у поля
-                // ввода нет своей направляющей, и её берут от первого текста.
-                .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-                HStack(spacing: 10) {
-                    unitField("Б", color: MacroKind.protein.color, text: $protein, field: .protein)
-                    unitField("Ж", color: MacroKind.fat.color, text: $fat, field: .fat)
-                    unitField("У", color: MacroKind.carbs.color, text: $carbs, field: .carbs)
-                }
-                .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-                DatePicker(
-                    "Дата и время",
-                    selection: $date,
-                    in: ...Date(),
-                    displayedComponents: [.date, .hourAndMinute]
-                )
-            } header: {
-                Text("Приём пищи")
-            } footer: {
-                if originalGrams != nil {
-                    Text("При изменении веса калории и БЖУ пересчитываются пропорционально.")
+            } else {
+                Section {
+                    TextField("Название", text: $name)
+                        .focused($focusedField, equals: .name)
+                    // Единицы подписями справа от каждого поля, а не в подсказке:
+                    // подсказка исчезает на первом символе, и в строке остаются
+                    // голые числа — какое из них граммы, а какое килокалории,
+                    // приходится вспоминать.
+                    HStack {
+                        TextField("Калории", text: $calories)
+                            .keyboardType(.numberPad)
+                            .focused($focusedField, equals: .calories)
+                        Text("ккал")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                        Divider()
+                        TextField("Вес", text: $grams)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .grams)
+                            .foregroundStyle(.secondary)
+                            .onChange(of: grams) { _, newValue in
+                                guard focusedField == .grams else { return }
+                                rescale(to: number(newValue))
+                            }
+                        Text("г")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    }
+                    // Разделитель без этого начинается от подписи с единицей: у поля
+                    // ввода нет своей направляющей, и её берут от первого текста.
+                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+                    HStack(spacing: 10) {
+                        unitField("Б", color: MacroKind.protein.color, text: $protein, field: .protein)
+                        unitField("Ж", color: MacroKind.fat.color, text: $fat, field: .fat)
+                        unitField("У", color: MacroKind.carbs.color, text: $carbs, field: .carbs)
+                    }
+                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+                    DatePicker(
+                        "Дата и время",
+                        selection: $date,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                } header: {
+                    Text("Приём пищи")
+                } footer: {
+                    if originalGrams != nil {
+                        Text("При изменении веса калории и БЖУ пересчитываются пропорционально.")
+                    }
                 }
             }
 
@@ -225,6 +283,17 @@ struct EditEntrySheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 CheckmarkButton {
+                    if isComposed {
+                        // Итог складывается из частей, а не берётся из полей:
+                        // у составного приёма своих чисел нет.
+                        let total = parts.compactMap(\.grams).reduce(0, +)
+                        store.updateEntry(entry, name: entry.name, calories: partsCalories,
+                                          macros: partsMacros,
+                                          grams: total > 0 ? total : nil,
+                                          date: date, components: parts)
+                        dismiss()
+                        return
+                    }
                     guard let cal = Int(calories),
                           !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                     let macros = Macros(
@@ -236,7 +305,7 @@ struct EditEntrySheet: View {
                     store.updateEntry(entry, name: name, calories: cal, macros: macros, grams: gramsValue, date: date)
                     dismiss()
                 }
-                .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || Int(calories) == nil)
+                .disabled(!isComposed && (name.trimmingCharacters(in: .whitespaces).isEmpty || Int(calories) == nil))
                 .fontWeight(.semibold)
             }
         }

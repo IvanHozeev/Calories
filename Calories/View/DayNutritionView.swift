@@ -298,19 +298,27 @@ struct DayNutritionView: View {
                 // Клетчатка показана выше, вместе с макросами.
                 ForEach(Micronutrient.allCases.filter { $0 != .fiber }) { nutrient in
                     if let amount = day.totals[nutrient] {
-                        nutrientRow(nutrient, amount: amount)
+                        nutrientRow(nutrient, amount: amount, isEstimate: day.hasEstimates)
                     }
                 }
             } header: {
                 Text("Витамины и минералы")
             } footer: {
-                Text(String(format: String(localized: "Посчитано по %lld%% съеденного за день."),
-                            Int((day.coverage * 100).rounded())))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(String(format: String(localized: "Посчитано по %lld%% съеденного за день."),
+                                Int((day.coverage * 100).rounded())))
+                    // Про оценку говорим прямо: знак «≈» сам по себе объясняет
+                    // только то, что число неточное, а не откуда оно взялось.
+                    if day.hasEstimates {
+                        Text("Часть состава перенесена с похожей еды — это оценка.")
+                    }
+                }
             }
         }
     }
 
-    private func nutrientRow(_ nutrient: Micronutrient, amount: Double) -> some View {
+    private func nutrientRow(_ nutrient: Micronutrient, amount: Double,
+                             isEstimate: Bool = false) -> some View {
         let share = amount / nutrient.dailyValue
         // У натрия шкала означает обратное: заполнилась — плохо. Поэтому он
         // оранжевый с самого начала, а не зелёный до какого-то порога.
@@ -321,7 +329,7 @@ struct DayNutritionView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text(nutrient.title)
                 Spacer()
-                Text(verbatim: formatted(amount, nutrient))
+                Text(verbatim: (isEstimate ? "≈ " : "") + formatted(amount, nutrient))
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
                 Text(verbatim: "\(Int((share * 100).rounded()))%")

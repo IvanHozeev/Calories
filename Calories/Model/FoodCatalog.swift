@@ -215,8 +215,13 @@ nonisolated enum FoodCatalog {
     /// калорийности и по раскладке макросов: витамины берутся у того же
     /// вещества, а не у однокоренного слова.
     static func donors(forName name: String, caloriesPer100g: Int,
-                       macrosPer100g: Macros, limit: Int = 3) -> [CatalogFood] {
-        let words = normalize(name)
+                       macrosPer100g: Macros, category: FoodCategory = .other,
+                       limit: Int = 3) -> [CatalogFood] {
+        let normalized = normalize(name)
+        // Обогащённому продукту донора по классу быть не может: премикс — это
+        // решение завода, а не свойство еды.
+        guard !isFortified(normalized) else { return [] }
+        let words = normalized
             .split(separator: " ")
             .map(String.init)
             .filter { $0.count >= 3 && !noiseWords.contains($0) && Int($0) == nil }
@@ -230,7 +235,8 @@ nonisolated enum FoodCatalog {
                 let candidate = (rank: rank, length: -word.count)
                 if best == nil || candidate < best! { best = candidate }
             }
-            guard let best, fits(calories: caloriesPer100g, macros: macrosPer100g, donor: entry.food)
+            guard let best, fits(calories: caloriesPer100g, macros: macrosPer100g,
+                                 category: category, donor: entry.food)
             else { continue }
             scored.append((best.rank, best.length, entry.names.map(\.count).min() ?? 0, entry.food))
         }
@@ -252,9 +258,21 @@ nonisolated enum FoodCatalog {
     ///
     /// Своей калорийности может и не быть — тогда сита нет: у продукта,
     /// заведённого без чисел, и витамины взять не с чем.
-    static func fits(calories: Int, macros: Macros, donor: CatalogFood,
+    static func fits(calories: Int, macros: Macros, category: FoodCategory = .other,
+                     donor: CatalogFood,
                      caloriesTolerance: Double = 0.25,
                      macroTolerance: Double = 0.5) -> Bool {
+        // Всю работу делает категория, а не узость допусков. На выгрузке USDA
+        // (4016 продуктов с полным составом) пары, похожие только по калориям и
+        // макросам, расходились по железу и кальцию в 2.0–2.3 раза; стоит
+        // потребовать ту же категорию — 1.4–1.7. Дальнейшее сужение допусков до
+        // 15% и 0.25 улучшает это на пять сотых, но выбрасывает половину
+        // подходящих пар: на моих продуктах предложений осталось пять из
+        // тринадцати. Поэтому категория обязательна, а допуски широкие.
+        //
+        // Неизвестную категорию («прочее») ни с чем не сверяем: она ничего
+        // не утверждает.
+        if category != .other, donor.foodCategory != category { return false }
         if calories > 0,
            abs(Double(donor.kcal - calories)) / Double(calories) > caloriesTolerance {
             return false
@@ -276,6 +294,16 @@ nonisolated enum FoodCatalog {
         return Macros(protein: macros.protein * MacroTargets.kcalPerProteinGram / total,
                       fat: macros.fat * MacroTargets.kcalPerFatGram / total,
                       carbs: macros.carbs * MacroTargets.kcalPerCarbGram / total)
+    }
+
+    /// Обогащённый продукт: витамины в нём из премикса.
+    ///
+    /// Слова с упаковки на трёх языках, которыми это объявляют. У таких
+    /// продуктов витамина A по данным USDA в восемь раз больше обычного, а
+    /// витамина D в одиннадцать, — то есть класс про них не знает ничего.
+    static func isFortified(_ normalizedName: String) -> Bool {
+        ["enriched", "fortified", "обогащ", "витаминизир", "מועשר"]
+            .contains { normalizedName.contains($0) }
     }
 
     /// Продукты каталога, у которых есть витамины, — для выбора донора руками.

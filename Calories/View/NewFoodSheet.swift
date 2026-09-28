@@ -27,6 +27,8 @@ struct NewFoodSheet: View {
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
     @State private var linkedSourceName: String?
+    /// Состав взят у похожей еды, а не у неё самой, — значит оценка.
+    @State private var linkedIsEstimate = false
     /// Поиск донора витаминов руками.
     ///
     /// Подбор по названию находит далеко не всё: у товара из израильского
@@ -119,9 +121,12 @@ struct NewFoodSheet: View {
     /// еда или однокоренное слово. Человек сравнивает её со своей упаковкой.
     private func donorRow(_ candidate: CatalogFood) -> some View {
         Button {
-            linkedMicronutrients = candidate.micronutrients
+            // Переносим не состав целиком: витамины A и C и натрий у похожей
+            // еды свои, и взять их значит придумать.
+            linkedMicronutrients = candidate.micronutrients.transferable()
             linkedCatalogID = candidate.id
             linkedSourceName = candidate.localizedName
+            linkedIsEstimate = candidate.localizedName != name.trimmingCharacters(in: .whitespaces)
             donorQuery = ""
             focusedField = nil
         } label: {
@@ -389,6 +394,7 @@ struct NewFoodSheet: View {
                                 linkedMicronutrients = Micronutrients()
                                 linkedCatalogID = nil
                                 self.linkedSourceName = nil
+                                linkedIsEstimate = false
                             } label: {
                                 Label("Отвязать от базы", systemImage: "link.badge.plus")
                             }
@@ -396,7 +402,11 @@ struct NewFoodSheet: View {
                     } header: {
                         Text("Витамины и минералы")
                     } footer: {
-                        if let linkedSourceName {
+                        if let linkedSourceName, linkedIsEstimate {
+                            // Про перенос говорим, что это оценка, и чего в ней
+                            // нет: витамины A и C и соль у похожей еды свои.
+                            Text(String(format: String(localized: "Оценка по «%@»: витамины A, C и натрий у похожей еды свои, их не переносим."), linkedSourceName))
+                        } else if let linkedSourceName {
                             Text(String(format: String(localized: "Взяты из «%@». Доля суточной нормы в порции."), linkedSourceName))
                         } else if showsMatchedVitamins {
                             explain("Название совпало с продуктом базы — состав показан оттуда, дневник считает его так же. Доля суточной нормы в порции.").map { Text($0) }
@@ -435,9 +445,11 @@ struct NewFoodSheet: View {
                         let f = fat.decimalValueOrZero
                         let c = carbs.decimalValueOrZero
                         if let food = editingFood {
-                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID)
+                            store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID,
+                                                  micronutrientsAreEstimated: linkedIsEstimate || (linkedCatalogID == nil && food.micronutrientsAreEstimated))
                         } else {
-                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID)
+                            store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID,
+                                               micronutrientsAreEstimated: linkedIsEstimate)
                         }
                         dismiss()
                     }
@@ -463,6 +475,7 @@ struct NewFoodSheet: View {
                     // На экране-детали фокус не забираем: иначе клавиатура
                     // выскакивает сразу после перехода и закрывает половину экрана.
                     linkedCatalogID = food.catalogID
+                    linkedIsEstimate = food.micronutrientsAreEstimated
                     if let id = food.catalogID,
                        let source = FoodCatalog.all.first(where: { $0.id == id }) {
                         linkedSourceName = source.localizedName

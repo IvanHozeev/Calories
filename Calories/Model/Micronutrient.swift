@@ -37,6 +37,39 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    /// Можно ли одолжить это вещество похожему продукту.
+    ///
+    /// Проверено на выгрузке USDA (4016 продуктов с полным составом): у пар,
+    /// признанных похожими по категории, калорийности и раскладке макросов,
+    /// вещества расходятся очень по-разному.
+    ///
+    /// Минералы сидят в теле продукта и нагревом не разрушаются — калий, магний,
+    /// селен, цинк и железо предсказываются с ошибкой в 1.2–1.3 раза.
+    /// Витамины группы B, фолаты, кальций, D, E и клетчатка дают 1.4–1.6 раза:
+    /// перенести можно, но это оценка.
+    ///
+    /// А витамины A и C и натрий переносить нельзя вовсе. Витамин A в животной
+    /// еде — готовый ретинол, в растительной — каротин, и его количество зависит
+    /// от сорта, а не от макросов; витамин C распадается от нагрева и хранения;
+    /// соль добавляет технолог, и в четверти случаев перенос насыпал бы её туда,
+    /// где её нет. Ошибка по этим трём — вдвое, и пустое место честнее.
+    var transfer: Transfer {
+        switch self {
+        case .potassium, .magnesium, .selenium, .zinc, .iron: return .direct
+        case .fiber, .calcium, .vitaminD, .vitaminE, .vitaminB6, .vitaminB12, .folate: return .estimate
+        case .vitaminA, .vitaminC, .sodium: return .never
+        }
+    }
+
+    enum Transfer {
+        /// Переносим молча: у похожей еды столько же.
+        case direct
+        /// Переносим, но это оценка, а не измерение.
+        case estimate
+        /// Не переносим: угадать нельзя.
+        case never
+    }
+
     /// Единица, в которой хранится и показывается количество.
     var unit: String {
         switch self {
@@ -151,6 +184,20 @@ nonisolated struct Micronutrients: Codable, Equatable {
     func setting(_ nutrient: Micronutrient, to amount: Double) -> Micronutrients {
         var result = self
         result.per100g[nutrient.rawValue] = amount
+        return result
+    }
+
+    /// Что из этого состава можно одолжить похожему продукту.
+    ///
+    /// Не весь состав целиком: витамины A и C и натрий у похожей еды свои, и
+    /// переносить их значит придумывать. Остальное — оценка по классу, и
+    /// продукт, получивший такой состав, помечен оценкой.
+    func transferable() -> Micronutrients {
+        var result = Micronutrients()
+        for nutrient in Micronutrient.allCases where nutrient.transfer != .never {
+            guard let amount = self[nutrient] else { continue }
+            result = result.setting(nutrient, to: amount)
+        }
         return result
     }
 

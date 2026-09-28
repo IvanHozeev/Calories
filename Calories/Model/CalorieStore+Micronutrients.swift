@@ -23,6 +23,9 @@ nonisolated struct MicronutrientDay: Equatable {
     /// а для клетчатки посчитан полностью — и прятать её за витаминным
     /// порогом значит скрывать посчитанное число.
     let fiberCoveredCalories: Int
+    /// Калории, состав которых оценён, а не измерен: перенос по похожему
+    /// продукту и блюда, у которых известны не все ингредиенты.
+    let estimatedCalories: Int
     let totalCalories: Int
 
     /// Какая часть дня учтена. Ноль, если день пуст.
@@ -49,8 +52,14 @@ nonisolated struct MicronutrientDay: Equatable {
         return totals[.fiber] ?? 0
     }
 
+    /// Часть учтённого дня — оценка. Тогда числа показываются со знаком «≈»:
+    /// перенос состава с похожей еды ошибается примерно в полтора раза, и
+    /// выдавать это за измерение нельзя.
+    var hasEstimates: Bool { estimatedCalories > 0 && coveredCalories > 0 }
+
     static let empty = MicronutrientDay(totals: Micronutrients(), coveredCalories: 0,
-                                        fiberCoveredCalories: 0, totalCalories: 0)
+                                        fiberCoveredCalories: 0, estimatedCalories: 0,
+                                        totalCalories: 0)
 }
 
 extension CalorieStore {
@@ -63,6 +72,7 @@ extension CalorieStore {
         var totals = Micronutrients()
         var covered = 0.0
         var fiberCovered = 0.0
+        var estimated = 0
         var total = 0
         for entry in dayEntries {
             total += entry.calories
@@ -83,6 +93,7 @@ extension CalorieStore {
             // а витамины по нему выходили заниженными.
             if profile.hasVitamins {
                 covered += Double(entry.calories) * profile.coverage
+                if profile.coverage < 1 { estimated += entry.calories }
             }
             if profile.per100g[.fiber] != nil {
                 fiberCovered += Double(entry.calories) * profile.coverage
@@ -91,6 +102,7 @@ extension CalorieStore {
         return MicronutrientDay(totals: totals,
                                 coveredCalories: Int(covered.rounded()),
                                 fiberCoveredCalories: Int(fiberCovered.rounded()),
+                                estimatedCalories: estimated,
                                 totalCalories: total)
     }
 
@@ -138,6 +150,14 @@ nonisolated struct NutrientProfile: Equatable {
     /// Доля массы, про которую состав известен. Единица у продукта, у блюда —
     /// сколько его граммов пришло из ингредиентов, найденных в базе.
     let coverage: Double
+
+    /// Сколько дня «стоит» оценка по классу.
+    ///
+    /// Ровно порог доверия, и это не случайность: перенесённый состав можно
+    /// показывать — вещества, которые мы переносим, у похожей еды расходятся в
+    /// 1.2–1.5 раза, — но день, собранный из одних оценок, не должен выглядеть
+    /// измеренным. На пороге он показывается со знаком «≈» и не более того.
+    static let estimateCoverage = MicronutrientDay.trustworthyCoverage
 
     init(per100g: Micronutrients, coverage: Double = 1) {
         self.per100g = per100g

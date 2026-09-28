@@ -350,7 +350,12 @@ final class CalorieStore {
         // меняются, но их немного.
         var profiles = FoodCatalog.nutrientProfilesByName
         for food in customFoods where !food.micronutrients.isEmpty {
-            profiles[food.name] = NutrientProfile(per100g: food.micronutrients)
+            // Оценка по классу идёт в день с половинным весом: вещества у
+            // похожей еды расходятся примерно в полтора раза, и объявлять такой
+            // день изученным наравне с измеренным нельзя.
+            profiles[food.name] = NutrientProfile(
+                per100g: food.micronutrients,
+                coverage: food.micronutrientsAreEstimated ? NutrientProfile.estimateCoverage : 1)
         }
         // Блюда после продуктов: их состав считается по ингредиентам, а значит
         // словарь продуктов к этому моменту должен быть уже собран.
@@ -964,6 +969,7 @@ final class CalorieStore {
                 category: item.category.flatMap(FoodCategory.init(rawValue:)) ?? .other)
             if let micronutrients = item.micronutrients { food.micronutrients = micronutrients }
             food.catalogID = item.catalogID
+            food.micronutrientsAreEstimated = item.micronutrientsAreEstimated ?? false
             food.updatedAt = item.updatedAt
             context.insert(food)
         }
@@ -1195,10 +1201,11 @@ final class CalorieStore {
         return found
     }
 
-    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil) {
+    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, defaultGrams: defaultGrams, category: category)
         if !micronutrients.isEmpty { food.micronutrients = micronutrients }
         food.catalogID = catalogID
+        food.micronutrientsAreEstimated = micronutrientsAreEstimated
         food.updatedAt = Date()
         context.insert(food)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
@@ -1226,7 +1233,8 @@ final class CalorieStore {
                       category: food.foodCategory,
                       defaultGrams: food.defaultGrams > 0 ? food.defaultGrams : 100,
                       micronutrients: food.micronutrients,
-                      catalogID: food.catalogID)
+                      catalogID: food.catalogID,
+                      micronutrientsAreEstimated: food.micronutrientsAreEstimated)
     }
 
     func deleteCustomFood(_ food: FoodItem) {
@@ -1236,9 +1244,10 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil) {
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false) {
         food.micronutrients = micronutrients
         food.catalogID = catalogID
+        food.micronutrientsAreEstimated = micronutrientsAreEstimated
         food.updatedAt = Date()
         food.defaultGrams = defaultGrams
         food.foodCategory = category
@@ -1517,7 +1526,8 @@ final class CalorieStore {
             guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
             guard nutrientProfilesByName[food.name] == nil else { continue }
             if !FoodCatalog.donors(forName: food.name, caloriesPer100g: food.caloriesPer100g,
-                                   macrosPer100g: food.macrosPer100g, limit: 1).isEmpty {
+                                   macrosPer100g: food.macrosPer100g,
+                                   category: food.foodCategory, limit: 1).isEmpty {
                 offered.insert(food.id)
             }
         }

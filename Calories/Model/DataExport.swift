@@ -44,6 +44,9 @@ struct CaloriesBackup: Codable {
         /// восстановления пропадала бы подпись «взяты из „Творог 5%“» и
         /// возможность отвязать.
         let catalogID: Int?
+        /// Состав оценён по похожему продукту, а не измерен. Без этого после
+        /// восстановления оценка выглядела бы измерением.
+        let micronutrientsAreEstimated: Bool?
         /// Когда продукт правили. Без неё восстановленные продукты выпадали бы
         /// из «Недавнего» — приложение считало бы их никогда не тронутыми.
         let updatedAt: Date?
@@ -126,7 +129,9 @@ extension CalorieStore {
                       fat: $0.fat, carbs: $0.carbs, defaultGrams: $0.defaultGrams,
                       category: $0.category,
                       micronutrients: $0.micronutrients.isEmpty ? nil : $0.micronutrients,
-                      catalogID: $0.catalogID, updatedAt: $0.updatedAt)
+                      catalogID: $0.catalogID,
+                      micronutrientsAreEstimated: $0.micronutrientsAreEstimated ? true : nil,
+                      updatedAt: $0.updatedAt)
             },
             dishes: dishes.map { .init(name: $0.name, createdAt: $0.createdAt, ingredients: $0.ingredients) },
             goalHistory: goalRecords.map { .init(date: $0.date, goal: $0.goal) },

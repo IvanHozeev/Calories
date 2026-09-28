@@ -34598,6 +34598,53 @@
         }
       }
     },
+    "Оценка по «%@»: витамины A, C и натрий у похожей еды свои, их не переносим." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تقدير حسب «%@»: الفيتامينان A وC والصوديوم يختلفان في كل طعام، فلا نَنقلها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schätzung nach „%@“: Vitamin A, C und Natrium sind bei jeder Nahrung eigen — die übernehmen wir nicht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated from “%@”: vitamins A and C and sodium are each food's own, so we do not carry them over."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimación según «%@»: las vitaminas A y C y el sodio son propios de cada alimento, no se copian."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimation d'après «%@» : les vitamines A et C et le sodium sont propres à chaque aliment, on ne les reprend pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הערכה לפי «%@»: ויטמינים A ו-C ונתרן משתנים בכל מזון, ולכן איננו מעתיקים אותם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimativa por «%@»: as vitaminas A e C e o sódio são próprios de cada alimento, não são copiados."
+          }
+        }
+      }
+    },
     "Оценка по фотографии приблизительная: вес порции и то, сколько ушло масла, по снимку не видно. Считай её черновиком, который нужно поправить, а не измерением." : {
       "localizations" : {
         "ar" : {
@@ -53741,6 +53788,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zinco"
+          }
+        }
+      }
+    },
+    "Часть состава перенесена с похожей еды — это оценка." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جزء من التركيب منقول من طعام مشابه — هذا تقدير."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Teil der Zusammensetzung ist von ähnlicher Nahrung übernommen — das ist eine Schätzung."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part of the composition is borrowed from similar food — that is an estimate."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte de la composición se tomó de un alimento parecido: es una estimación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une partie de la composition vient d'un aliment semblable : c'est une estimation."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חלק מההרכב הועתק ממזון דומה — זו הערכה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte da composição foi tirada de um alimento parecido — é uma estimativa."
           }
         }
       }

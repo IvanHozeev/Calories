@@ -207,318 +207,39 @@ struct BodyView: View {
             // Расчёт первым: ради него профиль и открывают — сколько тратишь,
             // сколько есть и сколько белка. Параметры, из которых он собран,
             // правят редко, и им место ниже.
-            if let draftProfile {
-                Section {
-                    calculationCard(draftProfile)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                } header: {
-                    Text("Расчёт")
-                } footer: {
-                    // Обе подписи объясняют, откуда берётся число, — на
-                    // коротком уровне их нет вовсе.
-                    if let fact = store.adaptiveTDEE, store.usesAdaptiveTDEE {
-                        // Само число расхода тут не повторяем: оно уже написано
-                        // крупно на карточке, и вторая его копия читалась как
-                        // ещё одна цифра, которую надо сверить с первой.
-                        explain(String(format: String(localized: "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
-                                       Int(fact.meanIntake.rounded()),
-                                       String(format: "%+.2f", fact.weeklyRateKg)))
-                            .map { Text(verbatim: $0) }
-                    } else {
-                        explain(draftProfile.isNavyMethod(from: measurement)
-                                ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
-                                : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
-                            .map { Text(verbatim: $0) }
-                    }
-                }
-            }
+            calculationSection
 
             // Состояние — отдельной карточкой, а не строчками внутри объяснения
             // расхода. «Как считаем» открывают раз в месяц, чтобы проверить
             // формулу, а на сон и пульс смотрят вместе с весом и замерами:
             // это про себя, а не про арифметику.
-            if hasStateCard {
-                Section {
-                    stateCard
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                } header: {
-                    Text("Состояние")
-                } footer: {
-                    stateFooter.map { Text($0) }
-                }
-            }
+            stateSection
 
             // Выбор цели — только без премиума. С премиумом режим задаётся
             // планом: вне плана идёт поддержание, и множитель из профиля
             // означал бы вечный дефицит по настройке, о которой забыли.
-            if store.plan == nil, !store.isPremium {
-                Section {
-                    Picker("Цель", selection: $goal) {
-                        ForEach(Goal.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("Цель")
-                } footer: {
-                    if store.profile == nil {
-                        Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
-                    }
-                }
-            }
+            premiumRow
             
             // Приёмы пищи — в профиле, а не в настройках приложения: это про
             // режим человека, как подъём, отбой и число приёмов, а не про то,
             // как приложение выглядит и куда кладёт копии.
-            Section("Питание") {
-                NavigationLink {
-                    MealScheduleSheet(
-                        entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-                        dailyGoal: store.adaptedTodayGoal,
-                        settings: .shared,
-                        isEmbedded: true
-                    )
-                } label: {
-                    Label("Приёмы пищи", systemImage: "fork.knife")
-                }
-                .accessibilityIdentifier("openMealSchedule")
-            }
+            nutritionSection
 
-            Section("Параметры тела") {
-                Picker("Пол", selection: $sex) {
-                    ForEach(Sex.allCases) { Text($0.title).tag($0) }
-                }
-                // Вес ведёт на свой экран, а не открывает колесо: он меняется
-                // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
-                // Динамика переехала туда же — отдельной строке рядом делать нечего.
-                NavigationLink {
-                    WeightDetailView(store: store)
-                } label: {
-                    HStack {
-                        Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
-                        Spacer()
-                        if let trend = weightTrend {
-                            Text(trend.caption)
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                            WeightSparkline(points: trend.points)
-                                .frame(width: 44, height: 18)
-                        }
-                        Text(weightDisplayText(weightTenths))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .accessibilityIdentifier("openWeight")
-                
-                
-                
-                HStack {
-                    Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
-                    Spacer()
-                    Text(heightDisplayText(heightTenths))
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showHeightPicker.toggle()
-                        if showHeightPicker { showAgePicker = false; showProteinPicker = false }
-                    }
-                }
-                if showHeightPicker {
-                    Picker("Рост", selection: $heightTenths) {
-                        ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
-                            Text(heightDisplayText(v)).tag(v)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-                HStack {
-                    Text("Возраст")
-                    Spacer()
-                    Text("\(ageInt) лет")
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showAgePicker.toggle()
-                        if showAgePicker { showHeightPicker = false; showProteinPicker = false }
-                    }
-                }
-                if showAgePicker {
-                    Picker("Возраст", selection: $ageInt) {
-                        ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-                // Замеры — пятой строкой, рядом с ростом и весом: это такой же
-                // параметр тела, просто снимаемый лентой. В тулбаре их искали
-                // глазами, потому что иконка линейки ничего не обещает.
-                NavigationLink {
-                    MeasurementsView(store: store)
-                } label: {
-                    HStack {
-                        Text("Замеры")
-                        Spacer()
-                        if let last = store.latestMeasurement {
-                            Text(last.date.formatted(date: .abbreviated, time: .omitted))
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .accessibilityIdentifier("openMeasurementsRow")
-            }
+            bodyParametersSection
             
             // Пока норма идёт от факта, множитель активности ни на что не
             // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
             // «Как считаем» — вместе с переключателем, который его включает.
-            if !usesFact {
-            Section {
-                ForEach(ActivityLevel.allCases) { level in
-                    Button {
-                        // Уровень активности множит TDEE, то есть меняет норму калорий
-                        // на сотни. Промахнуться по соседней строке легко, а последствие
-                        // молчаливое: цифра назавтра другая, а почему — непонятно.
-                        guard level != activityLevel else { return }
-                        pendingActivity = level
-                    } label: {
-                        HStack {
-                            // Цвета явные: иерархический .primary внутри кнопки
-                            // списка берёт акцент, и все пять строк были синими —
-                            // самым шумным местом профиля.
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(level.title)
-                                    .foregroundStyle(Color.primary)
-                                Text(level.subtitle)
-                                    .font(.app(.caption))
-                                    .foregroundStyle(Color.secondary)
-                            }
-                            Spacer()
-                            if activityLevel == level {
-                                Image(systemName: "checkmark")
-                                    .font(.app(.subheadline, weight: .semibold))
-                                    .foregroundStyle(.tint)
-                            }
-                        }
-                    }
-                }
-            } header: {
-                Text("Уровень активности")
-            } footer: {
-                explain("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.").map { Text($0) }
-            }
-            }
+            activityLevelSection
             
-            Section {
-                if leanMassKg != nil {
-                    Picker("Считать", selection: $proteinBasis) {
-                        ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .accessibilityIdentifier("proteinBasis")
-                    .onChange(of: proteinBasis) { _, basis in
-                        if basis == .leanMass { seedLeanProteinIfNeeded() }
-                    }
-                }
-                HStack {
-                    Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
-                    Spacer()
-                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showProteinPicker.toggle()
-                        if showProteinPicker { showHeightPicker = false; showAgePicker = false }
-                    }
-                }
-                if showProteinPicker {
-                    Picker("Белок", selection: proteinBasis == .leanMass ? $proteinLeanTenths : $proteinTenths) {
-                        ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-                if let draftProfile {
-                    HStack {
-                        Text("Итого белка")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(verbatim: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))")
-                            .font(.app(.body, weight: .semibold))
-                    }
-                }
-            } header: {
-                Text("Норма белка")
-            } footer: {
-                Text(proteinFooter)
-            }
+            proteinSection
 
-            Section {
-                HStack {
-                    Text("Жира на кг веса")
-                    Spacer()
-                    Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
-                        .foregroundStyle(.secondary)
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showFatPicker.toggle()
-                        if showFatPicker {
-                            showProteinPicker = false; showHeightPicker = false; showAgePicker = false
-                        }
-                    }
-                }
-                if showFatPicker {
-                    Picker("Жир", selection: $fatTenths) {
-                        // Колесо ограничено жёсткими границами: за ними не бывает
-                        // осознанного выбора, только промах пальцем.
-                        ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),
-                                id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(height: 160)
-                }
-                if let draftProfile {
-                    HStack {
-                        Text("Итого жира")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Text(verbatim: "\(Int(draftProfile.fatTargetGrams.rounded())) \(String(localized: "г"))")
-                            .font(.app(.body, weight: .semibold))
-                    }
-                }
-                // Вне рабочего коридора число разрешено, но о нём сказано вслух.
-                if let warning = fatWarning {
-                    Label(warning, systemImage: "exclamationmark.triangle.fill")
-                        .font(.app(.caption))
-                        .foregroundStyle(.orange)
-                }
-            } header: {
-                Text("Норма жира")
-            } footer: {
-                explain("Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки.").map { Text($0) }
-            }
+            fatSection
 
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
             }
-
-
-            Section {
-                BrandFooter()
-                    .brandFooterRow()
-            }
+            brandSection
         }
         .sheet(isPresented: $showingBasis) {
             CalculationBasisSheet(store: store, activityLevel: $activityLevel)
@@ -957,4 +678,341 @@ private struct CalculationBasisSheet: View {
             }
         }
     }
+}
+
+// MARK: - Разделы профиля
+//
+// Тело `body` было списком на триста семьдесят строк, где разделы приходилось
+// искать глазами по отступам. Каждый раздел стал свойством с явным типом: и
+// читается, и проверяется типами по частям.
+private extension BodyView {
+    /// Расчёт: сколько тратишь, сколько есть и сколько белка. Ради него
+    /// профиль и открывают, поэтому он первый.
+    @ViewBuilder
+    var calculationSection: some View {
+    if let draftProfile {
+        Section {
+            calculationCard(draftProfile)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+        } header: {
+            Text("Расчёт")
+        } footer: {
+            // Обе подписи объясняют, откуда берётся число, — на
+            // коротком уровне их нет вовсе.
+            if let fact = store.adaptiveTDEE, store.usesAdaptiveTDEE {
+                // Само число расхода тут не повторяем: оно уже написано
+                // крупно на карточке, и вторая его копия читалась как
+                // ещё одна цифра, которую надо сверить с первой.
+                explain(String(format: String(localized: "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
+                               Int(fact.meanIntake.rounded()),
+                               String(format: "%+.2f", fact.weeklyRateKg)))
+                    .map { Text(verbatim: $0) }
+            } else {
+                explain(draftProfile.isNavyMethod(from: measurement)
+                        ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+                        : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
+                    .map { Text(verbatim: $0) }
+            }
+        }
+    }
+    }
+
+    /// Состояние: сон, пульс покоя и активность — когда о них есть что сказать.
+    @ViewBuilder
+    var stateSection: some View {
+    if hasStateCard {
+        Section {
+            stateCard
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+        } header: {
+            Text("Состояние")
+        } footer: {
+            stateFooter.map { Text($0) }
+        }
+    }
+    }
+
+    /// Строка про подписку — только пока нет ни плана, ни подписки.
+    @ViewBuilder
+    var premiumRow: some View {
+    if store.plan == nil, !store.isPremium {
+        Section {
+            Picker("Цель", selection: $goal) {
+                ForEach(Goal.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+        } header: {
+            Text("Цель")
+        } footer: {
+            if store.profile == nil {
+                Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
+            }
+        }
+    }
+    }
+
+    /// Питание: переход к расписанию приёмов.
+    var nutritionSection: some View {
+    Section("Питание") {
+        NavigationLink {
+            MealScheduleSheet(
+                entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+                dailyGoal: store.adaptedTodayGoal,
+                settings: .shared,
+                isEmbedded: true
+            )
+        } label: {
+            Label("Приёмы пищи", systemImage: "fork.knife")
+        }
+        .accessibilityIdentifier("openMealSchedule")
+    }
+    }
+
+    /// Параметры тела: то, из чего считается расход. Правят их редко, поэтому
+    /// они ниже расчёта.
+    var bodyParametersSection: some View {
+    Section("Параметры тела") {
+        Picker("Пол", selection: $sex) {
+            ForEach(Sex.allCases) { Text($0.title).tag($0) }
+        }
+        // Вес ведёт на свой экран, а не открывает колесо: он меняется
+        // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
+        // Динамика переехала туда же — отдельной строке рядом делать нечего.
+        NavigationLink {
+            WeightDetailView(store: store)
+        } label: {
+            HStack {
+                Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
+                Spacer()
+                if let trend = weightTrend {
+                    Text(trend.caption)
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                    WeightSparkline(points: trend.points)
+                        .frame(width: 44, height: 18)
+                }
+                Text(weightDisplayText(weightTenths))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .accessibilityIdentifier("openWeight")
+        
+        
+        
+        HStack {
+            Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
+            Spacer()
+            Text(heightDisplayText(heightTenths))
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showHeightPicker.toggle()
+                if showHeightPicker { showAgePicker = false; showProteinPicker = false }
+            }
+        }
+        if showHeightPicker {
+            Picker("Рост", selection: $heightTenths) {
+                ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
+                    Text(heightDisplayText(v)).tag(v)
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 160)
+        }
+        HStack {
+            Text("Возраст")
+            Spacer()
+            Text("\(ageInt) лет")
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showAgePicker.toggle()
+                if showAgePicker { showHeightPicker = false; showProteinPicker = false }
+            }
+        }
+        if showAgePicker {
+            Picker("Возраст", selection: $ageInt) {
+                ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 160)
+        }
+        // Замеры — пятой строкой, рядом с ростом и весом: это такой же
+        // параметр тела, просто снимаемый лентой. В тулбаре их искали
+        // глазами, потому что иконка линейки ничего не обещает.
+        NavigationLink {
+            MeasurementsView(store: store)
+        } label: {
+            HStack {
+                Text("Замеры")
+                Spacer()
+                if let last = store.latestMeasurement {
+                    Text(last.date.formatted(date: .abbreviated, time: .omitted))
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .accessibilityIdentifier("openMeasurementsRow")
+    }
+    }
+
+    /// Уровень активности — только пока расход считается формулой. Когда он
+    /// измерен, множитель ни на что не влияет, и выбор уезжает в «Как считаем».
+    @ViewBuilder
+    var activityLevelSection: some View {
+    if !usesFact {
+    Section {
+        ForEach(ActivityLevel.allCases) { level in
+            Button {
+                // Уровень активности множит TDEE, то есть меняет норму калорий
+                // на сотни. Промахнуться по соседней строке легко, а последствие
+                // молчаливое: цифра назавтра другая, а почему — непонятно.
+                guard level != activityLevel else { return }
+                pendingActivity = level
+            } label: {
+                HStack {
+                    // Цвета явные: иерархический .primary внутри кнопки
+                    // списка берёт акцент, и все пять строк были синими —
+                    // самым шумным местом профиля.
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(level.title)
+                            .foregroundStyle(Color.primary)
+                        Text(level.subtitle)
+                            .font(.app(.caption))
+                            .foregroundStyle(Color.secondary)
+                    }
+                    Spacer()
+                    if activityLevel == level {
+                        Image(systemName: "checkmark")
+                            .font(.app(.subheadline, weight: .semibold))
+                            .foregroundStyle(.tint)
+                    }
+                }
+            }
+        }
+    } header: {
+        Text("Уровень активности")
+    } footer: {
+        explain("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.").map { Text($0) }
+    }
+    }
+    }
+
+    /// Норма белка: на чём считать и сколько.
+    var proteinSection: some View {
+    Section {
+        if leanMassKg != nil {
+            Picker("Считать", selection: $proteinBasis) {
+                ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .accessibilityIdentifier("proteinBasis")
+            .onChange(of: proteinBasis) { _, basis in
+                if basis == .leanMass { seedLeanProteinIfNeeded() }
+            }
+        }
+        HStack {
+            Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
+            Spacer()
+            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showProteinPicker.toggle()
+                if showProteinPicker { showHeightPicker = false; showAgePicker = false }
+            }
+        }
+        if showProteinPicker {
+            Picker("Белок", selection: proteinBasis == .leanMass ? $proteinLeanTenths : $proteinTenths) {
+                ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 160)
+        }
+        if let draftProfile {
+            HStack {
+                Text("Итого белка")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(verbatim: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))")
+                    .font(.app(.body, weight: .semibold))
+            }
+        }
+    } header: {
+        Text("Норма белка")
+    } footer: {
+        Text(proteinFooter)
+    }
+    }
+
+    /// Норма жира и её границы.
+    var fatSection: some View {
+    Section {
+        HStack {
+            Text("Жира на кг веса")
+            Spacer()
+            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
+                .foregroundStyle(.secondary)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showFatPicker.toggle()
+                if showFatPicker {
+                    showProteinPicker = false; showHeightPicker = false; showAgePicker = false
+                }
+            }
+        }
+        if showFatPicker {
+            Picker("Жир", selection: $fatTenths) {
+                // Колесо ограничено жёсткими границами: за ними не бывает
+                // осознанного выбора, только промах пальцем.
+                ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),
+                        id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 160)
+        }
+        if let draftProfile {
+            HStack {
+                Text("Итого жира")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(verbatim: "\(Int(draftProfile.fatTargetGrams.rounded())) \(String(localized: "г"))")
+                    .font(.app(.body, weight: .semibold))
+            }
+        }
+        // Вне рабочего коридора число разрешено, но о нём сказано вслух.
+        if let warning = fatWarning {
+            Label(warning, systemImage: "exclamationmark.triangle.fill")
+                .font(.app(.caption))
+                .foregroundStyle(.orange)
+        }
+    } header: {
+        Text("Норма жира")
+    } footer: {
+        explain("Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки.").map { Text($0) }
+    }
+    }
+
+    /// Подпись приложения в конце списка.
+    var brandSection: some View {
+        Section {
+            BrandFooter()
+                .brandFooterRow()
+        }
+    }
+
 }

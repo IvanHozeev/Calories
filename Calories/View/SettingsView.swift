@@ -97,153 +97,19 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            Section("Подписка") {
-                if store.isPremium {
-                    Label("Premium активен", systemImage: "checkmark.seal.fill")
-                        .foregroundStyle(.green)
-                } else {
-                    Button {
-                        showingPaywall = true
-                    } label: {
-                        Label("Оформить Premium", systemImage: "sparkles")
-                    }
-                }
-            }
-            
-            // Системное сразу после подписки: оформление, шрифт и язык ищут
-            // чаще, чем выгрузку копий, а та нужна раз в жизни телефона.
-            // Оформление отдельной секцией: тема, шрифт и цвет — это про вид,
-            // а не про то, как приложение считает.
-            Section {
-                themeRow
-                fontRow
-                accentRow
-                intensityRow
-                ringSoundRow
-            } header: {
-                Text("Оформление")
-            } footer: {
-                accentFooter
-            }
-
-            Section {
-                Picker(selection: Binding(
-                    get: { ExplanationSettings.shared.level },
-                    set: { ExplanationSettings.shared.level = $0 }
-                )) {
-                    ForEach(ExplanationLevel.allCases) { level in
-                        Text(verbatim: level.title).tag(level)
-                    }
-                } label: {
-                    Label("Объяснения", systemImage: "text.alignleft")
-                }
-                .accessibilityIdentifier("explanationLevel")
-            } footer: {
-                Text(verbatim: ExplanationSettings.shared.level.summary)
-            }
-
-            Section("Системное") {
-                // Единицы одной строкой: «Метрическая» и «Американская» не
-                // помещались рядом с подписью и переносились.
-                Picker(selection: $useImperial) {
-                    Text(verbatim: "кг · см").tag(false)
-                    Text(verbatim: "lb · in").tag(true)
-                } label: {
-                    Label("Единицы", systemImage: "ruler")
-                }
-
-                NavigationLink {
-                    RemindersView()
-                } label: {
-                    Label("Напоминания", systemImage: "bell")
-                }
-                // Язык меняет система: свой список всё равно требовал
-                // перезапуска руками, а системный экран делает это сам и
-                // выглядит как обычный переход в настройки приложения.
-                Button {
-                    if let url = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(url)
-                    }
-                } label: {
-                    HStack {
-                        Label("Язык", systemImage: "character.bubble")
-                            .foregroundStyle(Color.primary)
-                        Spacer()
-                        // Цвета явные: иерархические внутри кнопки списка
-                        // берут акцент, и язык красился синим, как ссылка.
-                        Text(verbatim: currentLanguageName)
-                            .foregroundStyle(Color.secondary)
-                        Image(systemName: "arrow.up.forward.app")
-                            .font(.app(.caption))
-                            .foregroundStyle(Color.secondary.opacity(0.6))
-                    }
-                }
-                .accessibilityIdentifier("openLanguage")
-            }
-
-            Section {
-                Button {
-                    prepareBackup()
-                } label: {
-                    rowLabel("Резервная копия (JSON)", systemImage: "arrow.down.doc")
-                }
-                Button {
-                    prepareCSV()
-                } label: {
-                    rowLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
-                }
-            } header: {
-                Text("Данные")
-            } footer: {
-                explain("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.").map { Text($0) }
-            }
-
-            Section {
-                if backups.isConfigured {
-                    LabeledContent("Папка", value: backups.folderName ?? "—")
-                    LabeledContent("Последняя копия", value: lastBackupText)
-                    Button("Сделать копию сейчас") { backups.backupNow(store) }
-                    Button("Выбрать другую папку") { pick(.backupFolder) }
-                } else {
-                    Button {
-                        pick(.backupFolder)
-                    } label: {
-                        rowLabel("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
-                    }
-                }
-                Button {
-                    pick(.backupFile)
-                } label: {
-                    rowLabel("Восстановить из копии", systemImage: "arrow.up.doc")
-                }
-                if let error = backups.lastError {
-                    Text(verbatim: error)
-                        .font(.app(.footnote))
-                        .foregroundStyle(.red)
-                }
-            } header: {
-                Text("Автоматическая копия")
-            } footer: {
-                explain("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.").map { Text($0) }
-            }
-            
+            // Порядок: подписка, вид, объяснения, системное — и только потом
+            // данные. Оформление и язык ищут часто, а выгрузка копии нужна раз
+            // в жизни телефона.
+            subscriptionSection
+            appearanceSection
+            explanationSection
+            systemSection
+            dataSection
+            autoBackupSection
 #if DEBUG
-            // Инструменты разработчика собраны на своём экране и только в
-            // отладочной сборке. Вперемешку с настройками пользователя они
-            // выглядели как возможности, которых он лишён, — а это не так.
-            Section {
-                NavigationLink {
-                    DeveloperSettingsView(store: store)
-                } label: {
-                    Label("Отладка", systemImage: "hammer")
-                }
-            }
+            developerSection
 #endif
-
-            Section {
-                BrandFooter(showsVersion: true)
-                    .brandFooterRow()
-            }
+            brandSection
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -695,4 +561,179 @@ private func rowLabel(_ title: LocalizedStringKey, systemImage: String) -> some 
     } icon: {
         Image(systemName: systemImage).foregroundStyle(.tint)
     }
+}
+
+// MARK: - Разделы настроек
+//
+// Тело `body` было списком на двести строк: разделы приходилось искать глазами
+// по отступам, а компилятор на такой форме однажды уже сдался — тогда из него
+// вынесли строки оформления. Теперь каждый раздел — свойство с явным типом.
+private extension SettingsView {
+    /// Подписка — первой: за ней сюда и заходят чаще всего.
+    var subscriptionSection: some View {
+    Section("Подписка") {
+        if store.isPremium {
+            Label("Premium активен", systemImage: "checkmark.seal.fill")
+                .foregroundStyle(.green)
+        } else {
+            Button {
+                showingPaywall = true
+            } label: {
+                Label("Оформить Premium", systemImage: "sparkles")
+            }
+        }
+    }
+    }
+
+    /// Оформление: тема, шрифт, цвет и звук кольца. Это про вид, а не про то,
+    /// как приложение считает, — поэтому своей секцией.
+    var appearanceSection: some View {
+    Section {
+        themeRow
+        fontRow
+        accentRow
+        intensityRow
+        ringSoundRow
+    } header: {
+        Text("Оформление")
+    } footer: {
+        accentFooter
+    }
+    }
+
+    /// Уровень объяснений. «Коротко» убирает подписи, а не пересказывает их.
+    var explanationSection: some View {
+    Section {
+        Picker(selection: Binding(
+            get: { ExplanationSettings.shared.level },
+            set: { ExplanationSettings.shared.level = $0 }
+        )) {
+            ForEach(ExplanationLevel.allCases) { level in
+                Text(verbatim: level.title).tag(level)
+            }
+        } label: {
+            Label("Объяснения", systemImage: "text.alignleft")
+        }
+        .accessibilityIdentifier("explanationLevel")
+    } footer: {
+        Text(verbatim: ExplanationSettings.shared.level.summary)
+    }
+    }
+
+    /// Системное: единицы, язык, уведомления.
+    var systemSection: some View {
+    Section("Системное") {
+        // Единицы одной строкой: «Метрическая» и «Американская» не
+        // помещались рядом с подписью и переносились.
+        Picker(selection: $useImperial) {
+            Text(verbatim: "кг · см").tag(false)
+            Text(verbatim: "lb · in").tag(true)
+        } label: {
+            Label("Единицы", systemImage: "ruler")
+        }
+
+        NavigationLink {
+            RemindersView()
+        } label: {
+            Label("Напоминания", systemImage: "bell")
+        }
+        // Язык меняет система: свой список всё равно требовал
+        // перезапуска руками, а системный экран делает это сам и
+        // выглядит как обычный переход в настройки приложения.
+        Button {
+            if let url = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url)
+            }
+        } label: {
+            HStack {
+                Label("Язык", systemImage: "character.bubble")
+                    .foregroundStyle(Color.primary)
+                Spacer()
+                // Цвета явные: иерархические внутри кнопки списка
+                // берут акцент, и язык красился синим, как ссылка.
+                Text(verbatim: currentLanguageName)
+                    .foregroundStyle(Color.secondary)
+                Image(systemName: "arrow.up.forward.app")
+                    .font(.app(.caption))
+                    .foregroundStyle(Color.secondary.opacity(0.6))
+            }
+        }
+        .accessibilityIdentifier("openLanguage")
+    }
+    }
+
+    /// Выгрузка данных руками.
+    var dataSection: some View {
+    Section {
+        Button {
+            prepareBackup()
+        } label: {
+            rowLabel("Резервная копия (JSON)", systemImage: "arrow.down.doc")
+        }
+        Button {
+            prepareCSV()
+        } label: {
+            rowLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
+        }
+    } header: {
+        Text("Данные")
+    } footer: {
+        explain("Данные хранятся только на этом устройстве. Синхронизации нет — выгрузи копию, чтобы не потерять историю вместе с телефоном.").map { Text($0) }
+    }
+    }
+
+    /// Автоматическая копия в выбранную папку.
+    var autoBackupSection: some View {
+    Section {
+        if backups.isConfigured {
+            LabeledContent("Папка", value: backups.folderName ?? "—")
+            LabeledContent("Последняя копия", value: lastBackupText)
+            Button("Сделать копию сейчас") { backups.backupNow(store) }
+            Button("Выбрать другую папку") { pick(.backupFolder) }
+        } else {
+            Button {
+                pick(.backupFolder)
+            } label: {
+                rowLabel("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
+            }
+        }
+        Button {
+            pick(.backupFile)
+        } label: {
+            rowLabel("Восстановить из копии", systemImage: "arrow.up.doc")
+        }
+        if let error = backups.lastError {
+            Text(verbatim: error)
+                .font(.app(.footnote))
+                .foregroundStyle(.red)
+        }
+    } header: {
+        Text("Автоматическая копия")
+    } footer: {
+        explain("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.").map { Text($0) }
+    }
+    }
+
+    /// Отладочные инструменты — только в отладочной сборке.
+    ///
+    /// Вперемешку с настройками пользователя они выглядели как возможности,
+    /// которых он лишён, — а это не так.
+    var developerSection: some View {
+    Section {
+        NavigationLink {
+            DeveloperSettingsView(store: store)
+        } label: {
+            Label("Отладка", systemImage: "hammer")
+        }
+    }
+    }
+
+    /// Подпись приложения с версией.
+    var brandSection: some View {
+    Section {
+        BrandFooter(showsVersion: true)
+            .brandFooterRow()
+    }
+    }
+
 }

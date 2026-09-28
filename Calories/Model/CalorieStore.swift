@@ -734,18 +734,6 @@ final class CalorieStore {
         measurements.dropFirst().first
     }
 
-    /// История одного обхвата от старых к новым — для графика.
-    /// Пропущенные замеры (ноль) не берём: это «не мерил», а не «ноль сантиметров».
-    func measurementHistory(_ site: MeasurementSite, side: BodySide = .right) -> [(date: Date, value: Double)] {
-        measurements
-            .compactMap { m -> (Date, Double)? in
-                let v = site.isPaired ? m.value(site, side) : m.value(site)
-                return v > 0 ? (m.date, v) : nil
-            }
-            .sorted { $0.0 < $1.0 }
-            .map { (date: $0.0, value: $0.1) }
-    }
-
     /// Сеанс замеров за сегодня. Если его ещё нет, заводит новый, унаследовав
     /// обхваты прошлого: снимают обычно одно-два места, а производные величины
     /// читаются по последнему сеансу целиком.
@@ -1214,11 +1202,6 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods.sort { $0.name < $1.name }
         rebuildCaches()
-    }
-
-    func setDefaultGrams(_ food: FoodItem, grams: Double) {
-        food.defaultGrams = grams
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
     }
 
     func addDish(name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {

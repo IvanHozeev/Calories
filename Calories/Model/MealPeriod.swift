@@ -65,13 +65,4 @@ enum MealPeriod: String, CaseIterable {
         return .nightSnack
     }
 
-    /// Время сегодняшнего дня, попадающее в этот приём пищи. Нужно при ручном выборе
-    /// приёма: запись группируется по часу, поэтому дата должна лежать внутри диапазона.
-    /// Если выбранный приём уже идёт прямо сейчас, оставляем текущее время —
-    /// так запись не «уезжает» относительно соседних.
-    func dateForToday(now: Date = Date()) -> Date {
-        let calendar = Calendar.current
-        if Self.period(for: now) == self { return now }
-        return calendar.date(bySettingHour: representativeHour, minute: 0, second: 0, of: now) ?? now
-    }
 }

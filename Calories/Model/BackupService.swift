@@ -66,11 +66,6 @@ final class BackupService {
         }
     }
 
-    func forgetFolder() {
-        defaults.removeObject(forKey: Keys.bookmark)
-        folderName = nil
-    }
-
     /// Пора ли делать копию. Отдельной функцией без побочных эффектов, чтобы
     /// расписание можно было проверить тестом, не трогая файловую систему.
     nonisolated static func shouldBackup(last: Date?, now: Date, interval: TimeInterval = interval) -> Bool {

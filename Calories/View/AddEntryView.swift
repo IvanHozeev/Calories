@@ -682,42 +682,6 @@ struct AddEntryView: View {
         store.recentMeals()
     }
 
-    /// Строка приёма: чем он был и во сколько обошёлся.
-    private func mealRow(_ meal: FoodEntry) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: meal.name)
-                    .font(.app(.subheadline))
-                    .lineLimit(2)
-                Text(verbatim: String(format: String(localized: "%1$lld позиций · %2$@"),
-                                      meal.components.count,
-                                      meal.date.formatted(date: .abbreviated, time: .omitted)))
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
-            Spacer(minLength: 8)
-            Text(verbatim: "\(meal.calories)")
-                .font(.app(.subheadline, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 2)
-    }
-
-    /// Кладёт приём в черновик целиком — позициями, а не одной строкой.
-    ///
-    /// Позициями потому, что дальше его обычно правят: вчера была ложка мёда,
-    /// сегодня нет. Одной строкой такой приём пришлось бы удалять и собирать
-    /// заново — то есть ровно то, от чего это и избавляет.
-    private func repeatMeal(_ meal: FoodEntry) {
-        withAnimation(.snappy) {
-            draftItems.append(contentsOf: meal.composition.map {
-                MealItem(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
-            })
-        }
-        scrollToTopTicket += 1
-    }
-
     /// Всё, из чего выбирают продукт: переключатель источника и секции с ними.
     @ViewBuilder
     private var browseSections: some View {
@@ -791,7 +755,7 @@ struct AddEntryView: View {
         // там порядок и есть смысл: сверху последнее съеденное, и
         // группировка сломала бы именно то, ради чего туда заходят.
         if isSearching || source == .mine {
-            ForEach(grouped(shownCustomFoods), id: \.0) { category, foods in
+            ForEach(FoodCategory.grouped(shownCustomFoods), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
                         foodRow(food)
@@ -847,7 +811,7 @@ struct AddEntryView: View {
                 // База разложена по категориям, а не идёт одним списком из
                 // шести десятков строк. Отдельного контрола для этого не нужно:
                 // заголовки секций сами работают навигацией.
-                ForEach(grouped(shownBuiltInFoods), id: \.0) { category, foods in
+                ForEach(FoodCategory.grouped(shownBuiltInFoods), id: \.0) { category, foods in
                     Section {
                         ForEach(foods) { food in
                             foodRow(food)
@@ -985,14 +949,6 @@ struct AddEntryView: View {
 
     /// Раскладывает продукты по категориям в порядке самого перечисления —
     /// он осмысленный (мясо, рыба, молочное...), в отличие от алфавитного.
-    private func grouped(_ foods: [FoodItem]) -> [(FoodCategory, [FoodItem])] {
-        let buckets = Dictionary(grouping: foods, by: \.foodCategory)
-        return FoodCategory.allCases.compactMap { category in
-            guard let items = buckets[category], !items.isEmpty else { return nil }
-            return (category, items)
-        }
-    }
-
     /// Пусто ли в выбранном источнике при текущем запросе.
     private var currentSourceIsEmpty: Bool {
         if isSearching {

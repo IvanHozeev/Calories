@@ -490,12 +490,6 @@ final class StepStore {
         healthStore.execute(query)
     }
 
-    /// Во сколько человек встал в этот день, если «Здоровье» это знает.
-    func wakeTime(on date: Date) -> Date? {
-        let calendar = Calendar.current
-        return history.days.first { calendar.isDate($0.date, inSameDayAs: date) }?.wakeTime
-    }
-
     /// Сколько спал перед этим днём и насколько это меньше обычного.
     func sleep(on date: Date) -> (hours: Double, shortfall: Double)? {
         let calendar = Calendar.current

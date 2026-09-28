@@ -314,24 +314,6 @@ struct BodyView: View {
                 String(format: "%+.1f %@", delta, unit))
     }
     
-    private func bmiColor(_ bmi: Double) -> Color {
-        switch bmi {
-        case ..<18.5: return .blue
-        case 18.5..<25: return .green
-        case 25..<30: return .yellow
-        default: return .red
-        }
-    }
-    
-    private func bmiLabel(_ bmi: Double) -> String {
-        switch bmi {
-        case ..<18.5: return "Недовес"
-        case 18.5..<25: return "Норма"
-        case 25..<30: return "Избыточный"
-        default: return "Ожирение"
-        }
-    }
-    
     /// Считаем ли норму от измеренного расхода.
     private var usesFact: Bool { store.usesAdaptiveTDEE && store.adaptiveTDEE != nil }
 
@@ -575,16 +557,6 @@ struct BodyView: View {
         .contentShape(Rectangle())
     }
 
-    private func resultRow(title: LocalizedStringKey, value: String, highlighted: Bool = false) -> some View {
-        HStack {
-            Text(title)
-                .foregroundStyle(highlighted ? .primary : .secondary)
-            Spacer()
-            Text(value)
-                .font(highlighted ? .body.weight(.semibold) : .body)
-                .foregroundStyle(highlighted ? .green : .primary)
-        }
-    }
 }
 
 /// Искра веса: тридцать дней одной линией. Осей нет намеренно — здесь важна

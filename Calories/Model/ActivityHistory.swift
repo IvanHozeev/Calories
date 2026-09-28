@@ -166,14 +166,6 @@ struct ActivityHistory: Sendable {
         return hours.reduce(0, +) / Double(hours.count)
     }
 
-    /// Пульс в покое за последние дни — для сравнения недели с месяцем.
-    func restingPulses(lastDays count: Int, now: Date = Date()) -> [Int] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: now)
-        guard let from = calendar.date(byAdding: .day, value: -count, to: today) else { return [] }
-        return days.filter { $0.date >= from }.compactMap(\.restingPulse)
-    }
-
     /// Шаги за конкретный день, если они записаны.
     func steps(on date: Date) -> Int? {
         let day = Calendar.current.startOfDay(for: date)

@@ -1516,7 +1516,8 @@ final class CalorieStore {
         for food in customFoods {
             guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
             guard nutrientProfilesByName[food.name] == nil else { continue }
-            if !FoodCatalog.candidates(forName: food.name, limit: 1).isEmpty {
+            if !FoodCatalog.donors(forName: food.name, caloriesPer100g: food.caloriesPer100g,
+                                   macrosPer100g: food.macrosPer100g, limit: 1).isEmpty {
                 offered.insert(food.id)
             }
         }

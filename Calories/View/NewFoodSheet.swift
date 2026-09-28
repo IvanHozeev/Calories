@@ -27,7 +27,13 @@ struct NewFoodSheet: View {
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
     @State private var linkedSourceName: String?
-    private enum Field: Hashable { case search, name, calories, protein, fat, carbs, fiber }
+    /// Поиск донора витаминов руками.
+    ///
+    /// Подбор по названию находит далеко не всё: у товара из израильского
+    /// магазина с каталогом не совпадает ни одно слово, а человек прекрасно
+    /// знает, что его «אבקת חלבון» — это сывороточный протеин.
+    @State private var donorQuery = ""
+    private enum Field: Hashable { case search, name, calories, protein, fat, carbs, fiber, donor }
     @FocusState private var focusedField: Field?
 
     @State private var searchQuery = ""
@@ -82,8 +88,58 @@ struct NewFoodSheet: View {
         let query = name.trimmingCharacters(in: .whitespaces)
         // И при создании, и при правке: в списке такой продукт помечен «здесь
         // есть что взять», и метка обязана вести туда, где это можно сделать.
-        guard query.count >= 3, linkedCatalogID == nil, micronutrients.isEmpty else { return [] }
-        return FoodCatalog.candidates(forName: query, limit: 3)
+        guard query.count >= 3, linkedCatalogID == nil, !micronutrients.hasVitamins else { return [] }
+        return FoodCatalog.donors(forName: query, caloriesPer100g: enteredCalories,
+                                  macrosPer100g: draftMacros, limit: 3)
+    }
+
+    /// Показывать ли раздел «Витамины из базы».
+    ///
+    /// Пока настоящих витаминов у продукта нет, одолжить их можно — даже если
+    /// клетчатка уже вписана руками. Раньше условие было «микронутриентов нет
+    /// совсем», и вписанная с упаковки клетчатка навсегда закрывала эту дорогу.
+    private var showsDonorSection: Bool {
+        // Пока продукт не назван, предлагать нечего: и подбор, и поиск руками
+        // начинаются с названия.
+        name.trimmingCharacters(in: .whitespaces).count >= 3
+            && !FoodCatalog.isEmpty && linkedCatalogID == nil && !micronutrients.hasVitamins
+    }
+
+    /// Найденное руками — без проверки по цифрам: человек знает свою еду лучше.
+    private var donorSearchResults: [CatalogFood] {
+        let query = donorQuery.trimmingCharacters(in: .whitespaces)
+        guard query.count >= 2 else { return [] }
+        let offered = Set(micronutrientSuggestions.map(\.id))
+        return FoodCatalog.vitaminSources(matching: query).filter { !offered.contains($0.id) }
+    }
+
+    /// Строка донора: что возьмём, чем он богат и сколько в нём калорий.
+    ///
+    /// Калорийность здесь не украшение: она главный признак того, та же это
+    /// еда или однокоренное слово. Человек сравнивает её со своей упаковкой.
+    private func donorRow(_ candidate: CatalogFood) -> some View {
+        Button {
+            linkedMicronutrients = candidate.micronutrients
+            linkedCatalogID = candidate.id
+            linkedSourceName = candidate.localizedName
+            donorQuery = ""
+            focusedField = nil
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: candidate.localizedName)
+                    MicroTags(nutrients: candidate.micronutrients.notable(inGrams: 100))
+                }
+                Spacer()
+                Text(verbatim: "\(candidate.kcal) \(String(localized: "ккал"))")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Image(systemName: "plus.circle")
+                    .foregroundStyle(.blue)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     private var servingGramsValue: Double {
@@ -281,25 +337,23 @@ struct NewFoodSheet: View {
                     explain("Это значение будет подставляться при добавлении продукта в приём пищи.").map { Text($0) }
                 }
 
-                if !micronutrientSuggestions.isEmpty {
+                if showsDonorSection {
                     Section {
                         ForEach(micronutrientSuggestions) { candidate in
-                            Button {
-                                linkedMicronutrients = candidate.micronutrients
-                                linkedCatalogID = candidate.id
-                                linkedSourceName = candidate.localizedName
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(verbatim: candidate.localizedName)
-                                        MicroTags(nutrients: candidate.micronutrients.notable(inGrams: 100))
-                                    }
-                                    Spacer()
-                                    Image(systemName: "plus.circle")
-                                        .foregroundStyle(.blue)
-                                }
-                            }
-                            .buttonStyle(.plain)
+                            donorRow(candidate)
+                        }
+                        // Поиск здесь же, а не на отдельном экране: это та же
+                        // задача, и уводить из неё некуда.
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.tertiary)
+                            TextField("Другой продукт из базы", text: $donorQuery)
+                                .focused($focusedField, equals: .donor)
+                                .submitLabel(.search)
+                                .accessibilityIdentifier("donorSearch")
+                        }
+                        ForEach(donorSearchResults) { candidate in
+                            donorRow(candidate)
                         }
                     } header: {
                         Text("Витамины из базы")

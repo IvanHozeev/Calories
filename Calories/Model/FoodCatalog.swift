@@ -189,19 +189,104 @@ nonisolated enum FoodCatalog {
         return ranked.prefix(limit).map(\.food)
     }
 
-    /// Что из каталога похоже на продукт с таким названием.
+    /// Слова, которые про еду ничего не говорят.
     ///
-    /// Ищем по самому длинному слову, а не по строке целиком: своё название
-    /// почти всегда шире каталожного — «Творог мой», «Spinach mine», — и поиск
-    /// по всей строке не находит ничего. Длинное слово выбрано потому, что оно
-    /// и есть сам продукт, а короткое — уточнение вроде «мой» или «дома».
-    static func candidates(forName name: String, limit: Int = 3) -> [CatalogFood] {
+    /// Брендовое название состоит из них почти целиком, и поиск по такому слову
+    /// приводит куда угодно: «Pro 40 Protein Drink» находился по «drink».
+    private static let noiseWords: Set<String> = [
+        "pro", "go", "free", "sugar", "drink", "extra", "soft", "bar", "new",
+        "light", "lite", "zero", "max", "plus", "original", "classic", "mix",
+        "taste", "flavor", "flavour", "style", "premium", "гр", "мой", "моя",
+        "мое", "мои", "дома", "свой", "своя",
+    ]
+
+    /// Кто из каталога может одолжить витамины продукту с такими цифрами.
+    ///
+    /// Два правила, и оба выучены на ошибках.
+    ///
+    /// Слова берём все, а не самое длинное: длинное слово — это чаще всего
+    /// бренд («Gold Standard», «Pastavita»), а еда названа коротким. Из всех
+    /// слов выбираем то, что дало лучшее совпадение, и при равенстве
+    /// предпочитаем длинное — оно говорит больше.
+    ///
+    /// И совпадения по названию мало. «Овсяное молоко без сахара» на 52 ккал
+    /// получало состав «Печенья овсяного» на 590, «Фасоль в томате» — сухой
+    /// фасоли втрое калорийнее. Поэтому донор обязан быть похож по
+    /// калорийности и по раскладке макросов: витамины берутся у того же
+    /// вещества, а не у однокоренного слова.
+    static func donors(forName name: String, caloriesPer100g: Int,
+                       macrosPer100g: Macros, limit: Int = 3) -> [CatalogFood] {
         let words = normalize(name)
             .split(separator: " ")
             .map(String.init)
-            .filter { $0.count >= 3 }
-        guard let key = words.max(by: { $0.count < $1.count }) else { return [] }
-        return search(key, limit: limit).filter { !$0.micronutrients.isEmpty }
+            .filter { $0.count >= 3 && !noiseWords.contains($0) && Int($0) == nil }
+        guard !words.isEmpty else { return [] }
+
+        var scored: [(rank: Int, length: Int, shortest: Int, food: CatalogFood)] = []
+        for entry in index where !entry.food.micronutrients.isEmpty {
+            var best: (rank: Int, length: Int)?
+            for word in words {
+                guard let rank = rank(entry: entry, needle: word) else { continue }
+                let candidate = (rank: rank, length: -word.count)
+                if best == nil || candidate < best! { best = candidate }
+            }
+            guard let best, fits(calories: caloriesPer100g, macros: macrosPer100g, donor: entry.food)
+            else { continue }
+            scored.append((best.rank, best.length, entry.names.map(\.count).min() ?? 0, entry.food))
+        }
+        scored.sort {
+            if $0.rank != $1.rank { return $0.rank < $1.rank }
+            if $0.length != $1.length { return $0.length < $1.length }
+            if $0.shortest != $1.shortest { return $0.shortest < $1.shortest }
+            return $0.food.id < $1.food.id
+        }
+        return scored.prefix(limit).map(\.food)
+    }
+
+    /// Та же ли это еда по цифрам.
+    ///
+    /// Калорийность — грубое сито: у похожих продуктов она расходится на
+    /// проценты, у случайно совпавших — в разы. Раскладка макросов ловит
+    /// остальное: сравниваем доли калорий, а не граммы, потому что жир даёт
+    /// вдвое больше энергии и на граммах выглядел бы наравне с углеводами.
+    ///
+    /// Своей калорийности может и не быть — тогда сита нет: у продукта,
+    /// заведённого без чисел, и витамины взять не с чем.
+    static func fits(calories: Int, macros: Macros, donor: CatalogFood,
+                     caloriesTolerance: Double = 0.25,
+                     macroTolerance: Double = 0.5) -> Bool {
+        if calories > 0,
+           abs(Double(donor.kcal - calories)) / Double(calories) > caloriesTolerance {
+            return false
+        }
+        guard let own = macroShares(macros), let theirs = macroShares(donor.macrosPer100g)
+        else { return true }
+        let distance = abs(own.protein - theirs.protein)
+            + abs(own.fat - theirs.fat)
+            + abs(own.carbs - theirs.carbs)
+        return distance <= macroTolerance
+    }
+
+    /// Доли калорий по макросам. Пусто, когда макросов нет вовсе.
+    private static func macroShares(_ macros: Macros) -> Macros? {
+        let total = macros.protein * MacroTargets.kcalPerProteinGram
+            + macros.fat * MacroTargets.kcalPerFatGram
+            + macros.carbs * MacroTargets.kcalPerCarbGram
+        guard total > 0 else { return nil }
+        return Macros(protein: macros.protein * MacroTargets.kcalPerProteinGram / total,
+                      fat: macros.fat * MacroTargets.kcalPerFatGram / total,
+                      carbs: macros.carbs * MacroTargets.kcalPerCarbGram / total)
+    }
+
+    /// Продукты каталога, у которых есть витамины, — для выбора донора руками.
+    ///
+    /// Без проверки по цифрам: человек знает про свою еду больше, чем мы, и
+    /// если он выбрал этот продукт, спорить не о чем. Калорийность донора
+    /// показываем рядом, чтобы выбор был зрячим.
+    static func vitaminSources(matching query: String, limit: Int = 6) -> [CatalogFood] {
+        let needle = normalize(query)
+        guard !needle.isEmpty else { return [] }
+        return search(needle, limit: limit * 4).filter { !$0.micronutrients.isEmpty }.prefix(limit).map { $0 }
     }
 
     private static func rank(entry: Entry, needle: String) -> Int? {

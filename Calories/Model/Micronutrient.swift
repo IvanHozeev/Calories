@@ -154,6 +154,15 @@ nonisolated struct Micronutrients: Codable, Equatable {
         return result
     }
 
+    /// Есть ли здесь настоящие витамины и минералы.
+    ///
+    /// Клетчатка не в счёт: её вписывают с упаковки, и продукт с одной
+    /// клетчаткой про витамины по-прежнему ничего не знает — значит одолжить
+    /// их ему всё ещё можно.
+    var hasVitamins: Bool {
+        Micronutrient.allCases.contains { $0 != .fiber && self[$0] != nil }
+    }
+
     /// Нутриенты порции по составу на сто грамм.
     func portion(grams: Double) -> Micronutrients {
         times(grams / 100)

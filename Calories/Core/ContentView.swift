@@ -57,19 +57,6 @@ struct ContentView: View {
         }
     }
 
-    /// День по приёмам: окна, их калории и что уже съедено.
-    private var todaySlots: [MealSchedule.Slot] {
-        let now = Date()
-        return MealSchedule.slots(.init(
-            wake: mealSchedule.today(mealSchedule.wake, now: now),
-            sleep: mealSchedule.today(mealSchedule.sleep, now: now),
-            mealCount: mealSchedule.count,
-            dailyGoal: store.adaptedTodayGoal,
-            entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-            now: now
-        ))
-    }
-
     /// Копия, к которой надо прокрутить список. Сбрасывается сразу после
     /// прокрутки: это событие, а не состояние.
     @State private var copiedEntryID: UUID?
@@ -121,7 +108,8 @@ struct ContentView: View {
                             fatTarget: store.fatTarget,
                             carbsTarget: store.carbsTarget,
                             weightKg: store.weightKg,
-                            onOpen: { showingDayNutrition = true }
+                            onOpen: { showingDayNutrition = true },
+                            focus: store.focusMacro
                         )
                         
                         // Экран читается как отъезд камеры: кольцо и макросы —
@@ -130,8 +118,12 @@ struct ContentView: View {
                         // неделя позади. Раньше план стоял выше приёмов, хотя
                         // в него заходят раз в неделю, а на ближайший приём
                         // смотрят по нескольку раз в день.
-                        if mealSchedule.isEnabled, !todaySlots.isEmpty {
-                            MealScheduleStrip(slots: todaySlots) { showingMealSchedule = true }
+                        if mealSchedule.isEnabled, !store.todaySlots.isEmpty {
+                            MealScheduleStrip(slots: store.todaySlots,
+                                              remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
+                                              dailyGoal: store.adaptedTodayGoal) {
+                                showingMealSchedule = true
+                            }
                         }
 
                         // Отмеченный день голодания — не строка в настройках, а
@@ -549,6 +541,16 @@ struct ContentView: View {
             // старт), и во время работы — забираем его в обоих случаях.
             .task { consumeQuickAction(quickActions.pending) }
             .onChange(of: quickActions.pending) { _, action in consumeQuickAction(action) }
+            // Закрытие макроса — событие, а не перекраска.
+            //
+            // Цвет приложения идёт за недобранным макросом, и без отклика его
+            // смена посреди дня читается как сбой: вот всё было бирюзовым, а
+            // стало коралловым. Короткий тук говорит, что это сделал человек,
+            // а не приложение сломалось.
+            .onChange(of: store.focusMacro) { oldValue, newValue in
+                guard oldValue != nil, newValue != oldValue else { return }
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
             .onChange(of: store.consumedToday) { oldValue, newValue in
                 let goal = store.adaptedTodayGoal
                 if oldValue < goal && newValue >= goal {

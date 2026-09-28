@@ -16,6 +16,12 @@ struct MacrosCard: View {
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
     /// между собой было нельзя, а витаминам в таком формате места нет вовсе.
     var onOpen: () -> Void = {}
+    /// Какой макрос сейчас ведущий — тот, что ещё не закрыт.
+    ///
+    /// Нужен не для расчёта, а для внимания: колонка ведущего чуть заметнее,
+    /// а закрытие макроса видно как событие — иначе смена цвета по всему
+    /// приложению читается как сбой, пока не поймаешь правило.
+    var focus: MacroKind? = nil
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -35,6 +41,9 @@ struct MacrosCard: View {
                 }
                 // Полоски ходят вместе с дугами кольца, той же пружиной.
                 .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
+                // Смена ведущего макроса — отдельное, более медленное
+                // движение: это смена смысла, а не изменение числа.
+                .animation(.easeInOut(duration: 0.5), value: focus)
                 // Шеврон как у строки плана: без него непонятно, что плашка
                 // куда-то ведёт.
                 Image(systemName: "chevron.right")
@@ -53,10 +62,13 @@ struct MacrosCard: View {
     private func macroColumn(_ kind: MacroKind, value: Double, color: Color) -> some View {
         let target = target(for: kind)
         let progress = target.map { $0 > 0 ? min(value / $0, 1) : 0 } ?? 0
+        let isLeading = focus == kind
         return VStack(alignment: .leading, spacing: 3) {
             Text(LocalizedStringKey(kind.title))
                 .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
+                // Подпись ведущего макроса — его цветом: приложение
+                // подсказывает, куда смотреть, не добавляя ни строчки текста.
+                .foregroundStyle(isLeading ? color : Color.secondary.opacity(0.6))
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(String(format: "%.0f", value))
                     .font(.app(.subheadline, weight: .semibold))

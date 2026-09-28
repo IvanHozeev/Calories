@@ -21,36 +21,51 @@ enum OpenFoodService {
         return URLSession(configuration: config)
     }()
 
-    private struct SearchResponse: Decodable {
-        let products: [Product]
+    /// Что из состава Open Food Facts умеет отдавать и в каком поле.
+    ///
+    /// Значения в полях `*_100g` нормализованы в граммы — натрий 0.0428
+    /// означает 42.8 мг, — а мы храним минералы в миллиграммах, а витамины A,
+    /// D, B12, фолаты и селен в микрограммах. Отсюда множители.
+    private static let offNutrients: [(key: String, nutrient: Micronutrient)] = [
+        ("fiber_100g", .fiber),
+        ("vitamin-a_100g", .vitaminA), ("vitamin-c_100g", .vitaminC),
+        ("vitamin-d_100g", .vitaminD), ("vitamin-e_100g", .vitaminE),
+        ("vitamin-b6_100g", .vitaminB6), ("vitamin-b12_100g", .vitaminB12),
+        ("vitamin-b9_100g", .folate), ("folates_100g", .folate),
+        ("calcium_100g", .calcium), ("iron_100g", .iron),
+        ("magnesium_100g", .magnesium), ("zinc_100g", .zinc),
+        ("potassium_100g", .potassium), ("sodium_100g", .sodium),
+        ("selenium_100g", .selenium),
+    ]
 
-        struct Product: Decodable {
-            let productName: String?
-            let nutriments: Nutriments?
-
-            struct Nutriments: Decodable {
-                let energyKcal100g: Double?
-                let proteins100g: Double?
-                let fat100g: Double?
-                let carbohydrates100g: Double?
-                /// Клетчатку Open Food Facts знает у большинства товаров —
-                /// в отличие от витаминов, которых там почти нет.
-                let fiber100g: Double?
-
-                enum CodingKeys: String, CodingKey {
-                    case energyKcal100g = "energy-kcal_100g"
-                    case proteins100g = "proteins_100g"
-                    case fat100g = "fat_100g"
-                    case carbohydrates100g = "carbohydrates_100g"
-                    case fiber100g = "fiber_100g"
-                }
-            }
-
-            enum CodingKeys: String, CodingKey {
-                case productName = "product_name"
-                case nutriments
-            }
+    /// Состав с этикетки: всё, что производитель указал.
+    ///
+    /// Раньше отсюда забиралась одна клетчатка, хотя в ответе часто лежат
+    /// натрий, кальций, железо, витамины C и D — их на упаковке указывают по
+    /// закону. Это данные с этикетки, то есть измерение, а не оценка.
+    ///
+    /// Нули не берём. В Open Food Facts ноль чаще значит «импортёр заполнил
+    /// поле», а не «в продукте этого нет»: у соуса из помидоров витамин A
+    /// стоит нулём, хотя каротин там есть. Пустое место честнее нуля — на нуле
+    /// день насчитал бы дефицит там, где данных нет.
+    static func micronutrients(from nutriments: [String: Any]) -> Micronutrients {
+        var result = Micronutrients()
+        for (key, nutrient) in offNutrients {
+            guard result[nutrient] == nil,
+                  let grams = nutriments[key] as? Double, grams > 0 else { continue }
+            let amount = nutrient == .fiber ? grams : grams * nutrient.gramsMultiplier
+            // Заведомая чушь бывает: у части товаров состав вписан в граммах
+            // на порцию или перепутана единица, и тогда «кальций 40 000 мг»
+            // приезжает как правда.
+            guard amount <= nutrient.plausibleMaximumPer100g else { continue }
+            result = result.setting(nutrient, to: amount)
         }
+        // Соль на упаковке пишут чаще натрия: это одно и то же вещество,
+        // пересчитанное по массе хлорида натрия.
+        if result[.sodium] == nil, let salt = nutriments["salt_100g"] as? Double, salt > 0 {
+            result = result.setting(.sodium, to: salt / 2.5 * 1000)
+        }
+        return result
     }
 
     /// Текстовый поиск. Основным источником стал USDA — он знает микронутриенты, —
@@ -74,21 +89,29 @@ enum OpenFoodService {
 
     /// Разбор ответа поиска — отдельно от запроса, чтобы его можно было
     /// проверить тестом: у сетевого метода проверяема только подпись.
+    ///
+    /// Разбираем словарём, а не типом: набор веществ у товаров разный, и
+    /// перечислять полтора десятка необязательных полей в `Codable` значит
+    /// писать одно и то же трижды — здесь, в штрихкоде и в ключах.
     static func parseSearch(_ data: Data) throws -> [FoodItem] {
-        let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
-        return decoded.products.compactMap { product -> FoodItem? in
-            let name = (product.productName ?? "").trimmingCharacters(in: .whitespaces)
-            guard !name.isEmpty, let kcal = product.nutriments?.energyKcal100g, kcal > 0 else { return nil }
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let products = json["products"] as? [[String: Any]]
+        else { throw ServiceError.unavailable }
+        return products.compactMap { product -> FoodItem? in
+            let name = (product["product_name"] as? String ?? "")
+                .trimmingCharacters(in: .whitespaces)
+            let nutriments = product["nutriments"] as? [String: Any] ?? [:]
+            let kcal = nutriments["energy-kcal_100g"] as? Double ?? 0
+            guard !name.isEmpty, kcal > 0 else { return nil }
             let item = FoodItem(
                 name: name,
                 caloriesPer100g: Int(kcal.rounded()),
-                protein: product.nutriments?.proteins100g ?? 0,
-                fat: product.nutriments?.fat100g ?? 0,
-                carbs: product.nutriments?.carbohydrates100g ?? 0
+                protein: nutriments["proteins_100g"] as? Double ?? 0,
+                fat: nutriments["fat_100g"] as? Double ?? 0,
+                carbs: nutriments["carbohydrates_100g"] as? Double ?? 0
             )
-            if let fiber = product.nutriments?.fiber100g, fiber > 0 {
-                item.micronutrients = Micronutrients([.fiber: fiber])
-            }
+            let micronutrients = micronutrients(from: nutriments)
+            if !micronutrients.isEmpty { item.micronutrients = micronutrients }
             return item
         }
     }
@@ -109,11 +132,7 @@ enum OpenFoodService {
 
     /// Разбор ответа по штрихкоду.
     ///
-    /// Клетчатка забирается так же, как в поиске: она здесь и есть главный
-    /// источник — витаминов у Open Food Facts почти нет, а клетчатку он знает
-    /// у большинства товаров. Раньше её брал только текстовый поиск, и
-    /// отсканированный товар приходил в дневник без неё, хотя в ответе она
-    /// лежала.
+    /// Состав забирается так же, как в поиске, — всё, что указал производитель.
     static func parseProduct(_ data: Data, barcode: String) -> BarcodeProduct? {
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               (json["status"] as? Int) == 1,
@@ -128,17 +147,13 @@ enum OpenFoodService {
         // Без калорийности продукт бесполезен: дневник считает именно её.
         guard kcal > 0 else { return nil }
 
-        var micronutrients = Micronutrients()
-        if let fiber = nutriments["fiber_100g"] as? Double, fiber > 0 {
-            micronutrients = Micronutrients([.fiber: fiber])
-        }
         return BarcodeProduct(
             name: name.isEmpty ? String(format: String(localized: "Продукт %@"), barcode) : name,
             caloriesPer100g: Int(kcal.rounded()),
             protein: nutriments["proteins_100g"] as? Double ?? 0,
             fat: nutriments["fat_100g"] as? Double ?? 0,
             carbs: nutriments["carbohydrates_100g"] as? Double ?? 0,
-            micronutrients: micronutrients
+            micronutrients: micronutrients(from: nutriments)
         )
     }
 }

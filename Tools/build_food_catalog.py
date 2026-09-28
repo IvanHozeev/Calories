@@ -39,6 +39,7 @@ CORE = os.path.join(ROOT, "Tools", "food_core.txt")
 TERMS = os.path.join(ROOT, "Tools", "food_terms_ru.json")
 OUT = os.path.join(ROOT, "Calories", "Resources", "FoodCatalog.json")
 LINKS = os.path.join(ROOT, "Tools", "food_core_usda.tsv")
+ALIASES = os.path.join(ROOT, "Tools", "food_aliases.txt")
 RECIPES = os.path.join(ROOT, "Tools", "dish_recipes.txt")
 
 CATEGORIES = {"meat", "fish", "dairy", "legumes", "grains", "dishes",
@@ -161,6 +162,27 @@ def read_core():
                 food["g"] = float(grams)
             foods.append(food)
     return foods, problems
+
+
+def read_aliases():
+    """Синонимы для поиска: иврит и другие названия того же продукта.
+
+    Нужны потому, что дневник ведут на языке упаковки: у израильского товара с
+    каталогом не совпадает ни одно слово, и найти его нельзя ни поиском, ни
+    подбором донора витаминов."""
+    aliases = {}
+    if not os.path.exists(ALIASES):
+        return aliases
+    with open(ALIASES, encoding="utf-8") as handle:
+        for line in handle:
+            line = line.strip()
+            if not line or line.startswith("#") or "|" not in line:
+                continue
+            name, rest = line.split("|", 1)
+            words = [x.strip() for x in rest.split(",") if x.strip()]
+            if words:
+                aliases.setdefault(name.strip(), []).extend(words)
+    return aliases
 
 
 def usda_category(description):
@@ -374,6 +396,14 @@ def main():
     args = parser.parse_args()
 
     core, problems = read_core()
+    aliases = read_aliases()
+    unknown = sorted(set(aliases) - {item["en"] for item in core})
+    if unknown:
+        problems.append("синонимы указаны для несуществующих позиций: "
+                        + ", ".join(unknown))
+    for item in core:
+        if item["en"] in aliases:
+            item["a"] = aliases[item["en"]]
     if problems:
         print("Проблемы в Tools/food_core.txt:", file=sys.stderr)
         for problem in problems:

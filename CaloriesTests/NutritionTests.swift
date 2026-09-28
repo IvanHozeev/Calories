@@ -129,6 +129,37 @@ struct MicronutrientDayTests {
         #expect(day.coveredCalories == 200)
     }
 
+    /// Состав, вписанный с упаковки, — измерение: день по нему посчитан целиком.
+    @Test func aCompositionTypedFromThePackageCountsInFull() {
+        store.addCustomFood(name: "Протеин мой", caloriesPer100g: 388,
+                            protein: 78, fat: 5, carbs: 6, category: .dairy,
+                            micronutrients: Micronutrients([.calcium: 400, .sodium: 300,
+                                                            .vitaminB6: 0.8]))
+        store.add(name: "Протеин мой", calories: 388, macros: Macros(protein: 78, fat: 5, carbs: 6),
+                  grams: 100)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.coveredCalories == 388, "Этикетка — не оценка")
+        #expect(!day.hasEstimates)
+        #expect(day.totals[.calcium] == 400)
+    }
+
+    /// Перенесённый с похожей еды — оценка: он стоит шесть десятых дня, и день
+    /// об этом говорит.
+    @Test func aBorrowedCompositionCountsForLess() {
+        store.addCustomFood(name: "Творог мой", caloriesPer100g: 121,
+                            protein: 18, fat: 5, carbs: 3.4, category: .dairy,
+                            micronutrients: Micronutrients([.calcium: 120, .vitaminB12: 0.4]),
+                            catalogID: 1865964, micronutrientsAreEstimated: true)
+        store.add(name: "Творог мой", calories: 121, macros: Macros(protein: 18, fat: 5, carbs: 3.4),
+                  grams: 100)
+
+        let day = store.micronutrients(on: Date())
+        #expect(day.coveredCalories == Int((121 * NutrientProfile.estimateCoverage).rounded()))
+        #expect(day.hasEstimates)
+        #expect(day.estimatedCalories == 121)
+    }
+
     @Test func fiberIsCountedOnItsOwnCoverageNotTheVitaminOne() {
         // Товар из Open Food Facts приносит одну клетчатку: витаминов там нет
         // и не будет. Раньше такой день прятал клетчатку вместе с витаминами,
@@ -666,6 +697,67 @@ struct OpenFoodParsingTests {
 
         #expect(items.count == 1, "Без имени или без калорий продукт в список не идёт")
         #expect(items.first?.micronutrients[.fiber] == 10)
+    }
+
+    /// С этикетки забираем всё, что производитель указал, а не одну клетчатку:
+    /// натрий, кальций, железо и витамины на упаковке пишут по закону.
+    @Test func theWholeLabelCompositionIsTakenNotJustFiber() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Молоко овсяное",
+         "nutriments": {"energy-kcal_100g": 52, "proteins_100g": 1, "fat_100g": 1.5,
+                        "carbohydrates_100g": 8, "calcium_100g": 0.12,
+                        "vitamin-d_100g": 0.0000015, "vitamin-b12_100g": 0.00000038,
+                        "sodium_100g": 0.0428}}}
+        """), barcode: "7290000000002")
+
+        // Open Food Facts отдаёт состав в граммах: 0.12 г кальция — это 120 мг,
+        // а 1.5 мкг витамина D приезжают как 0.0000015 г.
+        #expect(product?.micronutrients[.calcium] == 120)
+        #expect(abs((product?.micronutrients[.vitaminD] ?? 0) - 1.5) < 0.001)
+        #expect(abs((product?.micronutrients[.sodium] ?? 0) - 42.8) < 0.001)
+        #expect(abs((product?.micronutrients[.vitaminB12] ?? 0) - 0.38) < 0.001)
+    }
+
+    /// Соль на упаковке пишут чаще натрия — это одно и то же вещество.
+    @Test func saltStandsInForSodium() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Хумус",
+         "nutriments": {"energy-kcal_100g": 185, "salt_100g": 1.25}}}
+        """), barcode: "3")
+        #expect(abs((product?.micronutrients[.sodium] ?? 0) - 500) < 0.001)
+    }
+
+    /// Ноль в Open Food Facts чаще значит «импортёр заполнил поле», а не «в
+    /// продукте этого нет»: у томатного соуса витамин A стоит нулём, хотя
+    /// каротин там есть. На нуле день насчитал бы дефицит из ничего.
+    @Test func zerosFromTheImporterAreNotData() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Соус",
+         "nutriments": {"energy-kcal_100g": 90, "vitamin-a_100g": 0, "iron_100g": 0,
+                        "sodium_100g": 0.384}}}
+        """), barcode: "4")
+        #expect(product?.micronutrients[.vitaminA] == nil)
+        #expect(product?.micronutrients[.iron] == nil)
+        #expect(product?.micronutrients[.sodium] != nil)
+    }
+
+    /// Перепутанная единица приезжает как правда: кальций на порцию, вписанный
+    /// в поле «на сто грамм», даёт сорок граммов кальция.
+    @Test func anImpossibleAmountIsRefused() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Добавка",
+         "nutriments": {"energy-kcal_100g": 300, "calcium_100g": 40}}}
+        """), barcode: "5")
+        #expect(product?.micronutrients[.calcium] == nil, "40 г кальция на сто грамм не бывает")
+    }
+
+    /// Соль и кальций с этикетки — не витамины: день по ним не считается
+    /// изученным, иначе приложение сказало бы, что витаминов в еде нет.
+    @Test func mineralsAloneDoNotDeclareTheDayStudied() {
+        let minerals = NutrientProfile(per100g: Micronutrients([.sodium: 400, .calcium: 120]))
+        #expect(!minerals.hasVitamins)
+        let withVitamin = NutrientProfile(per100g: Micronutrients([.sodium: 400, .vitaminD: 1.5]))
+        #expect(withVitamin.hasVitamins)
     }
 }
 

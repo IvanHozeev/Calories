@@ -31,12 +31,19 @@ nonisolated struct CatalogFood: Codable, Identifiable, Hashable, Sendable {
     /// считается по рецепту из продуктов каталога, и часть ингредиентов может
     /// быть без данных. У продукта состав либо есть целиком, либо его нет.
     let microCoverage: Double?
+    /// Названия того же продукта на других языках — для поиска, не для показа.
+    ///
+    /// Дневник ведут на языке упаковки: у израильского товара с каталогом не
+    /// совпадает ни одно слово, и «אבקת חלבון» не находило ничего. Синонимы
+    /// живут в `Tools/food_aliases.txt` и в каталог попадают сборкой.
+    let aliases: [String]?
 
     /// Ключи короткие: на двух тысячах позиций разница в размере файла
     /// заметная, а читают его не глазами.
     private enum CodingKeys: String, CodingKey {
         case id = "i", ru, en, kcal = "k", protein = "p", fat = "f", carbs = "c"
         case category = "cat", grams = "g", micro = "m", microCoverage = "mc"
+        case aliases = "a"
     }
 
     var foodCategory: FoodCategory { FoodCategory(rawValue: category) ?? .other }
@@ -135,7 +142,7 @@ nonisolated enum FoodCatalog {
             // В индекс идут оба названия и то, что человек видит на экране:
             // француз ищет по французскому названию, а русский с тем же успехом
             // набирает и «курица», и «chicken».
-            let names = Set([food.ru, food.en, food.localizedName]
+            let names = Set(([food.ru, food.en, food.localizedName] + (food.aliases ?? []).map(Optional.some))
                 .compactMap { $0 }
                 .map(normalize)
                 .filter { !$0.isEmpty })

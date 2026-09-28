@@ -35,7 +35,16 @@ struct NewFoodSheet: View {
     /// магазина с каталогом не совпадает ни одно слово, а человек прекрасно
     /// знает, что его «אבקת חלבון» — это сывороточный протеин.
     @State private var donorQuery = ""
-    private enum Field: Hashable { case search, name, calories, protein, fat, carbs, fiber, donor }
+    /// Вещества, вписанные с упаковки: на сто грамм, как их и печатают.
+    ///
+    /// Это единственный точный источник состава для добавок и магазинных
+    /// товаров: перенос с похожей еды ошибается примерно в полтора раза и не
+    /// видит обогащения, а на упаковке написано то, что в банке.
+    @State private var entered: [Micronutrient: String] = [:]
+    private enum Field: Hashable {
+        case search, name, calories, protein, fat, carbs, fiber, donor
+        case nutrient(Micronutrient)
+    }
     @FocusState private var focusedField: Field?
 
     @State private var searchQuery = ""
@@ -44,8 +53,8 @@ struct NewFoodSheet: View {
 
     private var isEditing: Bool { editingFood != nil }
 
-    /// Витамины и минералы показываем от источника: у своих продуктов их нет,
-    /// у продуктов базы бывают. Вводить их руками негде и незачем.
+    /// Состав продукта: вписанное с упаковки, перенесённое с похожей еды или
+    /// найденное по названию — в этом порядке старшинства.
     private var micronutrients: Micronutrients {
         var base = Micronutrients()
         if !linkedMicronutrients.isEmpty {
@@ -55,11 +64,16 @@ struct NewFoodSheet: View {
         } else {
             base = matchedInCatalog ?? Micronutrients()
         }
-        // Введённая руками клетчатка перекрывает найденную: человек смотрит
-        // на упаковку того, что купил, а совпадение по названию — догадка.
-        let entered = fiber.decimalValueOrZero
-        guard entered > 0 else { return base }
-        return base.setting(.fiber, to: entered)
+        // Вписанное руками перекрывает найденное: человек смотрит на упаковку
+        // того, что купил, а перенос с похожей еды — оценка.
+        for (nutrient, text) in self.entered {
+            let amount = text.decimalValueOrZero
+            guard amount > 0 else { continue }
+            base = base.setting(nutrient, to: amount)
+        }
+        let fiberEntered = fiber.decimalValueOrZero
+        guard fiberEntered > 0 else { return base }
+        return base.setting(.fiber, to: fiberEntered)
     }
 
     /// Состав продукта базы, чьё название совпало с введённым.
@@ -145,6 +159,23 @@ struct NewFoodSheet: View {
             }
         }
         .buttonStyle(.plain)
+    }
+
+    /// Вписанные вещества в том порядке, в каком они перечислены у нутриентов:
+    /// клетчатка первая, дальше витамины, дальше минералы. Так же они стоят и в
+    /// разборе дня, и порядок не должен зависеть от того, что ввели раньше.
+    private var enteredNutrients: [Micronutrient] {
+        Micronutrient.allCases.filter { entered[$0] != nil }
+    }
+
+    /// Чего ещё не вписали. Клетчатка не в списке: у неё своё поле рядом с
+    /// углеводами, потому что на упаковке она стоит там же.
+    private var missingNutrients: [Micronutrient] {
+        Micronutrient.allCases.filter { $0 != .fiber && entered[$0] == nil }
+    }
+
+    private func binding(for nutrient: Micronutrient) -> Binding<String> {
+        Binding(get: { entered[nutrient] ?? "" }, set: { entered[nutrient] = $0 })
     }
 
     private var servingGramsValue: Double {
@@ -316,6 +347,43 @@ struct NewFoodSheet: View {
                     }
                 }
 
+                // Состав с упаковки — руками. Перенос с похожей еды ошибается
+                // примерно в полтора раза и слеп к обогащению, а у добавок и
+                // магазинных товаров всё напечатано на боку банки.
+                Section {
+                    ForEach(enteredNutrients, id: \.self) { nutrient in
+                        HStack {
+                            TextField(nutrient.title, text: binding(for: nutrient))
+                                .keyboardType(.decimalPad)
+                                .focused($focusedField, equals: .nutrient(nutrient))
+                            Text(verbatim: nutrient.unit)
+                                .foregroundStyle(.secondary)
+                        }
+                        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) { entered[nutrient] = nil } label: {
+                                Label("Убрать", systemImage: "trash")
+                            }
+                        }
+                    }
+                    if !missingNutrients.isEmpty {
+                        Menu {
+                            ForEach(missingNutrients, id: \.self) { nutrient in
+                                Button(nutrient.title) {
+                                    entered[nutrient] = ""
+                                    focusedField = .nutrient(nutrient)
+                                }
+                            }
+                        } label: {
+                            Label("Добавить вещество", systemImage: "plus.circle")
+                        }
+                    }
+                } header: {
+                    Text("Состав с упаковки")
+                } footer: {
+                    explain("На сто грамм, как печатают на этикетке. Вписанное точнее любого справочника и перекрывает перенесённое.").map { Text($0) }
+                }
+
                 Section {
                     HStack {
                         TextField("100", text: $servingGrams)
@@ -476,6 +544,15 @@ struct NewFoodSheet: View {
                     // выскакивает сразу после перехода и закрывает половину экрана.
                     linkedCatalogID = food.catalogID
                     linkedIsEstimate = food.micronutrientsAreEstimated
+                    // Свой состав показываем в полях: его вписывали руками или
+                    // принесли с этикетки, и править его надо там же. А
+                    // перенесённый в поля не тянем — он не измерение.
+                    if food.catalogID == nil {
+                        for nutrient in Micronutrient.allCases where nutrient != .fiber {
+                            guard let amount = food.micronutrients[nutrient], amount > 0 else { continue }
+                            entered[nutrient] = String(format: "%g", amount)
+                        }
+                    }
                     if let id = food.catalogID,
                        let source = FoodCatalog.all.first(where: { $0.id == id }) {
                         linkedSourceName = source.localizedName

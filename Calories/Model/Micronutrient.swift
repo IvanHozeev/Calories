@@ -70,6 +70,66 @@ nonisolated enum Micronutrient: String, CaseIterable, Identifiable, Codable {
         case never
     }
 
+    /// Во что превращать граммы: Open Food Facts отдаёт состав в граммах, а мы
+    /// храним минералы в миллиграммах, а витамины A, D, B12, фолаты и селен —
+    /// в микрограммах.
+    var gramsMultiplier: Double {
+        switch unitScale {
+        case .micrograms: return 1_000_000
+        case .milligrams: return 1_000
+        case .grams: return 1
+        }
+    }
+
+    /// Больше этого на сто грамм не бывает ни у одной еды.
+    ///
+    /// Нужен против перепутанных единиц: у части товаров в Open Food Facts
+    /// состав вписан на порцию или в других единицах, и тогда «кальций
+    /// 40 000 мг» приезжает как правда. Порог щедрый — это сито от чуши, а не
+    /// проверка правдоподобия.
+    var plausibleMaximumPer100g: Double {
+        switch self {
+        case .fiber:      return 100
+        case .vitaminA:   return 30_000
+        case .vitaminC:   return 5_000
+        case .vitaminD:   return 2_000
+        case .vitaminE:   return 1_000
+        case .vitaminB6:  return 100
+        case .vitaminB12: return 1_000
+        case .folate:     return 10_000
+        case .calcium:    return 5_000
+        case .iron:       return 500
+        case .magnesium:  return 3_000
+        case .zinc:       return 500
+        case .potassium:  return 10_000
+        case .sodium:     return 40_000
+        case .selenium:   return 5_000
+        }
+    }
+
+    /// В каких единицах хранится количество.
+    private var unitScale: UnitScale {
+        switch self {
+        case .vitaminA, .vitaminD, .vitaminB12, .folate, .selenium: return .micrograms
+        case .vitaminC, .vitaminE, .vitaminB6, .calcium, .iron,
+             .magnesium, .zinc, .potassium, .sodium: return .milligrams
+        case .fiber: return .grams
+        }
+    }
+
+    private enum UnitScale { case micrograms, milligrams, grams }
+
+    /// Витамин, а не минерал. По этому признаку день решает, можно ли считать
+    /// состав записи изученным: минералы с этикетки про витамины не говорят.
+    var isVitamin: Bool {
+        switch self {
+        case .vitaminA, .vitaminC, .vitaminD, .vitaminE, .vitaminB6, .vitaminB12, .folate:
+            return true
+        case .fiber, .calcium, .iron, .magnesium, .zinc, .potassium, .sodium, .selenium:
+            return false
+        }
+    }
+
     /// Единица, в которой хранится и показывается количество.
     var unit: String {
         switch self {

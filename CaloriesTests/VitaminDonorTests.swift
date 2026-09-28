@@ -117,4 +117,23 @@ struct VitaminDonorTests {
         #expect(day.hasEstimates)
         #expect(!MicronutrientDay.empty.hasEstimates)
     }
+
+    /// Дневник ведут на языке упаковки. У израильского товара с каталогом не
+    /// совпадает ни одно слово, поэтому у позиций есть синонимы — в поиске они
+    /// работают, а на экране не показываются.
+    @Test func hebrewNamesFindTheirFood() throws {
+        #expect(FoodCatalog.search("אבקת חלבון").first?.ru == "Протеин сывороточный")
+        #expect(FoodCatalog.search("חלב").contains { $0.ru?.hasPrefix("Молоко") == true })
+        #expect(FoodCatalog.search("שיבולת שועל").first?.ru == "Овсяные хлопья сухие")
+        #expect(FoodCatalog.search("תמרים").first?.ru == "Финики")
+        // Показываем по-прежнему название на языке интерфейса, а не синоним.
+        let coffee = try #require(FoodCatalog.search("קפה").first)
+        #expect(coffee.localizedName != "קפה")
+    }
+
+    /// Свой продукт на иврите теперь находит донора: раньше у «אבקת חלבון»
+    /// не совпадало с каталогом ни одно слово.
+    @Test func aHebrewLabelCanBorrowFromTheCatalogue() {
+        #expect(!donors("יוגורט טבעי", 60, 4.1, 3.2, 4.7, category: .dairy).isEmpty)
+    }
 }

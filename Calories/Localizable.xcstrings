@@ -15135,6 +15135,53 @@
         }
       }
     },
+    "Добавить вещество" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إضافة عنصر"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoff hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add a nutrient"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir un nutriente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un nutriment"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להוסיף רכיב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar um nutriente"
+          }
+        }
+      }
+    },
     "Добавить еду" : {
       "localizations" : {
         "ar" : {
@@ -26892,6 +26939,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Na manutenção não precisa de plano: a meta é o seu gasto, sem ritmo nem fim."
+          }
+        }
+      }
+    },
+    "На сто грамм, как печатают на этикетке. Вписанное точнее любого справочника и перекрывает перенесённое." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لكل مئة غرام، كما يُطبع على الملصق. ما تكتبه أدق من أي مرجع ويتجاوز ما نُقل من طعام مشابه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro hundert Gramm, so wie es auf dem Etikett steht. Eingetragenes ist genauer als jedes Nachschlagewerk und überschreibt Übernommenes."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Per hundred grams, the way the label prints it. What you enter beats any reference and overrides anything borrowed."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por cien gramos, como lo imprime la etiqueta. Lo que escribas supera cualquier tabla y reemplaza lo copiado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour cent grammes, comme sur l'étiquette. Ce que tu saisis vaut mieux que n'importe quelle table et remplace ce qui a été repris."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לכל מאה גרם, כפי שמודפס על התווית. מה שתזין מדויק מכל טבלה ודוחק את מה שהועתק."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por cem gramas, como vem impresso no rótulo. O que você escrever vale mais que qualquer tabela e substitui o que foi copiado."
           }
         }
       }
@@ -47368,6 +47462,53 @@
         }
       }
     },
+    "Состав с упаковки" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التركيب من العبوة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusammensetzung von der Packung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composition from the package"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composición del envase"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composition sur l'emballage"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרכב מהאריזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Composição da embalagem"
+          }
+        }
+      }
+    },
     "Состояние" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -51502,6 +51643,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Perto do mínimo. Serve por pouco tempo — no pico da definição, não a fase toda."
+          }
+        }
+      }
+    },
+    "Убрать" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إزالة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "להסיר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover"
           }
         }
       }

@@ -8,13 +8,25 @@ import SwiftUI
 /// и пропущенного.
 struct MealScheduleStrip: View {
     let slots: [MealSchedule.Slot]
+    /// Сколько осталось от дневной нормы и какова она сама — чтобы не
+    /// объявлять день закрытым, пока есть что есть.
+    var remainingToday: Int = 0
+    var dailyGoal: Int = 0
     var now: Date = Date()
     var onOpen: () -> Void
 
     private var next: MealSchedule.Slot? { MealSchedule.nextSlot(slots, now: now) }
 
     private var title: String {
-        guard let next else { return String(localized: "День закрыт") }
+        guard let next else {
+            // Приёмы кончились, а норма — нет: так бывает, если человек ел
+            // мало весь день. Говорить «день закрыт» в этот момент значит
+            // спорить с кольцом, где висит остаток.
+            guard MealSchedule.isDayClosed(remaining: remainingToday, goal: dailyGoal) else {
+                return String(format: String(localized: "Осталось %lld ккал"), remainingToday)
+            }
+            return String(localized: "День закрыт")
+        }
         // По названию, а не по номеру: «полдник» человек понимает сразу, а
         // «приём 4 из 5» заставляет пересчитывать, что это за еда.
         let name = String(localized: String.LocalizationValue(next.period.rawValue))
@@ -97,15 +109,7 @@ struct MealScheduleSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     private var slots: [MealSchedule.Slot] {
-        let now = Date()
-        return MealSchedule.slots(.init(
-            wake: settings.today(settings.wake, now: now),
-            sleep: settings.today(settings.sleep, now: now),
-            mealCount: settings.count,
-            dailyGoal: dailyGoal,
-            entries: entries,
-            now: now
-        ))
+        MealSchedule.slots(settings: settings, entries: entries, dailyGoal: dailyGoal)
     }
 
     var body: some View {

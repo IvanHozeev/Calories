@@ -178,6 +178,16 @@ enum MealSchedule {
     /// раскладываются по оставшимся приёмам, и человек видит новую цифру, а не
     /// узнаёт вечером, что «должен» ещё полторы тысячи.
 
+    /// Можно ли считать день закрытым.
+    ///
+    /// «День закрыт» при недоеденных пятистах килокалориях — это не итог, а
+    /// ошибка: приёмы кончились, а еда нет. Допуск тот же, что у дневной
+    /// нормы: два процента, но не меньше полусотни — попасть в норму точнее
+    /// невозможно, и требовать этого незачем.
+    static func isDayClosed(remaining: Int, goal: Int) -> Bool {
+        remaining <= max(50, Int((Double(goal) * 0.02).rounded()))
+    }
+
     /// Сколько нужно съесть, чтобы приём считался закрытым.
     ///
     /// Не ровно столько, сколько отведено: попасть в план до килокалории
@@ -323,5 +333,26 @@ enum MealSchedule {
     static func nextSlot(_ slots: [Slot], now: Date = Date()) -> Slot? {
         slots.first { $0.state == .current }
             ?? slots.first { $0.state == .upcoming && $0.period != .nightSnack }
+    }
+}
+
+extension MealSchedule {
+    /// Окна дня по настройкам расписания.
+    ///
+    /// `Input` собирался руками в пяти местах: на «Сегодня», в листе расписания,
+    /// дважды в добавлении еды и в разборе дня. Правила за один день менялись
+    /// трижды, и каждый раз приходилось вспоминать про все пять. Про подъём,
+    /// отбой и число приёмов знают сами настройки — снаружи остаётся сказать,
+    /// что съедено и сколько можно.
+    static func slots(settings: MealScheduleSettings,
+                      entries: [(date: Date, calories: Int)],
+                      dailyGoal: Int,
+                      now: Date = Date()) -> [Slot] {
+        slots(.init(wake: settings.today(settings.wake, now: now),
+                    sleep: settings.today(settings.sleep, now: now),
+                    mealCount: settings.count,
+                    dailyGoal: dailyGoal,
+                    entries: entries,
+                    now: now))
     }
 }

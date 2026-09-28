@@ -108,6 +108,18 @@ struct MealScheduleTests {
         #expect(try #require(MealSchedule.nextSlot(slots, now: at(12))).period == .lunch)
     }
 
+    /// «День закрыт» при недоеденных сотнях килокалорий — это не итог, а
+    /// спор с кольцом, где висит остаток.
+    @Test func theDayIsNotClosedWhileThereIsFoodLeft() {
+        #expect(!MealSchedule.isDayClosed(remaining: 500, goal: 2800))
+        #expect(!MealSchedule.isDayClosed(remaining: 120, goal: 2800))
+        // Попасть в норму до килокалории невозможно: допуск тот же, что у дня.
+        #expect(MealSchedule.isDayClosed(remaining: 40, goal: 2800))
+        #expect(MealSchedule.isDayClosed(remaining: 0, goal: 2800))
+        // У маленькой нормы процент вырождается — спасает нижняя граница.
+        #expect(MealSchedule.isDayClosed(remaining: 45, goal: 1200))
+    }
+
     /// Окно открывается раньше самого приёма — на середине пути от прошлого.
     /// Это нужно для засчёта съеденного, но звать к полднику за час двадцать
     /// до него нельзя.

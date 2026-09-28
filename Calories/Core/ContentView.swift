@@ -71,286 +71,14 @@ struct ContentView: View {
             ScrollViewReader { scroll in
             List {
                 Section {
-                    VStack(spacing: 24) {
-                        ProgressRing(
-                            consumed: store.consumedToday,
-                            goal: store.adaptedTodayGoal,
-                            macros: store.macrosToday,
-                            proteinTarget: store.proteinTarget,
-                            fatTarget: store.fatTarget,
-                            carbsTarget: store.carbsTarget,
-                            spinTicket: ringSpinTicket,
-                            pullAngle: Double(ringPull) * 1.4,
-                            onOpen: {
-                                entryAction = nil
-                                showingAdd = true
-                            }
-                        )
-                        .padding(.top)
-                        // Следим, насколько список стянут вниз: кольцо поворачивается
-                        // за пальцем. Покой — первое положение, которое увидели.
-                        .background {
-                            GeometryReader { geometry in
-                                Color.clear
-                                    .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
-                                        guard let resting = ringRestingY else {
-                                            ringRestingY = y
-                                            return
-                                        }
-                                        ringPull = max(0, y - resting)
-                                    }
-                            }
-                        }
-
-                        MacrosCard(
-                            macros: store.macrosToday,
-                            proteinTarget: store.proteinTarget,
-                            fatTarget: store.fatTarget,
-                            carbsTarget: store.carbsTarget,
-                            weightKg: store.weightKg,
-                            onOpen: { showingDayNutrition = true },
-                            focus: store.focusMacro
-                        )
-                        
-                        // Экран читается как отъезд камеры: кольцо и макросы —
-                        // сегодняшний день, дальше ближайший приём (часы),
-                        // голодание (ближайшие дни), план (недели вперёд) и
-                        // неделя позади. Раньше план стоял выше приёмов, хотя
-                        // в него заходят раз в неделю, а на ближайший приём
-                        // смотрят по нескольку раз в день.
-                        if mealSchedule.isEnabled, !store.todaySlots.isEmpty {
-                            MealScheduleStrip(slots: store.todaySlots,
-                                              remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                              dailyGoal: store.adaptedTodayGoal) {
-                                showingMealSchedule = true
-                            }
-                        }
-
-                        // Отмеченный день голодания — не строка в настройках, а
-                        // состояние сегодняшнего дня: пустой дневник в такой день
-                        // должен читаться как «так и задумано», а не как провал.
-                        // Голодание сегодня или в ближайшие три дня: подсказка к
-                        // месту — за пару дней про кофе, накануне про соль и воду,
-                        // в сам день про выход. Вся памятка — по нажатию.
-                        //
-                        // Выше недели: голодание — про сегодня и ближайшие дни,
-                        // а неделя про прошедшие. Внизу экрана, под неделей и
-                        // банком, подсказка про выход из поста попадалась на
-                        // глаза последней, когда она нужнее всего.
-                        if let hint = store.fastingHint() {
-                            FastingStrip(hint: hint) { showingFasting = true }
-                        }
-
-                        // Строка вместо карточки: план виден и открывается,
-                        // но не занимает полэкрана. Подробности — на его
-                        // собственном экране, куда ведёт и она, и кольцо.
-                        PlanStrip(
-                            store: store,
-                            onOpenPlan: { showingPlan = true },
-                            onShowPaywall: { showingPaywall = true }
-                        )
-
-                        // Неделя последней: это уже прошедшие дни, и открывают
-                        // их реже всего.
-                        WeekStrip(weeks: store.weekStripWeeks(),
-                                  onSelect: { selectedHistoryDay = $0 },
-                                  onShowAll: { showingActivity = true },
-                                  onShowWeek: { showingWeekReview = true })
-
-                        if store.calorieBankBonus != 0 {
-                            Button { showingBankInfo = true } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                                        .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
-                                    Text(store.calorieBankBonus > 0
-                                         ? "+\(store.calorieBankBonus) ккал из недели"
-                                         : "\(store.calorieBankBonus) ккал из недели")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .font(.app(.caption))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(.ultraThinMaterial, in: Capsule())
-                            }
-                            .buttonStyle(.plain)
-                            .popover(isPresented: $showingBankInfo) {
-                                CalorieBankPopover(
-                                    bonus: store.calorieBankBonus,
-                                    baseGoal: store.todayGoal,
-                                    adaptedGoal: store.adaptedTodayGoal
-                                )
-                                .presentationCompactAdaptation(.popover)
-                            }
-                        } else if !store.isPremium && store.plan == nil {
-                            Button { showingPaywall = true } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "lock.fill")
-                                        .foregroundStyle(.secondary)
-                                    Text("Банк калорий")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .font(.app(.caption))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(.ultraThinMaterial, in: Capsule())
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        if store.profile == nil {
-                            NavigationLink {
-                                SettingsView(store: store)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "person.crop.circle.badge.questionmark")
-                                        .font(.app(.footnote))
-                                    Text("Заполните профиль, чтобы рассчитать цель")
-                                        .font(.app(.caption))
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.app(.caption2))
-                                }
-                                .foregroundStyle(.blue)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(Color.blue.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                        } else if !store.hasWeighedToday {
-                            Button {
-                                todaySheet = .weight
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "figure.stand")
-                                        .font(.app(.footnote))
-                                    Text("Не забудь взвеситься сегодня")
-                                        .font(.app(.caption))
-                                    Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .font(.app(.caption2))
-                                }
-                                .foregroundStyle(.orange)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(Color.orange.opacity(0.08))
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                    summaryCards
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
                 }
                 .listSectionSeparator(.hidden)
 
-                if store.todayEntries.isEmpty {
-                    Section {
-                        VStack(spacing: 8) {
-                            Image(systemName: "tray")
-                                .font(.app(.largeTitle))
-                                .foregroundStyle(.secondary)
-                            Text("Пока ничего не добавлено")
-                                .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                        .listRowBackground(Color.clear)
-                    }
-                    .listSectionSeparator(.hidden)
-                } else {
-                    ForEach(store.groupedTodayEntries, id: \.period) { group in
-                        Section {
-                            ForEach(group.entries) { entry in
-                                NavigationLink(value: entry) {
-                                    EntryRow(entry: entry,
-                                             icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
-                                             micros: store.notableMicronutrients(for: entry))
-                                }
-                                // Копия первой: на полном свайпе срабатывает
-                                // первая кнопка, а повторить съеденное просят
-                                // чаще, чем дописать в него забытое.
-                                .swipeActions(edge: .leading) {
-                                    Button {
-                                        // Копия получает время «сейчас», а секции
-                                        // отсортированы по последней записи — значит
-                                        // приём пищи переезжает в начало списка.
-                                        // Без явной анимации это происходит рывком:
-                                        // половина экрана переставляется за кадр,
-                                        // и понять, что произошло, невозможно.
-                                        // Явной транзакцией, а не `withAnimation`:
-                                        // мутация стора уезжает в наблюдение, и
-                                        // из обработчика свайпа анимация до
-                                        // списка доходила не всегда — строка
-                                        // появлялась рывком.
-                                        var transaction = Transaction(animation: .snappy)
-                                        transaction.disablesAnimations = false
-                                        withTransaction(transaction) {
-                                            // Вместе с составом: приём из пяти
-                                            // продуктов, скопированный одной
-                                            // строкой без начинки, теряет и
-                                            // разбор дня по категориям, и
-                                            // возможность дополнить его потом.
-                                            store.add(name: entry.name, calories: entry.calories,
-                                                      macros: entry.macros, grams: entry.grams,
-                                                      components: entry.components)
-                                        }
-                                        // И показываем, куда она встала: копия
-                                        // получает время «сейчас» и уходит в
-                                        // текущий приём, а он может быть в
-                                        // другом конце дневника.
-                                        // Самая свежая запись — последняя:
-                                        // день теперь идёт по порядку.
-                                        copiedEntryID = store.todayEntries.max { $0.date < $1.date }?.id
-                                    } label: {
-                                        Image(systemName: "plus.square.on.square")
-                                    }
-                                    .tint(.blue)
-                                    .accessibilityIdentifier("copyEntry")
-                                    .accessibilityLabel("Повторить")
-                                    // Дополнить — это правка того же приёма, а не
-                                    // добавление нового: приём пищи хранится одной
-                                    // строкой с итогами, поэтому он становится
-                                    // первой строкой черновика, а новое досыпается.
-                                    // Значок карандаша об этом и говорит; плюс
-                                    // читался как «добавить ещё один приём».
-                                    Button {
-                                        appendingTo = entry
-                                    } label: {
-                                        Image(systemName: "pencil")
-                                    }
-                                    .tint(.indigo)
-                                }
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        store.delete(entry: entry)
-                                    } label: {
-                                        Image(systemName: "trash")
-                                    }
-                                }
-                            }
-                        } header: {
-                            // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
-                            // во сколько обошёлся обед, приходится складывать строки глазами.
-                            // Тихо, как подписи недели и макросов: название
-                            // приёма пищи — главное, итог рядом мельче.
-                            HStack(alignment: .firstTextBaseline) {
-                                Text(LocalizedStringKey(group.period.rawValue))
-                                    .font(.app(.subheadline, weight: .semibold))
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
-                                    .font(.app(.caption))
-                                    .foregroundStyle(.secondary)
-                                    .monospacedDigit()
-                            }
-                            .textCase(nil)
-                        }
-                    }
-                }
-            }
+                diarySections
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
@@ -561,6 +289,304 @@ struct ContentView: View {
         }
     }
 }
+
+}
+
+// MARK: - Части экрана «Сегодня»
+//
+// Тело `body` разрослось до пятисот строк, и это стоило не только чтения:
+// на таком дереве компилятор один раз уже сдался с «unable to type-check this
+// expression in reasonable time». Куски вынесены свойствами с явным типом —
+// так проверка типов идёт по частям, а сам `body` показывает устройство
+// экрана, а не его содержимое.
+private extension ContentView {
+    /// Сегодняшний день сверху экрана: кольцо, макросы и полоски.
+    ///
+    /// Порядок читается как отъезд камеры: кольцо и макросы — это прямо
+    /// сейчас, дальше ближайший приём (часы), голодание (дни), план (недели)
+    /// и неделя позади.
+    var summaryCards: some View {
+        VStack(spacing: 24) {
+            ProgressRing(
+                consumed: store.consumedToday,
+                goal: store.adaptedTodayGoal,
+                macros: store.macrosToday,
+                proteinTarget: store.proteinTarget,
+                fatTarget: store.fatTarget,
+                carbsTarget: store.carbsTarget,
+                spinTicket: ringSpinTicket,
+                pullAngle: Double(ringPull) * 1.4,
+                onOpen: {
+                    entryAction = nil
+                    showingAdd = true
+                }
+            )
+            .padding(.top)
+            // Следим, насколько список стянут вниз: кольцо поворачивается
+            // за пальцем. Покой — первое положение, которое увидели.
+            .background {
+                GeometryReader { geometry in
+                    Color.clear
+                        .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                            guard let resting = ringRestingY else {
+                                ringRestingY = y
+                                return
+                            }
+                            ringPull = max(0, y - resting)
+                        }
+                }
+            }
+
+            MacrosCard(
+                macros: store.macrosToday,
+                proteinTarget: store.proteinTarget,
+                fatTarget: store.fatTarget,
+                carbsTarget: store.carbsTarget,
+                weightKg: store.weightKg,
+                onOpen: { showingDayNutrition = true },
+                focus: store.focusMacro
+            )
+            
+            // Экран читается как отъезд камеры: кольцо и макросы —
+            // сегодняшний день, дальше ближайший приём (часы),
+            // голодание (ближайшие дни), план (недели вперёд) и
+            // неделя позади. Раньше план стоял выше приёмов, хотя
+            // в него заходят раз в неделю, а на ближайший приём
+            // смотрят по нескольку раз в день.
+            if mealSchedule.isEnabled, !store.todaySlots.isEmpty {
+                MealScheduleStrip(slots: store.todaySlots,
+                                  remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
+                                  dailyGoal: store.adaptedTodayGoal) {
+                    showingMealSchedule = true
+                }
+            }
+
+            // Отмеченный день голодания — не строка в настройках, а
+            // состояние сегодняшнего дня: пустой дневник в такой день
+            // должен читаться как «так и задумано», а не как провал.
+            // Голодание сегодня или в ближайшие три дня: подсказка к
+            // месту — за пару дней про кофе, накануне про соль и воду,
+            // в сам день про выход. Вся памятка — по нажатию.
+            //
+            // Выше недели: голодание — про сегодня и ближайшие дни,
+            // а неделя про прошедшие. Внизу экрана, под неделей и
+            // банком, подсказка про выход из поста попадалась на
+            // глаза последней, когда она нужнее всего.
+            if let hint = store.fastingHint() {
+                FastingStrip(hint: hint) { showingFasting = true }
+            }
+
+            // Строка вместо карточки: план виден и открывается,
+            // но не занимает полэкрана. Подробности — на его
+            // собственном экране, куда ведёт и она, и кольцо.
+            PlanStrip(
+                store: store,
+                onOpenPlan: { showingPlan = true },
+                onShowPaywall: { showingPaywall = true }
+            )
+
+            // Неделя последней: это уже прошедшие дни, и открывают
+            // их реже всего.
+            WeekStrip(weeks: store.weekStripWeeks(),
+                      onSelect: { selectedHistoryDay = $0 },
+                      onShowAll: { showingActivity = true },
+                      onShowWeek: { showingWeekReview = true })
+
+            if store.calorieBankBonus != 0 {
+                Button { showingBankInfo = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                            .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
+                        Text(store.calorieBankBonus > 0
+                             ? "+\(store.calorieBankBonus) ккал из недели"
+                             : "\(store.calorieBankBonus) ккал из недели")
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.app(.caption))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.ultraThinMaterial, in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .popover(isPresented: $showingBankInfo) {
+                    CalorieBankPopover(
+                        bonus: store.calorieBankBonus,
+                        baseGoal: store.todayGoal,
+                        adaptedGoal: store.adaptedTodayGoal
+                    )
+                    .presentationCompactAdaptation(.popover)
+                }
+            } else if !store.isPremium && store.plan == nil {
+                Button { showingPaywall = true } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "lock.fill")
+                            .foregroundStyle(.secondary)
+                        Text("Банк калорий")
+                            .foregroundStyle(.secondary)
+                    }
+                    .font(.app(.caption))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(.ultraThinMaterial, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            }
+
+            if store.profile == nil {
+                NavigationLink {
+                    SettingsView(store: store)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.questionmark")
+                            .font(.app(.footnote))
+                        Text("Заполните профиль, чтобы рассчитать цель")
+                            .font(.app(.caption))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption2))
+                    }
+                    .foregroundStyle(.blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.blue.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            } else if !store.hasWeighedToday {
+                Button {
+                    todaySheet = .weight
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "figure.stand")
+                            .font(.app(.footnote))
+                        Text("Не забудь взвеситься сегодня")
+                            .font(.app(.caption))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption2))
+                    }
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            }
+
+        }
+    }
+
+    /// Съеденное за день: приёмы пищи по порядку, в каждом свои строки.
+    @ViewBuilder
+    var diarySections: some View {
+        if store.todayEntries.isEmpty {
+        Section {
+            VStack(spacing: 8) {
+                Image(systemName: "tray")
+                    .font(.app(.largeTitle))
+                    .foregroundStyle(.secondary)
+                Text("Пока ничего не добавлено")
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 40)
+            .listRowBackground(Color.clear)
+        }
+        .listSectionSeparator(.hidden)
+        } else {
+        ForEach(store.groupedTodayEntries, id: \.period) { group in
+            Section {
+                ForEach(group.entries) { entry in
+                    NavigationLink(value: entry) {
+                        EntryRow(entry: entry,
+                                 icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
+                                 micros: store.notableMicronutrients(for: entry))
+                    }
+                    // Копия первой: на полном свайпе срабатывает
+                    // первая кнопка, а повторить съеденное просят
+                    // чаще, чем дописать в него забытое.
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            // Копия получает время «сейчас», а секции
+                            // отсортированы по последней записи — значит
+                            // приём пищи переезжает в начало списка.
+                            // Без явной анимации это происходит рывком:
+                            // половина экрана переставляется за кадр,
+                            // и понять, что произошло, невозможно.
+                            // Явной транзакцией, а не `withAnimation`:
+                            // мутация стора уезжает в наблюдение, и
+                            // из обработчика свайпа анимация до
+                            // списка доходила не всегда — строка
+                            // появлялась рывком.
+                            var transaction = Transaction(animation: .snappy)
+                            transaction.disablesAnimations = false
+                            withTransaction(transaction) {
+                                // Вместе с составом: приём из пяти
+                                // продуктов, скопированный одной
+                                // строкой без начинки, теряет и
+                                // разбор дня по категориям, и
+                                // возможность дополнить его потом.
+                                store.add(name: entry.name, calories: entry.calories,
+                                          macros: entry.macros, grams: entry.grams,
+                                          components: entry.components)
+                            }
+                            // И показываем, куда она встала: копия
+                            // получает время «сейчас» и уходит в
+                            // текущий приём, а он может быть в
+                            // другом конце дневника.
+                            // Самая свежая запись — последняя:
+                            // день теперь идёт по порядку.
+                            copiedEntryID = store.todayEntries.max { $0.date < $1.date }?.id
+                        } label: {
+                            Image(systemName: "plus.square.on.square")
+                        }
+                        .tint(.blue)
+                        .accessibilityIdentifier("copyEntry")
+                        .accessibilityLabel("Повторить")
+                        // Дополнить — это правка того же приёма, а не
+                        // добавление нового: приём пищи хранится одной
+                        // строкой с итогами, поэтому он становится
+                        // первой строкой черновика, а новое досыпается.
+                        // Значок карандаша об этом и говорит; плюс
+                        // читался как «добавить ещё один приём».
+                        Button {
+                            appendingTo = entry
+                        } label: {
+                            Image(systemName: "pencil")
+                        }
+                        .tint(.indigo)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            store.delete(entry: entry)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+                }
+            } header: {
+                // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
+                // во сколько обошёлся обед, приходится складывать строки глазами.
+                // Тихо, как подписи недели и макросов: название
+                // приёма пищи — главное, итог рядом мельче.
+                HStack(alignment: .firstTextBaseline) {
+                    Text(LocalizedStringKey(group.period.rawValue))
+                        .font(.app(.subheadline, weight: .semibold))
+                        .foregroundStyle(.primary)
+                    Spacer()
+                    Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+                .textCase(nil)
+            }
+        }
+        }
+        }
+    }
+
 
 /// Шаги капсулой в тулбаре, напротив плюса.
 ///

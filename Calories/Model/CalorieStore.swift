@@ -1219,6 +1219,7 @@ final class CalorieStore {
     }
 
     func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false) {
+        let previousName = food.name
         food.micronutrients = micronutrients
         food.catalogID = catalogID
         food.micronutrientsAreEstimated = micronutrientsAreEstimated
@@ -1230,6 +1231,7 @@ final class CalorieStore {
         food.protein = protein
         food.fat = fat
         food.carbs = carbs
+        propagate(foodNamed: previousName, renamedTo: name)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         customFoods.sort { $0.name < $1.name }
         rebuildCaches()
@@ -1246,10 +1248,12 @@ final class CalorieStore {
     }
 
     func updateDish(_ dish: Dish, name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {
+        let previousName = dish.name
         dish.name = name
         dish.ingredients = ingredients
         dish.defaultServingGrams = servingGrams
         dish.updatedAt = Date()
+        propagate(dishNamed: previousName, renamedTo: name)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         rebuildCaches()
     }
@@ -1278,6 +1282,101 @@ final class CalorieStore {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         weightEntries.removeAll { $0.id == entry.id }
         rebuildCaches()
+    }
+
+    /// Правка продукта или блюда расходится по дереву.
+    ///
+    /// Блюдо и приём пищи хранят цифры копией, а не ссылкой: так история не
+    /// переписывается сама, когда в справочнике что-то поправили. Но у своей
+    /// еды всё наоборот — поправил калорийность тунца, значит в банке был
+    /// другой тунец, и блюда с ним и приёмы с этими блюдами считались неверно.
+    /// Поэтому правка своего продукта проходит по блюдам, где он стоит
+    /// ингредиентом, а потом по записям, где стоит он сам или эти блюда.
+    ///
+    /// Переименование связь не рвёт: ингредиенты и составляющие получают новое
+    /// имя вместе со свежими цифрами.
+    private func propagate(foodNamed oldName: String, renamedTo newName: String) {
+        var touched: Set<String> = [newName]
+        for dish in dishes {
+            var ingredients = dish.ingredients
+            var changed = false
+            for index in ingredients.indices where ingredients[index].foodName == oldName {
+                guard let food = customFood(named: newName) else { continue }
+                ingredients[index].foodName = newName
+                ingredients[index].caloriesPer100g = food.caloriesPer100g
+                ingredients[index].macrosPer100g = food.macrosPer100g
+                changed = true
+            }
+            guard changed else { continue }
+            dish.ingredients = ingredients
+            dish.updatedAt = Date()
+            touched.insert(dish.name)
+        }
+        refreshEntries(named: touched, renamedFrom: oldName, to: newName)
+    }
+
+    /// То же для блюда: пересчитываем записи, где оно стоит.
+    private func propagate(dishNamed oldName: String, renamedTo newName: String) {
+        refreshEntries(named: [newName], renamedFrom: oldName, to: newName)
+    }
+
+    /// Пересчёт записей дневника по свежим цифрам.
+    ///
+    /// Считаем от граммов: запись «просто 300 ккал» пересчитывать не из чего,
+    /// и её не трогаем.
+    private func refreshEntries(named names: Set<String>, renamedFrom oldName: String, to newName: String) {
+        for entry in entries {
+            var parts = entry.components
+            var changed = false
+
+            if !parts.isEmpty {
+                for index in parts.indices {
+                    let name = parts[index].name == oldName ? newName : parts[index].name
+                    guard names.contains(name), let grams = parts[index].grams, grams > 0,
+                          let source = perHundredGrams(named: name) else { continue }
+                    parts[index] = EntryComponent(
+                        name: name,
+                        calories: Int((Double(source.calories) * grams / 100).rounded()),
+                        macros: source.macros.portion(grams: grams),
+                        grams: grams)
+                    changed = true
+                }
+                guard changed else { continue }
+                entry.components = parts
+                entry.calories = parts.reduce(0) { $0 + $1.calories }
+                entry.macros = parts.reduce(Macros.zero) { $0 + $1.macros }
+                if entry.name == oldName { entry.name = newName }
+                continue
+            }
+
+            let name = entry.name == oldName ? newName : entry.name
+            guard names.contains(name), let grams = entry.grams, grams > 0,
+                  let source = perHundredGrams(named: name) else { continue }
+            entry.name = name
+            entry.calories = Int((Double(source.calories) * grams / 100).rounded())
+            entry.macros = source.macros.portion(grams: grams)
+        }
+    }
+
+    /// Свежие цифры на сто грамм по имени: свой продукт, блюдо или строка базы.
+    ///
+    /// Свой продукт первым: он для человека и есть настоящий, а в базе может
+    /// лежать тёзка с другими числами.
+    private func perHundredGrams(named name: String) -> (calories: Int, macros: Macros)? {
+        if let food = customFood(named: name) {
+            return (food.caloriesPer100g, food.macrosPer100g)
+        }
+        if let dish = dishes.first(where: { $0.name == name }), dish.totalGrams > 0 {
+            return (dish.caloriesPer100g, dish.macrosPer100g)
+        }
+        if let item = FoodDatabase.items.first(where: { $0.name == name }) {
+            return (item.caloriesPer100g, item.macrosPer100g)
+        }
+        return nil
+    }
+
+    private func customFood(named name: String) -> FoodItem? {
+        customFoods.first { $0.name == name }
     }
 
     private func rebuildRecent() {

@@ -903,3 +903,136 @@ struct DayContextTests {
         #expect(DayAnalysis.context(.init()).isEmpty)
     }
 }
+
+/// Правка своего продукта расходится по дереву: блюда с ним и записи дневника
+/// с ними пересчитываются сами.
+///
+/// Копия цифр в блюде и в записи нужна истории — но не тогда, когда человек
+/// исправляет ошибку в собственном продукте. Поправил калорийность тунца —
+/// значит в банке был другой тунец, и всё, что из него собрано, считалось
+/// неверно.
+@MainActor
+@Suite(.serialized)
+struct EditPropagationTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    private func tuna() throws -> FoodItem {
+        try #require(store.customFoods.first { $0.name == "Тунец" })
+    }
+
+    private func addTuna(calories: Int = 200) {
+        store.addCustomFood(name: "Тунец", caloriesPer100g: calories,
+                            protein: 25, fat: 10, carbs: 0, category: .fish)
+    }
+
+    @Test func fixingAProductFixesTheDishMadeOfIt() throws {
+        addTuna()
+        let food = try tuna()
+        store.addDish(name: "Салат с тунцом", ingredients: [
+            DishIngredient(foodName: "Тунец", caloriesPer100g: food.caloriesPer100g,
+                           macrosPer100g: food.macrosPer100g, grams: 200)
+        ])
+        #expect(store.dishes.first?.totalCalories == 400)
+
+        store.updateCustomFood(food, name: "Тунец", caloriesPer100g: 100,
+                               protein: 25, fat: 2, carbs: 0, category: .fish)
+
+        let dish = try #require(store.dishes.first)
+        #expect(dish.totalCalories == 200, "Блюдо считает по старым цифрам продукта")
+        #expect(dish.totalMacros.fat == 4)
+    }
+
+    @Test func fixingAProductFixesTheMealItIsIn() throws {
+        addTuna()
+        let food = try tuna()
+        store.add(name: "Тунец", calories: 400, macros: Macros(protein: 50, fat: 20, carbs: 0), grams: 200)
+
+        store.updateCustomFood(food, name: "Тунец", caloriesPer100g: 100,
+                               protein: 25, fat: 2, carbs: 0, category: .fish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.calories == 200)
+        #expect(entry.macros.fat == 4)
+    }
+
+    /// Самый частый случай: приём собран из нескольких продуктов, и поправить
+    /// надо один из них.
+    @Test func fixingAProductFixesTheMealItIsPartOf() throws {
+        addTuna()
+        let food = try tuna()
+        store.add(name: "Тунец, рис", calories: 600, macros: Macros(protein: 55, fat: 20, carbs: 45),
+                  grams: 400, components: [
+                    EntryComponent(name: "Тунец", calories: 400,
+                                   macros: Macros(protein: 50, fat: 20, carbs: 0), grams: 200),
+                    EntryComponent(name: "Рис", calories: 200,
+                                   macros: Macros(protein: 5, fat: 0, carbs: 45), grams: 200),
+                  ])
+
+        store.updateCustomFood(food, name: "Тунец", caloriesPer100g: 100,
+                               protein: 25, fat: 2, carbs: 0, category: .fish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.calories == 400, "Тунец пересчитан, рис остался как был")
+        #expect(entry.components.first?.calories == 200)
+        #expect(entry.components.last?.calories == 200)
+    }
+
+    /// Блюдо в дневнике тоже: поправил продукт — поменялось блюдо, а за ним и
+    /// съеденная порция.
+    @Test func fixingAProductReachesTheMealThroughTheDish() throws {
+        addTuna()
+        let food = try tuna()
+        store.addDish(name: "Салат с тунцом", ingredients: [
+            DishIngredient(foodName: "Тунец", caloriesPer100g: 200,
+                           macrosPer100g: Macros(protein: 25, fat: 10, carbs: 0), grams: 200)
+        ])
+        // Съели половину кастрюли.
+        store.add(name: "Салат с тунцом", calories: 200,
+                  macros: Macros(protein: 25, fat: 10, carbs: 0), grams: 100)
+
+        store.updateCustomFood(food, name: "Тунец", caloriesPer100g: 100,
+                               protein: 25, fat: 2, carbs: 0, category: .fish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.calories == 100, "Порция блюда считается по свежим цифрам")
+    }
+
+    /// Переименование связь не рвёт.
+    @Test func renamingKeepsTheLink() throws {
+        addTuna()
+        let food = try tuna()
+        store.addDish(name: "Салат", ingredients: [
+            DishIngredient(foodName: "Тунец", caloriesPer100g: 200,
+                           macrosPer100g: Macros(protein: 25, fat: 10, carbs: 0), grams: 100)
+        ])
+        store.updateCustomFood(food, name: "Тунец в масле", caloriesPer100g: 300,
+                               protein: 25, fat: 20, carbs: 0, category: .fish)
+
+        let dish = try #require(store.dishes.first)
+        #expect(dish.ingredients.first?.foodName == "Тунец в масле")
+        #expect(dish.totalCalories == 300)
+    }
+
+    /// Записи без граммов пересчитывать не из чего — их не трогаем.
+    @Test func anEntryWithoutWeightIsLeftAlone() throws {
+        addTuna()
+        let food = try tuna()
+        store.add(name: "Тунец", calories: 350)
+
+        store.updateCustomFood(food, name: "Тунец", caloriesPer100g: 100,
+                               protein: 25, fat: 2, carbs: 0, category: .fish)
+
+        #expect(store.entries.first?.calories == 350)
+    }
+}

@@ -9,9 +9,8 @@ struct ContentView: View {
     /// на одной вьюхе спорят, и срабатывает только последний.
     @State private var todaySheet: TodaySheet?
     @State private var ringSpinTicket = 0
-    /// Где кольцо стоит, когда список в покое, и насколько его сейчас стянули вниз.
-    @State private var ringRestingY: CGFloat?
-    @State private var ringPull: CGFloat = 0
+    /// Насколько список стянут. Читает его только кольцо — см. `RingPull`.
+    @State private var ringPull = RingPull()
 
     enum TodaySheet: String, Identifiable {
         case weight, quickCalories, newFood, newDish, scanner, fasting
@@ -79,6 +78,7 @@ struct ContentView: View {
                 .listSectionSeparator(.hidden)
 
                 diarySections
+            }
             .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
@@ -290,8 +290,6 @@ struct ContentView: View {
     }
 }
 
-}
-
 // MARK: - Части экрана «Сегодня»
 //
 // Тело `body` разрослось до пятисот строк, и это стоило не только чтения:
@@ -306,8 +304,11 @@ private extension ContentView {
     /// сейчас, дальше ближайший приём (часы), голодание (дни), план (недели)
     /// и неделя позади.
     var summaryCards: some View {
-        VStack(spacing: 24) {
-            ProgressRing(
+        // Расписание спрашиваем один раз: строится оно примерно за миллисекунду,
+        // а в теле оно нужно дважды — проверить, есть ли приёмы, и показать их.
+        let slots = store.todaySlots
+        return VStack(spacing: 24) {
+            PullableRing(
                 consumed: store.consumedToday,
                 goal: store.adaptedTodayGoal,
                 macros: store.macrosToday,
@@ -315,27 +316,12 @@ private extension ContentView {
                 fatTarget: store.fatTarget,
                 carbsTarget: store.carbsTarget,
                 spinTicket: ringSpinTicket,
-                pullAngle: Double(ringPull) * 1.4,
+                pull: ringPull,
                 onOpen: {
                     entryAction = nil
                     showingAdd = true
                 }
             )
-            .padding(.top)
-            // Следим, насколько список стянут вниз: кольцо поворачивается
-            // за пальцем. Покой — первое положение, которое увидели.
-            .background {
-                GeometryReader { geometry in
-                    Color.clear
-                        .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
-                            guard let resting = ringRestingY else {
-                                ringRestingY = y
-                                return
-                            }
-                            ringPull = max(0, y - resting)
-                        }
-                }
-            }
 
             MacrosCard(
                 macros: store.macrosToday,
@@ -353,8 +339,8 @@ private extension ContentView {
             // неделя позади. Раньше план стоял выше приёмов, хотя
             // в него заходят раз в неделю, а на ближайший приём
             // смотрят по нескольку раз в день.
-            if mealSchedule.isEnabled, !store.todaySlots.isEmpty {
-                MealScheduleStrip(slots: store.todaySlots,
+            if mealSchedule.isEnabled, !slots.isEmpty {
+                MealScheduleStrip(slots: slots,
                                   remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
                                   dailyGoal: store.adaptedTodayGoal) {
                     showingMealSchedule = true
@@ -584,9 +570,10 @@ private extension ContentView {
             }
         }
         }
-        }
     }
 
+
+}
 
 /// Шаги капсулой в тулбаре, напротив плюса.
 ///
@@ -709,4 +696,65 @@ private struct CalorieBankPopover: View {
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
     ContentView(store: CalorieStore(context: container.mainContext), stepStore: StepStore())
+}
+
+/// Насколько список стянут вниз прямо сейчас.
+///
+/// Отдельным наблюдаемым объектом, а не состоянием экрана: писать его будет
+/// «Сегодня», а читать — только кольцо, и тогда кадр жеста перерисовывает
+/// кольцо, а не весь экран.
+@Observable
+final class RingPull {
+    var offset: CGFloat = 0
+}
+
+/// Кольцо, которое поворачивается за пальцем, пока список тянут вниз.
+///
+/// Своей вьюхой, а не частью «Сегодня», ради одного: положение пальца меняется
+/// на каждом кадре жеста, и пока это состояние лежало в `ContentView`, каждый
+/// кадр перестраивал весь экран — кольцо, карточку макросов, полоски приёмов,
+/// голодания, плана и недели. Полоска недели и расписание приёмов считаются
+/// заново примерно за миллисекунду, и на жесте это чувствовалось подлагиванием.
+/// Теперь на кадр перерисовывается только кольцо.
+private struct PullableRing: View {
+    let consumed: Int
+    let goal: Int
+    let macros: Macros
+    let proteinTarget: Double?
+    let fatTarget: Double?
+    let carbsTarget: Double?
+    let spinTicket: Int
+    let pull: RingPull
+    var onOpen: () -> Void
+
+    /// Где кольцо стоит, когда список в покое.
+    @State private var restingY: CGFloat?
+
+    var body: some View {
+        ProgressRing(
+            consumed: consumed,
+            goal: goal,
+            macros: macros,
+            proteinTarget: proteinTarget,
+            fatTarget: fatTarget,
+            carbsTarget: carbsTarget,
+            spinTicket: spinTicket,
+            pullAngle: Double(pull.offset) * 1.4,
+            onOpen: onOpen
+        )
+        .padding(.top)
+        // Покой — первое положение, которое увидели.
+        .background {
+            GeometryReader { geometry in
+                Color.clear
+                    .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                        guard let resting = restingY else {
+                            restingY = y
+                            return
+                        }
+                        pull.offset = max(0, y - resting)
+                    }
+            }
+        }
+    }
 }

@@ -18,28 +18,31 @@ import SwiftUI
 enum Palette {
     /// Цвет в трёх состояниях. Каждое — пара для градиента дуги.
     struct Ramp {
+        /// Имя нужно не для показа, а для памяти готовых цветов: по нему они
+        /// и лежат в кэше.
+        let name: String
         let pale: [Color]
         let standard: [Color]
         let vivid: [Color]
     }
 
-    static let kcal = Ramp(pale: [Color(hex: 0x6ADFB9), Color(hex: 0x3AC09C)],
+    static let kcal = Ramp(name: "kcal", pale: [Color(hex: 0x6ADFB9), Color(hex: 0x3AC09C)],
                            standard: [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)],
                            vivid: [Color(hex: 0x1EE1A2), Color(hex: 0x04C28F)])
-    static let protein = Ramp(pale: [Color(hex: 0x5DD9E6), Color(hex: 0x389FBC)],
+    static let protein = Ramp(name: "protein", pale: [Color(hex: 0x5DD9E6), Color(hex: 0x389FBC)],
                               standard: [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)],
                               vivid: [Color(hex: 0x05D3E9), Color(hex: 0x0494BE)])
-    static let fat = Ramp(pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)],
+    static let fat = Ramp(name: "fat", pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)],
                           standard: [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)],
                           vivid: [Color(hex: 0xF78C51), Color(hex: 0xF7511D)])
     /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
     /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
-    static let carbs = Ramp(pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)],
+    static let carbs = Ramp(name: "carbs", pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)],
                             standard: [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)],
                             vivid: [Color(hex: 0xCC76F7), Color(hex: 0xA02FF7)])
     /// Перебор — красно-коралловый, а не системный оранжевый: тот спорил бы по
     /// тону с цветом жиров.
-    static let over = Ramp(pale: [Color(hex: 0xF57B72), Color(hex: 0xC04E56)],
+    static let over = Ramp(name: "over", pale: [Color(hex: 0xF57B72), Color(hex: 0xC04E56)],
                            standard: [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)],
                            vivid: [Color(hex: 0xF72C1D), Color(hex: 0xC20412)])
 
@@ -52,18 +55,38 @@ enum Palette {
     /// чем электрический фиолетовый на нём же.
     static let darkLuminanceFloor = 0.20
 
+    /// Готовые цвета: считаются один раз на каждое сочетание цвета и
+    /// насыщенности.
+    ///
+    /// Кольцо спрашивает их на каждой перерисовке — а перерисовывается оно на
+    /// каждом кадре, пока список тянут вниз. Каждый вопрос стоил двух переводов
+    /// в HSB, подъёма светимости и создания динамического цвета: полмиллисекунды
+    /// на кадр там, где весь кадр — шестнадцать. Насыщенность человек меняет
+    /// ползунком раз в месяц, так что помнить нечего, кроме десятка пар.
+    private nonisolated(unsafe) static var cache: [String: [Color]] = [:]
+    private static let cacheLock = NSLock()
+
     /// Цвета на экран: состояние между `pale` и `vivid` по выбранной
     /// насыщенности, с поправкой на тёмную тему.
     static func colors(_ ramp: Ramp, intensity: Double) -> [Color] {
         let factor = min(max(intensity, PaletteIntensity.range.lowerBound),
                          PaletteIntensity.range.upperBound)
+        let key = "\(ramp.name)-\(Int((factor * 1000).rounded()))"
+        cacheLock.lock()
+        let remembered = cache[key]
+        cacheLock.unlock()
+        if let remembered { return remembered }
         let standard = PaletteIntensity.standard
         let (from, to, amount): ([Color], [Color], Double) = factor <= standard
             ? (ramp.pale, ramp.standard,
                (factor - PaletteIntensity.range.lowerBound) / (standard - PaletteIntensity.range.lowerBound))
             : (ramp.standard, ramp.vivid,
                (factor - standard) / (PaletteIntensity.range.upperBound - standard))
-        return zip(from, to).map { $0.blended(with: $1, amount: amount).liftedOnDark() }
+        let colors = zip(from, to).map { $0.blended(with: $1, amount: amount).liftedOnDark() }
+        cacheLock.lock()
+        cache[key] = colors
+        cacheLock.unlock()
+        return colors
     }
 }
 

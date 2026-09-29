@@ -99,7 +99,7 @@ struct ProgressRing: View {
     /// Растёт вместе с толщиной: у толстой дуги скругления съедают больше.
     private let gap: Double = 12.5
 
-    private struct Segment: Identifiable {
+    struct Segment: Identifiable, Equatable {
         let id: String
         let start: Double
         let end: Double
@@ -179,32 +179,18 @@ struct ProgressRing: View {
 
     var body: some View {
         ZStack {
-            ForEach(segments) { segment in
-                // Дорожка — цвет самой дуги, приглушённый, как у полосок
-                // макросов под кольцом. Вместо серой канавки: пустое кольцо
-                // уже показывает, на что делится день.
-                RingArc(start: segment.start, end: segment.end)
-                    // Толще дуга — заметнее и дорожка, поэтому она бледнее
-                    // прежнего: на иконке дорожки нет вовсе, и здесь она
-                    // должна читаться как место под цвет, а не как второй знак.
-                    .stroke(segment.colors[0].opacity(0.15),
-                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                RingArc(start: segment.start,
-                        end: segment.start + (segment.end - segment.start) * segment.progress)
-                    // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
-                    // в углу получала бы только один край градиента.
-                    .stroke(LinearGradient(colors: segment.colors,
-                                           startPoint: Self.point(at: segment.start),
-                                           endPoint: Self.point(at: segment.end)),
-                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
-                    // Скруглённые концы у нулевой длины дают точку — её и гасим.
-                    .opacity(segment.progress > 0 ? 1 : 0)
-            }
-            .padding(lineWidth / 2)
-            // Одним слоем: каждая дуга крутилась отдельно,
-            // и на обороте цвета размазывались друг по другу. Склеенное кольцо
-            // поворачивается как цельная картинка.
-            .compositingGroup()
+            // Дуги — своей вьюхой, и это не про порядок в файле.
+            //
+            // Пока список тянут вниз, угол меняется на каждом кадре, и тело
+            // кольца пересчитывалось целиком: доли макросов, цвета, восемь дуг
+            // с градиентами. Вынесенные дуги получают те же самые доли и цвета,
+            // SwiftUI видит, что аргументы не изменились, и не перерисовывает
+            // их — поворачивается уже готовая картинка.
+            RingArcs(segments: segments, lineWidth: lineWidth)
+                // Одним слоем: каждая дуга крутилась отдельно,
+                // и на обороте цвета размазывались друг по другу. Склеенное кольцо
+                // поворачивается как цельная картинка.
+                .compositingGroup()
             .modifier(RefreshSpin(baseRotation: Self.rotation, pullAngle: pullAngle, spinTicket: spinTicket))
             // Дуга доезжает до новой длины пружиной — на любое изменение
             // съеденного, откуда бы оно ни пришло.
@@ -267,6 +253,45 @@ struct ProgressRing: View {
                 .foregroundStyle(.tertiary)
                 .contentTransition(.numericText())
         })
+    }
+}
+
+/// Дуги кольца: дорожка и залитая часть на каждый сегмент.
+///
+/// Отдельной вьюхой ради жеста: поворот кольца за пальцем меняется на каждом
+/// кадре, а дуги при этом те же. Отдельная вьюха с теми же аргументами
+/// перерисовываться не будет.
+private struct RingArcs: View {
+    let segments: [ProgressRing.Segment]
+    let lineWidth: CGFloat
+
+    var body: some View {
+        ZStack {
+            ForEach(segments) { segment in
+                // Дорожка — цвет самой дуги, приглушённый, как у полосок
+                // макросов под кольцом. Вместо серой канавки: пустое кольцо
+                // уже показывает, на что делится день.
+                RingArc(start: segment.start, end: segment.end)
+                    // Толще дуга — заметнее и дорожка, поэтому она бледнее
+                    // прежнего: на иконке дорожки нет вовсе, и здесь она
+                    // должна читаться как место под цвет, а не как второй знак.
+                    .stroke(segment.colors[0].opacity(0.15),
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                // Своей дугой, а не общей: у этой есть анимируемые данные, и
+                // заливка растёт плавно, а не перескакивает.
+                RingArc(start: segment.start,
+                        end: segment.start + (segment.end - segment.start) * segment.progress)
+                    // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
+                    // в углу получала бы только один край градиента.
+                    .stroke(LinearGradient(colors: segment.colors,
+                                           startPoint: CircleArc.point(at: segment.start),
+                                           endPoint: CircleArc.point(at: segment.end)),
+                            style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                    // Скруглённые концы у нулевой длины дают точку — её и гасим.
+                    .opacity(segment.progress > 0 ? 1 : 0)
+            }
+        }
+        .padding(lineWidth / 2)
     }
 }
 

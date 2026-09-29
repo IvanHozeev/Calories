@@ -357,20 +357,7 @@ struct AddEntryView: View {
                 // человек замечал ошибку уже в дневнике. Строка занимает одну
                 // высоту и молчит, пока время сегодняшнее; сдвинутое время
                 // подсвечивается оранжевым — это уже предупреждение.
-                if !isSearching, !searchFocused {
-                    Section {
-                        DatePicker(selection: $selectedDate, in: ...Date(),
-                                   displayedComponents: [.date, .hourAndMinute]) {
-                            Text("Когда")
-                                .font(.app(.footnote))
-                                .foregroundStyle(timeAdjusted ? Color.orange : .secondary)
-                        }
-                        .font(.app(.footnote))
-                        .accessibilityIdentifier("mealTimePicker")
-                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                        .listRowBackground(Color.clear)
-                    }
-                }
+                mealTimeSection
 
                 // Пока в строке поиска что-то есть, найденное идёт выше набранного:
                 // смотрят сейчас на результаты, а список уже положенного только
@@ -412,97 +399,15 @@ struct AddEntryView: View {
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
             .task(id: "\(source.rawValue)|\(wantsOnlineSearch)|\(searchText)") {
-                debouncedSearch = searchText
-                guard source == .online || wantsOnlineSearch else {
-                    isSearchingOFF = false
-                    return
-                }
-                guard !searchText.isEmpty else {
-                    debouncedSearch = ""
-                    offResults = []
-                    noNetwork = false
-                    isSearchingOFF = false
-                    return
-                }
-                try? await Task.sleep(for: .milliseconds(200))
-                guard !Task.isCancelled else { return }
-                isSearchingOFF = true
-                offResults = []
-                do {
-                    let results = try await FoodSearch.search(query: searchText)
-                    guard !Task.isCancelled else { isSearchingOFF = false; return }
-                    offResults = results
-                    noNetwork = false
-                    searchFailure = nil
-                } catch let urlError as URLError where
-                    urlError.code == .notConnectedToInternet ||
-                    urlError.code == .networkConnectionLost ||
-                    urlError.code == .timedOut ||
-                    urlError.code == .cannotFindHost ||
-                    urlError.code == .cannotConnectToHost {
-                    noNetwork = true
-                } catch is CancellationError {
-                    // Запрос отменили новым вводом — это не ошибка
-                } catch {
-                    searchFailure = error.localizedDescription
-                }
-                isSearchingOFF = false
+                await searchOnlineIfNeeded()
             }
             .scrollDismissesKeyboard(.interactively)
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
-            .toolbar {
-                // Источник — меню, а не полоса сегментов над списком: четыре
-                // подписи в сегментах обрезались, а строку экрана занимали
-                // всегда, хотя переключают источник редко.
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Picker("Источник", selection: $source) {
-                            ForEach(FoodSource.allCases) { item in
-                                Label(item.title, systemImage: item.icon).tag(item)
-                            }
-                        }
-                    } label: {
-                        Image(systemName: source.icon)
-                    }
-                    .accessibilityIdentifier("sourceFilter")
-                    .accessibilityLabel("Источник")
-                }
-            }
+            .toolbar { sourceToolbar }
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // С набранным приёмом пищи «Отмена» уезжает вниз, к «Сохранить»:
-                // наверху её прячет раскрытая строка поиска, а решают «сохранить
-                // или бросить» в одном месте.
-                if draftItems.isEmpty {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Отмена") { dismiss() }
-                    }
-                }
-                // Плавающая кнопка нижней панели перекрывает список. Пока сохранять
-                // нечего, она не нужна — показываем её только при непустом черновике.
-                if !draftItems.isEmpty {
-                    ToolbarItem(placement: .bottomBar) {
-                        Button("Отмена") { dismiss() }
-                            .accessibilityIdentifier("cancelMeal")
-                    }
-                    ToolbarItem(placement: .bottomBar) {
-                        Button {
-                            saveDraft()
-                        } label: {
-                            Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
-                                .frame(maxWidth: .infinity)
-                                .fontWeight(.semibold)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .accessibilityIdentifier("saveMeal")
-                    }
-                }
-                // Ни плюса, ни часов в тулбаре: «новый продукт» и «только калории»
-                // живут в плюсе на «Сегодня», а время приёма — на экране продукта,
-                // где его решают, уже выбрав, что съели.
-            }
+            .toolbar { draftToolbar }
             // Чтобы последняя строка не оставалась навсегда под кнопкой.
             .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
             .navigationDestination(item: $serving) { target in
@@ -555,6 +460,133 @@ struct AddEntryView: View {
     }
 
     /// Набранный приём пищи.
+    /// Время приёма — на самом экране, а не за переходом.
+    ///
+    /// Оно жило в отдельном листе, потому что «меняют это редко»: еда обычно
+    /// записывается тогда же, когда съедена. Но редко — не значит никогда, а за
+    /// переходом его не видно вовсе, и человек замечал ошибку уже в дневнике.
+    /// Строка занимает одну высоту и молчит, пока время сегодняшнее; сдвинутое
+    /// подсвечивается оранжевым — это уже предупреждение.
+    ///
+    /// Пока ищут, строки нет: на экране в этот момент решают, что съели, а не
+    /// когда.
+    @ViewBuilder
+    private var mealTimeSection: some View {
+        if !isSearching, !searchFocused {
+            Section {
+                DatePicker(selection: $selectedDate, in: ...Date(),
+                           displayedComponents: [.date, .hourAndMinute]) {
+                    Text("Когда")
+                        .font(.app(.footnote))
+                        .foregroundStyle(timeAdjusted ? Color.orange : .secondary)
+                }
+                .font(.app(.footnote))
+                .accessibilityIdentifier("mealTimePicker")
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                .listRowBackground(Color.clear)
+            }
+        }
+    }
+
+    /// Источник еды — меню, а не полоса сегментов над списком: четыре подписи в
+    /// сегментах обрезались, а строку экрана занимали всегда, хотя источник
+    /// переключают редко.
+    @ToolbarContentBuilder
+    private var sourceToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            Menu {
+                Picker("Источник", selection: $source) {
+                    ForEach(FoodSource.allCases) { item in
+                        Label(item.title, systemImage: item.icon).tag(item)
+                    }
+                }
+            } label: {
+                Image(systemName: source.icon)
+            }
+            .accessibilityIdentifier("sourceFilter")
+            .accessibilityLabel("Источник")
+        }
+    }
+
+    /// Отмена и сохранение.
+    ///
+    /// С набранным приёмом «Отмена» уезжает вниз, к «Сохранить»: наверху её
+    /// прячет раскрытая строка поиска, а решают «сохранить или бросить» в одном
+    /// месте. Пока сохранять нечего, плавающей кнопки нет — она перекрывает
+    /// список.
+    ///
+    /// Ни плюса, ни часов здесь нет: «новый продукт» и «только калории» живут в
+    /// плюсе на «Сегодня», а время приёма — строкой на этом экране.
+    @ToolbarContentBuilder
+    private var draftToolbar: some ToolbarContent {
+        if draftItems.isEmpty {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Отмена") { dismiss() }
+            }
+        }
+        if !draftItems.isEmpty {
+            ToolbarItem(placement: .bottomBar) {
+                Button("Отмена") { dismiss() }
+                    .accessibilityIdentifier("cancelMeal")
+            }
+            ToolbarItem(placement: .bottomBar) {
+                Button {
+                    saveDraft()
+                } label: {
+                    Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
+                        .frame(maxWidth: .infinity)
+                        .fontWeight(.semibold)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("saveMeal")
+            }
+        }
+    }
+
+    /// Поиск в сети — только на своей вкладке и только после паузы в наборе.
+    ///
+    /// В сеть ходим не на каждое нажатие клавиши: раньше запрос уходил даже
+    /// когда искали в своих продуктах. Отмену задачи новым вводом ошибкой не
+    /// считаем — это обычный ход событий, а не сбой, и показывать по ней
+    /// «нет сети» нельзя.
+    private func searchOnlineIfNeeded() async {
+        debouncedSearch = searchText
+        guard source == .online || wantsOnlineSearch else {
+            isSearchingOFF = false
+            return
+        }
+        guard !searchText.isEmpty else {
+            debouncedSearch = ""
+            offResults = []
+            noNetwork = false
+            isSearchingOFF = false
+            return
+        }
+        try? await Task.sleep(for: .milliseconds(200))
+        guard !Task.isCancelled else { return }
+        isSearchingOFF = true
+        offResults = []
+        do {
+            let results = try await FoodSearch.search(query: searchText)
+            guard !Task.isCancelled else { isSearchingOFF = false; return }
+            offResults = results
+            noNetwork = false
+            searchFailure = nil
+        } catch let urlError as URLError where
+            urlError.code == .notConnectedToInternet ||
+            urlError.code == .networkConnectionLost ||
+            urlError.code == .timedOut ||
+            urlError.code == .cannotFindHost ||
+            urlError.code == .cannotConnectToHost {
+            noNetwork = true
+        } catch is CancellationError {
+            // Запрос отменили новым вводом
+        } catch {
+            searchFailure = error.localizedDescription
+        }
+        isSearchingOFF = false
+    }
+
     @ViewBuilder
     private var draftSection: some View {
         if !draftItems.isEmpty {

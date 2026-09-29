@@ -300,6 +300,9 @@
         }
       }
     },
+    "%@ осталось" : {
+
+    },
     "%@ ч" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -578,6 +581,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@: %2$lld kcal"
+          }
+        }
+      }
+    },
+    "%1$lld ккал по плану. Например: %2$@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld سعرة مخطط لها. مثلًا: %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal geplant. Zum Beispiel: %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal planned. For example: %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal previstas. Por ejemplo: %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal prévues. Par exemple : %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld קלוריות לפי התוכנית. לדוגמה: %2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld kcal previstas. Por exemplo: %2$@"
           }
         }
       }
@@ -1049,6 +1099,59 @@
         }
       }
     },
+    "%lld ккал по плану" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld سعرة مخطط لها"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal geplant"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal planned"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal previstas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal prévues"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld קלוריות לפי התוכנית"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld kcal previstas"
+          }
+        }
+      }
+    },
+    "%lld ккал/100г" : {
+
+    },
+    "%lld лет" : {
+
+    },
     "%lld мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1142,6 +1245,9 @@
           }
         }
       }
+    },
+    "%lld см" : {
+
     },
     "%lld уд/мин" : {
       "extractionState" : "manual",
@@ -1283,7 +1389,12 @@
         }
       }
     },
-    "%lld%%" : {},
+    "%lld%%" : {
+
+    },
+    "+%lld" : {
+
+    },
     "+%lld ккал из недели" : {
       "localizations" : {
         "ar" : {
@@ -2728,6 +2839,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "P"
+          }
+        }
+      }
+    },
+    "Б%lld Ж%lld У%lld" : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Б%1$lld Ж%2$lld У%3$lld"
           }
         }
       }
@@ -5461,7 +5582,9 @@
         }
       }
     },
-    "В среднем" : {},
+    "В среднем" : {
+
+    },
     "В среднем %lld ккал в день — норма недели выдержана." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16193,6 +16316,9 @@
         }
       }
     },
+    "Записал %@ кг." : {
+
+    },
     "Записал %lld ккал. Норма на сегодня уже перебрана." : {
       "localizations" : {
         "ar" : {
@@ -16291,7 +16417,9 @@
         }
       }
     },
-    "Записано" : {},
+    "Записано" : {
+
+    },
     "Записано %lld дней из семи — маловато для выводов." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17081,6 +17209,9 @@
         }
       }
     },
+    "из %@ шагов" : {
+
+    },
     "из %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17128,7 +17259,12 @@
         }
       }
     },
-    "из 7" : {},
+    "из %lld ккал" : {
+
+    },
+    "из 7" : {
+
+    },
     "Из банка недели" : {
       "localizations" : {
         "ar" : {
@@ -25797,6 +25933,9 @@
         }
       }
     },
+    "Недель: %lld" : {
+
+    },
     "Недельный баланс" : {
       "localizations" : {
         "ar" : {
@@ -29416,6 +29555,16 @@
         }
       }
     },
+    "Осталось %lld ккал из %lld." : {
+      "localizations" : {
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Осталось %1$lld ккал из %2$lld."
+          }
+        }
+      }
+    },
     "Остаток" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30481,7 +30630,6 @@
       }
     },
     "Отладка" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -43934,6 +44082,9 @@
         }
       }
     },
+    "Ставить %lld ккал/день" : {
+
+    },
     "Старт плана" : {
       "localizations" : {
         "ar" : {
@@ -47047,7 +47198,9 @@
         }
       }
     },
-    "уд/мин" : {},
+    "уд/мин" : {
+
+    },
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -48771,6 +48924,9 @@
         }
       }
     },
+    "ч" : {
+
+    },
     "Часть состава перенесена с похожей еды — это оценка." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48818,7 +48974,6 @@
         }
       }
     },
-    "ч" : {},
     "Через 30–60 минут" : {
       "localizations" : {
         "ar" : {
@@ -49611,6 +49766,9 @@
           }
         }
       }
+    },
+    "шагов из %@" : {
+
     },
     "шагов/день" : {
       "extractionState" : "manual",
@@ -50583,100 +50741,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ovo de galinha"
-          }
-        }
-      }
-    },
-    "%lld ккал по плану" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld سعرة مخطط لها"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld kcal geplant"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld kcal planned"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld kcal previstas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld kcal prévues"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld קלוריות לפי התוכנית"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld kcal previstas"
-          }
-        }
-      }
-    },
-    "%1$lld ккал по плану. Например: %2$@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld سعرة مخطط لها. مثلًا: %2$@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal geplant. Zum Beispiel: %2$@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal planned. For example: %2$@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal previstas. Por ejemplo: %2$@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal prévues. Par exemple : %2$@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld קלוריות לפי התוכנית. לדוגמה: %2$@"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal previstas. Por exemplo: %2$@"
           }
         }
       }

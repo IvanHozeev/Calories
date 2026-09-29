@@ -158,6 +158,9 @@ final class CalorieStore {
     /// перерисовку — тот же капкан, что уже подтормаживал ввод в поиске.
     /// Своих продуктов немного, поэтому раз на изменение данных это дёшево.
     @ObservationIgnored private(set) var foodsOfferedVitamins: Set<UUID> = []
+    /// Отпечаток своих продуктов, по которому видно, надо ли пересчитывать
+    /// предложения витаминов. Ноль — «ещё не считали ни разу».
+    @ObservationIgnored private var vitaminOffersSignature: Int?
     /// Какой макрос сегодня ведущий — тот, что ещё не закрыт.
     ///
     /// Порядок закрытия: белок, потом жир, потом углеводы. По нему красится
@@ -331,6 +334,34 @@ final class CalorieStore {
         cachesBuiltForDay = calendar.startOfDay(for: Date())
         publishToWidget(calendar)
     }
+
+#if DEBUG
+    /// Сколько стоит каждый шаг перестройки — в миллисекундах.
+    ///
+    /// Перестройка идёт на каждую запись еды и на каждое потягивание списка
+    /// вниз, то есть внутри жеста, и лишние сто миллисекунд здесь человек
+    /// чувствует как подлагивание. Вопрос «что именно из этого дорого»
+    /// возникает не первый раз, и отвечать на него догадками дороже, чем
+    /// держать эти двадцать строк.
+    func rebuildTimings() -> [(step: String, ms: Double)] {
+        let calendar = Calendar.current
+        func measure(_ name: String, _ block: () -> Void) -> (String, Double) {
+            let start = Date()
+            block()
+            return (name, Date().timeIntervalSince(start) * 1000)
+        }
+        return [
+            measure("словари") { rebuildLookups(calendar) },
+            measure("сегодня") { rebuildToday(calendar) },
+            measure("дни") { rebuildDays(calendar) },
+            measure("серии") { rebuildStreaks(calendar) },
+            measure("расход") { rebuildExpenditure(calendar) },
+            measure("недавнее") { rebuildRecent() },
+            measure("витамины своим") { rebuildVitaminOffers() },
+            measure("виджет") { publishToWidget(calendar) },
+        ]
+    }
+#endif
 
     /// Словари для O(1)-обращений: день → записи, имя → категория и состав,
     /// день → зафиксированная цель.
@@ -1343,7 +1374,36 @@ final class CalorieStore {
     /// Точное совпадение по названию не считаем: там состав и так подтягивается
     /// сам, и предлагать нечего. Смысл только в непохожих названиях — «Творог
     /// мой» против «Творог 5%», — где связь может найти только поиск.
+    ///
+    /// Считается заново только когда изменились сами продукты, а не при каждой
+    /// перестройке кэшей. Перебор каталога стоит несколько миллисекунд на
+    /// продукт, а перестройка идёт на каждую запись еды и на каждое обновление
+    /// «Сегодня»: на семидесяти своих продуктах это давало полторы десятых
+    /// секунды на жест — ровно то подлагивание, которое видно при потягивании
+    /// списка вниз. Сами продукты меняются от силы раз в день.
     private func rebuildVitaminOffers() {
+        // В отпечаток идёт всё, от чего зависит ответ: имя и категория решают,
+        // кого искать, калории и макросы — подойдёт ли донор по цифрам, состав
+        // и связь с каталогом — нужно ли вообще предлагать. Блюда тоже: их имена
+        // попадают в словарь составов, по которому мы отсеиваем тех, у кого
+        // состав и так есть.
+        var hasher = Hasher()
+        for food in customFoods {
+            hasher.combine(food.id)
+            hasher.combine(food.name)
+            hasher.combine(food.caloriesPer100g)
+            hasher.combine(food.protein)
+            hasher.combine(food.fat)
+            hasher.combine(food.carbs)
+            hasher.combine(food.category)
+            hasher.combine(food.catalogID)
+            hasher.combine(food.micronutrientsData)
+        }
+        for dish in dishes { hasher.combine(dish.name) }
+        let signature = hasher.finalize()
+        guard signature != vitaminOffersSignature else { return }
+        vitaminOffersSignature = signature
+
         var offered: Set<UUID> = []
         for food in customFoods {
             guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }

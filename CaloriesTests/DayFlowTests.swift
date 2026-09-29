@@ -900,3 +900,60 @@ struct WeightTrendTests {
         #expect(abs((store.weightTrend(on: month) ?? 0) - 80.066) < 0.01)
     }
 }
+
+/// Предложения витаминов пересчитываются по отпечатку своих продуктов.
+///
+/// Перебор каталога стоил полторы десятых секунды на семидесяти продуктах и шёл
+/// на каждую запись еды — то есть внутри жеста. Теперь он идёт только когда
+/// продукты изменились, и это надо было закрепить: кэш, который не замечает
+/// правку, хуже медленного пересчёта.
+@MainActor
+@Suite(.serialized)
+struct VitaminOfferCacheTests {
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    @Test func anOfferAppearsWhenTheProductCanBorrow() throws {
+        // Своё молоко: в каталоге есть молоко с теми же цифрами и той же категорией.
+        store.addCustomFood(name: "Молоко моё", caloriesPer100g: 44,
+                            protein: 2.9, fat: 1.5, carbs: 4.7, category: .dairy)
+        let milk = try #require(store.customFoods.first)
+        #expect(store.foodsOfferedVitamins.contains(milk.id))
+    }
+
+    /// Правка цифр меняет ответ — значит отпечаток обязан её заметить.
+    @Test func editingTheNumbersRecountsTheOffer() throws {
+        store.addCustomFood(name: "Молоко моё", caloriesPer100g: 44,
+                            protein: 2.9, fat: 1.5, carbs: 4.7, category: .dairy)
+        let milk = try #require(store.customFoods.first)
+        #expect(store.foodsOfferedVitamins.contains(milk.id))
+
+        // Те же слова, но калорийность сгущёнки: молоко ему больше не донор.
+        store.updateCustomFood(milk, name: "Молоко моё", caloriesPer100g: 320,
+                               protein: 7.2, fat: 8.5, carbs: 56, category: .dairy)
+        #expect(!store.foodsOfferedVitamins.contains(milk.id),
+                "Кэш не заметил правку цифр")
+    }
+
+    /// Запись еды продукты не меняет — пересчитывать нечего, и ответ не должен
+    /// поехать.
+    @Test func addingFoodKeepsTheAnswer() throws {
+        store.addCustomFood(name: "Молоко моё", caloriesPer100g: 44,
+                            protein: 2.9, fat: 1.5, carbs: 4.7, category: .dairy)
+        let milk = try #require(store.customFoods.first)
+        let before = store.foodsOfferedVitamins
+        store.add(name: "Молоко моё", calories: 88, macros: Macros(protein: 5.8, fat: 3, carbs: 9.4), grams: 200)
+        #expect(store.foodsOfferedVitamins == before)
+        #expect(store.foodsOfferedVitamins.contains(milk.id))
+    }
+}

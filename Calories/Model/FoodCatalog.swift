@@ -94,6 +94,12 @@ nonisolated enum FoodCatalog {
         let food: CatalogFood
         let names: [String]
         let tokens: [String]
+        /// Состав, разобранный один раз при сборке индекса.
+        ///
+        /// `CatalogFood.micronutrients` собирает словарь заново на каждое
+        /// обращение, а подбор донора спрашивал его у всех двухсот девяноста
+        /// позиций на каждый свой продукт: полсекунды на обновление «Сегодня».
+        let micronutrients: Micronutrients
     }
 
     static var prefersRussian: Bool {
@@ -122,6 +128,15 @@ nonisolated enum FoodCatalog {
 
     private static let index: [Entry] = load()
 
+    /// Только те позиции, у которых есть что одолжить. Подбор донора перебирал
+    /// весь каталог и у каждой строки спрашивал состав — а состава нет у сорока
+    /// пяти позиций из двухсот девяноста трёх.
+    private static let donorIndex: [Entry] = index.filter { !$0.micronutrients.isEmpty }
+
+    /// Есть ли у этой строки каталога витамины. По идентификатору, чтобы не
+    /// разбирать словарь состава ради одного «да».
+    private static let idsWithMicronutrients: Set<Int> = Set(donorIndex.map(\.food.id))
+
     private static func load() -> [Entry] {
         guard let url = Bundle.main.url(forResource: "FoodCatalog", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -149,7 +164,8 @@ nonisolated enum FoodCatalog {
                 .sorted()
             return Entry(food: food,
                          names: names,
-                         tokens: names.flatMap { $0.split(separator: " ").map(String.init) })
+                         tokens: names.flatMap { $0.split(separator: " ").map(String.init) },
+                         micronutrients: food.micronutrients)
         }
     }
 
@@ -235,7 +251,7 @@ nonisolated enum FoodCatalog {
         guard !words.isEmpty else { return [] }
 
         var scored: [(rank: Int, length: Int, shortest: Int, food: CatalogFood)] = []
-        for entry in index where !entry.food.micronutrients.isEmpty {
+        for entry in donorIndex {
             var best: (rank: Int, length: Int)?
             for word in words {
                 guard let rank = rank(entry: entry, needle: word) else { continue }
@@ -321,7 +337,10 @@ nonisolated enum FoodCatalog {
     static func vitaminSources(matching query: String, limit: Int = 6) -> [CatalogFood] {
         let needle = normalize(query)
         guard !needle.isEmpty else { return [] }
-        return search(needle, limit: limit * 4).filter { !$0.micronutrients.isEmpty }.prefix(limit).map { $0 }
+        return search(needle, limit: limit * 4)
+            .filter { idsWithMicronutrients.contains($0.id) }
+            .prefix(limit)
+            .map { $0 }
     }
 
     private static func rank(entry: Entry, needle: String) -> Int? {

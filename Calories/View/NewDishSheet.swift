@@ -110,6 +110,48 @@ struct NewDishSheet: View {
                 TextField("Борщ, куриная грудка с рисом...", text: $name)
             }
 
+            // Состав сразу под названием: блюдо и есть свой состав, а порция
+            // и итог считаются уже из него — значит идут следом, а не перед ним.
+            Section("Состав") {
+                ForEach(ingredients) { ingredient in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(ingredient.foodName)
+                            Text("\(Int(ingredient.grams)) г")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text("\(ingredient.calories) ккал")
+                            .foregroundStyle(.secondary)
+                    }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            gramsEditText = String(format: "%g", ingredient.grams)
+                            gramsEditTarget = ingredient
+                        } label: {
+                            Label("Граммы", systemImage: "scalemass")
+                        }
+                        .tint(.blue)
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button(role: .destructive) {
+                            if let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) {
+                                ingredients.remove(at: idx)
+                            }
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+                }
+
+                Button {
+                    showingIngredientPicker = true
+                } label: {
+                    Label("Добавить ингредиент", systemImage: "plus")
+                }
+            }
+
             // Порция и итог — одно и то же, разнесённое по двум карточкам:
             // число калорий имеет смысл только применительно к порции. Готовят
             // на несколько раз, а едят один, поэтому и считаем на порцию, а не
@@ -165,46 +207,6 @@ struct NewDishSheet: View {
                     } else {
                         Text("Доля суточной нормы в порции. У натрия это доля потолка, а не цели.")
                     }
-                }
-            }
-
-            Section("Состав") {
-                ForEach(ingredients) { ingredient in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(ingredient.foodName)
-                            Text("\(Int(ingredient.grams)) г")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Text("\(ingredient.calories) ккал")
-                            .foregroundStyle(.secondary)
-                    }
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            gramsEditText = String(format: "%g", ingredient.grams)
-                            gramsEditTarget = ingredient
-                        } label: {
-                            Label("Граммы", systemImage: "scalemass")
-                        }
-                        .tint(.blue)
-                    }
-                    .swipeActions(edge: .trailing) {
-                        Button(role: .destructive) {
-                            if let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) {
-                                ingredients.remove(at: idx)
-                            }
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-                    }
-                }
-
-                Button {
-                    showingIngredientPicker = true
-                } label: {
-                    Label("Добавить ингредиент", systemImage: "plus")
                 }
             }
 

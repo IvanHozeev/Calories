@@ -121,6 +121,56 @@ struct NewFoodSheet: View {
             && !FoodCatalog.isEmpty && linkedCatalogID == nil && !micronutrients.hasVitamins
     }
 
+    /// Строка вписанного вещества.
+    ///
+    /// Имя — подписью слева, а не подсказкой поля: подсказка исчезает на первом
+    /// введённом символе, и раздел превращался в столбик чисел без имён. Доля
+    /// суточной нормы тут же, чтобы то же самое не искать ниже.
+    private func enteredRow(_ nutrient: Micronutrient) -> some View {
+        HStack(spacing: 8) {
+            Text(nutrient.title)
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+            TextField("0", text: binding(for: nutrient))
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+                .focused($focusedField, equals: .nutrient(nutrient))
+                .frame(maxWidth: 90)
+                .monospacedDigit()
+            Text(verbatim: nutrient.unit)
+                .foregroundStyle(.secondary)
+                .frame(width: 32, alignment: .leading)
+            Text(verbatim: shareText(nutrient))
+                .font(.app(.caption))
+                .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
+                .monospacedDigit()
+                .frame(width: 46, alignment: .trailing)
+        }
+        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive) { entered[nutrient] = nil } label: {
+                Label("Убрать", systemImage: "trash")
+            }
+        }
+    }
+
+    /// Доля суточной нормы в порции — то же число, что в списке состава.
+    private func shareText(_ nutrient: Micronutrient) -> String {
+        let per100g = (entered[nutrient] ?? "").decimalValueOrZero
+        guard per100g > 0 else { return "" }
+        let inServing = per100g * servingToSave / 100
+        return "· \(Int((inServing / nutrient.dailyValue * 100).rounded()))%"
+    }
+
+    /// Что показывать в списке состава.
+    ///
+    /// Вписанное руками стоит выше — полем, вместе с долей нормы, — и повторять
+    /// его здесь незачем: человек видел бы одни и те же числа дважды, в двух
+    /// разделах подряд.
+    private var shownNutrients: [Micronutrient] {
+        Micronutrient.allCases.filter { entered[$0] == nil && (micronutrients[$0] ?? 0) > 0 }
+    }
+
     /// Найденное руками — без проверки по цифрам: человек знает свою еду лучше.
     private var donorSearchResults: [CatalogFood] {
         let query = donorQuery.trimmingCharacters(in: .whitespaces)
@@ -468,19 +518,7 @@ private extension NewFoodSheet {
     var packageSection: some View {
     Section {
         ForEach(enteredNutrients, id: \.self) { nutrient in
-            HStack {
-                TextField(nutrient.title, text: binding(for: nutrient))
-                    .keyboardType(.decimalPad)
-                    .focused($focusedField, equals: .nutrient(nutrient))
-                Text(verbatim: nutrient.unit)
-                    .foregroundStyle(.secondary)
-            }
-            .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-            .swipeActions(edge: .trailing) {
-                Button(role: .destructive) { entered[nutrient] = nil } label: {
-                    Label("Убрать", systemImage: "trash")
-                }
-            }
+            enteredRow(nutrient)
         }
         if !missingNutrients.isEmpty {
             Menu {
@@ -564,9 +602,9 @@ private extension NewFoodSheet {
     /// Состав продукта — тот, что в итоге сохранится, и откуда он взялся.
     @ViewBuilder
     var vitaminsSection: some View {
-    if !micronutrients.isEmpty {
+    if !shownNutrients.isEmpty {
         Section {
-            ForEach(Micronutrient.allCases) { nutrient in
+            ForEach(shownNutrients) { nutrient in
                 // Ноль показывать нечего: он означает «в продукте
                 // этого нет», и строка с прочерком только удлиняет
                 // список, ничего не сообщая.

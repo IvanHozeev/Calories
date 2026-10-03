@@ -570,6 +570,13 @@ struct PlanView: View {
         }
     }
 
+    /// Насколько прибавка к норме должна быть заметной, чтобы о ней говорить.
+    ///
+    /// Полсотни килокалорий в день — это около пятидесяти граммов веса в неделю,
+    /// то есть меньше, чем шумит сам тренд. Предлагать такое значит звать
+    /// человека менять норму ради ничего.
+    static let meaningfulCalorieGain = 50
+
     /// Дата на экране плана: с годом, если она не в этом году.
     ///
     /// Без года прогноз на десять месяцев вперёд печатался как «4 августа» и
@@ -584,15 +591,21 @@ struct PlanView: View {
 
     @ViewBuilder
     private func aheadActions(plan: Plan, adherence: PlanAdherence) -> some View {
-        // Вариант 1: замедлить — есть больше, прийти к цели к исходной дате.
+        // Вариант 1: есть больше и всё равно прийти к цели в срок.
         //
-        // Только пока темп говорит то же, что и положение. Иначе выходил совет
-        // есть больше человеку, у которого вес и так стоит: по графику он
-        // впереди, а по темпу не дойдёт до цели вовсе.
+        // Только пока темп говорит то же, что и положение: иначе выходил совет
+        // есть больше человеку, у которого вес и так стоит.
+        //
+        // И только когда прибавка заметна. Раньше предложение показывалось
+        // всегда и выглядело бессмыслицей: «замедлить — и прийти к той же цели
+        // к той же дате». Человек не видел, что меняется, потому что менялась
+        // не цель, а размер тарелки, а про него текст и не говорил.
         if let recalibrated = adherence.recalibratedDailyCalories, !plan.cyclingEnabled,
-           adherence.projectionAgreesWithPlan {
+           adherence.projectionAgreesWithPlan,
+           recalibrated - store.dailyGoal >= Self.meaningfulCalorieGain {
+            let extra = recalibrated - store.dailyGoal
             VStack(alignment: .leading, spacing: 8) {
-                Text("Замедлить: при \(recalibrated) ккал/день придёшь к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(Self.planDate(plan.endDate)).")
+                Text("Можно есть на \(extra) ккал в день больше — \(recalibrated) ккал — и всё равно прийти к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(Self.planDate(plan.endDate)).")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {

@@ -434,7 +434,11 @@ struct AddEntryView: View {
     /// время приёма — то, что правят по-настоящему, — лежало строкой в списке.
     @ToolbarContentBuilder
     private var whenToolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
+        // Строка поиска и «когда» — одной нижней полосой. Место поиска среди
+        // пунктов тулбара приходится назвать явно: иначе система показывает
+        // либо поиск, либо пункты, и один из них пропадает.
+        DefaultToolbarItem(kind: .search, placement: .bottomBar)
+        ToolbarItem(placement: .bottomBar) {
             DatePicker("Когда", selection: $selectedDate, in: ...Date(),
                        displayedComponents: [.date, .hourAndMinute])
                 .labelsHidden()
@@ -479,7 +483,7 @@ struct AddEntryView: View {
                 Button("Отмена") {
                     withAnimation { draftItems.removeAll() }
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .accessibilityIdentifier("cancelMeal")
 
                 Button {
@@ -489,10 +493,16 @@ struct AddEntryView: View {
                         .frame(maxWidth: .infinity)
                         .fontWeight(.semibold)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
                 .accessibilityIdentifier("saveMeal")
             }
-            .padding(.horizontal, 16)
+            // Стекло и крупный размер — те же, что у кнопок в тулбаре: полоса
+            // переехала из тулбара, и выглядеть она должна так же, а не
+            // плоскими кнопками вполовину ниже.
+            .controlSize(.large)
+            // По краям строки поиска под ней, а не по краям экрана: иначе
+            // кнопки вылезают за неё и строка смотрится вставленной криво.
+            .padding(.horizontal, 28)
         }
     }
 

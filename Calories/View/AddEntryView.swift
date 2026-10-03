@@ -24,6 +24,8 @@ struct AddEntryView: View {
     /// Раскрыта ли строка поиска. Отдельно от `searchFocused`: то читает состояние
     /// у системы, а этим мы им управляем — возвращаем курсор после добавления.
     @State private var searchPresented = false
+    /// Открыт выбор даты и времени приёма.
+    @State private var showingWhen = false
     /// Продукт ушёл в приём пищи — список наверх, а курсор в поиск, если он там был.
     ///
     /// Флагом, а не действием на месте: пока экран порции закрывается, фокус
@@ -438,12 +440,27 @@ struct AddEntryView: View {
         // пунктов тулбара приходится назвать явно: иначе система показывает
         // либо поиск, либо пункты, и один из них пропадает.
         DefaultToolbarItem(kind: .search, placement: .bottomBar)
+        // Отдельной кнопкой, а не полем внутри той же капсулы: дата, вшитая
+        // в строку поиска, читалась как часть поиска.
+        ToolbarSpacer(.fixed, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
-            DatePicker("Когда", selection: $selectedDate, in: ...Date(),
-                       displayedComponents: [.date, .hourAndMinute])
-                .labelsHidden()
-                .font(.app(.footnote))
-                .accessibilityIdentifier("mealTimePicker")
+            Button {
+                showingWhen = true
+            } label: {
+                Label("Когда", systemImage: "clock")
+            }
+            .accessibilityIdentifier("mealTimePicker")
+            .popover(isPresented: $showingWhen) {
+                DatePicker("Когда", selection: $selectedDate, in: ...Date(),
+                           displayedComponents: [.date, .hourAndMinute])
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .frame(width: 320)
+                    .padding(.vertical, 8)
+                    // Поповером, а не листом: лист поверх листа — это второй
+                    // этаж модальности, и выход из него человек ищет заново.
+                    .presentationCompactAdaptation(.popover)
+            }
         }
     }
 

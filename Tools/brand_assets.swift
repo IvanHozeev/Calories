@@ -59,7 +59,7 @@ func linear(_ ctx: CGContext, _ colors: [CGColor], from: CGPoint, to: CGPoint) {
 let palette: [[CGColor]] = [
     [rgb(0xC08CFF), rgb(0x8B4DFF)],
     [rgb(0xFFA06B), rgb(0xFF6B3D)],
-    [rgb(0x23DCF0), rgb(0x0098C4)],
+    [rgb(0x23DCF0), rgb(0x04ACDA)],
 ]
 /// Доли дуг как у типичной сушки на 80 кг: углеводы 250 г, жиры 64 г, белки 160 г.
 let grams: [CGFloat] = [250, 64, 160]

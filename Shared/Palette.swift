@@ -29,9 +29,13 @@ enum Palette {
     static let kcal = Ramp(name: "kcal", pale: [Color(hex: 0x6ADFB9), Color(hex: 0x3AC09C)],
                            standard: [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)],
                            vivid: [Color(hex: 0x1EE1A2), Color(hex: 0x04C28F)])
-    static let protein = Ramp(name: "protein", pale: [Color(hex: 0x5DD9E6), Color(hex: 0x389FBC)],
-                              standard: [Color(hex: 0x23DCF0), Color(hex: 0x0098C4)],
-                              vivid: [Color(hex: 0x05D3E9), Color(hex: 0x0494BE)])
+    /// Дальний конец дуги раньше уходил в стальной синий: светимость падала
+    /// вдвое (0.58 → 0.29), вчетверо круче, чем у жиров, и белок читался
+    /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
+    /// у соседей, и цвет остаётся бирюзовым, а не синеет.
+    static let protein = Ramp(name: "protein", pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)],
+                              standard: [Color(hex: 0x23DCF0), Color(hex: 0x04ACDA)],
+                              vivid: [Color(hex: 0x05D3E9), Color(hex: 0x009FD0)])
     static let fat = Ramp(name: "fat", pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)],
                           standard: [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)],
                           vivid: [Color(hex: 0xF78C51), Color(hex: 0xF7511D)])

@@ -44,9 +44,12 @@ struct CaloriesEntry: TimelineEntry {
     }
     var remaining: Int { max(goal - consumed, 0) }
 
+    /// Тот же знак, что на «Сегодня»: три дуги макросов, калории — числом.
+    /// Отдельной раскладки «калории половиной круга» больше нет ни здесь, ни
+    /// в приложении.
     var segments: [WidgetRingSegment] {
-        WidgetRingLayout.today(consumed: consumed, goal: goal, protein: protein, fat: fat, carbs: carbs,
-                               proteinTarget: proteinTarget, fatTarget: fatTarget, carbsTarget: carbsTarget)
+        WidgetRingLayout.mark(protein: protein, fat: fat, carbs: carbs,
+                              proteinTarget: proteinTarget, fatTarget: fatTarget, carbsTarget: carbsTarget)
     }
 }
 
@@ -108,10 +111,10 @@ struct CaloriesWidgetEntryView: View {
     // толщина и акцент. Показываем «осталось», а не «съедено»: на блокировке
     // смотрят, чтобы решить, есть ли ещё запас или уже нет.
 
-    /// То же кольцо, одним цветом: форма узнаётся и без цвета.
+    /// Тот же знак, одним цветом: форма узнаётся и без цвета.
     private var circularView: some View {
         ZStack {
-            WidgetRing(segments: entry.segments, lineWidth: 5, rotation: -40)
+            WidgetRing(segments: entry.segments, lineWidth: 5)
             Text(verbatim: "\(entry.remaining)")
                 .font(.system(size: 13, weight: .semibold))
                 .minimumScaleFactor(0.5)
@@ -151,7 +154,7 @@ struct CaloriesWidgetEntryView: View {
 
     private func ringWithRemaining(lineWidth: CGFloat, number: CGFloat) -> some View {
         ZStack {
-            WidgetRing(segments: entry.segments, lineWidth: lineWidth, rotation: -40)
+            WidgetRing(segments: entry.segments, lineWidth: lineWidth)
             VStack(spacing: 0) {
                 Text(verbatim: "\(entry.remaining)")
                     .font(.system(size: number, weight: .bold))
@@ -187,8 +190,9 @@ struct CaloriesWidgetEntryView: View {
                 ringWithRemaining(lineWidth: side * 0.085, number: side * 0.2)
                     .frame(width: side, height: side)
 
-                // Как плашка макросов под кольцом: число с целью и тонкая
-                // полоска цветом дуги. Калории уже в кольце.
+                // Как плашка макросов под знаком в приложении: число с целью и
+                // тонкая полоска цветом дуги. Дуга показывает долю, строка —
+                // сами граммы, и на экране они стоят той же парой.
                 VStack(alignment: .leading, spacing: 14) {
                     statRow(letter: "Б", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
                     statRow(letter: "Ж", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)

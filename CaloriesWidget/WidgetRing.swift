@@ -78,34 +78,6 @@ enum WidgetRingLayout {
         return floored.map { $0 / sum }
     }
 
-    /// Кольцо «Сегодня»: калории на правой половине, макросы делят левую.
-    /// Поворот на −40° делается снаружи, как в приложении.
-    static func today(consumed: Int, goal: Int,
-                      protein: Double, fat: Double, carbs: Double,
-                      proteinTarget: Double, fatTarget: Double, carbsTarget: Double) -> [WidgetRingSegment] {
-        // Те же 12.5, что у кольца «Сегодня»: зазор между дугами читается как
-        // часть рисунка, и разница в полтора градуса делала виджет чуть более
-        // плотным, чем экран, с которого его узнают.
-        let gap = 12.5
-        let calorieProgress = goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0
-        var result = [WidgetRingSegment(id: "kcal", start: gap / 2, end: 180 - gap / 2, progress: calorieProgress,
-                                        colors: consumed > goal ? WidgetPalette.over : WidgetPalette.kcal)]
-        let parts: [(String, Double, [Color])] = [
-            ("protein", ratio(protein, proteinTarget), WidgetPalette.protein),
-            ("fat", ratio(fat, fatTarget), WidgetPalette.fat),
-            ("carbs", ratio(carbs, carbsTarget), WidgetPalette.carbs),
-        ]
-        let split = shares([proteinTarget, fatTarget, carbsTarget])
-        var cursor = 180.0
-        for (index, part) in parts.enumerated() {
-            let span = 180 * split[index]
-            result.append(WidgetRingSegment(id: part.0, start: cursor + gap / 2, end: cursor + span - gap / 2,
-                                            progress: part.1, colors: part.2))
-            cursor += span
-        }
-        return result
-    }
-
     /// Знак «С»: только макросы, разрыв повёрнут на 40° против часовой — как на
     /// иконке. Сверху вниз против часовой: углеводы, жиры, белки.
     ///

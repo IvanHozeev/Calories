@@ -352,16 +352,11 @@ struct AddEntryView: View {
             // самого searchable-контейнера, поэтому состояние забирает отсюда
             // невидимая подложка.
             .background(SearchActivityReader(isActive: $searchFocused))
-            // Строка живёт под тулбаром и вытягивается скроллом вниз.
-            //
-            // Внизу, как на вкладке еды, её поставить нельзя: системный элемент
-            // поиска в нижнем тулбаре внутри модального листа роняет весь лист —
-            // стоит добавить продукт с экрана порции, и приём закрывается
-            // целиком, не сохранившись. Своя строка вместо системной оказалась
-            // хуже системной, поэтому здесь она остаётся наверху.
+            // Размещение выбирает система: на iOS 26 она сама кладёт строку
+            // вниз, к большому пальцу, — туда, где к ней и возвращаются после
+            // каждого добавленного продукта.
             .searchable(text: $searchText,
                         isPresented: $searchPresented,
-                        placement: .navigationBarDrawer(displayMode: .automatic),
                         prompt: "Поиск еды")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
@@ -376,8 +371,7 @@ struct AddEntryView: View {
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { draftToolbar }
-            // Чтобы последняя строка не оставалась навсегда под кнопкой.
-            .contentMargins(.bottom, draftItems.isEmpty ? 0 : 64, for: .scrollContent)
+            .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in
                 servingScreen(target)
             }
@@ -465,18 +459,29 @@ struct AddEntryView: View {
                 Button("Отмена") { dismiss() }
             }
         }
+    }
+
+    /// Отмена и сохранение — полосой над строкой поиска.
+    ///
+    /// Не пунктами нижнего тулбара: там уже стоит системная строка поиска, и
+    /// система показывает что-то одно — при первом же добавленном продукте
+    /// поиск подменялся кнопками, а искать дальше было нечем. Полоса в
+    /// безопасной области — штатное для этого место: она встаёт над строкой
+    /// поиска, со своим стеклом, и обе остаются на экране.
+    ///
+    /// Отмена здесь — отмена набранного, а не выход с экрана: человек собирает
+    /// приём и передумал про то, что набрал. Выход остаётся наверху слева и
+    /// возвращается туда сам, как только приём опустел.
+    @ViewBuilder
+    private var draftBar: some View {
         if !draftItems.isEmpty {
-            ToolbarItem(placement: .bottomBar) {
-                // Отмена набранного, а не выход с экрана: человек собирает
-                // приём и передумал про то, что набрал, — а не про то, что
-                // вообще сюда зашёл. Выход остаётся наверху слева и
-                // возвращается туда сам, как только приём опустел.
+            HStack(spacing: 12) {
                 Button("Отмена") {
                     withAnimation { draftItems.removeAll() }
                 }
+                .buttonStyle(.bordered)
                 .accessibilityIdentifier("cancelMeal")
-            }
-            ToolbarItem(placement: .bottomBar) {
+
                 Button {
                     saveDraft()
                 } label: {
@@ -487,6 +492,7 @@ struct AddEntryView: View {
                 .buttonStyle(.borderedProminent)
                 .accessibilityIdentifier("saveMeal")
             }
+            .padding(.horizontal, 16)
         }
     }
 

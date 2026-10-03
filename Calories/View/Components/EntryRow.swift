@@ -5,9 +5,6 @@ import SwiftUI
 /// вместо слипшегося «Б6 Ж31 У58».
 struct EntryRow: View {
     let entry: FoodEntry
-    /// Значки категорий всех продуктов приёма пищи. Место под них занято всегда,
-    /// даже когда значков нет: иначе названия строк поедут по левому краю.
-    var icons: [String] = []
     /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
     var micros: [Micronutrient] = []
 
@@ -17,9 +14,20 @@ struct EntryRow: View {
         entry.protein > 0 || entry.fat > 0 || entry.carbs > 0
     }
 
+    /// Вес порции.
+    ///
+    /// У приёма из нескольких продуктов своего веса нет — он лежит у
+    /// составляющих, и раньше строка молчала о весе вовсе. Складываем их, но
+    /// только когда вес известен у всех: сумма двух из трёх — не вес приёма,
+    /// а полуправда.
     private var portionText: String? {
-        guard let grams = entry.grams, grams > 0 else { return nil }
-        return String(format: "%.0f \(String(localized: "г"))", grams)
+        if let grams = entry.grams, grams > 0 {
+            return String(format: "%.0f \(String(localized: "г"))", grams)
+        }
+        let parts = entry.components
+        guard !parts.isEmpty, parts.allSatisfy({ ($0.grams ?? 0) > 0 }) else { return nil }
+        let total = parts.reduce(0.0) { $0 + ($1.grams ?? 0) }
+        return String(format: "%.0f \(String(localized: "г"))", total)
     }
 
     var body: some View {
@@ -35,29 +43,18 @@ struct EntryRow: View {
                     .font(.app(.subheadline))
                     .lineLimit(1)
 
-                // Время, порция, значки и макросы — всё это подписи к еде, и
-                // разносить их по уровням незачем.
-                HStack(spacing: 6) {
-                    Text(entry.date, format: .dateTime.hour().minute())
+                // Вес — одной серой подписью под названием.
+                //
+                // Времени здесь больше нет: оно ушло в заголовок приёма пищи,
+                // где раньше дублировались калории единственной строки. Значков
+                // категорий тоже: вилка у приёма и корзина у своего продукта
+                // ничего не говорили о съеденном, а строку занимали.
+                if let portionText {
+                    Text(verbatim: portionText)
                         .foregroundStyle(.tertiary)
-                    if let portionText {
-                        Text(verbatim: portionText)
-                            .foregroundStyle(.tertiary)
-                    }
-                    if !icons.isEmpty {
-                        // Больше трёх не показываем: дальше они съедают строку,
-                        // а различать приёмы пищи по четвёртой иконке не выходит.
-                        HStack(spacing: 3) {
-                            ForEach(icons.prefix(3), id: \.self) { icon in
-                                Image(systemName: icon)
-                            }
-                        }
-                        .foregroundStyle(.tertiary)
-                        .accessibilityHidden(true)
-                    }
+                        .font(.app(.caption))
+                        .lineLimit(1)
                 }
-                .font(.app(.caption))
-                .lineLimit(1)
 
                 // Макросы — своей строкой. В одну кучу с временем и порцией
                 // они слипались: это числа, которые читают, а не подпись,

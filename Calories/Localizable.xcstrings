@@ -300,7 +300,9 @@
         }
       }
     },
-    "%@ осталось" : {},
+    "%@ осталось" : {
+
+    },
     "%@ ч" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1144,8 +1146,12 @@
         }
       }
     },
-    "%lld ккал/100г" : {},
-    "%lld лет" : {},
+    "%lld ккал/100г" : {
+
+    },
+    "%lld лет" : {
+
+    },
     "%lld мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1240,7 +1246,9 @@
         }
       }
     },
-    "%lld см" : {},
+    "%lld см" : {
+
+    },
     "%lld уд/мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1381,8 +1389,12 @@
         }
       }
     },
-    "%lld%%" : {},
-    "+%lld" : {},
+    "%lld%%" : {
+
+    },
+    "+%lld" : {
+
+    },
     "+%lld ккал из недели" : {
       "localizations" : {
         "ar" : {
@@ -5570,7 +5582,9 @@
         }
       }
     },
-    "В среднем" : {},
+    "В среднем" : {
+
+    },
     "В среднем %lld ккал в день — норма недели выдержана." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12867,6 +12881,7 @@
       }
     },
     "Дневные макросы" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -16248,7 +16263,9 @@
         }
       }
     },
-    "Записал %@ кг." : {},
+    "Записал %@ кг." : {
+
+    },
     "Записал %lld ккал. Норма на сегодня уже перебрана." : {
       "localizations" : {
         "ar" : {
@@ -16347,7 +16364,9 @@
         }
       }
     },
-    "Записано" : {},
+    "Записано" : {
+
+    },
     "Записано %lld дней из семи — маловато для выводов." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17137,7 +17156,9 @@
         }
       }
     },
-    "из %@ шагов" : {},
+    "из %@ шагов" : {
+
+    },
     "из %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17185,8 +17206,12 @@
         }
       }
     },
-    "из %lld ккал" : {},
-    "из 7" : {},
+    "из %lld ккал" : {
+
+    },
+    "из 7" : {
+
+    },
     "Из банка недели" : {
       "localizations" : {
         "ar" : {
@@ -17837,6 +17862,145 @@
         }
       }
     },
+    "Итого" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الإجمالي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gesamt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סה\"כ"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        }
+      }
+    },
+    "Итого жира" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إجمالي الدهون"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fett gesamt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fat total"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grasa total"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lipides au total"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סה״כ שומן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gordura no total"
+          }
+        }
+      }
+    },
+    "Йогурт натуральный" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "زبادي طبيعي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naturjoghurt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plain yogurt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yogur natural"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yaourt nature"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יוגורט טבעי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iogurte natural"
+          }
+        }
+      }
+    },
     "ИМТ" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -18163,6 +18327,7 @@
       }
     },
     "Источник" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -18442,52 +18607,6 @@
         }
       }
     },
-    "Итого" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الإجمالي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gesamt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סה\"כ"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        }
-      }
-    },
     "Итого белка" : {
       "localizations" : {
         "ar" : {
@@ -18530,52 +18649,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteína no total"
-          }
-        }
-      }
-    },
-    "Итого жира" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "إجمالي الدهون"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fett gesamt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fat total"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grasa total"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lipides au total"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "סה״כ שומן"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gordura no total"
           }
         }
       }
@@ -18761,53 +18834,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ioga"
-          }
-        }
-      }
-    },
-    "Йогурт натуральный" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "زبادي طبيعي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Naturjoghurt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plain yogurt"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yogur natural"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Yaourt nature"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "יוגורט טבעי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Iogurte natural"
           }
         }
       }
@@ -22477,53 +22503,6 @@
         }
       }
     },
-    "Можно есть на %lld ккал в день больше — %lld ккал — и всё равно прийти к %@ кг к %@." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يمكنك أن تأكل %1$lld سعرة إضافية يوميًا — %2$lld سعرة — وتصل مع ذلك إلى %3$@ كغ بحلول %4$@."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du kannst täglich %1$lld kcal mehr essen — %2$lld kcal — und kommst trotzdem bis %4$@ auf %3$@ kg."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can eat %1$lld kcal a day more — %2$lld kcal — and still reach %3$@ kg by %4$@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puedes comer %1$lld kcal más al día — %2$lld kcal — y aun así llegar a %3$@ kg el %4$@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tu peux manger %1$lld kcal de plus par jour — %2$lld kcal — et arriver quand même à %3$@ kg le %4$@."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשר לאכול %1$lld קלוריות ביום יותר — %2$lld קלוריות — ועדיין להגיע ל-%3$@ ק\"ג עד %4$@."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dá para comer %1$lld kcal a mais por dia — %2$lld kcal — e ainda assim chegar a %3$@ kg até %4$@."
-          }
-        }
-      }
-    },
     "ми" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -22944,6 +22923,53 @@
         }
       }
     },
+    "Можно есть на %lld ккал в день больше — %lld ккал — и всё равно прийти к %@ кг к %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك أن تأكل %1$lld سعرة إضافية يوميًا — %2$lld سعرة — وتصل مع ذلك إلى %3$@ كغ بحلول %4$@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst täglich %1$lld kcal mehr essen — %2$lld kcal — und kommst trotzdem bis %4$@ auf %3$@ kg."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can eat %1$lld kcal a day more — %2$lld kcal — and still reach %3$@ kg by %4$@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes comer %1$lld kcal más al día — %2$lld kcal — y aun así llegar a %3$@ kg el %4$@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux manger %1$lld kcal de plus par jour — %2$lld kcal — et arriver quand même à %3$@ kg le %4$@."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לאכול %1$lld קלוריות ביום יותר — %2$lld קלוריות — ועדיין להגיע ל-%3$@ ק\"ג עד %4$@."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dá para comer %1$lld kcal a mais por dia — %2$lld kcal — e ainda assim chegar a %3$@ kg até %4$@."
+          }
+        }
+      }
+    },
     "Можно и то, и другое" : {
       "localizations" : {
         "ar" : {
@@ -23175,6 +23201,7 @@
       }
     },
     "Мои" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -25902,7 +25929,9 @@
         }
       }
     },
-    "Недель: %lld" : {},
+    "Недель: %lld" : {
+
+    },
     "Недельный баланс" : {
       "localizations" : {
         "ar" : {
@@ -27893,6 +27922,53 @@
         }
       }
     },
+    "Норма углеводов" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حصة الكربوهيدرات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kohlenhydrat-Ziel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carb target"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de carbohidratos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Objectif de glucides"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד פחמימות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meta de carboidratos"
+          }
+        }
+      }
+    },
     "Нужен для расчёта базового обмена" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -29152,6 +29228,7 @@
       }
     },
     "Онлайн" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -44049,7 +44126,9 @@
         }
       }
     },
-    "Ставить %lld ккал/день" : {},
+    "Ставить %lld ккал/день" : {
+
+    },
     "Старт плана" : {
       "localizations" : {
         "ar" : {
@@ -45580,53 +45659,6 @@
         }
       }
     },
-    "Темп за фазу" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الوتيرة خلال المرحلة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tempo in dieser Phase"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rate in this phase"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritmo en esta fase"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rythme sur cette phase"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "קצב בשלב הזה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ritmo nesta fase"
-          }
-        }
-      }
-    },
     "Тёмная" : {
       "localizations" : {
         "ar" : {
@@ -45716,6 +45748,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ritmo"
+          }
+        }
+      }
+    },
+    "Темп за фазу" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوتيرة خلال المرحلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempo in dieser Phase"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate in this phase"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo en esta fase"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rythme sur cette phase"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קצב בשלב הזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo nesta fase"
           }
         }
       }
@@ -47210,7 +47289,9 @@
         }
       }
     },
-    "уд/мин" : {},
+    "уд/мин" : {
+
+    },
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -48934,7 +49015,9 @@
         }
       }
     },
-    "ч" : {},
+    "ч" : {
+
+    },
     "Часть состава перенесена с похожей еды — это оценка." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -49775,7 +49858,9 @@
         }
       }
     },
-    "шагов из %@" : {},
+    "шагов из %@" : {
+
+    },
     "шагов/день" : {
       "extractionState" : "manual",
       "localizations" : {

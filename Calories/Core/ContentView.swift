@@ -169,7 +169,7 @@ struct ContentView: View {
                         Button {
                             todaySheet = .weight
                         } label: {
-                            Label("Взвеситься", systemImage: "figure.stand")
+                            Label("Взвеситься", systemImage: "scalemass")
                         }
                         Button {
                             showingMeasurements = true
@@ -287,6 +287,19 @@ struct ContentView: View {
             }
             }
         }
+    }
+}
+
+extension ContentView {
+    /// Время приёма пищи: когда ел. Если записей несколько — от первой до
+    /// последней, потому что приём редко укладывается в минуту.
+    static func mealTime(_ entries: [FoodEntry]) -> String {
+        let dates = entries.map(\.date).sorted()
+        guard let first = dates.first, let last = dates.last else { return "" }
+        let time = Date.FormatStyle.dateTime.hour().minute()
+        let start = first.formatted(time)
+        let end = last.formatted(time)
+        return start == end ? start : "\(start) – \(end)"
     }
 }
 
@@ -443,7 +456,7 @@ private extension ContentView {
                     todaySheet = .weight
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "figure.stand")
+                        Image(systemName: "scalemass")
                             .font(.app(.footnote))
                         Text("Не забудь взвеситься сегодня")
                             .font(.app(.caption))
@@ -486,7 +499,6 @@ private extension ContentView {
                 ForEach(group.entries) { entry in
                     NavigationLink(value: entry) {
                         EntryRow(entry: entry,
-                                 icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
                                  micros: store.notableMicronutrients(for: entry))
                     }
                     // Копия первой: на полном свайпе срабатывает
@@ -552,16 +564,17 @@ private extension ContentView {
                     }
                 }
             } header: {
-                // Итог по приёму пищи прямо в заголовке — иначе, чтобы понять,
-                // во сколько обошёлся обед, приходится складывать строки глазами.
-                // Тихо, как подписи недели и макросов: название
-                // приёма пищи — главное, итог рядом мельче.
+                // Справа время приёма, а не его калории.
+                //
+                // У приёма из одной записи число повторялось дважды подряд —
+                // в заголовке и в самой строке. Время же из строки ушло сюда:
+                // во сколько ел — свойство приёма, а не куска еды.
                 HStack(alignment: .firstTextBaseline) {
                     Text(LocalizedStringKey(group.period.rawValue))
                         .font(.app(.subheadline, weight: .semibold))
                         .foregroundStyle(.primary)
                     Spacer()
-                    Text(verbatim: "\(group.entries.reduce(0) { $0 + $1.calories }) \(String(localized: "ккал"))")
+                    Text(verbatim: Self.mealTime(group.entries))
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()

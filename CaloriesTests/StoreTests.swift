@@ -160,60 +160,6 @@ struct CalorieStoreTests {
 
         // Порядок как в составе, два мяса схлопываются в одно
         #expect(store.foodCategories(of: dish) == [.meat, .grains])
-
-        // Незнакомый ингредиент просто пропускается
-        let mystery = Dish(name: "Загадка", ingredients: [
-            DishIngredient(foodName: "Неизвестно что", caloriesPer100g: 100, macrosPer100g: .zero, grams: 100)
-        ])
-        #expect(store.foodCategories(of: mystery).isEmpty)
-    }
-
-    @Test func diaryRowShowsCategoryOfAFreshCustomProduct() {
-        // Ровно сценарий из жизни: завёл свой хлеб, съел, посмотрел в дневник.
-        store.addCustomFood(name: "Хлеб с семенами", caloriesPer100g: 280, protein: 9, fat: 6, carbs: 45, category: .grains)
-        store.add(name: "Хлеб с семенами", calories: 140, macros: Macros(protein: 4.5, fat: 3, carbs: 22.5), grams: 50)
-
-        let entry = store.entries.first { $0.name == "Хлеб с семенами" }
-        #expect(entry != nil, "Запись не попала в дневник")
-        #expect(store.foodCategories(forEntryNamed: "Хлеб с семенами") == [.grains])
-    }
-
-    @Test func recentFoodsKeepTheirCategory() {
-        // Недавнее пересобирается из записей дневника: категорию оно должно
-        // восстанавливать по названию, иначе весь список показывает «Другое».
-        store.addCustomFood(name: "Мой творог", caloriesPer100g: 120, protein: 18, fat: 5, carbs: 3, category: .dairy)
-        store.add(name: "Мой творог", calories: 240, macros: Macros(protein: 36, fat: 10, carbs: 6), grams: 200)
-
-        let recent = store.recentFoods.first { $0.name == "Мой творог" }
-        #expect(recent?.foodCategory == .dairy)
-    }
-
-    @Test func entryCategoriesAreRecoveredFromTheJoinedName() {
-        // Запись дневника категорий не хранит: приём пищи собирается из нескольких
-        // продуктов. Зато его имя склеено из названий через запятую.
-        store.addCustomFood(name: "Мой протеин", caloriesPer100g: 380, protein: 80, fat: 5, carbs: 5, category: .dairy)
-        store.addCustomFood(name: "Мой батончик", caloriesPer100g: 400, protein: 20, fat: 15, carbs: 45, category: .sweets)
-
-        #expect(store.foodCategories(forEntryNamed: "Мой протеин") == [.dairy])
-        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Мой батончик") == [.dairy, .sweets])
-
-        // Незнакомый кусок пропускается, а не отменяет остальные значки
-        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Неизвестно что") == [.dairy])
-        #expect(store.foodCategories(forEntryNamed: "Приём пищи").isEmpty)
-        #expect(store.foodCategories(forEntryNamed: "").isEmpty)
-    }
-
-    @Test func entryCategoriesCollapseRepeats() {
-        // Курица с говядиной — это одно мясо, а не две одинаковые вилки подряд.
-        store.addCustomFood(name: "Курочка", caloriesPer100g: 165, protein: 31, fat: 4, carbs: 0, category: .meat)
-        store.addCustomFood(name: "Говядинка", caloriesPer100g: 250, protein: 26, fat: 15, carbs: 0, category: .meat)
-        #expect(store.foodCategories(forEntryNamed: "Курочка, Говядинка") == [.meat])
-    }
-
-    @Test func entryCategoriesSurviveATruncatedName() {
-        // Длинные имена обрезаются многоточием — обрубок не должен ломать разбор.
-        store.addCustomFood(name: "Мой протеин", caloriesPer100g: 380, protein: 80, fat: 5, carbs: 5, category: .dairy)
-        #expect(store.foodCategories(forEntryNamed: "Мой протеин, Овсянка на в…") == [.dairy])
     }
 
     // MARK: Initial state

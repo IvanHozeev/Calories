@@ -369,7 +369,6 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        pickFromMenu("sourceFilter", item: "Database", in: app)
         let search = revealSearchField(in: app)
         XCTAssertTrue(search.waitForExistence(timeout: 5))
         search.tap()
@@ -477,9 +476,6 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        // База продуктов живёт на своей вкладке источника
-        pickFromMenu("sourceFilter", item: "Database", in: app)
-
         // До продукта добираемся поиском, а не пролистыванием. Раньше во
         // встроенной базе было шесть десятков позиций и «Миндаль» находился
         // за десяток свайпов; теперь их почти три сотни, разложенных по
@@ -556,40 +552,42 @@ final class CaloriesUITests: XCTestCase {
                       "После «Готово» экран приёма пищи не вернулся")
     }
 
-    /// Источники разведены сегментами, чтобы поиск шёл по одному, а не по всем сразу.
+    /// Поиск идёт сразу по всему: недавнее, свои продукты, блюда и база.
+    ///
+    /// Раньше источник выбирался кнопкой в тулбаре, и поиск шёл по одному
+    /// выбранному. Кнопка ушла: при наборе запроса показываются все источники
+    /// разом, а внешняя база — по отдельной кнопке в результатах, потому что
+    /// она ходит в сеть.
     @MainActor
-    func testFoodSourcesAreSeparated() {
+    func testSearchCoversEverySourceAtOnce() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
         openAddEntry(in: app)
 
-        let sources = app.descendants(matching: .any).matching(identifier: "sourceFilter").firstMatch
-        XCTAssertTrue(sources.waitForExistence(timeout: 5), "Нет переключателя источника")
-        sources.tap()
-        for name in ["Recent", "Mine", "Database", "Online"] {
-            XCTAssertTrue(app.buttons[name].firstMatch.exists, "Нет источника «\(name)»")
-        }
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "sourceFilter").firstMatch.exists,
+                       "Переключателя источника на экране быть не должно")
 
-        // База разложена по категориям и появляется только на своей вкладке
-        app.buttons["Database"].firstMatch.tap()
-        let header = app.staticTexts["Meat and poultry"]
-        scrollTo(header, in: app)
-        XCTAssertTrue(header.exists, "База не открылась на своей вкладке")
-
-        let second = app.staticTexts["Fish and seafood"]
-        scrollTo(second, in: app)
-        XCTAssertTrue(second.exists, "Категории должны идти отдельными секциями")
-
-        // Поиск проверяем последним: он забирает фокус, а сегменты прячутся уже
-        // по курсору в строке, и вернуть их внутри теста нечем — «Отмена» на этом
-        // экране не одна, и попасть можно не в ту.
         let search = revealSearchField(in: app)
-        if search.exists {
-            search.tap()
-            search.typeText("Beef")
-            XCTAssertTrue(app.staticTexts["Beef"].waitForExistence(timeout: 5),
-                          "Поиск должен находить продукт, не переключая источник")
-        }
+        XCTAssertTrue(search.waitForExistence(timeout: 5), "Не показалась строка поиска")
+        search.tap()
+        search.typeText("Beef")
+
+        XCTAssertTrue(app.staticTexts["Beef"].firstMatch.waitForExistence(timeout: 5),
+                      "Продукт из базы должен находиться без выбора источника")
+        let usda = app.buttons["Search the USDA database"]
+        XCTAssertTrue(usda.exists || app.staticTexts["Search the USDA database"].exists,
+                      "Во внешнюю базу должна вести кнопка прямо из результатов")
+    }
+
+    /// Дата и время приёма стоят в тулбаре, на месте прежнего выбора источника.
+    @MainActor
+    func testMealTimeLivesInTheToolbar() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let picker = app.descendants(matching: .any).matching(identifier: "mealTimePicker").firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 5), "Нет выбора времени приёма")
     }
 
     /// Выбор шрифта должен доезжать до интерфейса, а не только сохраняться.

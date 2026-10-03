@@ -148,9 +148,10 @@ struct BodyView: View {
         let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
         let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
 
+        // Белок и жир здесь не повторяем: их «итого» стоит двумя секциями выше,
+        // в самих нормах, где их и задают. Новое число тут одно — углеводы,
+        // которых никто не задаёт: они остаток нормы калорий.
         Section {
-            macroBudgetRow("Белки", grams: protein, color: MacroKind.protein.color)
-            macroBudgetRow("Жиры", grams: fat, color: MacroKind.fat.color)
             if carbs > 0 {
                 macroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
             } else {
@@ -165,7 +166,7 @@ struct BodyView: View {
                 .foregroundStyle(.orange)
             }
         } header: {
-            Text("Дневные макросы")
+            Text("Норма углеводов")
         } footer: {
             explain("Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они.").map { Text($0) }
         }
@@ -220,12 +221,16 @@ struct BodyView: View {
             // означал бы вечный дефицит по настройке, о которой забыли.
             premiumRow
             
-            // Приёмы пищи — в профиле, а не в настройках приложения: это про
-            // режим человека, как подъём, отбой и число приёмов, а не про то,
-            // как приложение выглядит и куда кладёт копии.
-            nutritionSection
-
             bodyParametersSection
+
+            // Питание сразу перед нормами белка и жира: расписание приёмов и
+            // эти нормы — про одно и то же, про еду. Параметры тела идут
+            // раньше, потому что из них считаются и те и другие.
+            //
+            // Приёмы пищи при этом в профиле, а не в настройках приложения: это
+            // про режим человека, как подъём и отбой, а не про то, как
+            // приложение выглядит и куда кладёт копии.
+            nutritionSection
             
             // Пока норма идёт от факта, множитель активности ни на что не
             // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
@@ -243,7 +248,6 @@ struct BodyView: View {
         }
         .sheet(isPresented: $showingBasis) {
             CalculationBasisSheet(store: store, activityLevel: $activityLevel)
-                .presentationDetents([.medium])
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -284,7 +288,7 @@ struct BodyView: View {
                 Button {
                     showingWeighIn = true
                 } label: {
-                    Image(systemName: "figure.stand")
+                    Image(systemName: "scalemass")
                 }
                 .accessibilityLabel("Взвеситься")
                 .accessibilityIdentifier("openWeighIn")
@@ -598,8 +602,19 @@ private struct CalculationBasisSheet: View {
     @Binding var activityLevel: ActivityLevel
     @Environment(\.dismiss) private var dismiss
 
+    /// Множитель активности спрашиваем, только пока расход считается по
+    /// формуле: измеренный расход уже знает и работу, и зал.
+    private var showsActivityPicker: Bool {
+        !(store.usesAdaptiveTDEE && store.adaptiveTDEE != nil)
+    }
 
-
+    /// Высота листа — под содержимое, а не половина экрана.
+    ///
+    /// С `.medium` переключатель с подписью занимал треть листа, а остальное
+    /// было пустым; с выключенным «по факту» туда же не влезали пять уровней
+    /// активности, и лист приходилось листать. Поэтому две высоты: система
+    /// подрежет большую сама, если экран ниже.
+    private var sheetHeight: CGFloat { showsActivityPicker ? 545 : 215 }
 
 
 
@@ -623,7 +638,7 @@ private struct CalculationBasisSheet: View {
                     }
                 }
 
-                if !(store.usesAdaptiveTDEE && store.adaptiveTDEE != nil) {
+                if showsActivityPicker {
                     Section {
                         Picker("Уровень активности", selection: $activityLevel) {
                             ForEach(ActivityLevel.allCases) { level in
@@ -641,6 +656,10 @@ private struct CalculationBasisSheet: View {
             }
             .glassRow()
             .listStyle(.insetGrouped)
+            // Отступ под заголовком — свой: штатный у сгруппированного списка
+            // рассчитан на длинный экран, а в листе на два пункта он читался
+            // как пустая строка между заголовком и переключателем.
+            .contentMargins(.top, 8, for: .scrollContent)
             .navigationTitle("Как считаем")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -649,6 +668,9 @@ private struct CalculationBasisSheet: View {
                 }
             }
         }
+        // Высота живёт здесь, а не на месте показа: она зависит от того, что
+        // сейчас в листе, и при переключении «по факту» меняется вместе с ним.
+        .presentationDetents([.height(sheetHeight)])
     }
 }
 

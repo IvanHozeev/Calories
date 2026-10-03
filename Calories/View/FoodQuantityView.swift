@@ -42,6 +42,9 @@ struct FoodQuantityView: View {
         Int((Double(food.caloriesPer100g) * grams / 100).rounded())
     }
 
+    /// Ровно сто граммов: тогда съеденное и цена ста граммов — одно число.
+    private var isHundredGrams: Bool { abs(grams - 100) < 0.5 }
+
     private var macros: Macros {
         food.macrosPer100g.portion(grams: grams)
     }
@@ -54,18 +57,20 @@ struct FoodQuantityView: View {
             // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
             Section {
                 VStack(spacing: 8) {
-                    Text(food.name)
-                        .font(.app(.subheadline, weight: .semibold))
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
+                    // Название ушло в заголовок экрана: оно и так стоит
+                    // над карточкой, а второй копией забирало строку у чисел.
                     Text("\(calories) ккал")
                         .font(.app(size: 28, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
-                    Text("\(food.caloriesPer100g) ккал / 100 г")
-                        .font(.app(.caption2))
-                        .foregroundStyle(.secondary)
+                    // Цена ста граммов — только когда она отличается от
+                    // съеденного: на ста граммах это было то же число дважды.
+                    if !isHundredGrams {
+                        Text("\(food.caloriesPer100g) ккал / 100 г")
+                            .font(.app(.caption2))
+                            .foregroundStyle(.secondary)
+                    }
 
                     MacrosRow(macros: macros)
                         .padding(.top, 2)
@@ -73,6 +78,11 @@ struct FoodQuantityView: View {
                     MacroSplitBar(macros: macros)
                         .padding(.top, 4)
                         .padding(.horizontal, 4)
+
+                    // Свойство еды — последней строкой карточки, под БЖУ:
+                    // сначала числа, потом вывод из них.
+                    FoodTraitLines(traits: food.traits)
+                        .padding(.top, 8)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
@@ -100,9 +110,6 @@ struct FoodQuantityView: View {
                 }
             }
 
-            // Чем продукт хорош или опасен на сушке, словами: в списке это
-            // только значок, а здесь есть место объяснить.
-            FoodTraitsSection(traits: food.traits)
         }
         .glassRow()
         // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
@@ -125,7 +132,7 @@ struct FoodQuantityView: View {
             try? await Task.sleep(for: .milliseconds(320))
             gramsFocused = true
         }
-        .navigationTitle("Порция")
+        .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             // Пополнение справочника — редкое действие, поэтому оно иконкой наверху.
@@ -247,6 +254,9 @@ struct DishQuantityView: View {
         Int((Double(dish.caloriesPer100g) * grams / 100).rounded())
     }
 
+    /// Ровно сто граммов: тогда съеденное и цена ста граммов — одно число.
+    private var isHundredGrams: Bool { abs(grams - 100) < 0.5 }
+
     private var macros: Macros {
         dish.macrosPer100g.portion(grams: grams)
     }
@@ -255,18 +265,24 @@ struct DishQuantityView: View {
         Form {
             Section {
                 VStack(spacing: 8) {
-                    Text(dish.name)
-                        .font(.app(.subheadline, weight: .semibold))
+                    // Название — в заголовке экрана, как и у продукта.
                     Text("\(calories) ккал")
                         .font(.app(size: 28, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .foregroundStyle(.green)
-                    Text("\(dish.caloriesPer100g) ккал / 100 г")
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
+                    if !isHundredGrams {
+                        Text("\(dish.caloriesPer100g) ккал / 100 г")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    }
+
                     MacrosRow(macros: macros)
                         .padding(.top, 4)
+
+                    // Как у продукта: свойство последней строкой.
+                    FoodTraitLines(traits: dish.traits)
+                        .padding(.top, 8)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
@@ -296,7 +312,7 @@ struct DishQuantityView: View {
 
             // Чем продукт хорош или опасен на сушке, словами: в списке это
             // только значок, а здесь есть место объяснить.
-            FoodTraitsSection(traits: dish.traits)
+
 
             if !dish.ingredients.isEmpty {
                 Section("Состав") {
@@ -332,7 +348,7 @@ struct DishQuantityView: View {
             try? await Task.sleep(for: .milliseconds(320))
             gramsFocused = true
         }
-        .navigationTitle("Порция")
+        .navigationTitle(dish.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !isPushed {

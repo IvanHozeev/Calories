@@ -45,8 +45,7 @@ struct DayDetailView: View {
                             EditEntrySheet(store: store, entry: entry, isEmbedded: true)
                         } label: {
                             EntryRow(entry: entry,
-                                     icons: store.foodCategories(forEntryNamed: entry.name).map(\.icon),
-                                     micros: store.notableMicronutrients(for: entry))
+                                         micros: store.notableMicronutrients(for: entry))
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {

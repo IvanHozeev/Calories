@@ -143,6 +143,38 @@ struct FoodRow: View {
 }
 
 /// Свойства продукта строками с пояснением — для экрана порции.
+/// Те же свойства, но строками внутри карточки, а не отдельной секцией.
+///
+/// На экране порции они стоят рядом с числом, которое объясняют. Отдельной
+/// карточкой над всем остальным они уезжали под шапку, едва поднималась
+/// клавиатура, — то есть именно тогда, когда человек на этот экран и смотрит.
+struct FoodTraitLines: View {
+    let traits: [FoodTrait]
+
+    var body: some View {
+        if !traits.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(traits) { trait in
+                    Label {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: trait.title)
+                                .font(.app(.footnote, weight: .semibold))
+                            Text(verbatim: trait.explanation)
+                                .font(.app(.caption2))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    } icon: {
+                        Image(systemName: trait.symbol)
+                            .foregroundStyle(trait.color)
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
 struct FoodTraitsSection: View {
     let traits: [FoodTrait]
 

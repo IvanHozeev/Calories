@@ -97,10 +97,10 @@ struct SettingsView: View {
 
     var body: some View {
         List {
-            // Порядок: подписка, вид, объяснения, системное — и только потом
-            // данные. Оформление и язык ищут часто, а выгрузка копии нужна раз
-            // в жизни телефона.
-            subscriptionSection
+            // Порядок: вид, объяснения, системное — и только потом данные.
+            // Оформление и язык ищут часто, а выгрузка копии нужна раз в жизни
+            // телефона. Подписка уехала в тулбар: это состояние, а не настройка,
+            // и целая секция ради одной строки занимала верх экрана.
             appearanceSection
             explanationSection
             systemSection
@@ -116,6 +116,7 @@ struct SettingsView: View {
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .navigationTitle("Настройки")
+        .toolbar { subscriptionToolbar }
         .fileExporter(
             isPresented: $showingExporter,
             document: exportDocument,
@@ -569,20 +570,24 @@ private func rowLabel(_ title: LocalizedStringKey, systemImage: String) -> some 
 // по отступам, а компилятор на такой форме однажды уже сдался — тогда из него
 // вынесли строки оформления. Теперь каждый раздел — свойство с явным типом.
 private extension SettingsView {
-    /// Подписка — первой: за ней сюда и заходят чаще всего.
-    var subscriptionSection: some View {
-    Section("Подписка") {
-        if store.isPremium {
-            Label("Premium активен", systemImage: "checkmark.seal.fill")
-                .foregroundStyle(.green)
-        } else {
+    /// Подписка — значком в шапке, а не секцией списка.
+    ///
+    /// Это состояние, а не настройка: с активной подпиской менять в ней нечего,
+    /// а целая секция с единственной строкой занимала верх экрана, отодвигая
+    /// то, ради чего в настройки заходят. Значок говорит то же самое одним
+    /// взглядом, а нажатие ведёт туда же, куда вела строка.
+    @ToolbarContentBuilder
+    var subscriptionToolbar: some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 showingPaywall = true
             } label: {
-                Label("Оформить Premium", systemImage: "sparkles")
+                Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
+                    .foregroundStyle(store.isPremium ? .green : .blue)
             }
+            .accessibilityIdentifier("subscription")
+            .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
         }
-    }
     }
 
     /// Оформление: тема, шрифт, цвет и звук кольца. Это про вид, а не про то,

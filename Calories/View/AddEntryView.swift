@@ -50,7 +50,6 @@ struct AddEntryView: View {
     /// Почему внешний поиск ничего не дал. Пустой список без объяснения читается
     /// как «такого продукта нет», хотя на деле источник недоступен или не настроен.
     @State private var searchFailure: String?
-    @State private var source: FoodSource = .recent
     @State private var serving: ServingTarget?
     /// Запрошен ли внешний поиск для текущего запроса. Сбрасывается при его смене:
     /// сеть дёргаем только когда о ней попросили, а не на каждую букву.
@@ -73,36 +72,6 @@ struct AddEntryView: View {
             case .food(let food, _, _): return "food-\(food.id.uuidString)"
             case .dish(let dish):       return "dish-\(dish.id.uuidString)"
             case .edit(let itemID):     return "edit-\(itemID.uuidString)"
-            }
-        }
-    }
-
-    /// Откуда берём продукты. Разделение не косметическое: пока источники шли
-    /// сплошным списком, поиск по своим продуктам приходилось выискивать глазами
-    /// среди сотен строк базы, а сетевой запрос уходил на каждое нажатие клавиши.
-    enum FoodSource: String, CaseIterable, Identifiable {
-        case recent, mine, database, online
-        var id: String { rawValue }
-        var title: String {
-            switch self {
-            case .recent:   return String(localized: "Недавнее")
-            case .mine:     return String(localized: "Мои")
-            case .database: return String(localized: "База")
-            case .online:   return String(localized: "Онлайн")
-            }
-        }
-
-        /// Значок источника — он же значок кнопки в тулбаре: по нему видно,
-        /// где ищешь, не открывая меню.
-        var icon: String {
-            switch self {
-            // Часы со стрелкой — привычный знак недавнего. Чтобы он ни с чем
-            // не спорил, у строки времени приёма своей иконки больше нет:
-            // подпись «Когда» и так всё говорит.
-            case .recent:   return "clock.arrow.circlepath"
-            case .mine:     return "person.crop.circle"
-            case .database: return "books.vertical"
-            case .online:   return "globe"
             }
         }
     }
@@ -357,7 +326,6 @@ struct AddEntryView: View {
                 // человек замечал ошибку уже в дневнике. Строка занимает одну
                 // высоту и молчит, пока время сегодняшнее; сдвинутое время
                 // подсвечивается оранжевым — это уже предупреждение.
-                mealTimeSection
 
                 // Пока в строке поиска что-то есть, найденное идёт выше набранного:
                 // смотрят сейчас на результаты, а список уже положенного только
@@ -398,13 +366,13 @@ struct AddEntryView: View {
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
-            .task(id: "\(source.rawValue)|\(wantsOnlineSearch)|\(searchText)") {
+            .task(id: "\(wantsOnlineSearch)|\(searchText)") {
                 await searchOnlineIfNeeded()
             }
             .scrollDismissesKeyboard(.interactively)
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
-            .toolbar { sourceToolbar }
+            .toolbar { whenToolbar }
             .navigationTitle("Приём пищи")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { draftToolbar }
@@ -460,51 +428,24 @@ struct AddEntryView: View {
     }
 
     /// Набранный приём пищи.
-    /// Время приёма — на самом экране, а не за переходом.
-    ///
-    /// Оно жило в отдельном листе, потому что «меняют это редко»: еда обычно
-    /// записывается тогда же, когда съедена. Но редко — не значит никогда, а за
-    /// переходом его не видно вовсе, и человек замечал ошибку уже в дневнике.
-    /// Строка занимает одну высоту и молчит, пока время сегодняшнее; сдвинутое
-    /// подсвечивается оранжевым — это уже предупреждение.
-    ///
-    /// Пока ищут, строки нет: на экране в этот момент решают, что съели, а не
-    /// когда.
-    @ViewBuilder
-    private var mealTimeSection: some View {
-        if !isSearching, !searchFocused {
-            Section {
-                DatePicker(selection: $selectedDate, in: ...Date(),
-                           displayedComponents: [.date, .hourAndMinute]) {
-                    Text("Когда")
-                        .font(.app(.footnote))
-                        .foregroundStyle(timeAdjusted ? Color.orange : .secondary)
-                }
-                .font(.app(.footnote))
-                .accessibilityIdentifier("mealTimePicker")
-                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                .listRowBackground(Color.clear)
-            }
-        }
-    }
 
     /// Источник еды — меню, а не полоса сегментов над списком: четыре подписи в
     /// сегментах обрезались, а строку экрана занимали всегда, хотя источник
     /// переключают редко.
+    /// Когда ел — в тулбаре, на месте прежнего выбора источника.
+    ///
+    /// Выбор источника убран: поиск и так идёт сразу по недавнему, своим
+    /// продуктам, блюдам и базе, а внешняя база открывается кнопкой в
+    /// результатах. Кнопка, которая ничего не меняет, занимала верх экрана, а
+    /// время приёма — то, что правят по-настоящему, — лежало строкой в списке.
     @ToolbarContentBuilder
-    private var sourceToolbar: some ToolbarContent {
+    private var whenToolbar: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Menu {
-                Picker("Источник", selection: $source) {
-                    ForEach(FoodSource.allCases) { item in
-                        Label(item.title, systemImage: item.icon).tag(item)
-                    }
-                }
-            } label: {
-                Image(systemName: source.icon)
-            }
-            .accessibilityIdentifier("sourceFilter")
-            .accessibilityLabel("Источник")
+            DatePicker("Когда", selection: $selectedDate, in: ...Date(),
+                       displayedComponents: [.date, .hourAndMinute])
+                .labelsHidden()
+                .font(.app(.footnote))
+                .accessibilityIdentifier("mealTimePicker")
         }
     }
 
@@ -526,8 +467,14 @@ struct AddEntryView: View {
         }
         if !draftItems.isEmpty {
             ToolbarItem(placement: .bottomBar) {
-                Button("Отмена") { dismiss() }
-                    .accessibilityIdentifier("cancelMeal")
+                // Отмена набранного, а не выход с экрана: человек собирает
+                // приём и передумал про то, что набрал, — а не про то, что
+                // вообще сюда зашёл. Выход остаётся наверху слева и
+                // возвращается туда сам, как только приём опустел.
+                Button("Отмена") {
+                    withAnimation { draftItems.removeAll() }
+                }
+                .accessibilityIdentifier("cancelMeal")
             }
             ToolbarItem(placement: .bottomBar) {
                 Button {
@@ -551,7 +498,7 @@ struct AddEntryView: View {
     /// «нет сети» нельзя.
     private func searchOnlineIfNeeded() async {
         debouncedSearch = searchText
-        guard source == .online || wantsOnlineSearch else {
+        guard wantsOnlineSearch else {
             isSearchingOFF = false
             return
         }
@@ -728,7 +675,7 @@ struct AddEntryView: View {
         // полностью нужно редко, а попасть в оставшиеся 400 ккал полдника —
         // каждый день. Приложение знает и остаток, и что человек обычно ест,
         // поэтому подбирает порцию само: «Творог 5%, 180 г».
-        if source == .recent, !isSearching, !suggestions.isEmpty {
+        if !isSearching, !suggestions.isEmpty {
             Section {
                 ForEach(suggestions) { item in
                     suggestionRow(item)
@@ -740,7 +687,7 @@ struct AddEntryView: View {
             }
         }
 
-        if isSearching || source == .recent, !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
+        if !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
             Section("Недавнее") {
                 ForEach(shownRecentFoods) { food in
                     foodRow(food)
@@ -755,7 +702,7 @@ struct AddEntryView: View {
             }
         }
 
-        if isSearching || source == .mine, !shownDishes.isEmpty {
+        if isSearching, !shownDishes.isEmpty {
             Section("Мои блюда") {
                 ForEach(shownDishes) { dish in
                     dishRow(dish)
@@ -786,7 +733,7 @@ struct AddEntryView: View {
         // не меньше, чем в базе. «Недавнее» намеренно оставлено плоским —
         // там порядок и есть смысл: сверху последнее съеденное, и
         // группировка сломала бы именно то, ради чего туда заходят.
-        if isSearching || source == .mine {
+        if isSearching {
             ForEach(FoodCategory.grouped(shownCustomFoods), id: \.0) { category, foods in
                 Section {
                     ForEach(foods) { food in
@@ -815,13 +762,13 @@ struct AddEntryView: View {
             }
         }
 
-        if source == .online || (isSearching && wantsOnlineSearch) {
+        if isSearching, wantsOnlineSearch {
             offSearchSection
         }
 
         // Пока сегменты спрятаны поиском, до внешней базы иначе не добраться,
         // а ради неё всё и затевалось: только там есть микронутриенты.
-        if isSearching, !wantsOnlineSearch, source != .online {
+        if isSearching, !wantsOnlineSearch {
             Section {
                 Button {
                     wantsOnlineSearch = true
@@ -833,7 +780,7 @@ struct AddEntryView: View {
             }
         }
 
-        if isSearching || source == .database {
+        if isSearching {
             if filteredBuiltInFoods.isEmpty {
                 Section("База продуктов") {
                     Text("Ничего не найдено")
@@ -981,19 +928,16 @@ struct AddEntryView: View {
 
     /// Раскладывает продукты по категориям в порядке самого перечисления —
     /// он осмысленный (мясо, рыба, молочное...), в отличие от алфавитного.
-    /// Пусто ли в выбранном источнике при текущем запросе.
+    /// Пусто ли на экране при текущем запросе.
     private var currentSourceIsEmpty: Bool {
         if isSearching {
             return recentFoodItems.isEmpty && recentDishItems.isEmpty
                 && filteredCustomFoods.isEmpty && filteredDishes.isEmpty
                 && filteredBuiltInFoods.isEmpty
         }
-        switch source {
-        case .recent:   return recentFoodItems.isEmpty && recentDishItems.isEmpty
-        case .mine:     return filteredCustomFoods.isEmpty && filteredDishes.isEmpty
-        case .database: return filteredBuiltInFoods.isEmpty
-        case .online:   return offResults.isEmpty
-        }
+        // Без поиска на экране недавнее и подсказки: пусто, когда пусто и то
+        // и другое.
+        return recentFoodItems.isEmpty && recentDishItems.isEmpty && suggestions.isEmpty
     }
 
     private func isSaved(_ food: FoodItem) -> Bool {

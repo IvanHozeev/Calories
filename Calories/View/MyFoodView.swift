@@ -6,7 +6,9 @@ struct MyFoodView: View {
     @State private var showingNewFood = false
     @State private var showingNewDish = false
     @State private var showingScanner = false
-    @State private var tab: Tab = .dishes
+    /// Свои продукты первыми: блюд у человека единицы, а продуктов десятки, и
+    /// заходят сюда чаще всего за ними.
+    @State private var tab: Tab = .products
     @State private var query = ""
     /// nil — показывать все категории.
     @State private var categoryFilter: FoodCategory?
@@ -28,7 +30,9 @@ struct MyFoodView: View {
         var icon: String {
             switch self {
             case .dishes:   return "frying.pan"
-            case .products: return "person.crop.circle"
+            // Корзина, а не человечек: человечек читается как профиль, а это
+            // не «я», это моя еда.
+            case .products: return "basket"
             case .database: return "books.vertical"
             }
         }

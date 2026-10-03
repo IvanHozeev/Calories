@@ -31,27 +31,6 @@ extension CalorieStore {
         categoryByFoodName[name]
     }
 
-    /// Категории всех продуктов, вошедших в приём пищи.
-    ///
-    /// Сама запись их не хранит: приём пищи собирается из нескольких продуктов,
-    /// и одной категории у него нет. Зато имя склеено из названий через
-    /// запятую — по нему состав и восстанавливается. Длинное имя обрезается
-    /// многоточием, поэтому последний кусок может не совпасть ни с чем: тогда
-    /// он просто пропускается, а не портит остальные значки.
-    func foodCategories(forEntryNamed name: String) -> [FoodCategory] {
-        var seen: Set<FoodCategory> = []
-        var found: [FoodCategory] = []
-        for part in name.components(separatedBy: ", ") {
-            let trimmed = part.trimmingCharacters(in: .whitespacesAndNewlines)
-                .trimmingCharacters(in: CharacterSet(charactersIn: "…"))
-            guard !trimmed.isEmpty else { continue }
-            guard let match = category(ofProductNamed: trimmed),
-                  seen.insert(match).inserted else { continue }
-            found.append(match)
-        }
-        return found
-    }
-
     /// Есть ли уже такой продукт среди своих. По названию: у продукта из базы
     /// и у своей копии разные идентификаторы, а человек различает их по имени.
     func isInMyFoods(_ food: FoodItem) -> Bool {

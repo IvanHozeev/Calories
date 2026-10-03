@@ -410,10 +410,43 @@ struct HealthInventoryView: View {
 }
 #endif
 
-/// Ползунок насыщенности палитры.
+/// Три названные насыщенности — концы ползунка и его середина.
+///
+/// Безымянный ползунок заставлял угадывать: человек тянет ручку и смотрит, что
+/// выйдет. Названия говорят, что получится, до того как трогаешь, а ползунок
+/// остаётся под ними для тех, кому между названиями.
+enum PalettePreset: String, CaseIterable, Identifiable {
+    case soft, standard, bold
+
+    var id: String { rawValue }
+
+    var value: Double {
+        switch self {
+        case .soft:     return PaletteIntensity.range.lowerBound
+        case .standard: return PaletteIntensity.standard
+        case .bold:     return PaletteIntensity.range.upperBound
+        }
+    }
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .soft:     return "Пастель"
+        case .standard: return "Стандарт"
+        case .bold:     return "Контраст"
+        }
+    }
+
+    /// Пресет, на котором стоит ползунок, или `nil` — значит, его сдвинули
+    /// между ними, и подсвечивать нечего.
+    static func matching(_ intensity: Double) -> PalettePreset? {
+        allCases.first { abs($0.value - intensity) < 0.01 }
+    }
+}
+
+/// Насыщенность палитры: три названия и ползунок под ними.
 private extension SettingsView {
     var intensityRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Label("Насыщенность", systemImage: "drop.halffull")
                 Spacer()
@@ -425,6 +458,17 @@ private extension SettingsView {
                     Circle().fill(ProgressRing.carbColors[0]).frame(width: 14, height: 14)
                 }
             }
+            Picker("Насыщенность", selection: Binding(
+                get: { PalettePreset.matching(paletteIntensity) },
+                set: { if let preset = $0 { paletteIntensity = preset.value } }
+            )) {
+                ForEach(PalettePreset.allCases) { preset in
+                    Text(preset.title).tag(Optional(preset))
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .accessibilityIdentifier("palettePreset")
             Slider(value: $paletteIntensity,
                    in: PaletteIntensity.range.lowerBound...PaletteIntensity.range.upperBound)
                 .accessibilityIdentifier("paletteIntensity")

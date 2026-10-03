@@ -1036,3 +1036,83 @@ struct EditPropagationTests {
         #expect(store.entries.first?.calories == 350)
     }
 }
+
+// MARK: - Удаление блюда
+
+/// Съеденное блюдо связано с рецептом по имени: по нему запись берёт витамины,
+/// категории и свежие цифры. Удаление рецепта рвало эту связь, и запись
+/// оставалась числом без состава — борщ, съеденный в мае, терял и овощи, и мясо.
+@MainActor
+struct DishDeletionTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext, defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    /// Борщ на килограмм: 600 г свёклы по 43 и 400 г говядины по 250.
+    private func borsch() throws -> Dish {
+        store.addDish(name: "Борщ", ingredients: [
+            DishIngredient(foodName: "Свёкла", caloriesPer100g: 43,
+                           macrosPer100g: Macros(protein: 1.6, fat: 0.2, carbs: 9.6), grams: 600),
+            DishIngredient(foodName: "Говядина", caloriesPer100g: 250,
+                           macrosPer100g: Macros(protein: 26, fat: 16, carbs: 0), grams: 400),
+        ])
+        return try #require(store.dishes.first)
+    }
+
+    @Test func deletingADishLeavesItsCompositionInTheDiary() throws {
+        let dish = try borsch()
+        store.add(name: dish.name, calories: dish.totalCalories, macros: dish.totalMacros, grams: 1000)
+        store.deleteDish(dish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.components.map(\.name) == ["Свёкла", "Говядина"])
+        #expect(entry.components.first?.grams == 600)
+        #expect(entry.calories == 258 + 1000)
+    }
+
+    @Test func halfAPortionKeepsHalfOfEachIngredient() throws {
+        let dish = try borsch()
+        store.add(name: dish.name, calories: 629, macros: dish.macrosPer100g.portion(grams: 500), grams: 500)
+        store.deleteDish(dish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.components.count == 2)
+        #expect(entry.components[0].grams == 300)
+        #expect(entry.components[1].grams == 200)
+        #expect(entry.calories == 129 + 500)
+    }
+
+    /// Блюдо внутри приёма из нескольких частей разворачивается на своём месте,
+    /// а соседи остаются как были.
+    @Test func aDishInsideAMealIsExpandedInPlace() throws {
+        let dish = try borsch()
+        store.add(name: "Обед", calories: 0, macros: .zero, components: [
+            EntryComponent(name: "Хлеб", calories: 140, macros: Macros(protein: 4, fat: 1, carbs: 28), grams: 50),
+            EntryComponent(name: dish.name, calories: 629, macros: dish.macrosPer100g.portion(grams: 500), grams: 500),
+        ])
+        store.deleteDish(dish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.components.map(\.name) == ["Хлеб", "Свёкла", "Говядина"])
+        #expect(entry.calories == 140 + 129 + 500)
+    }
+
+    /// Записанному без граммов пересчитывать нечего — и трогать его нельзя.
+    @Test func anEntryWithoutWeightIsLeftAlone() throws {
+        let dish = try borsch()
+        store.add(name: dish.name, calories: 300, macros: .zero)
+        store.deleteDish(dish)
+
+        let entry = try #require(store.entries.first)
+        #expect(entry.components.isEmpty)
+        #expect(entry.calories == 300)
+    }
+}

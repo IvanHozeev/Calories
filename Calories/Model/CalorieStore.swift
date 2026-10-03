@@ -1330,10 +1330,62 @@ final class CalorieStore {
     }
 
     func deleteDish(_ dish: Dish) {
+        bakeCompositionIntoEntries(of: dish)
         context.delete(dish)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes.removeAll { $0.id == dish.id }
         rebuildCaches()
+    }
+
+    /// Впечатать состав блюда в записи, где его ели, — перед тем как удалить.
+    ///
+    /// Съеденное связано с блюдом по имени: по нему запись берёт витамины,
+    /// категории и свежие цифры, когда блюдо правят. После удаления имя
+    /// перестаёт на что-либо указывать, и запись остаётся числом без состава:
+    /// борщ, съеденный в мае, теряет и овощи, и мясо, хотя человек их съел.
+    ///
+    /// Поэтому состав переносится в саму запись, пересчитанный на съеденную
+    /// массу. Записи «просто 300 ккал», где граммов нет, не трогаем —
+    /// пересчитывать нечего.
+    private func bakeCompositionIntoEntries(of dish: Dish) {
+        let batch = dish.totalGrams
+        guard batch > 0, !dish.ingredients.isEmpty else { return }
+
+        func parts(forEaten grams: Double) -> [EntryComponent] {
+            let share = grams / batch
+            return dish.ingredients.map { ingredient in
+                let eaten = ingredient.grams * share
+                return EntryComponent(
+                    name: ingredient.foodName,
+                    calories: Int((Double(ingredient.caloriesPer100g) * eaten / 100).rounded()),
+                    macros: ingredient.macrosPer100g.portion(grams: eaten),
+                    grams: eaten)
+            }
+        }
+
+        for entry in entries {
+            if entry.components.isEmpty {
+                guard entry.name == dish.name, let grams = entry.grams, grams > 0 else { continue }
+                entry.components = parts(forEaten: grams)
+            } else {
+                var expanded: [EntryComponent] = []
+                var changed = false
+                for part in entry.components {
+                    guard part.name == dish.name, let grams = part.grams, grams > 0 else {
+                        expanded.append(part)
+                        continue
+                    }
+                    expanded.append(contentsOf: parts(forEaten: grams))
+                    changed = true
+                }
+                guard changed else { continue }
+                entry.components = expanded
+            }
+            // Итог пересобираем из частей — как и всюду, где состав меняется:
+            // иначе сумма частей и число записи разойдутся на округления.
+            entry.calories = entry.components.reduce(0) { $0 + $1.calories }
+            entry.macros = entry.components.reduce(Macros.zero) { $0 + $1.macros }
+        }
     }
 
     func addWeight(_ kg: Double, date: Date = Date()) {

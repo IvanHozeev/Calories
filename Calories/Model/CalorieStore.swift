@@ -41,6 +41,32 @@ final class CalorieStore {
     /// а не формулой, его держат ради «замедлить»: та пишет сюда пересчитанное.
     private(set) var dailyGoalPhaseID: UUID?
 
+    /// Откуда взялась дневная норма — и, значит, что с ней делать, когда
+    /// изменится расход.
+    ///
+    /// Норма идёт за расходом: он измеряется по дневнику и весам, и застывшее
+    /// число быстро перестаёт значить то, что обещает. Но «идёт за расходом» —
+    /// не то же самое, что «возвращается к плановой»: человек, принявший на
+    /// экране плана предложение есть больше, выбрал темп, а не одно число, и
+    /// подтянувшиеся шаги не должны отменять его выбор.
+    enum GoalSource: String {
+        /// Плановая норма фазы: столько, сколько велит заданный темп.
+        case plan
+        /// Принятый пересчёт «ставить N ккал/день»: столько, сколько нужно,
+        /// чтобы прийти к цели фазы в срок от сегодняшнего веса.
+        case recalibrated
+        /// Своё число, вписанное руками. Формулы за ним нет, и трогать его
+        /// нельзя: это не расчёт, который можно повторить.
+        case manual
+    }
+
+    private(set) var dailyGoalSource: GoalSource = .plan
+
+    private func setGoalSource(_ source: GoalSource) {
+        dailyGoalSource = source
+        defaults.set(source.rawValue, forKey: Keys.goalSource)
+    }
+
     private func stampDailyGoalPhase() {
         dailyGoalPhaseID = plan?.phase(on: Date())?.id
         defaults.set(dailyGoalPhaseID?.uuidString, forKey: Keys.goalPhase)
@@ -205,6 +231,7 @@ final class CalorieStore {
         static let activityBaselineDay = "activity_baseline_day"
         static let usesAdaptiveTDEE = "use_adaptive_tdee"
         static let goalSyncedTDEE = "goal_synced_tdee"
+        static let goalSource = "daily_goal_source"
         static let phaseHistory = "phase_history"
         static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
@@ -222,6 +249,8 @@ final class CalorieStore {
         self.defaults = defaults
         self.groupDefaults = groupDefaults
         self.dailyGoal = defaults.object(forKey: Keys.goal) as? Int ?? 2000
+        self.dailyGoalSource = (defaults.string(forKey: Keys.goalSource)
+                                .flatMap(GoalSource.init(rawValue:))) ?? .plan
         self.usesAdaptiveTDEE = defaults.object(forKey: Keys.usesAdaptiveTDEE) as? Bool ?? true
         self.phaseHistory = (defaults.data(forKey: Keys.phaseHistory))
             .flatMap { try? JSONDecoder().decode([PhaseRecord].self, from: $0) } ?? []
@@ -301,11 +330,34 @@ final class CalorieStore {
     /// ккал/день» с экрана плана затиралась бы на каждой перестройке кэшей.
     private func syncGoalWithExpenditure() {
         guard let plan, profile != nil else { return }
+        // Своё число не трогаем: за ним нет формулы, которую можно пересчитать,
+        // а молча заменить его — значит отменить решение человека. Если из-за
+        // расхода оно устарело, об этом скажет экран плана своим предложением.
+        guard dailyGoalSource != .manual else { return }
         let expenditure = (workingTDEE / 5).rounded() * 5
         guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
         defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
-        let target = plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
+        // Принятый пересчёт пересчитываем так же, как его считал экран плана:
+        // человек согласился приходить к цели фазы в срок, а не на конкретное
+        // число. Иначе подтянувшиеся шаги возвращали норму к плановой, и
+        // прибавка, принятая утром, пропадала без следа.
+        let target = dailyGoalSource == .recalibrated
+            ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
+            : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
         if target != dailyGoal { dailyGoal = target }
+    }
+
+    /// Сколько есть, чтобы прийти к цели идущей фазы в срок от нынешнего веса.
+    ///
+    /// Считается здесь, а не берётся у `adherence`: сверка собирается раньше
+    /// расхода, и на том самом пересчёте, ради которого всё затевается, у неё
+    /// в руках вчерашний расход.
+    func recalibratedGoal(now: Date = Date()) -> Int? {
+        guard let adherence, let weight = adherence.actualWeightToday else { return nil }
+        let remainingDays = adherence.phaseEnd.timeIntervalSince(now) / 86400
+        guard remainingDays > 0 else { return nil }
+        let dailyDelta = (adherence.phaseTargetWeightKg - weight) * Plan.kcalPerKg / remainingDays
+        return Int((workingTDEE + dailyDelta).rounded())
     }
 
     /// Пересчитывает всё производное от записей дневника.
@@ -903,6 +955,7 @@ final class CalorieStore {
         if let data = try? JSONEncoder().encode(newProfile) {
             defaults.set(data, forKey: Keys.profile)
         }
+        if syncDailyGoal { setGoalSource(.plan) }
         if syncDailyGoal, let plan {
             // Норма плана — производная от TDEE, а он падает вместе с весом.
             // Раньше при выключенном цикле она замерзала на дате старта, и к середине
@@ -924,6 +977,21 @@ final class CalorieStore {
         }
     }
 
+    /// Принять пересчёт с экрана плана: «ставить N ккал/день».
+    ///
+    /// Запоминаем не только число, но и то, откуда оно: дальше норма пойдёт
+    /// за расходом по этому же правилу, а не вернётся к плановой.
+    func acceptRecalibratedGoal(_ calories: Int) {
+        setGoalSource(.recalibrated)
+        dailyGoal = calories
+    }
+
+    /// Своё число вместо расчётного — из профиля.
+    func setManualGoal(_ calories: Int) {
+        setGoalSource(.manual)
+        dailyGoal = calories
+    }
+
     /// Запускает план — считает точную дневную норму под срок/целевой вес и делает её текущей целью.
     ///
     /// Гейт премиума живёт здесь, а не только в UI: раньше единственной защитой была
@@ -942,6 +1010,9 @@ final class CalorieStore {
         // Цель считается от расхода, а сам профиль тут не нужен — важно лишь,
         // что он есть: без него считать не от чего.
         if profile != nil {
+            // Новый план — новый договор: прежний принятый пересчёт к нему
+            // отношения не имеет.
+            setGoalSource(.plan)
             dailyGoal = newPlan.dailyCalorieTarget(tdee: workingTDEE)
         }
         rebuildCaches()

@@ -379,3 +379,79 @@ struct PlanProjectionHonestyTests {
                           direction: 1, phaseEnd: phaseEnd).deeperTarget == nil)
     }
 }
+
+// MARK: - Откуда взялась дневная норма
+
+/// Принятое на экране плана «ставить N ккал/день» не должно пропадать от того,
+/// что подтянулись шаги.
+///
+/// Так это и выглядело: человек принимал прибавку утром, днём обновлял данные
+/// браслета, расход менялся — и норма возвращалась к плановой, а кнопка на
+/// экране плана снова становилась активной, будто предложение никто не
+/// принимал.
+@MainActor
+struct GoalSourceTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(
+            UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0)
+        )
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
+                             durationWeeks: 10, startWeightKg: 77, targetWeightKg: 73))
+        // Опережает план: вес ниже ожидаемого, значит есть что предложить.
+        store.addWeight(75.4, date: Date().addingTimeInterval(-7 * 86_400))
+        store.addWeight(74.8, date: Date())
+    }
+
+    /// Перестройка кэшей после смены расхода — то, что делает обновление шагов.
+    private func expenditureChanges() {
+        store.usesAdaptiveTDEE.toggle()
+    }
+
+    @Test func anAcceptedRecalibrationOutlivesAStepsRefresh() throws {
+        let recalibrated = try #require(store.recalibratedGoal())
+        store.acceptRecalibratedGoal(recalibrated)
+        #expect(store.dailyGoal == recalibrated)
+
+        expenditureChanges()
+
+        #expect(store.dailyGoalSource == .recalibrated)
+        #expect(store.dailyGoal == store.recalibratedGoal(),
+                "Норма пересчитана тем же правилом, а не возвращена к плановой")
+        let plan = try #require(store.plan)
+        #expect(store.dailyGoal != plan.dailyCalorieTarget(for: Date(), tdee: store.workingTDEE),
+                "Плановая норма — это как раз то, что человек отказался держать")
+    }
+
+    @Test func aHandWrittenGoalIsNotRecalculatedAtAll() {
+        store.setManualGoal(1777)
+        expenditureChanges()
+        #expect(store.dailyGoal == 1777)
+        #expect(store.dailyGoalSource == .manual)
+    }
+
+    @Test func aPlainPlanGoalStillFollowsExpenditure() throws {
+        let plan = try #require(store.plan)
+        #expect(store.dailyGoalSource == .plan)
+        expenditureChanges()
+        #expect(store.dailyGoal == plan.dailyCalorieTarget(for: Date(), tdee: store.workingTDEE))
+    }
+
+    @Test func aNewPlanForgetsTheAcceptedRecalibration() throws {
+        store.acceptRecalibratedGoal(try #require(store.recalibratedGoal()))
+        store.startPlan(Plan(startDate: Date(), durationWeeks: 8, startWeightKg: 74.8, targetWeightKg: 72))
+        #expect(store.dailyGoalSource == .plan)
+    }
+}

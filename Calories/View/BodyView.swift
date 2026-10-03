@@ -257,7 +257,9 @@ struct BodyView: View {
             Button("Отмена", role: .cancel) { }
             Button("Сохранить") {
                 if let value = Int(goalText), value > 0 {
-                    store.dailyGoal = value
+                    // Своё число живёт, пока его не перебьёт правка профиля:
+                    // расход его больше не двигает.
+                    store.setManualGoal(value)
                 }
             }
         } message: {

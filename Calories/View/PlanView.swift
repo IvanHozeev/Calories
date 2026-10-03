@@ -609,7 +609,9 @@ struct PlanView: View {
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
-                    store.dailyGoal = recalibrated
+                    // Через стор, а не присваиванием: он запомнит, что норму
+                    // выбрали пересчётом, и дальше поведёт её так же.
+                    store.acceptRecalibratedGoal(recalibrated)
                 }
                 .buttonStyle(.bordered)
             }
@@ -653,7 +655,7 @@ struct PlanView: View {
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
-                    store.dailyGoal = recalibrated
+                    store.acceptRecalibratedGoal(recalibrated)
                 }
                 .buttonStyle(.bordered)
             }

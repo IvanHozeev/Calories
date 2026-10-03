@@ -108,9 +108,13 @@ enum WidgetRingLayout {
 
     /// Знак «С»: только макросы, разрыв повёрнут на 40° против часовой — как на
     /// иконке. Сверху вниз против часовой: углеводы, жиры, белки.
+    ///
+    /// Разрыв и зазоры те же, что у кольца «Сегодня» в приложении: с тех пор
+    /// как экран сам стал знаком, виджет и экран обязаны совпасть — иначе на
+    /// домашнем экране и в приложении рядом стоят два похожих, но разных знака.
     static func mark(protein: Double, fat: Double, carbs: Double,
                      proteinTarget: Double, fatTarget: Double, carbsTarget: Double) -> [WidgetRingSegment] {
-        let opening = 60.0, gap = 16.0, rotation = 40.0
+        let opening = 84.0, gap = 16.0, rotation = 40.0
         let split = shares([carbsTarget, fatTarget, proteinTarget])
         let parts: [(String, Double, [Color])] = [
             ("carbs", ratio(carbs, carbsTarget), WidgetPalette.carbs),
@@ -123,7 +127,6 @@ enum WidgetRingLayout {
             let end = cursor
             let start = end - available * split[index]
             cursor = start - gap
-            // Заливка идёт от верхнего конца «С» вниз — как читают букву.
             return WidgetRingSegment(id: part.0, start: start, end: end, progress: part.1, colors: part.2)
         }
     }
@@ -136,8 +139,6 @@ struct WidgetRing: View {
     let segments: [WidgetRingSegment]
     var lineWidth: CGFloat
     var rotation: Double = 0
-    /// Заливка идёт от конца дуги к началу — для «С», которую читают сверху.
-    var fillsFromEnd = false
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     /// Градиент вдоль дуги. У почти замкнутого кольца начало и конец дуги в
@@ -161,10 +162,10 @@ struct WidgetRing: View {
                     .stroke(renderingMode == .fullColor ? segment.colors[0].opacity(0.15) : Color.white.opacity(0.25),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 if segment.progress > 0 {
+                    // Заливка растёт от начала дуги — туда же, куда она растёт
+                    // на заставке: знак заполняется снизу вверх.
                     let span = (segment.end - segment.start) * segment.progress
-                    let arc = fillsFromEnd
-                        ? CircleArc(start: segment.end - span, end: segment.end)
-                        : CircleArc(start: segment.start, end: segment.start + span)
+                    let arc = CircleArc(start: segment.start, end: segment.start + span)
                     if renderingMode == .fullColor {
                         arc.stroke(gradient(for: segment),
                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))

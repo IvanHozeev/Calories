@@ -54,13 +54,17 @@ struct RingView<Label: View>: View {
     }
 }
 
-/// Кольцо дня: калории и макросы, каждый своей дугой-прогрессом.
+/// Кольцо дня — это знак приложения, собранный из макросов.
 ///
-/// Калории — половина круга: это главное число дня. Вторая половина делится
-/// между белками, жирами и углеводами по их целям в граммах, поэтому у типичной
-/// сушки самая длинная дуга углеводная, а самая короткая — жировая. Длина дуги
-/// — сколько нужно съесть, заливка — сколько уже съедено. Тот же знак на иконке
-/// и лаунч-скрине, только там без калорий: буква «С».
+/// Три дуги: углеводы, жиры, белки. Длина каждой — её норма в граммах, заливка
+/// — сколько уже съедено, поэтому у типичной сушки самая длинная дуга
+/// углеводная, а самая короткая жировая. Разрыв и порядок дуг те же, что на
+/// иконке и лаунч-скрине: это один и тот же знак, а не похожий.
+///
+/// Калорийной дуги здесь нет намеренно. Она занимала половину круга и говорила
+/// ровно то же, что крупное число в центре, — а остальное кольцо приходилось
+/// делить на оставшуюся половину, и знак переставал быть знаком. Калории
+/// остались числом, которое и так читают первым.
 ///
 /// Нажатие открывает добавление приёма пищи. Еду записывают по нескольку раз
 /// в день, а на план смотрят раз в неделю: самая крупная мишень экрана должна
@@ -85,19 +89,25 @@ struct ProgressRing: View {
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
-    /// Поворот как у знака на иконке: разрыв между концом калорий и началом
-    /// углеводов уходит на ту же диагональ, и кольцо узнаётся как тот же знак.
+    /// Поворот как у знака на иконке: разрыв уходит на ту же диагональ,
+    /// между часом и двумя, и кольцо узнаётся как тот же знак.
     private static let rotation: Double = -40
 
-    /// Под знак иконки: там дуга плотная, и тонкое кольцо на «Сегодня»
-    /// читалось как другой знак, хотя это один и тот же. Толще прежних 14,
-    /// но всё ещё заметно тоньше иконки — в середине живёт крупная цифра
-    /// остатка, и у неё должен остаться воздух.
-    private let lineWidth: CGFloat = 17
-    private let size: CGFloat = 230
-    /// Зазор между дугами в градусах — с запасом на скруглённые концы.
-    /// Растёт вместе с толщиной: у толстой дуги скругления съедают больше.
-    private let gap: Double = 12.5
+    /// Верхний конец «С» в неповёрнутой рамке. После поворота на -40° он
+    /// встаёт туда же, где у знака, — на 14° от двенадцати часов.
+    private static let topEnd: Double = 54
+    /// Разрыв знака. Шире, чем у иконки: там дуга плотная и короткий разрыв
+    /// читается, а здесь линия тоньше — с узким разрывом буква закрывалась.
+    private static let opening: Double = 84
+
+    /// Тоньше иконки и чуть толще прежнего кольца: внутри живёт крупное число
+    /// остатка, и ему нужен воздух, но дуга из трёх макросов должна читаться
+    /// как знак, а не как волосяная линия.
+    private let lineWidth: CGFloat = 20
+    /// Меньше прежних 230, но ненамного: знак — единственная крупная вещь на
+    /// экране, и слишком маленький он теряет вес, ради которого на него и
+    /// смотрят.
+    private let size: CGFloat = 216
 
     struct Segment: Identifiable, Equatable {
         let id: String
@@ -148,33 +158,40 @@ struct ProgressRing: View {
         return min(max(value / target, 0), 1)
     }
 
-    private var segments: [Segment] {
-        let calorieProgress = showsTargets ? 1 : (goal > 0 ? min(Double(consumed) / Double(goal), 1) : 0)
-        let calorieColors: [Color] = consumed > goal ? Self.overColors : Self.kcalColors
+    /// Зазор между дугами — тот же расчёт, что у знака: скруглённые концы
+    /// съедают тем больше градусов, чем толще дуга при том же радиусе.
+    private var gap: Double {
+        let radius = (size - lineWidth) / 2
+        return 1.25 / (radius / lineWidth) * 180 / .pi
+    }
 
-        // Доли макросов — по граммам целей. Без целей (профиль не заполнен)
+    private var segments: [Segment] {
+        // Доли дуг — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
-        let targets = [proteinTarget ?? 0, fatTarget ?? 0, carbsTarget ?? 0]
+        let targets = [carbsTarget ?? 0, fatTarget ?? 0, proteinTarget ?? 0]
         let total = targets.reduce(0, +)
         let rawShares = total > 0 ? targets.map { $0 / total } : [1.0 / 3, 1.0 / 3, 1.0 / 3]
         let floored = rawShares.map { max($0, 0.08) }
         let shares = floored.map { $0 / floored.reduce(0, +) }
 
-        var result = [Segment(id: "kcal", start: gap / 2, end: 180 - gap / 2,
-                              progress: calorieProgress, colors: calorieColors)]
-        let macroParts: [(String, Double, [Color])] = [
-            ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
-            ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
+        // Порядок как на иконке: сверху от разрыва углеводы, ниже жиры, у
+        // нижнего конца «С» белки. Дуги идут вниз от верхнего конца, поэтому
+        // заливка каждой растёт снизу вверх, к разрыву.
+        let parts: [(String, Double, [Color])] = [
             ("carbs", showsTargets ? 1 : Self.ratio(macros.carbs, carbsTarget), Self.carbColors),
+            ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
+            ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
         ]
-        var cursor = 180.0
-        for (index, part) in macroParts.enumerated() {
-            let span = 180 * shares[index]
-            result.append(Segment(id: part.0, start: cursor + gap / 2, end: cursor + span - gap / 2,
-                                  progress: part.1, colors: part.2))
-            cursor += span
+        let gap = gap
+        let available = 360 - Self.opening - gap * Double(parts.count - 1)
+        var cursor = Self.topEnd
+        return parts.enumerated().map { index, part in
+            let span = available * shares[index]
+            let segment = Segment(id: part.0, start: cursor - span, end: cursor,
+                                  progress: part.1, colors: part.2)
+            cursor -= span + gap
+            return segment
         }
-        return result
     }
 
     var body: some View {
@@ -226,7 +243,7 @@ struct ProgressRing: View {
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Text(verbatim: "\(goal)")
-                    .font(.app(size: 42, weight: .bold))
+                    .font(.app(size: 40, weight: .bold))
                 Text("ккал в день")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
@@ -241,8 +258,10 @@ struct ProgressRing: View {
                 // об одном, а системный оранжевый рядом с персиковыми жирами
                 // читался третьим, ничего не значащим оттенком.
                 .foregroundStyle(overGoal ? Self.overColors[0] : Color.secondary)
+            // Чуть мельче прежнего: знак уже кольца, и прежние 42 упирались
+            // в дуги на четырёхзначном остатке.
             Text("\(abs(remaining))")
-                .font(.app(size: 42, weight: .bold))
+                .font(.app(size: 40, weight: .bold))
                 .foregroundStyle(Color.primary)
                 .contentTransition(.numericText())
             Text("из \(goal) ккал")

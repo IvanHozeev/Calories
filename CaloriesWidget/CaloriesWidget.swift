@@ -541,7 +541,7 @@ struct MacrosWidgetEntryView: View {
             WidgetRing(segments: WidgetRingLayout.mark(
                 protein: entry.protein, fat: entry.fat, carbs: entry.carbs,
                 proteinTarget: entry.proteinTarget, fatTarget: entry.fatTarget, carbsTarget: entry.carbsTarget),
-                       lineWidth: 11, fillsFromEnd: true)
+                       lineWidth: 11)
             VStack(spacing: 0) {
                 Text(verbatim: "\(Int(entry.protein.rounded()))")
                     .font(.system(size: 26, weight: .bold))

@@ -280,9 +280,45 @@ struct PlanAdherence {
     /// Вес ещё устаканивается после подъёма калорий — судить по нему рано.
     var isSettlingAfterIncrease: Bool = false
 
+    /// Целевой вес фазы и куда она ведёт: нужны, чтобы понять, о чём говорит
+    /// прогноз — обгоняет он план или отстаёт от него.
+    var phaseTargetWeightKg: Double = 0
+    /// −1 на снижении, +1 на наборе, 0 на поддержании.
+    var direction: Double = 0
+    /// Когда фаза должна кончиться по плану.
+    var phaseEnd: Date = .distantPast
+
     var deviationKg: Double? {
         guard let actualWeightToday else { return nil }
         return actualWeightToday - expectedWeightToday
+    }
+
+    /// Говорит ли темп то же, что и положение.
+    ///
+    /// Вердикт «опережаешь» считается по весу: тренд ниже ожидаемого. Прогноз
+    /// считается по темпу за фазу. Эти двое расходятся, когда вес ушёл вниз
+    /// рывком в начале, а потом встал: по положению человек впереди, а по
+    /// темпу не дойдёт до цели никогда. Пока они расходятся, предлагать «есть
+    /// больше» нельзя — это совет ускорить то, что и так стоит.
+    var projectionAgreesWithPlan: Bool {
+        guard let projectedEndDate else { return false }
+        return projectedEndDate <= phaseEnd.addingTimeInterval(3 * 86400)
+    }
+
+    /// Вес, до которого при нынешнем темпе дойдёшь к концу фазы, — но только
+    /// если он действительно глубже цели.
+    ///
+    /// Иначе «углубить цель» предлагало цель слабее нынешней: при почти нулевом
+    /// темпе прогноз выходит выше целевого веса, и кнопка звала поднять цель,
+    /// называя это углублением.
+    var deeperTarget: Double? {
+        guard direction != 0, let projected = projectedWeightAtPlanEnd else { return nil }
+        let rounded = (projected * 10).rounded() / 10
+        // Глубже цели — это ниже на снижении и выше на наборе, то есть дальше
+        // по направлению фазы.
+        let gain = (rounded - phaseTargetWeightKg) * direction
+        guard gain >= 0.2 else { return nil }
+        return rounded
     }
 }
 

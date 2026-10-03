@@ -549,7 +549,13 @@ struct PlanView: View {
                     .foregroundStyle(.secondary)
             } else {
                 if let projectedEndDate = adherence.projectedEndDate {
-                    ResultRow(title: "При текущем темпе цель — к", value: projectedEndDate.formatted(.dateTime.day().month(.wide)))
+                    ResultRow(title: "При текущем темпе цель — к", value: Self.planDate(projectedEndDate))
+                }
+                // Темп рядом с датой: без него дата в следующем августе выглядит
+                // опечаткой, а с ним понятно, откуда она взялась.
+                if let rate = adherence.observedWeeklyRateKg {
+                    ResultRow(title: "Темп за фазу",
+                              value: String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 }
 
                 if adherence.status == .ahead {
@@ -564,12 +570,29 @@ struct PlanView: View {
         }
     }
 
+    /// Дата на экране плана: с годом, если она не в этом году.
+    ///
+    /// Без года прогноз на десять месяцев вперёд печатался как «4 августа» и
+    /// читался как прошедший день — цель, к которой уже опоздал.
+    static func planDate(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let sameYear = calendar.component(.year, from: date) == calendar.component(.year, from: Date())
+        return sameYear
+            ? date.formatted(.dateTime.day().month(.wide))
+            : date.formatted(.dateTime.day().month(.wide).year())
+    }
+
     @ViewBuilder
     private func aheadActions(plan: Plan, adherence: PlanAdherence) -> some View {
-        // Вариант 1: замедлить — есть больше, прийти к цели к исходной дате
-        if let recalibrated = adherence.recalibratedDailyCalories, !plan.cyclingEnabled {
+        // Вариант 1: замедлить — есть больше, прийти к цели к исходной дате.
+        //
+        // Только пока темп говорит то же, что и положение. Иначе выходил совет
+        // есть больше человеку, у которого вес и так стоит: по графику он
+        // впереди, а по темпу не дойдёт до цели вовсе.
+        if let recalibrated = adherence.recalibratedDailyCalories, !plan.cyclingEnabled,
+           adherence.projectionAgreesWithPlan {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Замедлить: при \(recalibrated) ккал/день придёшь к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(plan.endDate.formatted(.dateTime.day().month(.wide))).")
+                Text("Замедлить: при \(recalibrated) ккал/день придёшь к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(Self.planDate(plan.endDate)).")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
@@ -586,16 +609,17 @@ struct PlanView: View {
         // Вариант 2: финишировать раньше — принять новый срок
         if let projectedEndDate = adherence.projectedEndDate,
            projectedEndDate < plan.endDate.addingTimeInterval(-3 * 86400) {
-            Button("Перенести финиш на \(projectedEndDate.formatted(.dateTime.day().month(.wide)))") {
+            Button("Перенести финиш на \(Self.planDate(projectedEndDate))") {
                 store.reschedulePlan(to: projectedEndDate)
             }
         }
 
-        // Вариант 3: углубить цель — показываем к какому весу придёт к исходной дате
-        if let projected = adherence.projectedWeightAtPlanEnd {
-            let rounded = (projected * 10).rounded() / 10
+        // Вариант 3: углубить цель — но только если при нынешнем темпе выходит
+        // вес глубже целевого. Иначе это предложение ослабить цель, названное
+        // углублением.
+        if let rounded = adherence.deeperTarget {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Углубить цель: при текущем темпе к \(plan.endDate.formatted(.dateTime.day().month(.wide))) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
+                Text("Углубить цель: при текущем темпе к \(Self.planDate(plan.endDate)) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Поставить цель \(String(format: "%.1f", rounded)) кг") {
@@ -612,7 +636,7 @@ struct PlanView: View {
     private func behindOrOnTrackActions(plan: Plan, adherence: PlanAdherence) -> some View {
         if let recalibrated = adherence.recalibratedDailyCalories, recalibrated != store.dailyGoal, !plan.cyclingEnabled {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Чтобы успеть к \(plan.endDate.formatted(.dateTime.day().month(.wide))):")
+                Text("Чтобы успеть к \(Self.planDate(plan.endDate)):")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
@@ -628,7 +652,7 @@ struct PlanView: View {
 
         if let projectedEndDate = adherence.projectedEndDate,
            projectedEndDate > plan.endDate.addingTimeInterval(7 * 86400) {
-            Button("Сдвинуть финиш на \(projectedEndDate.formatted(.dateTime.day().month(.wide)))") {
+            Button("Сдвинуть финиш на \(Self.planDate(projectedEndDate))") {
                 store.reschedulePlan(to: projectedEndDate)
             }
         }

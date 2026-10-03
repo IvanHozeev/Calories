@@ -321,3 +321,61 @@ struct PlanVerdictTests {
                                    tolerance: PlanStatus.tolerance(plannedChangeKg: 0, settling: true)) == .onTrack)
     }
 }
+
+/// Экран плана не должен спорить сам с собой.
+///
+/// Вердикт «опережаешь» считается по весу: тренд ниже ожидаемого. Прогноз
+/// считается по темпу за фазу. Эти двое расходятся, когда вес ушёл вниз рывком
+/// в начале, а потом встал — и тогда экран одновременно хвалил за опережение,
+/// обещал цель через десять месяцев и предлагал есть больше.
+struct PlanProjectionHonestyTests {
+    private func adherence(projected: Date?, projectedWeight: Double?,
+                           target: Double, direction: Double, phaseEnd: Date) -> PlanAdherence {
+        PlanAdherence(expectedWeightToday: 76.1, actualWeightToday: 75.7,
+                      observedWeeklyRateKg: -0.04, projectedEndDate: projected,
+                      projectedWeightAtPlanEnd: projectedWeight,
+                      recalibratedDailyCalories: 2837, status: .ahead, dataGap: nil,
+                      isSettlingAfterIncrease: false,
+                      phaseTargetWeightKg: target, direction: direction, phaseEnd: phaseEnd)
+    }
+
+    /// Темп обещает цель через десять месяцев, а фаза кончается через месяц —
+    /// значит «есть больше, чтобы прийти вовремя» предлагать нельзя.
+    @Test func aDistantProjectionDisagreesWithThePlan() {
+        let phaseEnd = Date().addingTimeInterval(30 * 86400)
+        let far = Date().addingTimeInterval(300 * 86400)
+        #expect(!adherence(projected: far, projectedWeight: 75.6, target: 74.1,
+                           direction: -1, phaseEnd: phaseEnd).projectionAgreesWithPlan)
+    }
+
+    @Test func aProjectionWithinThePlanAgrees() {
+        let phaseEnd = Date().addingTimeInterval(30 * 86400)
+        let soon = Date().addingTimeInterval(20 * 86400)
+        #expect(adherence(projected: soon, projectedWeight: 73.5, target: 74.1,
+                          direction: -1, phaseEnd: phaseEnd).projectionAgreesWithPlan)
+    }
+
+    /// «Углубить цель» предлагалось даже тогда, когда прогноз выходил выше
+    /// целевого веса: кнопка звала поднять цель, называя это углублением.
+    @Test func aWeakerProjectionIsNotADeeperGoal() {
+        let phaseEnd = Date().addingTimeInterval(30 * 86400)
+        #expect(adherence(projected: nil, projectedWeight: 75.6, target: 74.1,
+                          direction: -1, phaseEnd: phaseEnd).deeperTarget == nil)
+    }
+
+    @Test func aDeeperProjectionIsOffered() {
+        let phaseEnd = Date().addingTimeInterval(30 * 86400)
+        let deeper = adherence(projected: nil, projectedWeight: 73.4, target: 74.1,
+                               direction: -1, phaseEnd: phaseEnd).deeperTarget
+        #expect(deeper == 73.4)
+    }
+
+    /// На наборе «глубже» значит больше, а не меньше.
+    @Test func onAGainDeeperMeansHeavier() {
+        let phaseEnd = Date().addingTimeInterval(30 * 86400)
+        #expect(adherence(projected: nil, projectedWeight: 78.5, target: 77.0,
+                          direction: 1, phaseEnd: phaseEnd).deeperTarget == 78.5)
+        #expect(adherence(projected: nil, projectedWeight: 76.5, target: 77.0,
+                          direction: 1, phaseEnd: phaseEnd).deeperTarget == nil)
+    }
+}

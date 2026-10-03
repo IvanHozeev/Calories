@@ -162,7 +162,7 @@ struct PlanEditorView: View {
 
                 if let draftPlan {
                     Section("Расчёт") {
-                        ResultRow(title: "Дата окончания", value: draftPlan.endDate.formatted(.dateTime.day().month(.wide)))
+                        ResultRow(title: "Дата окончания", value: PlanView.planDate(draftPlan.endDate))
                         ResultRow(title: "Всего недель", value: "\(draftPlan.durationWeeks)")
                         // Прогноз, а не цель: целевой вес у цепочки не задают,
                         // его считают по темпам, которые готов держать.

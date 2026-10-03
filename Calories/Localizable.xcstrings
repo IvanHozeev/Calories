@@ -300,9 +300,7 @@
         }
       }
     },
-    "%@ осталось" : {
-
-    },
+    "%@ осталось" : {},
     "%@ ч" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1146,12 +1144,8 @@
         }
       }
     },
-    "%lld ккал/100г" : {
-
-    },
-    "%lld лет" : {
-
-    },
+    "%lld ккал/100г" : {},
+    "%lld лет" : {},
     "%lld мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1246,9 +1240,7 @@
         }
       }
     },
-    "%lld см" : {
-
-    },
+    "%lld см" : {},
     "%lld уд/мин" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1389,12 +1381,8 @@
         }
       }
     },
-    "%lld%%" : {
-
-    },
-    "+%lld" : {
-
-    },
+    "%lld%%" : {},
+    "+%lld" : {},
     "+%lld ккал из недели" : {
       "localizations" : {
         "ar" : {
@@ -5582,9 +5570,7 @@
         }
       }
     },
-    "В среднем" : {
-
-    },
+    "В среднем" : {},
     "В среднем %lld ккал в день — норма недели выдержана." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16316,9 +16302,7 @@
         }
       }
     },
-    "Записал %@ кг." : {
-
-    },
+    "Записал %@ кг." : {},
     "Записал %lld ккал. Норма на сегодня уже перебрана." : {
       "localizations" : {
         "ar" : {
@@ -16417,9 +16401,7 @@
         }
       }
     },
-    "Записано" : {
-
-    },
+    "Записано" : {},
     "Записано %lld дней из семи — маловато для выводов." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17209,9 +17191,7 @@
         }
       }
     },
-    "из %@ шагов" : {
-
-    },
+    "из %@ шагов" : {},
     "из %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17259,12 +17239,8 @@
         }
       }
     },
-    "из %lld ккал" : {
-
-    },
-    "из 7" : {
-
-    },
+    "из %lld ккал" : {},
+    "из 7" : {},
     "Из банка недели" : {
       "localizations" : {
         "ar" : {
@@ -25933,9 +25909,7 @@
         }
       }
     },
-    "Недель: %lld" : {
-
-    },
+    "Недель: %lld" : {},
     "Недельный баланс" : {
       "localizations" : {
         "ar" : {
@@ -44082,9 +44056,7 @@
         }
       }
     },
-    "Ставить %lld ккал/день" : {
-
-    },
+    "Ставить %lld ккал/день" : {},
     "Старт плана" : {
       "localizations" : {
         "ar" : {
@@ -45611,6 +45583,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tema"
+          }
+        }
+      }
+    },
+    "Темп за фазу" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوتيرة خلال المرحلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempo in dieser Phase"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rate in this phase"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo en esta fase"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rythme sur cette phase"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "קצב בשלב הזה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ritmo nesta fase"
           }
         }
       }
@@ -47198,9 +47217,7 @@
         }
       }
     },
-    "уд/мин" : {
-
-    },
+    "уд/мин" : {},
     "Удалить" : {
       "localizations" : {
         "ar" : {
@@ -48924,9 +48941,7 @@
         }
       }
     },
-    "ч" : {
-
-    },
+    "ч" : {},
     "Часть состава перенесена с похожей еды — это оценка." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -49767,9 +49782,7 @@
         }
       }
     },
-    "шагов из %@" : {
-
-    },
+    "шагов из %@" : {},
     "шагов/день" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -771,7 +771,10 @@ extension CalorieStore {
             recalibratedDailyCalories: recalibratedDailyCalories,
             status: status,
             dataGap: nil,
-            isSettlingAfterIncrease: settling
+            isSettlingAfterIncrease: settling,
+            phaseTargetWeightKg: phaseTargetWeight,
+            direction: phase.intent.direction,
+            phaseEnd: phaseEnd
         )
     }
 }

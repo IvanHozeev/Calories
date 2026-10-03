@@ -508,11 +508,16 @@ final class CaloriesUITests: XCTestCase {
         openAddEntry(in: app)
 
         // Время приёма живёт на самом экране: за переходом его не видно, и
-        // ошибку замечали уже в дневнике.
-        let picker = app.descendants(matching: .any).matching(identifier: "mealTimePicker").firstMatch
-        XCTAssertTrue(picker.waitForExistence(timeout: 5), "На экране приёма пищи нет выбора времени")
+        // ошибку замечали уже в дневнике. Теперь это кнопка с часами рядом со
+        // строкой поиска, а календарь с временем открываются по нажатию.
+        let clock = app.descendants(matching: .any).matching(identifier: "mealTimePicker").firstMatch
+        XCTAssertTrue(clock.waitForExistence(timeout: 5), "На экране приёма пищи нет выбора времени")
+        clock.tap()
+
         // И дата, и время: поправить один только час невозможно.
-        XCTAssertGreaterThanOrEqual(picker.buttons.count, 2,
+        let calendar = app.datePickers.firstMatch
+        XCTAssertTrue(calendar.waitForExistence(timeout: 5), "По часам должен открываться выбор дня и времени")
+        XCTAssertGreaterThanOrEqual(calendar.buttons.count, 2,
                                     "У записи должны настраиваться и день, и время")
     }
 

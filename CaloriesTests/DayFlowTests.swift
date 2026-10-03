@@ -139,14 +139,16 @@ struct MealScheduleTests {
         #expect(try #require(MealSchedule.nextSlot(slots, now: at(12))).period == .lunch)
     }
 
-    /// Съеденное внутри окна продолжает считаться в тот же приём — перебором,
-    /// а не в никуда.
-    @Test func foodInsideTheWindowKeepsAddingAsAnOvershoot() throws {
+    /// Съеденное внутри окна продолжает считаться в тот же приём, а не в никуда.
+    ///
+    /// Перебор сверх отведённого окну больше не считается вовсе: план окна
+    /// плавает вместе с пропущенными приёмами, и сравнивать с ним съеденное
+    /// нечестно. Счёт идёт по дню.
+    @Test func foodInsideTheWindowKeepsAddingUp() throws {
         let slots = MealSchedule.slots(input(count: 3, entries: [(at(8), 700), (at(9, 30), 400)],
                                              now: at(9, 45)))
         let breakfast = try #require(slots.first)
         #expect(breakfast.consumed == 1100)
-        #expect(breakfast.overeaten > 0)
     }
 
     /// Остаток нормы делится между приёмами, что впереди, — по весу: на обед

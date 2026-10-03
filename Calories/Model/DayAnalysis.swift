@@ -151,15 +151,22 @@ enum DayAnalysis {
         /// Вес утром и отклонение от тренда.
         var weightKg: Double? = nil
         var weightAboveTrend: Double? = nil
-        /// Самый крупный перебор по приёму: название и на сколько.
-        var overeatenMeal: String? = nil
-        var overeatenBy: Int = 0
+        /// Белок за день и его норма: единственный макрос, недобор которого
+        /// на дефиците стоит мышц, а не жира.
+        var proteinGrams: Double? = nil
+        var proteinTarget: Double? = nil
     }
 
     /// Сколько килокалорий поправки стоит называть вслух: меньше — шум.
     static let notableAdjustment = 80
     /// Насколько вес должен уйти выше тренда, чтобы об этом говорить.
     static let notableWeightRise = 0.5
+    /// Ниже какой доли нормы белок считается недобранным.
+    ///
+    /// Не сто процентов: попасть в норму грамм в грамм нельзя, и называть
+    /// недобором сто сорок граммов из ста сорока трёх — значит ругать за
+    /// точность весов.
+    static let proteinShortfall = 0.9
 
     /// - Parameter brief: человек выбрал короткие объяснения. Тогда та же
     ///   мысль без разжёвывания: он знает, почему вес утром скачет.
@@ -217,10 +224,19 @@ enum DayAnalysis {
                                                        String(localized: "Вес утром %1$@ кг, +%2$@ к тренду — в пределах разброса.")), String(format: "%.1f", weight), String(format: "%.1f", above))))
         }
 
-        if let meal = input.overeatenMeal, input.overeatenBy > 0 {
-            result.append(Advice(id: "meal-overshoot", tone: .info,
-                                 text: String(format: pick(String(localized: "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму."),
-                                                           String(localized: "Перебор на приёме «%1$@»: %2$lld ккал.")), meal, input.overeatenBy)))
+        // Белок — вместо прежнего «перебор на приёме „Ужин“».
+        //
+        // Тот совет сравнивал съеденное в окне с планом окна, а план окна
+        // плавает: пропущенный завтрак раскидывается по оставшимся, и человек,
+        // не съевший за день ничего лишнего, читал, что перебрал. Белок за
+        // день — факт, который ни от чего не плавает, и единственный, на
+        // который на дефиците стоит смотреть ежедневно.
+        if let protein = input.proteinGrams, let target = input.proteinTarget, target > 0,
+           protein < target * Self.proteinShortfall {
+            result.append(Advice(id: "protein-short", tone: .warning,
+                                 text: String(format: pick(String(localized: "Белка %1$lld г при норме %2$lld. На дефиците недобор белка уходит в мышцы, а не в жир: тело возьмёт недостающее из них."),
+                                                           String(localized: "Белка %1$lld г из %2$lld — недобор.")),
+                                              Int(protein.rounded()), Int(target.rounded()))))
         }
 
         return result

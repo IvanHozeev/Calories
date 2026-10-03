@@ -109,8 +109,6 @@ enum MealSchedule {
 
         var id: Int { index }
 
-        /// Насколько съедено больше, чем отводилось. Ноль — уложился.
-        var overeaten: Int { max(0, consumed - planned) }
 
         enum State: String, Equatable {
             /// Окно ещё впереди.

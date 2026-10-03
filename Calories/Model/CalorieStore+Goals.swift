@@ -601,7 +601,7 @@ extension CalorieStore {
     ///
     /// Собирается здесь, а не в экране: это данные, а не оформление, и
     /// проверять их надо тестами, а не глазами.
-    func dayContext(on date: Date, schedule: MealScheduleSettings) -> DayAnalysis.Context {
+    func dayContext(on date: Date) -> DayAnalysis.Context {
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: date)
         var context = DayAnalysis.Context()
@@ -627,15 +627,14 @@ extension CalorieStore {
             if let trend = weightTrend(on: day) { context.weightAboveTrend = morning - trend }
         }
 
-        // Самый крупный перебор по приёму — но только когда день разбит на
-        // приёмы: без расписания говорить не о чем.
-        if schedule.isEnabled {
-            let slots = slots(on: day, schedule: schedule)
-            if let worst = slots.max(by: { $0.overeaten < $1.overeaten }), worst.overeaten > 0 {
-                context.overeatenMeal = String(localized: String.LocalizationValue(worst.period.rawValue))
-                context.overeatenBy = worst.overeaten
-            }
+        // Белок за день против нормы. Экран дня показывает съеденные граммы,
+        // но не норму, так что ответ «хватило или нет» взять неоткуда.
+        if let summary = days.first(where: { calendar.isDate($0.date, inSameDayAs: day) }) {
+            context.proteinGrams = summary.totalMacros.protein
+        } else if calendar.isDateInToday(day) {
+            context.proteinGrams = macrosToday.protein
         }
+        context.proteinTarget = profile?.proteinTargetGrams(from: latestMeasurement)
         return context
     }
 

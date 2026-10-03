@@ -45,7 +45,7 @@ struct DayNutritionView: View {
 
     /// Обстоятельства дня: почему он получился таким.
     private var context: [DayAnalysis.Advice] {
-        DayAnalysis.context(store.dayContext(on: date, schedule: MealScheduleSettings.shared),
+        DayAnalysis.context(store.dayContext(on: date),
                             brief: ExplanationSettings.shared.level == .expert)
     }
 

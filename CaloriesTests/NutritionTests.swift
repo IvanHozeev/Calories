@@ -879,10 +879,18 @@ struct DayContextTests {
         #expect(!ids(result).contains("weight-spike"))
     }
 
-    /// Смотреть стоит не на день целиком, а на приём, где ушло вверх.
-    @Test func theWorstMealIsNamed() {
-        let result = DayAnalysis.context(.init(overeatenMeal: "Ужин", overeatenBy: 400))
-        #expect(ids(result).contains("meal-overshoot"))
+    /// Недобор белка называем: на дефиците это единственный макрос, который
+    /// тело возьмёт из мышц, если его не дать.
+    @Test func aProteinShortfallIsNamed() {
+        let result = DayAnalysis.context(.init(proteinGrams: 96, proteinTarget: 143))
+        #expect(ids(result).contains("protein-short"))
+    }
+
+    /// А норму, недобранную на пару граммов, называть недобором нельзя: это
+    /// придирка к точности весов, а не к еде.
+    @Test func aProteinNormHitIsNotCalledAShortfall() {
+        let result = DayAnalysis.context(.init(proteinGrams: 140, proteinTarget: 143))
+        #expect(!ids(result).contains("protein-short"))
     }
 
     /// На коротком уровне мысль та же, а слов меньше — иначе это был бы

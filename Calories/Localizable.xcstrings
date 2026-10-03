@@ -4423,53 +4423,6 @@
         }
       }
     },
-    "Больше всего ушло вверх на приёме «%1$@» — на %2$lld ккал. Смотреть стоит не на день целиком, а на этот приём: именно там решается, попадёшь ли в норму." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أكبر تجاوز كان في %1$@ — بمقدار %2$lld سعرة. الأجدى النظر إلى تلك الوجبة لا إلى اليوم كله: هناك يُحسم بلوغ الهدف."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der größte Überschuss lag beim %1$@ – um %2$lld kcal. Lohnender ist der Blick auf diese Mahlzeit statt auf den ganzen Tag: dort entscheidet sich das Ziel."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The biggest overshoot was at %1$@ — by %2$lld kcal. It is worth looking at that meal rather than the whole day: that is where hitting the target is decided."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El mayor exceso fue en %1$@: %2$lld kcal. Conviene mirar esa comida y no el día entero: ahí se decide si entras en el objetivo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le plus gros dépassement est au %1$@ — de %2$lld kcal. C’est ce repas qu’il faut regarder, pas la journée entière : c’est là que se joue l’objectif."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "החריגה הגדולה ביותר הייתה ב%1$@ — ב־%2$lld קלוריות. כדאי להסתכל על הארוחה הזו ולא על כל היום: שם נקבע אם תעמוד ביעד."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O maior excesso foi em %1$@ — %2$lld kcal. Vale olhar essa refeição, não o dia inteiro: é ali que se decide se você bate a meta."
-          }
-        }
-      }
-    },
     "Больше половины калорий — белок. На его переваривание уходит около четверти его энергии." : {
       "localizations" : {
         "ar" : {
@@ -32063,53 +32016,6 @@
         }
       }
     },
-    "Перебор на приёме «%1$@»: %2$lld ккал." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تجاوز في %1$@: %2$lld سعرة."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Überschuss beim %1$@: %2$lld kcal."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Overshoot at %1$@: %2$lld kcal."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exceso en %1$@: %2$lld kcal."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dépassement au %1$@ : %2$lld kcal."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "חריגה ב%1$@: %2$lld קלוריות."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Excesso em %1$@: %2$lld kcal."
-          }
-        }
-      }
-    },
     "Перекус" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -50973,6 +50879,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Contraste"
+          }
+        }
+      }
+    },
+    "Белка %1$lld г при норме %2$lld. На дефиците недобор белка уходит в мышцы, а не в жир: тело возьмёт недостающее из них." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld غ بروتين مقابل %2$lld مطلوبة. في العجز، نقص البروتين يُدفع من العضلات لا من الدهون: الجسم يأخذ الناقص منها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g Eiweiß bei einem Soll von %2$lld. Im Defizit geht fehlendes Eiweiß auf Kosten der Muskeln, nicht des Fetts: der Körper holt sich das Fehlende dort."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g of protein against a target of %2$lld. In a deficit, protein you skip comes out of muscle, not fat — the body takes what it is missing from there."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de proteína frente a los %2$lld de la meta. En déficit, la proteína que falta sale del músculo, no de la grasa: el cuerpo la saca de ahí."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de protéines pour un objectif de %2$lld. En déficit, les protéines manquantes sont prises au muscle, pas à la graisse : le corps va les chercher là."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld גרם חלבון מול יעד של %2$lld. בגירעון, חלבון שחסר נלקח מהשריר ולא מהשומן — הגוף משלים אותו משם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de proteína para uma meta de %2$lld. Em déficit, a proteína que falta sai do músculo, não da gordura: o corpo tira dali o que falta."
+          }
+        }
+      }
+    },
+    "Белка %1$lld г из %2$lld — недобор." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld غ بروتين من %2$lld — ناقص."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g Eiweiß von %2$lld — zu wenig."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g of protein out of %2$lld — short."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de proteína de %2$lld: falta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de protéines sur %2$lld — insuffisant."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld גרם חלבון מתוך %2$lld — חסר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld g de proteína de %2$lld — faltou."
           }
         }
       }

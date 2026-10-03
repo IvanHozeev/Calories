@@ -5257,49 +5257,49 @@
         }
       }
     },
-    "В плане есть фаза со слишком резким темпом — она отмечена внутри." : {
+    "Темп фазы выше разумного: на сушке это 1% массы в неделю, на наборе 0.5%. Такая фаза отмечена оранжевым." : {
       "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "إحدى المراحل بوتيرة حادة أكثر من اللازم — وهي مؤشَّرة بداخلها."
+            "value" : "وتيرة إحدى المراحل أعلى من المعقول: 1% من الكتلة أسبوعيًا في التنشيف و0.5% في الزيادة. هذه المرحلة معلّمة باللون البرتقالي."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine Phase hat ein zu scharfes Tempo — sie ist darin markiert."
+            "value" : "Das Tempo einer Phase liegt über dem Vernünftigen: 1 % der Masse pro Woche in der Diät, 0,5 % im Aufbau. Diese Phase ist orange markiert."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "One of the phases has too sharp a pace — it is marked inside."
+            "value" : "One phase runs faster than is sensible: 1% of body mass a week on a cut, 0.5% on a bulk. That phase is marked in orange."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una de las fases lleva un ritmo demasiado brusco: está marcada dentro."
+            "value" : "El ritmo de una fase supera lo razonable: 1 % de la masa por semana en definición y 0,5 % en volumen. Esa fase está marcada en naranja."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Une des phases a un rythme trop brutal — elle est signalée à l'intérieur."
+            "value" : "Le rythme d'une phase dépasse le raisonnable : 1 % de la masse par semaine en sèche, 0,5 % en prise. Cette phase est signalée en orange."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "באחד השלבים הקצב חד מדי — הוא מסומן בתוכו."
+            "value" : "הקצב של אחד השלבים גבוה מהסביר: 1% מהמסה בשבוע בחיטוב ו־0.5% בעלייה. השלב הזה מסומן בכתום."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uma das fases tem um ritmo brusco demais: está marcada dentro."
+            "value" : "O ritmo de uma fase passa do razoável: 1% da massa por semana no corte e 0,5% no ganho. Essa fase está marcada em laranja."
           }
         }
       }

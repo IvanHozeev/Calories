@@ -175,8 +175,11 @@ struct PlanEditorView: View {
                         }
 
                         if draftPlan.hasAggressivePhase {
+                            // С числом, а не с эпитетом: «слишком резкий» ничего
+                            // не говорит о том, где граница и насколько её
+                            // перешли.
                             Label(
-                                "В плане есть фаза со слишком резким темпом — она отмечена внутри.",
+                                "Темп фазы выше разумного: на сушке это 1% массы в неделю, на наборе 0.5%. Такая фаза отмечена оранжевым.",
                                 systemImage: "exclamationmark.triangle.fill"
                             )
                             .font(.app(.caption))
@@ -245,7 +248,11 @@ struct PlanEditorView: View {
                     Text(String(format: String(localized: "%lld нед."), phase.durationWeeks))
                     if phase.intent != .maintenance {
                         Text(verbatim: "·")
+                        // Резкий темп оранжевым на самом числе: раньше о нём
+                        // говорил только значок слева, а превышала границу
+                        // именно эта цифра.
                         Text(String(format: "%.2f%%", phase.weeklyRatePercent))
+                            .foregroundStyle(phase.isAggressive ? Color.orange : Color.secondary)
                     }
                     if phase.rampWeeks > 0 {
                         Text(verbatim: "·")

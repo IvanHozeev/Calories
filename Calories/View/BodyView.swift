@@ -936,13 +936,13 @@ private extension BodyView {
             .frame(height: 160)
         }
         if let draftProfile {
-            HStack {
-                Text("Итого белка")
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(verbatim: "\(Int(draftProfile.proteinTargetGrams(from: measurement).rounded())) \(String(localized: "г"))")
-                    .font(.app(.body, weight: .semibold))
-            }
+            // Той же строкой, что и углеводы ниже: три итога одного вида —
+            // граммы макроса — и читаться они должны одинаково, цветом
+            // своего макроса. Белок и жир стояли чёрными, а углеводы
+            // фиолетовыми, будто это числа из разных мест.
+            macroBudgetRow("Итого белка",
+                           grams: draftProfile.proteinTargetGrams(from: measurement),
+                           color: MacroKind.protein.color)
         }
     } header: {
         Text("Норма белка")
@@ -980,13 +980,9 @@ private extension BodyView {
             .frame(height: 160)
         }
         if let draftProfile {
-            HStack {
-                Text("Итого жира")
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(verbatim: "\(Int(draftProfile.fatTargetGrams.rounded())) \(String(localized: "г"))")
-                    .font(.app(.body, weight: .semibold))
-            }
+            macroBudgetRow("Итого жира",
+                           grams: draftProfile.fatTargetGrams,
+                           color: MacroKind.fat.color)
         }
         // Вне рабочего коридора число разрешено, но о нём сказано вслух.
         if let warning = fatWarning {

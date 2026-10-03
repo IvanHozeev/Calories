@@ -108,6 +108,12 @@ struct MealScheduleSheet: View {
     var isEmbedded = false
     @Environment(\.dismiss) private var dismiss
 
+    /// Есть ли в расписании второй ужин — единственный приём, время которого
+    /// зависит от отбоя.
+    private var hasSecondDinner: Bool {
+        MealSchedule.periods(count: settings.count).contains(.secondDinner)
+    }
+
     private var slots: [MealSchedule.Slot] {
         MealSchedule.slots(settings: settings, entries: entries, dailyGoal: dailyGoal)
     }
@@ -144,9 +150,18 @@ struct MealScheduleSheet: View {
                         }
                     }
                     .accessibilityIdentifier("mealCountStepper")
-                    DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
+                    // Отбой спрашиваем, только когда он на что-то влияет:
+                    // от него считается время второго ужина, а он бывает
+                    // лишь при шести приёмах. На пяти приёмах строка стояла
+                    // как настройка, которая ничего не меняет.
+                    if hasSecondDinner {
+                        DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
+                    }
                 } footer: {
-                    explain("Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.").map { Text($0) }
+                    explain(hasSecondDinner
+                            ? String(localized: "Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.")
+                            : String(localized: "Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними."))
+                        .map { Text(verbatim: $0) }
                 }
 
                 Section {
@@ -202,22 +217,17 @@ struct MealScheduleSheet: View {
                         .foregroundStyle(.secondary)
                 }
                 if slot.consumed > 0 {
-                    // Перебор называем вслух: иначе закрытое окно показывает
-                    // «съедено 900» и молчит о том, что отводилось 700.
-                    // Пересчитывать в уме, глядя на вчерашний день, человек
-                    // не станет — он просто не узнает, где именно ушёл вверх.
-                    if slot.overeaten > 0 {
-                        Text(verbatim: String(format: String(localized: "съедено %1$lld ккал · на %2$lld больше"),
-                                              slot.consumed, slot.overeaten))
-                            .font(.app(.caption2))
-                            .foregroundStyle(.orange)
-                            .monospacedDigit()
-                    } else {
-                        Text(verbatim: String(format: String(localized: "съедено %lld ккал"), slot.consumed))
-                            .font(.app(.caption2))
-                            .foregroundStyle(.tertiary)
-                            .monospacedDigit()
-                    }
+                    // Только съеденное, без «на столько-то больше».
+                    //
+                    // Перебор на приёме сравнивался с планом, который сам
+                    // меняется: пропущенный завтрак раскидывается по
+                    // оставшимся окнам, и съевший свои 831 во второй завтрак
+                    // читал «на 473 больше», хотя за день не съел ничего
+                    // лишнего. Счёт идёт по дню, а не по окнам.
+                    Text(verbatim: String(format: String(localized: "съедено %lld ккал"), slot.consumed))
+                        .font(.app(.caption2))
+                        .foregroundStyle(.tertiary)
+                        .monospacedDigit()
                 }
             }
             Spacer()

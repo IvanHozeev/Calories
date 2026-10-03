@@ -55,7 +55,11 @@ struct FoodRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            VStack(alignment: .leading, spacing: 6) {
+            // Строки прижаты друг к другу: три яруса (название, порция,
+            // макросы) с воздухом по шесть точек растягивали ячейку так, что
+            // в поиске помещалось пять продуктов. Ярусы остаются — макросы
+            // не стоит склеивать с подписью, — а воздух между ними убран.
+            VStack(alignment: .leading, spacing: 3) {
                 // Значки свойств — рядом с названием: это про сам продукт,
                 // а не про порцию, и читаются они до цифр.
                 HStack(alignment: .firstTextBaseline, spacing: 5) {
@@ -135,7 +139,7 @@ struct FoodRow: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 2)
         // Разделитель начинается от края содержимого — там же, где полоска,
         // а не от названия, отодвинутого под неё.
         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }

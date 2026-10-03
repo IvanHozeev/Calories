@@ -307,32 +307,29 @@ struct IngredientPickerSheet: View {
         }
     }
 
+    /// Выбран продукт — дальше спрашиваем вес.
+    private func select(_ food: FoodItem) {
+        selectedFood = food
+        grams = 100
+        gramsText = "100"
+    }
+
     private var foodPickerView: some View {
         List {
             if !filteredCustomFoods.isEmpty {
                 Section("Мои продукты") {
                     ForEach(filteredCustomFoods) { food in
-                        Button {
-                            selectedFood = food
-                            grams = 100
-                            gramsText = "100"
-                        } label: {
-                            foodRow(food)
-                        }
-                        .buttonStyle(.plain)
+                        foodRow(food)
+                            .contentShape(Rectangle())
+                            .onTapGesture { select(food) }
                     }
                 }
             }
             Section("База продуктов") {
                 ForEach(filteredBuiltIn) { food in
-                    Button {
-                        selectedFood = food
-                        grams = 100
-                        gramsText = "100"
-                    } label: {
-                        foodRow(food)
-                    }
-                    .buttonStyle(.plain)
+                    foodRow(food)
+                        .contentShape(Rectangle())
+                        .onTapGesture { select(food) }
                 }
             }
         }
@@ -353,22 +350,18 @@ struct IngredientPickerSheet: View {
         let cal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
         let m = food.macrosPer100g.portion(grams: grams)
         return List {
+            // Поле и стрелки — одной строкой, как на экране порции. Две
+            // строки про один и тот же вес («Количество, г 100» и «100 г»
+            // со степпером) читались как два разных числа.
             Section(food.name) {
-                HStack {
-                    Text("Количество, г")
-                    Spacer()
-                    TextField("100", text: $gramsText)
+                Stepper(value: $grams, in: 1...5000, step: 10) {
+                    TextField("Граммы", text: $gramsText)
                         .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
                         .focused($gramsFocused)
-                        .frame(width: 80)
+                        .font(.app(.body, weight: .medium))
                         .onChange(of: gramsText) { _, v in
                             if let value = Double(v), value > 0 { grams = min(value, 5000) }
                         }
-                }
-
-                Stepper(value: $grams, in: 1...5000, step: 10) {
-                    Text("\(Int(grams)) г")
                 }
                 .onChange(of: grams) { _, v in
                     if Double(gramsText) != v { gramsText = "\(Int(v))" }
@@ -380,8 +373,9 @@ struct IngredientPickerSheet: View {
                     Text("\(cal) ккал")
                         .font(.app(.headline))
                     Spacer()
-                    Text("Б\(Int(m.protein)) Ж\(Int(m.fat)) У\(Int(m.carbs))")
-                        .foregroundStyle(.secondary)
+                    // Цветными тегами, как везде: серое «Б0 Ж0 У14» было
+                    // единственным местом, где макросы не читались цветом.
+                    MacroTags(macros: m, compact: true)
                 }
             }
         }
@@ -407,18 +401,21 @@ struct IngredientPickerSheet: View {
         }
     }
 
+    /// Строка та же, что в поиске и в своих продуктах.
+    ///
+    /// Здесь лежала своя копия: «Б23 Ж48 У19» одной серой строкой, калории
+    /// серым справа, ни цвета макросов, ни полоски ведущего. Состав блюда
+    /// набирают теми же глазами, что и дневник, и продукт должен выглядеть
+    /// одинаково везде, иначе каждый список приходится читать заново.
     private func foodRow(_ food: FoodItem) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(food.name)
-                Text("Б\(Int(food.macrosPer100g.protein)) Ж\(Int(food.macrosPer100g.fat)) У\(Int(food.macrosPer100g.carbs))")
-                    .font(.app(.caption2))
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Text("\(food.caloriesPer100g) ккал/100г")
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
-        }
+        FoodRow(
+            name: food.name,
+            calories: food.caloriesPer100g,
+            portion: "100 \(String(localized: "г"))",
+            macros: food.macrosPer100g,
+            icons: [food.foodCategory.icon],
+            micros: store.notableMicronutrients(forFoodNamed: food.name, grams: 100),
+            traits: food.traits
+        )
     }
 }

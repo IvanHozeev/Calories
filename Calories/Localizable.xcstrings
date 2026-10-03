@@ -15894,6 +15894,53 @@
         }
       }
     },
+    "Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفطور 8:00، الغداء 13:00، العشاء 19:00. الفطور الثاني ووجبة العصر في المنتصف تمامًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frühstück um 8:00, Mittagessen um 13:00, Abendessen um 19:00. Zweites Frühstück und Zwischenmahlzeit liegen genau dazwischen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Breakfast at 8:00, lunch at 13:00, dinner at 19:00. Second breakfast and the afternoon snack sit exactly between them."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desayuno a las 8:00, comida a las 13:00, cena a las 19:00. El segundo desayuno y la merienda van justo en medio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petit-déjeuner à 8:00, déjeuner à 13:00, dîner à 19:00. Le second petit-déjeuner et le goûter tombent pile entre eux."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ארוחת בוקר ב־8:00, צהריים ב־13:00, ערב ב־19:00. ארוחת בוקר שנייה וארוחת ארבע בדיוק באמצע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Café da manhã às 8:00, almoço às 13:00, jantar às 19:00. O segundo café e o lanche ficam exatamente no meio."
+          }
+        }
+      }
+    },
     "Закрыть" : {
       "localizations" : {
         "ar" : {
@@ -44958,53 +45005,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uma refeição já feita se fecha na hora, sem esperar o fim da janela. Uma janela perdida não some: suas calorias se espalham pelas refeições restantes."
-          }
-        }
-      }
-    },
-    "съедено %1$lld ккал · на %2$lld больше" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "أُكل %1$lld سعرة · بزيادة %2$lld"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal gegessen · %2$lld drüber"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal eaten · %2$lld over"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal comidas · %2$lld de más"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal mangées · %2$lld de trop"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נאכלו %1$lld קלוריות · %2$lld יותר"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$lld kcal comidas · %2$lld a mais"
           }
         }
       }

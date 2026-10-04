@@ -574,3 +574,47 @@ struct StallReportTests {
         #expect(abs(report.unexplainedKg) < StallReport.notableKg)
     }
 }
+
+// MARK: - Погрешность темпа
+
+/// Темп за фазу считался по двум точкам, и ошибка любой из них целиком уходила
+/// в наклон: одно утро после солёного ужина двигало дату финиша на месяцы.
+struct WeightTrendFitTests {
+    private func points(_ values: [(day: Int, kg: Double)]) -> [(date: Date, kg: Double)] {
+        let start = Date().addingTimeInterval(-40 * 86_400)
+        return values.map { (date: start.addingTimeInterval(Double($0.day) * 86_400), kg: $0.kg) }
+    }
+
+    @Test func aCleanLineGivesItsSlopeAndAlmostNoError() throws {
+        // Ровно по 0.1 кг в день — это 0.7 кг в неделю.
+        let fit = try #require(WeightTrendFit.fit(points((0..<14).map { (day: $0, kg: 80 - Double($0) * 0.1) })))
+        #expect(abs(fit.weeklyRateKg + 0.7) < 0.01)
+        #expect(fit.standardErrorKg < 0.01, "По прямой разбросу взяться неоткуда")
+        #expect(fit.isDistinguishableFromZero)
+    }
+
+    /// Вес скачет на килограмм вокруг одного и того же числа: наклон есть, но
+    /// он неотличим от нуля, и говорить «цель к такому-то» нельзя.
+    @Test func noiseAroundAFlatWeightIsNotATrend() throws {
+        let fit = try #require(WeightTrendFit.fit(points([
+            (0, 80.0), (2, 81.0), (4, 79.2), (6, 80.8), (8, 79.4), (10, 80.6)
+        ])))
+        #expect(!fit.isDistinguishableFromZero, "Коридор наклона накрывает ноль")
+    }
+
+    /// По двум-трём точкам прямая проходит слишком ровно: ошибка выходит
+    /// нулевой, то есть обещанием точности, которой нет.
+    @Test func twoPointsAreNotALine() {
+        #expect(WeightTrendFit.fit(points([(0, 80), (7, 79)])) == nil)
+        #expect(WeightTrendFit.fit(points([(0, 80), (3, 79.5), (7, 79)])) == nil)
+    }
+
+    /// Шум не должен менять знак темпа: прямая по десяти взвешиваниям держит
+    /// направление, даже когда отдельное утро выбивается на килограмм.
+    @Test func oneSaltyMorningDoesNotFlipTheSlope() throws {
+        var values = (0..<10).map { (day: $0 * 2, kg: 80 - Double($0) * 0.2) }
+        values[9].kg += 1.2
+        let fit = try #require(WeightTrendFit.fit(points(values)))
+        #expect(fit.weeklyRateKg < 0, "Направление остаётся прежним")
+    }
+}

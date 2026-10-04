@@ -52010,6 +52010,100 @@
           }
         }
       }
+    },
+    "от %1$@ до %2$@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من %1$@ إلى %2$@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "von %1$@ bis %2$@"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "between %1$@ and %2$@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entre el %1$@ y el %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entre le %1$@ et le %2$@"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בין %1$@ ל־%2$@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "entre %1$@ e %2$@"
+          }
+        }
+      }
+    },
+    "Темп пока не отличим от нуля: вес шумит сильнее, чем движется. Дата финиша появится, когда тренд станет уверенным." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوتيرة لا تُميَّز عن الصفر بعد: ضجيج الوزن أكبر من حركته. سيظهر تاريخ النهاية عندما يصبح الاتجاه واثقًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tempo ist noch nicht von null zu unterscheiden: das Gewicht rauscht stärker, als es sich bewegt. Das Zieldatum erscheint, sobald der Trend sicher ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pace cannot yet be told apart from zero: the weight is noisier than it is moving. The finish date appears once the trend is certain."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El ritmo todavía no se distingue de cero: el peso tiene más ruido que movimiento. La fecha de fin aparecerá cuando la tendencia sea firme."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rythme ne se distingue pas encore de zéro : le poids bruite plus qu'il ne bouge. La date de fin apparaîtra quand la tendance sera sûre."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקצב עדיין לא ניתן להבחנה מאפס: המשקל רועש יותר משהוא זז. תאריך הסיום יופיע כשהמגמה תהיה ברורה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ritmo ainda não se distingue de zero: o peso faz mais ruído do que movimento. A data de fim aparece quando a tendência for firme."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

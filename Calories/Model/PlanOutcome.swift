@@ -315,6 +315,33 @@ struct PlanAdherence {
     var direction: Double = 0
     /// Когда фаза должна кончиться по плану.
     var phaseEnd: Date = .distantPast
+    /// Прямая по взвешиваниям фазы: темп и его погрешность. nil — взвешиваний
+    /// мало, и прямую строить не из чего.
+    var trendFit: WeightTrendFit? = nil
+
+    /// Коридор даты финиша: та же цель при темпе на границах погрешности.
+    ///
+    /// Две даты, а не одна: «цель к 3 ноября» при трёх взвешиваниях — точность,
+    /// которой нет. Nil, когда темп не отличим от нуля: тогда дата не
+    /// существует вовсе, и называть её нельзя.
+    func projectedEndRange(from today: Date = Date()) -> ClosedRange<Date>? {
+        guard let trendFit, trendFit.isDistinguishableFromZero, let actual = actualWeightToday else { return nil }
+        let remaining = phaseTargetWeightKg - actual
+        let dates: [Date] = [trendFit.range.lowerBound, trendFit.range.upperBound].compactMap { rate in
+            guard rate != 0 else { return nil }
+            let weeks = remaining / rate
+            guard weeks.isFinite, weeks > 0, weeks < 260 else { return nil }
+            return Calendar.current.date(byAdding: .day, value: Int((weeks * 7).rounded()), to: today)
+        }
+        guard let first = dates.min(), let last = dates.max(), first != last else { return nil }
+        return first...last
+    }
+
+    /// Темп измерен, но от нуля не отличается: данных мало или вес стоит.
+    var rateIsIndistinguishableFromZero: Bool {
+        guard let trendFit else { return false }
+        return !trendFit.isDistinguishableFromZero
+    }
 
     var deviationKg: Double? {
         guard let actualWeightToday else { return nil }

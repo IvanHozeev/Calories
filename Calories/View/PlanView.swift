@@ -549,14 +549,33 @@ struct PlanView: View {
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
             } else {
-                if let projectedEndDate = adherence.projectedEndDate {
+                // Дата финиша — только когда темп от нуля отличается. При трёх
+                // взвешиваниях наклон с тем же успехом может быть нулём, и
+                // «цель к 3 ноября» там — обещание точности, которой нет.
+                if adherence.rateIsIndistinguishableFromZero {
+                    Label("Темп пока не отличим от нуля: вес шумит сильнее, чем движется. Дата финиша появится, когда тренд станет уверенным.",
+                          systemImage: "questionmark.circle")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else if let projectedEndDate = adherence.projectedEndDate {
                     ResultRow(title: "При текущем темпе цель — к", value: Self.planDate(projectedEndDate))
+                    // Коридор под датой: та же цель при темпе на границах
+                    // погрешности. Без него одна дата выглядит обещанием.
+                    if let range = adherence.projectedEndRange() {
+                        Text(String(format: String(localized: "от %1$@ до %2$@"),
+                                    Self.planDate(range.lowerBound), Self.planDate(range.upperBound)))
+                            .font(.app(.caption))
+                            .foregroundStyle(.tertiary)
+                    }
                 }
                 // Темп рядом с датой: без него дата в следующем августе выглядит
                 // опечаткой, а с ним понятно, откуда она взялась.
                 if let rate = adherence.observedWeeklyRateKg {
                     ResultRow(title: "Темп за фазу",
-                              value: String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
+                              value: adherence.trendFit.map {
+                                  String(format: "%+.2f ± %.2f \(String(localized: "кг/нед"))", rate, $0.standardErrorKg)
+                              } ?? String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 }
 
                 // Разбор расхождения — туда же, где названо само расхождение.

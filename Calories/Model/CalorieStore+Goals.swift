@@ -768,7 +768,15 @@ extension CalorieStore {
         let phaseStartWeight = weightTrend(on: phaseStart) ?? plan.startWeightKg
         let daysInPhase = max(0, today.timeIntervalSince(phaseStart) / 86400)
         let weeksInPhase = max(daysInPhase / 7, 1.0 / 7)
-        let observedWeeklyRate = (actualWeightToday - phaseStartWeight) / weeksInPhase
+
+        // Прямая по всем взвешиваниям фазы, когда их хватает: по двум точкам
+        // ошибка любой из них целиком уходит в наклон, и дата финиша прыгает
+        // от одного солёного ужина. У прямой же есть своя погрешность, и её
+        // можно показать вместо того, чтобы делать вид, что её нет.
+        let phaseEntries = weightEntries.filter { $0.date >= phaseStart }
+            .map { (date: $0.date, kg: $0.weightKg) }
+        let fit = WeightTrendFit.fit(phaseEntries)
+        let observedWeeklyRate = fit?.weeklyRateKg ?? (actualWeightToday - phaseStartWeight) / weeksInPhase
 
         var projectedEndDate: Date?
         if observedWeeklyRate != 0 {
@@ -817,7 +825,8 @@ extension CalorieStore {
             isSettlingAfterIncrease: settling,
             phaseTargetWeightKg: phaseTargetWeight,
             direction: phase.intent.direction,
-            phaseEnd: phaseEnd
+            phaseEnd: phaseEnd,
+            trendFit: fit
         )
     }
 }

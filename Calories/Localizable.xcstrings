@@ -51070,6 +51070,946 @@
           }
         }
       }
+    },
+    "Съедено в среднем на %lld ккал в день больше нормы" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُكل في المتوسط %lld سعرة يوميًا فوق المعدّل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Schnitt %lld kcal pro Tag mehr gegessen als das Soll"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ate %lld kcal a day more than the target on average"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se comió de media %lld kcal al día por encima de la meta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En moyenne %lld kcal par jour de plus que l'objectif"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נאכלו בממוצע %lld קלוריות ביום מעל היעד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comeu em média %lld kcal por dia acima da meta"
+          }
+        }
+      }
+    },
+    "Съедено в среднем на %lld ккал в день меньше нормы" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أُكل في المتوسط %lld سعرة يوميًا دون المعدّل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Schnitt %lld kcal pro Tag weniger gegessen als das Soll"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ate %lld kcal a day less than the target on average"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se comió de media %lld kcal al día por debajo de la meta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En moyenne %lld kcal par jour de moins que l'objectif"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נאכלו בממוצע %lld קלוריות ביום מתחת ליעד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comeu em média %lld kcal por dia abaixo da meta"
+          }
+        }
+      }
+    },
+    "Шагов в среднем %1$lld против обычных %2$lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطوات %1$lld في المتوسط مقابل %2$lld المعتادة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schritte im Schnitt %1$lld statt der üblichen %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps averaged %1$lld against the usual %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasos: %1$lld de media frente a los %2$lld habituales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas : %1$lld en moyenne contre %2$lld d'habitude"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "צעדים בממוצע %1$lld מול %2$lld הרגילים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passos: %1$lld em média contra os %2$lld habituais"
+          }
+        }
+      }
+    },
+    "Норма посчитана по формуле (%1$lld ккал), а по факту расход %2$lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المعدّل محسوب بالمعادلة (%1$lld سعرة) بينما الاستهلاك الفعلي %2$lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Soll kommt aus der Formel (%1$lld kcal), gemessen wird aber %2$lld verbraucht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target comes from the formula (%1$lld kcal) while the measured spend is %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La meta sale de la fórmula (%1$lld kcal), pero el gasto real es %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif vient de la formule (%1$lld kcal), alors que la dépense mesurée est %2$lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד מחושב בנוסחה (%1$lld קלוריות), בעוד שההוצאה בפועל היא %2$lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta vem da fórmula (%1$lld kcal), mas o gasto real é %2$lld"
+          }
+        }
+      }
+    },
+    "Необъяснённое: вода, гликоген, точность весов и ленты" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غير مُفسَّر: ماء وجليكوجين ودقة الميزان والشريط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unerklärt: Wasser, Glykogen, Genauigkeit von Waage und Maßband"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unexplained: water, glycogen, the accuracy of the scale and the tape"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin explicar: agua, glucógeno, precisión de la báscula y la cinta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inexpliqué : eau, glycogène, précision de la balance et du mètre"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא מוסבר: מים, גליקוגן, דיוק המשקל והסרט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por explicar: água, glicogénio, precisão da balança e da fita"
+          }
+        }
+      }
+    },
+    "Взвешиваний за %1$lld дней: %2$lld — тренду пока верить рано" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عمليات الوزن خلال %1$lld يومًا: %2$lld — من المبكر الوثوق بالاتجاه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wiegungen in %1$lld Tagen: %2$lld — dem Trend ist noch nicht zu trauen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weigh-ins in %1$lld days: %2$lld — too few to trust the trend yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesajes en %1$lld días: %2$lld: aún es pronto para fiarse de la tendencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesées en %1$lld jours : %2$lld — trop peu pour se fier à la tendance"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שקילות ב־%1$lld ימים: %2$lld — מוקדם לסמוך על המגמה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesagens em %1$lld dias: %2$lld — ainda é cedo para confiar na tendência"
+          }
+        }
+      }
+    },
+    "Записано дней: %1$lld из %2$lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيام مسجَّلة: %1$lld من %2$lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erfasste Tage: %1$lld von %2$lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days logged: %1$lld of %2$lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días registrados: %1$lld de %2$lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours notés : %1$lld sur %2$lld"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ימים שתועדו: %1$lld מתוך %2$lld"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dias registados: %1$lld de %2$lld"
+          }
+        }
+      }
+    },
+    "Ночей короче обычного: %lld — вес утром держит воду" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليالٍ أقصر من المعتاد: %lld — الوزن صباحًا يحتبس الماء"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächte kürzer als sonst: %lld — morgens hält das Gewicht Wasser"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nights shorter than usual: %lld — morning weight holds water"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noches más cortas de lo habitual: %lld: el peso matutino retiene agua"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuits plus courtes que d'habitude : %lld — le poids du matin retient l'eau"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לילות קצרים מהרגיל: %lld — המשקל בבוקר אוגר מים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noites mais curtas do que o habitual: %lld — o peso da manhã retém água"
+          }
+        }
+      }
+    },
+    "Разбор расхождения" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تحليل الفارق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Abweichung aufgeschlüsselt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where the weight went"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De dónde sale la diferencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D'où vient l'écart"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מאיפה הפער"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De onde vem a diferença"
+          }
+        }
+      }
+    },
+    "Почему так" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لماذا هكذا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum so"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why is that"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Por qué?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "למה ככה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porquê"
+          }
+        }
+      }
+    },
+    "Планировалось" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المخطَّط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geplant"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prévu"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתוכנן"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsto"
+          }
+        }
+      }
+    },
+    "Вышло" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفعلي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tatsächlich"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actual"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réel"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בפועל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real"
+          }
+        }
+      }
+    },
+    "Из чего сложилось" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مما تكوّن"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Woraus es sich ergibt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What it is made of"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De qué se compone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui le compose"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ממה זה מורכב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De que é feito"
+          }
+        }
+      }
+    },
+    "Что мешает считать точнее" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما يمنع حسابًا أدقّ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was genaueres Rechnen verhindert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What stands in the way of a sharper count"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué impide contar con más precisión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui empêche de compter plus précisément"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה מפריע לחשב מדויק יותר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que impede uma conta mais precisa"
+          }
+        }
+      }
+    },
+    "Пока нечего считать" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا شيء لحسابه بعد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch nichts zu rechnen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to count yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todavía no hay qué contar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien à calculer pour l'instant"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין עדיין מה לחשב"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há o que contar"
+          }
+        }
+      }
+    },
+    "Данных за две недели слишком мало, чтобы разбирать: без регулярных взвешиваний и записей считать нечего." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بيانات الأسبوعين أقل من أن تُحلَّل: بدون وزن وتسجيل منتظمين لا يوجد ما يُحسب."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für zwei Wochen sind die Daten zu dünn: ohne regelmäßiges Wiegen und Erfassen gibt es nichts zu rechnen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two weeks of data this thin cannot be broken down: without regular weigh-ins and entries there is nothing to count."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hay muy pocos datos de dos semanas para desglosar: sin pesajes y registros regulares no hay nada que contar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les données de ces deux semaines sont trop maigres : sans pesées ni saisies régulières, il n'y a rien à calculer."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הנתונים משבועיים דלים מכדי לפרק: בלי שקילות ורישומים סדירים אין מה לחשב."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dados destas duas semanas são escassos demais para desdobrar: sem pesagens e registos regulares não há o que contar."
+          }
+        }
+      }
+    },
+    "Заметных причин не нашлось: еда и движение держались плана." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تُوجد أسباب ملحوظة: الأكل والحركة التزما بالخطة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine nennenswerten Ursachen: Essen und Bewegung hielten sich an den Plan."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No notable causes: food and movement stayed with the plan."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay causas notables: la comida y el movimiento siguieron el plan."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune cause notable : l'alimentation et l'activité ont suivi le plan."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נמצאו סיבות בולטות: האוכל והתנועה נצמדו לתוכנית."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem causas notáveis: a comida e o movimento seguiram o plano."
+          }
+        }
+      }
+    },
+    "Темп по плану против темпа по тренду веса. Тренд, а не последнее взвешивание: вода даёт больше килограмма разброса, и по одному утру судить нельзя." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وتيرة الخطة مقابل وتيرة اتجاه الوزن. الاتجاه وليس آخر وزنة: الماء يعطي تشتتًا يفوق الكيلوغرام، ولا يُحكم بصباح واحد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tempo nach Plan gegen Tempo nach dem Gewichtstrend. Der Trend, nicht die letzte Wiegung: Wasser streut über ein Kilo, und ein einzelner Morgen entscheidet nichts."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The plan's pace against the pace of the weight trend. The trend, not the last weigh-in: water spreads the number by more than a kilo, and one morning decides nothing."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El ritmo del plan frente al ritmo de la tendencia del peso. La tendencia, no el último pesaje: el agua da más de un kilo de dispersión y una sola mañana no decide nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le rythme du plan face au rythme de la tendance du poids. La tendance, pas la dernière pesée : l'eau donne plus d'un kilo d'écart, et un seul matin ne décide rien."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקצב לפי התוכנית מול הקצב לפי מגמת המשקל. המגמה, לא השקילה האחרונה: מים נותנים פיזור של יותר מקילוגרם, ובוקר אחד לא קובע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O ritmo do plano contra o ritmo da tendência do peso. A tendência, não a última pesagem: a água dá mais de um quilo de dispersão e uma só manhã não decide nada."
+          }
+        }
+      }
+    },
+    "Килограммы рядом с причиной — её вклад в расхождение за эти две недели. Плюс значит «тянуло вес вверх»." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الكيلوغرامات بجانب السبب هي مساهمته في الفارق خلال هذين الأسبوعين. والموجب يعني «شدّ الوزن إلى أعلى»."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Kilo neben einer Ursache sind ihr Anteil an der Abweichung dieser zwei Wochen. Plus heißt: zog das Gewicht nach oben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The kilos next to a cause are its share of the gap over these two weeks. A plus means it pulled the weight up."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los kilos junto a una causa son su parte de la diferencia en estas dos semanas. El más significa que tiraba del peso hacia arriba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les kilos à côté d'une cause sont sa part de l'écart sur ces deux semaines. Un plus signifie qu'elle tirait le poids vers le haut."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הקילוגרמים לצד סיבה הם חלקה בפער של השבועיים האלה. פלוס פירושו שמשך את המשקל למעלה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os quilos ao lado de uma causa são a sua parte na diferença destas duas semanas. O mais significa que puxava o peso para cima."
+          }
+        }
+      }
+    },
+    "Расхождение" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفارق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abweichung"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gap"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diferencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écart"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פער"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diferença"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

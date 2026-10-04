@@ -496,3 +496,81 @@ struct CompositionWindowTests {
         #expect(verdict == .worked)
     }
 }
+
+// MARK: - Разбор расхождения
+
+/// «Я всё делаю правильно, а вес стоит» — вопрос, из-за которого бросают.
+/// Разбор не предсказывает, а раскладывает уже случившееся на измеренные
+/// слагаемые и честно называет то, что не разложилось.
+struct StallReportTests {
+    /// Две недели: план просил минус 0.7 кг в неделю, вышло ноль.
+    /// Съедалось на 300 ккал в день больше нормы — это 0.55 кг за окно,
+    /// то есть почти всё расхождение.
+    private func overeating() -> StallReport.Input {
+        StallReport.Input(days: 14, plannedWeeklyRateKg: -0.7, actualWeeklyRateKg: 0,
+                          meanIntake: 2800, meanGoal: 2500, loggedDays: 14, weighIns: 8,
+                          weightKg: 76)
+    }
+
+    @Test func overeatingIsNamedWithItsWeight() throws {
+        let report = StallReport.make(overeating())
+        let intake = try #require(report.causes.first { $0.id == "intake" })
+        #expect(abs(intake.kg - 0.545) < 0.01, "300 ккал в день за две недели — это 0.55 кг")
+        #expect(report.gapKg > 0, "Вес выше запланированного")
+    }
+
+    /// Шаги тоже деньги: упавшая активность объясняет часть расхождения.
+    @Test func fallenStepsAreNamed() throws {
+        var input = overeating()
+        input.meanSteps = 6000
+        input.baselineSteps = 9000
+        let report = StallReport.make(input)
+        let activity = try #require(report.causes.first { $0.id == "activity" })
+        #expect(activity.kg > 0, "Шагов меньше обычного — вес тянуло вверх")
+        #expect(report.causes.first?.id == "intake", "Причины идут по весу вклада")
+    }
+
+    /// Формула, завышающая расход, — промах приложения, а не человека.
+    @Test func aWrongFormulaIsNamedAsSuch() throws {
+        var input = overeating()
+        input.meanIntake = 2500
+        input.usesMeasuredTDEE = false
+        input.formulaTDEE = 3200
+        input.measuredTDEE = 2950
+        let report = StallReport.make(input)
+        let expenditure = try #require(report.causes.first { $0.id == "expenditure" })
+        #expect(expenditure.kg > 0)
+    }
+
+    /// То, что не разложилось, называется своим именем, а не прячется.
+    @Test func whatIsLeftOverIsCalledUnexplained() {
+        var input = overeating()
+        input.meanIntake = 2500   // ел ровно норму
+        let report = StallReport.make(input)
+        #expect(report.causes.isEmpty)
+        #expect(abs(report.unexplainedKg - report.gapKg) < 0.001,
+                "Без объяснимых причин всё расхождение — необъяснённое")
+    }
+
+    /// Пара взвешиваний за две недели — это не разбор, а гадание.
+    @Test func tooLittleDataIsAdmittedInsteadOfGuessed() {
+        var input = overeating()
+        input.weighIns = 1
+        input.loggedDays = 2
+        let report = StallReport.make(input)
+        #expect(report.tooLittleData)
+        #expect(report.causes.isEmpty, "Гадать по двум дням нельзя")
+        #expect(!report.remarks.isEmpty, "И надо сказать, чего не хватает")
+    }
+
+    /// Когда всё идёт по плану, разбор молчит, а не выдумывает виноватых.
+    @Test func aPlanOnTrackHasNothingToExplain() {
+        let input = StallReport.Input(days: 14, plannedWeeklyRateKg: -0.7, actualWeeklyRateKg: -0.7,
+                                      meanIntake: 2500, meanGoal: 2500, loggedDays: 14, weighIns: 8,
+                                      meanSteps: 9000, baselineSteps: 9000, weightKg: 76)
+        let report = StallReport.make(input)
+        #expect(report.causes.isEmpty)
+        #expect(abs(report.gapKg) < 0.01)
+        #expect(abs(report.unexplainedKg) < StallReport.notableKg)
+    }
+}

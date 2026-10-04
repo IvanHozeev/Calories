@@ -559,6 +559,15 @@ struct PlanView: View {
                               value: String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 }
 
+                // Разбор расхождения — туда же, где названо само расхождение.
+                // Вопрос «почему так» задают ровно здесь и ровно в эту секунду.
+                NavigationLink {
+                    StallReportView(store: store)
+                } label: {
+                    Label("Почему так", systemImage: "magnifyingglass")
+                }
+                .accessibilityIdentifier("openStallReport")
+
                 if adherence.status == .ahead {
                     aheadActions(plan: plan, adherence: adherence)
                 } else {

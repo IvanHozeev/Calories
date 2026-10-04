@@ -597,6 +597,50 @@ extension CalorieStore {
         return (RecoverySignal.verdict(input), text)
     }
 
+    /// Всё, что нужно для разбора расхождения: план против факта за окно.
+    ///
+    /// Собирается здесь, а не в экране: это данные, и проверяются они тестами.
+    func stallInput(window length: Int = 14, now: Date = Date()) -> StallReport.Input {
+        let calendar = Calendar.current
+        let from = calendar.startOfDay(for: now.addingTimeInterval(-Double(length) * 86_400))
+        var input = StallReport.Input(days: length)
+
+        input.plannedWeeklyRateKg = plan?.weeklyRateKg(on: now) ?? 0
+
+        // Темп по тренду, а не по двум случайным взвешиваниям: вердикт по
+        // разнице двух дней — это вердикт по воде.
+        if let then = weightTrend(on: from), let nowWeight = weightTrend(on: now) {
+            input.actualWeeklyRateKg = (nowWeight - then) / (Double(length) / 7)
+            input.weightKg = nowWeight
+        }
+        input.weightKg = input.weightKg ?? latestWeight?.weightKg ?? profile?.weightKg
+
+        // Съеденное против нормы — по тем дням, где записи есть. Пустой день
+        // не значит «съедено ноль», и считать его нулём было бы враньём.
+        let logged: [DaySummary] = days.filter { $0.date >= from && !$0.entries.isEmpty }
+        if !logged.isEmpty {
+            let eaten: Int = logged.reduce(0) { $0 + $1.totalCalories }
+            let goals: Int = logged.reduce(0) { $0 + $1.goal }
+            input.loggedDays = logged.count
+            input.meanIntake = Double(eaten) / Double(logged.count)
+            input.meanGoal = Double(goals) / Double(logged.count)
+        }
+        input.weighIns = weightEntries.filter { $0.date >= from }.count
+
+        let activity: [ActivityDay] = stepHistory.filter { $0.date >= from }
+        if !activity.isEmpty {
+            let steps: Int = activity.reduce(0) { $0 + $1.steps }
+            input.meanSteps = steps / activity.count
+            input.shortSleepNights = activity.filter { ($0.sleepHours ?? 99) < 6 }.count
+        }
+        input.baselineSteps = activityBaseline?.steps
+
+        input.formulaTDEE = profile?.tdee
+        input.measuredTDEE = smoothedTDEE ?? adaptiveTDEE?.tdee
+        input.usesMeasuredTDEE = usesAdaptiveTDEE && adaptiveTDEE != nil
+        return input
+    }
+
     /// Обстоятельства дня для разбора: нагрузка, сон, пульс, вес и перебор.
     ///
     /// Собирается здесь, а не в экране: это данные, а не оформление, и

@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 /// Ближайший приём пищи строкой под кольцом: когда и сколько на него.
 ///
@@ -174,7 +175,13 @@ struct MealScheduleSheet: View {
             }
             // Напоминания переставляются на выходе: пока крутят стрелки,
             // дёргать систему на каждый тик незачем.
-            .onDisappear { MealReminders.reschedule(settings: settings, store: store) }
+            .onDisappear {
+                MealReminders.reschedule(settings: settings, store: store)
+                // Виджет на блокировке живёт расписанием: правку он должен
+                // увидеть сразу, а не на следующей перестройке кэшей.
+                store?.publishMealsToWidget()
+                WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesMealWidget")
+            }
             .glassRow()
             .listStyle(.insetGrouped)
             .navigationTitle("Приёмы пищи")

@@ -124,10 +124,20 @@ struct RootView: View {
         .onChange(of: store.consumedToday) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "MacrosWidget")
+            // И приём пищи: съеденное меняет то, сколько осталось на ближайший.
+            WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesMealWidget")
         }
         .onChange(of: store.adaptedTodayGoal) { _, _ in
             WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesWidget")
             WidgetCenter.shared.reloadTimelines(ofKind: "MacrosWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesMealWidget")
+        }
+        // Первый запуск новой сборки: виджет мог нарисоваться раньше, чем
+        // приложение впервые выложило расписание, и так и остался бы с пустым
+        // ответом до полуночи.
+        .task {
+            store.publishMealsToWidget()
+            WidgetCenter.shared.reloadTimelines(ofKind: "CaloriesMealWidget")
         }
         // Цвет акцента виджету шагов: он в своём процессе и настроек
         // приложения не видит, поэтому выбор кладётся в общие настройки группы.

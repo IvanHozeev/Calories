@@ -37,6 +37,8 @@ struct MealEntry: TimelineEntry {
     let current: MealSlotSnapshot?
     /// Ближайший впереди.
     let next: MealSlotSnapshot?
+    /// Расписание вообще включено: без него и показывать нечего.
+    var hasSchedule: Bool = true
 
     /// Что показывать: идущий приём важнее будущего — в его окне и едят.
     var shown: MealSlotSnapshot? { current ?? next }
@@ -63,10 +65,19 @@ enum MealFeed {
 
     /// Что показывать на этот момент: идущий приём важнее будущего — в его
     /// окне и едят.
+    ///
+    /// Когда впереди на сегодня не осталось ничего, показываем первый приём
+    /// завтрашнего дня: время у приёмов изо дня в день одно и то же. Калорий у
+    /// него нет — норму на завтра никто ещё не считал, и выдумывать её нельзя.
     static func shown(at date: Date, in slots: [MealSlotSnapshot]) -> MealSlotSnapshot? {
-        slots.first { date >= $0.start && date < $0.end }
-            ?? slots.first { $0.time > date }
-            ?? slots.first { $0.end > date }
+        if let current = slots.first(where: { date >= $0.start && date < $0.end }) { return current }
+        if let next = slots.first(where: { $0.time > date }) { return next }
+        guard let first = slots.min(by: { $0.time < $1.time }) else { return nil }
+        return MealSlotSnapshot(period: first.period,
+                                time: first.time.addingTimeInterval(86_400),
+                                start: first.start.addingTimeInterval(86_400),
+                                end: first.end.addingTimeInterval(86_400),
+                                calories: 0)
     }
 }
 
@@ -101,9 +112,12 @@ struct MealProvider: TimelineProvider {
 
     private func entry(at date: Date, slots: [MealSlotSnapshot]? = nil) -> MealEntry {
         let all = slots ?? MealFeed.slots()
-        let current = all.first { date >= $0.start && date < $0.end }
-        let next = all.first { $0.time > date } ?? all.first { $0.end > date }
-        return MealEntry(date: date, current: current, next: current == nil ? next : nil)
+        let shown = MealFeed.shown(at: date, in: all)
+        let isCurrent = shown.map { date >= $0.start && date < $0.end } ?? false
+        return MealEntry(date: date,
+                         current: isCurrent ? shown : nil,
+                         next: isCurrent ? nil : shown,
+                         hasSchedule: !all.isEmpty)
     }
 
     private func loadSlots() -> [MealSlotSnapshot] { MealFeed.slots() }
@@ -134,9 +148,13 @@ struct MealWidgetView: View {
             // Одна строка и один значок — больше система здесь не покажет.
             Label {
                 if let slot, slot.isCurrent {
-                    Text(verbatim: "\(title) · \(slot.calories) \(String(localized: "ккал"))")
+                    Text(verbatim: slot.calories > 0
+                         ? "\(title) · \(slot.calories) \(String(localized: "ккал"))"
+                         : title)
                 } else if let slot {
-                    Text(verbatim: "\(title) \(time) · \(slot.calories) \(String(localized: "ккал"))")
+                    Text(verbatim: slot.calories > 0
+                         ? "\(title) \(time) · \(slot.calories) \(String(localized: "ккал"))"
+                         : "\(title) \(time)")
                 } else {
                     Text("Нет расписания")
                 }
@@ -189,7 +207,9 @@ struct MealWidgetView: View {
                                           slot.calories))
                         .font(.caption)
                 } else {
-                    Text(verbatim: "\(time) · \(slot.calories) \(String(localized: "ккал"))")
+                    Text(verbatim: slot.calories > 0
+                         ? "\(time) · \(slot.calories) \(String(localized: "ккал"))"
+                         : time)
                         .font(.caption)
                     // Системный таймер сам считает минуты: виджету не нужно
                     // просыпаться ради каждой из них.
@@ -199,7 +219,10 @@ struct MealWidgetView: View {
                         .lineLimit(1)
                 }
             } else {
-                Text("Расписание выключено")
+                // Разные ответы на разные вопросы: расписания нет вовсе —
+                // или оно есть, но приложение ещё не рассказало виджету, что в
+                // нём. Второе чинится открытием приложения, первое — нет.
+                Text(entry.hasSchedule ? "Приёмов больше нет" : "Расписание выключено")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

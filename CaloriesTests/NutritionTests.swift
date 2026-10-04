@@ -1124,3 +1124,65 @@ struct DishDeletionTests {
         #expect(entry.calories == 300)
     }
 }
+
+// MARK: - Пара под остаток
+
+/// Готовый приём под остаток находится не всегда: такого ужина человек мог
+/// никогда не есть. Зато из его же продуктов пара собирается почти всегда — и
+/// собирается точно, потому что двух продуктов хватает, чтобы попасть сразу в
+/// калории и в белок.
+struct MealPairTests {
+    private let cottage = MealSuggestions.Food(name: "Творог 5%", caloriesPer100g: 121,
+                                               macrosPer100g: Macros(protein: 17, fat: 5, carbs: 3),
+                                               timesEaten: 20)
+    private let oats = MealSuggestions.Food(name: "Овсянка", caloriesPer100g: 370,
+                                            macrosPer100g: Macros(protein: 12, fat: 7, carbs: 62),
+                                            timesEaten: 15)
+    private let banana = MealSuggestions.Food(name: "Банан", caloriesPer100g: 89,
+                                              macrosPer100g: Macros(protein: 1, fat: 0, carbs: 23),
+                                              timesEaten: 10)
+
+    @Test func aPairHitsBothTheCaloriesAndTheProtein() throws {
+        let pairs = MealSuggestions.pair(remaining: 500, protein: 40, from: [cottage, oats, banana])
+        let best = try #require(pairs.first)
+        #expect(abs(Double(best.calories) - 500) / 500 <= MealSuggestions.pairCalorieTolerance,
+                "Калории должны сойтись: \(best.calories)")
+        #expect(abs(best.macros.protein - 40) / 40 <= MealSuggestions.pairProteinTolerance,
+                "И белок тоже: \(best.macros.protein)")
+    }
+
+    /// Порции должны быть едой, а не расчётом: ни пяти граммов, ни килограмма.
+    @Test func portionsStayWithinWhatAPersonActuallyEats() throws {
+        let pairs = MealSuggestions.pair(remaining: 500, protein: 40, from: [cottage, oats, banana])
+        for part in try #require(pairs.first).parts {
+            let grams = try #require(part.grams)
+            #expect(MealSuggestions.portionRange.contains(grams), "\(part.name): \(grams) г")
+            #expect(grams.truncatingRemainder(dividingBy: 5) == 0, "Округляем до пятёрки")
+        }
+    }
+
+    /// Два продукта с одинаковым отношением белка к калориям вторым уравнением
+    /// не решаются — это, по сути, один и тот же продукт.
+    @Test func twinFoodsDoNotPretendToSolveTwoEquations() {
+        let twin = MealSuggestions.Food(name: "Творог другой", caloriesPer100g: 242,
+                                        macrosPer100g: Macros(protein: 34, fat: 10, carbs: 6),
+                                        timesEaten: 5)
+        #expect(MealSuggestions.pair(remaining: 500, protein: 40, from: [cottage, twin]).isEmpty)
+    }
+
+    /// Невозможного не обещаем: сорок граммов белка в двести килокалорий из
+    /// творога с бананом не положить.
+    @Test func animpossibleAskReturnsNothing() {
+        #expect(MealSuggestions.pair(remaining: 200, protein: 40, from: [banana, oats]).isEmpty)
+    }
+
+    /// Один и тот же продукт не должен занимать все подсказки.
+    @Test func suggestionsDoNotRepeatTheSameFood() {
+        let foods = [cottage, oats, banana,
+                     MealSuggestions.Food(name: "Рис", caloriesPer100g: 130,
+                                          macrosPer100g: Macros(protein: 3, fat: 0, carbs: 28), timesEaten: 8)]
+        let pairs = MealSuggestions.pair(remaining: 500, protein: 40, from: foods, limit: 2)
+        let names = pairs.flatMap { $0.parts.map(\.name) }
+        #expect(Set(names).count == names.count, "Продукты в подсказках не повторяются")
+    }
+}

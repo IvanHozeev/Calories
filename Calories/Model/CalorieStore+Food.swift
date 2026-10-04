@@ -78,7 +78,52 @@ extension CalorieStore {
             MealSuggestions.Option(name: name, parts: value.parts, calories: value.calories,
                                    macros: value.macros, timesEaten: value.times)
         }
-        return MealSuggestions.suggest(remaining: remaining, from: options, leadingMacro: focusMacro)
+        let scaled = MealSuggestions.suggest(remaining: remaining, from: options, leadingMacro: focusMacro)
+
+        // Пары добираем только тогда, когда готовых приёмов не хватило.
+        // Свой вчерашний ужин — лучшая подсказка, какую можно дать; пара
+        // собирается, когда подходящего ужина не было.
+        guard scaled.count < MealSuggestions.limit else { return scaled }
+        let pairs = MealSuggestions.pair(remaining: remaining,
+                                         protein: proteinRemainingForMeal(remaining: remaining),
+                                         from: pairPool(since: cutoff),
+                                         limit: MealSuggestions.limit - scaled.count)
+        // Пара, повторяющая состав уже предложенного приёма, — та же подсказка
+        // другими словами.
+        let shownNames = Set(scaled.flatMap { $0.parts.map(\.name) })
+        return scaled + pairs.filter { Set($0.parts.map(\.name)).isDisjoint(with: shownNames) }
+    }
+
+    /// Сколько белка просится в этот приём.
+    ///
+    /// Не весь дневной остаток: если человек не добрал сорок граммов, а приём
+    /// на четыреста килокалорий, в него столько не положить. Берём долю,
+    /// пропорциональную калориям приёма в остатке дня, — и не меньше того, что
+    /// в эти калории вообще влезает.
+    private func proteinRemainingForMeal(remaining: Int) -> Double {
+        guard let target = proteinTarget else { return 0 }
+        let left = max(0, target - macrosToday.protein)
+        let dayLeft = max(1, adaptedTodayGoal - consumedToday)
+        let share = min(1, Double(remaining) / Double(dayLeft))
+        return left * share
+    }
+
+    /// Продукты, из которых собираем пару: то, что человек ел сам.
+    ///
+    /// Только свои и съеденные — каталог целиком сюда пускать нельзя: подсказка
+    /// из трёхсот незнакомых позиций читается как реклама, а не как помощь.
+    private func pairPool(since cutoff: Date) -> [MealSuggestions.Food] {
+        var times: [String: Int] = [:]
+        for entry in entries where entry.date >= cutoff {
+            for part in entry.composition where part.grams ?? 0 > 0 {
+                times[part.name, default: 0] += 1
+            }
+        }
+        return times.compactMap { name, count in
+            guard let per100 = perHundredGrams(named: name), per100.calories > 0 else { return nil }
+            return MealSuggestions.Food(name: name, caloriesPer100g: per100.calories,
+                                        macrosPer100g: per100.macros, timesEaten: count)
+        }
     }
 
     /// Недавние приёмы пищи — те, что собраны из нескольких продуктов.

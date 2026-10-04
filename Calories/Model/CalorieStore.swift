@@ -1515,7 +1515,7 @@ final class CalorieStore {
     ///
     /// Свой продукт первым: он для человека и есть настоящий, а в базе может
     /// лежать тёзка с другими числами.
-    private func perHundredGrams(named name: String) -> (calories: Int, macros: Macros)? {
+    func perHundredGrams(named name: String) -> (calories: Int, macros: Macros)? {
         if let food = customFood(named: name) {
             return (food.caloriesPer100g, food.macrosPer100g)
         }

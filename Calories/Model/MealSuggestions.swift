@@ -91,6 +91,107 @@ enum MealSuggestions {
         return Array(candidates.sorted { $0.fit > $1.fit }.prefix(limit))
     }
 
+    // MARK: - Пара под остаток
+
+    /// Продукт, из которого можно собрать пару: цифры на сто грамм.
+    struct Food {
+        let name: String
+        let caloriesPer100g: Int
+        let macrosPer100g: Macros
+        /// Сколько раз человек его ел — чем чаще, тем охотнее предлагаем.
+        let timesEaten: Int
+    }
+
+    /// Разумные границы порции в граммах. Ниже — не еда, выше — не порция.
+    static let portionRange: ClosedRange<Double> = 30...400
+    /// Насколько собранная пара может разойтись с остатком калорий.
+    static let pairCalorieTolerance = 0.07
+    /// И с остатком белка. Допуск шире: белок добирают за день, а не за приём.
+    static let pairProteinTolerance = 0.2
+
+    /// Собрать пару продуктов под остаток калорий и белка.
+    ///
+    /// Нужна там, где прежняя подсказка молчала: приёма, который попадает в
+    /// оставшиеся 480 ккал, человек никогда не ел, и предложить ему нечего.
+    /// Зато из его же продуктов пара собирается почти всегда — и собирается
+    /// точно, потому что двух продуктов хватает, чтобы попасть сразу в два
+    /// числа: калории и белок.
+    ///
+    /// Решается это не перебором граммов, а системой из двух уравнений на две
+    /// порции: сколько сотен граммов первого и второго дают нужные калории и
+    /// нужный белок. Перебор идёт только по парам продуктов, и его немного.
+    static func pair(remaining: Int, protein: Double, from foods: [Food],
+                     limit: Int = 2) -> [Candidate] {
+        guard remaining >= minimumRemaining, protein > 0 else { return [] }
+        let targetCalories = Double(remaining)
+        let pool = Array(foods.filter { $0.caloriesPer100g > 0 }
+            .sorted { $0.timesEaten > $1.timesEaten }
+            .prefix(14))
+        guard pool.count >= 2 else { return [] }
+
+        var found: [Candidate] = []
+        for (i, first) in pool.enumerated() {
+            for second in pool[(i + 1)...] {
+                guard let candidate = solve(first: first, second: second,
+                                            calories: targetCalories, protein: protein) else { continue }
+                found.append(candidate)
+            }
+        }
+        // По одному продукту в паре: три варианта с одним и тем же творогом —
+        // это один вариант, показанный трижды.
+        var usedNames = Set<String>()
+        var result: [Candidate] = []
+        for candidate in found.sorted(by: { $0.fit > $1.fit }) {
+            let names = Set(candidate.parts.map(\.name))
+            guard usedNames.isDisjoint(with: names) else { continue }
+            usedNames.formUnion(names)
+            result.append(candidate)
+            if result.count == limit { break }
+        }
+        return result
+    }
+
+    /// Две порции, попадающие сразу в калории и в белок.
+    private static func solve(first: Food, second: Food,
+                              calories: Double, protein: Double) -> Candidate? {
+        // Сотни граммов: a — первого, b — второго.
+        let c1 = Double(first.caloriesPer100g), c2 = Double(second.caloriesPer100g)
+        let p1 = first.macrosPer100g.protein, p2 = second.macrosPer100g.protein
+        let determinant = c1 * p2 - c2 * p1
+        // Пара, у которой калории и белок идут в одной пропорции, вторым
+        // уравнением не решается: это, по сути, один и тот же продукт.
+        guard abs(determinant) > 0.5 else { return nil }
+
+        let a = (calories * p2 - protein * c2) / determinant
+        let b = (protein * c1 - calories * p1) / determinant
+        // До пятёрки: кухонные весы точнее не дают.
+        let gramsFirst = (a * 100 / 5).rounded() * 5
+        let gramsSecond = (b * 100 / 5).rounded() * 5
+        guard portionRange.contains(gramsFirst), portionRange.contains(gramsSecond) else { return nil }
+
+        let parts = [component(first, grams: gramsFirst), component(second, grams: gramsSecond)]
+        let total = parts.reduce(0) { $0 + $1.calories }
+        let macros = parts.reduce(Macros.zero) { $0 + $1.macros }
+        let calorieMiss = abs(Double(total) - calories) / calories
+        let proteinMiss = abs(macros.protein - protein) / protein
+        guard calorieMiss <= pairCalorieTolerance, proteinMiss <= pairProteinTolerance else { return nil }
+
+        // Точность по калориям важнее: белок добирают в течение дня, а в приём
+        // надо попасть сейчас.
+        var fit = 1 - calorieMiss * 2 - proteinMiss
+        fit += min(Double(first.timesEaten + second.timesEaten), 20) / 100
+        return Candidate(id: "pair-\(first.name)-\(second.name)",
+                         name: "\(first.name) + \(second.name)",
+                         parts: parts, calories: total, macros: macros, fit: fit)
+    }
+
+    private static func component(_ food: Food, grams: Double) -> EntryComponent {
+        EntryComponent(name: food.name,
+                       calories: Int((Double(food.caloriesPer100g) * grams / 100).rounded()),
+                       macros: food.macrosPer100g.portion(grams: grams),
+                       grams: grams)
+    }
+
     /// Богата ли еда этим макросом — по доле калорий, а не по граммам.
     private static func isRich(calories: Int, macros: Macros, in macro: MacroKind) -> Bool {
         let total = Double(calories)

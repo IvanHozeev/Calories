@@ -7,12 +7,14 @@ struct CaloriesWidgetBundle: WidgetBundle {
         CaloriesWidget()
         MacrosWidget()
         StepsWidget()
+        MealWidget()
         // Контролы появились в iOS 18, а приложение живёт с 17.6.
         if #available(iOS 18.0, *) {
             QuickAddControl()
             PhotographFoodControl()
             ScanBarcodeControl()
             TakeMeasurementsControl()
+            MealControl()
         }
     }
 }

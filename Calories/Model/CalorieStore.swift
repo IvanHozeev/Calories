@@ -762,6 +762,30 @@ final class CalorieStore {
         groupDefaults?.set(proteinTarget ?? 0, forKey: "widget_protein_target")
         groupDefaults?.set(fatTarget ?? 0, forKey: "widget_fat_target")
         groupDefaults?.set(carbsTarget ?? MacroTargets.carbsMinimum, forKey: "widget_carbs_target")
+        publishMealsToWidget()
+    }
+
+    /// Расписание приёмов — виджету на экране блокировки.
+    ///
+    /// Отдаём весь день, а не один ближайший приём: виджет живёт своей
+    /// временной лентой и в семь вечера должен сам перейти с обеда на ужин, не
+    /// дожидаясь, пока приложение откроют и пересчитают.
+    private func publishMealsToWidget() {
+        let schedule = MealScheduleSettings.shared
+        guard schedule.isEnabled else {
+            groupDefaults?.removeObject(forKey: "widget_meals")
+            return
+        }
+        // Перекус пропускаем: это не окно расписания, а всё, что съедено мимо
+        // окон, и его «время» ничего не значит.
+        let payload = slots(on: Date(), schedule: schedule).filter { $0.end > $0.start }.map {
+            ["period": $0.period.rawValue,
+             "time": $0.time.timeIntervalSince1970,
+             "start": $0.start.timeIntervalSince1970,
+             "end": $0.end.timeIntervalSince1970,
+             "calories": Double($0.calories)] as [String: Any]
+        }
+        groupDefaults?.set(try? JSONSerialization.data(withJSONObject: payload), forKey: "widget_meals")
     }
 
     /// Пересобирает кэши, если с момента последнего пересчёта сменились сутки.

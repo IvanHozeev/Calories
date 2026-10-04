@@ -280,6 +280,7 @@ struct PlanView: View {
         case .worked:        return .green
         case .costly:        return .orange
         case .stalled:       return .secondary
+        case .tooSoon:       return .secondary
         case .recomposition: return .green
         }
     }

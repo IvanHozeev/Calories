@@ -455,3 +455,44 @@ struct GoalSourceTests {
         #expect(store.dailyGoalSource == .plan)
     }
 }
+
+// MARK: - Срок между замерами
+
+/// Вердикт по составу на коротком сроке — это вердикт по воде.
+///
+/// Из жизни: замеры 1 и 4 октября, вес по тренду ушёл с 74.8 до 74.5 — ровно
+/// в темп плана, 0.7 кг в неделю. Приложение же говорило «вес не сдвинулся,
+/// либо дефицита нет, либо считается не всё съеденное»: порог «сдвинулся»
+/// написан под полкилограмма и не знал, что прошло три дня.
+struct CompositionWindowTests {
+    private func change(days: Int, from: Double, to: Double,
+                        fatFrom: Double = 12.7, fatTo: Double = 11.7) -> CompositionChange {
+        let end = Date()
+        return CompositionChange(fromDate: end.addingTimeInterval(-Double(days) * 86_400),
+                                 toDate: end,
+                                 startWeightKg: from, endWeightKg: to,
+                                 startFatPercent: fatFrom, endFatPercent: fatTo)
+    }
+
+    @Test func threeDaysAreNotAStall() {
+        let verdict = change(days: 3, from: 74.8, to: 74.5).verdict(for: .cut)
+        #expect(verdict == .tooSoon, "За три дня судить не о чем — это ещё не остановка")
+    }
+
+    @Test func theAdviceNamesTheDaysInsteadOfBlamingTheDiary() {
+        let advice = change(days: 3, from: 74.8, to: 74.5).advice(for: .cut)
+        #expect(advice.contains("3"), "Совет должен называть срок, из-за которого судить рано")
+    }
+
+    /// А две недели без движения — уже настоящая остановка, и молчать о ней
+    /// нельзя: именно ради этого вердикт и существует.
+    @Test func twoStillWeeksAreAStall() {
+        let verdict = change(days: 14, from: 74.8, to: 74.7, fatFrom: 12.7, fatTo: 12.6).verdict(for: .cut)
+        #expect(verdict == .stalled)
+    }
+
+    @Test func twoWeeksOfLossStillWork() {
+        let verdict = change(days: 14, from: 76.0, to: 74.6, fatFrom: 14.0, fatTo: 12.5).verdict(for: .cut)
+        #expect(verdict == .worked)
+    }
+}

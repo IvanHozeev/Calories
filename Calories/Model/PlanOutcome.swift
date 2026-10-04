@@ -20,6 +20,20 @@ struct CompositionChange {
     var fatDeltaKg: Double { endFatKg - startFatKg }
     var leanDeltaKg: Double { endLeanKg - startLeanKg }
 
+    /// Сколько дней прошло между замерами.
+    var days: Int {
+        max(0, Calendar.current.dateComponents([.day], from: fromDate, to: toDate).day ?? 0)
+    }
+
+    /// Раньше этого срока сравнивать состав не о чем.
+    ///
+    /// За несколько дней вес меняется водой и гликогеном сильнее, чем жиром:
+    /// соль, углеводы накануне и недосып дают больше килограмма разброса, а
+    /// запланированный дефицит за три дня — граммов триста. Две недели — тот же
+    /// порог, с которого приложение берётся считать расход по факту, и по той
+    /// же причине: короче окно, и меряешь не жир, а воду.
+    static let minimumDays = 14
+
     /// Насколько метод вообще способен различить.
     ///
     /// У Navy погрешность около ±3% жира, что на 77 кг даёт ±2.3 кг сухой массы.
@@ -46,6 +60,8 @@ enum PhaseCompositionVerdict {
     case costly
     /// Не сделала ничего — вес не сдвинулся дальше погрешности весов.
     case stalled
+    /// Между замерами слишком мало дней, чтобы судить.
+    case tooSoon
     /// Жир ушёл, сухая масса прибавила. Лучшее, что может случиться, и
     /// случается это независимо от того, какая фаза шла: вес при этом может
     /// стоять, расти или падать — судить по нему тут бессмысленно.
@@ -56,6 +72,7 @@ enum PhaseCompositionVerdict {
         case .worked:       return String(localized: "Фаза отработала")
         case .costly:       return String(localized: "Отработала дорого")
         case .stalled:      return String(localized: "Вес не сдвинулся")
+        case .tooSoon:      return String(localized: "Рано судить")
         case .recomposition: return String(localized: "Жир вниз, мышцы вверх")
         }
     }
@@ -65,6 +82,7 @@ enum PhaseCompositionVerdict {
         case .worked:        return "checkmark.circle.fill"
         case .costly:        return "exclamationmark.triangle.fill"
         case .stalled:       return "pause.circle.fill"
+        case .tooSoon:       return "hourglass"
         case .recomposition: return "arrow.up.arrow.down.circle.fill"
         }
     }
@@ -97,6 +115,13 @@ extension CompositionChange {
     }
 
     func verdict(for intent: PlanIntent) -> PhaseCompositionVerdict {
+        // Срок — раньше всего остального. На трёх днях вердикт получался
+        // особенно глупым: вес ушёл на триста граммов — ровно в темп плана, —
+        // а порог «сдвинулся» написан под полкилограмма и выдавал «вес не
+        // сдвинулся, дефицита нет». Приложение обвиняло человека в том, что
+        // просто прошло мало времени.
+        if days < Self.minimumDays { return .tooSoon }
+
         // Рекомпозиция судится раньше намерения: жир вниз, мышцы вверх — это
         // успех в любой фазе, и по весу его не увидеть вовсе. Раньше такой
         // исход на поддержании объявлялся «дорогим» просто потому, что вес
@@ -132,6 +157,9 @@ extension CompositionChange {
     /// Что с этим делать. Текст зависит и от вердикта, и от намерения: «ешь
     /// больше» на сушке и на наборе — противоположные советы.
     func advice(for intent: PlanIntent) -> String {
+        if verdict(for: intent) == .tooSoon {
+            return String(format: String(localized: "Между замерами %lld дн. За такой срок вес меняется водой и гликогеном сильнее, чем жиром: сравнивать состав можно с двух недель."), days)
+        }
         if verdict(for: intent) == .recomposition {
             return String(localized: "Жир ушёл, а сухая масса прибавила — так бывает у новичков, после перерыва и на возврате к прежней форме. Вес при этом может стоять или даже расти: смотреть надо на состав.")
         }
@@ -154,8 +182,8 @@ extension CompositionChange {
             return String(localized: "Вес поехал. На поддержании это значит, что норма разошлась с фактическим расходом.")
         case (.maintenance, .stalled):
             return String(localized: "Вес держится — поддержание делает ровно то, зачем нужно.")
-        case (_, .recomposition):
-            // Разобрано выше, до switch: совет у рекомпозиции один на все фазы.
+        case (_, .recomposition), (_, .tooSoon):
+            // Разобрано выше, до switch: эти два совета одни на все фазы.
             return ""
         }
     }

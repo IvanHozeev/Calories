@@ -50976,6 +50976,100 @@
           }
         }
       }
+    },
+    "Рано судить" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "من المبكر الحكم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu früh für ein Urteil"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too soon to tell"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es pronto para juzgar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop tôt pour juger"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מוקדם מדי לשפוט"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cedo demais para julgar"
+          }
+        }
+      }
+    },
+    "Между замерами %lld дн. За такой срок вес меняется водой и гликогеном сильнее, чем жиром: сравнивать состав можно с двух недель." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بين القياسين %lld يومًا. في هذه المدة يتغير الوزن بالماء والجليكوجين أكثر مما يتغير بالدهون: مقارنة التركيب تصبح ذات معنى من أسبوعين."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zwischen den Messungen liegen %lld Tage. In dieser Zeit ändert sich das Gewicht stärker durch Wasser und Glykogen als durch Fett: die Zusammensetzung lässt sich ab zwei Wochen vergleichen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld days between measurements. Over that span weight moves more by water and glycogen than by fat: the composition is worth comparing from two weeks on."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld días entre mediciones. En ese plazo el peso cambia más por agua y glucógeno que por grasa: la composición se puede comparar a partir de dos semanas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld jours entre les mesures. Sur ce laps de temps, le poids bouge plus par l'eau et le glycogène que par la graisse : la composition se compare à partir de deux semaines."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ימים בין המדידות. בטווח כזה המשקל משתנה ממים וגליקוגן יותר מאשר משומן: אפשר להשוות הרכב החל משבועיים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld dias entre as medições. Nesse prazo o peso muda mais por água e glicogénio do que por gordura: a composição compara-se a partir de duas semanas."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

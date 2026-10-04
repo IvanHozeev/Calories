@@ -102,6 +102,10 @@ extension CompositionChange {
     var fatShareOfChange: Double? {
         guard abs(weightDeltaKg) > Self.scaleNoiseKg else { return nil }
         guard (fatDeltaKg >= 0) == (weightDeltaKg >= 0) else { return nil }
+        // И сам жир должен выйти за погрешность метода. Иначе «жиром 85%
+        // изменения веса» считалось по разнице, которую лента различить не
+        // способна: цифра точная, а стоит за ней ничто.
+        guard abs(fatDeltaKg) > noiseKg else { return nil }
         return fatDeltaKg / weightDeltaKg
     }
 

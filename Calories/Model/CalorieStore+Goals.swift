@@ -791,10 +791,24 @@ extension CalorieStore {
         // оставшийся дефицит по месяцам поддержания, которые идут следом.
         let remainingDaysInPhase = max(0, phaseEnd.timeIntervalSince(today) / 86400)
         var recalibratedDailyCalories: Int?
-        if remainingDaysInPhase > 0 {
+        // Неделя — тот минимум, на котором пересчёт ещё что-то значит. На двух
+        // оставшихся днях он честно делил отставание в килограмм на два дня и
+        // выдавал «ставить −700 ккал/день»: арифметически верно, съесть
+        // невозможно, а кнопка рядом это ещё и записывала в норму.
+        if remainingDaysInPhase >= 7 {
             let remainingChangeNeeded = phaseTargetWeight - actualWeightToday
             let dailyDelta = remainingChangeNeeded * Plan.kcalPerKg / remainingDaysInPhase
-            recalibratedDailyCalories = Int((workingTDEE + dailyDelta).rounded())
+            let raw = workingTDEE + dailyDelta
+            // Коридор: ниже основного обмена не предлагаем никогда — это уже
+            // не дефицит, а голод, — и выше полутора расходов тоже, иначе
+            // «догнать план» превращается в совет переедать.
+            let floor = profile.map { max($0.bmr, workingTDEE * 0.6) } ?? workingTDEE * 0.6
+            let ceiling = workingTDEE * 1.5
+            // Упёрлись в край — значит план этими калориями уже не спасти, и
+            // предлагать нечего: такое чинится сроком или целью, а не тарелкой.
+            if raw >= floor, raw <= ceiling {
+                recalibratedDailyCalories = Int(raw.rounded())
+            }
         }
 
         let remainingWeeksInPhase = remainingDaysInPhase / 7

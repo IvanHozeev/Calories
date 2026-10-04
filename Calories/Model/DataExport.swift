@@ -173,6 +173,51 @@ extension CalorieStore {
         return rows.joined(separator: "\n")
     }
 
+    /// Профиль в том виде, в каком его читает GymLogger.
+    ///
+    /// Два приложения, одно тело: вес, рост и возраст человек вводит дважды и
+    /// дважды забывает обновить. Пока общего хранилища у них нет, это
+    /// единственный путь, который работает **без единой правки на той
+    /// стороне**: у GymLogger есть импорт, и он разбирает файл `field,value`,
+    /// понимая `name`, `height`, `weight`, `dateOfBirth`, `trainingStartYear`
+    /// и `activeSplit`.
+    ///
+    /// Вес отдаём трендовый, а не последнее взвешивание: именно он — настоящий
+    /// вес человека, и именно от него считается всё остальное.
+    func makeGymProfileCSV(now: Date = Date()) -> String {
+        var rows = ["field,value"]
+        if let weight = weightTrend(on: now) ?? latestWeight?.weightKg ?? profile?.weightKg {
+            rows.append(String(format: "weight,%.1f", weight))
+        }
+        if let height = profile?.heightCm {
+            rows.append(String(format: "height,%.1f", height))
+        }
+        // Дата рождения у профиля не хранится — там возраст. Считаем от него
+        // первое января: месяц и день приложению неизвестны, и притворяться,
+        // что известны, не стоит.
+        if let age = profile?.age, age > 0 {
+            let year = Calendar.current.component(.year, from: now) - age
+            if let birth = Calendar.current.date(from: DateComponents(year: year, month: 1, day: 1)) {
+                rows.append("dateOfBirth,\(ISO8601DateFormatter().string(from: birth))")
+            }
+        }
+        return rows.joined(separator: "\n")
+    }
+
+    /// История взвешиваний для GymLogger — отдельным файлом.
+    ///
+    /// Модель веса с историей там уже есть, импорта для неё пока нет: GymLogger
+    /// забирает из профиля только сегодняшнее число. Файл лежит готовым, и на
+    /// той стороне его разбор — два десятка строк.
+    func makeGymWeightsCSV() -> String {
+        let formatter = ISO8601DateFormatter()
+        var rows = ["date,value"]
+        for entry in weightEntries.sorted(by: { $0.date < $1.date }) {
+            rows.append("\(formatter.string(from: entry.date)),\(String(format: "%.1f", entry.weightKg))")
+        }
+        return rows.joined(separator: "\n")
+    }
+
     private static func csvEscape(_ value: String) -> String {
         guard value.contains(",") || value.contains("\"") || value.contains("\n") else { return value }
         return "\"" + value.replacingOccurrences(of: "\"", with: "\"\"") + "\""

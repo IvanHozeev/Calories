@@ -73,6 +73,15 @@ struct SettingsView: View {
     }
     
     
+    /// Профиль в формате импорта GymLogger. Имя файла — то, которое он ждёт:
+    /// импорт ищет именно `gymlogger_profile.csv`, и переименованный файл он
+    /// молча не заметит.
+    private func prepareGymProfile() {
+        exportDocument = ExportDocument(text: store.makeGymProfileCSV(), type: .commaSeparatedText)
+        exportFilename = "gymlogger_profile"
+        showingExporter = true
+    }
+
     private func pick(_ target: FilePick) {
         pickTarget = target
         showingPicker = true
@@ -723,6 +732,14 @@ private extension SettingsView {
             prepareCSV()
         } label: {
             rowLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
+        }
+        // Вес, рост и возраст — в том виде, в каком их читает GymLogger.
+        // Одно тело на два приложения: вводить его дважды и дважды забывать
+        // обновить — работа, которой быть не должно.
+        Button {
+            prepareGymProfile()
+        } label: {
+            rowLabel("Профиль для GymLogger", systemImage: "figure.strengthtraining.traditional")
         }
     } header: {
         Text("Данные")

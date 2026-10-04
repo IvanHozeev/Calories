@@ -618,3 +618,75 @@ struct WeightTrendFitTests {
         #expect(fit.weeklyRateKg < 0, "Направление остаётся прежним")
     }
 }
+
+// MARK: - Чем обеспечены обещания
+
+/// Ревизия: приложение не вправе называть число, которого не выдержат данные.
+@MainActor
+struct PromisesAreBackedTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0))
+    }
+
+    /// Фаза кончается послезавтра, отставание — килограмм. Делить его на два
+    /// дня арифметика умеет, а съесть такое нельзя: «ставить −700 ккал/день».
+    @Test func aDoomedPhaseIsNotSavedByAnImpossibleNumber() throws {
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-54 * 86_400),
+                             durationWeeks: 8, startWeightKg: 77, targetWeightKg: 73))
+        store.addWeight(76.0, date: Date().addingTimeInterval(-7 * 86_400))
+        store.addWeight(75.8, date: Date())
+
+        let adherence = try #require(store.planAdherence())
+        #expect(adherence.recalibratedDailyCalories == nil,
+                "На последних днях фазы пересчёт предлагать нечего")
+    }
+
+    /// А на нормальном сроке он есть и остаётся съедобным.
+    @Test func aLivePhaseStillGetsANumberAndItIsEdible() throws {
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
+                             durationWeeks: 10, startWeightKg: 77, targetWeightKg: 74))
+        store.addWeight(76.4, date: Date().addingTimeInterval(-7 * 86_400))
+        store.addWeight(76.2, date: Date())
+
+        let adherence = try #require(store.planAdherence())
+        let recalibrated = try #require(adherence.recalibratedDailyCalories)
+        let bmr = try #require(store.profile?.bmr)
+        #expect(Double(recalibrated) >= bmr * 0.99, "Ниже основного обмена не предлагаем")
+        #expect(Double(recalibrated) <= store.workingTDEE * 1.5)
+    }
+}
+
+/// Доля жира в изменении веса считалась по разнице, которую лента различить
+/// не способна: цифра точная, а стоит за ней ничто.
+struct FatShareHonestyTests {
+    private func change(weight: (Double, Double), fat: (Double, Double)) -> CompositionChange {
+        CompositionChange(fromDate: Date().addingTimeInterval(-60 * 86_400), toDate: Date(),
+                          startWeightKg: weight.0, endWeightKg: weight.1,
+                          startFatPercent: fat.0, endFatPercent: fat.1)
+    }
+
+    @Test func aFatChangeInsideTheNoiseGivesNoShare() {
+        // Вес ушёл на кило, а жир — на двести граммов: это ниже ±3% метода.
+        let small = change(weight: (77, 76), fat: (20, 19.9))
+        #expect(small.fatShareOfChange == nil)
+    }
+
+    @Test func aRealFatLossStillReportsItsShare() throws {
+        let real = change(weight: (77, 73), fat: (20, 16))
+        let share = try #require(real.fatShareOfChange)
+        #expect(share > 0.5)
+    }
+}

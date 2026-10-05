@@ -232,6 +232,8 @@ final class CalorieStore {
         static let usesAdaptiveTDEE = "use_adaptive_tdee"
         static let goalSyncedTDEE = "goal_synced_tdee"
         static let goalSource = "daily_goal_source"
+        static let previousPlan = "plan_previous"
+        static let previousPlanDate = "plan_previous_date"
         static let phaseHistory = "phase_history"
         static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
@@ -1028,10 +1030,21 @@ final class CalorieStore {
     /// проверка `isPremium` в тулбаре профиля, и любой новый экран мог случайно выдать
     /// платную фичу бесплатно. Уже сохранённый план продолжает работать — отбирать
     /// у пользователя то, что он настроил, мы не будем.
-    func startPlan(_ newPlan: Plan) {
+    func startPlan(_ newPlan: Plan, remembering: Bool = true) {
         guard isPremium else {
             logger.warning("startPlan вызван без активного премиума — игнорируем")
             return
+        }
+        // Запоминаем, что было до правки.
+        //
+        // Предложения с экрана плана переписывают и срок, и цель, и норму
+        // калорий разом — а понимает человек это через неделю, глядя на
+        // съехавшие числа. Один шаг назад стоит дёшево и возвращает всё
+        // сразу: план, цель и норму.
+        if remembering, let previous = plan, previous != newPlan,
+           let data = try? JSONEncoder().encode(previous) {
+            defaults.set(data, forKey: Keys.previousPlan)
+            defaults.set(Date(), forKey: Keys.previousPlanDate)
         }
         plan = newPlan
         if let data = try? JSONEncoder().encode(newPlan) {
@@ -1239,6 +1252,32 @@ final class CalorieStore {
     }
 
     /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
+    /// Сколько дней предлагаем вернуться к прежнему плану.
+    ///
+    /// Неделя: дальше это уже не «отменить правку», а смена плана задним
+    /// числом, и делать её надо осознанно, в редакторе.
+    static let planRevertWindowDays = 7
+
+    /// План до последней правки — пока предложение вернуться ещё в силе.
+    var revertablePlan: Plan? {
+        guard let data = defaults.data(forKey: Keys.previousPlan),
+              let changed = defaults.object(forKey: Keys.previousPlanDate) as? Date,
+              Date().timeIntervalSince(changed) < Double(Self.planRevertWindowDays) * 86_400,
+              let previous = try? JSONDecoder().decode(Plan.self, from: data),
+              previous != plan else { return nil }
+        return previous
+    }
+
+    /// Вернуть план, каким он был до последней правки, вместе с нормой.
+    func revertPlan() {
+        guard let previous = revertablePlan else { return }
+        defaults.removeObject(forKey: Keys.previousPlan)
+        defaults.removeObject(forKey: Keys.previousPlanDate)
+        // Без запоминания: иначе отмена сама станет правкой, которую
+        // предложат отменить, и кнопка начнёт переключать план туда-сюда.
+        startPlan(previous, remembering: false)
+    }
+
     func reschedulePlan(to newEndDate: Date) {
         guard let plan else { return }
         startPlan(plan.rescheduled(toEnd: newEndDate))

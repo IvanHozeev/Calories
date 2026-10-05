@@ -590,6 +590,23 @@ struct PlanView: View {
                               } ?? String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 }
 
+                // Шаг назад — рядом с предложениями, которые этот шаг и
+                // делают. Возвращает план целиком: срок, цель и норму.
+                if let previous = store.revertablePlan {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(format: String(localized: "Было: %1$@ кг к %2$@"),
+                                    String(format: "%.1f", previous.targetWeightKg),
+                                    Self.planDate(previous.endDate)))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                        Button("Вернуть прежний план") {
+                            store.revertPlan()
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("revertPlan")
+                    }
+                }
+
                 // Разбор расхождения — туда же, где названо само расхождение.
                 // Вопрос «почему так» задают ровно здесь и ровно в эту секунду.
                 NavigationLink {

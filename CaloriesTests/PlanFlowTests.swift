@@ -740,3 +740,68 @@ struct PlanOfferLoopTests {
         #expect(!moved.hasAggressivePhase)
     }
 }
+
+// MARK: - Шаг назад по плану
+
+/// Предложения с экрана плана переписывают срок, цель и норму разом, а понимает
+/// это человек через неделю, глядя на съехавшие числа.
+@MainActor
+struct PlanRevertTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0))
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
+                             durationWeeks: 10, startWeightKg: 77, targetWeightKg: 73))
+    }
+
+    @Test func anEditCanBeTakenBackWholeWithTheGoal() throws {
+        let before = try #require(store.plan)
+        let goalBefore = store.dailyGoal
+
+        store.reschedulePlan(to: before.endDate.addingTimeInterval(-14 * 86_400))
+        #expect(store.plan?.endDate != before.endDate, "Правка применилась")
+
+        let revertable = try #require(store.revertablePlan)
+        #expect(abs(revertable.targetWeightKg - before.targetWeightKg) < 0.01)
+
+        store.revertPlan()
+        #expect(store.plan?.endDate == before.endDate, "Срок вернулся")
+        #expect(store.dailyGoal == goalBefore, "И норма вместе с ним")
+    }
+
+    /// Отмена не должна сама становиться правкой: иначе кнопка переключала бы
+    /// план туда-сюда.
+    @Test func revertingIsNotItselfAnEdit() {
+        store.reschedulePlan(to: Date().addingTimeInterval(21 * 86_400))
+        store.revertPlan()
+        #expect(store.revertablePlan == nil)
+    }
+
+    /// Новый план с нуля отменять нечем: возвращаться некуда.
+    @Test func aFirstPlanHasNothingToGoBackTo() async throws {
+        let fresh = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        let empty = CalorieStore(context: fresh.mainContext, defaults: defaults, groupDefaults: nil)
+        empty.isPremium = true
+        empty.updateProfile(UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0))
+        empty.startPlan(Plan(startDate: Date(), durationWeeks: 8, startWeightKg: 77, targetWeightKg: 74))
+        #expect(empty.revertablePlan == nil)
+    }
+}

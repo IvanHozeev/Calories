@@ -690,3 +690,53 @@ struct FatShareHonestyTests {
         #expect(share > 0.5)
     }
 }
+
+// MARK: - Предложения, которые гоняют план по кругу
+
+/// Из жизни: «перенести финиш раньше» → «можно есть больше» → «углубить цель»
+/// → снова «перенести финиш». Каждый шаг по отдельности верен, вместе они
+/// загнали темп на 1.27 кг в неделю, срезали норму на четыреста килокалорий и
+/// увели цель с 71.7 на 73.5 — то есть человек соглашался на одно, а получал
+/// другое.
+struct PlanOfferLoopTests {
+    private func cut(weeks: Int = 8, from: Double = 77, to: Double = 73) -> Plan {
+        Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
+             durationWeeks: weeks, startWeightKg: from, targetWeightKg: to)
+    }
+
+    /// Перенос финиша не должен трогать цель: кнопка про срок, а не про вес.
+    @Test func movingTheFinishKeepsTheTarget() {
+        let plan = cut()
+        let earlier = plan.endDate.addingTimeInterval(-14 * 86_400)
+        let moved = plan.rescheduled(toEnd: earlier)
+        #expect(abs(moved.targetWeightKg - plan.targetWeightKg) < 0.05,
+                "Цель прежняя: \(moved.targetWeightKg) против \(plan.targetWeightKg)")
+        #expect(moved.endDate < plan.endDate, "А срок — ближе")
+    }
+
+    /// И темп под новый срок обязан вырасти — именно об этом перенос и есть.
+    @Test func movingTheFinishRecomputesThePace() throws {
+        let plan = cut()
+        let moved = plan.rescheduled(toEnd: plan.endDate.addingTimeInterval(-14 * 86_400))
+        let before = try #require(plan.phases.last).weeklyRatePercent
+        let after = try #require(moved.phases.last).weeklyRatePercent
+        #expect(after > before)
+    }
+
+    /// Перенос, после которого план становится резче разумного, экран не
+    /// предлагает: проверяется это по самому получившемуся плану.
+    @Test func anImpossibleReschedulePlanIsRecognised() {
+        let plan = cut(weeks: 8, from: 77, to: 71)
+        // Ужать шесть килограммов в три недели — это больше двух процентов
+        // массы в неделю.
+        let crazy = plan.rescheduled(toEnd: plan.startDate.addingTimeInterval(21 * 86_400))
+        #expect(crazy.hasAggressivePhase, "Такой план должен быть распознан как резкий")
+    }
+
+    /// А разумный перенос резким не становится.
+    @Test func aSaneRescheduleStaysSane() {
+        let plan = cut(weeks: 10, from: 77, to: 74)
+        let moved = plan.rescheduled(toEnd: plan.endDate.addingTimeInterval(-7 * 86_400))
+        #expect(!moved.hasAggressivePhase)
+    }
+}

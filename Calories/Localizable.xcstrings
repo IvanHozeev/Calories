@@ -52151,6 +52151,147 @@
           }
         }
       }
+    },
+    "Ты впереди плана — запас можно потратить одним способом из трёх." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أنت متقدم على الخطة — ويمكن إنفاق هذا الفائض بطريقة واحدة من ثلاث."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du bist dem Plan voraus — dieses Polster lässt sich auf eine von drei Arten ausgeben."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You are ahead of the plan — that surplus can be spent in one of three ways."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vas por delante del plan: ese margen se puede gastar de una de tres maneras."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu es en avance sur le plan — cette avance se dépense d'une façon parmi trois."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אתה מקדים את התוכנית — את העודף הזה אפשר לנצל באחת משלוש דרכים."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estás à frente do plano — essa folga gasta-se de uma de três maneiras."
+          }
+        }
+      }
+    },
+    "Та же цель, но раньше: темп пересчитается под новый срок." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف نفسه لكن أبكر: تُعاد وتيرة الخطة وفق الموعد الجديد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dasselbe Ziel, nur früher: das Tempo wird auf den neuen Termin umgerechnet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The same target, only sooner: the pace is recomputed for the new date."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La misma meta, pero antes: el ritmo se recalcula para la nueva fecha."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le même objectif, mais plus tôt : le rythme est recalculé pour la nouvelle date."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אותו יעד, רק מוקדם יותר: הקצב יחושב מחדש לפי המועד החדש."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mesma meta, só que mais cedo: o ritmo é recalculado para a nova data."
+          }
+        }
+      }
+    },
+    "Темп идущей фазы %1$@ %% массы в неделю — выше разумного предела в %2$@ %%. Сдвинь финиш дальше или подними целевой вес." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وتيرة المرحلة الجارية %1$@ %% من الكتلة أسبوعيًا — أعلى من الحد المعقول %2$@ %%. أجّل الموعد أو ارفع الوزن المستهدف."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tempo der laufenden Phase liegt bei %1$@ %% der Masse pro Woche — über der vernünftigen Grenze von %2$@ %%. Schieb den Termin nach hinten oder setz das Zielgewicht höher."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The running phase moves at %1$@ %% of body mass a week — above the sensible limit of %2$@ %%. Push the finish further out or raise the target weight."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La fase en curso va al %1$@ %% de la masa por semana, por encima del límite razonable del %2$@ %%. Aplaza la fecha o sube el peso objetivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La phase en cours avance à %1$@ %% de la masse par semaine — au-delà de la limite raisonnable de %2$@ %%. Repousse la date ou relève le poids cible."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "השלב הנוכחי מתקדם ב־%1$@ %% מהמסה בשבוע — מעל הגבול הסביר של %2$@ %%. דחה את המועד או העלה את משקל היעד."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A fase em curso avança a %1$@ %% da massa por semana — acima do limite razoável de %2$@ %%. Adia a data ou sobe o peso-alvo."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

@@ -510,6 +510,18 @@ struct PlanView: View {
             } else {
             statusRow(adherence.status)
 
+            // Резкий темп называем вслух и здесь, а не только в редакторе:
+            // именно сюда человек смотрит каждую неделю.
+            if let phase = plan.currentPhase, phase.isAggressive {
+                Label(String(format: String(localized: "Темп идущей фазы %1$@ %% массы в неделю — выше разумного предела в %2$@ %%. Сдвинь финиш дальше или подними целевой вес."),
+                             String(format: "%.2f", phase.weeklyRatePercent),
+                             String(format: "%.1f", phase.intent.aggressiveRatePercent)),
+                      systemImage: "exclamationmark.triangle.fill")
+                    .font(.app(.caption))
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             // Пока вес устаканивается после подъёма калорий, об этом надо
             // сказать прямо. Иначе человек видит плюс полтора килограмма
             // и делает вывод про жир, которого там нет.
@@ -588,6 +600,14 @@ struct PlanView: View {
                 .accessibilityIdentifier("openStallReport")
 
                 if adherence.status == .ahead {
+                    // Три предложения ниже — взаимоисключающие ответы на один
+                    // и тот же запас: он тратится один раз, и принять надо
+                    // что-то одно. Стопкой кнопок они читались как список дел,
+                    // и человек проходил его сверху вниз.
+                    Text("Ты впереди плана — запас можно потратить одним способом из трёх.")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                     aheadActions(plan: plan, adherence: adherence)
                 } else {
                     behindOrOnTrackActions(plan: plan, adherence: adherence)
@@ -617,6 +637,16 @@ struct PlanView: View {
             ? date.formatted(.dateTime.day().month(.wide))
             : date.formatted(.dateTime.day().month(.wide).year())
     }
+
+    /// Предложение, после которого план становится резче разумного, — не
+    /// предложение, а ловушка.
+    ///
+    /// Из жизни: человек согласился финишировать раньше, потом съесть больше,
+    /// потом углубить цель — и каждый шаг по отдельности был верным, а вместе
+    /// они загнали темп на 1.27 кг в неделю и срезали норму на четыреста
+    /// килокалорий. Каждое предложение теперь проверяется по тому плану,
+    /// который из него получится.
+    private func isSafe(_ plan: Plan) -> Bool { !plan.hasAggressivePhase }
 
     @ViewBuilder
     private func aheadActions(plan: Plan, adherence: PlanAdherence) -> some View {
@@ -652,16 +682,23 @@ struct PlanView: View {
 
         // Вариант 2: финишировать раньше — принять новый срок
         if let projectedEndDate = adherence.projectedEndDate,
-           projectedEndDate < plan.endDate.addingTimeInterval(-3 * 86400) {
-            Button("Перенести финиш на \(Self.planDate(projectedEndDate))") {
-                store.reschedulePlan(to: projectedEndDate)
+           projectedEndDate < plan.endDate.addingTimeInterval(-3 * 86400),
+           isSafe(plan.rescheduled(toEnd: projectedEndDate)) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Та же цель, но раньше: темп пересчитается под новый срок.")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                Button("Перенести финиш на \(Self.planDate(projectedEndDate))") {
+                    store.reschedulePlan(to: projectedEndDate)
+                }
+                .buttonStyle(.bordered)
             }
         }
 
         // Вариант 3: углубить цель — но только если при нынешнем темпе выходит
         // вес глубже целевого. Иначе это предложение ослабить цель, названное
         // углублением.
-        if let rounded = adherence.deeperTarget {
+        if let rounded = adherence.deeperTarget, isSafe(plan.retargeted(to: rounded)) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Углубить цель: при текущем темпе к \(Self.planDate(plan.endDate)) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
                     .font(.app(.caption))

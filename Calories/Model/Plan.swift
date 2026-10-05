@@ -657,6 +657,15 @@ struct Plan: Codable, Equatable {
         let days = Calendar.current.dateComponents([.day], from: startDate, to: newEndDate).day ?? 0
         let totalWeeks = max(1, Int((Double(days) / 7).rounded(.up)))
         let weeksBefore = phases.dropLast().reduce(0) { $0 + $1.expandedWeeks }
+        // Целевой вес переносом срока не трогаем.
+        //
+        // Раньше трогали, и это был самый неприятный из возможных сюрпризов:
+        // кнопка называлась «перенести финиш», а вместе со сроком уезжала и
+        // цель. Фаза становилась короче при том же темпе, то есть кончалась
+        // раньше и выше — человек соглашался финишировать раньше, а получал
+        // другую цель, с 71.7 на 73.5. Теперь цель прежняя, а под новый срок
+        // пересчитывается темп: об этом кнопка и есть.
+        let target = targetWeightKg
         var updated = self
         // Срок последней фазы задан неделями дефицита, а финиш — неделями вместе
         // с брейками. Подбираем первый срок, при котором фаза дотягивается до даты.
@@ -666,7 +675,7 @@ struct Plan: Codable, Equatable {
             last.durationWeeks += 1
         }
         updated.phases[phases.count - 1] = last
-        return updated
+        return updated.retargeted(to: target)
     }
 
     // MARK: - Диет-брейк вручную

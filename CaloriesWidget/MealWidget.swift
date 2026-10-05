@@ -27,8 +27,11 @@ struct MealSlotSnapshot: Equatable {
     let end: Date
     /// Сколько калорий на него отведено.
     let calories: Int
+    /// Приём уже съеден или пропущен — его окно закрыто, сколько бы времени в
+    /// нём ни оставалось.
+    let isClosed: Bool
 
-    var isCurrent: Bool { Date() >= start && Date() < end }
+    var isCurrent: Bool { !isClosed && Date() >= start && Date() < end }
 }
 
 struct MealEntry: TimelineEntry {
@@ -55,11 +58,13 @@ enum MealFeed {
                   let start = item["start"] as? Double,
                   let end = item["end"] as? Double,
                   let calories = item["calories"] as? Double else { return nil }
+            let state = item["state"] as? String
             return MealSlotSnapshot(period: period,
                                     time: Date(timeIntervalSince1970: time),
                                     start: Date(timeIntervalSince1970: start),
                                     end: Date(timeIntervalSince1970: end),
-                                    calories: Int(calories))
+                                    calories: Int(calories),
+                                    isClosed: state == "done" || state == "missed")
         }
     }
 
@@ -70,14 +75,19 @@ enum MealFeed {
     /// завтрашнего дня: время у приёмов изо дня в день одно и то же. Калорий у
     /// него нет — норму на завтра никто ещё не считал, и выдумывать её нельзя.
     static func shown(at date: Date, in slots: [MealSlotSnapshot]) -> MealSlotSnapshot? {
-        if let current = slots.first(where: { date >= $0.start && date < $0.end }) { return current }
-        if let next = slots.first(where: { $0.time > date }) { return next }
+        let open = slots.filter { !$0.isClosed }
+        // Съеденный завтрак не показываем до конца его окна: человек уже
+        // позавтракал, и на экране приложения в эту минуту стоит следующий
+        // приём. Виджет, говорящий «Завтрак», спорит с ним — и, что хуже,
+        // показывает съеденные калории там, где обещаны отведённые.
+        if let current = open.first(where: { date >= $0.start && date < $0.end }) { return current }
+        if let next = open.first(where: { $0.time > date }) { return next }
         guard let first = slots.min(by: { $0.time < $1.time }) else { return nil }
         return MealSlotSnapshot(period: first.period,
                                 time: first.time.addingTimeInterval(86_400),
                                 start: first.start.addingTimeInterval(86_400),
                                 end: first.end.addingTimeInterval(86_400),
-                                calories: 0)
+                                calories: 0, isClosed: false)
     }
 }
 
@@ -86,7 +96,7 @@ struct MealProvider: TimelineProvider {
         let soon = Date().addingTimeInterval(2 * 3600)
         let slot = MealSlotSnapshot(period: "Ужин", time: soon,
                                     start: soon.addingTimeInterval(-1800),
-                                    end: soon.addingTimeInterval(1800), calories: 840)
+                                    end: soon.addingTimeInterval(1800), calories: 840, isClosed: false)
         return MealEntry(date: Date(), current: nil, next: slot)
     }
 

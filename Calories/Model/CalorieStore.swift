@@ -791,7 +791,10 @@ final class CalorieStore {
              "time": $0.time.timeIntervalSince1970,
              "start": $0.start.timeIntervalSince1970,
              "end": $0.end.timeIntervalSince1970,
-             "calories": Double($0.calories)] as [String: Any]
+             "calories": Double($0.calories),
+             // Съеденное окно закрыто, даже если его время ещё идёт: виджет
+             // обязан переходить к следующему приёму тогда же, когда «Сегодня».
+             "state": $0.state.rawValue] as [String: Any]
         }
         groupDefaults?.set(try? JSONSerialization.data(withJSONObject: payload), forKey: "widget_meals")
     }

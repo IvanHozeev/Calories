@@ -234,8 +234,14 @@ extension CalorieStore {
     }
 
     /// Зафиксированная цель на дату (из снапшота) — иначе живой расчёт. O(1) через goalsByDay.
+    ///
+    /// Сегодня — исключение: его снапшот пишется по ходу дня и к вечеру
+    /// устарел бы, а норма сегодняшнего дня обязана идти за шагами и расходом
+    /// до самой полуночи. Читаем живое значение, а в снапшот оно попадает
+    /// следом.
     func goal(for date: Date) -> Int {
         let day = Calendar.current.startOfDay(for: date)
+        if Calendar.current.isDateInToday(day) { return adaptedTodayGoal }
         return goalsByDay[day] ?? effectiveGoal(for: day)
     }
 

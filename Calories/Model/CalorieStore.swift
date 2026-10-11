@@ -387,6 +387,7 @@ final class CalorieStore {
 
         cachesBuiltForDay = calendar.startOfDay(for: Date())
         publishToWidget(calendar)
+        BodyBridge.publish(profile: profile, measurement: latestMeasurement)
     }
 
 #if DEBUG
@@ -695,6 +696,33 @@ final class CalorieStore {
         let adapted = computeAdaptedTodayGoal()
         adaptedTodayGoal = adapted
         calorieBankBonus = adapted - effectiveGoal(for: Date())
+        rememberTodaysGoal(adapted)
+    }
+
+    /// Записать норму, которая стоит на экране сегодня.
+    ///
+    /// Прошедший день до сих пор получал свою норму задним числом: вечером
+    /// `lockPastGoals` считал её заново — и считал **сегодняшним** числом.
+    /// А `dailyGoal` меняется сам, вслед за измеренным расходом. В итоге день,
+    /// прожитый с нормой 2822, назавтра показывал 2492, и съеденное ровно в
+    /// норму превращалось в перебор на триста килокалорий.
+    ///
+    /// Поэтому норма дня записывается, пока день идёт: на экране и в истории
+    /// должно стоять одно и то же число. Запись обновляется на каждой
+    /// перестройке — к полуночи в ней останется то, что человек видел
+    /// последним.
+    private func rememberTodaysGoal(_ goal: Int) {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let existing = goalRecords.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            guard existing.goal != goal else { return }
+            existing.goal = goal
+        } else {
+            let record = GoalRecord(date: today, goal: goal)
+            context.insert(record)
+            goalRecords = (goalRecords + [record]).sorted { $0.date < $1.date }
+        }
+        goalsByDay[today] = goal
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
     }
 
     /// Пересматривает «обычный день» — раз в неделю, как и сам расход.
@@ -977,6 +1005,9 @@ final class CalorieStore {
     func saveMeasurementEdits() {
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         measurements.sort { $0.date > $1.date }
+        // Процент жира только что изменился — пусть зал узнает об этом сразу,
+        // а не на следующей перестройке кэшей.
+        BodyBridge.publish(profile: profile, measurement: latestMeasurement)
     }
 
     // MARK: - Изменение данных
@@ -990,6 +1021,7 @@ final class CalorieStore {
         if let data = try? JSONEncoder().encode(newProfile) {
             defaults.set(data, forKey: Keys.profile)
         }
+        BodyBridge.publish(profile: profile, measurement: latestMeasurement)
         if syncDailyGoal { setGoalSource(.plan) }
         if syncDailyGoal, let plan {
             // Норма плана — производная от TDEE, а он падает вместе с весом.

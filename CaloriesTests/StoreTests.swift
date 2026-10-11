@@ -190,14 +190,19 @@ struct CalorieStoreTests {
             store.add(name: "День \(offset)", calories: 1500, date: date)
         }
         store.lockPastGoals()
+        // Сегодняшняя запись не в счёт: она пишется по ходу дня, а не фиксацией
+        // прошлого, — смотрим только на прожитые дни.
         let lockedAtOnce = store.goalRecords
+            .filter { !calendar.isDateInToday($0.date) }
             .sorted { $0.date < $1.date }
             .map(\.goal)
 
         #expect(lockedAtOnce.count == 5)
         // Значения должны быть воспроизводимыми: повторный вызов ничего не меняет.
         store.lockPastGoals()
-        let again = store.goalRecords.sorted { $0.date < $1.date }.map(\.goal)
+        let again = store.goalRecords
+            .filter { !calendar.isDateInToday($0.date) }
+            .sorted { $0.date < $1.date }.map(\.goal)
         #expect(again == lockedAtOnce, "Повторная фиксация не должна менять уже записанные цели")
     }
 
@@ -597,4 +602,70 @@ struct CalorieStoreTests {
         #expect(!store.dishes.contains { $0.name == "Временное" })
     }
 
+}
+
+// MARK: - Норма прожитого дня
+
+/// Из жизни: день прожит с нормой 2822, а назавтра в истории стоит 2492 — и
+/// съеденное ровно в норму превращается в перебор на триста килокалорий.
+///
+/// Причина: норму прошедшего дня считали задним числом, **сегодняшним**
+/// `dailyGoal`, а он сам едет вслед за измеренным расходом.
+@MainActor
+struct PastDayGoalTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext, defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    @Test func todaysGoalIsWrittenDownWhileTheDayIsStillRunning() throws {
+        store.dailyGoal = 2800
+        store.add(name: "Завтрак", calories: 700)
+
+        let today = Calendar.current.startOfDay(for: Date())
+        let record = try #require(store.goalRecords.first { Calendar.current.isDate($0.date, inSameDayAs: today) })
+        #expect(record.goal == store.adaptedTodayGoal)
+    }
+
+    /// И записанное не переписывается, когда норма меняется назавтра.
+    @Test func aLivedDayKeepsTheGoalItWasLivedWith() throws {
+        store.dailyGoal = 2800
+        store.add(name: "Ужин", calories: 1000)
+        let lived = store.adaptedTodayGoal
+
+        // Назавтра расход пересчитали, и норма уехала.
+        store.dailyGoal = 2400
+
+        let today = Calendar.current.startOfDay(for: Date())
+        let record = try #require(store.goalRecords.first { Calendar.current.isDate($0.date, inSameDayAs: today) })
+        #expect(record.goal != lived || store.adaptedTodayGoal == lived,
+                "Пока день идёт, запись следует за живым числом")
+
+        // А прошлый день, записанный вчера, не трогается вовсе.
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        store.add(name: "Вчера", calories: 500, date: yesterday)
+        store.lockPastGoals()
+        let before = try #require(store.goalRecords.first { Calendar.current.isDate($0.date, inSameDayAs: yesterday) }).goal
+        store.dailyGoal = 1900
+        let after = try #require(store.goalRecords.first { Calendar.current.isDate($0.date, inSameDayAs: yesterday) }).goal
+        #expect(before == after, "Прожитый день свою норму больше не меняет")
+    }
+
+    /// Сегодняшняя норма на экране обязана идти за шагами и расходом до
+    /// полуночи, а не застывать на утреннем снимке.
+    @Test func todayStillFollowsTheLiveNumber() {
+        store.dailyGoal = 2800
+        store.add(name: "Обед", calories: 600)
+        let first = store.goal(for: Date())
+        store.dailyGoal = 3000
+        #expect(store.goal(for: Date()) != first, "Сегодня читается живым, а не из снимка")
+        #expect(store.goal(for: Date()) == store.adaptedTodayGoal)
+    }
 }

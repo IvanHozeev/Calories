@@ -25,6 +25,23 @@ struct NewDishSheet: View {
         return totalMacros.times(portionGrams / totalGrams)
     }
 
+    /// На сколько порций хватит кастрюли — «на 4 порции» или «на 3.5».
+    ///
+    /// Ничего, пока порция не задана: без неё «порция» и есть вся кастрюля,
+    /// и «на 1 порцию» — не ответ, а пересказ вопроса.
+    private var portionsInBatch: String? {
+        guard servingGramsValue > 0, totalGrams > 0 else { return nil }
+        let count = totalGrams / servingGramsValue
+        guard count >= 1.1 else { return nil }
+        // Половинки показываем, четвертинки нет: «на 3.5 порции» — это
+        // по-человечески, «на 3.47» — отчёт.
+        let rounded = (count * 2).rounded() / 2
+        let text = rounded == rounded.rounded()
+            ? String(format: "%.0f", rounded)
+            : String(format: "%.1f", rounded)
+        return String(format: String(localized: "на %@ порции"), text)
+    }
+
     private var servingGramsValue: Double {
         servingGrams.decimalValueOrZero
     }
@@ -172,9 +189,18 @@ struct NewDishSheet: View {
                                 .font(.app(.title3, weight: .semibold))
                                 .contentTransition(.numericText())
                             Spacer()
-                            Text(verbatim: "\(Int(totalGrams)) \(String(localized: "г всего"))")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
+                            // Сколько раз это съесть: кастрюля на 1400 г с
+                            // порцией по 350 — это четыре раза, и считать это
+                            // в уме у плиты человек не должен.
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(verbatim: "\(Int(totalGrams)) \(String(localized: "г всего"))")
+                                if let portions = portionsInBatch {
+                                    Text(verbatim: portions)
+                                        .foregroundStyle(.tertiary)
+                                }
+                            }
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
                         }
                         MacroTags(macros: portionMacros)
                         MacroSplitBar(macros: portionMacros)

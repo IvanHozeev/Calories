@@ -793,6 +793,27 @@ final class CalorieStore {
         groupDefaults?.set(fatTarget ?? 0, forKey: "widget_fat_target")
         groupDefaults?.set(carbsTarget ?? MacroTargets.carbsMinimum, forKey: "widget_carbs_target")
         publishMealsToWidget()
+        publishLastMeal()
+    }
+
+    /// Когда человек ел в последний раз и насколько плотно.
+    ///
+    /// Нужно не виджету, а соседнему приложению — журналу тренировок: после
+    /// плотной еды полтора часа под штангой даются тяжело, и предупредить об
+    /// этом может только тот, кто знает про еду. Приложение публикует факт —
+    /// время и размер приёма; что с ним делать, решает тот, кто читает.
+    ///
+    /// Размер отдаём вместе со временем намеренно: двести килокалорий кофе с
+    /// молоком и девятьсот обеда — это не одно и то же ожидание, и одинаковый
+    /// совет на оба был бы чушью.
+    private func publishLastMeal() {
+        guard let last = entries.first else {
+            groupDefaults?.removeObject(forKey: "last_meal_at")
+            groupDefaults?.removeObject(forKey: "last_meal_calories")
+            return
+        }
+        groupDefaults?.set(last.date, forKey: "last_meal_at")
+        groupDefaults?.set(last.calories, forKey: "last_meal_calories")
     }
 
     /// Расписание приёмов — виджету на экране блокировки.

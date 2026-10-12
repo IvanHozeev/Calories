@@ -29,8 +29,9 @@ struct SharedBodyPayload: Codable, Equatable, Sendable {
 
 enum BodyBridge {
 
-    /// Группа, которая есть в entitlements обоих приложений.
-    static let appGroup = "group.ivankhozeyev.team.shared"
+    /// Группа, которая есть в entitlements обоих приложений — своя, давно заведённая:
+    /// заводить вторую ради одной записи незачем, тем более что эта уже провижена.
+    static let appGroup = CalorieStore.appGroup
     static let key = "body_snapshot"
 
     /// Кладёт свежие цифры в общую группу. Ничего не пишет, пока профиля нет:

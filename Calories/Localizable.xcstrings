@@ -52433,6 +52433,53 @@
           }
         }
       }
+    },
+    "Ничего не нашлось ни в своих продуктах, ни в блюдах, ни в базе." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم يُعثر على شيء لا في منتجاتك ولا في أطباقك ولا في القاعدة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weder unter deinen Lebensmitteln noch unter deinen Gerichten noch in der Datenbank gefunden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing found — not in your foods, not in your dishes, not in the database."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró nada: ni en tus productos, ni en tus platos, ni en la base."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien trouvé : ni dans tes aliments, ni dans tes plats, ni dans la base."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נמצא כלום — לא במוצרים שלך, לא במנות ולא במאגר."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não se encontrou nada: nem nos teus alimentos, nem nos pratos, nem na base."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

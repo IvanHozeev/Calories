@@ -115,13 +115,30 @@ struct MyFoodView: View {
                 recentSection
             }
 
-            switch tab {
-            case .dishes: dishesSection(dishes)
-            case .products: productsSection(products)
-            case .database: databaseSection(database)
-            }
-
-            if !trimmedQuery.isEmpty {
+            // Пока ищут — ищем везде, а не в выбранном разделе.
+            //
+            // Раздел выбирают, чтобы листать: «мои продукты», «мои блюда»,
+            // «база». Но ищущий не знает, в каком из них лежит нужное, —
+            // и на «моих продуктах» запрос к базе не находил ничего,
+            // хотя продукт там есть. Раздел остаётся про листание, поиск
+            // идёт по всему сразу; пустые разделы молчат.
+            if trimmedQuery.isEmpty {
+                switch tab {
+                case .dishes: dishesSection(dishes)
+                case .products: productsSection(products)
+                case .database: databaseSection(database)
+                }
+            } else {
+                if !products.isEmpty { productsSection(products) }
+                if !dishes.isEmpty { dishesSection(dishes) }
+                if !database.isEmpty { databaseSection(database) }
+                if products.isEmpty, dishes.isEmpty, database.isEmpty, remoteResults.isEmpty, !isSearchingRemote {
+                    Section {
+                        Text("Ничего не нашлось ни в своих продуктах, ни в блюдах, ни в базе.")
+                            .foregroundStyle(.secondary)
+                            .font(.app(.callout))
+                    }
+                }
                 remoteSection
             }
         }

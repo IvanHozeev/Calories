@@ -29,6 +29,12 @@ struct WeekReviewView: View {
 
     var body: some View {
         List {
+            // Какая именно неделя — над названием: «итог недели» без дат
+            // одинаково выглядит и сегодня, и через месяц в истории.
+            ScreenTitle(title: String(localized: "Итог недели"),
+                        eyebrow: ScreenTitle.weekRange(from: Calendar.current.date(byAdding: .day, value: -6, to: Date()) ?? Date()))
+                .asScreenTitleRow()
+
             Section {
                 numbers
                     .listRowBackground(Color.clear)
@@ -98,6 +104,7 @@ struct WeekReviewView: View {
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
         .navigationTitle("Итог недели")
+        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
     }
 

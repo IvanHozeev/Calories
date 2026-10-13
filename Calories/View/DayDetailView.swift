@@ -11,6 +11,13 @@ struct DayDetailView: View {
 
     var body: some View {
         List {
+            // Дата крупно и в содержимом, а не мелким по центру шапки: это и
+            // есть предмет экрана. День недели сверху — то, чего в самой дате
+            // нет, а вспоминают о нём чаще всего («это была суббота?»).
+            ScreenTitle(title: day.date.formatted(.dateTime.day().month(.wide)),
+                        eyebrow: day.date.formatted(.dateTime.weekday(.wide)))
+                .asScreenTitleRow()
+
             Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -73,6 +80,7 @@ struct DayDetailView: View {
         }
         .glassRow()
         .navigationTitle(day.date.formatted(.dateTime.day().month(.wide)))
+        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

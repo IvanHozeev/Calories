@@ -112,12 +112,15 @@ struct WeekStrip: View {
                 // а в понедельник брейк, — не открывая план. И видно, с какой
                 // нормой прожит вчерашний день: она у каждого дня своя.
                 if showsGoals {
+                    // Не мельче подписи дня недели и не бледнее её: десятым
+                    // кеглем в третьей ступени серого число не читалось вовсе,
+                    // а оно здесь — то, ради чего строку и добавили.
                     Text(verbatim: "\(day.goal)")
-                        .font(.app(size: 10))
+                        .font(.app(.caption, weight: .medium))
                         .monospacedDigit()
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(0.7)
                 }
                 Circle()
                     .fill(dot)

@@ -33,11 +33,6 @@ struct PlanView: View {
         List {
             if let plan = store.plan {
                 Section {
-                    ScreenTitle(title: plan.title, eyebrow: planWeek)
-                        .asScreenTitleRow()
-                }
-
-                Section {
                     hero(plan)
                 }
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -84,7 +79,6 @@ struct PlanView: View {
             Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
         }
         .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
-        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
         // Правка в тулбаре, а не строкой списка: настраивают план один раз,
         // а смотрят на него каждую неделю, и строка занимала место в самом

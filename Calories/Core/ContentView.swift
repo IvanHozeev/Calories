@@ -105,14 +105,14 @@ struct ContentView: View {
                 PlanView(store: store)
             }
             .navigationTitle("Сегодня")
-            // Без заголовка: большой «Сегодня» спорил за внимание с кольцом,
-            // а вкладка и так подписана в таббаре.
-            .navigationBarTitleDisplayMode(.inline)
-            .hiddenNavigationTitle()
+            // Слева — где экран, справа — что на нём можно сделать. Шаги
+            // стояли на месте заголовка и читались как название экрана,
+            // хотя это кнопка, и ведёт она совсем на другой экран.
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 // Без общей стеклянной подложки: в строке остаются сами
                 // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
                 }
                 .withoutSharedBackground()
@@ -199,12 +199,6 @@ struct ContentView: View {
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
             }
-            .sheet(isPresented: $showingMealSchedule) {
-                MealScheduleSheet(entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-                                  dailyGoal: store.adaptedTodayGoal,
-                                  settings: mealSchedule)
-                    .presentationDetents([.large])
-            }
             .sheet(item: $todaySheet) { sheet in
                 switch sheet {
                 case .weight:
@@ -261,6 +255,15 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingSteps) {
                 StepsNavigationView(store: stepStore)
+            }
+            // Переходом, а не листом: расписание — экран настройки, с которого
+            // уходят назад, а не задача, которую закрывают галочкой. Листом он
+            // к тому же перекрывал «Сегодня», ради которого его и открывали.
+            .navigationDestination(isPresented: $showingMealSchedule) {
+                MealScheduleSheet(entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
+                                  dailyGoal: store.adaptedTodayGoal,
+                                  settings: mealSchedule,
+                                  isEmbedded: true)
             }
             .sheet(isPresented: $showingPaywall) {
                 PaywallView(store: store)

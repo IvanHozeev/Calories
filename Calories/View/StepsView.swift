@@ -101,7 +101,6 @@ struct StepsNavigationView: View {
             }
         }
         .navigationTitle("Шаги")
-        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
         .scrollIndicators(.hidden)
         .toolbar {
@@ -258,9 +257,6 @@ private struct StepsContentView: View {
 
     var body: some View {
         List {
-            ScreenTitle(title: String(localized: "Шаги"))
-                .asScreenTitleRow()
-
             VStack(spacing: 16) {
                 todayCard
                 chartCard

@@ -109,6 +109,10 @@ struct RootView: View {
         // У подключённого шрифта системного дизайна нет, и применять его
         // нельзя: `.fontDesign` подменяет им любой свой шрифт в дереве.
         .fontDesign((AppFont(rawValue: appFont) ?? .system).design)
+        // Шапку рисует UIKit, и начертание с корня до неё не доходит: его
+        // приходится отдавать ей отдельно — при запуске и после каждой смены.
+        .task(id: appFont) { NavigationBarFont.apply() }
+        .task(id: appTextSize) { NavigationBarFont.apply() }
         // Смена начертания меняет ширину каждой строки, а значит и всю раскладку.
         // Без анимации интерфейс перескакивает; с ней текст переезжает плавно.
         .animation(.easeInOut(duration: 0.25), value: appFont)

@@ -805,3 +805,69 @@ struct PlanRevertTests {
         #expect(empty.revertablePlan == nil)
     }
 }
+
+// MARK: - Договор о норме
+
+/// Норма шла за измеренным расходом сама — и правильно шла. Неправильно было
+/// менять её молча: человек жил с числом, которое ехало у него за спиной.
+@MainActor
+struct WeeklyAgreementTests {
+    let container: ModelContainer
+    let store: CalorieStore
+
+    init() async throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+                BodyMeasurement.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        let defaults = TestDefaults.make()
+        defaults.set(true, forKey: "is_premium")
+        store = CalorieStore(context: container.mainContext, defaults: defaults, groupDefaults: nil)
+        store.isPremium = true
+        store.updateProfile(UserProfile(weightKg: 77, heightCm: 180, age: 30, sex: .male,
+                                        activityLevel: .moderate, goal: .fatLoss, proteinPerKg: 2.0))
+        store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
+                             durationWeeks: 10, startWeightKg: 77, targetWeightKg: 74))
+    }
+
+    /// Пока норму ни разу не подтверждали, план ставит её сам: это не правка
+    /// за спиной, а то, зачем план и заводят.
+    @Test func aFreshPlanSetsTheGoalWithoutAsking() {
+        #expect(store.dailyGoal > 0)
+        #expect(store.proposedGoal == nil)
+    }
+
+    /// А после согласия расчёт больше не правит число молча — он предлагает.
+    @Test func afterAnAgreementChangesAreProposedNotApplied() {
+        store.setManualGoal(2500)
+        let agreed = store.dailyGoal
+
+        // Расход поменялся — приложение пересчитало бы норму.
+        store.usesAdaptiveTDEE.toggle()
+
+        #expect(store.dailyGoal == agreed, "Число, с которым человек живёт, остаётся прежним")
+    }
+
+    @Test func acceptingTheProposalMovesTheGoalAndClosesTheReview() {
+        store.setManualGoal(2500)
+        store.usesAdaptiveTDEE.toggle()
+        guard let proposal = store.proposedGoal else { return }  // нечего предлагать — нечего и проверять
+
+        store.acceptProposedGoal()
+        #expect(store.dailyGoal == proposal)
+        #expect(store.proposedGoal == nil)
+        #expect(!store.reviewIsDue)
+    }
+
+    @Test func keepingTheGoalAlsoClosesTheReviewUntilNextWeek() {
+        store.setManualGoal(2500)
+        store.usesAdaptiveTDEE.toggle()
+        let before = store.dailyGoal
+
+        store.keepCurrentGoal()
+        #expect(store.dailyGoal == before)
+        #expect(store.proposedGoal == nil)
+        #expect(!store.reviewIsDue)
+    }
+}

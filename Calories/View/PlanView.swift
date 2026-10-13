@@ -490,8 +490,61 @@ struct PlanView: View {
         }
     }
 
+    /// Откуда вышли, сколько прошли, куда идём — одной строкой.
+    ///
+    /// Эти три числа лежали порознь: стартовый вес в карточке плана, текущий в
+    /// строках соответствия, целевой в фазах. Вопрос же задают один, и ответом
+    /// на него служит их сопоставление, а не каждое по отдельности.
+    private func progressSummary(plan: Plan, adherence: PlanAdherence) -> some View {
+        HStack(alignment: .top, spacing: 0) {
+            summaryCell(title: String(localized: "Старт"),
+                        value: String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg),
+                        caption: Self.planDate(plan.startDate),
+                        tint: .secondary)
+            summaryCell(title: String(localized: "Изменение"),
+                        value: adherence.actualWeightToday.map {
+                            String(format: "%+.1f \(String(localized: "кг"))", $0 - plan.startWeightKg)
+                        } ?? "—",
+                        caption: nil,
+                        // Цвет по направлению фазы, а не по знаку: минус на
+                        // наборе — это не успех.
+                        tint: changeTint(plan: plan, adherence: adherence))
+            summaryCell(title: String(localized: "Цель"),
+                        value: String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg),
+                        caption: Self.planDate(plan.endDate),
+                        tint: .secondary)
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func summaryCell(title: String, value: String, caption: String?, tint: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: title)
+                .font(.app(.caption2))
+                .foregroundStyle(.tertiary)
+            Text(verbatim: value)
+                .font(.app(.headline))
+                .monospacedDigit()
+                .foregroundStyle(tint)
+            if let caption {
+                Text(verbatim: caption)
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func changeTint(plan: Plan, adherence: PlanAdherence) -> Color {
+        guard let actual = adherence.actualWeightToday else { return .secondary }
+        let change = actual - plan.startWeightKg
+        guard abs(change) > 0.2, let intent = plan.currentPhase?.intent else { return .primary }
+        return (change < 0) == (intent == .cut) ? ProgressRing.kcalColors[0] : .primary
+    }
+
     private func adherenceSection(plan: Plan, adherence: PlanAdherence) -> some View {
         Section {
+            progressSummary(plan: plan, adherence: adherence)
             PlanProgressChart(plan: plan, entries: store.weightEntries)
 
             // Во время брейка вес о плане не говорит: калории подняли, вернулись

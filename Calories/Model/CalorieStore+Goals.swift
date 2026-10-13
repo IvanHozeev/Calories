@@ -21,17 +21,19 @@ extension CalorieStore {
         total <= goal + max(50, Int((Double(goal) * 0.02).rounded()))
     }
 
-    func goalHistory(days: Int) -> [(date: Date, hasEntries: Bool, onGoal: Bool)] {
+    func goalHistory(days: Int) -> [DayMark] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         return (0..<days).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            let dayGoal = goal(for: date)
             // Голодание — день с «записью» и в норме, как и для серии: пустой
             // кружок в неделе и в истории читался бы как забытый дневник.
-            if isFastDay(date) { return (date, true, true) }
+            if isFastDay(date) { return DayMark(date: date, hasEntries: true, onGoal: true, goal: dayGoal) }
             let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
-            let dayGoal = goalsByDay[date] ?? effectiveGoal(for: date)
-            return (date, dayTotal > 0, dayTotal > 0 && isWithinGoal(total: dayTotal, goal: dayGoal))
+            return DayMark(date: date, hasEntries: dayTotal > 0,
+                           onGoal: dayTotal > 0 && isWithinGoal(total: dayTotal, goal: dayGoal),
+                           goal: dayGoal)
         }
     }
 
@@ -41,7 +43,7 @@ extension CalorieStore {
     /// Назад — не глубже первого дня с записями, чтобы новичок не листал пустые
     /// страницы, и не больше `maxWeeks`: двенадцать недель — это одна фаза
     /// сушки или набора целиком, а старше открывается календарём.
-    func weekStripWeeks(maxWeeks: Int = 12) -> [[(date: Date, hasEntries: Bool, onGoal: Bool)]] {
+    func weekStripWeeks(maxWeeks: Int = 12) -> [[DayMark]] {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let firstDay = entriesByDay.keys.min() ?? today

@@ -14,12 +14,67 @@ struct WeekReviewView: View {
         WeekReview.lines(input, brief: ExplanationSettings.shared.level == .expert)
     }
 
+    /// Почему предлагается именно это число.
+    private func reason(for proposal: Int) -> String {
+        let delta = proposal - store.dailyGoal
+        let measured = store.smoothedTDEE ?? store.adaptiveTDEE?.tdee
+        guard let measured else {
+            return String(format: String(localized: "Расчёт плана на эту неделю даёт на %lld ккал в день больше."), delta)
+        }
+        return String(format: delta > 0
+                      ? String(localized: "Измеренный расход — %1$lld ккал в день: при нём план сходится на %2$lld ккал больше нынешней нормы.")
+                      : String(localized: "Измеренный расход — %1$lld ккал в день: при нём план сходится на %2$lld ккал меньше нынешней нормы."),
+                      Int(measured.rounded()), abs(delta))
+    }
+
     var body: some View {
         List {
             Section {
                 numbers
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+            }
+
+            // Договор о норме — здесь, а не само собой.
+            //
+            // Норма идёт за измеренным расходом, и это правильно. Неправильно
+            // было менять её молча: человек жил с числом, которое ехало у него
+            // за спиной. Раз в неделю приложение показывает, что посчитало, и
+            // спрашивает — а до ответа держит прежнее.
+            if let proposal = store.proposedGoal {
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack(alignment: .firstTextBaseline, spacing: 8) {
+                            Text(verbatim: "\(store.dailyGoal)")
+                                .font(.app(.title3, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .strikethrough()
+                            Image(systemName: "arrow.right")
+                                .font(.app(.footnote))
+                                .foregroundStyle(.tertiary)
+                            Text(verbatim: "\(proposal) \(String(localized: "ккал"))")
+                                .font(.app(.title3, weight: .bold))
+                                .monospacedDigit()
+                            Spacer()
+                        }
+                        Text(verbatim: reason(for: proposal))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(spacing: 12) {
+                            Button("Оставить как есть") { store.keepCurrentGoal() }
+                                .buttonStyle(.bordered)
+                            Button("Принять") { store.acceptProposedGoal() }
+                                .buttonStyle(.borderedProminent)
+                                .accessibilityIdentifier("acceptGoalProposal")
+                        }
+                    }
+                    .padding(.vertical, 2)
+                } header: {
+                    Text("Норма на следующую неделю")
+                } footer: {
+                    explain("До ответа норма остаётся прежней. Приложение считает расход по дневнику и весам, но менять число, с которым ты живёшь, без твоего ведома оно не должно.").map { Text($0) }
+                }
             }
 
             Section {

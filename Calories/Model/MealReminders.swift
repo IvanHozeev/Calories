@@ -53,9 +53,23 @@ enum MealReminders {
         // замыкания центра уведомлений главный актор не заходит.
         let plan = store.map { plannedMeals(settings: settings, store: $0) } ?? []
 
+        let weighInTime = settings.remindsWeighIn ? settings.today(settings.weighIn) : nil
+
         center.getPendingNotificationRequests { pending in
             let ours = pending.map(\.identifier).filter { $0.hasPrefix(prefix) }
             center.removePendingNotificationRequests(withIdentifiers: ours)
+
+            if let weighInTime {
+                let content = UNMutableNotificationContent()
+                content.title = String(localized: "Взвешивание")
+                content.body = String(localized: "Натощак, до еды и питья — так утро сравнимо с утром.")
+                content.sound = .default
+                let parts = Calendar.current.dateComponents([.hour, .minute], from: weighInTime)
+                center.add(UNNotificationRequest(identifier: "\(prefix)weighIn",
+                                                 content: content,
+                                                 trigger: UNCalendarNotificationTrigger(dateMatching: parts,
+                                                                                        repeats: true)))
+            }
 
             guard settings.isEnabled else { return }
             let times = MealSchedule.times(wake: settings.today(settings.wake),
@@ -77,6 +91,8 @@ enum MealReminders {
                 center.add(UNNotificationRequest(identifier: "\(prefix)\(index)",
                                                  content: content, trigger: trigger))
             }
+            // Взвешивание — своим напоминанием и без оглядки на тумблер
+            // приёмов: весы нужны и тому, кто день на приёмы не делит.
             logger.info("расписание приёмов: \(times.count) напоминаний")
         }
     }

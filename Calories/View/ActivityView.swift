@@ -84,7 +84,7 @@ struct ActivityView: View {
 /// Сетка последних пяти недель. Даёт то, чего не даёт список: картину месяца целиком —
 /// где шли подряд зелёные дни, а где провалы.
 private struct MonthGrid: View {
-    let days: [(date: Date, hasEntries: Bool, onGoal: Bool)]
+    let days: [DayMark]
     var onSelect: (Date) -> Void
 
     private let calendar = Calendar.current
@@ -171,7 +171,7 @@ private struct MonthGrid: View {
         }
     }
 
-    private func color(for day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> Color {
+    private func color(for day: DayMark) -> Color {
         if day.onGoal { return ProgressRing.kcalColors[0] }
         if day.hasEntries { return .orange }
         return .clear

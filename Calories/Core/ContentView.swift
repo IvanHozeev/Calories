@@ -384,6 +384,32 @@ private extension ContentView {
                 onShowPaywall: { showingPaywall = true }
             )
 
+            // Недельный обзор зовёт только когда есть о чём говорить:
+            // прошла неделя с прошлого раза, и расчёт разошёлся с нормой
+            // заметнее полусотни килокалорий. Без повода строки нет.
+            if store.reviewIsDue, let proposal = store.proposedGoal {
+                Button { showingWeekReview = true } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "calendar.badge.clock")
+                            .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Недельный обзор")
+                                .font(.app(.subheadline, weight: .medium))
+                            Text(verbatim: String(format: String(localized: "Расчёт предлагает %lld ккал в день"), proposal))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("weeklyReviewDue")
+            }
+
             // Неделя последней: это уже прошедшие дни, и открывают
             // их реже всего.
             WeekStrip(weeks: store.weekStripWeeks(),

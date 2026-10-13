@@ -158,6 +158,11 @@ struct MealScheduleSheet: View {
                     if hasSecondDinner {
                         DatePicker("Отбой", selection: $settings.sleep, displayedComponents: .hourAndMinute)
                     }
+                    Toggle("Напоминать взвешиваться", isOn: $settings.remindsWeighIn)
+                    if settings.remindsWeighIn {
+                        DatePicker("Взвешивание", selection: $settings.weighIn,
+                                   displayedComponents: .hourAndMinute)
+                    }
                 } footer: {
                     explain(hasSecondDinner
                             ? String(localized: "Завтрак в 8:00, обед в 13:00, ужин в 19:00. Второй завтрак и полдник — ровно между ними, второй ужин — между ужином и отбоем.")
@@ -166,6 +171,9 @@ struct MealScheduleSheet: View {
                 }
 
                 Section {
+                    // Взвешивание — первым событием дня: оно и происходит
+                    // первым, натощак, до всякой еды.
+                    weighInRow
                     ForEach(slots) { slot in
                         row(slot)
                     }
@@ -195,6 +203,31 @@ struct MealScheduleSheet: View {
                     }
                 }
             }
+        }
+    }
+
+    /// Взвешивание в ленте дня — с галочкой, когда оно уже сделано.
+    @ViewBuilder
+    private var weighInRow: some View {
+        if settings.remindsWeighIn {
+            let done = store?.hasWeighedToday ?? false
+            HStack(spacing: 12) {
+                Image(systemName: done ? "checkmark.circle.fill" : "scalemass")
+                    .font(.app(.footnote))
+                    .foregroundStyle(done ? ProgressRing.kcalColors[0] : .secondary)
+                    .frame(width: 20)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Взвешивание")
+                        .font(.app(.subheadline, weight: .medium))
+                    Text(verbatim: String(format: String(localized: "в %@"),
+                                          settings.weighIn.formatted(date: .omitted, time: .shortened)))
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+            }
+            .padding(.vertical, 2)
+            .accessibilityElement(children: .combine)
         }
     }
 

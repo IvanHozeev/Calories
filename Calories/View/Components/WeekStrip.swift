@@ -10,9 +10,23 @@ import SwiftUI
 /// Именно окна по семь дней до сегодня, а не недели с понедельника: в понедельник
 /// календарная неделя начиналась бы с пустого сегодня, и вчера в ней не было бы.
 /// Прошлые недели — свайпом вправо.
+/// Один день в полоске и в сетке месяца.
+///
+/// Типом, а не кортежем: к дате, записям и попаданию в норму добавилась сама
+/// норма, и кортеж из четырёх полей читался уже хуже, чем выглядел.
+struct DayMark: Identifiable {
+    let date: Date
+    let hasEntries: Bool
+    let onGoal: Bool
+    /// Норма этого дня — та, что действовала в нём.
+    let goal: Int
+
+    var id: Date { date }
+}
+
 struct WeekStrip: View {
     /// Недели от давней к текущей, по семь дней в каждой.
-    let weeks: [[(date: Date, hasEntries: Bool, onGoal: Bool)]]
+    let weeks: [[DayMark]]
     var onSelect: (Date) -> Void
     var onShowAll: () -> Void
     /// Итог недели — то, ради чего полоску и читают: семь кружков человек
@@ -20,6 +34,16 @@ struct WeekStrip: View {
     var onShowWeek: (() -> Void)? = nil
 
     private let calendar = Calendar.current
+
+    /// Показывать ли нормы под числами.
+    ///
+    /// Только когда дни отличаются: у человека без циклирования и брейков под
+    /// всеми семью стоит одно и то же число, и семь одинаковых цифр — это не
+    /// сведения, а шум. Решается один раз на всю полоску, а не на каждую
+    /// неделю: иначе её высота прыгала бы при листании.
+    private var showsGoals: Bool {
+        weeks.contains { Set($0.map(\.goal)).count > 1 }
+    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -41,7 +65,7 @@ struct WeekStrip: View {
                 .scrollTargetBehavior(.paging)
                 .scrollIndicators(.hidden)
                 .defaultScrollAnchor(.trailing)
-                .frame(height: 44)
+                .frame(height: showsGoals ? 56 : 44)
 
                 Button(action: onShowAll) {
                     Image(systemName: "calendar")
@@ -70,7 +94,7 @@ struct WeekStrip: View {
     /// Тихо, как шапка недели в Календаре: цвет — только точка под числом.
     /// Залитые кружки над кольцом давали ряд из семи цветных пятен тех же
     /// зелёного и оранжевого, что в кольце, и спорили с ним за внимание.
-    private func dayCell(_ day: (date: Date, hasEntries: Bool, onGoal: Bool)) -> some View {
+    private func dayCell(_ day: DayMark) -> some View {
         let isToday = calendar.isDateInToday(day.date)
         let dot: Color = day.onGoal ? ProgressRing.kcalColors[0] : (day.hasEntries ? .orange : .clear)
         return Button {
@@ -84,11 +108,22 @@ struct WeekStrip: View {
                     .font(.app(.subheadline, weight: isToday ? .bold : .regular))
                     .monospacedDigit()
                     .foregroundStyle(isToday ? .primary : .secondary)
+                // Норма дня прямо под числом: тогда видно, что завтра рефид,
+                // а в понедельник брейк, — не открывая план. И видно, с какой
+                // нормой прожит вчерашний день: она у каждого дня своя.
+                if showsGoals {
+                    Text(verbatim: "\(day.goal)")
+                        .font(.app(size: 10))
+                        .monospacedDigit()
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
                 Circle()
                     .fill(dot)
                     .frame(width: 5, height: 5)
             }
-            .frame(maxWidth: .infinity, minHeight: 44)
+            .frame(maxWidth: .infinity, minHeight: showsGoals ? 56 : 44)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

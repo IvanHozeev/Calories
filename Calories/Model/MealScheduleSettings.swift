@@ -11,6 +11,8 @@ final class MealScheduleSettings {
     static let wakeKey = "meal_schedule_wake"
     static let sleepKey = "meal_schedule_sleep"
     static let countKey = "meal_schedule_count"
+    static let weighInKey = "meal_schedule_weigh_in"
+    static let weighInOnKey = "meal_schedule_weigh_in_on"
 
     /// Один экземпляр на всё приложение.
     ///
@@ -29,12 +31,19 @@ final class MealScheduleSettings {
         sleep = Self.time(defaults.object(forKey: Self.sleepKey) as? Date, hour: 23)
         let stored = defaults.integer(forKey: Self.countKey)
         count = MealSchedule.allowedCounts.contains(stored) ? stored : 4
+        weighIn = Self.time(defaults.object(forKey: Self.weighInKey) as? Date, hour: 7)
+        remindsWeighIn = defaults.bool(forKey: Self.weighInOnKey)
     }
 
     var isEnabled: Bool { didSet { defaults.set(isEnabled, forKey: Self.enabledKey) } }
     var wake: Date { didSet { defaults.set(wake, forKey: Self.wakeKey) } }
     var sleep: Date { didSet { defaults.set(sleep, forKey: Self.sleepKey) } }
     var count: Int { didSet { defaults.set(count, forKey: Self.countKey) } }
+    /// Когда человек встаёт на весы. Взвешивание — такое же событие дня, как
+    /// приём пищи: оно происходит в одно и то же время, натощак, до еды, — и
+    /// место ему в расписании, а не в баннере «не забудь».
+    var weighIn: Date { didSet { defaults.set(weighIn, forKey: Self.weighInKey) } }
+    var remindsWeighIn: Bool { didSet { defaults.set(remindsWeighIn, forKey: Self.weighInOnKey) } }
 
     /// Время сегодняшнего дня по сохранённым часам и минутам: в настройках
     /// хранится момент, а нужен он каждый день заново.

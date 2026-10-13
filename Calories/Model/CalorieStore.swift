@@ -234,6 +234,8 @@ final class CalorieStore {
         static let goalSource = "daily_goal_source"
         static let previousPlan = "plan_previous"
         static let previousPlanDate = "plan_previous_date"
+        static let goalAgreedAt = "daily_goal_agreed_at"
+        static let goalProposal = "daily_goal_proposal"
         static let phaseHistory = "phase_history"
         static let goalPhase = "daily_goal_phase"
         static let profile = "user_profile"
@@ -339,6 +341,18 @@ final class CalorieStore {
         let expenditure = (workingTDEE / 5).rounded() * 5
         guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
         defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
+        // Договорились — значит договорились до следующего обзора.
+        //
+        // Норма шла за расходом сама, и правильно шла: расход меряется, и
+        // застывшее число быстро перестаёт значить обещанное. Но человек от
+        // этого жил с цифрой, которая менялась у него за спиной: сегодня
+        // 2824, завтра 2492, и ни одного слова о том, почему. Теперь
+        // пересчёт не применяется молча — он откладывается до недельного
+        // обзора, где его показывают и спрашивают.
+        if goalWasAgreed {
+            proposeGoalChange(plan: plan)
+            return
+        }
         // Принятый пересчёт пересчитываем так же, как его считал экран плана:
         // человек согласился приходить к цели фазы в срок, а не на конкретное
         // число. Иначе подтянувшиеся шаги возвращали норму к плановой, и
@@ -1071,12 +1085,16 @@ final class CalorieStore {
     /// за расходом по этому же правилу, а не вернётся к плановой.
     func acceptRecalibratedGoal(_ calories: Int) {
         setGoalSource(.recalibrated)
+        defaults.set(Date(), forKey: Keys.goalAgreedAt)
+        defaults.removeObject(forKey: Keys.goalProposal)
         dailyGoal = calories
     }
 
     /// Своё число вместо расчётного — из профиля.
     func setManualGoal(_ calories: Int) {
         setGoalSource(.manual)
+        defaults.set(Date(), forKey: Keys.goalAgreedAt)
+        defaults.removeObject(forKey: Keys.goalProposal)
         dailyGoal = calories
     }
 
@@ -1308,6 +1326,59 @@ final class CalorieStore {
     }
 
     /// Пересчитывает срок плана под новую дату финиша (в любую сторону).
+    /// Сколько ждать между недельными обзорами.
+    static let reviewIntervalDays = 7
+    /// Меньше этого норму не пересматриваем: пятьдесят килокалорий в день —
+    /// это полста граммов веса в неделю, то есть меньше, чем шумит тренд.
+    static let meaningfulGoalChange = 50
+
+    /// Норму хоть раз подтверждали вручную — значит дальше её меняют только с
+    /// согласия.
+    private var goalWasAgreed: Bool { defaults.object(forKey: Keys.goalAgreedAt) is Date }
+
+    /// Когда норму согласовали в последний раз.
+    var goalAgreedAt: Date? { defaults.object(forKey: Keys.goalAgreedAt) as? Date }
+
+    /// Отложенный пересчёт: число, которое приложение предлагает поставить.
+    var proposedGoal: Int? {
+        guard let value = defaults.object(forKey: Keys.goalProposal) as? Int, value != dailyGoal else { return nil }
+        return value
+    }
+
+    /// Пора ли подводить недельный итог: прошла неделя с прошлого раза и есть
+    /// что обсудить.
+    var reviewIsDue: Bool {
+        guard let proposedGoal, abs(proposedGoal - dailyGoal) >= Self.meaningfulGoalChange else { return false }
+        guard let agreed = goalAgreedAt else { return true }
+        return Date().timeIntervalSince(agreed) >= Double(Self.reviewIntervalDays) * 86_400
+    }
+
+    private func proposeGoalChange(plan: Plan) {
+        let target = dailyGoalSource == .recalibrated
+            ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
+            : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
+        if abs(target - dailyGoal) >= Self.meaningfulGoalChange {
+            defaults.set(target, forKey: Keys.goalProposal)
+        } else {
+            defaults.removeObject(forKey: Keys.goalProposal)
+        }
+    }
+
+    /// Принять предложенную норму — и считать её согласованной.
+    func acceptProposedGoal() {
+        guard let proposedGoal else { return }
+        defaults.removeObject(forKey: Keys.goalProposal)
+        defaults.set(Date(), forKey: Keys.goalAgreedAt)
+        dailyGoal = proposedGoal
+    }
+
+    /// Оставить как есть: до следующего обзора число не трогаем.
+    func keepCurrentGoal() {
+        defaults.removeObject(forKey: Keys.goalProposal)
+        defaults.set(Date(), forKey: Keys.goalAgreedAt)
+        rebuildCaches()
+    }
+
     /// Сколько дней предлагаем вернуться к прежнему плану.
     ///
     /// Неделя: дальше это уже не «отменить правку», а смена плана задним

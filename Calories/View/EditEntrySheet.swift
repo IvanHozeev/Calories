@@ -161,11 +161,6 @@ struct EditEntrySheet: View {
     private var formContent: some View {
         Form {
             Section {
-                ScreenTitle(title: name)
-                    .asScreenTitleRow()
-            }
-
-            Section {
                 VStack(spacing: 10) {
                     Text(verbatim: "\(draftCalories) \(String(localized: "ккал"))")
                         .font(.app(size: 34, weight: .bold))
@@ -283,8 +278,9 @@ struct EditEntrySheet: View {
         }
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)
-        .navigationTitle("Редактировать")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(name.isEmpty ? String(localized: "Редактировать") : name,
+                     eyebrow: name.isEmpty ? nil : String(localized: "Редактировать"),
+                     lines: 2, trailingButtons: 1)
         .toolbar {
             if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {

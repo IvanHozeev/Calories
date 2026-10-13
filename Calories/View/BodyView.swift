@@ -661,8 +661,7 @@ private struct CalculationBasisSheet: View {
             // рассчитан на длинный экран, а в листе на два пункта он читался
             // как пустая строка между заголовком и переключателем.
             .contentMargins(.top, 8, for: .scrollContent)
-            .navigationTitle("Как считаем")
-            .navigationBarTitleDisplayMode(.inline)
+            .screenTitle(String(localized: "Как считаем"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     CheckmarkButton { dismiss() }

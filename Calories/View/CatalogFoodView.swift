@@ -93,8 +93,7 @@ struct CatalogFoodView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle(food.name)
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(food.name, trailingButtons: 1)
         // Та же закладка, что на экране порции: один значок значит одно
         // действие везде — «положить в мои продукты».
         .toolbar {

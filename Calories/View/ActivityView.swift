@@ -71,8 +71,7 @@ struct ActivityView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("История")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "История"))
         .navigationDestination(item: $selectedDay) { date in
             DayDetailView(store: store, date: date)
         }

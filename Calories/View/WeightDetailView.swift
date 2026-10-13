@@ -145,7 +145,7 @@ struct WeightDetailView: View {
                 .glassRow()
             }
         }
-        .navigationTitle("Вес и динамика")
+        .screenTitle(String(localized: "Вес и динамика"), trailingButtons: 1)
         .scrollIndicators(.hidden)
         // Плюса в тулбаре нет намеренно: на экране уже есть кнопка «Записать вес»,
         // и делала она ровно то же самое. Две кнопки под одно действие заставляют

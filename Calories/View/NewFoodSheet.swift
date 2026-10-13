@@ -323,8 +323,8 @@ struct NewFoodSheet: View {
             // Форма внутри листа по умолчанию не прячет клавиатуру при прокрутке,
             // и свайп вниз упирается в неё вместо того, чтобы её убрать.
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(isEditing ? "Редактировать" : "Свой продукт")
-            .navigationBarTitleDisplayMode(.inline)
+            .screenTitle(isEditing ? String(localized: "Редактировать")
+                       : String(localized: "Свой продукт"), trailingButtons: 1)
             .toolbar {
                 if !isEmbedded {
                     ToolbarItem(placement: .cancellationAction) {

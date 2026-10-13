@@ -100,8 +100,8 @@ struct StepsNavigationView: View {
                     .safeAreaInset(edge: .bottom) { noDataHint }
             }
         }
-        .navigationTitle("Шаги")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Шаги"),
+                     trailingButtons: store.sources.count > 1 ? 2 : 1)
         .scrollIndicators(.hidden)
         .toolbar {
             // Выбор источника появляется только когда выбирать есть из чего:

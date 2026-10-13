@@ -678,6 +678,11 @@ private struct StepsChip: View {
             .padding(.leading, 2)
             .padding(.trailing, 6)
         }
+        // Своим стилем, а не системным: у кнопки в шапке подсветка нажатия
+        // повторяет форму стеклянной подложки, а подложку здесь сняли — и
+        // вместо неё под пальцем проступал прямоугольник по размеру надписи.
+        .buttonStyle(.plain)
+        .contentShape(.capsule)
         .accessibilityLabel(store.isAuthorized
             ? Text(verbatim: store.stepsToday.formatted() + " " + String(localized: "шагов из \(store.stepGoal.formatted())"))
             : Text("Подключить шаги"))

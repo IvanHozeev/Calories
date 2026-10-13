@@ -33,8 +33,7 @@ struct MeasurementHistoryView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("История замеров")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "История замеров"))
     }
 
     private func row(_ measurement: BodyMeasurement) -> some View {

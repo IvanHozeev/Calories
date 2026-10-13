@@ -192,8 +192,8 @@ struct MealScheduleSheet: View {
             }
             .glassRow()
             .listStyle(.insetGrouped)
-            .navigationTitle("Приёмы пищи")
-            .navigationBarTitleDisplayMode(.inline)
+            .screenTitle(String(localized: "Приёмы пищи"),
+                         trailingButtons: isEmbedded ? 0 : 1)
             // Закрывать нечего, когда экран открыт переходом: назад ведёт
             // сам навигационный стек.
             .toolbar {

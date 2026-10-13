@@ -221,8 +221,7 @@ private struct RingSoundSettingsView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Звук кольца")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Звук кольца"))
     }
 }
 
@@ -293,8 +292,7 @@ struct FontSettingsView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Шрифт и размер")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Шрифт и размер"))
     }
 }
 
@@ -362,8 +360,7 @@ struct DeveloperSettingsView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Отладка")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Отладка"))
     }
 }
 
@@ -407,8 +404,7 @@ struct HealthInventoryView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Что есть в «Здоровье»")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Что есть в «Здоровье»"))
         .overlay {
             if inventory.isChecking { ProgressView() }
             else if inventory.rows.isEmpty && inventory.failure == nil {

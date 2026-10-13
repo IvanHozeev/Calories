@@ -121,8 +121,7 @@ struct FastingView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("Голодание")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Голодание"))
         .onAppear {
             // Открываем на том посте, который идёт или ближе всего к сегодня:
             // чаще всего правят именно его.

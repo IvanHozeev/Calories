@@ -55,8 +55,7 @@ struct RemindersView: View {
         // значило бы дёргать систему зря.
         .onDisappear { MealReminders.reschedule(settings: schedule) }
         .glassRow()
-        .navigationTitle("Напоминания")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Напоминания"))
         .onAppear {
             Task { await store.refreshAuthStatus() }
         }

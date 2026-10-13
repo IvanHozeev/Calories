@@ -70,6 +70,18 @@ struct WeekStrip: View {
 
     private let calendar = Calendar.current
 
+    /// Высота полоски.
+    ///
+    /// Считается от кегля, а не задана числом: со строкой нормы в ячейке four
+    /// строки — день недели, число, норма и точка, — и при крупном системном
+    /// шрифте фиксированная высота срезала бы нижнюю, то есть точку. Она и
+    /// срезалась: при обычном кегле пятьдесят шесть точек на всё это уже
+    /// не хватало.
+    @ScaledMetric(relativeTo: .subheadline) private var tallRow: CGFloat = 66
+    @ScaledMetric(relativeTo: .subheadline) private var shortRow: CGFloat = 44
+
+    private var rowHeight: CGFloat { showsGoals ? tallRow : shortRow }
+
     /// Показывать ли нормы под числами.
     ///
     /// Только когда дни отличаются: у человека без циклирования и брейков под
@@ -100,7 +112,7 @@ struct WeekStrip: View {
                 .scrollTargetBehavior(.paging)
                 .scrollIndicators(.hidden)
                 .defaultScrollAnchor(.trailing)
-                .frame(height: showsGoals ? 56 : 44)
+                .frame(height: rowHeight)
 
                 Button(action: onShowAll) {
                     Image(systemName: "calendar")
@@ -184,7 +196,7 @@ struct WeekStrip: View {
                 // а отметка, что день есть и он не в цель.
                 dayDot(day.verdict)
             }
-            .frame(maxWidth: .infinity, minHeight: showsGoals ? 56 : 44)
+            .frame(maxWidth: .infinity, minHeight: rowHeight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

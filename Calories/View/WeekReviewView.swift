@@ -39,11 +39,6 @@ struct WeekReviewView: View {
     var body: some View {
         List {
             Section {
-                ScreenTitle(title: Self.weekRange())
-                    .asScreenTitleRow()
-            }
-
-            Section {
                 numbers
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -111,8 +106,7 @@ struct WeekReviewView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("Итог недели")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Итог недели"), eyebrow: Self.weekRange())
         // Какая именно неделя — над названием: «итог недели» без дат одинаково
     }
 

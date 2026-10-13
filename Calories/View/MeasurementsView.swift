@@ -41,8 +41,7 @@ struct MeasurementsView: View {
         }
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("Замеры")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Замеры"), trailingButtons: 2)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

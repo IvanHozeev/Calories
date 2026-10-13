@@ -12,12 +12,6 @@ struct DayDetailView: View {
     var body: some View {
         List {
             Section {
-                ScreenTitle(title: day.date.formatted(.dateTime.day().month(.wide)),
-                            eyebrow: day.date.formatted(.dateTime.weekday(.wide)))
-                    .asScreenTitleRow()
-            }
-
-            Section {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Итого")
@@ -78,9 +72,9 @@ struct DayDetailView: View {
             }
         }
         .glassRow()
-        .navigationTitle(day.date.formatted(.dateTime.day().month(.wide)))
-        .hiddenNavigationTitle()
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(day.date.formatted(.dateTime.day().month(.wide)),
+                     eyebrow: day.date.formatted(.dateTime.weekday(.wide)),
+                     trailingButtons: 1)
         // Дата с днём недели — в шапке, слева, двумя плотными строками. День
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

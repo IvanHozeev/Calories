@@ -29,8 +29,7 @@ struct StallReportView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .navigationTitle("Разбор расхождения")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Разбор расхождения"))
     }
 
     /// Три числа, ради которых сюда заходят: сколько должно было уйти, сколько

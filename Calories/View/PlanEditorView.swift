@@ -189,8 +189,7 @@ struct PlanEditorView: View {
                 }
         }
         .glassRow()
-        .navigationTitle(store.plan == nil ? String(localized: "Новый план") : String(localized: "Изменить план"))
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(store.plan == nil ? String(localized: "Новый план") : String(localized: "Изменить план"), trailingButtons: 1)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 CheckmarkButton {

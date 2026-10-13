@@ -55,8 +55,7 @@ struct MeasurementEntryView: View {
         }
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .navigationTitle("Замеры")
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "Замеры"), trailingButtons: 1)
         .onAppear(perform: loadOnce)
     }
 

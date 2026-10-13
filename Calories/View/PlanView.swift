@@ -78,8 +78,7 @@ struct PlanView: View {
         } message: {
             Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
         }
-        .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
-        .navigationBarTitleDisplayMode(.inline)
+        .screenTitle(String(localized: "План"), eyebrow: planWeek, trailingButtons: 1)
         // Правка в тулбаре, а не строкой списка: настраивают план один раз,
         // а смотрят на него каждую неделю, и строка занимала место в самом
         // низу, куда ради неё приходилось долистывать весь разбор.

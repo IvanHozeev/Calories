@@ -14,7 +14,13 @@ DERIVED="${TMPDIR:-/tmp}/calories-build"
 SIM="EA9D7E37-491D-4021-9DFF-00844371F9BC"
 
 if [ "${1:-}" = "phone" ]; then
-    DEVICE=$(xcrun devicectl list devices 2>/dev/null | awk '/connected/ {print $(NF-2); exit}')
+    # Телефон по сети числится «available (paired)», а не «connected»:
+    # искали второе — и своего же телефона не находили. Берём любой, кого
+    # devicectl готов обслужить, а идентификатор вынимаем по форме UUID:
+    # имя владельца бывает из двух слов, и счёт колонок от конца врал.
+    DEVICE=$(xcrun devicectl list devices 2>/dev/null \
+        | grep -E 'available|connected' \
+        | grep -Eo '[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}' | head -1)
     if [ -z "$DEVICE" ]; then
         echo "Телефон не виден по сети: включи Wi-Fi и разбуди его."
         exit 1

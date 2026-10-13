@@ -33,6 +33,11 @@ struct PlanView: View {
         List {
             if let plan = store.plan {
                 Section {
+                    ScreenTitle(title: plan.title, eyebrow: planWeek)
+                        .asScreenTitleRow()
+                }
+
+                Section {
                     hero(plan)
                 }
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -79,6 +84,7 @@ struct PlanView: View {
             Text("Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.")
         }
         .navigationTitle(store.plan.map(\.title) ?? String(localized: "Новый план"))
+        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
         // Правка в тулбаре, а не строкой списка: настраивают план один раз,
         // а смотрят на него каждую неделю, и строка занимала место в самом
@@ -488,6 +494,15 @@ struct PlanView: View {
                 explain("Праздник не в тот день — перенеси рефид на сегодня. Он меняется местами с самым сытным днём, что ещё впереди на этой неделе, так что недельный дефицит не меняется. Со следующего понедельника — обычная раскладка.").map { Text($0) }
             }
         }
+    }
+
+    /// Какая это неделя плана — строкой над названием в шапке.
+    ///
+    /// Из всего, что знает карточка, именно неделя отвечает на «где я»:
+    /// название фазы человек помнит и так, а счёт недель — нет.
+    private var planWeek: String? {
+        guard let plan = store.plan else { return nil }
+        return String(format: String(localized: "Неделя %d из %d"), plan.currentWeek, plan.durationWeeks)
     }
 
     /// Откуда вышли, сколько прошли, куда идём — одной строкой.

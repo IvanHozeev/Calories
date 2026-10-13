@@ -280,8 +280,7 @@ struct BodyView: View {
             Text(activityChangeMessage(to: level))
         }
         .navigationTitle("Профиль")
-        .navigationBarTitleDisplayMode(.inline)
-        .hiddenNavigationTitle()
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 // Взвешивание — самое частое действие на этом экране: вес

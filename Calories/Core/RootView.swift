@@ -39,12 +39,9 @@ struct RootView: View {
             // «Еды» внизу осталось две вкладки, а в настройки ходят сами по себе.
             Tab("Настройки", systemImage: "gearshape", value: 2) {
                 NavigationStack {
+                    // Заголовок и его размер — забота самого экрана: inline
+                    // отсюда перебивал крупный заголовок, который он просит.
                     SettingsView(store: store)
-                        // Как на остальных вкладках: название и так в таббаре.
-                        // Здесь, а не в самом экране: с «Сегодня» в него заходят
-                        // переходом, и там заголовок нужен.
-                        .navigationBarTitleDisplayMode(.inline)
-                        .hiddenNavigationTitle()
                 }
             }
 

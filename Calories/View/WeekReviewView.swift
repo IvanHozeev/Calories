@@ -27,13 +27,22 @@ struct WeekReviewView: View {
                       Int(measured.rounded()), abs(delta))
     }
 
+    /// «7 – 13 октября»: неделя, о которой речь. Итог считается за последние
+    /// семь дней, а не за календарную неделю, — и подпись должна говорить то же.
+    static func weekRange(now: Date = Date(), calendar: Calendar = .current) -> String {
+        let start = calendar.date(byAdding: .day, value: -6, to: now) ?? now
+        let sameMonth = calendar.component(.month, from: start) == calendar.component(.month, from: now)
+        let from = start.formatted(sameMonth ? .dateTime.day() : .dateTime.day().month(.wide))
+        return "\(from) – \(now.formatted(.dateTime.day().month(.wide)))"
+    }
+
     var body: some View {
         List {
-            // Какая именно неделя — над названием: «итог недели» без дат
-            // одинаково выглядит и сегодня, и через месяц в истории.
-            ScreenTitle(title: String(localized: "Итог недели"),
-                        eyebrow: ScreenTitle.weekRange(from: Calendar.current.date(byAdding: .day, value: -6, to: Date()) ?? Date()))
-                .asScreenTitleRow()
+            Section {
+                ScreenTitle(title: String(localized: "Итог недели"),
+                            eyebrow: Self.weekRange())
+                    .asScreenTitleRow()
+            }
 
             Section {
                 numbers
@@ -106,6 +115,7 @@ struct WeekReviewView: View {
         .navigationTitle("Итог недели")
         .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
+        // Какая именно неделя — над названием: «итог недели» без дат одинаково
     }
 
     /// Три числа, ради которых сюда заходят: сколько ел, куда пошёл вес,

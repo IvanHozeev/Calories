@@ -125,6 +125,7 @@ struct SettingsView: View {
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .navigationTitle("Настройки")
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar { subscriptionToolbar }
         .fileExporter(
             isPresented: $showingExporter,

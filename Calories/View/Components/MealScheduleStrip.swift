@@ -130,6 +130,11 @@ struct MealScheduleSheet: View {
     private var content: some View {
         Group {
             List {
+                Section {
+                    ScreenTitle(title: String(localized: "Приёмы пищи"))
+                        .asScreenTitleRow()
+                }
+
                 // Тумблер первым: он включает всё остальное на этом экране,
                 // и раньше лежал под расписанием — то есть под тем, чем
                 // управляет.
@@ -193,6 +198,7 @@ struct MealScheduleSheet: View {
             .glassRow()
             .listStyle(.insetGrouped)
             .navigationTitle("Приёмы пищи")
+            .hiddenNavigationTitle()
             .navigationBarTitleDisplayMode(.inline)
             // Закрывать нечего, когда экран открыт переходом: назад ведёт
             // сам навигационный стек.

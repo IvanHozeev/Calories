@@ -29,11 +29,15 @@ extension CalorieStore {
             let dayGoal = goal(for: date)
             // Голодание — день с «записью» и в норме, как и для серии: пустой
             // кружок в неделе и в истории читался бы как забытый дневник.
-            if isFastDay(date) { return DayMark(date: date, hasEntries: true, onGoal: true, goal: dayGoal) }
+            let isToday = calendar.isDateInToday(date)
+            if isFastDay(date) {
+                return DayMark(date: date, hasEntries: true, onGoal: true, goal: dayGoal,
+                               consumed: dayGoal, isToday: isToday)
+            }
             let dayTotal = (entriesByDay[date] ?? []).reduce(0) { $0 + $1.calories }
             return DayMark(date: date, hasEntries: dayTotal > 0,
                            onGoal: dayTotal > 0 && isWithinGoal(total: dayTotal, goal: dayGoal),
-                           goal: dayGoal)
+                           goal: dayGoal, consumed: dayTotal, isToday: isToday)
         }
     }
 

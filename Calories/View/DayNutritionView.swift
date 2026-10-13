@@ -51,6 +51,12 @@ struct DayNutritionView: View {
 
     var body: some View {
         List {
+            Section {
+                ScreenTitle(title: String(localized: "Разбор дня"),
+                            eyebrow: date.formatted(.dateTime.day().month(.wide)))
+                    .asScreenTitleRow()
+            }
+
             if !categories.isEmpty {
                 Section {
                     compositionChart
@@ -115,6 +121,7 @@ struct DayNutritionView: View {
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
         .navigationTitle("Разбор дня")
+        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
     }
 

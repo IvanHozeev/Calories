@@ -101,8 +101,9 @@ struct StepsNavigationView: View {
             }
         }
         .navigationTitle("Шаги")
-        .scrollIndicators(.hidden)
+        .hiddenNavigationTitle()
         .navigationBarTitleDisplayMode(.inline)
+        .scrollIndicators(.hidden)
         .toolbar {
             // Выбор источника появляется только когда выбирать есть из чего:
             // у большинства шаги пишет один телефон, и меню с единственным
@@ -257,6 +258,9 @@ private struct StepsContentView: View {
 
     var body: some View {
         List {
+            ScreenTitle(title: String(localized: "Шаги"))
+                .asScreenTitleRow()
+
             VStack(spacing: 16) {
                 todayCard
                 chartCard

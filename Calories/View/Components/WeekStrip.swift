@@ -20,8 +20,43 @@ struct DayMark: Identifiable {
     let onGoal: Bool
     /// Норма этого дня — та, что действовала в нём.
     let goal: Int
+    /// Сколько съедено. Нужно, чтобы отличить недобор от попадания: «не
+    /// больше нормы» одинаково верно и для дня в цель, и для дня на тысяче.
+    var consumed: Int = 0
+    /// День ещё идёт — судить рано.
+    var isToday: Bool = false
 
     var id: Date { date }
+
+    /// Чем кончился день.
+    enum Verdict {
+        /// Записей нет.
+        case empty
+        /// Идёт прямо сейчас.
+        case running
+        /// Съедено в норму.
+        case onGoal
+        /// Заметно меньше нормы — на дефиците это дыра, а не успех.
+        case under
+        /// Перебор.
+        case over
+    }
+
+    /// Насколько можно недобрать, чтобы это считалось попаданием.
+    ///
+    /// Десятая часть нормы: промахнуться на двести килокалорий из двух с
+    /// половиной тысяч — обычная жизнь, а тысяча вместо двух с половиной —
+    /// не «уложился», сколько бы знак «меньше» ни был формально верен.
+    static let undershootShare = 0.1
+
+    var verdict: Verdict {
+        guard hasEntries else { return .empty }
+        // Сегодня приговора нет: день не кончился, и зелёная точка с утра
+        // означала бы лишь то, что человек ещё не успел съесть норму.
+        if isToday { return .running }
+        if !onGoal { return .over }
+        return Double(consumed) < Double(goal) * (1 - Self.undershootShare) ? .under : .onGoal
+    }
 }
 
 struct WeekStrip: View {
@@ -91,12 +126,34 @@ struct WeekStrip: View {
         }
     }
 
+    /// Точка дня.
+    ///
+    /// Цвет — только у законченного дня, и только у двух исходов: попал в
+    /// норму и перебрал. Идущий день и недобор рисуются кольцом: сегодня
+    /// судить рано — зелёная точка с утра означала бы лишь то, что человек ещё
+    /// не успел съесть норму, — а тысяча из двух с половиной это не «уложился»,
+    /// хотя формально и «не больше нормы».
+    @ViewBuilder
+    private func dayDot(_ verdict: DayMark.Verdict) -> some View {
+        switch verdict {
+        case .empty:
+            Circle().fill(.clear).frame(width: 5, height: 5)
+        case .running:
+            Circle().stroke(Color.secondary, lineWidth: 1).frame(width: 5, height: 5)
+        case .onGoal:
+            Circle().fill(ProgressRing.kcalColors[0]).frame(width: 5, height: 5)
+        case .under:
+            Circle().stroke(ProgressRing.kcalColors[0], lineWidth: 1).frame(width: 5, height: 5)
+        case .over:
+            Circle().fill(.orange).frame(width: 5, height: 5)
+        }
+    }
+
     /// Тихо, как шапка недели в Календаре: цвет — только точка под числом.
     /// Залитые кружки над кольцом давали ряд из семи цветных пятен тех же
     /// зелёного и оранжевого, что в кольце, и спорили с ним за внимание.
     private func dayCell(_ day: DayMark) -> some View {
         let isToday = calendar.isDateInToday(day.date)
-        let dot: Color = day.onGoal ? ProgressRing.kcalColors[0] : (day.hasEntries ? .orange : .clear)
         return Button {
             onSelect(day.date)
         } label: {
@@ -122,9 +179,10 @@ struct WeekStrip: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
-                Circle()
-                    .fill(dot)
-                    .frame(width: 5, height: 5)
+                // Точка под числом: цвет — только у законченного дня. Сегодня
+                // и недобор рисуются кольцом, а не заливкой: это не вердикт,
+                // а отметка, что день есть и он не в цель.
+                dayDot(day.verdict)
             }
             .frame(maxWidth: .infinity, minHeight: showsGoals ? 56 : 44)
             .contentShape(Rectangle())

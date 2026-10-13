@@ -669,3 +669,37 @@ struct PastDayGoalTests {
         #expect(store.goal(for: Date()) == store.adaptedTodayGoal)
     }
 }
+
+// MARK: - Точка дня
+
+/// «Не больше нормы» одинаково верно для дня в цель и для дня на тысяче — а
+/// это разные дни, и красить их одинаково нельзя. И у сегодняшнего дня приговора
+/// нет вовсе: с утра зелёная точка означала бы лишь то, что норму ещё не успели
+/// съесть.
+struct DayVerdictTests {
+    private func mark(consumed: Int, goal: Int, today: Bool = false, onGoal: Bool? = nil) -> DayMark {
+        DayMark(date: Date(), hasEntries: consumed > 0,
+                onGoal: onGoal ?? (consumed <= goal + max(50, Int(Double(goal) * 0.02))),
+                goal: goal, consumed: consumed, isToday: today)
+    }
+
+    @Test func todayHasNoVerdictYet() {
+        #expect(mark(consumed: 553, goal: 2824, today: true).verdict == .running)
+    }
+
+    @Test func aDayInTheGoalIsGreen() {
+        #expect(mark(consumed: 2780, goal: 2824).verdict == .onGoal)
+    }
+
+    @Test func aDayWellUnderIsNotTheSameAsHittingIt() {
+        #expect(mark(consumed: 1200, goal: 2824).verdict == .under)
+    }
+
+    @Test func anOvershootStaysAnOvershoot() {
+        #expect(mark(consumed: 3400, goal: 2824).verdict == .over)
+    }
+
+    @Test func aDayWithoutEntriesSaysNothing() {
+        #expect(mark(consumed: 0, goal: 2824).verdict == .empty)
+    }
+}

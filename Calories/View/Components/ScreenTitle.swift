@@ -20,6 +20,9 @@ struct ScreenTitle: View {
     let title: String
     /// Строка над названием: даты, неделя плана, день недели.
     var eyebrow: String? = nil
+    /// Строка под названием — там, где название общее, а уточнение частное:
+    /// «Сегодня» и какое именно сегодня.
+    var subtitle: String? = nil
     /// В шапке, а не в содержимом: две плотные строки в сорок четыре точки.
     /// Перестаёт быть крупным — и взамен перестаёт уезжать прокруткой.
     var isCompact = false
@@ -40,6 +43,13 @@ struct ScreenTitle: View {
                            weight: .bold))
                 .lineLimit(isCompact ? compactLines : 2)
                 .minimumScaleFactor(0.7)
+            if let subtitle {
+                Text(verbatim: subtitle)
+                    .font(.app(.caption2))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         // В шапке — отступ от кнопки «назад»: слот начинается сразу за ней,
@@ -52,7 +62,7 @@ struct ScreenTitle: View {
         // строк подпись делала панель «13 ОКТЯБРЯ, РАЗБОР ДНЯ» — найти шапку по
         // названию экрана после этого было нечем, ни тесту, ни человеку.
         .accessibilityLabel(Text(verbatim: title))
-        .accessibilityValue(Text(verbatim: eyebrow ?? ""))
+        .accessibilityValue(Text(verbatim: eyebrow ?? subtitle ?? ""))
         .accessibilityAddTraits(.isHeader)
     }
 

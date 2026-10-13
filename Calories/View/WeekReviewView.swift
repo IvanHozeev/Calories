@@ -2,10 +2,12 @@ import SwiftUI
 
 /// Итог недели: семь дней одним разбором.
 ///
+/// Своего экрана у него больше нет — он живёт первыми секциями «Истории».
+///
 /// День отвечает «как я сегодня», но решает не он: вес двигается неделями,
 /// расход считается по неделе, дефицит держится или срывается тоже на неделе.
 /// До этого экрана человек видел семь кружков в полоске и складывал их в уме.
-struct WeekReviewView: View {
+struct WeekReviewView {
     var store: CalorieStore
 
     private var input: WeekReview.Input { store.weekReviewInput() }
@@ -36,9 +38,12 @@ struct WeekReviewView: View {
         return "\(from) – \(now.formatted(.dateTime.day().month(.wide)))"
     }
 
-    var body: some View {
-        List {
-            Section {
+    /// Секции итога недели: итог недели живёт в «Истории»
+    /// первым, что видно. По отдельности неделя и список дней выглядели
+    /// одинаково бедно — семь чисел на одном экране и семь строк на другом.
+    @ViewBuilder
+    var sections: some View {
+        Section {
                 numbers
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -102,12 +107,6 @@ struct WeekReviewView: View {
             } header: {
                 Text("Что это значит")
             }
-        }
-        .glassRow()
-        .listStyle(.insetGrouped)
-        .scrollIndicators(.hidden)
-        .screenTitle(String(localized: "Итог недели"), eyebrow: Self.weekRange())
-        // Какая именно неделя — над названием: «итог недели» без дат одинаково
     }
 
     /// Три числа, ради которых сюда заходят: сколько ел, куда пошёл вес,

@@ -1,6 +1,11 @@
 import SwiftUI
 
-/// История дней: календарь месяца или карточки дней.
+/// История: итог недели и дни, из которых она сложилась.
+///
+/// Раньше это были два экрана — «Итог недели» и «История», каждый за своей
+/// иконкой у полоски дней. Поодиночке оба выглядели бедно: на одном семь
+/// чисел, на другом семь строк, и ходить за ними приходилось в разные места,
+/// хотя речь об одном и том же.
 ///
 /// Раньше это был экран «Активность» за огоньком в тулбаре: серия, награды,
 /// неделя макросов и только в самом низу — прошедшие дни. Заходили туда ради
@@ -29,6 +34,10 @@ struct ActivityView: View {
 
     var body: some View {
         List {
+            // Сначала итог недели — то, ради чего сюда и заходят, — и только
+            // потом дни, из которых он сложился.
+            WeekReviewView(store: store).sections
+
             Section {
                 Picker("Вид", selection: $historyMode) {
                     ForEach(HistoryMode.allCases) { mode in
@@ -71,7 +80,7 @@ struct ActivityView: View {
         .glassRow()
         .listStyle(.insetGrouped)
         .scrollIndicators(.hidden)
-        .screenTitle(String(localized: "История"))
+        .screenTitle(String(localized: "История"), eyebrow: WeekReviewView.weekRange())
         .navigationDestination(item: $selectedDay) { date in
             DayDetailView(store: store, date: date)
         }

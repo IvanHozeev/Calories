@@ -59,7 +59,6 @@ struct ContentView: View {
     /// Копия, к которой надо прокрутить список. Сбрасывается сразу после
     /// прокрутки: это событие, а не состояние.
     @State private var copiedEntryID: UUID?
-    @State private var showingWeekReview = false
 
     var body: some View {
         NavigationStack {
@@ -105,11 +104,26 @@ struct ContentView: View {
                 PlanView(store: store)
             }
             .navigationTitle("Сегодня")
-            // Слева — где экран, справа — что на нём можно сделать. Шаги
-            // стояли на месте заголовка и читались как название экрана,
-            // хотя это кнопка, и ведёт она совсем на другой экран.
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .hiddenNavigationTitle()
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Заголовок — он же дверь в историю. Раньше туда вели две
+                // мелкие иконки у полоски дней: без подписи, без объяснения,
+                // и обе — рядом с тем, что и так листается пальцем.
+                ToolbarItem(placement: .principal) {
+                    Button { showingActivity = true } label: {
+                        ScreenTitle(title: String(localized: "Сегодня"),
+                                    subtitle: Date().formatted(.dateTime.weekday(.wide).day().month(.wide)),
+                                    isCompact: true)
+                            .inBar(back: false, trailingButtons: 3)
+                    }
+                    .buttonStyle(.plain)
+                    // Без своего идентификатора: шапка берёт имя у того, что
+                    // в ней стоит, и «openHistory» становился именем всей
+                    // панели — найти её по названию экрана было уже нечем.
+                    .accessibilityHint("Открыть историю")
+                }
+                .withoutSharedBackground()
                 // Без общей стеклянной подложки: в строке остаются сами
                 // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
                 ToolbarItem(placement: .topBarTrailing) {
@@ -246,9 +260,6 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingActivity) {
                 ActivityView(store: store)
-            }
-            .navigationDestination(isPresented: $showingWeekReview) {
-                WeekReviewView(store: store)
             }
             .navigationDestination(item: $selectedHistoryDay) { date in
                 DayDetailView(store: store, date: date)
@@ -391,7 +402,7 @@ private extension ContentView {
             // прошла неделя с прошлого раза, и расчёт разошёлся с нормой
             // заметнее полусотни килокалорий. Без повода строки нет.
             if store.reviewIsDue, let proposal = store.proposedGoal {
-                Button { showingWeekReview = true } label: {
+                Button { showingActivity = true } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "calendar.badge.clock")
                             .foregroundStyle(.secondary)
@@ -416,9 +427,7 @@ private extension ContentView {
             // Неделя последней: это уже прошедшие дни, и открывают
             // их реже всего.
             WeekStrip(weeks: store.weekStripWeeks(),
-                      onSelect: { selectedHistoryDay = $0 },
-                      onShowAll: { showingActivity = true },
-                      onShowWeek: { showingWeekReview = true })
+                      onSelect: { selectedHistoryDay = $0 })
 
             if store.calorieBankBonus != 0 {
                 Button { showingBankInfo = true } label: {

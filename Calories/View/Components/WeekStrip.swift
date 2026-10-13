@@ -63,10 +63,6 @@ struct WeekStrip: View {
     /// Недели от давней к текущей, по семь дней в каждой.
     let weeks: [[DayMark]]
     var onSelect: (Date) -> Void
-    var onShowAll: () -> Void
-    /// Итог недели — то, ради чего полоску и читают: семь кружков человек
-    /// иначе складывает в голове сам.
-    var onShowWeek: (() -> Void)? = nil
 
     private let calendar = Calendar.current
 
@@ -113,28 +109,6 @@ struct WeekStrip: View {
                 .scrollIndicators(.hidden)
                 .defaultScrollAnchor(.trailing)
                 .frame(height: rowHeight)
-
-                Button(action: onShowAll) {
-                    Image(systemName: "calendar")
-                        .font(.app(.subheadline))
-                        .foregroundStyle(.tertiary)
-                        .frame(width: 30, height: 44)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Все дни")
-                .accessibilityIdentifier("allDays")
-
-                if let onShowWeek {
-                    Button(action: onShowWeek) {
-                        Image(systemName: "chart.bar.doc.horizontal")
-                            .font(.app(.subheadline))
-                            .foregroundStyle(.tertiary)
-                            .frame(width: 30, height: 44)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Итог недели")
-                    .accessibilityIdentifier("openWeekReview")
-                }
         }
     }
 
@@ -180,6 +154,10 @@ struct WeekStrip: View {
                 // Норма дня прямо под числом: тогда видно, что завтра рефид,
                 // а в понедельник брейк, — не открывая план. И видно, с какой
                 // нормой прожит вчерашний день: она у каждого дня своя.
+                // Точка сразу под числом дня, а норма под ней: вердикт
+                // относится к дню, а не к норме, и стоять он должен рядом
+                // с тем, о чём говорит.
+                dayDot(day.verdict)
                 if showsGoals {
                     // Не мельче подписи дня недели и не бледнее её: десятым
                     // кеглем в третьей ступени серого число не читалось вовсе,
@@ -191,10 +169,6 @@ struct WeekStrip: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
-                // Точка под числом: цвет — только у законченного дня. Сегодня
-                // и недобор рисуются кольцом, а не заливкой: это не вердикт,
-                // а отметка, что день есть и он не в цель.
-                dayDot(day.verdict)
             }
             .frame(maxWidth: .infinity, minHeight: rowHeight)
             .contentShape(Rectangle())

@@ -38,8 +38,14 @@ struct ScreenTitle: View {
                     .foregroundStyle(Color.accentColor)
                     .lineLimit(1)
             }
+            // Ступенью выше заголовков секций под ним.
+            //
+            // В сгруппированном списке заголовок секции набран тем же кеглем,
+            // что `title3`, и название экрана оказывалось не крупнее того, что
+            // в нём лежит, — иерархия переворачивалась на каждом экране,
+            // открытом переходом.
             Text(verbatim: title)
-                .font(.app(isCompact ? (compactLines > 1 ? .subheadline : .title3) : .largeTitle,
+                .font(.app(isCompact ? (compactLines > 1 ? .headline : .title2) : .largeTitle,
                            weight: .bold))
                 .lineLimit(isCompact ? compactLines : 2)
                 .minimumScaleFactor(0.7)
@@ -63,6 +69,17 @@ struct ScreenTitle: View {
         .accessibilityAddTraits(.isHeader)
     }
 
+    /// «6 – 12 октября»: неделя, о которой речь. Месяц пишется один раз, когда
+    /// оба конца в нём же.
+    static func weekRange(from start: Date, calendar: Calendar = .current) -> String {
+        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
+        let sameMonth = calendar.component(.month, from: start) == calendar.component(.month, from: end)
+        let from = start.formatted(sameMonth ? .dateTime.day() : .dateTime.day().month(.wide))
+        return "\(from) – \(end.formatted(.dateTime.day().month(.wide)))"
+    }
+}
+
+extension View {
     /// Ширина промежутка между кнопками шапки — та, которую заголовок забирает
     /// себе, чтобы встать у его левого края, а не по центру.
     ///
@@ -76,17 +93,6 @@ struct ScreenTitle: View {
         return frame(width: max(120, width), alignment: .leading)
     }
 
-    /// «6 – 12 октября»: неделя, о которой речь. Месяц пишется один раз, когда
-    /// оба конца в нём же.
-    static func weekRange(from start: Date, calendar: Calendar = .current) -> String {
-        let end = calendar.date(byAdding: .day, value: 6, to: start) ?? start
-        let sameMonth = calendar.component(.month, from: start) == calendar.component(.month, from: end)
-        let from = start.formatted(sameMonth ? .dateTime.day() : .dateTime.day().month(.wide))
-        return "\(from) – \(end.formatted(.dateTime.day().month(.wide)))"
-    }
-}
-
-extension View {
     /// Заголовок-строка списка: без подложки, разделителя и отступов ячейки.
     func asScreenTitleRow() -> some View {
         listRowBackground(Color.clear)

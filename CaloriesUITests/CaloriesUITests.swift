@@ -52,6 +52,20 @@ final class CaloriesUITests: XCTestCase {
         add.tap()
     }
 
+    /// Открывает настройки.
+    ///
+    /// Своей вкладки у них больше нет: «Профиль» и «Настройки» были двумя
+    /// списками параметров рядом, и настройки уехали за шестерёнку в шапке
+    /// профиля — как в системных приложениях.
+    private func openSettings(in app: XCUIApplication) {
+        let tab = app.tabBars.buttons["Profile"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки профиля")
+        tab.tap()
+        let gear = app.buttons["openSettings"]
+        XCTAssertTrue(gear.waitForExistence(timeout: 5), "В шапке профиля нет настроек")
+        gear.tap()
+    }
+
     /// Нажимает «В приём пищи» на экране порции.
     ///
     /// Не сразу: на этом экране курсор сам встаёт в поле веса, и поднявшаяся
@@ -205,23 +219,19 @@ final class CaloriesUITests: XCTestCase {
         // добавления, а склад без записи в дневник был лишним.
         XCTAssertFalse(app.tabBars.buttons["Food"].exists)
 
-        app.tabBars.buttons["Settings"].tap()
-        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Вкладка «Настройки» не открылась")
-
         app.tabBars.buttons["Today"].tap()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5),
                       "Возврат на «Сегодня» не сработал")
     }
 
     @MainActor
-    func testSettingsHaveTheirOwnTab() {
+    func testSettingsOpenFromTheProfile() {
         let app = launchApp()
-        let tab = app.tabBars.buttons["Settings"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
-        tab.tap()
+        openSettings(in: app)
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Вкладка должна открывать настройки")
+                      "Шестерёнка в шапке профиля должна открывать настройки")
+        // Своей вкладки у настроек больше нет.
+        XCTAssertFalse(app.tabBars.buttons["Settings"].exists)
     }
 
     /// Включённое деление дня должно быть видно на «Сегодня».
@@ -317,9 +327,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testSettingsOffersDataExport() {
         let app = launchApp()
-        let tab = app.tabBars.buttons["Settings"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
-        tab.tap()
+        openSettings(in: app)
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let backup = app.buttons["Backup (JSON)"]
@@ -599,9 +607,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testFontChoiceIsOfferedAndPersists() {
         let app = launchApp()
-        let tab = app.tabBars.buttons["Settings"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки настроек")
-        tab.tap()
+        openSettings(in: app)
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
 
         let entry = app.buttons["openFontSettings"]
@@ -777,7 +783,7 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Restore"].exists,
                       "Восстановление покупок обязательно для App Review")
-        XCTAssertTrue(app.staticTexts["Diet breaks on a schedule or by hand"].exists,
+        XCTAssertTrue(app.staticTexts["Refeeds and diet breaks"].exists,
                       "Перечень фич должен быть переведён, а не падать на русский исходник")
     }
 

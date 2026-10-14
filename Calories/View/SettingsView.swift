@@ -6,7 +6,6 @@ import UniformTypeIdentifiers
 /// и занимал пять секций из восьми, из-за чего экран лишь назывался настройками.
 struct SettingsView: View {
     var store: CalorieStore
-    @State private var showingPaywall = false
     @AppStorage("use_imperial") private var useImperial = false
     @AppStorage("app_theme") private var appTheme = AppTheme.system.rawValue
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
@@ -108,8 +107,9 @@ struct SettingsView: View {
         List {
             // Порядок: вид, объяснения, системное — и только потом данные.
             // Оформление и язык ищут часто, а выгрузка копии нужна раз в жизни
-            // телефона. Подписка уехала в тулбар: это состояние, а не настройка,
-            // и целая секция ради одной строки занимала верх экрана.
+            // телефона. Подписки здесь нет вовсе: это состояние, а не
+            // настройка, и значок о ней стоит этажом выше, в шапке «Профиля»,
+            // откуда в настройки и заходят.
             appearanceSection
             explanationSection
             systemSection
@@ -124,9 +124,7 @@ struct SettingsView: View {
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
-        .navigationTitle("Настройки")
-        .toolbarTitleDisplayMode(.inlineLarge)
-        .toolbar { subscriptionToolbar }
+        .screenTitle(String(localized: "Настройки"))
         .fileExporter(
             isPresented: $showingExporter,
             document: exportDocument,
@@ -182,9 +180,6 @@ struct SettingsView: View {
             Button("OK", role: .cancel) { exportError = nil }
         } message: {
             Text(exportError ?? "")
-        }
-        .sheet(isPresented: $showingPaywall) {
-            PaywallView(store: store, focus: .plan)
         }
     }
 }
@@ -620,26 +615,6 @@ private func rowLabel(_ title: LocalizedStringKey, systemImage: String) -> some 
 // по отступам, а компилятор на такой форме однажды уже сдался — тогда из него
 // вынесли строки оформления. Теперь каждый раздел — свойство с явным типом.
 private extension SettingsView {
-    /// Подписка — значком в шапке, а не секцией списка.
-    ///
-    /// Это состояние, а не настройка: с активной подпиской менять в ней нечего,
-    /// а целая секция с единственной строкой занимала верх экрана, отодвигая
-    /// то, ради чего в настройки заходят. Значок говорит то же самое одним
-    /// взглядом, а нажатие ведёт туда же, куда вела строка.
-    @ToolbarContentBuilder
-    var subscriptionToolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                showingPaywall = true
-            } label: {
-                Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
-                    .foregroundStyle(store.isPremium ? .green : .blue)
-            }
-            .accessibilityIdentifier("subscription")
-            .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
-        }
-    }
-
     /// Оформление: тема, шрифт, цвет и звук кольца. Это про вид, а не про то,
     /// как приложение считает, — поэтому своей секцией.
     var appearanceSection: some View {

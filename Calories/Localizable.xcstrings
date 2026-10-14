@@ -4,6 +4,617 @@
     "" : {
       "shouldTranslate" : false
     },
+    "Вердикт, который не врёт" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حكم لا يكذب"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Urteil, das nicht blufft"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A verdict that does not bluff"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un veredicto que no miente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un verdict qui ne bluffe pas"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מסקנה שלא משקרת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um veredicto que não mente"
+          }
+        }
+      }
+    },
+    "Если данных мало, так и будет сказано: по трём дням вес не судят." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إن قلّت البيانات قال ذلك: ثلاثة أيام لا يُحكم بها على الوزن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn die Daten nicht reichen, sagt es das: über drei Tage lässt sich kein Gewicht beurteilen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When there is too little data it says so: three days are not enough to judge a weight."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si hay pocos datos, lo dirá: tres días no bastan para juzgar un peso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S'il y a trop peu de données, il le dit : trois jours ne suffisent pas pour juger un poids."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אם אין מספיק נתונים — כך ייאמר: לפי שלושה ימים לא שופטים משקל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se houver poucos dados, ele diz: três dias não bastam para julgar um peso."
+          }
+        }
+      }
+    },
+    "Не число из формулы, а расход, измеренный по твоему дневнику и весам." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ليس رقمًا من معادلة، بل إنفاق مقاس من يومياتك وميزانك."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Zahl aus einer Formel, sondern der Verbrauch, gemessen an Tagebuch und Waage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not a number from a formula, but expenditure measured from your diary and your scale."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No un número de una fórmula, sino el gasto medido por tu diario y tu báscula."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas un nombre issu d'une formule, mais la dépense mesurée d'après ton journal et ta balance."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא מספר מנוסחה, אלא הוצאה שנמדדת מהיומן ומהמשקל שלך."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não um número de uma fórmula, mas o gasto medido pelo seu diário e pela balança."
+          }
+        }
+      }
+    },
+    "Норма идёт за расходом" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف يتبع إنفاقك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel folgt deinem Verbrauch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target follows your expenditure"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo sigue a tu gasto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif suit ta dépense"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד עוקב אחרי ההוצאה שלך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta acompanha o seu gasto"
+          }
+        }
+      }
+    },
+    "Норма не меняется молча" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الهدف لا يتغيّر من دون علمك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Ziel ändert sich nie hinter deinem Rücken"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The target never changes behind your back"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El objetivo nunca cambia a tus espaldas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'objectif ne change jamais dans ton dos"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "היעד לא משתנה מאחורי הגב שלך"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A meta nunca muda pelas suas costas"
+          }
+        }
+      }
+    },
+    "Норма, которая считает по тебе" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "هدف يُحسب منك، لا من معادلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Ziel, das dich rechnet, nicht eine Formel"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A target that counts you, not a formula"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un objetivo calculado por ti, no por una fórmula"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un objectif calculé sur toi, pas sur une formule"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יעד שמחושב לפיך, לא לפי נוסחה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma meta calculada por você, não por uma fórmula"
+          }
+        }
+      }
+    },
+    "Отменить можно в любой момент." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك الإلغاء في أي وقت."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jederzeit kündbar."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel any time."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes cancelar cuando quieras."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annulable à tout moment."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לבטל בכל רגע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pode cancelar quando quiser."
+          }
+        }
+      }
+    },
+    "План из фаз" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خطة من مراحل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Plan aus Phasen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A plan made of phases"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un plan por fases"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un plan en phases"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תוכנית מורכבת משלבים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um plano em fases"
+          }
+        }
+      }
+    },
+    "По расписанию или вручную. Рефид можно перенести на праздник, не ломая неделю." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بجدول أو يدويًا. يمكن نقل يوم التحميل إلى مناسبة دون كسر الأسبوع."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nach Plan oder von Hand. Ein Refeed lässt sich auf einen Feiertag schieben, ohne die Woche zu zerlegen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a schedule or by hand. A refeed can move to a celebration without breaking the week."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programadas o a mano. Una recarga puede moverse a una celebración sin romper la semana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programmés ou à la main. Un refeed peut se déplacer sur une fête sans casser la semaine."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לפי לוח או ידנית. אפשר להעביר ריפיד לאירוע בלי לשבור את השבוע."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Programados ou manuais. Um refeed pode ir para uma comemoração sem quebrar a semana."
+          }
+        }
+      }
+    },
+    "Раз в неделю приложение показывает, что посчитало, и спрашивает. До ответа держит прежнюю." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مرة كل أسبوع يعرض التطبيق ما حسبه ويسأل. وحتى تجيب يبقي على القديم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einmal pro Woche zeigt die App ihre Rechnung und fragt nach. Bis zur Antwort bleibt der alte Wert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Once a week the app shows what it worked out and asks. Until you answer it keeps the old one."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vez por semana la app muestra lo que calculó y pregunta. Hasta que respondas mantiene el anterior."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une fois par semaine, l'app montre ce qu'elle a calculé et demande. Tant que tu n'as pas répondu, elle garde l'ancien."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "פעם בשבוע האפליקציה מראה מה חישבה ושואלת. עד שתענה היא שומרת על הקודם."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma vez por semana o app mostra o que calculou e pergunta. Até você responder, mantém a anterior."
+          }
+        }
+      }
+    },
+    "Расход считается по твоему дневнику и весам, а не по формуле: она не знает ни твоей работы, ни адаптации к дефициту." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُحسب الإنفاق من يومياتك وميزانك لا من معادلة: المعادلة لا تعرف عملك ولا تكيّفك مع العجز."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Verbrauch wird aus Tagebuch und Waage berechnet, nicht aus einer Formel: die kennt weder deine Arbeit noch deine Anpassung ans Defizit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenditure is figured from your diary and your scale, not from a formula: a formula knows neither your job nor how you adapt to a deficit."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El gasto se calcula con tu diario y tu báscula, no con una fórmula: una fórmula no conoce ni tu trabajo ni tu adaptación al déficit."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La dépense se calcule d'après ton journal et ta balance, pas d'après une formule : elle ne connaît ni ton travail ni ton adaptation au déficit."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ההוצאה מחושבת מהיומן ומהמשקל שלך, לא מנוסחה: נוסחה לא מכירה את העבודה שלך ולא את ההסתגלות לגירעון."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O gasto é calculado pelo seu diário e pela balança, não por uma fórmula: ela não conhece nem o seu trabalho nem a sua adaptação ao déficit."
+          }
+        }
+      }
+    },
+    "Рефиды и диет-брейки" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أيام التحميل وفترات التوقف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeeds und Diätpausen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeeds and diet breaks"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recargas y pausas de dieta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeeds et pauses de régime"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ריפידים והפסקות דיאטה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refeeds e pausas na dieta"
+          }
+        }
+      }
+    },
+    "Сушка, поддержание, набор — у каждой свой темп и срок, и видно, на какой ты неделе." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تنشيف، ثبات، زيادة — لكل مرحلة وتيرتها ومدتها، وترى في أي أسبوع أنت."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diät, Erhalt, Aufbau — jede mit eigenem Tempo und eigener Dauer, und du siehst, in welcher Woche du bist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cut, maintenance, bulk — each with its own rate and length, and you can see which week you are in."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definición, mantenimiento, volumen: cada fase con su ritmo y su duración, y ves en qué semana estás."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sèche, maintien, prise de masse — chacune avec son rythme et sa durée, et tu vois à quelle semaine tu es."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיטוב, שימור, מסה — לכל שלב קצב ומשך משלו, ורואים באיזה שבוע אתה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cutting, manutenção, bulking — cada fase com seu ritmo e sua duração, e dá para ver em que semana você está."
+          }
+        }
+      }
+    },
     "—" : {
       "shouldTranslate" : false
     },

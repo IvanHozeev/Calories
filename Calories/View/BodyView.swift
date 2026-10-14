@@ -186,6 +186,8 @@ struct BodyView: View {
     
     /// Лист взвешивания с кнопки в тулбаре.
     @State private var showingWeighIn = false
+    @State private var showingSettings = false
+    @State private var showingPaywall = false
 
     private var draftProfile: UserProfile? {
         UserProfile(
@@ -209,12 +211,6 @@ struct BodyView: View {
             // сколько есть и сколько белка. Параметры, из которых он собран,
             // правят редко, и им место ниже.
             calculationSection
-
-            // Состояние — отдельной карточкой, а не строчками внутри объяснения
-            // расхода. «Как считаем» открывают раз в месяц, чтобы проверить
-            // формулу, а на сон и пульс смотрят вместе с весом и замерами:
-            // это про себя, а не про арифметику.
-            stateSection
 
             // Выбор цели — только без премиума. С премиумом режим задаётся
             // планом: вне плана идёт поддержание, и множитель из профиля
@@ -282,6 +278,31 @@ struct BodyView: View {
         .navigationTitle("Профиль")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
+            // Подписка и настройки — отсюда, а не своей вкладкой внизу.
+            //
+            // «Профиль» и «Настройки» были двумя списками параметров рядом
+            // друг с другом, и человек всякий раз решал, в каком из них
+            // лежит нужное. Теперь профиль — экран о себе, а настройки за
+            // шестерёнкой в его шапке, как в системных приложениях.
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingPaywall = true
+                } label: {
+                    Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
+                        .foregroundStyle(store.isPremium ? .green : .blue)
+                }
+                .accessibilityIdentifier("subscription")
+                .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("Настройки")
+                .accessibilityIdentifier("openSettings")
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 // Взвешивание — самое частое действие на этом экране: вес
                 // пишут каждое утро, а замеры снимают раз в месяц. Замеры
@@ -294,6 +315,12 @@ struct BodyView: View {
                 .accessibilityLabel("Взвеситься")
                 .accessibilityIdentifier("openWeighIn")
             }
+        }
+        .navigationDestination(isPresented: $showingSettings) {
+            SettingsView(store: store)
+        }
+        .navigationDestination(isPresented: $showingPaywall) {
+            PaywallView(store: store, focus: .plan)
         }
         .sheet(isPresented: $showingWeighIn) {
             AddWeightView(store: store)
@@ -370,7 +397,16 @@ struct BodyView: View {
 
             Divider().opacity(0.4)
 
-            HStack(alignment: .top, spacing: 8) {
+            // Одной сеткой, а не двумя карточками.
+            //
+            // «Расчёт» и «Состояние» были двумя подложками подряд, и обе —
+            // про одно: сколько организм тратит и в каком он состоянии. Сон и
+            // пульс объясняют тот самый расход, что написан выше; врозь их
+            // приходилось сводить в уме. Колонки общие на оба ряда — иначе два
+            // числа в первом ряду разъезжались по половине ширины и справа
+            // оставалась дыра.
+            Grid(alignment: .topLeading, horizontalSpacing: 8, verticalSpacing: 12) {
+                GridRow {
                 // Норма, совпавшая с расходом, не показывается вовсе: на
                 // поддержании едят столько, сколько тратят, и это то же самое
                 // число, что крупно стоит выше. Писать его дважды — заставлять
@@ -401,54 +437,40 @@ struct BodyView: View {
                 miniStat("Жир %", String(format: "%.1f", fat), unit: "%",
                          color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)))
                     .accessibilityIdentifier("bodyFatRow")
+                    // Третья колонка пустует, когда норма совпала с расходом:
+                    // пусть числа стоят по колонкам, а не разъезжаются.
+                    Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                }
+
+                if hasStateNumbers {
+                    GridRow {
+                        if let sleep = store.sleep(on: Date()) {
+                            miniStat("Сон", String(format: "%.1f", sleep.hours), unit: "ч",
+                                     color: sleep.shortfall >= 1 ? ProgressRing.kcalColors[0] : Color.primary)
+                                .accessibilityIdentifier("sleepRow")
+                        }
+                        if let pulse = store.restingPulse() {
+                            miniStat("Пульс в покое", "\(pulse.value)", unit: "уд/мин",
+                                     color: RestingPulse.isNotable(rise: pulse.rise)
+                                         ? ProgressRing.kcalColors[0] : Color.primary)
+                                .accessibilityIdentifier("restingPulseRow")
+                        }
+                        if let today = todayActivity {
+                            miniStat("Сегодня", today.value, unit: today.unit, color: Color.primary)
+                                .accessibilityIdentifier("activityRow")
+                        }
+                    }
+                }
             }
 
-            Text(verbatim: basisCaption(profile))
+            Text(verbatim: [basisCaption(profile), stateCaption]
+                    .compactMap { $0 }.joined(separator: " · "))
                 .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
-                .lineLimit(1)
+                .lineLimit(2)
                 .minimumScaleFactor(0.8)
-        }
-        .padding(12)
-        // Обычная подложка карточки списка, а не стекло: у стекла своя тень,
-        // и на светлой теме она ложилась под карточкой грязным пятном. Здесь
-        // карточка и так лежит на сером фоне списка — ей хватает заливки.
-        .background(Color(.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 16))
-    }
+                .fixedSize(horizontal: false, vertical: true)
 
-    /// Есть ли что показывать: карточка из трёх прочерков хуже, чем её
-    /// отсутствие.
-    private var hasStateCard: Bool {
-        store.sleep(on: Date()) != nil || store.restingPulse() != nil
-            || store.activityBaseline != nil || store.recoveryAdvice() != nil
-    }
-
-    /// Сон, пульс и нагрузка — три числа и серая строка под ними.
-    private var stateCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .top, spacing: 8) {
-                if let sleep = store.sleep(on: Date()) {
-                    miniStat("Сон", String(format: "%.1f", sleep.hours), unit: "ч",
-                             color: sleep.shortfall >= 1 ? ProgressRing.kcalColors[0] : Color.primary)
-                        .accessibilityIdentifier("sleepRow")
-                }
-                if let pulse = store.restingPulse() {
-                    miniStat("Пульс в покое", "\(pulse.value)", unit: "уд/мин",
-                             color: RestingPulse.isNotable(rise: pulse.rise)
-                                 ? ProgressRing.kcalColors[0] : Color.primary)
-                        .accessibilityIdentifier("restingPulseRow")
-                }
-                if let today = todayActivity {
-                    miniStat("Сегодня", today.value, unit: today.unit, color: Color.primary)
-                        .accessibilityIdentifier("activityRow")
-                }
-            }
-            if let caption = stateCaption {
-                Text(verbatim: caption)
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
             // Совет — под числами и отдельной строкой: числа описывают, а он
             // предлагает сделать. Без него сон и пульс остаются тем, на что
             // смотрят и ничего не меняют.
@@ -467,8 +489,17 @@ struct BodyView: View {
             }
         }
         .padding(12)
+        // Обычная подложка карточки списка, а не стекло: у стекла своя тень,
+        // и на светлой теме она ложилась под карточкой грязным пятном. Здесь
+        // карточка и так лежит на сером фоне списка — ей хватает заливки.
         .background(Color(.secondarySystemGroupedBackground),
                     in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    /// Есть ли что показать во втором ряду сетки: ряд из трёх прочерков
+    /// хуже, чем его отсутствие.
+    private var hasStateNumbers: Bool {
+        store.sleep(on: Date()) != nil || store.restingPulse() != nil || todayActivity != nil
     }
 
     /// Нагрузка сегодня: поправка в килокалориях, а пока базы нет — просто шаги.
@@ -709,22 +740,8 @@ private extension BodyView {
                         : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
                     .map { Text(verbatim: $0) }
             }
-        }
-    }
-    }
-
-    /// Состояние: сон, пульс покоя и активность — когда о них есть что сказать.
-    @ViewBuilder
-    var stateSection: some View {
-    if hasStateCard {
-        Section {
-            stateCard
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-        } header: {
-            Text("Состояние")
-        } footer: {
+            // Сон и пульс объясняются тут же: карточка теперь одна, и подпись
+            // под ней должна отвечать за всё, что в ней стоит.
             stateFooter.map { Text($0) }
         }
     }

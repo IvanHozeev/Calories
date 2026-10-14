@@ -291,7 +291,7 @@ struct ContentView: View {
                                   settings: mealSchedule,
                                   isEmbedded: true)
             }
-            .sheet(isPresented: $showingPaywall) {
+            .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
             // Действие с иконки может прилететь и до появления экрана (холодный
@@ -672,21 +672,17 @@ private struct StepsChip: View {
         } label: {
             HStack(spacing: 7) {
                 if store.isAuthorized {
-                    // Кольцо во всю высоту кнопки и пешеход внутри: одно число
-                    // без значка не читалось как шаги.
-                    ZStack {
-                        Circle()
-                            .stroke(tint.opacity(0.2), lineWidth: 3)
-                        Circle()
-                            .trim(from: 0, to: progress)
-                            .stroke(tint, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                            .rotationEffect(.degrees(-90))
-                            .animation(.easeOut, value: progress)
-                        Image(systemName: "figure.walk")
-                            .font(.app(size: 15, weight: .semibold))
-                            .foregroundStyle(tint)
-                    }
-                    .frame(width: 32, height: 32)
+                    // Пешеход и число — без кольца вокруг.
+                    //
+                    // Кольцо шагов стояло в двух точках от кольца калорий, и
+                    // два кольца в шапке читались как одно целое с главным.
+                    // Долю от цели оно к тому же показывало тремя точками
+                    // линии: угадать по ней число нельзя, а само число стоит
+                    // рядом. Цвет остался — зелёный, когда цель взята.
+                    Image(systemName: "figure.walk")
+                        .font(.app(size: 17, weight: .semibold))
+                        .foregroundStyle(tint)
+                        .frame(height: 32)
                     // Число обычным цветом: в цвете акцента кольцо и пешеход,
                     // а цифра читается лучше нейтральной.
                     Text(store.stepsToday.formatted())

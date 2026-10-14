@@ -12,7 +12,7 @@ enum PaywallFocus {
 
     var headline: String {
         switch self {
-        case .general: return String(localized: "Premium")
+        case .general: return String(localized: "Норма, которая считает по тебе")
         case .plan: return String(localized: "Персональный план")
         case .trialEnded: return String(localized: "Пробные две недели закончились")
         }
@@ -20,7 +20,7 @@ enum PaywallFocus {
 
     var subtitle: String? {
         switch self {
-        case .general: return nil
+        case .general: return String(localized: "Не число из формулы, а расход, измеренный по твоему дневнику и весам.")
         case .plan: return String(localized: "Персональный план калорийности под твои цели")
         case .trialEnded: return String(localized: "План продолжает считать норму. Экран плана, вердикт и настройка — в Premium.")
         }
@@ -46,66 +46,76 @@ struct PaywallView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 22) {
-                    header
-                    if shownFocus == .trialEnded { trialSummary }
-                    features
+        ScrollView {
+            VStack(spacing: 24) {
+                header
+                if shownFocus == .trialEnded { trialSummary }
+                features
 
-                    if purchases.isPremium {
-                        activeState
-                    } else if purchases.isLoading {
-                        ProgressView()
-                            .padding(.vertical, 40)
-                    } else if purchases.loadFailed {
-                        failedState
-                    } else {
-                        offers
-                    }
-                }
-                .padding(.bottom, 24)
-            }
-            .navigationTitle("Подписка")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Восстановить") {
-                        Task { await purchases.restore() }
-                    }
-                    .font(.app(.footnote))
+                if purchases.isPremium {
+                    activeState
+                } else if purchases.isLoading {
+                    ProgressView().padding(.vertical, 40)
+                } else if purchases.loadFailed {
+                    failedState
+                } else {
+                    offers
                 }
             }
-            .task {
-                if purchases.products.isEmpty { await purchases.load() }
-                selectedID = purchases.subscriptions.last?.id
+            .padding(.bottom, 16)
+        }
+        .scrollIndicators(.hidden)
+        // Справа не значок, а слово «Восстановить»: места оно занимает втрое
+        // больше, и заголовок, посчитанный по одной кнопке, залезал под шеврон.
+        .screenTitle(String(localized: "Подписка"), trailingButtons: 3)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Восстановить") {
+                    Task { await purchases.restore() }
+                }
+                .font(.app(.footnote))
             }
-            .alert("Не удалось", isPresented: Binding(
-                get: { purchases.purchaseError != nil },
-                set: { if !$0 { purchases.purchaseError = nil } }
-            )) {
-                Button("OK", role: .cancel) { purchases.purchaseError = nil }
-            } message: {
-                Text(purchases.purchaseError ?? "")
+        }
+        // Кнопка покупки — у нижней кромки, а не в конце прокрутки.
+        //
+        // Она лежала последней в списке, и на экране с четырьмя фичами и тремя
+        // тарифами до неё надо было доскроллить: человек соглашался купить и
+        // искал, чем. Теперь она на месте, где палец её и ждёт.
+        .safeAreaBar(edge: .bottom) {
+            if !purchases.isPremium, !purchases.isLoading, !purchases.loadFailed {
+                purchaseBar
             }
+        }
+        .task {
+            if purchases.products.isEmpty { await purchases.load() }
+            selectedID = purchases.subscriptions.last?.id
+        }
+        .alert("Не удалось", isPresented: Binding(
+            get: { purchases.purchaseError != nil },
+            set: { if !$0 { purchases.purchaseError = nil } }
+        )) {
+            Button("OK", role: .cancel) { purchases.purchaseError = nil }
+        } message: {
+            Text(purchases.purchaseError ?? "")
         }
     }
 
     // MARK: - Части экрана
 
     private var header: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "sparkles")
-                .font(.app(size: 52))
-                .foregroundStyle(.yellow)
-                .padding(.top, 20)
+        VStack(spacing: 14) {
+            // Знак приложения, а не универсальные искры: искрами помечают
+            // платное в любом приложении магазина, и шапка не говорила, чьё
+            // это Premium. Кольцо в режиме нормы — полные дуги — то же, что
+            // человек видит на «Сегодня» каждый день.
+            ProgressRing(consumed: 0, goal: 1, showsTargets: true, miniature: 96, onOpen: {})
+                .padding(.top, 8)
+                .accessibilityHidden(true)
 
             Text(shownFocus.headline)
-                .font(.app(.largeTitle, weight: .bold))
+                .font(.app(.title, weight: .bold))
                 .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
 
             if let subtitle = shownFocus.subtitle {
                 Text(subtitle)
@@ -117,14 +127,27 @@ struct PaywallView: View {
         }
     }
 
+    /// Что входит — не списком галочек, а с одной строкой объяснения на
+    /// каждую.
+    ///
+    /// Галочка без объяснения продаёт только то, что человек и так знает по
+    /// названию. А продаёт здесь ровно то, чего нет у счётчиков калорий:
+    /// норма, которая идёт за измеренным расходом, и которая не меняется
+    /// у человека за спиной.
     private var features: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            featureRow("План из фаз: сушка, поддержание, набор — с темпом и сроком каждой")
-            featureRow("Диет-брейки по расписанию или вручную")
-            featureRow("Недельный цикл калорий и перенос рефида на праздник")
-            featureRow("Вердикт по весу: идёшь по графику, опережаешь или отстаёшь — и что с этим делать")
+        VStack(spacing: 18) {
+            featureRow("chart.line.uptrend.xyaxis", "Норма идёт за расходом",
+                       "Расход считается по твоему дневнику и весам, а не по формуле: она не знает ни твоей работы, ни адаптации к дефициту.")
+            featureRow("hand.raised", "Норма не меняется молча",
+                       "Раз в неделю приложение показывает, что посчитало, и спрашивает. До ответа держит прежнюю.")
+            featureRow("calendar", "План из фаз",
+                       "Сушка, поддержание, набор — у каждой свой темп и срок, и видно, на какой ты неделе.")
+            featureRow("fork.knife", "Рефиды и диет-брейки",
+                       "По расписанию или вручную. Рефид можно перенести на праздник, не ломая неделю.")
+            featureRow("checkmark.seal", "Вердикт, который не врёт",
+                       "Если данных мало, так и будет сказано: по трём дням вес не судят.")
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 24)
     }
 
     /// Итоги пробного периода: то, что уже работает на человека.
@@ -189,11 +212,17 @@ struct PaywallView: View {
             ForEach(purchases.subscriptions) { product in
                 offerCard(product)
             }
-
             if let lifetime = purchases.lifetime {
                 offerCard(lifetime)
             }
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 4)
+    }
 
+    /// Кнопка покупки и строка мелким под ней — у нижней кромки экрана.
+    private var purchaseBar: some View {
+        VStack(spacing: 6) {
             Button {
                 guard let product = selectedProduct else { return }
                 isPurchasing = true
@@ -216,17 +245,14 @@ struct PaywallView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(selectedProduct == nil || isPurchasing)
-            .padding(.top, 6)
 
-            if let intro = introText(for: selectedProduct) {
-                Text(intro)
-                    .font(.app(.caption2))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
+            Text(introText(for: selectedProduct) ?? String(localized: "Отменить можно в любой момент."))
+                .font(.app(.caption2))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 8)
+        .padding(.vertical, 10)
     }
 
     private func offerCard(_ product: Product) -> some View {
@@ -282,12 +308,23 @@ struct PaywallView: View {
         return String(localized: "Первая неделя бесплатно, потом по тарифу. Отменить можно в любой момент.")
     }
 
-    private func featureRow(_ text: LocalizedStringKey) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green)
-            Text(text)
-            Spacer()
+    private func featureRow(_ icon: String,
+                            _ title: LocalizedStringKey,
+                            _ detail: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.app(.headline))
+                .foregroundStyle(ProgressRing.kcalColors[0])
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.app(.headline))
+                Text(detail)
+                    .font(.app(.footnote))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
         }
     }
 }

@@ -286,16 +286,6 @@ struct BodyView: View {
             // шестерёнкой в его шапке, как в системных приложениях.
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    showingPaywall = true
-                } label: {
-                    Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
-                        .foregroundStyle(store.isPremium ? .green : .blue)
-                }
-                .accessibilityIdentifier("subscription")
-                .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
                     showingSettings = true
                 } label: {
                     Image(systemName: "gearshape")
@@ -314,6 +304,16 @@ struct BodyView: View {
                 }
                 .accessibilityLabel("Взвеситься")
                 .accessibilityIdentifier("openWeighIn")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingPaywall = true
+                } label: {
+                    Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
+                        .foregroundStyle(store.isPremium ? .green : .blue)
+                }
+                .accessibilityIdentifier("subscription")
+                .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
             }
         }
         .navigationDestination(isPresented: $showingSettings) {

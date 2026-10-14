@@ -139,12 +139,6 @@ struct ContentView: View {
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
                 }
                 .withoutSharedBackground()
-                // Без общей стеклянной подложки: в строке остаются сами
-                // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
-                ToolbarItem(placement: .topBarTrailing) {
-                    StepsChip(store: stepStore) { showingSteps = true }
-                }
-                .withoutSharedBackground()
                 ToolbarItem(placement: .topBarTrailing) {
                     // Способы добавить еду выбираются здесь, до входа в лист.
                     // Раньше это меню жило внутри самого листа: чтобы отсканировать
@@ -217,6 +211,12 @@ struct ContentView: View {
                         Image(systemName: "plus")
                     }
                     .accessibilityIdentifier("addMenu")
+                }
+                .withoutSharedBackground()
+                // Без общей стеклянной подложки: в строке остаются сами
+                // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
+                ToolbarItem(placement: .topBarTrailing) {
+                    StepsChip(store: stepStore) { showingSteps = true }
                 }
                 .withoutSharedBackground()
             }

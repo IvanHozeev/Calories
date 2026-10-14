@@ -86,6 +86,12 @@ struct ProgressRing: View {
     /// онбординга — там съеденного ещё нет, а пустое кольцо не показывает,
     /// на что делится день.
     var showsTargets = false
+    /// Размер миниатюры для шапки — только дуги, без числа внутри.
+    ///
+    /// Крупное кольцо уезжает прокруткой, а знать, сколько осталось, хочется
+    /// и после неё. В шапке от него нужна одна вещь — сами дуги: число там
+    /// всё равно не прочитать, а знак узнаётся и в тридцать точек.
+    var miniature: CGFloat? = nil
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
@@ -103,11 +109,17 @@ struct ProgressRing: View {
     /// Тоньше иконки и чуть толще прежнего кольца: внутри живёт крупное число
     /// остатка, и ему нужен воздух, но дуга из трёх макросов должна читаться
     /// как знак, а не как волосяная линия.
-    private let lineWidth: CGFloat = 20
+    /// Доля от размера, как у крупного кольца, и чуть больше неё.
+    ///
+    /// Один в один знак в тридцать точек выходил волосяным: дуга в три точки
+    /// на экране телефона — это уже линия, а не форма. Четверть сверху
+    /// возвращает ей вес, не делая миниатюру толстым родственником кольца.
+    private static let strokeShare = 20.0 / 216.0 * 1.3
+    private var lineWidth: CGFloat { miniature.map { $0 * Self.strokeShare } ?? 20 }
     /// Меньше прежних 230, но ненамного: знак — единственная крупная вещь на
     /// экране, и слишком маленький он теряет вес, ради которого на него и
     /// смотрят.
-    private let size: CGFloat = 216
+    private var size: CGFloat { miniature ?? 216 }
 
     struct Segment: Identifiable, Equatable {
         let id: String
@@ -214,10 +226,12 @@ struct ProgressRing: View {
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 
-            centerLabel
-                // Без своей анимации contentTransition ничего не делает, и
-                // число подменялось за кадр, пока дуга ехала.
-                .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
+            if miniature == nil {
+                centerLabel
+                    // Без своей анимации contentTransition ничего не делает, и
+                    // число подменялось за кадр, пока дуга ехала.
+                    .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
+            }
         }
         .frame(width: size, height: size)
         // Размер кольца фиксирован, текст внутри масштабировать некуда.
@@ -227,7 +241,10 @@ struct ProgressRing: View {
         // Своей подписи нет намеренно: VoiceOver читает содержимое кольца
         // («Остаток 2183 из 2582 ккал»), и это точнее любой общей фразы.
         // А «Добавить еду» тут ещё и совпало бы с пунктом меню на плюсе.
-        .accessibilityIdentifier("addFromRing")
+        // Только у крупного: миниатюра в шапке — то же кольцо и тот же код,
+        // и с тем же идентификатором их стало два. Тест брал первое попавшееся
+        // и жал по тому, которого на экране нет.
+        .accessibilityIdentifier(miniature == nil ? "addFromRing" : "")
         .accessibilityAddTraits(.isButton)
     }
 

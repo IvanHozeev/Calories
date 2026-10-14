@@ -97,7 +97,7 @@ struct FoodRow: View {
                 if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {
                         if hasMacros {
-                            MacroTags(macros: macros, compact: true)
+                            MacroTags(macros: macros, compact: true, leading: leadingKind)
                         }
                         if !micros.isEmpty {
                             MicroTags(nutrients: micros)
@@ -108,25 +108,9 @@ struct FoodRow: View {
                     }
                 }
             }
-            // Полоска ведущего макроса — ровно от названия до чипов: по высоте
-            // блока текста, а не всей ячейки, и чуть левее букв, в поле строки.
-            //
-            // Плоская, без свечения: приложение стало лёгким и плоским —
-            // дуги кольца, стекло, ничего светящегося, — и мягкий ореол
-            // вокруг полоски остался от прежнего, «гравированного» вида.
-            // Сигнал читается и без него: цвет и так один на весь макрос.
-            // Место под полоску занято всегда, даже когда её нет: иначе
-            // названия подсвеченных и обычных строк стояли бы на разной высоте
-            // по левому краю.
-            .padding(.leading, 11)
-            .overlay(alignment: .leading) {
-                if let leadingKind {
-                    Capsule()
-                        .fill(leadingKind.color)
-                        .frame(width: 3)
-                        .accessibilityHidden(true)
-                }
-            }
+            // Полоски ведущего макроса здесь больше нет: о нём говорит сама
+            // строка макросов — ведущая цифра крупнее и в своём цвете. Полоска
+            // была вторым знаком о том же, и её ещё надо было выучить.
 
             Spacer(minLength: 0)
 

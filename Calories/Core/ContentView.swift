@@ -36,6 +36,8 @@ struct ContentView: View {
     /// когда тумблер переключили на соседней.
     @State private var mealSchedule = MealScheduleSettings.shared
     @State private var showingMealSchedule = false
+    /// Крупное кольцо уехало под шапку — в шапке его подменяет миниатюра.
+    @State private var ringIsAway = false
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -112,6 +114,31 @@ struct ContentView: View {
             // уезжает прокруткой, а «Сегодня» с датой нужны и после неё.
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
+                // Кольцо, уехавшее за верх экрана, возвращается сюда
+                // миниатюрой — и уезжает обратно, когда список вернут наверх.
+                ToolbarItem(placement: .topBarTrailing) {
+                    ProgressRing(
+                        consumed: store.consumedToday,
+                        goal: store.adaptedTodayGoal,
+                        macros: store.macrosToday,
+                        proteinTarget: store.proteinTarget,
+                        fatTarget: store.fatTarget,
+                        carbsTarget: store.carbsTarget,
+                        miniature: 32,
+                        onOpen: {
+                            entryAction = nil
+                            showingAdd = true
+                        }
+                    )
+                    .accessibilityHidden(true)
+                    // Шириной, а не только прозрачностью: невидимая миниатюра
+                    // всё равно занимала бы место у шагов и заголовка.
+                    .frame(width: ringIsAway ? 32 : 0, height: 32)
+                    .scaleEffect(ringIsAway ? 1 : 0.2)
+                    .opacity(ringIsAway ? 1 : 0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
+                }
+                .withoutSharedBackground()
                 // Без общей стеклянной подложки: в строке остаются сами
                 // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
                 ToolbarItem(placement: .topBarTrailing) {
@@ -335,7 +362,8 @@ private extension ContentView {
                 onOpen: {
                     entryAction = nil
                     showingAdd = true
-                }
+                },
+                onAway: { ringIsAway = $0 }
             )
 
             MacrosCard(
@@ -771,9 +799,20 @@ private struct PullableRing: View {
     let spinTicket: Int
     let pull: RingPull
     var onOpen: () -> Void
+    /// Кольцо ушло под шапку — там его подменяет миниатюра.
+    var onAway: (Bool) -> Void = { _ in }
 
     /// Где кольцо стоит, когда список в покое.
     @State private var restingY: CGFloat?
+    @State private var isAway = false
+
+    /// Ниже этой линии кольцо ещё видно из-под шапки.
+    ///
+    /// Шапка с двумя строками заголовка и строка состояния над ней — около ста
+    /// сорока точек. Считать точно неоткуда: глобальная система координат про
+    /// безопасные области ничего не знает, а ошибка в десяток точек меняет
+    /// только момент подмены, не её саму.
+    private static let barBottom: CGFloat = 140
 
     var body: some View {
         ProgressRing(
@@ -793,6 +832,11 @@ private struct PullableRing: View {
             GeometryReader { geometry in
                 Color.clear
                     .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                        let away = y + geometry.size.height < Self.barBottom
+                        if away != isAway {
+                            isAway = away
+                            onAway(away)
+                        }
                         guard let resting = restingY else {
                             restingY = y
                             return

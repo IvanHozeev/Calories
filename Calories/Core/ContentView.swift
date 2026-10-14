@@ -114,116 +114,94 @@ struct ContentView: View {
             // уезжает прокруткой, а «Сегодня» с датой нужны и после неё.
             .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                // Кольцо, уехавшее за верх экрана, возвращается сюда
-                // миниатюрой — и уезжает обратно, когда список вернут наверх.
+                // Объединяем миниатюру кольца и меню плюса в один слот тулбара,
+                // чтобы они управляли общим пространством и анимировались вместе.
                 ToolbarItem(placement: .topBarTrailing) {
-                    ProgressRing(
-                        consumed: store.consumedToday,
-                        goal: store.adaptedTodayGoal,
-                        macros: store.macrosToday,
-                        proteinTarget: store.proteinTarget,
-                        fatTarget: store.fatTarget,
-                        carbsTarget: store.carbsTarget,
-                        miniature: 32,
-                        onOpen: {
-                            entryAction = nil
-                            showingAdd = true
+                    HStack(spacing: ringIsAway ? 8 : 0) {
+                        if ringIsAway {
+                            ProgressRing(
+                                consumed: store.consumedToday,
+                                goal: store.adaptedTodayGoal,
+                                macros: store.macrosToday,
+                                proteinTarget: store.proteinTarget,
+                                fatTarget: store.fatTarget,
+                                carbsTarget: store.carbsTarget,
+                                miniature: 32,
+                                onOpen: {
+                                    entryAction = nil
+                                    showingAdd = true
+                                }
+                            )
+                            .accessibilityHidden(true)
+                            .transition(.scale(scale: 0.2).combined(with: .opacity))
                         }
-                    )
-                    .accessibilityHidden(true)
-                    // Шириной, а не только прозрачностью: невидимая миниатюра
-                    // всё равно занимала бы место у шагов и заголовка.
-                    .frame(width: ringIsAway ? 32 : 0, height: 32)
-                    .scaleEffect(ringIsAway ? 1 : 0.2)
-                    .opacity(ringIsAway ? 1 : 0)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
-                }
-                // Этот модификатор если убрать оставляем пустое место постоянно под миниатюру кольца при скролле
-                // нужно найти способ как убрать его и при этом чтобы место для кольца в этой стеклянной подложке появлялось автоматически ad hoc
-                .withoutSharedBackground()
-                ToolbarItem(placement: .topBarTrailing) {
-                    // Способы добавить еду выбираются здесь, до входа в лист.
-                    // Раньше это меню жило внутри самого листа: чтобы отсканировать
-                    // штрихкод, надо было сперва открыть экран добавления, а потом
-                    // искать там ещё один плюс — два шага там, где нужен один.
-                    // Сверху то, что избавляет от ручного ввода: штрихкод, когда
-                    // есть упаковка, фото — когда её нет.
-                    Menu {
-                        if GeminiVisionService.isConfigured {
+                        
+                        Menu {
+                            if GeminiVisionService.isConfigured {
+                                Button {
+                                    entryAction = .camera
+                                    showingAdd = true
+                                } label: {
+                                    Label("Снять еду", systemImage: "camera")
+                                }
+                            }
                             Button {
-                                entryAction = .camera
+                                todaySheet = .scanner
+                            } label: {
+                                Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                            }
+                            Divider()
+                            Button {
+                                entryAction = nil
                                 showingAdd = true
                             } label: {
-                                Label("Снять еду", systemImage: "camera")
+                                Label("Приём пищи", systemImage: "fork.knife")
                             }
-                        }
-                        // Сканер сразу, без экрана приёма пищи под ним: штрихкод
-                        // сканируют, когда упаковка в руках, и записывают её же.
-                        Button {
-                            todaySheet = .scanner
+                            Button {
+                                todaySheet = .quickCalories
+                            } label: {
+                                Label("Только калории", systemImage: "number")
+                            }
+                            Button {
+                                todaySheet = .newFood
+                            } label: {
+                                Label("Новый продукт", systemImage: "plus")
+                            }
+                            Button {
+                                todaySheet = .newDish
+                            } label: {
+                                Label("Новое блюдо", systemImage: "frying.pan")
+                            }
+                            Divider()
+                            Button {
+                                todaySheet = .weight
+                            } label: {
+                                Label("Взвеситься", systemImage: "scalemass")
+                            }
+                            Button {
+                                showingMeasurements = true
+                            } label: {
+                                Label("Снять замеры", systemImage: "ruler")
+                            }
+                            Button {
+                                todaySheet = .fasting
+                            } label: {
+                                Label("Голодание", systemImage: "moon.stars")
+                            }
+                            .accessibilityIdentifier("openFasting")
                         } label: {
-                            Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                            Image(systemName: "plus")
                         }
-                        Divider()
-                        Button {
-                            entryAction = nil
-                            showingAdd = true
-                        } label: {
-                            Label("Приём пищи", systemImage: "fork.knife")
-                        }
-                        // Переехали сюда из плюса на экране приёма пищи: всё, чем
-                        // что-то записывают, собрано в одном меню.
-                        Button {
-                            todaySheet = .quickCalories
-                        } label: {
-                            Label("Только калории", systemImage: "number")
-                        }
-                        Button {
-                            todaySheet = .newFood
-                        } label: {
-                            Label("Новый продукт", systemImage: "plus")
-                        }
-                        Button {
-                            todaySheet = .newDish
-                        } label: {
-                            Label("Новое блюдо", systemImage: "frying.pan")
-                        }
-                        Divider()
-                        // Вес и замеры тут же: плюс на «Сегодня» отвечает на вопрос
-                        // «записать сегодняшнее», а тело — такая же запись, как еда.
-                        Button {
-                            todaySheet = .weight
-                        } label: {
-                            Label("Взвеситься", systemImage: "scalemass")
-                        }
-                        Button {
-                            showingMeasurements = true
-                        } label: {
-                            Label("Снять замеры", systemImage: "ruler")
-                        }
-                        // Голодание — тоже отметка дня, а не настройка: его ставят
-                        // на конкретную дату, и искать это в настройках не станут.
-                        Button {
-                            todaySheet = .fasting
-                        } label: {
-                            Label("Голодание", systemImage: "moon.stars")
-                        }
-                        .accessibilityIdentifier("openFasting")
-                    } label: {
-                        Image(systemName: "plus")
+                        .accessibilityIdentifier("addMenu")
                     }
-                    .accessibilityIdentifier("addMenu")
+                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
                 }
-                // Закомментировал пока что, хочу починить сломанную анимацию у этих иконок при переходе с Сегодня на Шаги
-//                .withoutSharedBackground()
-                // Без общей стеклянной подложки: в строке остаются сами
-                // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
+
+                // Отдельный ToolbarItem для шагов (остается на своем месте)
                 ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
                 }
-//                .withoutSharedBackground()
-            }
-            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
+            }            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
             }

@@ -52,9 +52,6 @@ struct ScreenTitle: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        // В шапке — отступ от кнопки «назад»: слот начинается сразу за ней,
-        // и заголовок прилипал к шеврону вплотную.
-        .padding(.leading, isCompact ? 10 : 0)
         .padding(.top, isCompact ? 0 : 4)
         .padding(.bottom, isCompact ? 0 : 2)
         .accessibilityElement(children: .combine)

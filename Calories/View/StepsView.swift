@@ -100,37 +100,50 @@ struct StepsNavigationView: View {
                     .safeAreaInset(edge: .bottom) { noDataHint }
             }
         }
+        // С датой над названием.
+        //
+        // Слот заголовка начинается вплотную за кнопкой «назад», и однострочное
+        // «Шаги» прилипало к шеврону. Двигать заголовок отступом пришлось бы на
+        // всех экранах разом ради одного — а у этого просто не было строки
+        // контекста, хотя она тут к месту: кольцо и проценты на экране про
+        // сегодня, а какое это сегодня, не сказано нигде.
         .screenTitle(String(localized: "Шаги"),
-                     trailingButtons: store.sources.count > 1 ? 2 : 1)
+                     eyebrow: Date().formatted(.dateTime.weekday(.wide).day().month(.wide)),
+                     trailingButtons: 1)
         .scrollIndicators(.hidden)
         .toolbar {
-            // Выбор источника появляется только когда выбирать есть из чего:
-            // у большинства шаги пишет один телефон, и меню с единственным
-            // пунктом было бы вопросом без смысла.
-            if store.sources.count > 1 {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Picker("Источник шагов", selection: sourceBinding) {
+            // Одной кнопкой, а не двумя: мишень и значок источника стояли
+            // рядом без подписей, и обе — настройки, которые трогают раз
+            // в полгода. Вдвоём они съедали место у заголовка, а порознь
+            // ничего не объясняли.
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
+                        selectedGoal = snapped
+                        showingGoalEditor = true
+                    } label: {
+                        Label("Цель", systemImage: "target")
+                    }
+                    .accessibilityIdentifier("stepGoal")
+
+                    // Выбор источника появляется только когда выбирать есть
+                    // из чего: у большинства шаги пишет один телефон, и пункт
+                    // с единственным вариантом был бы вопросом без смысла.
+                    if store.sources.count > 1 {
+                        Picker("Источники", selection: sourceBinding) {
                             Text("Все источники").tag(String?.none)
                             ForEach(store.sources) { source in
                                 Text(source.name).tag(String?.some(source.id))
                             }
                         }
-                    } label: {
-                        Image(systemName: "dot.radiowaves.left.and.right")
+                        .pickerStyle(.menu)
+                        .accessibilityIdentifier("stepSource")
                     }
-                    .accessibilityIdentifier("stepSource")
-                    .accessibilityLabel("Источник шагов")
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
-                    selectedGoal = snapped
-                    showingGoalEditor = true
                 } label: {
-                    Image(systemName: "target")
+                    Image(systemName: "ellipsis")
                 }
+                .accessibilityLabel("Настройки шагов")
             }
         }
         .sheet(isPresented: $showingGoalEditor, onDismiss: {

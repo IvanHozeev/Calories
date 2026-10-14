@@ -104,26 +104,14 @@ struct ContentView: View {
                 PlanView(store: store)
             }
             .navigationTitle("Сегодня")
-            .hiddenNavigationTitle()
-            .navigationBarTitleDisplayMode(.inline)
+            // Какое именно сегодня. «Сегодня» — слово без числа, а записи
+            // в приложении о днях, и день недели с датой человек держит
+            // в голове сам ровно до первого раза, когда ошибётся.
+            .navigationSubtitle(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
+            // Крупным, но в самой шапке: большой заголовок над содержимым
+            // уезжает прокруткой, а «Сегодня» с датой нужны и после неё.
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                // Заголовок — он же дверь в историю. Раньше туда вели две
-                // мелкие иконки у полоски дней: без подписи, без объяснения,
-                // и обе — рядом с тем, что и так листается пальцем.
-                ToolbarItem(placement: .principal) {
-                    Button { showingActivity = true } label: {
-                        ScreenTitle(title: String(localized: "Сегодня"),
-                                    subtitle: Date().formatted(.dateTime.weekday(.wide).day().month(.wide)),
-                                    isCompact: true)
-                            .inBar(back: false, trailingButtons: 3)
-                    }
-                    .buttonStyle(.plain)
-                    // Без своего идентификатора: шапка берёт имя у того, что
-                    // в ней стоит, и «openHistory» становился именем всей
-                    // панели — найти её по названию экрана было уже нечем.
-                    .accessibilityHint("Открыть историю")
-                }
-                .withoutSharedBackground()
                 // Без общей стеклянной подложки: в строке остаются сами
                 // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
                 ToolbarItem(placement: .topBarTrailing) {
@@ -427,7 +415,8 @@ private extension ContentView {
             // Неделя последней: это уже прошедшие дни, и открывают
             // их реже всего.
             WeekStrip(weeks: store.weekStripWeeks(),
-                      onSelect: { selectedHistoryDay = $0 })
+                      onSelect: { selectedHistoryDay = $0 },
+                      onShowAll: { showingActivity = true })
 
             if store.calorieBankBonus != 0 {
                 Button { showingBankInfo = true } label: {

@@ -63,6 +63,8 @@ struct WeekStrip: View {
     /// Недели от давней к текущей, по семь дней в каждой.
     let weeks: [[DayMark]]
     var onSelect: (Date) -> Void
+    /// История: итог недели и все прошедшие дни.
+    var onShowAll: () -> Void
 
     private let calendar = Calendar.current
 
@@ -109,6 +111,16 @@ struct WeekStrip: View {
                 .scrollIndicators(.hidden)
                 .defaultScrollAnchor(.trailing)
                 .frame(height: rowHeight)
+
+                Button(action: onShowAll) {
+                    Image(systemName: "calendar")
+                        .font(.app(.subheadline))
+                        .foregroundStyle(.tertiary)
+                        .frame(width: 30, height: 44)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("История")
+                .accessibilityIdentifier("allDays")
         }
     }
 

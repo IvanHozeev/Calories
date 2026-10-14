@@ -138,6 +138,8 @@ struct ContentView: View {
                     .opacity(ringIsAway ? 1 : 0)
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
                 }
+                // Этот модификатор если убрать оставляем пустое место постоянно под миниатюру кольца при скролле
+                // нужно найти способ как убрать его и при этом чтобы место для кольца в этой стеклянной подложке появлялось автоматически ad hoc
                 .withoutSharedBackground()
                 ToolbarItem(placement: .topBarTrailing) {
                     // Способы добавить еду выбираются здесь, до входа в лист.
@@ -212,13 +214,14 @@ struct ContentView: View {
                     }
                     .accessibilityIdentifier("addMenu")
                 }
-                .withoutSharedBackground()
+                // Закомментировал пока что, хочу починить сломанную анимацию у этих иконок при переходе с Сегодня на Шаги
+//                .withoutSharedBackground()
                 // Без общей стеклянной подложки: в строке остаются сами
                 // элементы — кольцо шагов и плюс, — а не две пилюли над кольцом.
                 ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
                 }
-                .withoutSharedBackground()
+//                .withoutSharedBackground()
             }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,

@@ -75,7 +75,13 @@ final class CalorieStore {
     private(set) var plan: Plan?
     /// Премиум куплен. Сам по себе не значит доступа: его даёт ещё и пробный период.
     private(set) var hasPurchasedPremium: Bool {
-        didSet { defaults.set(hasPurchasedPremium, forKey: Keys.premium) }
+        didSet {
+            defaults.set(hasPurchasedPremium, forKey: Keys.premium)
+            // И в общую группу — сразу, а не до следующего пересчёта дня:
+            // покупку совершают в одном приложении, а открыться она должна
+            // в обоих, пока человек ещё помнит, за что платил.
+            groupDefaults?.set(isPremium, forKey: "shared_is_premium")
+        }
     }
 
     /// Когда начался пробный период плана. Начинается один раз — при первом плане
@@ -806,8 +812,24 @@ final class CalorieStore {
         groupDefaults?.set(proteinTarget ?? 0, forKey: "widget_protein_target")
         groupDefaults?.set(fatTarget ?? 0, forKey: "widget_fat_target")
         groupDefaults?.set(carbsTarget ?? MacroTargets.carbsMinimum, forKey: "widget_carbs_target")
+        publishShared()
         publishMealsToWidget()
         publishLastMeal()
+    }
+
+    /// То, что о дне и подписке должны знать соседние приложения.
+    ///
+    /// Читать общую группу GymLogger умеет, а писать в неё может только тот,
+    /// кому эти числа принадлежат. Баланс дня нужен ему, чтобы не звать на
+    /// тяжёлую тренировку в глубоком дефиците, а признак подписки — чтобы
+    /// купленное здесь открывалось и там, без второй покупки.
+    ///
+    /// Баланс кладём готовым числом, хотя норму и съеденное отдаём рядом:
+    /// вычесть одно из другого несложно, но тогда правило «что такое баланс»
+    /// живёт в двух приложениях и расходится в тот день, когда изменится здесь.
+    private func publishShared() {
+        groupDefaults?.set(adaptedTodayGoal - consumedToday, forKey: "shared_balance_today")
+        groupDefaults?.set(isPremium, forKey: "shared_is_premium")
     }
 
     /// Когда человек ел в последний раз и насколько плотно.

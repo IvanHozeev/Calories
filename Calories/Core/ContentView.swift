@@ -117,7 +117,7 @@ struct ContentView: View {
                 // Объединяем миниатюру кольца и меню плюса в один слот тулбара,
                 // чтобы они управляли общим пространством и анимировались вместе.
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: ringIsAway ? 8 : 0) {
+                    HStack {
                         if ringIsAway {
                             ProgressRing(
                                 consumed: store.consumedToday,
@@ -200,8 +200,10 @@ struct ContentView: View {
                 // Отдельный ToolbarItem для шагов (остается на своем месте)
                 ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
+                        .accessibilityIdentifier("steps")
                 }
-            }            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
+            }
+            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
             }

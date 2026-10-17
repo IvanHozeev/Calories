@@ -44,6 +44,36 @@ struct PlanStrip: View {
         .accessibilityIdentifier("planStrip")
     }
 
+    /// Та же строка плиткой: крупно — неделя, подписью — фаза и темп.
+    var tile: TodayTile {
+        TodayTile(icon: icon,
+                  tint: tint,
+                  label: String(localized: "План"),
+                  value: tileValue,
+                  caption: tileCaption,
+                  identifier: "planStrip",
+                  onTap: store.isPremium ? onOpenPlan : onShowPaywall)
+    }
+
+    private var tileValue: String {
+        if !store.isPremium { return String(localized: "Персональный план") }
+        if store.planOutcome != nil { return String(localized: "План завершён") }
+        guard let plan = store.plan else {
+            return store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent).headline
+        }
+        return String(format: String(localized: "Неделя %d из %d"),
+                      plan.currentWeek, plan.durationWeeks)
+    }
+
+    private var tileCaption: String? {
+        guard store.isPremium else { return String(localized: "Открыть") }
+        if store.planOutcome != nil { return String(localized: "посмотри итог") }
+        guard let plan = store.plan else { return nil }
+        let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
+        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
+        return "\(phase.title) · \(rate)"
+    }
+
     private var icon: String {
         if !store.isPremium { return "lock.fill" }
         if store.planOutcome != nil { return "flag.checkered" }

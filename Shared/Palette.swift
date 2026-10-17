@@ -16,39 +16,45 @@ import SwiftUI
 /// руками: `pale` — запылённый, `vivid` — сочный, и у сирени он ведёт тон к
 /// розовому, а не к синему, иначе это уже не сирень.
 enum Palette {
-    /// Цвет в трёх состояниях. Каждое — пара для градиента дуги.
+    /// Цвет в состояниях пастели. Каждое — пара для градиента дуги.
+    ///
+    /// Насыщенных состояний здесь больше нет. Они были — «стандарт» и
+    /// «контраст», — и до экрана не доходили: приложение про лёгкость, а
+    /// плакатные цвета на нём читались как чужие. Осталась пастель, и
+    /// выбирать в ней есть из чего: от дымки до плотной.
     struct Ramp {
         /// Имя нужно не для показа, а для памяти готовых цветов: по нему они
         /// и лежат в кэше.
         let name: String
+        /// Самый светлый конец: цвета почти ушли в белый.
+        let faint: [Color]
+        /// Плотный конец — та пастель, что была в приложении до сих пор.
         let pale: [Color]
-        let standard: [Color]
-        let vivid: [Color]
     }
 
-    static let kcal = Ramp(name: "kcal", pale: [Color(hex: 0x6ADFB9), Color(hex: 0x3AC09C)],
-                           standard: [Color(hex: 0x3BE8B0), Color(hex: 0x00C892)],
-                           vivid: [Color(hex: 0x1EE1A2), Color(hex: 0x04C28F)])
+    static let kcal = Ramp(name: "kcal",
+                           faint: [Color(hex: 0xAAFCE2), Color(hex: 0x8EFADD)],
+                           pale: [Color(hex: 0x6ADFB9), Color(hex: 0x3AC09C)])
     /// Дальний конец дуги раньше уходил в стальной синий: светимость падала
     /// вдвое (0.58 → 0.29), вчетверо круче, чем у жиров, и белок читался
     /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
     /// у соседей, и цвет остаётся бирюзовым, а не синеет.
-    static let protein = Ramp(name: "protein", pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)],
-                              standard: [Color(hex: 0x23DCF0), Color(hex: 0x04ACDA)],
-                              vivid: [Color(hex: 0x05D3E9), Color(hex: 0x009FD0)])
-    static let fat = Ramp(name: "fat", pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)],
-                          standard: [Color(hex: 0xFFA06B), Color(hex: 0xFF6B3D)],
-                          vivid: [Color(hex: 0xF78C51), Color(hex: 0xF7511D)])
+    static let protein = Ramp(name: "protein",
+                              faint: [Color(hex: 0xA0F4FD), Color(hex: 0x80E3FC)],
+                              pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)])
+    static let fat = Ramp(name: "fat",
+                          faint: [Color(hex: 0xFED5BE), Color(hex: 0xFEBEAA)],
+                          pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)])
     /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
     /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
-    static let carbs = Ramp(name: "carbs", pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)],
-                            standard: [Color(hex: 0xC08CFF), Color(hex: 0x8B4DFF)],
-                            vivid: [Color(hex: 0xCC76F7), Color(hex: 0xA02FF7)])
+    static let carbs = Ramp(name: "carbs",
+                            faint: [Color(hex: 0xE3CDFE), Color(hex: 0xCCB1FE)],
+                            pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)])
     /// Перебор — красно-коралловый, а не системный оранжевый: тот спорил бы по
     /// тону с цветом жиров.
-    static let over = Ramp(name: "over", pale: [Color(hex: 0xF57B72), Color(hex: 0xC04E56)],
-                           standard: [Color(hex: 0xFF4A3D), Color(hex: 0xC81E2B)],
-                           vivid: [Color(hex: 0xF72C1D), Color(hex: 0xC20412)])
+    static let over = Ramp(name: "over",
+                           faint: [Color(hex: 0xFEB0AA), Color(hex: 0xFA9EA4)],
+                           pale: [Color(hex: 0xF57B72), Color(hex: 0xC04E56)])
 
     /// Ниже этой светимости дуга тонет в тёмной теме.
     ///
@@ -80,13 +86,12 @@ enum Palette {
         let remembered = cache[key]
         cacheLock.unlock()
         if let remembered { return remembered }
-        let standard = PaletteIntensity.standard
-        let (from, to, amount): ([Color], [Color], Double) = factor <= standard
-            ? (ramp.pale, ramp.standard,
-               (factor - PaletteIntensity.range.lowerBound) / (standard - PaletteIntensity.range.lowerBound))
-            : (ramp.standard, ramp.vivid,
-               (factor - standard) / (PaletteIntensity.range.upperBound - standard))
-        let colors = zip(from, to).map { $0.blended(with: $1, amount: amount).liftedOnDark() }
+        // Один отрезок вместо двух: ползунок идёт от дымки до плотной
+        // пастели и дальше не ведёт никуда. Серединной точки, на которой
+        // раньше стоял «стандарт», больше нет.
+        let span = PaletteIntensity.range.upperBound - PaletteIntensity.range.lowerBound
+        let amount = span > 0 ? (factor - PaletteIntensity.range.lowerBound) / span : 1
+        let colors = zip(ramp.faint, ramp.pale).map { $0.blended(with: $1, amount: amount).liftedOnDark() }
         cacheLock.lock()
         cache[key] = colors
         cacheLock.unlock()
@@ -94,15 +99,17 @@ enum Palette {
     }
 }
 
-/// Насыщенность палитры — общий множитель для всех цветов кольца.
+/// Плотность пастели — общий множитель для всех цветов кольца.
 ///
-/// Один и тот же набор оттенков одним людям кажется блёклым, другим кричащим,
-/// и спорить тут не о чем: вкус. Поэтому тон задан в приложении, а сочность
-/// человек выбирает сам — от пастели до плаката.
+/// Раньше это была насыщенность от пастели до плаката. Плакат убран совсем:
+/// приложение про лёгкость, и кричащие цвета в нём выглядели чужими, сколько
+/// бы ни стоял ползунок. Выбор остался, но весь внутри пастели — от дымки,
+/// где цвет едва намечен, до плотной, с которой приложение и жило.
 enum PaletteIntensity {
     static let key = "palette_intensity"
-    /// Границы: на них приходятся `pale` и `vivid`, середина — `standard`.
-    static let range: ClosedRange<Double> = 0.6...1.35
+    /// Границы: на них приходятся `faint` и `pale`.
+    static let range: ClosedRange<Double> = 0.0...1.0
+    /// Значение по умолчанию: плотная пастель — та, что была до сих пор.
     static let standard: Double = 1
 
     static var current: Double { current(groupDefaults: .standard) }

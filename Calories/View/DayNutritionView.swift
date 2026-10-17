@@ -11,6 +11,12 @@ struct DayNutritionView: View {
     var store: CalorieStore
     var date: Date = Date()
 
+    /// Выбранный ломоть кольца состава. Nil — выбран весь день.
+    @State private var selectedPart: DayCategories.Part.ID?
+    /// Угол, по которому ткнули. `chartAngleSelection` отдаёт градусы, а не
+    /// сегмент, поэтому угол здесь промежуточный — сегмент из него считаем.
+    @State private var selectedAngle: Double?
+
     private var macros: Macros {
         let day = Calendar.current.startOfDay(for: date)
         return (store.entriesByDay[day] ?? []).reduce(Macros.zero) { $0 + $1.macros }
@@ -127,26 +133,63 @@ struct DayNutritionView: View {
     /// чего в рационе не было вовсе.
     private var compositionChart: some View {
         let parts = categories
+        let shown = parts.first { $0.id == selectedPart }
         return Chart(parts) { part in
+            // Выбранный сегмент выходит из кольца наружу и тянет на себя
+            // внимание, остальные приглушаются. Двигаем внешний радиус, а не
+            // толщину: кольцо остаётся кольцом, просто один ломоть выдвинут.
             SectorMark(angle: .value("Калории", part.calories),
                        innerRadius: .ratio(0.62),
+                       outerRadius: .ratio(part.id == selectedPart ? 1.0 : 0.92),
                        angularInset: 1.5)
                 .cornerRadius(4)
                 .foregroundStyle(color(for: part))
+                .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.35)
         }
         .chartLegend(.hidden)
+        .chartAngleSelection(value: $selectedAngle)
         .frame(height: 190)
         .overlay {
+            // В середине — либо день целиком, либо выбранная категория.
+            // Ради этого числа по сегменту и жмут: доля в процентах есть в
+            // подписи, а калорий этой категории не было нигде.
             VStack(spacing: 2) {
-                Text(verbatim: "\(parts.reduce(0) { $0 + $1.calories })")
+                Text(verbatim: "\(shown?.calories ?? parts.reduce(0) { $0 + $1.calories })")
                     .font(.app(size: 26, weight: .bold))
                     .monospacedDigit()
-                Text("ккал")
+                    .contentTransition(.numericText())
+                Text(verbatim: shown.map { title(for: $0) } ?? String(localized: "ккал"))
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .padding(.horizontal, 24)
             }
         }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
+        // Касание — в категорию: `chartAngleSelection` отдаёт не сегмент, а
+        // значение, в котором отложена дуга, и найти ломоть приходится самим.
+        .onChange(of: selectedAngle) { _, value in
+            let pick = value.flatMap { self.part(atValue: $0, in: parts) }
+            selectedPart = pick == selectedPart ? nil : pick
+        }
         .padding(.bottom, 4)
+    }
+
+    /// Какой сегмент лежит под этим касанием.
+    ///
+    /// Приходит не угол в градусах, а значение в единицах дуги — у нас это
+    /// калории, накопленные от начала круга. Сперва я делил круг на триста
+    /// шестьдесят и сравнивал с ними: всё, что дальше трёхсот шестидесяти
+    /// килокалорий, проваливалось мимо цикла и выбирало последний ломоть —
+    /// то есть любое касание выбирало одно и то же.
+    private func part(atValue value: Double, in parts: [DayCategories.Part]) -> DayCategories.Part.ID? {
+        var cursor = 0.0
+        for part in parts {
+            cursor += Double(part.calories)
+            if value <= cursor { return part.id }
+        }
+        return parts.last?.id
     }
 
     /// Подписи под кольцом: сеткой, а не строкой — категорий бывает под
@@ -166,13 +209,25 @@ struct DayNutritionView: View {
                         .foregroundStyle(.tertiary)
                         .monospacedDigit()
                 }
+                // Подпись — такая же дверь к числу, как и сам ломоть: попасть
+                // пальцем в узкий сегмент на два процента нельзя, а в строку
+                // под кольцом можно.
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedPart = selectedPart == part.id ? nil : part.id
+                }
+                .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.45)
             }
         }
         .font(.app(.caption2))
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
     }
 
     private func color(for part: DayCategories.Part) -> Color {
-        part.category?.color ?? Color.secondary.opacity(0.35)
+        // «Неизвестно» было почти прозрачным — настолько, что выбранным оно
+        // выглядело так же, как погашенным, и нажатие по нему читалось как
+        // «ничего не случилось». Серый остаётся серым, но ломтём, а не дымкой.
+        part.category?.color ?? Color.secondary.opacity(0.55)
     }
 
     private func title(for part: DayCategories.Part) -> String {

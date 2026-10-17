@@ -365,12 +365,28 @@ private extension ContentView {
             // неделя позади. Раньше план стоял выше приёмов, хотя
             // в него заходят раз в неделю, а на ближайший приём
             // смотрят по нескольку раз в день.
-            if mealSchedule.isEnabled, !slots.isEmpty {
-                MealScheduleStrip(slots: slots,
-                                  remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                  dailyGoal: store.adaptedTodayGoal) {
-                    showingMealSchedule = true
+            // Две плитки вместо двух полос.
+            //
+            // Полоса во всю ширину несла три слова и стрелку, остальное было
+            // воздухом, и таких полос подряд стояло две. Плитки занимают ту же
+            // высоту вдвоём, сколько раньше одна полоса, и читаются как два
+            // ответа на два разных вопроса: когда есть и куда иду.
+            HStack(spacing: 12) {
+                if mealSchedule.isEnabled, !slots.isEmpty {
+                    MealScheduleStrip(slots: slots,
+                                      remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
+                                      dailyGoal: store.adaptedTodayGoal) {
+                        showingMealSchedule = true
+                    }
+                    .tile
                 }
+
+                PlanStrip(
+                    store: store,
+                    onOpenPlan: { showingPlan = true },
+                    onShowPaywall: { showingPaywall = true }
+                )
+                .tile
             }
 
             // Отмеченный день голодания — не строка в настройках, а
@@ -387,15 +403,6 @@ private extension ContentView {
             if let hint = store.fastingHint() {
                 FastingStrip(hint: hint) { showingFasting = true }
             }
-
-            // Строка вместо карточки: план виден и открывается,
-            // но не занимает полэкрана. Подробности — на его
-            // собственном экране, куда ведёт и она, и кольцо.
-            PlanStrip(
-                store: store,
-                onOpenPlan: { showingPlan = true },
-                onShowPaywall: { showingPaywall = true }
-            )
 
             // Недельный обзор зовёт только когда есть о чём говорить:
             // прошла неделя с прошлого раза, и расчёт разошёлся с нормой

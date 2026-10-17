@@ -411,29 +411,32 @@ struct HealthInventoryView: View {
 }
 #endif
 
-/// Три названные насыщенности — концы ползунка и его середина.
+/// Три названные плотности пастели — концы ползунка и его середина.
 ///
 /// Безымянный ползунок заставлял угадывать: человек тянет ручку и смотрит, что
 /// выйдет. Названия говорят, что получится, до того как трогаешь, а ползунок
 /// остаётся под ними для тех, кому между названиями.
+///
+/// «Стандарта» и «Контраста» тут больше нет: насыщенные цвета убраны из
+/// палитры совсем, и выбирать осталось только внутри пастели.
 enum PalettePreset: String, CaseIterable, Identifiable {
-    case soft, standard, bold
+    case haze, soft, dense
 
     var id: String { rawValue }
 
     var value: Double {
         switch self {
-        case .soft:     return PaletteIntensity.range.lowerBound
-        case .standard: return PaletteIntensity.standard
-        case .bold:     return PaletteIntensity.range.upperBound
+        case .haze:  return PaletteIntensity.range.lowerBound
+        case .soft:  return (PaletteIntensity.range.lowerBound + PaletteIntensity.range.upperBound) / 2
+        case .dense: return PaletteIntensity.range.upperBound
         }
     }
 
     var title: LocalizedStringKey {
         switch self {
-        case .soft:     return "Пастель"
-        case .standard: return "Стандарт"
-        case .bold:     return "Контраст"
+        case .haze:  return "Дымка"
+        case .soft:  return "Пастель"
+        case .dense: return "Плотная"
         }
     }
 

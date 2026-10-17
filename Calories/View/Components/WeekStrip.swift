@@ -78,16 +78,21 @@ struct WeekStrip: View {
     @ScaledMetric(relativeTo: .subheadline) private var tallRow: CGFloat = 66
     @ScaledMetric(relativeTo: .subheadline) private var shortRow: CGFloat = 44
 
-    private var rowHeight: CGFloat { showsGoals ? tallRow : shortRow }
+    private var rowHeight: CGFloat { showsEaten ? tallRow : shortRow }
 
-    /// Показывать ли нормы под числами.
+    /// Показывать ли числа под днями.
     ///
-    /// Только когда дни отличаются: у человека без циклирования и брейков под
-    /// всеми семью стоит одно и то же число, и семь одинаковых цифр — это не
-    /// сведения, а шум. Решается один раз на всю полоску, а не на каждую
-    /// неделю: иначе её высота прыгала бы при листании.
-    private var showsGoals: Bool {
-        weeks.contains { Set($0.map(\.goal)).count > 1 }
+    /// Под числом дня стоит съеденное, а не норма.
+    ///
+    /// Норма там была сведениями о плане, а не о прожитом дне: она одинакова
+    /// у всех дней без циклирования, а главное — не отвечает на вопрос, с
+    /// которым на полоску и смотрят. «Сколько я тогда съел» — отвечает, и
+    /// вместе с точкой-вердиктом над ним день читается целиком.
+    ///
+    /// Решается один раз на всю полоску, а не на каждую неделю: иначе её
+    /// высота прыгала бы при листании.
+    private var showsEaten: Bool {
+        weeks.contains { week in week.contains { $0.hasEntries } }
     }
 
     var body: some View {
@@ -143,7 +148,10 @@ struct WeekStrip: View {
         case .under:
             Circle().stroke(ProgressRing.kcalColors[0], lineWidth: 1).frame(width: 5, height: 5)
         case .over:
-            Circle().fill(.orange).frame(width: 5, height: 5)
+            // Свой красный из палитры кольца, а не системный: системный тут
+            // кричал, а этот — тот же цвет, которым перебор нарисован в самом
+            // кольце. Один перебор — один цвет на всё приложение.
+            Circle().fill(ProgressRing.overColors[0]).frame(width: 5, height: 5)
         }
     }
 
@@ -170,14 +178,24 @@ struct WeekStrip: View {
                 // относится к дню, а не к норме, и стоять он должен рядом
                 // с тем, о чём говорит.
                 dayDot(day.verdict)
-                if showsGoals {
+                if showsEaten {
                     // Не мельче подписи дня недели и не бледнее её: десятым
                     // кеглем в третьей ступени серого число не читалось вовсе,
                     // а оно здесь — то, ради чего строку и добавили.
-                    Text(verbatim: "\(day.goal)")
+                    //
+                    // У дня без записей места под число не отнимаем, но и
+                    // нуля не пишем: пустой день и день на нуле — разные вещи.
+                    Text(verbatim: day.hasEntries ? "\(day.consumed)" : " ")
                         .font(.app(.caption, weight: .medium))
                         .monospacedDigit()
-                        .foregroundStyle(.secondary)
+                        // Зелёным, цветом калорий: это съеденное, то же самое,
+                        // что крупно стоит в кольце на «Сегодня». Серым оно
+                        // читалось как подпись к числу дня, а не как число.
+                        //
+                        // День с перебором — красным, вместе с точкой под
+                        // числом: тогда перебор виден по самому числу, а не
+                        // по пятну под ним, которое ещё надо соотнести.
+                        .foregroundStyle(day.verdict == .over ? ProgressRing.overColors[0] : ProgressRing.kcalColors[0])
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }

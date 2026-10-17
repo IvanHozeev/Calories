@@ -46,6 +46,43 @@ struct MealScheduleStrip: View {
                       MealScheduleStrip.countdown(to: next.time, from: now))
     }
 
+    /// Та же строка, но плиткой: сверху — какой приём, крупно — когда,
+    /// подписью — сколько на него отведено.
+    ///
+    /// Разложено на три куска именно здесь, рядом с полосой, чтобы правило
+    /// «начатый приём показывает остаток» и «день закрыт только когда норма
+    /// действительно добрана» не разошлись между двумя видами одного и того
+    /// же.
+    var tile: TodayTile {
+        TodayTile(icon: "fork.knife",
+                  tint: Color.accentColor,
+                  label: tileLabel,
+                  value: tileValue,
+                  caption: tileCaption,
+                  identifier: "mealScheduleStrip",
+                  onTap: onOpen)
+    }
+
+    private var tileLabel: String {
+        guard let next else { return String(localized: "Приёмы пищи") }
+        return String(localized: String.LocalizationValue(next.period.rawValue))
+    }
+
+    /// Крупным — когда. Это и есть вопрос, с которым на плитку смотрят.
+    private var tileValue: String {
+        guard let next else { return title }
+        if next.state == .current, now >= next.time { return String(localized: "Сейчас") }
+        return String(format: String(localized: "через %@"),
+                      MealScheduleStrip.countdown(to: next.time, from: now))
+    }
+
+    private var tileCaption: String? {
+        guard let next else { return nil }
+        return next.consumed > 0
+            ? String(format: String(localized: "ещё %lld ккал"), next.calories)
+            : String(format: String(localized: "%lld ккал"), next.calories)
+    }
+
     /// «2 ч 40 мин» или «25 мин» — сколько ждать.
     static func countdown(to date: Date, from now: Date) -> String {
         let minutes = max(0, Int(date.timeIntervalSince(now) / 60))

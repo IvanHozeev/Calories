@@ -4,6 +4,194 @@
     "" : {
       "shouldTranslate" : false
     },
+    "В постели %1$@ ч — на %2$@ ч меньше обычного. Фаз сна источник не пишет, так что это время между «лёг» и «встал», а не измеренный сон. После короткой ночи голод сильнее, а вес утром выше: это вода и кортизол, а не жир." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الفراش %1$@ س — أقل من المعتاد بـ %2$@ س. المصدر لا يسجّل مراحل النوم، فهذا وقت بين الاستلقاء والنهوض لا نوم مقاس. بعد ليلة قصيرة يشتدّ الجوع ويرتفع وزن الصباح: ماء وكورتيزول لا دهن."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Bett %1$@ h — %2$@ h weniger als sonst. Die Quelle schreibt keine Schlafphasen, das ist also die Zeit zwischen Hinlegen und Aufstehen, kein gemessener Schlaf. Nach einer kurzen Nacht ist der Hunger größer und das Morgengewicht höher: Wasser und Cortisol, kein Fett."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In bed %1$@ h — %2$@ h less than usual. The source writes no sleep stages, so this is the time between lying down and getting up, not measured sleep. After a short night hunger is stronger and morning weight is higher: that is water and cortisol, not fat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la cama %1$@ h: %2$@ h menos de lo habitual. La fuente no registra fases, así que es el tiempo entre acostarse y levantarse, no sueño medido. Tras una noche corta el hambre aprieta y el peso matinal sube: es agua y cortisol, no grasa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au lit %1$@ h — %2$@ h de moins que d'habitude. La source n'écrit pas les phases : c'est le temps entre le coucher et le lever, pas du sommeil mesuré. Après une nuit courte la faim est plus forte et le poids du matin plus haut : c'est de l'eau et du cortisol, pas de la graisse."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במיטה %1$@ ש׳ — %2$@ ש׳ פחות מהרגיל. המקור לא רושם שלבי שינה, אז זה הזמן בין השכיבה לקימה ולא שינה מדודה. אחרי לילה קצר הרעב חזק יותר והמשקל בבוקר גבוה יותר: מים וקורטיזול, לא שומן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na cama %1$@ h — %2$@ h menos que o normal. A fonte não registra fases, então é o tempo entre deitar e levantar, não sono medido. Depois de uma noite curta a fome aperta e o peso da manhã sobe: é água e cortisol, não gordura."
+          }
+        }
+      }
+    },
+    "В постели %1$@ ч — на %2$@ ч меньше обычного: жди голода и воды на весах." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الفراش %1$@ س — أقل بـ %2$@ س من المعتاد: توقّع جوعًا وماءً على الميزان."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Bett %1$@ h — %2$@ h weniger als sonst: rechne mit Hunger und Wasser auf der Waage."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In bed %1$@ h — %2$@ h less than usual: expect hunger and water on the scale."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la cama %1$@ h: %2$@ h menos de lo habitual. Espera hambre y agua en la báscula."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au lit %1$@ h — %2$@ h de moins que d'habitude : attends-toi à la faim et à l'eau sur la balance."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במיטה %1$@ ש׳ — %2$@ ש׳ פחות מהרגיל: צפה לרעב ולמים על המשקל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na cama %1$@ h — %2$@ h menos que o normal: espere fome e água na balança."
+          }
+        }
+      }
+    },
+    "В постели %@ ч — норма." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الفراش %@ س — المعتاد."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Bett %@ h — das Übliche."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In bed %@ h — the usual."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la cama %@ h: lo normal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au lit %@ h — la normale."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במיטה %@ ש׳ — כרגיל."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na cama %@ h — o normal."
+          }
+        }
+      }
+    },
+    "В постели %@ ч — норма. Фаз источник не пишет, но столько времени на сон отведено." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الفراش %@ س — المعتاد. المصدر لا يسجّل المراحل، لكن هذا هو الوقت المخصّص للنوم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Im Bett %@ h — das Übliche. Die Quelle schreibt keine Phasen, aber so viel Zeit war für Schlaf da."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In bed %@ h — that is the usual. The source writes no stages, but that much time was given to sleep."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En la cama %@ h: lo normal. La fuente no registra fases, pero ese es el tiempo dedicado a dormir."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au lit %@ h — la normale. La source n'écrit pas les phases, mais c'est le temps consacré au sommeil."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במיטה %@ ש׳ — כרגיל. המקור לא רושם שלבים, אבל זה הזמן שהוקצה לשינה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na cama %@ h — o normal. A fonte não registra fases, mas esse foi o tempo dado ao sono."
+          }
+        }
+      }
+    },
     "Дымка" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -47,6 +235,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Névoa"
+          }
+        }
+      }
+    },
+    "Ночей не собралось" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لم تتكوّن أي ليلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Nacht kam zusammen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No nights came together"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se formó ninguna noche"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune nuit ne s'est formée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נוצר אף לילה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma noite se formou"
+          }
+        }
+      }
+    },
+    "Обычно вместе" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عادةً معًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meist zusammen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usually together"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente juntos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Souvent ensemble"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בדרך כלל יחד"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normalmente juntos"
           }
         }
       }
@@ -98,6 +380,53 @@
         }
       }
     },
+    "Отрезки склеиваются в одну ночь, пока разрыв между ними не больше трёх часов. Ночь короче трёх часов отбрасывается как дрёма." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تُدمج المقاطع في ليلة واحدة ما دامت الفجوة بينها لا تتجاوز ثلاث ساعات. والليلة الأقصر من ثلاث ساعات تُهمل بوصفها غفوة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abschnitte werden zu einer Nacht verbunden, solange die Lücke dazwischen höchstens drei Stunden beträgt. Eine Nacht unter drei Stunden gilt als Nickerchen und entfällt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Segments join into one night while the gap between them is no more than three hours. A night shorter than three hours is dropped as a nap."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los tramos se unen en una noche mientras el hueco entre ellos no pase de tres horas. Una noche de menos de tres horas se descarta como siesta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les segments se joignent en une nuit tant que l'écart entre eux ne dépasse pas trois heures. Une nuit de moins de trois heures est écartée comme sieste."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המקטעים מתחברים ללילה אחד כל עוד הפער ביניהם אינו עולה על שלוש שעות. לילה קצר משלוש שעות נזנח כנמנום."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os trechos se juntam numa noite enquanto o intervalo entre eles não passar de três horas. Uma noite menor que três horas é descartada como cochilo."
+          }
+        }
+      }
+    },
     "Плотная" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -141,6 +470,241 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Densa"
+          }
+        }
+      }
+    },
+    "Серым — записи, которые в счёт сна не идут: «в постели» при наличии фаз и «не сплю». Две последние ночи, от свежей к старой." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بالرمادي السجلات التي لا تُحتسب نومًا: «في الفراش» عند وجود المراحل، و«مستيقظ». آخر ليلتين، من الأحدث إلى الأقدم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grau sind die Einträge, die nicht als Schlaf zählen: „im Bett“, wenn Phasen vorliegen, und „wach“. Die letzten zwei Nächte, neueste zuerst."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grey are the records that do not count as sleep: in-bed when stages exist, and awake. The last two nights, newest first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En gris, los registros que no cuentan como sueño: «en la cama» cuando hay fases, y «despierto». Las dos últimas noches, de la más reciente a la más antigua."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En gris, les enregistrements qui ne comptent pas comme sommeil : « au lit » quand des phases existent, et « éveillé ». Les deux dernières nuits, de la plus récente à la plus ancienne."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "באפור הרשומות שאינן נחשבות שינה: «במיטה» כשיש שלבים, ו«ער». שני הלילות האחרונים, מהחדש לישן."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em cinza, os registros que não contam como sono: «na cama» quando há fases, e «acordado». As duas últimas noites, da mais recente para a mais antiga."
+          }
+        }
+      }
+    },
+    "Сон: что пришло" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النوم: ما وصل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schlaf: was ankam"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep: what arrived"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sueño: lo que llegó"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sommeil : ce qui est arrivé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שינה: מה הגיע"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sono: o que chegou"
+          }
+        }
+      }
+    },
+    "Сырьё из «Здоровья» рядом с тем, что из него собрало приложение. Нужно, когда названная ночь не сходится с тем, сколько человек спал." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السجلات الخام من «الصحة» بجوار ما صنعه منها التطبيق. لحين لا تطابق الليلة المعلنة ما حدث فعلًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Rohdaten aus Health neben dem, was die App daraus gemacht hat. Für den Fall, dass die genannte Nacht nicht zur echten passt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The raw records from Health next to what the app made of them. For when the night it names does not match the night that happened."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los registros en bruto de Salud junto a lo que la app hizo con ellos. Para cuando la noche que nombra no coincide con la real."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les enregistrements bruts de Santé à côté de ce que l'app en a fait. Pour quand la nuit annoncée ne correspond pas à la vraie."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הרשומות הגולמיות מ־Health לצד מה שהאפליקציה עשתה מהן. למקרה שהלילה שהיא מציינת לא תואם למה שהיה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os registros brutos da Saúde ao lado do que o app fez deles. Para quando a noite que ele nomeia não bate com a real."
+          }
+        }
+      }
+    },
+    "Что отдало «Здоровье»" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما سلّمته «الصحة»"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was Health geliefert hat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What Health handed over"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que entregó Salud"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que Santé a fourni"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה Health מסר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que a Saúde entregou"
+          }
+        }
+      }
+    },
+    "Что посчитало приложение" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما حسبه التطبيق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was die App errechnet hat"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What the app worked out"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo que calculó la app"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que l'app a calculé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מה האפליקציה חישבה"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que o app calculou"
           }
         }
       }

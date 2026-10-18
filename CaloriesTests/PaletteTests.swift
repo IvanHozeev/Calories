@@ -26,22 +26,25 @@ struct PaletteTests {
         }
     }
 
-    /// Ползунок задаёт положение между бледным и сочным состоянием, а за его
+    /// Ползунок задаёт положение между дымкой и плотной пастелью, а за его
     /// границами ничего нового не происходит.
+    ///
+    /// Насыщенных состояний у палитры больше нет: «стандарт» и «контраст»
+    /// убраны из кода, и концы ползунка — два пастельных конца.
     @Test func theSliderEndsAreTheHandPickedStates() {
         let low = Palette.colors(Palette.carbs, intensity: PaletteIntensity.range.lowerBound)
         let high = Palette.colors(Palette.carbs, intensity: PaletteIntensity.range.upperBound)
         #expect(look(low) != look(high))
-        #expect(look(Palette.colors(Palette.carbs, intensity: 0.1)) == look(low),
-                "Ниже границы — та же бледная пара")
+        #expect(look(Palette.colors(Palette.carbs, intensity: -3)) == look(low),
+                "Ниже границы — та же дымка")
         #expect(look(Palette.colors(Palette.carbs, intensity: 9)) == look(high),
-                "Выше границы — та же сочная пара")
+                "Выше границы — та же плотная пастель")
     }
 
     /// Сирень на обоих концах остаётся сиренью: тон гуляет внутри
     /// фиолетово-розового участка круга, а не уезжает в синеву.
     @Test func lilacStaysLilacAtBothEnds() throws {
-        for intensity in [0.6, 1.0, 1.35] {
+        for intensity in [PaletteIntensity.range.lowerBound, 0.5, PaletteIntensity.range.upperBound] {
             for color in Palette.colors(Palette.carbs, intensity: intensity) {
                 let hue = try #require(resolved(color, dark: false).hsb).hue * 360
                 #expect(hue >= 255 && hue <= 300, "Тон \(Int(hue))° при насыщенности \(intensity)")
@@ -55,7 +58,7 @@ struct PaletteTests {
     /// и на почти чёрном фоне читалась как выключенная.
     @Test func noArcSinksIntoTheDarkTheme() {
         for (name, ramp) in ramps {
-            for intensity in [0.6, 1.0, 1.35] {
+            for intensity in [PaletteIntensity.range.lowerBound, 0.5, PaletteIntensity.range.upperBound] {
                 for color in Palette.colors(ramp, intensity: intensity) {
                     let luminance = resolved(color, dark: true).luminance
                     #expect(luminance >= Palette.darkLuminanceFloor - 0.01,
@@ -88,7 +91,7 @@ struct PaletteTests {
         defaults?.removePersistentDomain(forName: "palette-tests")
         defaults?.set(4.2, forKey: PaletteIntensity.key)
         #expect(PaletteIntensity.current(groupDefaults: defaults) == PaletteIntensity.range.upperBound)
-        defaults?.set(0.1, forKey: PaletteIntensity.key)
+        defaults?.set(-3, forKey: PaletteIntensity.key)
         #expect(PaletteIntensity.current(groupDefaults: defaults) == PaletteIntensity.range.lowerBound)
         defaults?.removePersistentDomain(forName: "palette-tests")
         #expect(PaletteIntensity.current(groupDefaults: defaults) == PaletteIntensity.standard)

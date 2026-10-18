@@ -61,6 +61,21 @@ extension CalorieStore {
     /// читаются как навязчивый совет, а собственный вчерашний творог — как
     /// подсказка. Порядок решают точность попадания, привычная порция и
     /// недобранный макрос.
+    /// Что обычно идёт вместе с тем, что уже лежит в приёме.
+    ///
+    /// Полгода, а не месяц, как у подсказок под остаток: привычка «молоко с
+    /// протеином» не выветривается за тридцать дней, а у человека, который
+    /// ест одно и то же, за месяц может не набраться и двух совпадений.
+    func pairSuggestions(draft: [String], days: Int = 180) -> [MealPairs.Suggestion] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
+        // Приём из одного продукта про пары ничего не говорит, и перебирать
+        // его незачем: таких записей в дневнике большинство.
+        let history = entries.filter { $0.date >= cutoff }
+            .map(\.composition)
+            .filter { $0.count > 1 }
+        return MealPairs.suggestions(draft: draft, history: history)
+    }
+
     func mealSuggestions(remaining: Int, days: Int = 30) -> [MealSuggestions.Candidate] {
         guard remaining >= MealSuggestions.minimumRemaining else { return [] }
         let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast

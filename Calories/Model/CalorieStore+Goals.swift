@@ -672,6 +672,7 @@ extension CalorieStore {
         if let sleep = sleep(on: day) {
             context.sleepHours = sleep.hours
             context.sleepShortfall = sleep.shortfall
+            context.sleepFromBedOnly = sleep.fromBedOnly
         }
         context.restingPulseRise = restingPulse(now: max(day, Date()))?.rise
 

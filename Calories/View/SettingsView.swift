@@ -316,6 +316,16 @@ struct DeveloperSettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    SleepDebugView()
+                } label: {
+                    Label("Сон: что пришло", systemImage: "bed.double")
+                }
+            } footer: {
+                Text("Сырьё из «Здоровья» рядом с тем, что из него собрало приложение. Нужно, когда названная ночь не сходится с тем, сколько человек спал.")
+            }
+
+            Section {
                 TextField("Ключ Gemini", text: $geminiAPIKey)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()

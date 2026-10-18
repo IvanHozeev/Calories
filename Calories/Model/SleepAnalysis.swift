@@ -8,6 +8,13 @@ struct SleepNight: Codable, Equatable, Sendable {
     let wake: Date
     /// Часы сна: сумма отрезков, без пробуждений посреди ночи.
     let hours: Double
+    /// Фаз у этой ночи не было — считали по «в постели».
+    ///
+    /// Разница не бухгалтерская. Браслеты вроде Mi Fitness пишут только
+    /// «в постели», и это не измеренный сон, а время между «лёг» и «встал»:
+    /// туда входит и чтение, и то, что человек проснулся и лежал. Называть
+    /// такое число сном — врать с уверенным лицом.
+    var fromBedOnly: Bool = false
 }
 
 /// Сон из «Здоровья» — отрезками, а не ночами.
@@ -57,8 +64,13 @@ enum SleepAnalysis {
         asleep.isEmpty ? inBed : asleep
     }
 
+    /// Фаз не было вовсе — значит, всё, что у нас есть, это «в постели».
+    static func isBedOnly(asleep: [Segment], inBed: [Segment]) -> Bool {
+        asleep.isEmpty && !inBed.isEmpty
+    }
+
     /// Собирает отрезки в ночи. Ночь принадлежит дню, в который человек встал.
-    static func nights(from segments: [Segment]) -> [SleepNight] {
+    static func nights(from segments: [Segment], fromBedOnly: Bool = false) -> [SleepNight] {
         let sorted = segments.filter { $0.duration > 0 }.sorted { $0.start < $1.start }
         guard !sorted.isEmpty else { return [] }
 
@@ -69,7 +81,8 @@ enum SleepAnalysis {
             guard let first = group.first, let last = group.last else { return }
             let hours = group.reduce(0.0) { $0 + $1.duration } / 3600
             guard hours >= minimumHours else { return }
-            nights.append(SleepNight(bed: first.start, wake: last.end, hours: hours))
+            nights.append(SleepNight(bed: first.start, wake: last.end, hours: hours,
+                                     fromBedOnly: fromBedOnly))
         }
 
         for segment in sorted.dropFirst() {

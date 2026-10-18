@@ -633,6 +633,11 @@ struct AddEntryView: View {
         store.mealSuggestions(remaining: mealRemaining)
     }
 
+    /// Что человек обычно кладёт вместе с тем, что уже в приёме.
+    private var pairs: [MealPairs.Suggestion] {
+        store.pairSuggestions(draft: draftItems.map(\.name))
+    }
+
     /// Какой приём сейчас ближайший — его именем и подписаны подсказки.
     private var nextMealPeriod: MealPeriod? {
         guard MealScheduleSettings.shared.isEnabled else { return nil }
@@ -676,6 +681,34 @@ struct AddEntryView: View {
         .padding(.vertical, 2)
     }
 
+    /// Кладёт в черновик то, что обычно идёт вместе.
+    private func addPair(_ item: MealPairs.Suggestion) {
+        withAnimation(.snappy) {
+            draftItems.append(MealItem(name: item.name, calories: item.calories,
+                                       macros: item.macros, grams: item.grams))
+        }
+    }
+
+    /// Строка «обычно вместе» — та же `FoodRow`, что и везде.
+    ///
+    /// Своя строка здесь была ошибкой: рядом с «Недавним» она выглядела
+    /// гостьей — другие отступы, другой вес шрифта, калории не на своём месте.
+    /// Ячейка еды в приложении одна, и подсказка — такая же еда.
+    private func pairRow(_ item: MealPairs.Suggestion) -> some View {
+        let grams = item.grams ?? 100
+        return FoodRow(
+            name: item.name,
+            calories: item.calories,
+            portion: String(format: "%.0f \(String(localized: "г"))", grams),
+            macros: item.macros,
+            // Значки и витамины — если продукт нашёлся в своих или в базе.
+            // Подсказка приходит из дневника, где лежат только имя и вес.
+            icons: store.foodNamed(item.name).map { [$0.foodCategory.icon] } ?? [],
+            micros: store.notableMicronutrients(forFoodNamed: item.name, grams: grams),
+            traits: store.foodNamed(item.name)?.traits ?? []
+        )
+    }
+
     /// Кладёт подсказку в черновик — уже с подобранным весом.
     private func addSuggestion(_ item: MealSuggestions.Candidate) {
         // Частями, а не одной строкой: дальше приём обычно правят — вчера был
@@ -707,6 +740,21 @@ struct AddEntryView: View {
         // полностью нужно редко, а попасть в оставшиеся 400 ккал полдника —
         // каждый день. Приложение знает и остаток, и что человек обычно ест,
         // поэтому подбирает порцию само: «Творог 5%, 180 г».
+        // Приём уже начат — подсказываем не «чем набрать остаток», а то, что
+        // к этому обычно идёт. Молоко без протеина человек кладёт редко, и
+        // искать второе поиском, зная наперёд, что ищешь, — лишняя работа.
+        if !isSearching, !draftItems.isEmpty, !pairs.isEmpty {
+            Section {
+                ForEach(pairs) { item in
+                    pairRow(item)
+                        .contentShape(Rectangle())
+                        .onTapGesture { addPair(item) }
+                }
+            } header: {
+                Text("Обычно вместе")
+            }
+        }
+
         // Пока приём пуст. Как только в нём появилась первая строка, человек
         // уже знает, что кладёт, и подсказка «Обед: 377 ккал» перестаёт быть
         // подсказкой: она предлагает набрать то, что он набирает сам, и число

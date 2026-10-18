@@ -16,6 +16,9 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
     var workoutTitle: String?
     /// Сколько спал ночью перед этим днём.
     var sleepHours: Double?
+    /// Это не измеренный сон, а время в постели: источник не пишет фаз.
+    /// Необязательное — у дней, записанных до того, как мы стали различать.
+    var sleepFromBedOnly: Bool?
     /// Когда в этот день встал. Ради этого сон и читается: время будильника
     /// iOS не отдаёт, и расписание приёмов пищи до сих пор угадывало подъём по
     /// первой еде.
@@ -38,7 +41,8 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
 
     init(date: Date, steps: Int, activeCalories: Int? = nil,
          workoutMinutes: Int? = nil, workoutTitle: String? = nil,
-         sleepHours: Double? = nil, wakeTime: Date? = nil, bedTime: Date? = nil,
+         sleepHours: Double? = nil, sleepFromBedOnly: Bool? = nil,
+         wakeTime: Date? = nil, bedTime: Date? = nil,
          restingPulse: Int? = nil, stepSource: String? = nil) {
         self.date = date
         self.steps = steps
@@ -46,6 +50,7 @@ struct ActivityDay: Identifiable, Codable, Equatable, Sendable {
         self.workoutMinutes = workoutMinutes
         self.workoutTitle = workoutTitle
         self.sleepHours = sleepHours
+        self.sleepFromBedOnly = sleepFromBedOnly
         self.wakeTime = wakeTime
         self.bedTime = bedTime
         self.restingPulse = restingPulse
@@ -110,6 +115,7 @@ struct ActivityHistory: Sendable {
                 // Сон приходит отдельным запросом: запись про шаги о нём не
                 // знает и стирать его не должна.
                 sleepHours: day.sleepHours ?? stored?.sleepHours,
+                sleepFromBedOnly: day.sleepFromBedOnly ?? stored?.sleepFromBedOnly,
                 wakeTime: day.wakeTime ?? stored?.wakeTime,
                 bedTime: day.bedTime ?? stored?.bedTime,
                 restingPulse: day.restingPulse ?? stored?.restingPulse,

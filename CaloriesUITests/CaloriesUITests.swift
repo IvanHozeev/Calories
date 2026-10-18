@@ -61,8 +61,17 @@ final class CaloriesUITests: XCTestCase {
         let tab = app.tabBars.buttons["Profile"]
         XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки профиля")
         tab.tap()
+        // Сначала сам экран, потом кнопка в его шапке.
+        //
+        // «Профиль» строится не мгновенно: там и параметры тела, и расчёт
+        // расхода по истории. Ожидание сразу кнопки отмеряло пять секунд от
+        // нажатия по вкладке, и на загруженной машине они кончались раньше,
+        // чем экран появлялся, — тест падал на «нет настроек» там, где их
+        // просто ещё не нарисовали.
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10),
+                      "Вкладка профиля не открылась")
         let gear = app.buttons["openSettings"]
-        XCTAssertTrue(gear.waitForExistence(timeout: 5), "В шапке профиля нет настроек")
+        XCTAssertTrue(gear.waitForExistence(timeout: 10), "В шапке профиля нет настроек")
         gear.tap()
     }
 

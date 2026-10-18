@@ -427,15 +427,18 @@ final class StepStore {
             sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]
         ) { [weak self] _, samples, _ in
             let found = (samples as? [HKCategorySample]) ?? []
-            let nights = SleepAnalysis.nights(from: SleepAnalysis.segments(
-                asleep: found.filter { Self.asleepValues.contains($0.value) }
-                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) },
-                inBed: found.filter { $0.value == HKCategoryValueSleepAnalysis.inBed.rawValue }
-                    .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }))
+            let asleep = found.filter { Self.asleepValues.contains($0.value) }
+                .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }
+            let inBed = found.filter { $0.value == HKCategoryValueSleepAnalysis.inBed.rawValue }
+                .map { SleepAnalysis.Segment(start: $0.startDate, end: $0.endDate) }
+            let nights = SleepAnalysis.nights(
+                from: SleepAnalysis.segments(asleep: asleep, inBed: inBed),
+                fromBedOnly: SleepAnalysis.isBedOnly(asleep: asleep, inBed: inBed))
             guard !nights.isEmpty else { return }
             let days = nights.map { night in
                 ActivityDay(date: calendar.startOfDay(for: night.wake), steps: 0,
-                            sleepHours: night.hours, wakeTime: night.wake, bedTime: night.bed)
+                            sleepHours: night.hours, sleepFromBedOnly: night.fromBedOnly,
+                            wakeTime: night.wake, bedTime: night.bed)
             }
             Task { @MainActor [weak self] in
                 self?.history.remember(days)

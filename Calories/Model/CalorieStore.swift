@@ -618,14 +618,15 @@ final class CalorieStore {
     /// Дневнику это нужно не для арифметики, а для объяснений: после короткой
     /// ночи и вес скачет, и голод сильнее, и шагов меньше — без этой строчки
     /// такой день выглядит просто сорванным.
-    func sleep(on date: Date) -> (hours: Double, shortfall: Double)? {
-        guard let hours = activity(on: date)?.sleepHours else { return nil }
+    func sleep(on date: Date) -> (hours: Double, shortfall: Double, fromBedOnly: Bool)? {
+        guard let day = activity(on: date), let hours = day.sleepHours else { return nil }
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let from = calendar.date(byAdding: .day, value: -28, to: today) ?? today
         let nights = stepHistory.filter { $0.date >= from }.compactMap(\.sleepHours)
         let usual = nights.count >= 7 ? nights.reduce(0, +) / Double(nights.count) : hours
-        return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual))
+        return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual),
+                day.sleepFromBedOnly ?? false)
     }
 
     /// Пульс в покое сейчас и насколько он выше привычного.
@@ -1718,6 +1719,16 @@ final class CalorieStore {
 
     private func customFood(named name: String) -> FoodItem? {
         customFoods.first { $0.name == name }
+    }
+
+    /// Продукт по имени: свой первым, потом встроенная база.
+    ///
+    /// Нужен подсказкам «обычно вместе»: в дневнике от продукта остаются
+    /// только имя и вес, а строка еды хочет ещё категорию и свойства.
+    /// Не нашёлся — значит продукт переименовали или он пришёл из поиска,
+    /// и строка просто обойдётся без значков.
+    func foodNamed(_ name: String) -> FoodItem? {
+        customFood(named: name) ?? FoodDatabase.items.first { $0.name == name }
     }
 
     private func rebuildRecent() {

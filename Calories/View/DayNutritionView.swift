@@ -13,9 +13,6 @@ struct DayNutritionView: View {
 
     /// Выбранный ломоть кольца состава. Nil — выбран весь день.
     @State private var selectedPart: DayCategories.Part.ID?
-    /// Угол, по которому ткнули. `chartAngleSelection` отдаёт градусы, а не
-    /// сегмент, поэтому угол здесь промежуточный — сегмент из него считаем.
-    @State private var selectedAngle: Double?
 
     private var macros: Macros {
         let day = Calendar.current.startOfDay(for: date)
@@ -122,7 +119,39 @@ struct DayNutritionView: View {
         .scrollIndicators(.hidden)
         .screenTitle(String(localized: "Разбор дня"),
                      eyebrow: date.formatted(.dateTime.day().month(.wide)))
+        // Тап мимо кольца снимает выбор.
+        //
+        // Выбранный ломоть — состояние, из которого нужен выход, и искать для
+        // него вторую кнопку незачем: выход там же, где в любом приложении, —
+        // нажать рядом. Жест висит на списке, а не на отдельной подложке:
+        // вложенные жесты срабатывают первыми, поэтому нажатие по самому
+        // кольцу, по строке подписи или по любой ячейке списка достаётся им,
+        // а сюда доходит только то, что мимо.
+        .onTapGesture {
+            if selectedPart != nil {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                    selectedPart = nil
+                }
+            }
+        }
+        // Выбор сам отпускает через четыре секунды.
+        //
+        // Столько нужно, чтобы прочитать число и название, и мало настолько,
+        // чтобы кольцо не осталось выбранным, когда человек уже читает строки
+        // ниже. Отсчёт начинается заново на каждом новом ломте: `task(id:)`
+        // отменяет прежний, и переход с куска на кусок не копит таймеров.
+        .task(id: selectedPart) {
+            guard selectedPart != nil else { return }
+            try? await Task.sleep(for: .seconds(Self.selectionHoldSeconds))
+            guard !Task.isCancelled else { return }
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                selectedPart = nil
+            }
+        }
     }
+
+    /// Сколько держится выбранный ломоть, прежде чем отпустить сам.
+    private static let selectionHoldSeconds: Double = 4
 
     // MARK: - Состав и разбор
 
@@ -138,17 +167,60 @@ struct DayNutritionView: View {
             // Выбранный сегмент выходит из кольца наружу и тянет на себя
             // внимание, остальные приглушаются. Двигаем внешний радиус, а не
             // толщину: кольцо остаётся кольцом, просто один ломоть выдвинут.
+            //
+            // Ломти толще и с круглыми концами — форма соседнего приложения,
+            // где кольцо собрано из отдельных кусков, а не разрезано на доли.
+            // Разница в том, что читается: дольки пирога глаз сравнивает по
+            // площади, а куски кольца — по длине, и длину он сравнивает лучше.
             SectorMark(angle: .value("Калории", part.calories),
-                       innerRadius: .ratio(0.62),
-                       outerRadius: .ratio(part.id == selectedPart ? 1.0 : 0.92),
-                       angularInset: 1.5)
-                .cornerRadius(4)
+                       innerRadius: .ratio(Self.innerRatio),
+                       outerRadius: .ratio(part.id == selectedPart ? 1.0 : 0.94),
+                       angularInset: 2.5)
+                // Конечное скругление, а не бесконечное: пока едет внешний
+                // радиус выбранного ломтя, бесконечное вырождает сектор, и на
+                // кадрах перехода кольцо рассыпается в шипы.
+                .cornerRadius(12)
                 .foregroundStyle(color(for: part))
                 .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.35)
         }
         .chartLegend(.hidden)
-        .chartAngleSelection(value: $selectedAngle)
         .frame(height: 190)
+        // Значки и попадания — из одной геометрии.
+        //
+        // Аннотация центрует значок по рамке сектора, а не по его дуге: у
+        // ломтя на четверть круга рамка почти квадратная, и середина её лежит
+        // в стороне от самой дуги. А `chartAngleSelection` знает только угол,
+        // поэтому нажатие в дырку посередине или мимо кольца всё равно
+        // попадало «в ломоть» — отсюда и кривые попадания. Считаем сами, зато
+        // один раз: и значок, и палец меряются одним кругом.
+        .chartOverlay { proxy in
+            GeometryReader { geometry in
+                let frame = proxy.plotFrame.map { geometry[$0] } ?? .zero
+                let radius = min(frame.width, frame.height) / 2
+                ZStack {
+                    ForEach(iconPlacements(in: parts)) { placement in
+                        Image(systemName: placement.icon)
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
+                            .opacity(selectedPart == nil || placement.id == selectedPart ? 1 : 0.35)
+                            .position(point(at: placement.turn,
+                                            radius: radius * (Self.innerRatio + 0.94) / 2,
+                                            in: frame))
+                    }
+                }
+                .allowsHitTesting(false)
+
+                // Нажатием, а не протяжкой: протяжка над кольцом забирала бы
+                // прокрутку списка, а выбор ломтя она всё равно не улучшает.
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { location in
+                        select(at: location, center: CGPoint(x: frame.midX, y: frame.midY),
+                               radius: radius, in: parts)
+                    }
+            }
+        }
         .overlay {
             // В середине — либо день целиком, либо выбранная категория.
             // Ради этого числа по сегменту и жмут: доля в процентах есть в
@@ -167,29 +239,71 @@ struct DayNutritionView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
-        // Касание — в категорию: `chartAngleSelection` отдаёт не сегмент, а
-        // значение, в котором отложена дуга, и найти ломоть приходится самим.
-        .onChange(of: selectedAngle) { _, value in
-            let pick = value.flatMap { self.part(atValue: $0, in: parts) }
-            selectedPart = pick == selectedPart ? nil : pick
-        }
         .padding(.bottom, 4)
     }
 
-    /// Какой сегмент лежит под этим касанием.
-    ///
-    /// Приходит не угол в градусах, а значение в единицах дуги — у нас это
-    /// калории, накопленные от начала круга. Сперва я делил круг на триста
-    /// шестьдесят и сравнивал с ними: всё, что дальше трёхсот шестидесяти
-    /// килокалорий, проваливалось мимо цикла и выбирало последний ломоть —
-    /// то есть любое касание выбирало одно и то же.
-    private func part(atValue value: Double, in parts: [DayCategories.Part]) -> DayCategories.Part.ID? {
+    /// Точка на круге: доля оборота от двенадцати часов по часовой стрелке.
+    private func point(at turn: Double, radius: CGFloat, in frame: CGRect) -> CGPoint {
+        let angle = turn * 2 * .pi - .pi / 2
+        return CGPoint(x: frame.midX + radius * cos(angle),
+                       y: frame.midY + radius * sin(angle))
+    }
+
+    /// Выбирает ломоть под пальцем — если палец вообще на кольце.
+    private func select(at location: CGPoint, center: CGPoint,
+                        radius: CGFloat, in parts: [DayCategories.Part]) {
+        let dx = location.x - center.x
+        let dy = location.y - center.y
+        let distance = sqrt(dx * dx + dy * dy)
+        // Дырка посередине и поле вокруг кольца — это «мимо», и нажатие туда
+        // снимает выбор, а не выбирает ближайшее по углу.
+        guard distance >= radius * Self.innerRatio * 0.85, distance <= radius * 1.08 else {
+            selectedPart = nil
+            return
+        }
+        let turn = (atan2(dy, dx) + .pi / 2 + 2 * .pi).truncatingRemainder(dividingBy: 2 * .pi) / (2 * .pi)
+        let pick = part(atTurn: turn, in: parts)
+        selectedPart = pick == selectedPart ? nil : pick
+    }
+
+    /// Какой ломоть занимает эту долю оборота.
+    private func part(atTurn turn: Double, in parts: [DayCategories.Part]) -> DayCategories.Part.ID? {
+        let total = parts.reduce(0.0) { $0 + Double($1.calories) }
+        guard total > 0 else { return nil }
         var cursor = 0.0
         for part in parts {
-            cursor += Double(part.calories)
-            if value <= cursor { return part.id }
+            cursor += Double(part.calories) / total
+            if turn <= cursor { return part.id }
         }
         return parts.last?.id
+    }
+
+    /// Толщина кольца долей от радиуса. Чем куски толще, тем больше они
+    /// читаются кусками, а не дольками разрезанного круга.
+    private static let innerRatio: Double = 0.58
+    /// Уже этой доли круга значок не ставим: на двух процентах он сядет
+    /// поверх соседнего ломтя и оба станут нечитаемыми.
+    private static let minimumShareForIcon: Double = 0.07
+
+    /// Где на кольце стоит значок категории.
+    private struct IconPlacement: Identifiable {
+        let id: DayCategories.Part.ID
+        let icon: String
+        /// Середина ломтя в долях оборота, от двенадцати часов по часовой.
+        let turn: Double
+    }
+
+    private func iconPlacements(in parts: [DayCategories.Part]) -> [IconPlacement] {
+        let total = parts.reduce(0.0) { $0 + Double($1.calories) }
+        guard total > 0 else { return [] }
+        var cursor = 0.0
+        return parts.compactMap { part in
+            let share = Double(part.calories) / total
+            let middle = cursor + share / 2
+            cursor += share
+            guard share >= Self.minimumShareForIcon, let icon = part.category?.icon else { return nil }
+            return IconPlacement(id: part.id, icon: icon, turn: middle)
+        }
     }
 
     /// Подписи под кольцом: сеткой, а не строкой — категорий бывает под

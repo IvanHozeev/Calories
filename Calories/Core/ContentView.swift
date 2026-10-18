@@ -38,6 +38,20 @@ struct ContentView: View {
     @State private var showingMealSchedule = false
     /// Крупное кольцо уехало под шапку — в шапке его подменяет миниатюра.
     @State private var ringIsAway = false
+    /// Высота списка и то, сколько у него снизу занято таббаром. Из этих
+    /// двух считается, сколько места осталось кольцу.
+    @State private var listHeight: CGFloat = 0
+    @State private var listBottomInset: CGFloat = 0
+
+    /// Высота первого экрана: ровно видимая часть списка.
+    ///
+    /// Полоска и плитки берут своё, остаток достаётся кольцу — поэтому блок
+    /// кончается у таббара, а дневник начинается со следующего экрана.
+    /// Нижняя граница не для красоты: на маленьком экране с крупным шрифтом
+    /// без неё кольцо схлопнулось бы в точку.
+    private var summaryHeight: CGFloat {
+        max(listHeight - listBottomInset - 8, 420)
+    }
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -72,6 +86,7 @@ struct ContentView: View {
             List {
                 Section {
                     summaryCards
+                        .frame(height: summaryHeight)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
@@ -203,6 +218,20 @@ struct ContentView: View {
                         .accessibilityIdentifier("steps")
                 }
             }
+            .background {
+                GeometryReader { geometry in
+                    Color.clear
+                        .onChange(of: geometry.size.height, initial: true) { _, height in
+                            listHeight = height
+                        }
+                        // Таббар вычитаем по безопасной области, а не числом:
+                        // высота списка приходит вместе с местом под ним, и
+                        // без этого последний ряд плиток уезжал под таббар.
+                        .onChange(of: geometry.safeAreaInsets.bottom, initial: true) { _, inset in
+                            listBottomInset = inset
+                        }
+                }
+            }
             .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
@@ -332,7 +361,18 @@ private extension ContentView {
         // Расписание спрашиваем один раз: строится оно примерно за миллисекунду,
         // а в теле оно нужно дважды — проверить, есть ли приёмы, и показать их.
         let slots = store.todaySlots
-        return VStack(spacing: 24) {
+        return VStack(spacing: 16) {
+            // Полоска дней первой строкой содержимого, а не прибитой панелью.
+            //
+            // Прибитая, она занимала место всегда, даже когда человек читает
+            // дневник и до прошлых дней ему нет дела. Первой строкой она
+            // стоит под шапкой, пока экран в покое, и уезжает под неё, стоит
+            // потянуть список вверх, — так же, как это делает поиск в списке
+            // чатов. Прокрутка её толкает, а не обходит.
+            WeekStrip(weeks: store.weekStripWeeks(),
+                      onSelect: { selectedHistoryDay = $0 },
+                      onShowAll: { showingActivity = true })
+
             PullableRing(
                 consumed: store.consumedToday,
                 goal: store.adaptedTodayGoal,
@@ -348,17 +388,11 @@ private extension ContentView {
                 },
                 onAway: { ringIsAway = $0 }
             )
+            // Кольцу — весь остаток: высоту блока задаёт экран, полоска и
+            // плитки берут своё, остальное кольцу. Так не нужно знать ни
+            // высоту полоски, ни число рядов — они меняются, а это нет.
+            .frame(maxHeight: .infinity)
 
-            MacrosCard(
-                macros: store.macrosToday,
-                proteinTarget: store.proteinTarget,
-                fatTarget: store.fatTarget,
-                carbsTarget: store.carbsTarget,
-                weightKg: store.weightKg,
-                onOpen: { showingDayNutrition = true },
-                focus: store.focusMacro
-            )
-            
             // Экран читается как отъезд камеры: кольцо и макросы —
             // сегодняшний день, дальше ближайший приём (часы),
             // голодание (ближайшие дни), план (недели вперёд) и
@@ -388,6 +422,21 @@ private extension ContentView {
                 )
                 .tile
             }
+
+            // Макросы под ними: приём и план — про то, что делать сейчас и
+            // куда идёшь, а макросы — отчёт о том, что уже съедено. Решение
+            // выше отчёта.
+            MacrosCard(
+                macros: store.macrosToday,
+                proteinTarget: store.proteinTarget,
+                fatTarget: store.fatTarget,
+                carbsTarget: store.carbsTarget,
+                fiber: store.micronutrients(on: Date()).fiber,
+                weightKg: store.weightKg,
+                onOpen: { showingDayNutrition = true },
+                focus: store.focusMacro
+            )
+            
 
             // Отмеченный день голодания — не строка в настройках, а
             // состояние сегодняшнего дня: пустой дневник в такой день
@@ -429,12 +478,6 @@ private extension ContentView {
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("weeklyReviewDue")
             }
-
-            // Неделя последней: это уже прошедшие дни, и открывают
-            // их реже всего.
-            WeekStrip(weeks: store.weekStripWeeks(),
-                      onSelect: { selectedHistoryDay = $0 },
-                      onShowAll: { showingActivity = true })
 
             if store.calorieBankBonus != 0 {
                 Button { showingBankInfo = true } label: {
@@ -810,7 +853,8 @@ private struct PullableRing: View {
             carbsTarget: carbsTarget,
             spinTicket: spinTicket,
             pullAngle: Double(pull.offset) * 1.4,
-            onOpen: onOpen
+            onOpen: onOpen,
+            fills: true
         )
         .padding(.top)
         // Покой — первое положение, которое увидели.

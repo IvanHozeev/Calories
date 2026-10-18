@@ -95,6 +95,14 @@ struct ProgressRing: View {
     /// Что делать по нажатию — записать еду.
     let onOpen: () -> Void
 
+    /// Кольцо занимает всё, что ему дали, а не свой размер.
+    ///
+    /// «Сегодня» отдаёт ему остаток высоты после плиток, и экран кончается
+    /// ровно у таббара. Числом это не задать: высота зависит от устройства,
+    /// от размера шрифта и от того, включено ли расписание приёмов, — любая
+    /// константа разъехалась бы на первом же чужом телефоне.
+    var fills = false
+
     /// Поворот как у знака на иконке: разрыв уходит на ту же диагональ,
     /// между часом и двумя, и кольцо узнаётся как тот же знак.
     private static let rotation: Double = -40
@@ -114,12 +122,23 @@ struct ProgressRing: View {
     /// Один в один знак в тридцать точек выходил волосяным: дуга в три точки
     /// на экране телефона — это уже линия, а не форма. Четверть сверху
     /// возвращает ей вес, не делая миниатюру толстым родственником кольца.
-    private static let strokeShare = 20.0 / 216.0 * 1.3
-    private var lineWidth: CGFloat { miniature.map { $0 * Self.strokeShare } ?? 20 }
-    /// Меньше прежних 230, но ненамного: знак — единственная крупная вещь на
-    /// экране, и слишком маленький он теряет вес, ради которого на него и
-    /// смотрят.
-    private var size: CGFloat { miniature ?? 216 }
+    private static let strokeShare = 30.0 / 236.0 * 1.3
+    /// Толще прежних двадцати.
+    ///
+    /// Форма соседнего приложения: там кольцо собрано из плотных кусков, и
+    /// именно толщина делает их кусками, а не линиями. У нас дуги остаются
+    /// знаком «С» — разрыв и поворот те же, — но набирают вес, и разрыв между
+    /// макросами читается как зазор между кусками, а не как промах пера.
+
+
+    /// Знак — единственная крупная вещь на экране, и мельчить его незачем.
+    /// Число здесь — запасное: его берут те места, где кольцо стоит само по
+    /// себе и мерить нечего.
+    private var size: CGFloat { miniature ?? 236 }
+
+    /// Толщина растёт вместе с диаметром: на большем круге та же дуга
+    /// выглядит тоньше, и знак перестаёт быть знаком.
+    private static let widthToSize = 30.0 / 236.0
 
     struct Segment: Identifiable, Equatable {
         let id: String
@@ -172,12 +191,12 @@ struct ProgressRing: View {
 
     /// Зазор между дугами — тот же расчёт, что у знака: скруглённые концы
     /// съедают тем больше градусов, чем толще дуга при том же радиусе.
-    private var gap: Double {
+    private func gap(lineWidth: CGFloat, size: CGFloat) -> Double {
         let radius = (size - lineWidth) / 2
         return 1.25 / (radius / lineWidth) * 180 / .pi
     }
 
-    private var segments: [Segment] {
+    private func segments(lineWidth: CGFloat, size: CGFloat) -> [Segment] {
         // Доли дуг — по граммам целей. Без целей (профиль не заполнен)
         // поровну; совсем крошечной дуге не даём пропасть — её не разглядеть.
         let targets = [carbsTarget ?? 0, fatTarget ?? 0, proteinTarget ?? 0]
@@ -194,7 +213,7 @@ struct ProgressRing: View {
             ("fat", showsTargets ? 1 : Self.ratio(macros.fat, fatTarget), Self.fatColors),
             ("protein", showsTargets ? 1 : Self.ratio(macros.protein, proteinTarget), Self.proteinColors),
         ]
-        let gap = gap
+        let gap = gap(lineWidth: lineWidth, size: size)
         let available = 360 - Self.opening - gap * Double(parts.count - 1)
         var cursor = Self.topEnd
         return parts.enumerated().map { index, part in
@@ -207,7 +226,21 @@ struct ProgressRing: View {
     }
 
     var body: some View {
-        ZStack {
+        if fills {
+            GeometryReader { geometry in
+                ring(side: min(geometry.size.width, geometry.size.height))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        } else {
+            ring(side: size)
+        }
+    }
+
+    /// Кольцо нарисованное под конкретный диаметр: толщина, зазоры и доли
+    /// дуг считаются от него, иначе на большем круге знак расползается.
+    private func ring(side: CGFloat) -> some View {
+        let lineWidth = miniature.map { $0 * Self.strokeShare } ?? side * Self.widthToSize
+        return ZStack {
             // Дуги — своей вьюхой, и это не про порядок в файле.
             //
             // Пока список тянут вниз, угол меняется на каждом кадре, и тело
@@ -215,7 +248,7 @@ struct ProgressRing: View {
             // с градиентами. Вынесенные дуги получают те же самые доли и цвета,
             // SwiftUI видит, что аргументы не изменились, и не перерисовывает
             // их — поворачивается уже готовая картинка.
-            RingArcs(segments: segments, lineWidth: lineWidth)
+            RingArcs(segments: segments(lineWidth: lineWidth, size: side), lineWidth: lineWidth)
                 // Одним слоем: каждая дуга крутилась отдельно,
                 // и на обороте цвета размазывались друг по другу. Склеенное кольцо
                 // поворачивается как цельная картинка.
@@ -233,7 +266,7 @@ struct ProgressRing: View {
                     .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
             }
         }
-        .frame(width: size, height: size)
+        .frame(width: side, height: side)
         // Размер кольца фиксирован, текст внутри масштабировать некуда.
         .dynamicTypeSize(...DynamicTypeSize.xxLarge)
         .contentShape(Circle())
@@ -311,7 +344,7 @@ private struct RingArcs: View {
                     // Толще дуга — заметнее и дорожка, поэтому она бледнее
                     // прежнего: на иконке дорожки нет вовсе, и здесь она
                     // должна читаться как место под цвет, а не как второй знак.
-                    .stroke(segment.colors[0].opacity(0.15),
+                    .stroke(segment.colors[0].opacity(0.13),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 // Своей дугой, а не общей: у этой есть анимируемые данные, и
                 // заливка растёт плавно, а не перескакивает.

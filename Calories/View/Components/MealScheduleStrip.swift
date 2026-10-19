@@ -156,6 +156,13 @@ struct MealScheduleSheet: View {
         MealSchedule.slots(settings: settings, entries: entries, dailyGoal: dailyGoal)
     }
 
+    /// Прожитые дни для сверки плана с фактом. Без дневника сверять нечего —
+    /// экран открывают и из настроек, где стора нет.
+    private var adherence: [MealAdherence.Day] {
+        guard settings.isEnabled, let store else { return [] }
+        return store.adherenceDays(schedule: settings)
+    }
+
     var body: some View {
         if isEmbedded {
             content
@@ -216,6 +223,21 @@ struct MealScheduleSheet: View {
                     }
                 } footer: {
                     explain("Съеденный приём закрывается сразу, не дожидаясь конца окна. Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.").map { Text($0) }
+                }
+
+                // Как расписание выглядит в жизни — ниже самого расписания.
+                //
+                // Сначала человек правит план, потом смотрит, сходится ли он
+                // с прожитыми днями: обратный порядок читался бы как упрёк на
+                // входе.
+                if !adherence.isEmpty {
+                    Section {
+                        MealAdherenceCard(days: adherence)
+                    } header: {
+                        Text("Как получается")
+                    } footer: {
+                        explain("Пунктир — время по расписанию, точки — дни, как они прошли. Считается по дням с записями, начиная с пятого.").map { Text($0) }
+                    }
                 }
             }
             // Напоминания переставляются на выходе: пока крутят стрелки,

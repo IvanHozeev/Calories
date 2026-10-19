@@ -505,6 +505,27 @@ extension CalorieStore {
             now: moment)
     }
 
+    /// План против факта за прошедшие дни.
+    ///
+    /// Сегодня не берём: день ещё идёт, и половина окон пуста просто потому,
+    /// что до них не дошло время. Пустой день — тоже не берём: забытый
+    /// дневник не значит пропущенные приёмы, а в выводах он выглядел бы
+    /// ровно так же.
+    func adherenceDays(back days: Int = 21,
+                       schedule: MealScheduleSettings,
+                       now: Date = Date()) -> [MealAdherence.Day] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: now)
+        return (1...max(days, 1)).compactMap { offset -> MealAdherence.Day? in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            let entries = (entriesByDay[date] ?? []).map { (date: $0.date, calories: $0.calories) }
+            guard !entries.isEmpty else { return nil }
+            return MealAdherence.day(date,
+                                     slots: slots(on: date, schedule: schedule, now: now),
+                                     entries: entries)
+        }
+    }
+
     /// Приёмы сегодняшнего дня по общим настройкам расписания.
     @MainActor
     var todaySlots: [MealSchedule.Slot] {

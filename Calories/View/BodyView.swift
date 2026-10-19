@@ -774,6 +774,7 @@ private extension BodyView {
                 entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
                 dailyGoal: store.adaptedTodayGoal,
                 settings: .shared,
+                store: store,
                 isEmbedded: true
             )
         } label: {

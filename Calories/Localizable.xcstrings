@@ -56229,6 +56229,98 @@
           }
         }
       }
+    },
+    "Вместе с GymLogger": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مع GymLogger"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zusammen mit GymLogger"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together with GymLogger"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Junto con GymLogger"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec GymLogger"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "יחד עם GymLogger"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Junto com o GymLogger"
+          }
+        }
+      }
+    },
+    "Журнал тренировок того же автора. Одна покупка открывает оба приложения.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سجل تمارين من المطوّر نفسه. عملية شراء واحدة تفتح التطبيقين."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Trainingstagebuch vom selben Autor. Ein Kauf schaltet beide Apps frei."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A training log by the same author. One purchase unlocks both apps."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un registro de entrenamientos del mismo autor. Una compra desbloquea ambas apps."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un carnet d’entraînement du même auteur. Un seul achat débloque les deux apps."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "יומן אימונים של אותו מפתח. רכישה אחת פותחת את שתי האפליקציות."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um registro de treinos do mesmo autor. Uma compra libera os dois apps."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

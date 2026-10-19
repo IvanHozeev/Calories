@@ -252,6 +252,28 @@ struct PaywallView: View {
             if let lifetime = purchases.lifetime {
                 offerCard(lifetime)
             }
+
+            // Пара приложений — своим блоком и ниже своих тарифов.
+            //
+            // Вперемешку с ними она читалась бы как ещё два непонятных тира
+            // Calories: человек сравнивал бы 44.99 с 59.99, не понимая, за
+            // что доплачивает. Отдельным заголовком видно, что это уже не
+            // про это приложение.
+            if !purchases.bundleProducts.isEmpty {
+                VStack(spacing: 8) {
+                    Text("Вместе с GymLogger")
+                        .font(.app(.subheadline, weight: .semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.top, 8)
+                    Text("Журнал тренировок того же автора. Одна покупка открывает оба приложения.")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    ForEach(purchases.bundleProducts) { product in
+                        offerCard(product)
+                    }
+                }
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 4)

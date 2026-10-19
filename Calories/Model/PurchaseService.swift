@@ -20,8 +20,14 @@ final class PurchaseService {
         static let monthly = "ivankhozeyev.team.Calories.premium.monthly"
         static let yearly = "ivankhozeyev.team.Calories.premium.yearly"
         static let lifetime = "ivankhozeyev.team.Calories.premium.lifetime"
+        /// Пара приложений одной покупкой. Открывает и GymLogger — он читает
+        /// флаг из общей папки, так же как мы читаем его.
+        static let bundleYearly = "ivankhozeyev.team.Calories.premium.bundle.yearly"
+        static let bundleLifetime = "ivankhozeyev.team.Calories.premium.bundle.lifetime"
 
-        static let all: [String] = [monthly, yearly, lifetime]
+        static let bundles: Set<String> = [bundleYearly, bundleLifetime]
+
+        static let all: [String] = [monthly, yearly, lifetime, bundleYearly, bundleLifetime]
     }
 
     private(set) var products: [Product] = []
@@ -32,9 +38,19 @@ final class PurchaseService {
 
     var isPremium: Bool { !purchasedIDs.isEmpty }
 
+    /// Куплена пара приложений, а не один Calories.
+    var hasBundle: Bool { !purchasedIDs.isDisjoint(with: ProductID.bundles) }
+
+    /// Тарифы на пару — отдельно: в пейволе они стоят своим блоком, иначе
+    /// читаются как ещё два непонятных тира Calories.
+    var bundleProducts: [Product] {
+        products.filter { ProductID.bundles.contains($0.id) }
+            .sorted { $0.price < $1.price }
+    }
+
     /// Подписки отдельно от разовой покупки — в интерфейсе они подаются по-разному.
     var subscriptions: [Product] {
-        products.filter { $0.type == .autoRenewable }
+        products.filter { $0.type == .autoRenewable && !ProductID.bundles.contains($0.id) }
             .sorted { $0.price < $1.price }
     }
 
@@ -80,6 +96,22 @@ final class PurchaseService {
             }
         }
         purchasedIDs = active
+        publishBundle()
+    }
+
+    /// Сказать соседу, что пара куплена здесь.
+    ///
+    /// Правило у обоих приложений одинаковое и держится на одном условии: в
+    /// общую папку уходит только собственная покупка. Подаренное соседом
+    /// право мы туда не пишем — иначе бандл открывал бы сам себя по кругу, и
+    /// никто уже не сказал бы, за что человек заплатил.
+    ///
+    /// Пишем на каждом пересчёте прав, а не один раз при покупке: подписку
+    /// возвращают и она истекает, и тогда флаг надо снять, а не оставить
+    /// навсегда.
+    private func publishBundle() {
+        UserDefaults(suiteName: CalorieStore.appGroup)?
+            .set(hasBundle, forKey: "shared_is_bundle")
     }
 
     @discardableResult

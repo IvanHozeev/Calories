@@ -21,6 +21,26 @@
       "productID": "ivankhozeyev.team.Calories.premium.lifetime",
       "referenceName": "Premium Lifetime",
       "type": "NonConsumable"
+    },
+    {
+      "displayPrice": "139.99",
+      "familyShareable": false,
+      "internalID": "6740480343",
+      "localizations": [
+        {
+          "description": "Calories и GymLogger вместе — навсегда.",
+          "displayName": "Обе программы навсегда",
+          "locale": "ru_RU"
+        },
+        {
+          "description": "Calories and GymLogger together — forever.",
+          "displayName": "Both Apps Forever",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "ivankhozeyev.team.Calories.premium.bundle.lifetime",
+      "referenceName": "Bundle Lifetime",
+      "type": "NonConsumable"
     }
   ],
   "settings": {},
@@ -89,6 +109,31 @@
           "productID": "ivankhozeyev.team.Calories.premium.yearly",
           "recurringSubscriptionPeriod": "P1Y",
           "referenceName": "Premium Yearly",
+          "subscriptionGroupID": "21398745",
+          "type": "RecurringSubscription"
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "59.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6740480341",
+          "localizations": [
+            {
+              "description": "Calories и GymLogger вместе: план питания и журнал тренировок, одной подпиской.",
+              "displayName": "Обе программы на год",
+              "locale": "ru_RU"
+            },
+            {
+              "description": "Calories and GymLogger together: the nutrition plan and the training log, one subscription.",
+              "displayName": "Both Apps Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "ivankhozeyev.team.Calories.premium.bundle.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Bundle Yearly",
           "subscriptionGroupID": "21398745",
           "type": "RecurringSubscription"
         }

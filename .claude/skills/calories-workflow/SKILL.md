@@ -90,35 +90,23 @@ xcrun swift-format format <файл.swift> | diff <файл.swift> - | head -40
 Проверка после правки:
 
 ```bash
-python3 - <<'PY'
-import json, re, os
-d=json.load(open('Calories/Localizable.xcstrings', encoding='utf-8'))
-have={k for k,v in d['strings'].items() if v.get('localizations')}
-pats=[r'String\(localized:\s*"([^"]+)"\)', r'Text\("([^"]+)"\)', r'Label\("([^"]+)",',
-      r'Button\("([^"]+)"\)', r'Section\("([^"]+)"\)', r'\.navigationTitle\("([^"]+)"\)',
-      r'Picker\("([^"]+)"', r'DatePicker\("([^"]+)"']
-missing={}
-for root,_,files in os.walk('Calories'):
-    for f in files:
-        if not f.endswith('.swift'): continue
-        s=open(os.path.join(root,f), encoding='utf-8').read()
-        for p in pats:
-            for x in re.findall(p, s, flags=re.S):
-                if re.search(r'[А-Яа-яЁё]', x) and x not in have and '\\(' not in x:
-                    missing.setdefault(x, f)
-print("БЕЗ ПЕРЕВОДА:", len(missing))
-for k,v in sorted(missing.items()): print(f"  {v:26} {k[:70]!r}")
-PY
+python3 Tools/check_localization.py [путь-к-DerivedData]
 ```
+
+Скрипт сверяет каталог не с регулярками по исходникам, а с ключами, которые
+компилятор выписал в `.stringsdata`. Это важно: строку с подстановкой —
+`Text("из \(goal) ккал")` — регулярка не сводит с ключом `из %lld ккал`, и
+пятнадцать таких строк прожили в приложении до первого скриншота английского
+интерфейса. Нужна любая свежая сборка; без аргумента скрипт берёт сборочный
+каталог Xcode.
 
 Исключение: названия языков в списке выбора («Русский») остаются на своём
 языке намеренно.
 
-Регулярки ловят не всё: строка внутри тернарника (`Label(x ? "А" : "Б", …)`)
-мимо них проходит, и так «Сохранить изменения» и «Расход по формуле» месяцами
-показывались по-русски в английском интерфейсе. Вторая проверка надёжнее —
-она смотрит не в код, а в сам каталог: Xcode выписывает туда все ключи, и
-ключ с кириллицей без локализаций значит непереведённую строку.
+Когда сборки под рукой нет, годится быстрая проверка по самому каталогу:
+ключ с кириллицей и без локализаций — это непереведённая строка. Она не
+заменяет первую (ключа, которого в каталоге ещё нет, она не увидит), но
+отвечает мгновенно.
 
 ```bash
 python3 -c "

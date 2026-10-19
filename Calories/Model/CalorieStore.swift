@@ -80,7 +80,7 @@ final class CalorieStore {
             // И в общую группу — сразу, а не до следующего пересчёта дня:
             // покупку совершают в одном приложении, а открыться она должна
             // в обоих, пока человек ещё помнит, за что платил.
-            groupDefaults?.set(isPremium, forKey: "shared_is_premium")
+            groupDefaults?.set(hasPurchasedPremium || isTrialActive, forKey: "shared_is_premium")
         }
     }
 
@@ -110,10 +110,34 @@ final class CalorieStore {
         return max(days, 0)
     }
 
-    /// Доступ к платному: куплено или идёт пробный период. Запись меняет только покупку.
+    /// Куплена пара приложений — здесь или в GymLogger.
+    ///
+    /// Разблокировка по соседству, а не общая подписка: она живёт в общей
+    /// папке и работает, пока оба приложения стоят на одном телефоне. Чек
+    /// соседа мы не проверяем и проверить не можем, поэтому это подарок
+    /// сверху, а не право. Сосед удалён и флага нет — приложение возвращается
+    /// к собственной покупке, а не запирается и не ругается.
+    ///
+    /// За купленный отдельно Calories GymLogger не открывается и наоборот:
+    /// открывает только бандл, иначе продаём одно, а отдаём два.
+    private(set) var bundleUnlocked = false
+
+    /// Доступ к платному: куплено, идёт пробный период или куплена пара.
+    /// Запись меняет только покупку.
     var isPremium: Bool {
-        get { hasPurchasedPremium || isTrialActive }
+        get { hasPurchasedPremium || isTrialActive || bundleUnlocked }
         set { hasPurchasedPremium = newValue }
+    }
+
+    /// Перечитать права, пришедшие от соседа.
+    ///
+    /// Вызывается при запуске и при каждом возвращении в приложение: покупку
+    /// совершают в GymLogger, пока мы в фоне, и узнать об этом иначе неоткуда.
+    func refreshSharedEntitlements() {
+        let bundle = (groupDefaults?.bool(forKey: "shared_is_bundle") ?? false)
+            || (groupDefaults?.bool(forKey: "gym_is_bundle") ?? false)
+        guard bundle != bundleUnlocked else { return }
+        bundleUnlocked = bundle
     }
 
     /// Пробный период был и кончился, а покупки нет — пэйвол говорит об этом прямо.
@@ -830,7 +854,10 @@ final class CalorieStore {
     /// живёт в двух приложениях и расходится в тот день, когда изменится здесь.
     private func publishShared() {
         groupDefaults?.set(adaptedTodayGoal - consumedToday, forKey: "shared_balance_today")
-        groupDefaults?.set(isPremium, forKey: "shared_is_premium")
+        // Своё, а не подаренное: иначе открытое по бандлу соседа уходило бы
+        // к нему же обратно как «премиум Calories», и никто бы уже не сказал,
+        // за что именно человек заплатил.
+        groupDefaults?.set(hasPurchasedPremium || isTrialActive, forKey: "shared_is_premium")
     }
 
     /// Когда человек ел в последний раз и насколько плотно.

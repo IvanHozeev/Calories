@@ -70,7 +70,11 @@ struct RootView: View {
         .environment(purchases)
         // Меню на иконке пересобираем на каждом подъёме: камера в нём появляется
         // только вместе с ключом, а его вводят прямо во время работы приложения.
-        .task { quickActions.refreshShortcutItems() }
+        .task {
+            quickActions.refreshShortcutItems()
+            // Бандл могли купить в GymLogger, пока нас тут не было.
+            store.refreshSharedEntitlements()
+        }
         .onChange(of: quickActions.pending) { _, action in
             guard action != nil else { return }
             // Онбординг висит фулскрин-кавером поверх табов. Подниматься из-под него
@@ -86,6 +90,7 @@ struct RootView: View {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 store.refreshIfDayChanged()
+                store.refreshSharedEntitlements()
                 stepStore.fetchAll()
                 quickActions.refreshShortcutItems()
             }

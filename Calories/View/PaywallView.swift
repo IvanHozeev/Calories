@@ -38,7 +38,16 @@ struct PaywallView: View {
     @State private var isPurchasing = false
 
     /// Кончился пробный период — говорим об этом, откуда бы ни открыли пэйвол.
-    private var shownFocus: PaywallFocus { store.trialEnded ? .trialEnded : focus }
+    /// Открытому бандлом про конец пробного периода говорить нечего: доступ
+    /// у него есть, и «пробные две недели закончились» звучит как потеря.
+    private var shownFocus: PaywallFocus {
+        store.trialEnded && !unlockedByBundle ? .trialEnded : focus
+    }
+
+    /// Открыто бандлом: своей покупки нет, но пара приложений куплена в
+    /// GymLogger. Показывать цены здесь нельзя — человек уже заплатил, и
+    /// тарифы читаются как требование заплатить снова.
+    private var unlockedByBundle: Bool { store.bundleUnlocked && !purchases.isPremium }
 
     private var selectedProduct: Product? {
         purchases.products.first { $0.id == selectedID }
@@ -54,6 +63,8 @@ struct PaywallView: View {
 
                 if purchases.isPremium {
                     activeState
+                } else if unlockedByBundle {
+                    bundleState
                 } else if purchases.isLoading {
                     ProgressView().padding(.vertical, 40)
                 } else if purchases.loadFailed {
@@ -82,7 +93,7 @@ struct PaywallView: View {
         // тарифами до неё надо было доскроллить: человек соглашался купить и
         // искал, чем. Теперь она на месте, где палец её и ждёт.
         .safeAreaBar(edge: .bottom) {
-            if !purchases.isPremium, !purchases.isLoading, !purchases.loadFailed {
+            if !purchases.isPremium, !unlockedByBundle, !purchases.isLoading, !purchases.loadFailed {
                 purchaseBar
             }
         }
@@ -181,6 +192,32 @@ struct PaywallView: View {
                 .foregroundStyle(.green)
         }
         .font(.app(.subheadline))
+    }
+
+    /// То же место, где обычно тарифы, но вместо них — откуда взялся доступ.
+    private var bundleState: some View {
+        VStack(spacing: 10) {
+            Label("Открыто бандлом", systemImage: "checkmark.seal.fill")
+                .font(.app(.headline))
+                .foregroundStyle(.green)
+            Text("Calories и GymLogger куплены вместе — платить второй раз не нужно.")
+                .font(.app(.subheadline))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            // Честно про границу подарка: флаг живёт в общей папке двух
+            // приложений, и если соседа снести, доступ вернётся к своей
+            // покупке. Узнать об этом лучше здесь, чем на закрытом экране.
+            Text("Доступ держится, пока GymLogger стоит на этом телефоне.")
+                .font(.app(.caption))
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+            Button("Готово") { dismiss() }
+                .buttonStyle(.borderedProminent)
+                .padding(.top, 4)
+        }
+        .padding(.top, 12)
+        .padding(.horizontal, 24)
+        .accessibilityIdentifier("bundleUnlocked")
     }
 
     private var activeState: some View {

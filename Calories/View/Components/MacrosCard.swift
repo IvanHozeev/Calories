@@ -117,16 +117,16 @@ struct MacrosCard: View {
 
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(verbatim: value.map { String(format: "%.0f", $0) } ?? "—")
-                        .font(.app(.title3, weight: .semibold))
+                        .font(.app(.headline))
                         .foregroundStyle(color)
                         .contentTransition(.numericText())
                     if let target {
                         Text(verbatim: "/ \(Int(target.rounded()))")
-                            .font(.app(.caption))
+                            .font(.app(.caption2))
                             .foregroundStyle(.tertiary)
                     }
                     Text("г")
-                        .font(.app(.caption))
+                        .font(.app(.caption2))
                         .foregroundStyle(.tertiary)
                     Spacer(minLength: 0)
                 }
@@ -148,7 +148,15 @@ struct MacrosCard: View {
             .padding(.vertical, 10)
             .frame(height: TodayTile.height)
             .contentShape(RoundedRectangle(cornerRadius: 18))
-            .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
+            // Цвет карточки, а не стекло.
+            //
+            // `glassEffect` рисует не только форму, но и мягкое поле вокруг
+            // неё. У шести плиток, стоящих вплотную, эти поля складываются в
+            // прямоугольник на пару тонов темнее фона: в тёмной теме его не
+            // видно, а в светлой под нижним рядом торчал чужой край. Тот же
+            // цвет, что у строк дневника, — плитки читаются как карточки
+            // одного экрана и ничего вокруг себя не рисуют.
+            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(identifier ?? "")

@@ -49,7 +49,7 @@ struct TodayTile: View {
                 }
 
                 Text(verbatim: value)
-                    .font(.app(.headline))
+                    .font(.app(.subheadline, weight: .semibold))
                     .lineLimit(2)
                     .minimumScaleFactor(0.75)
                     .multilineTextAlignment(.leading)
@@ -72,7 +72,15 @@ struct TodayTile: View {
             .padding(.vertical, 8)
             .frame(height: Self.height)
             .contentShape(RoundedRectangle(cornerRadius: 18))
-            .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
+            // Цвет карточки, а не стекло.
+            //
+            // `glassEffect` рисует не только форму, но и мягкое поле вокруг
+            // неё. У шести плиток, стоящих вплотную, эти поля складываются в
+            // прямоугольник на пару тонов темнее фона: в тёмной теме его не
+            // видно, а в светлой под нижним рядом торчал чужой край. Тот же
+            // цвет, что у строк дневника, — плитки читаются как карточки
+            // одного экрана и ничего вокруг себя не рисуют.
+            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)

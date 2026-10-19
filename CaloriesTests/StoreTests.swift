@@ -359,9 +359,9 @@ struct CalorieStoreTests {
     /// Ночной перекус идёт с 23:00 до 05:00, поэтому запись в 00:30 — самая ранняя за день,
     /// хотя её приём пищи стоит последним в MealPeriod. Порядок групп должен идти
     /// от свежей записи к старой по фактическому времени.
-    /// Порядок приёмов — порядок суток, а «Перекус» всегда в конце: его
-    /// записи приходят и в полночь, и под утро, но человек считает их хвостом
-    /// дня, а не его началом.
+    /// Порядок приёмов — порядок часов, а не порядок типов. Ночной перекус
+    /// в половине первого съеден раньше завтрака, и стоять он должен там же,
+    /// где прожит, — в начале дня.
     @Test func groupedTodayEntries_followTheOrderOfTheDay() {
         let calendar = Calendar.current
         func today(hour: Int, minute: Int) -> Date {
@@ -373,8 +373,22 @@ struct CalorieStoreTests {
         store.add(name: "Ужин", calories: 300, date: today(hour: 19, minute: 0))
 
         let periods = store.groupedTodayEntries.map(\.period)
-        #expect(periods == [.breakfast, .dinner, .nightSnack],
-                "День должен читаться сверху вниз, а перекус — стоять последним")
+        #expect(periods == [.nightSnack, .breakfast, .dinner],
+                "День должен читаться по часам, сверху вниз")
+    }
+
+    /// А перекус до полуночи остаётся хвостом дня — по тем же часам.
+    @Test func groupedTodayEntries_lateSnackStaysLast() {
+        let calendar = Calendar.current
+        func today(hour: Int, minute: Int) -> Date {
+            calendar.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()
+        }
+
+        store.add(name: "Завтрак", calories: 200, date: today(hour: 9, minute: 0))
+        store.add(name: "Ужин", calories: 300, date: today(hour: 19, minute: 0))
+        store.add(name: "Поздний", calories: 100, date: today(hour: 23, minute: 30))
+
+        #expect(store.groupedTodayEntries.map(\.period) == [.breakfast, .dinner, .nightSnack])
     }
 
     /// День читается сверху вниз, как он и прожит: внутри приёма записи идут

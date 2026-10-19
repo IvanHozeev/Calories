@@ -122,7 +122,7 @@ struct ProgressRing: View {
     /// Один в один знак в тридцать точек выходил волосяным: дуга в три точки
     /// на экране телефона — это уже линия, а не форма. Четверть сверху
     /// возвращает ей вес, не делая миниатюру толстым родственником кольца.
-    private static let strokeShare = 30.0 / 236.0 * 1.3
+    private static let strokeShare = 26.0 / 236.0 * 1.3
     /// Толще прежних двадцати.
     ///
     /// Форма соседнего приложения: там кольцо собрано из плотных кусков, и
@@ -138,7 +138,11 @@ struct ProgressRing: View {
 
     /// Толщина растёт вместе с диаметром: на большем круге та же дуга
     /// выглядит тоньше, и знак перестаёт быть знаком.
-    private static let widthToSize = 30.0 / 236.0
+    ///
+    /// Доля подобрана под вес шрифта на плитках: когда числа под кольцом
+    /// похудели на ступень, прежняя дуга рядом с ними стала грубой. Знак и
+    /// текст должны читаться как одна рука, а не как плакат и подпись к нему.
+    private static let widthToSize = 26.0 / 236.0
 
     struct Segment: Identifiable, Equatable {
         let id: String
@@ -260,7 +264,7 @@ struct ProgressRing: View {
             .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
 
             if miniature == nil {
-                centerLabel
+                centerLabel(side: side)
                     // Без своей анимации contentTransition ничего не делает, и
                     // число подменялось за кадр, пока дуга ехала.
                     .animation(.spring(response: 0.65, dampingFraction: 0.85), value: consumed)
@@ -281,7 +285,20 @@ struct ProgressRing: View {
         .accessibilityAddTraits(.isButton)
     }
 
-    private var centerLabel: some View {
+    /// Размер, на котором выверены шрифты внутри кольца. Всё остальное —
+    /// доля от него: кольцу «Сегодня» высоту даёт экран, и на дне без еды,
+    /// где ещё висит напоминание взвеситься, оно садится вдвое. Число тогда
+    /// оставалось прежним и вылезало за дуги — знак переставал быть кругом.
+    private static let designSide: CGFloat = 236
+
+    private func centerLabel(side: CGFloat) -> some View {
+        // Не меньше двух третей: ниже этого подписи становятся нечитаемыми,
+        // и честнее показать тесный центр, чем мелкий шрифт, который никто
+        // не разберёт.
+        let scale = max(min(side / Self.designSide, 1), 0.66)
+        // Текст живёт во вписанном квадрате, а не во всей рамке: угол круга
+        // отнимает у строки больше, чем кажется.
+        let inner = side * 0.62
         // Крупным идёт остаток, а не съеденное: смотрят на кольцо ради одного
         // вопроса — сколько ещё можно. Съеденное осталось, но ушло вниз: это
         // справка, а не то, ради чего сюда смотрят.
@@ -293,11 +310,12 @@ struct ProgressRing: View {
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Text(verbatim: "\(goal)")
-                    .font(.app(size: 40, weight: .bold))
+                    .font(.app(size: 40 * scale, weight: .bold))
                 Text("ккал в день")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
-            })
+            }
+            .fitsInRing(width: inner, scale: scale))
         }
         return AnyView(VStack(spacing: 2) {
             // Тихо, как подписи плашек: цвет только у слова «Перебор», число
@@ -311,7 +329,7 @@ struct ProgressRing: View {
             // Чуть мельче прежнего: знак уже кольца, и прежние 42 упирались
             // в дуги на четырёхзначном остатке.
             Text("\(abs(remaining))")
-                .font(.app(size: 40, weight: .bold))
+                .font(.app(size: 40 * scale, weight: .bold))
                 .foregroundStyle(Color.primary)
                 .contentTransition(.numericText())
             Text("из \(goal) ккал")
@@ -321,7 +339,22 @@ struct ProgressRing: View {
                 .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
                 .contentTransition(.numericText())
-        })
+        }
+        .fitsInRing(width: inner, scale: scale))
+    }
+}
+
+private extension View {
+    /// Держит содержимое центра внутри круга: одна строка, ширина по
+    /// вписанному квадрату, и запас на сжатие для четырёхзначных чисел с
+    /// разделителем — «2 713» шире, чем «162», а место под них одно.
+    func fitsInRing(width: CGFloat, scale: CGFloat) -> some View {
+        frame(maxWidth: width)
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            // Мелкому кольцу мелкие подписи: шкала системного шрифта на
+            // крошечном круге выталкивает строки за дуги так же, как число.
+            .dynamicTypeSize(scale < 0.85 ? ...DynamicTypeSize.large : ...DynamicTypeSize.xxLarge)
     }
 }
 

@@ -86,6 +86,10 @@ struct ContentView: View {
             List {
                 Section {
                     summaryCards
+                        // Ровно видимая часть списка: только так кольцу
+                        // достаётся весь остаток. С «не меньше» список
+                        // считает высоту блока по содержимому, и кольцо
+                        // получает свой минимум вместо свободного места.
                         .frame(height: summaryHeight)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -93,9 +97,26 @@ struct ContentView: View {
                 }
                 .listSectionSeparator(.hidden)
 
+                // Подсказки — отдельной строкой сразу под первым экраном:
+                // свою высоту они берут у дневника, а не у кольца.
+                if hasDayHints {
+                    Section {
+                        dayHints
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                    }
+                    .listSectionSeparator(.hidden)
+                }
+
+                // Стекло — только строкам дневника.
+                //
+                // На списке целиком оно побеждало прозрачный фон, заданный
+                // строке: первый экран получал белую плашку во всю свою
+                // высоту, и в светлой теме под плитками торчал её край.
                 diarySections
+                    .glassRow()
             }
-            .glassRow()
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
             .onChange(of: copiedEntryID) { _, id in
@@ -301,6 +322,7 @@ struct ContentView: View {
                 MealScheduleSheet(entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
                                   dailyGoal: store.adaptedTodayGoal,
                                   settings: mealSchedule,
+                                  store: store,
                                   isEmbedded: true)
             }
             .navigationDestination(isPresented: $showingPaywall) {
@@ -391,7 +413,17 @@ private extension ContentView {
             // Кольцу — весь остаток: высоту блока задаёт экран, полоска и
             // плитки берут своё, остальное кольцу. Так не нужно знать ни
             // высоту полоски, ни число рядов — они меняются, а это нет.
-            .frame(maxHeight: .infinity)
+            //
+            // Но не меньше своего минимума: знак с крупным числом внутри —
+            // главное на экране, и уступать место подсказке он не должен.
+            // Если всё вместе не влезло, блок станет выше экрана, и дневник
+            // начнётся чуть ниже — это дешевле раздавленного кольца.
+            .frame(minHeight: 240, maxHeight: .infinity)
+            // Немного воздуха сверху и снизу: знак берёт не весь остаток, а
+            // остаток минус поля. Диаметр считается по меньшей стороне, так
+            // что эти четырнадцать точек с каждой стороны и есть «чуть
+            // поменьше» — и заодно кольцо перестаёт упираться в плитки.
+            .padding(.vertical, 14)
 
             // Экран читается как отъезд камеры: кольцо и макросы —
             // сегодняшний день, дальше ближайший приём (часы),
@@ -405,6 +437,7 @@ private extension ContentView {
             // воздухом, и таких полос подряд стояло две. Плитки занимают ту же
             // высоту вдвоём, сколько раньше одна полоса, и читаются как два
             // ответа на два разных вопроса: когда есть и куда иду.
+            VStack(spacing: 12) {
             HStack(spacing: 12) {
                 if mealSchedule.isEnabled, !slots.isEmpty {
                     MealScheduleStrip(slots: slots,
@@ -436,8 +469,40 @@ private extension ContentView {
                 onOpen: { showingDayNutrition = true },
                 focus: store.focusMacro
             )
-            
+            }
 
+        }
+    }
+
+    /// Есть ли сегодня хоть одна подсказка.
+    ///
+    /// Спрашиваем до того, как строить строку: пустая строка в списке — это
+    /// не ничто, а пустая плашка с фоном и отступами, и под плитками
+    /// оставался светлый обрезок с провалом до дневника.
+    private var hasDayHints: Bool {
+        if store.fastingHint() != nil { return true }
+        if store.reviewIsDue, store.proposedGoal != nil { return true }
+        if store.calorieBankBonus != 0 { return true }
+        if !store.isPremium, store.plan == nil { return true }
+        if store.profile == nil { return true }
+        return !store.hasWeighedToday
+    }
+
+    /// Подсказки дня: голодание, недельный обзор, банк калорий, напоминание
+    /// взвеситься.
+    ///
+    /// Своей строкой под первым экраном, а не внутри него.
+    ///
+    /// Они приходят и уходят — сегодня висит «взвесься», завтра банк, а
+    /// послезавтра ничего, — и пока они стояли в блоке фиксированной высоты,
+    /// каждая отнимала место у кольца: в день без еды, где подсказок больше
+    /// всего, знак садился вдвое и выглядел карликом. Теперь состав первого
+    /// экрана постоянный — полоска, кольцо, шесть плиток, — и кольцо всегда
+    /// одного размера. Подсказки же никуда не делись: они сразу под ним, в
+    /// одном движении прокрутки.
+    @ViewBuilder
+    var dayHints: some View {
+        VStack(spacing: 16) {
             // Отмеченный день голодания — не строка в настройках, а
             // состояние сегодняшнего дня: пустой дневник в такой день
             // должен читаться как «так и задумано», а не как провал.
@@ -560,7 +625,6 @@ private extension ContentView {
                 }
                 .buttonStyle(.plain)
             }
-
         }
     }
 

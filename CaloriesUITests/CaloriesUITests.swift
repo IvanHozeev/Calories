@@ -290,8 +290,11 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testSearchTabOpensTheFoodScreen() {
         let app = launchApp()
-        let tab = app.tabBars.buttons["Search"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки поиска")
+        // Вкладка называется «Рацион» («Pantry» на английской локали, на
+        // которой идёт набор): за ней лежит вся еда, а поиск — лишь способ
+        // в ней найти нужное.
+        let tab = app.tabBars.buttons["Pantry"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки рациона")
         tab.tap()
 
         // Раздел выбирается меню в тулбаре: своих продуктов, блюд и базы.

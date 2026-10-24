@@ -90,21 +90,18 @@ struct PlanEditorView: View {
                 }
 
                 Section {
-                    ForEach($phases) { $phase in
-                        NavigationLink {
-                            PlanPhaseEditorView(phase: $phase,
-                                                startWeightKg: weight(atStartOf: phase),
-                                                isFirst: phases.first?.id == phase.id)
-                        } label: {
-                            phaseRow(phase)
-                        }
+                    // Перетаскивать фазы можно прямо так, без «Править».
+                    //
+                    // Порядок фаз — это и есть план: сушка перед набором или
+                    // после — разные годы жизни. А чтобы поменять их местами,
+                    // надо было сперва вспомнить, что где-то есть режим
+                    // правки. С iOS 27 список умеет это сам; на 26 остаётся
+                    // прежний способ, он никуда не делся.
+                    if #available(iOS 27, *) {
+                        phaseRows.reorderable()
+                    } else {
+                        phaseRows
                     }
-                    .onDelete { offsets in
-                        // Последнюю не отдаём: план без единой фазы — это не план.
-                        guard phases.count > offsets.count else { return }
-                        phases.remove(atOffsets: offsets)
-                    }
-                    .onMove { phases.move(fromOffsets: $0, toOffset: $1) }
 
                     Menu {
                         ForEach(PlanIntent.allCases) { intent in
@@ -232,6 +229,26 @@ struct PlanEditorView: View {
             weight += earlier.weeklyRateKg(fromWeightKg: weight) * Double(earlier.durationWeeks)
         }
         return weight
+    }
+
+    /// Фазы списком — отдельным свойством, чтобы переупорядочивание
+    /// включалось только там, где оно есть, а сам список не раздваивался.
+    private var phaseRows: some DynamicViewContent {
+        ForEach($phases) { $phase in
+            NavigationLink {
+                PlanPhaseEditorView(phase: $phase,
+                                    startWeightKg: weight(atStartOf: phase),
+                                    isFirst: phases.first?.id == phase.id)
+            } label: {
+                phaseRow(phase)
+            }
+        }
+        .onDelete { offsets in
+            // Последнюю не отдаём: план без единой фазы — это не план.
+            guard phases.count > offsets.count else { return }
+            phases.remove(atOffsets: offsets)
+        }
+        .onMove { phases.move(fromOffsets: $0, toOffset: $1) }
     }
 
     private func phaseRow(_ phase: PlanPhase) -> some View {

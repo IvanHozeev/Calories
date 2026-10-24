@@ -264,7 +264,7 @@ enum MealSchedule {
         // больше, чем на полдник.
         let sharing = upcoming.filter { leftovers[$0] == nil }
         let weightAhead = sharing.reduce(0.0) { $0 + weight(of: periods[$1]) }
-        var remainingToShare = max(0, remaining - leftovers.values.reduce(0, +))
+        let remainingToShare = max(0, remaining - leftovers.values.reduce(0, +))
         var handed = 0
 
         for (index, bound) in bounds.enumerated() {

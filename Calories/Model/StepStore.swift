@@ -473,6 +473,11 @@ final class StepStore {
                 hours.append(RestingPulse.Hour(start: stats.startDate, average: average))
             }
             guard !hours.isEmpty else { return }
+            // Снимок, а не сама переменная: обработчик HealthKit складывал в
+            // неё часы и тут же отдавал её задаче на главном акторе — две
+            // нити на одном массиве. Сейчас это предупреждение, в Swift 6
+            // будет ошибка, и правильно: копия стоит дёшево, гонка дорого.
+            let measured = hours
             Task { @MainActor [weak self] in
                 guard let self else { return }
                 // Окно сна, если оно известно: тогда считаем дно именно по нему,
@@ -483,7 +488,7 @@ final class StepStore {
                         windows[calendar.startOfDay(for: day.date)] = (bed, wake)
                     }
                 }
-                let byDay = RestingPulse.daily(from: hours, sleep: windows, calendar: calendar)
+                let byDay = RestingPulse.daily(from: measured, sleep: windows, calendar: calendar)
                 guard !byDay.isEmpty else { return }
                 self.history.remember(byDay.map {
                     ActivityDay(date: $0.key, steps: 0, restingPulse: $0.value)

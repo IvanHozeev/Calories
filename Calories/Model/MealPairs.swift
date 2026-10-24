@@ -95,7 +95,7 @@ enum MealPairs {
 
     /// Имена сравниваем без регистра и лишних пробелов: «Протеин AllIn» и
     /// «протеин allin» — один и тот же продукт, а не два разных.
-    static func normalized(_ name: String) -> String {
+    nonisolated static func normalized(_ name: String) -> String {
         name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 

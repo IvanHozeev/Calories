@@ -148,15 +148,9 @@ struct MacrosCard: View {
             .padding(.vertical, 10)
             .frame(height: TodayTile.height)
             .contentShape(RoundedRectangle(cornerRadius: 18))
-            // Цвет карточки, а не стекло.
-            //
-            // `glassEffect` рисует не только форму, но и мягкое поле вокруг
-            // неё. У шести плиток, стоящих вплотную, эти поля складываются в
-            // прямоугольник на пару тонов темнее фона: в тёмной теме его не
-            // видно, а в светлой под нижним рядом торчал чужой край. Тот же
-            // цвет, что у строк дневника, — плитки читаются как карточки
-            // одного экрана и ничего вокруг себя не рисуют.
-            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18))
+            // Стекло, собранное руками: заливка, кант и тень. Почему не
+            // системное — в `TileSurface`.
+            .tileSurface()
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(identifier ?? "")

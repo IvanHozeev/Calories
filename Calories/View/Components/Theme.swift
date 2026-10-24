@@ -103,6 +103,70 @@ extension View {
     }
 }
 
+/// Поверхность плитки: стекло, собранное руками.
+///
+/// Рецепт — тот же, что у карточек соседнего приложения, и взят у него же.
+/// Системное `glassEffect` сюда не годится: вокруг него есть поле, и шесть
+/// плиток, стоящих вплотную, складывают эти поля в прямоугольник на пару
+/// тонов темнее фона — в светлой теме он торчал из-под нижнего ряда. У соседа
+/// карточки идут по одной в ряд, складывать нечего, поэтому там системное
+/// стекло выглядит чисто, а у нас не могло.
+///
+/// Собрано из трёх вещей, ни одна из которых поля не создаёт:
+///
+/// - заливка — материал, а поверх него почти непрозрачная краска. Материал
+///   здесь работает подложкой, а не стеклом: это и убирает любое потемнение
+///   от соседей, ценой того, что стекло остаётся намёком;
+/// - кант ровно в одну точку и градиентный сверху вниз: свет падает сверху,
+///   поэтому верхняя кромка почти белая, нижняя почти исчезает. Объём даёт
+///   именно он;
+/// - скругление непрерывное и не мельче восемнадцати — на меньшем форма
+///   начинает спорить с содержимым.
+///
+/// Теней нет намеренно. Любая заметная тень на светлом сером фоне читается не
+/// как объём, а как подложка, и плитки выглядят наклеенными поверх экрана.
+struct TileSurface: ViewModifier {
+    var cornerRadius: CGFloat = 20
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var strokeColors: [Color] {
+        colorScheme == .dark
+            ? [.white.opacity(0.18), .white.opacity(0.02)]
+            : [.white.opacity(0.90), .black.opacity(0.04)]
+    }
+
+    private var tint: Color {
+        colorScheme == .dark ? .white.opacity(0.08) : .white.opacity(0.92)
+    }
+
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: max(cornerRadius, 18), style: .continuous)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                shape
+                    .fill(.ultraThinMaterial)
+                    .overlay(shape.fill(tint))
+            }
+            .overlay {
+                shape.strokeBorder(
+                    LinearGradient(colors: strokeColors, startPoint: .top, endPoint: .bottom),
+                    lineWidth: 1
+                )
+            }
+            .clipShape(shape)
+    }
+}
+
+extension View {
+    /// Плитка «Сегодня»: приём, план и четыре макроса.
+    func tileSurface(cornerRadius: CGFloat = 20) -> some View {
+        modifier(TileSurface(cornerRadius: cornerRadius))
+    }
+}
+
 /// Вдавленность: канавка, прорезанная в поверхности карточки.
 ///
 /// Приём один на кольцо, полосу и всё остальное, что показывает прогресс, поэтому
@@ -246,7 +310,10 @@ enum AppAccent: String, CaseIterable, Identifiable {
     case focus
     case system, kcal, protein, fat, carbs
 
-    static let defaultsKey = "app_accent"
+    /// Ключ читают и там, где главного актора нет: виджет собирает цвет в
+    /// фоновом проходе, не заходя в интерфейс. Константе изоляция не нужна —
+    /// это строка, а не состояние.
+    nonisolated static let defaultsKey = "app_accent"
 
     var id: String { rawValue }
 

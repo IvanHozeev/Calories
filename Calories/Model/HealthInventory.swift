@@ -34,7 +34,10 @@ final class HealthInventory {
     }
 
     /// Сколько дней назад смотрим.
-    static let window = 30
+    /// Константа, а не состояние: её читают и из `isDense`, который зовут
+    /// вне главного актора. Изоляция тут ничего не защищает — число и так
+    /// не меняется.
+    nonisolated static let window = 30
 
     private let healthStore = HKHealthStore()
     private(set) var rows: [Row] = []

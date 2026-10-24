@@ -1,5 +1,9 @@
 import Foundation
-import UserNotifications
+// Центр уведомлений — тип из старого мира без пометок о пересылке между
+// нитями, а его колбэки приходят не на главном акторе. Пометка на импорте
+// говорит компилятору ровно это, вместо того чтобы глушить предупреждения
+// поштучно в каждом замыкании.
+@preconcurrency import UserNotifications
 import OSLog
 
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories", category: "meal-reminders")
@@ -111,7 +115,9 @@ enum MealReminders {
     /// того, что уже съедено, а содержимое уведомления фиксируется при
     /// постановке — и назавтра показывало бы вчерашнюю арифметику. Доля приёма
     /// от дневной нормы такой беды не знает: она одна и та же изо дня в день.
-    static func body(for meal: PlannedMeal) -> String {
+    /// Текст собирается в колбэке центра уведомлений, то есть вне главного
+    /// актора: состояния тут нет, только подстановка чисел в строку.
+    nonisolated static func body(for meal: PlannedMeal) -> String {
         guard let suggestion = meal.suggestion else {
             return String(format: String(localized: "%lld ккал по плану"), meal.calories)
         }

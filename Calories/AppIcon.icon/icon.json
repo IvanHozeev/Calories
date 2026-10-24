@@ -1,0 +1,41 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:1.00000,1.00000,1.00000,1.00000",
+      "srgb:0.94118,0.94902,0.98824,1.00000"
+    ]
+  },
+  "fill-specializations" : [
+    {
+      "appearance" : "dark",
+      "value" : "system-dark"
+    }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Ring.svg",
+          "name" : "Ring"
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Sign",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

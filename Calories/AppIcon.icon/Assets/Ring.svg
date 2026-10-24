@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<defs>
+  <linearGradient id="carbs" gradientUnits="userSpaceOnUse" x1="241.80" y1="668.00" x2="618.71" y2="218.82">
+    <stop offset="0" stop-color="#AC66FF"/>
+    <stop offset="1" stop-color="#BF7FFF"/>
+  </linearGradient>
+  <linearGradient id="protein" gradientUnits="userSpaceOnUse" x1="813.37" y1="431.25" x2="555.42" y2="820.96">
+    <stop offset="0" stop-color="#00CBE6"/>
+    <stop offset="1" stop-color="#00AED2"/>
+  </linearGradient>
+  <linearGradient id="fat" gradientUnits="userSpaceOnUse" x1="512.00" y1="824.00" x2="266.14" y2="704.09">
+    <stop offset="0" stop-color="#FF642E"/>
+    <stop offset="1" stop-color="#FF9963"/>
+  </linearGradient>
+</defs>
+  <path d="M 241.80 668.00 A 312.00 312.00 0 0 1 618.71 218.82" fill="none" stroke="url(#carbs)" stroke-width="122.00" stroke-linecap="round"/>
+  <path d="M 813.37 431.25 A 312.00 312.00 0 0 1 555.42 820.96" fill="none" stroke="url(#protein)" stroke-width="122.00" stroke-linecap="round"/>
+  <path d="M 512.00 824.00 A 312.00 312.00 0 0 1 266.14 704.09" fill="none" stroke="url(#fat)" stroke-width="122.00" stroke-linecap="round"/>
+</svg>

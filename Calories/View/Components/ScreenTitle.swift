@@ -79,6 +79,25 @@ struct ScreenTitle: View {
     }
 }
 
+/// Ширина окна, в котором живёт шапка.
+///
+/// Не `UIScreen.main`: с iOS 26 он объявлен устаревшим и в iOS 27 остался
+/// только ради совместимости. Дело не в предупреждении компилятора — экран и
+/// окно перестали совпадать: на айпаде в Stage Manager и в разделённом экране
+/// окно уже́ экрана, и заголовок, посчитанный по экрану, уезжал под кнопки.
+///
+/// Берём активную сцену, как и советует Apple взамен: сначала ключевое окно,
+/// потом экран сцены, и только если нет ни того ни другого — ширина iPhone,
+/// на которой заголовки и выверялись.
+enum BarWidth {
+    static var current: CGFloat {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        if let window = scene?.keyWindow?.bounds.width, window > 0 { return window }
+        return scene?.screen.bounds.width ?? 393
+    }
+}
+
 extension View {
     /// Ширина промежутка между кнопками шапки — та, которую заголовок забирает
     /// себе, чтобы встать у его левого края, а не по центру.
@@ -87,7 +106,7 @@ extension View {
     /// каждый заголовок вправо: слот и так начинается после кнопки. А взять всю
     /// панель целиком — наоборот, увести его за левый край.
     func inBar(back: Bool = true, trailingButtons: Int = 0) -> some View {
-        let width = UIScreen.main.bounds.width - 48
+        let width = BarWidth.current - 48
             - (back ? 44 : 0)
             - CGFloat(trailingButtons) * 46
         return frame(width: max(120, width), alignment: .leading)

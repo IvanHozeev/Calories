@@ -169,7 +169,9 @@ extension CompositionChange {
         }
         switch (intent, verdict(for: intent)) {
         case (.cut, .worked):
-            return String(localized: "Вес уходит жиром, сухая масса на месте — так дефицит и должен выглядеть.")
+            // Хвост «так дефицит и должен выглядеть» повторял зелёную
+            // галочку над строкой: она уже сказала, что всё идёт верно.
+            return String(localized: "Вес уходит жиром, сухая масса на месте.")
         case (.cut, .costly):
             return String(localized: "Уходит не только жир. Смягчи дефицит или подними норму белка — на сушке чинят это в первую очередь.")
         case (.cut, .stalled):

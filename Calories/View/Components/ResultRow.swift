@@ -11,15 +11,29 @@ struct ResultRow: View {
     let title: LocalizedStringKey
     let value: String
     var highlighted = false
+    /// Уточнение под числом: отклонение от плана, коридор дат, погрешность.
+    ///
+    /// Раньше каждое такое уточнение было отдельной строкой, и экран плана
+    /// превращался в таблицу из семи чисел, где главное тонуло среди
+    /// производного. Под своим числом оно читается как его часть и места
+    /// занимает вдвое меньше.
+    var caption: String? = nil
 
     var body: some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text(title)
                 .foregroundStyle(highlighted ? .primary : .secondary)
             Spacer()
-            Text(value)
-                .font(highlighted ? .body.weight(.semibold) : .body)
-                .foregroundStyle(highlighted ? .green : .primary)
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(value)
+                    .font(highlighted ? .body.weight(.semibold) : .body)
+                    .foregroundStyle(highlighted ? .green : .primary)
+                if let caption {
+                    Text(verbatim: caption)
+                        .font(.app(.caption2))
+                        .foregroundStyle(.tertiary)
+                }
+            }
         }
     }
 }

@@ -56738,6 +56738,880 @@
           }
         }
       }
+    },
+    "В зале идёт разгрузка — лучшей недели для диет-брейка не будет. Тело отдыхает целиком, а жир за сушку уходит так же.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هناك تخفيف في النادي — لا توجد أسبوع أفضل لاستراحة الحمية. الجسم يرتاح كاملًا، والدهون تنزل كما هي."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Im Studio läuft ein Deload — eine bessere Woche für eine Diätpause gibt es nicht. Der Körper ruht ganz, und das Fett geht trotzdem."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A deload is on at the gym — there is no better week for a diet break. The body rests as a whole, and the fat still comes off."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hay descarga en el gimnasio: no habrá mejor semana para un descanso de dieta. El cuerpo descansa entero y la grasa se va igual."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharge en cours à la salle — pas de meilleure semaine pour une pause diète. Le corps se repose en entier, et le gras part pareil."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בחדר כושר יש דילואד — לא יהיה שבוע טוב יותר להפסקת דיאטה. הגוף נח במלואו, והשומן יורד באותה מידה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Há deload na academia — não haverá semana melhor para uma pausa na dieta. O corpo descansa por inteiro, e a gordura sai igual."
+          }
+        }
+      }
+    },
+    "В зале разгрузка — хорошая неделя и для брейка.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تخفيف في النادي — أسبوع جيد للاستراحة هنا أيضًا."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload im Studio — auch hier eine gute Woche für eine Pause."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A deload at the gym — a good week for a break here too."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descarga en el gimnasio: también es buena semana para una pausa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharge à la salle — bonne semaine pour une pause ici aussi."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "דילואד בחדר כושר — שבוע טוב גם להפסקה כאן."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload na academia — boa semana para uma pausa aqui também."
+          }
+        }
+      }
+    },
+    "В зале %1$@ рабочих сетов за неделю, больше всего досталось: %2$@.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ مجموعة عمل في النادي هذا الأسبوع، وأكثرها على: %2$@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ Arbeitssätze im Studio diese Woche; am meisten bekam: %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ working sets at the gym this week; the most went to %2$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ series efectivas en el gimnasio esta semana; lo más cargado: %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ séries de travail à la salle cette semaine ; le plus chargé : %2$@."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ סטים אפקטיביים השבוע בחדר כושר; הכי הרבה קיבלו: %2$@."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ séries de trabalho na academia nesta semana; o mais carregado: %2$@."
+          }
+        }
+      }
+    },
+    "В зале %1$@ сетов, больше всего: %2$@.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ مجموعة في النادي، أغلبها %2$@."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ Sätze im Studio, vor allem %2$@."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ sets at the gym, mostly %2$@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ series en el gimnasio, sobre todo %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ séries à la salle, surtout %2$@."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ סטים בחדר כושר, בעיקר %2$@."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ séries na academia, principalmente %2$@."
+          }
+        }
+      }
+    },
+    "В зале %@ рабочих сетов за неделю — это та работа, из которой сложилась вторая половина расхода.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ مجموعة عمل في النادي هذا الأسبوع — منها جاء النصف الآخر من الإنفاق."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Arbeitssätze im Studio diese Woche — daraus kam die andere Hälfte des Verbrauchs."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ working sets at the gym this week — that is the work the other half of your expenditure came from."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ series efectivas en el gimnasio esta semana: de ahí salió la otra mitad del gasto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ séries de travail à la salle cette semaine — c’est de là que vient l’autre moitié de la dépense."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ סטים אפקטיביים השבוע בחדר כושר — מכאן הגיעה המחצית השנייה של ההוצאה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ séries de trabalho na academia nesta semana — daí veio a outra metade do gasto."
+          }
+        }
+      }
+    },
+    "В зале %@ сетов за неделю.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ مجموعة في النادي هذا الأسبوع."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ Sätze im Studio diese Woche."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ sets at the gym this week."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ series en el gimnasio esta semana."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ séries à la salle cette semaine."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ סטים בחדר כושר השבוע."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ séries na academia nesta semana."
+          }
+        }
+      }
+    },
+    "В зале разгрузка: %@ рабочих сетов. Меньше работы — меньше и расход, поэтому вес на такой неделе часто стоит, и это не провал.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تخفيف في النادي: %@ مجموعة عمل. عمل أقل يعني إنفاقًا أقل، لذا يثبت الوزن غالبًا في هذا الأسبوع، وليس هذا فشلًا."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload im Studio: %@ Arbeitssätze. Weniger Arbeit heißt weniger Verbrauch, deshalb steht das Gewicht in solchen Wochen oft — kein Scheitern."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A deload at the gym: %@ working sets. Less work means less expenditure, so weight often holds that week — and that is not a failure."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descarga en el gimnasio: %@ series efectivas. Menos trabajo, menos gasto: en esa semana el peso suele quedarse quieto, y no es un fracaso."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharge à la salle : %@ séries de travail. Moins de travail, moins de dépense — le poids stagne souvent cette semaine, et ce n’est pas un échec."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "דילואד בחדר כושר: %@ סטים אפקטיביים. פחות עבודה, פחות הוצאה — ולכן המשקל נעצר בשבוע כזה, וזה לא כישלון."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload na academia: %@ séries de trabalho. Menos trabalho, menos gasto — nessa semana o peso costuma parar, e isso não é fracasso."
+          }
+        }
+      }
+    },
+    "Разгрузка в зале, %@ сетов.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تخفيف في النادي، %@ مجموعة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload im Studio, %@ Sätze."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload at the gym, %@ sets."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descarga en el gimnasio, %@ series."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décharge à la salle, %@ séries."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "דילואד בחדר כושר, %@ סטים."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deload na academia, %@ séries."
+          }
+        }
+      }
+    },
+    "+%lld ккал в день, цель и срок те же": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld سعرة يوميًا، الهدف والموعد كما هما"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld kcal pro Tag, gleiches Ziel und Datum"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld kcal a day, same goal and date"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld kcal al día, mismo objetivo y fecha"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld kcal par jour, même objectif et date"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld קק\"ל ביום, אותה מטרה ואותו תאריך"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld kcal por dia, mesma meta e prazo"
+          }
+        }
+      }
+    },
+    "При этом темпе к сроку выходит меньше": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بهذه الوتيرة يصل الوزن أقل عند الموعد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In diesem Tempo wird es zum Termin weniger"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At this pace the date lands lower"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A este ritmo, para esa fecha sale menos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À ce rythme, à l’échéance cela fait moins"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בקצב הזה בתאריך יוצא פחות"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neste ritmo, no prazo sai menos"
+          }
+        }
+      }
+    },
+    "на %@ кг впереди плана": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ كغ قبل الخطة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg vor Plan"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg ahead of plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg por delante del plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg d’avance sur le plan"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ק\"ג לפני התוכנית"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg à frente do plano"
+          }
+        }
+      }
+    },
+    "на %@ кг позади плана": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ كغ خلف الخطة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg hinter Plan"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg behind plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg por detrás del plan"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg de retard sur le plan"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ק\"ג מאחורי התוכנית"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kg atrás do plano"
+          }
+        }
+      }
+    },
+    "разброс ±%@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تفاوت ±%@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Streuung ±%@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "spread ±%@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "margen ±%@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "écart ±%@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פיזור ±%@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "variação ±%@"
+          }
+        }
+      }
+    },
+    "Вес уходит жиром, сухая масса на месте.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوزن ينزل دهنًا، والكتلة الصافية ثابتة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Gewicht geht als Fett; die Magermasse hält."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight is coming off as fat; lean mass holds."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso se va como grasa; la masa magra se mantiene."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le poids part en gras ; la masse maigre tient."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל יורד משומן, מסת הרזה נשמרת."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso sai como gordura; a massa magra se mantém."
+          }
+        }
+      }
+    },
+    "Замеры %1$@ и %2$@ · лентой, ±%3$.1f кг сухой массы — шум": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قياسات %1$@ و%2$@ · بالشريط، ±%3$.1f كغ من الكتلة الصافية ضجيج"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messungen %1$@ und %2$@ · per Maßband, ±%3$.1f kg Magermasse sind Rauschen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measured %1$@ and %2$@ · by tape, ±%3$.1f kg of lean mass is noise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medidas %1$@ y %2$@ · con cinta, ±%3$.1f kg de masa magra es ruido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesures %1$@ et %2$@ · au mètre, ±%3$.1f kg de masse maigre, c’est du bruit"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מדידות %1$@ ו-%2$@ · בסרט, ±%3$.1f ק\"ג מסת רזה הם רעש"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medidas %1$@ e %2$@ · com fita, ±%3$.1f kg de massa magra é ruído"
+          }
+        }
+      }
+    },
+    "%@ — день углеводов": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — يوم كربوهيدرات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — Kohlenhydrat-Tag"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — a carb day"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@: día de carbohidratos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — jour glucides"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — יום פחמימות"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — dia de carboidratos"
+          }
+        }
+      }
+    },
+    "%lld позиции": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld عناصر"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld Posten"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld items"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld productos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld aliments"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld פריטים"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld itens"
+          }
+        }
+      }
+    },
+    "%lld раз": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld مرات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld×"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld times"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld veces"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fois"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld פעמים"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld vezes"
+          }
+        }
+      }
+    },
+    "Как обычно": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كالمعتاد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie immer"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "As usual"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como siempre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comme d’habitude"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כרגיל"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como sempre"
+          }
+        }
+      }
     }
   },
   "version": "1.1"

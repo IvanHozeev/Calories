@@ -220,12 +220,22 @@ struct PlanView: View {
     /// говорим, где заканчивается точность метода.
     private func compositionSection(_ change: CompositionChange, intent: PlanIntent?) -> some View {
         Section {
-            ResultRow(title: "Вес", value: String(format: "%.1f → %.1f \(String(localized: "кг"))", change.startWeightKg, change.endWeightKg))
-            ResultRow(title: "Жир", value: String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
-                                    change.startFatKg, change.endFatKg, change.fatDeltaKg))
-            ResultRow(title: "Сухая масса", value: String(format: "%.1f → %.1f \(String(localized: "кг"))  (%+.1f)",
-                                            change.startLeanKg, change.endLeanKg, change.leanDeltaKg),
-                      highlighted: change.verdict != .leanLoss)
+            // Крупно — насколько изменилось, подписью — откуда и куда.
+            //
+            // Вопрос секции «из чего уходит вес», и ответ на него — дельты.
+            // Шесть чисел в столбик заставляли вычитать в уме, чтобы узнать
+            // то, что приложение уже посчитало.
+            ResultRow(title: "Вес",
+                      value: String(format: "%+.1f \(String(localized: "кг"))",
+                                    change.endWeightKg - change.startWeightKg),
+                      caption: String(format: "%.1f → %.1f", change.startWeightKg, change.endWeightKg))
+            ResultRow(title: "Жир",
+                      value: String(format: "%+.1f \(String(localized: "кг"))", change.fatDeltaKg),
+                      caption: String(format: "%.1f → %.1f", change.startFatKg, change.endFatKg))
+            ResultRow(title: "Сухая масса",
+                      value: String(format: "%+.1f \(String(localized: "кг"))", change.leanDeltaKg),
+                      highlighted: change.verdict != .leanLoss,
+                      caption: String(format: "%.1f → %.1f", change.startLeanKg, change.endLeanKg))
 
             // Вердикт с оглядкой на то, зачем идёт фаза: «сухая держится» —
             // успех на сушке и провал на наборе. Без плана остаётся прежний,
@@ -267,8 +277,11 @@ struct PlanView: View {
             default:           Text("Из чего уходит вес")
             }
         } footer: {
+            // Две вещи, и обе нужны: когда снято и где кончается точность.
+            // Остальное — пересказ того, что человек уже прочёл в числах.
+            // Заодно ушла вторая точка после сокращённой даты.
             Text(String(
-                format: String(localized: "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя."),
+                format: String(localized: "Замеры %1$@ и %2$@ · лентой, ±%3$.1f кг сухой массы — шум"),
                 change.fromDate.formatted(.dateTime.day().month(.abbreviated)),
                 change.toDate.formatted(.dateTime.day().month(.abbreviated)),
                 change.noiseKg
@@ -596,12 +609,25 @@ struct PlanView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            ResultRow(title: "Ожидаемый вес сегодня", value: String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
+            // Вес одной строкой вместо трёх.
+            //
+            // Было: ожидаемый, фактический и отклонение — тремя рядами. Но
+            // ожидаемый вес человек не выбирает и ничего с ним не делает, а
+            // отклонение и есть разница между двумя первыми. Остаётся факт
+            // крупно и отклонение подписью под ним — ровно то, ради чего
+            // сюда смотрят: где я и насколько в стороне от плана.
             if let actual = adherence.actualWeightToday {
-                ResultRow(title: "Фактический вес (тренд)", value: String(format: "%.1f \(String(localized: "кг"))", actual))
-            }
-            if let deviation = adherence.deviationKg {
-                ResultRow(title: "Отклонение", value: String(format: "%+.1f \(String(localized: "кг"))", deviation))
+                ResultRow(title: "Вес",
+                          value: String(format: "%.1f \(String(localized: "кг"))", actual),
+                          caption: adherence.deviationKg.map {
+                              String(format: $0 < 0
+                                     ? String(localized: "на %@ кг впереди плана")
+                                     : String(localized: "на %@ кг позади плана"),
+                                     String(format: "%.1f", abs($0)))
+                          })
+            } else {
+                ResultRow(title: "Ожидаемый вес сегодня",
+                          value: String(format: "%.1f \(String(localized: "кг"))", adherence.expectedWeightToday))
             }
 
             if adherence.status == .insufficientData {
@@ -634,23 +660,25 @@ struct PlanView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 } else if let projectedEndDate = adherence.projectedEndDate {
-                    ResultRow(title: "При текущем темпе цель — к", value: Self.planDate(projectedEndDate))
-                    // Коридор под датой: та же цель при темпе на границах
-                    // погрешности. Без него одна дата выглядит обещанием.
-                    if let range = adherence.projectedEndRange() {
-                        Text(String(format: String(localized: "от %1$@ до %2$@"),
-                                    Self.planDate(range.lowerBound), Self.planDate(range.upperBound)))
-                            .font(.app(.caption))
-                            .foregroundStyle(.tertiary)
-                    }
+                    // Коридор — подписью под датой: та же цель при темпе на
+                    // границах погрешности. Своей строкой он выглядел вторым
+                    // сроком, а без него одна дата читается как обещание.
+                    ResultRow(title: "Цель",
+                              value: Self.planDate(projectedEndDate),
+                              caption: adherence.projectedEndRange().map {
+                                  String(format: String(localized: "от %1$@ до %2$@"),
+                                         Self.planDate($0.lowerBound), Self.planDate($0.upperBound))
+                              })
                 }
                 // Темп рядом с датой: без него дата в следующем августе выглядит
                 // опечаткой, а с ним понятно, откуда она взялась.
                 if let rate = adherence.observedWeeklyRateKg {
-                    ResultRow(title: "Темп за фазу",
-                              value: adherence.trendFit.map {
-                                  String(format: "%+.2f ± %.2f \(String(localized: "кг/нед"))", rate, $0.standardErrorKg)
-                              } ?? String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
+                    ResultRow(title: "Темп",
+                              value: String(format: "%+.2f \(String(localized: "кг/нед"))", rate),
+                              caption: adherence.trendFit.map {
+                                  String(format: String(localized: "разброс ±%@"),
+                                         String(format: "%.2f", $0.standardErrorKg))
+                              })
                 }
 
                 // Шаг назад — рядом с предложениями, которые этот шаг и
@@ -684,10 +712,8 @@ struct PlanView: View {
                     // и тот же запас: он тратится один раз, и принять надо
                     // что-то одно. Стопкой кнопок они читались как список дел,
                     // и человек проходил его сверху вниз.
-                    Text("Ты впереди плана — запас можно потратить одним способом из трёх.")
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    // Без вступления: вердикт «Опережаешь график» стоит выше,
+                    // а что запас тратится один раз, видно по самим кнопкам.
                     aheadActions(plan: plan, adherence: adherence)
                 } else {
                     behindOrOnTrackActions(plan: plan, adherence: adherence)
@@ -744,7 +770,10 @@ struct PlanView: View {
            recalibrated - store.dailyGoal >= Self.meaningfulCalorieGain {
             let extra = recalibrated - store.dailyGoal
             VStack(alignment: .leading, spacing: 8) {
-                Text("Можно есть на \(extra) ккал в день больше — \(recalibrated) ккал — и всё равно прийти к \(String(format: "%.1f", plan.targetWeightKg)) кг к \(Self.planDate(plan.endDate)).")
+                // Кнопка ниже уже называет норму целиком, а цель и срок
+                // стоят выше по экрану. Остаётся прибавка — единственное,
+                // чего человек ещё не видел.
+                Text("+\(extra) ккал в день, цель и срок те же")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Ставить \(recalibrated) ккал/день") {
@@ -780,7 +809,7 @@ struct PlanView: View {
         // углублением.
         if let rounded = adherence.deeperTarget, isSafe(plan.retargeted(to: rounded)) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Углубить цель: при текущем темпе к \(Self.planDate(plan.endDate)) ты можешь достичь \(String(format: "%.1f", rounded)) кг.")
+                Text("При этом темпе к сроку выходит меньше")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                 Button("Поставить цель \(String(format: "%.1f", rounded)) кг") {

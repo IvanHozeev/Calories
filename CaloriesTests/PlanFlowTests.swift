@@ -456,6 +456,55 @@ struct GoalSourceTests {
     }
 }
 
+// MARK: - Сигнал из зала
+
+/// Разгрузка в зале — повод для диет-брейка, но не приказ.
+///
+/// Соседнее приложение знает то, чего не знаем мы: человек уже решил отдохнуть
+/// от железа. Держать в такую неделю прежний дефицит — отдыхать наполовину.
+/// Но сам по себе делоад ничего не требует: на первой неделе дефицита он не
+/// повод ломать план.
+struct GymDeloadSignalTests {
+    private func cutting(weeks: Int, deload: Bool?) -> RecoverySignal.Input {
+        var input = RecoverySignal.Input()
+        input.isCutting = true
+        input.weeksInDeficit = weeks
+        input.gymDeload = deload
+        return input
+    }
+
+    @Test func deloadOnTheFourthWeekSuggestsABreak() {
+        #expect(RecoverySignal.verdict(cutting(weeks: 4, deload: true)) == .dietBreak)
+    }
+
+    @Test func deloadOnTheFirstWeekSuggestsNothing() {
+        #expect(RecoverySignal.verdict(cutting(weeks: 1, deload: true)) == .fine,
+                "Неделя дефицита — ещё не усталость, ломать план незачем")
+    }
+
+    /// Без соседа всё как было: решение принимается по своим признакам.
+    @Test func withoutTheNeighbourNothingChanges() {
+        #expect(RecoverySignal.verdict(cutting(weeks: 4, deload: nil)) == .fine)
+        #expect(RecoverySignal.verdict(cutting(weeks: 9, deload: nil)) == .dietBreak)
+    }
+
+    /// Второй брейк подряд не предлагаем, даже если в зале разгрузка.
+    @Test func aRecentBreakOutweighsTheDeload() {
+        var input = cutting(weeks: 5, deload: true)
+        input.weeksSinceBreak = 1
+        #expect(RecoverySignal.verdict(input) == .fine)
+    }
+
+    /// Совет называет причину словами человека, а не нашей догадкой о
+    /// самочувствии: он про зал, а не про пульс.
+    @Test func theAdviceNamesTheGymNotTheBody() throws {
+        let text = try #require(RecoverySignal.reason(cutting(weeks: 4, deload: true), brief: true))
+        #expect(text.contains("deload") || text.contains("разгрузка") || text.contains("Deload")
+                || text.lowercased().contains("gym") || text.contains("зал"),
+                "Причина должна называть зал: \(text)")
+    }
+}
+
 // MARK: - Срок между замерами
 
 /// Вердикт по составу на коротком сроке — это вердикт по воде.

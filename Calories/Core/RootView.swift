@@ -78,6 +78,7 @@ struct RootView: View {
             quickActions.refreshShortcutItems()
             // Бандл могли купить в GymLogger, пока нас тут не было.
             store.refreshSharedEntitlements()
+            store.refreshGymState()
         }
         .onChange(of: quickActions.pending) { _, action in
             guard action != nil else { return }
@@ -95,6 +96,7 @@ struct RootView: View {
             if phase == .active {
                 store.refreshIfDayChanged()
                 store.refreshSharedEntitlements()
+                store.refreshGymState()
                 stepStore.fetchAll()
                 quickActions.refreshShortcutItems()
             }

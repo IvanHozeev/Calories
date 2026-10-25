@@ -575,6 +575,11 @@ extension CalorieStore {
             input.restingPulse = pulse.value
             input.pulseRise = pulse.rise
         }
+        // Вторая половина расхода — работа в зале. Приходит из соседнего
+        // приложения; его нет или оно молчит — неделя разбирается как раньше.
+        input.gymSets = GymBridge.weeklySets(gymState, now: now)
+        input.gymTopMuscles = GymBridge.topMuscles(gymState, limit: 2, now: now).map(\.muscle)
+        input.gymDeload = GymBridge.isDeload(gymState, now: now)
         return input
     }
 
@@ -619,6 +624,10 @@ extension CalorieStore {
             calendar.date(byAdding: .day, value: -offset, to: now).flatMap { sleep(on: $0)?.shortfall }
         }
         if !week.isEmpty { input.sleepShortfall = week.reduce(0, +) / Double(week.count) }
+        // Что происходит в зале. nil, когда соседа нет или он давно молчит —
+        // тогда про разгрузку просто ничего не известно, и решение
+        // принимается по своим признакам, как раньше.
+        input.gymDeload = GymBridge.isDeload(gymState, now: now)
         return input
     }
 

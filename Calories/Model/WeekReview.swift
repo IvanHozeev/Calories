@@ -30,6 +30,13 @@ enum WeekReview {
         /// Пульс в покое: среднее за неделю и насколько это выше привычного.
         var restingPulse: Int? = nil
         var pulseRise: Int? = nil
+        /// Взвешенные рабочие сеты за неделю — из соседнего приложения.
+        /// nil, когда его нет или оно давно молчит.
+        var gymSets: Double? = nil
+        /// Самые нагруженные мышцы недели: чем назвать нагрузку словами.
+        var gymTopMuscles: [String] = []
+        /// Идёт ли разгрузка в зале.
+        var gymDeload: Bool? = nil
     }
 
     struct Line: Identifiable, Equatable {
@@ -146,6 +153,29 @@ enum WeekReview {
                                 String(localized: "Пульс в покое %1$lld — на %2$lld выше привычного. Неделю подряд так держится недовосстановление; отдых сдвинет вес вернее, чем ещё меньше еды."),
                                 String(localized: "Пульс в покое %1$lld, на %2$lld выше обычного.")), pulse, rise)))
         }
+        // Зал — последним: это не оценка недели и не объяснение самочувствия,
+        // а вторая половина расхода, которой мы до сих пор не видели. Вес
+        // встал при честном дефиците — объём недели и есть первое, что стоит
+        // проверить, прежде чем резать еду дальше.
+        if let sets = input.gymSets, sets > 0 {
+            let muscles = input.gymTopMuscles.prefix(2).joined(separator: ", ")
+            let text: String
+            if input.gymDeload == true {
+                text = String(format: pick(
+                    String(localized: "В зале разгрузка: %@ рабочих сетов. Меньше работы — меньше и расход, поэтому вес на такой неделе часто стоит, и это не провал."),
+                    String(localized: "Разгрузка в зале, %@ сетов.")), Self.sets(sets))
+            } else if muscles.isEmpty {
+                text = String(format: pick(
+                    String(localized: "В зале %@ рабочих сетов за неделю — это та работа, из которой сложилась вторая половина расхода."),
+                    String(localized: "В зале %@ сетов за неделю.")), Self.sets(sets))
+            } else {
+                text = String(format: pick(
+                    String(localized: "В зале %1$@ рабочих сетов за неделю, больше всего досталось: %2$@."),
+                    String(localized: "В зале %1$@ сетов, больше всего: %2$@.")), Self.sets(sets), muscles)
+            }
+            result.append(Line(id: "gym", tone: .info, text: text))
+        }
+
         if let steps = input.steps, steps > 0 {
             result.append(Line(id: "steps", tone: .info,
                                text: String(format: pick(
@@ -153,6 +183,14 @@ enum WeekReview {
                                 String(localized: "Шагов в среднем %lld в день.")), steps)))
         }
         return result
+    }
+
+    /// Сеты — с половинками, как их считает сосед: сет на одну сторону
+    /// у него стоит половину, и округлять это до целого значит врать.
+    private static func sets(_ value: Double) -> String {
+        value == value.rounded()
+            ? String(format: "%.0f", value)
+            : String(format: "%.1f", value)
     }
 
     private static func signed(_ value: Double) -> String {

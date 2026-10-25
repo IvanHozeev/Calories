@@ -30,6 +30,9 @@ enum RecoverySignal {
         var sleepShortfall: Double = 0
         /// Брали ли диет-брейк недавно — второй подряд предлагать незачем.
         var weeksSinceBreak: Int? = nil
+        /// Идёт ли разгрузочная неделя в зале. nil — соседнего приложения нет
+        /// или оно давно молчит, и тогда об этом просто ничего не известно.
+        var gymDeload: Bool? = nil
     }
 
     enum Verdict: String, Equatable, Sendable {
@@ -47,6 +50,10 @@ enum RecoverySignal {
     static let weeksBeforeBreak = 8
     /// Ближе этого срока второй брейк не предлагаем.
     static let weeksBetweenBreaks = 4
+    /// Сколько недель дефицита должно пройти, чтобы совпадение с разгрузкой
+    /// в зале стало поводом. Половина обычного срока: четыре недели — уже
+    /// усталость, просто ещё не та, ради которой стоит ломать план.
+    static let weeksBeforeBreakWithDeload = 4
     /// Вес считается вставшим, если за неделю ушло меньше трети плана.
     static let stallShare = 1.0 / 3
 
@@ -68,6 +75,15 @@ enum RecoverySignal {
         // Долгий дефицит — повод для брейка сам по себе: организм устаёт и
         // тогда, когда человек этого ещё не чувствует.
         if input.weeksInDeficit >= weeksBeforeBreak, !recentBreak { return .dietBreak }
+        // Разгрузка в зале — не признак усталости, а уже принятое решение
+        // отдохнуть. Тело отдыхает целиком, и держать в эту неделю прежний
+        // дефицит — значит отдыхать наполовину. Повод, а не диагноз: сам по
+        // себе делоад брейка не требует, но на четвёртой неделе дефицита
+        // лучшей недели для него не будет.
+        if input.gymDeload == true, input.weeksInDeficit >= weeksBeforeBreakWithDeload,
+           !recentBreak {
+            return .dietBreak
+        }
         let strain = strain(input)
         // Три признака разом — это уже не «тяжёлая неделя», а накопленная
         // усталость, и одним сытым днём она не лечится.
@@ -81,6 +97,15 @@ enum RecoverySignal {
         let verdict = verdict(input)
         guard verdict != .fine else { return nil }
         func pick(_ detailed: String, _ short: String) -> String { brief ? short : detailed }
+
+        // Про совпадение с залом говорим первым: это не наша догадка о
+        // самочувствии, а то, что человек уже сам решил.
+        if verdict == .dietBreak, input.gymDeload == true,
+           input.weeksInDeficit < weeksBeforeBreak {
+            return pick(
+                String(localized: "В зале идёт разгрузка — лучшей недели для диет-брейка не будет. Тело отдыхает целиком, а жир за сушку уходит так же."),
+                String(localized: "В зале разгрузка — хорошая неделя и для брейка."))
+        }
 
         if verdict == .dietBreak, input.weeksInDeficit >= weeksBeforeBreak {
             return String(format: pick(

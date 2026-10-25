@@ -129,6 +129,27 @@ final class CalorieStore {
         set { hasPurchasedPremium = newValue }
     }
 
+    /// Что сейчас в зале: разгрузка, тип дня, объём недели. nil — соседнего
+    /// приложения нет или оно молчит.
+    ///
+    /// Снимок держим в памяти, а не читаем при каждом обращении: к нему
+    /// ходят и вердикт недели, и подсказки дня, а меняется он несколько раз
+    /// в сутки.
+    private(set) var gymState: GymBridge.State?
+
+    /// Имя сегодняшней тяжёлой тренировки — или nil, когда день лёгкий,
+    /// это отдых, или о дне ничего не известно.
+    var gymHeavyDayName: String? {
+        guard GymBridge.isHeavyDay(gymState) == true else { return nil }
+        return GymBridge.todayName(gymState)
+    }
+
+    /// Перечитать снимок из зала. Зовётся там же, где права: тренировку
+    /// закрывают в соседнем приложении, пока мы в фоне.
+    func refreshGymState() {
+        gymState = GymBridge.read(defaults: groupDefaults)
+    }
+
     /// Перечитать права, пришедшие от соседа.
     ///
     /// Вызывается при запуске и при каждом возвращении в приложение: покупку
@@ -139,6 +160,8 @@ final class CalorieStore {
         guard bundle != bundleUnlocked else { return }
         bundleUnlocked = bundle
     }
+
+
 
     /// Пробный период был и кончился, а покупки нет — пэйвол говорит об этом прямо.
     var trialEnded: Bool {

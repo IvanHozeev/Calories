@@ -17,11 +17,20 @@ struct MacrosCard: View {
     /// недобирают её чаще, чем любой из трёх, — именно потому, что её нигде
     /// не было видно, пока не откроешь разбор.
     var fiber: Double? = nil
+    /// Клетчатка известна не по всему дню — показанное число нижнее.
+    var fiberIsPartial: Bool = false
     let weightKg: Double?
     /// Открыть разбор дня. Раньше на карточке жили три всплывающих окошка —
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
     /// между собой было нельзя, а витаминам в таком формате места нет вовсе.
     var onOpen: () -> Void = {}
+    /// Имя сегодняшней тяжёлой тренировки из соседнего приложения — или nil.
+    ///
+    /// Нужно для одной вещи: тихо подсветить углеводы в день ног или спины.
+    /// Строкой это уже пробовали — она занимала ряд и требовала чтения;
+    /// значок в углу плитки говорит то же самое и не отнимает места ни у
+    /// кольца, ни у глаза.
+    var gymDayName: String? = nil
     /// Какой макрос сейчас ведущий — тот, что ещё не закрыт.
     ///
     /// Нужен не для расчёта, а для внимания: колонка ведущего чуть заметнее,
@@ -80,6 +89,7 @@ struct MacrosCard: View {
              target: target(for: kind),
              color: kind.color,
              isLeading: focus == kind,
+             gymDay: kind == .carbs ? gymDayName : nil,
              // Имя — одной плитке, а не всем четырём.
              //
              // На обёртке его наследовал каждый из четырёх кнопок, и поиск по
@@ -94,7 +104,10 @@ struct MacrosCard: View {
              value: fiber,
              target: Micronutrient.fiber.dailyValue,
              color: MacroKind.carbs.color,
-             isLeading: false)
+             isLeading: false,
+             // «Не меньше», когда состав известен не про весь день: клетчатка
+             // складывается, и показанное — нижняя граница.
+             prefix: fiberIsPartial ? "≥" : nil)
     }
 
     /// Одна плитка: подпись, число с целью и полоска под ними.
@@ -103,7 +116,8 @@ struct MacrosCard: View {
     /// бы «не ел», а на деле мы просто не знаем — клетчатку отдаёт не всякий
     /// источник.
     private func tile(title: LocalizedStringKey, value: Double?, target: Double?,
-                      color: Color, isLeading: Bool, identifier: String? = nil) -> some View {
+                      color: Color, isLeading: Bool, gymDay: String? = nil,
+                      prefix: String? = nil, identifier: String? = nil) -> some View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
         return Button(action: onOpen) {
             VStack(alignment: .leading, spacing: 5) {
@@ -116,7 +130,10 @@ struct MacrosCard: View {
                     .minimumScaleFactor(0.8)
 
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
-                    Text(verbatim: value.map { String(format: "%.0f", $0) } ?? "—")
+                    Text(verbatim: value.map { v in
+                        let number = String(format: "%.0f", v)
+                        return prefix.map { "\($0)\(number)" } ?? number
+                    } ?? "—")
                         .font(.app(.headline))
                         .foregroundStyle(color)
                         .contentTransition(.numericText())
@@ -147,6 +164,14 @@ struct MacrosCard: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .frame(height: TodayTile.height)
+            .overlay(alignment: .topTrailing) {
+                if let gymDay {
+                    GymAccent(color: color)
+                        .padding(.top, 9)
+                        .padding(.trailing, 11)
+                        .accessibilityLabel(Text(verbatim: gymDay))
+                }
+            }
             .contentShape(RoundedRectangle(cornerRadius: 18))
             // Стекло, собранное руками: заливка, кант и тень. Почему не
             // системное — в `TileSurface`.
@@ -165,3 +190,26 @@ struct MacrosCard: View {
     }
 }
 
+
+/// Тихий акцент на углеводах в тяжёлый день.
+///
+/// Пульс, а не мигание: значок дышит — медленно светлеет и темнеет, чуть
+/// меняясь в размере. Этого хватает, чтобы глаз сам нашёл плитку, и мало,
+/// чтобы это стало раздражать к вечеру. Движение идёт только пока значок на
+/// экране: уехал — анимация уехала с ним.
+private struct GymAccent: View {
+    let color: Color
+    @State private var breathing = false
+
+    var body: some View {
+        Image(systemName: "dumbbell.fill")
+            .font(.app(.caption2))
+            .foregroundStyle(color)
+            .opacity(breathing ? 1 : 0.45)
+            .scaleEffect(breathing ? 1.08 : 0.94)
+            .animation(.easeInOut(duration: 1.6).repeatForever(autoreverses: true),
+                       value: breathing)
+            .onAppear { breathing = true }
+            .accessibilityHidden(false)
+    }
+}

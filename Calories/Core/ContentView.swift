@@ -466,8 +466,10 @@ private extension ContentView {
                 fatTarget: store.fatTarget,
                 carbsTarget: store.carbsTarget,
                 fiber: store.micronutrients(on: Date()).fiber,
+                fiberIsPartial: store.micronutrients(on: Date()).fiberIsPartial,
                 weightKg: store.weightKg,
                 onOpen: { showingDayNutrition = true },
+                gymDayName: store.gymHeavyDayName,
                 focus: store.focusMacro
             )
             }
@@ -898,6 +900,13 @@ private struct PullableRing: View {
     /// Где кольцо стоит, когда список в покое.
     @State private var restingY: CGFloat?
     @State private var isAway = false
+    /// Насколько кольцо уже ушло под шапку, 0…1.
+    ///
+    /// Нужно ради одного: знак не должен исчезать рывком. Пока он виден
+    /// целиком — это кольцо дня; когда уезжает — он на глазах сжимается до
+    /// размера миниатюры, которая его там и подхватывает. Так два кольца
+    /// читаются как одно, переехавшее в шапку, а не как подмена.
+    @State private var away: CGFloat = 0
 
     /// Ниже этой линии кольцо ещё видно из-под шапки.
     ///
@@ -921,11 +930,20 @@ private struct PullableRing: View {
             fills: true
         )
         .padding(.top)
+        // Сжимается к верхней кромке, а не к центру: знак будто втягивается
+        // в шапку, куда и уезжает. До трети роста, дальше — миниатюра.
+        .scaleEffect(1 - 0.34 * away, anchor: .top)
+        .opacity(1 - 0.35 * away)
         // Покой — первое положение, которое увидели.
         .background {
             GeometryReader { geometry in
                 Color.clear
                     .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                        let height = max(geometry.size.height, 1)
+                        // Доля ухода: ноль, пока низ кольца ниже шапки;
+                        // единица, когда оно скрылось целиком.
+                        let hidden = (Self.barBottom - y) / height
+                        away = min(max(hidden, 0), 1)
                         let away = y + geometry.size.height < Self.barBottom
                         if away != isAway {
                             isAway = away

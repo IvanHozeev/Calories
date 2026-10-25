@@ -106,7 +106,7 @@ struct DayNutritionView: View {
                 // её тоже. Среди витаминов она пропадала вместе с ними, стоило
                 // дню собраться из магазинной еды.
                 if let fiber = micronutrients.fiber {
-                    fiberRow(fiber)
+                    fiberRow(fiber, isPartial: micronutrients.fiberIsPartial)
                 }
             } header: {
                 Text("Белки, жиры, углеводы")
@@ -415,13 +415,17 @@ struct DayNutritionView: View {
     }
 
     /// Клетчатка той же строкой, что макросы: граммы, цель и зачем она.
-    private func fiberRow(_ amount: Double) -> some View {
+    private func fiberRow(_ amount: Double, isPartial: Bool) -> some View {
         let target = Micronutrient.fiber.dailyValue
         return VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Клетчатка")
                 Spacer()
-                Text(String(format: "%.0f \(String(localized: "г"))", amount))
+                // «Не меньше», когда состав известен не про весь день:
+                // клетчатка складывается, поэтому показанное — нижняя
+                // граница, а не оценка.
+                Text(String(format: isPartial ? "≥ %.0f \(String(localized: "г"))"
+                                              : "%.0f \(String(localized: "г"))", amount))
                     .font(.app(.body, weight: .semibold))
                     .foregroundStyle(MacroKind.carbs.color)
                     .monospacedDigit()

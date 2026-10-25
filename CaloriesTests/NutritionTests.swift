@@ -176,7 +176,15 @@ struct MicronutrientDayTests {
         #expect(!day.isTrustworthy, "Витаминов у такой еды нет, и день по ним не покрыт")
     }
 
-    @Test func fiberHidesWhenMostOfTheDayIsUnknown() {
+    /// На тонком дне клетчатка не прячется, а говорит нижнюю границу.
+    ///
+    /// Раньше здесь ожидался `nil`: число на десятой части дня считалось
+    /// выдумкой. Для витаминов это так и есть — неизвестная часть дня может
+    /// сказать что угодно. Но клетчатка складывается: если в известной части
+    /// её два грамма, то во всём дне её не меньше двух. Прятать это значило
+    /// показывать прочерк, который человек читает как «ты её не ел», — а у
+    /// человека с десятками своих продуктов порог не набирался никогда.
+    @Test func fiberShowsALowerBoundOnAThinDay() {
         let yogurt = FoodItem(name: "Йогурт из магазина", caloriesPer100g: 60, protein: 5, fat: 2, carbs: 4)
         yogurt.micronutrients = Micronutrients([.fiber: 2])
         container.mainContext.insert(yogurt)
@@ -185,7 +193,8 @@ struct MicronutrientDayTests {
         store.add(name: "Шаурма у дома", calories: 900, macros: .zero, grams: 400)
 
         let day = store.micronutrients(on: Date())
-        #expect(day.fiber == nil, "На десятой части дня число про клетчатку — выдумка")
+        #expect(day.fiber == 2, "Столько её точно съедено")
+        #expect(day.fiberIsPartial, "Про остальной день мы не знаем — это нижняя граница")
     }
 
     @Test func anEntryWithoutWeightCannotBeCounted() {

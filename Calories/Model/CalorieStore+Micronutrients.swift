@@ -46,11 +46,28 @@ nonisolated struct MicronutrientDay: Equatable {
 
     var isTrustworthy: Bool { coverage >= Self.trustworthyCoverage }
 
-    /// Съедено клетчатки за день, если про день известно достаточно.
+    /// Съедено клетчатки за день — столько, сколько известно.
+    ///
+    /// Витаминный порог сюда не годится, и это не послабление, а разная
+    /// природа чисел. Про витамины неизвестная половина дня может сказать что
+    /// угодно: «железо 8 мг» при половине без данных читается как дефицит,
+    /// которого может не быть. Клетчатка же складывается: если в известной
+    /// части дня её 18 г, то во всём дне её **не меньше** 18 г — и это
+    /// полезное знание, а не догадка.
+    ///
+    /// Старое правило на практике значило, что человек с десятками своих
+    /// продуктов не видел клетчатку никогда: порог в шесть десятых дня не
+    /// набирался, и на экране стоял прочерк при полностью заполненном
+    /// составе. Прочерк читается как «ты её не ел», то есть приложение врало
+    /// умолчанием там, где у него был честный ответ.
     var fiber: Double? {
-        guard fiberCoverage >= Self.trustworthyCoverage else { return nil }
+        guard fiberCoveredCalories > 0 else { return nil }
         return totals[.fiber] ?? 0
     }
+
+    /// Известна ли клетчатка по всему дню. Ложь — показанное число нижнее:
+    /// столько её точно есть, а сколько в остальном дне, мы не знаем.
+    var fiberIsPartial: Bool { fiberCoverage < 0.95 }
 
     /// Часть учтённого дня — оценка. Тогда числа показываются со знаком «≈»:
     /// перенос состава с похожей еды ошибается примерно в полтора раза, и
@@ -76,27 +93,41 @@ extension CalorieStore {
         var total = 0
         for entry in dayEntries {
             total += entry.calories
-            // Без веса пересчитывать нечего: у записи «просто 300 ккал» нет
-            // граммов, а состав задан на сто грамм. Такая запись честно
-            // попадает в непокрытую часть дня, а не считается нулём.
-            guard let grams = entry.grams, grams > 0,
-                  let profile = nutrientProfilesByName[entry.name]
-            else { continue }
-            totals = totals + profile.per100g.portion(grams: grams)
-            // Долей, а не целиком: у блюда из трёх ингредиентов, где состав
-            // известен у двух, покрыты не все его калории. Записать их все —
-            // значит объявить день изученным сильнее, чем он изучен.
+            // По составу, а не по имени записи.
             //
-            // Витаминное покрытие считаем по профилям, где витамины есть.
-            // Товар из Open Food Facts приходит с одной клетчаткой, и раньше
-            // он объявлял свои калории изученными — день выглядел посчитанным,
-            // а витамины по нему выходили заниженными.
-            if profile.hasVitamins {
-                covered += Double(entry.calories) * profile.coverage
-                if profile.coverage < 1 { estimated += entry.calories }
-            }
-            if profile.per100g[.fiber] != nil {
-                fiberCovered += Double(entry.calories) * profile.coverage
+            // Почти каждый приём здесь составной, и называется он склейкой:
+            // «Протеин, Молоко 3%». Продукта с таким именем в базе нет, вес у
+            // записи общий, а состав задан на сто грамм каждого ингредиента —
+            // поэтому поиск по имени записи не находил ничего, и день без
+            // единого одиночного продукта оставался с прочерком вместо
+            // клетчатки, хотя человек её вписал.
+            //
+            // У записи из одного продукта состав — он сам, так что путь один
+            // на оба случая.
+            for part in entry.composition {
+                // Без веса пересчитывать нечего: у записи «просто 300 ккал»
+                // нет граммов, а состав задан на сто грамм. Такая запись
+                // честно попадает в непокрытую часть дня, а не в ноль.
+                guard let grams = part.grams, grams > 0,
+                      let profile = nutrientProfilesByName[part.name]
+                else { continue }
+                totals = totals + profile.per100g.portion(grams: grams)
+                // Долей, а не целиком: у блюда из трёх ингредиентов, где
+                // состав известен у двух, покрыты не все его калории.
+                // Записать их все — значит объявить день изученным сильнее,
+                // чем он изучен.
+                //
+                // Витаминное покрытие считаем по профилям, где витамины есть.
+                // Товар из Open Food Facts приходит с одной клетчаткой, и
+                // раньше он объявлял свои калории изученными — день выглядел
+                // посчитанным, а витамины по нему выходили заниженными.
+                if profile.hasVitamins {
+                    covered += Double(part.calories) * profile.coverage
+                    if profile.coverage < 1 { estimated += part.calories }
+                }
+                if profile.per100g[.fiber] != nil {
+                    fiberCovered += Double(part.calories) * profile.coverage
+                }
             }
         }
         return MicronutrientDay(totals: totals,
@@ -109,8 +140,22 @@ extension CalorieStore {
     /// Чем богата эта запись дневника. Пусто, если состав неизвестен или у
     /// записи нет веса — тогда и считать нечего.
     func notableMicronutrients(for entry: FoodEntry) -> [Micronutrient] {
-        guard let grams = entry.grams, grams > 0 else { return [] }
-        return notableMicronutrients(forFoodNamed: entry.name, grams: grams)
+        // Складываем по составу: у составного приёма имя — склейка, под
+        // которой продукта нет, и значки богатства не показывались ни у
+        // одного такого приёма.
+        var totals = Micronutrients()
+        var known = false
+        for part in entry.composition {
+            guard let grams = part.grams, grams > 0,
+                  let profile = nutrientProfilesByName[part.name], profile.isTrustworthy
+            else { continue }
+            totals = totals + profile.per100g.portion(grams: grams)
+            known = true
+        }
+        guard known else { return [] }
+        // Состав уже в граммах съеденного, поэтому «за сто грамм» здесь —
+        // сами эти сто грамм.
+        return totals.notable(inGrams: 100)
     }
 
     /// Чем богат продукт в такой порции.

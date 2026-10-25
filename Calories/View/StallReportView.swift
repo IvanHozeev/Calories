@@ -17,7 +17,7 @@ struct StallReportView: View {
             summary
             if report.tooLittleData {
                 Section {
-                    Text("Данных за две недели слишком мало, чтобы разбирать: без регулярных взвешиваний и записей считать нечего.")
+                    Text("Нужны регулярные записи и взвешивания.")
                         .font(.app(.callout))
                 } header: {
                     Text("Пока нечего считать")

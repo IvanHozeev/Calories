@@ -35,11 +35,12 @@ struct DayDetailView: View {
                     .padding(.vertical, 8)
             }
 
-            Section("Приёмы пищи") {
-                if day.entries.isEmpty {
-                    Text("Пока ничего не добавлено")
-                        .foregroundStyle(.secondary)
-                } else {
+            // Пустую секцию не показываем вовсе: заголовок «Приёмы пищи»
+            // с подписью «пока ничего не добавлено» под ним — два
+            // предложения о том, что в этот день человек не ел, хотя об
+            // этом уже сказали числа выше.
+            if !day.entries.isEmpty {
+                Section("Приёмы пищи") {
                     ForEach(day.entries) { entry in
                         NavigationLink {
                             EditEntrySheet(store: store, entry: entry, isEmbedded: true)

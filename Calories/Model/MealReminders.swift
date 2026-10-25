@@ -87,7 +87,12 @@ enum MealReminders {
                 // полдник, и не считает приёмы по номерам.
                 content.title = meal?.title ?? String(format: String(localized: "Приём %1$lld из %2$lld"),
                                                       index + 1, times.count)
-                content.body = meal.map(body(for:)) ?? String(localized: "Окно открылось — запиши, что ешь.")
+                // Тело — только когда ему есть что добавить к заголовку:
+                // сколько калорий на приём и чем его обычно закрывают.
+                // «Окно открылось — запиши, что ешь» не добавляло ничего:
+                // уведомление и так пришло, и так названо.
+                content.body = meal.map(body(for:)) ?? ""
+
                 content.sound = .default
                 content.categoryIdentifier = category
                 let parts = calendar.dateComponents([.hour, .minute], from: time)

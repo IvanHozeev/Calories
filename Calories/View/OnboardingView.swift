@@ -171,9 +171,27 @@ struct OnboardingView: View {
                 // перетекает в приветствие, а не сменяется им.
                 BrandMark(animated: true)
                     .frame(width: 150)
-                VStack(spacing: 12) {
+                VStack(spacing: 6) {
+                    // Чем приложение себя считает — надстрочником, как
+                    // подзаголовок в магазине. Ниже имя, под ним обещание:
+                    // порядок чтения тот же, что у соседнего приложения, и
+                    // два продукта читаются как одна линейка.
+                    //
+                    // Обе строки не переводим: «It counts» по-английски
+                    // значит и «оно считает», и «это важно» — каламбур
+                    // держит обе половины обещания, а в переводе остаётся
+                    // только одна. Это знак, как и само название.
+                    Text(verbatim: "Nutrition Coach")
+                        .font(.app(.footnote, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
                     Text(verbatim: "Calories")
                         .font(.app(size: 38, weight: .bold))
+                    Text(verbatim: "Eat. It counts.")
+                        .font(.app(.subheadline, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .padding(.bottom, 10)
                     Text("Настроим норму калорий и макросов под тебя и твою цель — пара минут.")
                         .font(.app(.body))
                         .foregroundStyle(.secondary)
@@ -192,7 +210,7 @@ struct OnboardingView: View {
     /// Спрашиваем прямо, а не угадываем по возрасту: и двадцатилетний, и
     /// сорокалетний могут считать макросы третий год или не считать никогда.
     private var explanationsStep: some View {
-        stepShell(title: "Как объяснять?", subtitle: "Это можно поменять в настройках в любой момент") {
+        stepShell(title: "Как объяснять?") {
             VStack(spacing: 12) {
                 ForEach(ExplanationLevel.allCases) { level in
                     Button {
@@ -284,7 +302,7 @@ struct OnboardingView: View {
     }
 
     private var goalStep: some View {
-        stepShell(title: "Цель", subtitle: "Из неё приложение соберёт план с темпом и сроком") {
+        stepShell(title: "Цель") {
             VStack(spacing: 16) {
                 Picker("Цель", selection: $intent) {
                     ForEach(PlanIntent.allCases) { Text($0.title).tag($0) }
@@ -349,7 +367,7 @@ struct OnboardingView: View {
     }
 
     private var cutOptionsStep: some View {
-        stepShell(title: "Как держать дефицит", subtitle: "Можно не трогать и настроить потом в плане") {
+        stepShell(title: "Как держать дефицит", subtitle: "Можно настроить потом") {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Диет-брейки")
@@ -419,7 +437,7 @@ struct OnboardingView: View {
     /// инструментов считать нечего: это честнее сказать на входе, чем потом
     /// показывать человеку «данных мало».
     private var gearStep: some View {
-        stepShell(title: "Что понадобится", subtitle: "Норма считается по твоим данным, а данные нужно чем-то снимать") {
+        stepShell(title: "Что понадобится", subtitle: "Данные нужно чем-то снимать") {
             VStack(alignment: .leading, spacing: 18) {
                 gearLine(icon: "scalemass", title: "Напольные весы",
                          text: explain("Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы."))
@@ -561,16 +579,20 @@ struct OnboardingView: View {
     // MARK: - Layout helpers
 
     @ViewBuilder
+    /// Подпись необязательна: у половины шагов под заголовком стояла
+    /// строка, которая ничего не добавляла — обещала то, что человек увидит
+    /// через экран, или успокаивала, что выбор можно поменять. Заголовок с
+    /// самим вопросом справляется и один.
     private func stepShell<Content: View>(
         title: LocalizedStringKey,
-        subtitle: LocalizedStringKey,
+        subtitle: LocalizedStringKey? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(spacing: 0) {
             VStack(spacing: 8) {
                 Text(title)
                     .font(.app(size: 28, weight: .bold))
-                Text(subtitle)
+                subtitle.map { Text($0) }
                     .font(.app(.subheadline))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

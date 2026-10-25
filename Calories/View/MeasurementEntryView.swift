@@ -43,7 +43,10 @@ struct MeasurementEntryView: View {
                 Section {
                     EmptyView()
                 } footer: {
-                    Text("Значения из замера от \(loadedFrom.formatted(date: .abbreviated, time: .omitted)). Поправь то, что изменилось, — остальное перенесётся.")
+                    // Откуда числа — и всё. Что их можно править, видно по
+                    // самим полям, а что непоправленное перенесётся —
+                    // человек увидит через секунду.
+                    Text("Из замера от \(loadedFrom.formatted(date: .abbreviated, time: .omitted))")
                 }
             }
 

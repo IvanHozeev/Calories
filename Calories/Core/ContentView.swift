@@ -530,7 +530,7 @@ private extension ContentView {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Недельный обзор")
                                 .font(.app(.subheadline, weight: .medium))
-                            Text(verbatim: String(format: String(localized: "Расчёт предлагает %lld ккал в день"), proposal))
+                            Text(verbatim: String(format: String(localized: "%lld ккал"), proposal))
                                 .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }
@@ -592,7 +592,7 @@ private extension ContentView {
                     HStack(spacing: 8) {
                         Image(systemName: "person.crop.circle.badge.questionmark")
                             .font(.app(.footnote))
-                        Text("Заполните профиль, чтобы рассчитать цель")
+                        Text("Заполнить профиль")
                             .font(.app(.caption))
                         Spacer()
                         Image(systemName: "chevron.right")
@@ -612,7 +612,7 @@ private extension ContentView {
                     HStack(spacing: 8) {
                         Image(systemName: "scalemass")
                             .font(.app(.footnote))
-                        Text("Не забудь взвеситься сегодня")
+                        Text("Взвешивание")
                             .font(.app(.caption))
                         Spacer()
                         Image(systemName: "chevron.right")
@@ -634,13 +634,12 @@ private extension ContentView {
     var diarySections: some View {
         if store.todayEntries.isEmpty {
         Section {
-            VStack(spacing: 8) {
-                Image(systemName: "tray")
-                    .font(.app(.largeTitle))
-                    .foregroundStyle(.secondary)
-                Text("Пока ничего не добавлено")
-                    .foregroundStyle(.secondary)
-            }
+            // Пустой лоток и есть сообщение: подпись «пока ничего не
+            // добавлено» повторяла его словами, а читать её было незачем.
+            Image(systemName: "tray")
+                .font(.app(.largeTitle))
+                .foregroundStyle(.secondary)
+                .accessibilityLabel("Пока ничего не добавлено")
             .frame(maxWidth: .infinity)
             .padding(.vertical, 40)
             .listRowBackground(Color.clear)

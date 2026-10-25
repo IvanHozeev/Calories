@@ -273,9 +273,10 @@ struct EditEntrySheet: View {
                 store.delete(entry: entry)
                 dismiss()
             }
-        } message: {
-            Text("Запись исчезнет из дневника, и день пересчитается без неё.")
         }
+        // Без пояснения: «запись исчезнет, и день пересчитается» — это и
+        // есть удаление записи, о котором спрашивает заголовок.
+
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)
         .screenTitle(name.isEmpty ? String(localized: "Редактировать") : name,

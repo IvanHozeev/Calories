@@ -666,7 +666,7 @@ private struct CalculationBasisSheet: View {
                                     Int((store.smoothedTDEE ?? fact.tdee).rounded()), fact.loggedDays,
                                     Int((store.profile?.tdee ?? 0).rounded())))
                     } else {
-                        Text("Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле.")
+                        Text("Пока по формуле. Расход по факту — после двух недель записей.")
                     }
                 }
 

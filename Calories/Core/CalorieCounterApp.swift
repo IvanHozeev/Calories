@@ -76,7 +76,9 @@ private struct StorageErrorView: View {
             Text("Не удалось открыть данные")
                 .font(.app(.title2, weight: .semibold))
                 .multilineTextAlignment(.center)
-            Text("Записи не потеряны, но приложение не смогло их прочитать. Попробуй перезапустить устройство. Не переустанавливай приложение — это сотрёт дневник.")
+            // Коротко, но без потери главного: человек в эту секунду думает
+            // переустановить приложение, а это сотрёт дневник.
+            Text("Перезапусти телефон. Не переустанавливай приложение — удалит записи.")
                 .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)

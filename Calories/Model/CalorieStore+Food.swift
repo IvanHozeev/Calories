@@ -76,6 +76,18 @@ extension CalorieStore {
         return MealPairs.suggestions(draft: draft, history: history)
     }
 
+    /// Что человек обычно собирает в это окно — приём целиком.
+    ///
+    /// Полгода, как и у пар: привычный завтрак не меняется за месяц, а у
+    /// человека, который ест одно и то же, за тридцать дней может не
+    /// набраться и трёх совпадений одного набора.
+    func usualMeals(period: MealPeriod?, days: Int = 180) -> [UsualMeal.Suggestion] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
+        let history = entries.filter { $0.date >= cutoff }
+            .map { (date: $0.date, parts: $0.composition) }
+        return UsualMeal.suggestions(history: history, period: period)
+    }
+
     func mealSuggestions(remaining: Int, days: Int = 30) -> [MealSuggestions.Candidate] {
         guard remaining >= MealSuggestions.minimumRemaining else { return [] }
         let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast

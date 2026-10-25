@@ -633,6 +633,11 @@ struct AddEntryView: View {
         store.mealSuggestions(remaining: mealRemaining)
     }
 
+    /// Приёмы, которые человек собирает снова и снова, — целиком.
+    private var usual: [UsualMeal.Suggestion] {
+        store.usualMeals(period: nextMealPeriod ?? MealPeriod.period(for: Date()))
+    }
+
     /// Что человек обычно кладёт вместе с тем, что уже в приёме.
     private var pairs: [MealPairs.Suggestion] {
         store.pairSuggestions(draft: draftItems.map(\.name))
@@ -682,6 +687,29 @@ struct AddEntryView: View {
     }
 
     /// Кладёт в черновик то, что обычно идёт вместе.
+    /// Весь набор — в черновик, одним движением и одной анимацией.
+    private func addUsual(_ item: UsualMeal.Suggestion) {
+        withAnimation(.snappy) {
+            draftItems.append(contentsOf: item.parts.map {
+                MealItem(name: $0.name, calories: $0.calories,
+                         macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                         grams: $0.grams)
+            })
+        }
+    }
+
+    /// Строка «как обычно»: состав перечислен, цена — общая.
+    ///
+    /// Та же `FoodRow`, что у всех подсказок: это такая же еда, просто сразу
+    /// несколькими позициями.
+    private func usualRow(_ item: UsualMeal.Suggestion) -> some View {
+        FoodRow(name: item.parts.map(\.name).joined(separator: ", "),
+                calories: item.calories,
+                portion: String(format: String(localized: "%lld позиции"), item.parts.count),
+                macros: item.macros,
+                detail: String(format: String(localized: "%lld раз"), item.times))
+    }
+
     private func addPair(_ item: MealPairs.Suggestion) {
         withAnimation(.snappy) {
             draftItems.append(MealItem(name: item.name, calories: item.calories,
@@ -759,6 +787,22 @@ struct AddEntryView: View {
         // уже знает, что кладёт, и подсказка «Обед: 377 ккал» перестаёт быть
         // подсказкой: она предлагает набрать то, что он набирает сам, и число
         // в ней считается от остатка, который он прямо сейчас и меняет.
+        // Приём целиком — выше подсказок под остаток. Если такой завтрак
+        // человек собирал три утра подряд, подбирать к остатку ему нечего:
+        // он уже знает, что будет есть, и всё, что от приложения нужно, —
+        // не заставлять собирать это заново по одной позиции.
+        if !isSearching, draftItems.isEmpty, !usual.isEmpty {
+            Section {
+                ForEach(usual) { item in
+                    usualRow(item)
+                        .contentShape(Rectangle())
+                        .onTapGesture { addUsual(item) }
+                }
+            } header: {
+                Text("Как обычно")
+            }
+        }
+
         if !isSearching, draftItems.isEmpty, !suggestions.isEmpty {
             Section {
                 ForEach(suggestions) { item in

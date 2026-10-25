@@ -15,6 +15,20 @@ struct MyFoodView: View {
     @State private var debouncedQuery = ""
     @State private var remoteResults: [FoodItem] = []
     @State private var isSearchingRemote = false
+    /// Секции в том порядке, в каком они на экране: по нему имя держится всю
+    /// длину категории, даже когда её заголовок давно уехал.
+    private var sectionOrder: [String] {
+        let source = trimmedQuery.isEmpty && tab == .products ? products : database
+        return FoodCategory.grouped(source).map(\.0.title)
+    }
+
+    /// Переезд заголовка секции в шапку. Объектом, а не состоянием экрана:
+    /// прокрутка меняет его на каждом кадре, и `@State` перестраивал бы весь
+    /// список.
+    @State private var head = SectionHeadState()
+    /// Линия, на которой приклеенный заголовок встаёт: безопасная зона
+    /// экрана. Меряем, а не задаём числом — у каждого экрана она своя.
+    @State private var pinLine: CGFloat = 0
     @State private var serving: ServingTarget?
     /// Что показывать. Считается не в теле, а по изменению запроса, раздела
     /// и категории — иначе ввод в строку поиска перебирает базу на каждую букву.
@@ -143,8 +157,22 @@ struct MyFoodView: View {
             }
         }
         .glassRow()
-        .navigationTitle("Рацион")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .measuresPinLine()
+        .onPreferenceChange(PinLineKey.self) { pinLine = $0 }
+        .onPreferenceChange(SectionHeadKey.self) { heads in
+            head.update(heads: heads, order: sectionOrder, pinLine: pinLine)
+        }
+        // Своё имя у экрана скрыто: его показывает пара в центре шапки,
+        // которая умеет меняться на имя категории.
+        .navigationTitle("")
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                SectionHeadTitle(state: head, fallback: String(localized: "Рацион"))
+            }
+        }
+        // На краю прокрутки iOS 26 режет содержимое под шапкой прямой линией,
+        // и под заголовком это читается как второй бар.
+        .scrollEdgeEffectStyle(.soft, for: .top)
         // На корневых вкладках заголовок скрыт: крупный спорил с содержимым,
         // а название и так в таббаре.
         .scrollIndicators(.hidden)
@@ -391,6 +419,10 @@ struct MyFoodView: View {
                     }
                 } header: {
                     Label(category.title, systemImage: category.icon)
+                        // Гаснет, уезжая в шапку: имя не должно стоять в двух
+                        // местах разом.
+                        .opacity(head.opacity(of: category.title))
+                        .tracksSectionHead(category.title)
                 }
             }
         }
@@ -435,6 +467,10 @@ struct MyFoodView: View {
                     }
                 } header: {
                     Label(category.title, systemImage: category.icon)
+                        // Гаснет, уезжая в шапку: имя не должно стоять в двух
+                        // местах разом.
+                        .opacity(head.opacity(of: category.title))
+                        .tracksSectionHead(category.title)
                 }
             }
         }

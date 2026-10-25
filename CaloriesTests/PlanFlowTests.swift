@@ -468,7 +468,12 @@ struct CompositionWindowTests {
     private func change(days: Int, from: Double, to: Double,
                         fatFrom: Double = 12.7, fatTo: Double = 11.7) -> CompositionChange {
         let end = Date()
-        return CompositionChange(fromDate: end.addingTimeInterval(-Double(days) * 86_400),
+        // Дни отсчитываем календарём, а не секундами: в сутки перевода
+        // стрелок «минус 86 400» — это не вчера, а вчера плюс час, и
+        // `dateComponents([.day])`, которым считает сам разбор, видит на
+        // день меньше. Ровно на этом весь набор лёг 25 октября 2026.
+        let start = Calendar.current.date(byAdding: .day, value: -days, to: end) ?? end
+        return CompositionChange(fromDate: start,
                                  toDate: end,
                                  startWeightKg: from, endWeightKg: to,
                                  startFatPercent: fatFrom, endFatPercent: fatTo)

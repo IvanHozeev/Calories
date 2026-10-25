@@ -130,6 +130,10 @@ enum MealSchedule {
         /// Что уже съедено за день: время и калории.
         let entries: [(date: Date, calories: Int)]
         let now: Date
+        /// Календарь — обычно системный. Задаётся отдельно, чтобы день
+        /// перевода стрелок можно было проверить тестом, не трогая часовой
+        /// пояс всей машины.
+        var calendar: Calendar = .current
     }
 
     /// Времена приёмов на этот день.
@@ -137,11 +141,18 @@ enum MealSchedule {
     /// Основные стоят на своих часах и не двигаются. Промежуточные ровно
     /// посередине между соседями: второй завтрак между завтраком и обедом,
     /// полдник между обедом и ужином, второй ужин между ужином и отбоем.
-    static func times(wake: Date, sleep: Date, count: Int) -> [Date] {
-        let calendar = Calendar.current
+    static func times(wake: Date, sleep: Date, count: Int,
+                      calendar: Calendar = .current) -> [Date] {
         let day = calendar.startOfDay(for: wake)
+        // Час ставим, а не прибавляем.
+        //
+        // В сутки перехода на зимнее или летнее время их не двадцать четыре:
+        // прибавив к полуночи восемь часов, попадаешь в семь утра или в
+        // девять — и всё расписание съезжает на час ровно в тот день, когда
+        // человек этого меньше всего ждёт. Календарь про перевод стрелок
+        // знает, поэтому просим у него восемь часов, а не восемь отрезков.
         func at(_ hour: Int) -> Date {
-            calendar.date(byAdding: .hour, value: hour, to: day) ?? day
+            calendar.date(bySettingHour: hour, minute: 0, second: 0, of: day) ?? day
         }
         let breakfast = at(breakfastHour)
         let lunch = at(lunchHour)
@@ -151,7 +162,11 @@ enum MealSchedule {
         var bedtime = calendar.date(bySettingHour: calendar.component(.hour, from: sleep),
                                     minute: calendar.component(.minute, from: sleep),
                                     second: 0, of: day) ?? dinner
-        if bedtime <= dinner { bedtime = bedtime.addingTimeInterval(86_400) }
+        // Сутки не всегда 86 400 секунд: в день перевода стрелок их на час
+        // больше или меньше, и «завтра в то же время» сдвигало отбой.
+        if bedtime <= dinner {
+            bedtime = calendar.date(byAdding: .day, value: 1, to: bedtime) ?? bedtime
+        }
         let lastAllowed = bedtime.addingTimeInterval(-lastMealBeforeSleep)
 
         return periods(count: count).map { period in
@@ -198,7 +213,8 @@ enum MealSchedule {
 
     static func slots(_ input: Input) -> [Slot] {
         let wake = input.wake
-        let times = times(wake: wake, sleep: input.sleep, count: input.mealCount)
+        let times = times(wake: wake, sleep: input.sleep, count: input.mealCount,
+                          calendar: input.calendar)
         guard !times.isEmpty, input.dailyGoal > 0 else { return [] }
 
         // Границы окон — середины между соседними приёмами.

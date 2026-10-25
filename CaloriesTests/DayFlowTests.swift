@@ -52,6 +52,37 @@ struct MealScheduleTests {
         #expect(try #require(slots.first { $0.period == .secondDinner }).time == at(20, 30))
     }
 
+    /// В день перевода стрелок расписание остаётся на своих часах.
+    ///
+    /// Поймано в живую: 25 октября 2026 Израиль перешёл на зимнее время, и
+    /// весь набор лёг разом. Часы отсчитывались прибавлением к полуночи, а в
+    /// такие сутки их не двадцать четыре — завтрак уезжал на семь утра. Для
+    /// проверки берём календарь с тем самым переходом и просим расписание на
+    /// этот день.
+    @Test func theScheduleHoldsItsHoursOnAClockChangeDay() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try #require(TimeZone(identifier: "Asia/Jerusalem"))
+        var parts = DateComponents()
+        parts.year = 2026
+        parts.month = 10
+        parts.day = 25
+        let midnight = try #require(calendar.date(from: parts))
+        func onThatDay(_ hour: Int) throws -> Date {
+            try #require(calendar.date(bySettingHour: hour, minute: 0, second: 0, of: midnight))
+        }
+
+        let slots = MealSchedule.slots(.init(wake: try onThatDay(7),
+                                             sleep: try onThatDay(23),
+                                             mealCount: 3,
+                                             dailyGoal: 2800,
+                                             entries: [],
+                                             now: try onThatDay(7),
+                                             calendar: calendar))
+        #expect(try #require(slots.first).time == (try onThatDay(8)))
+        #expect(try #require(slots.first { $0.period == .lunch }).time == (try onThatDay(13)))
+        #expect(try #require(slots.first { $0.period == .dinner }).time == (try onThatDay(19)))
+    }
+
     /// Отбой — единственное, что человек задаёт сам, и двигает он только
     /// второй ужин.
     @Test func onlyTheLastMealFollowsBedtime() throws {

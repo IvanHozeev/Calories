@@ -76,6 +76,116 @@ extension CalorieStore {
         return MealPairs.suggestions(draft: draft, history: history)
     }
 
+    /// Состояние партии блюда: сколько осталось, насколько хватит, до когда
+    /// это ещё еда. nil — партии нет, блюдо живёт просто рецептом.
+    ///
+    /// Съеденное считаем по дневнику, а не отдельным счётчиком: запись могут
+    /// удалить или поправить вес, и счётчик разошёлся бы с дневником молча.
+    /// Берём записи этого блюда начиная со дня готовки — всё, что съедено
+    /// раньше, было из прошлой кастрюли.
+    func batchState(of dish: Dish, now: Date = Date()) -> DishBatch.State? {
+        guard let cookedAt = dish.cookedAt, dish.batchGrams > 0 else { return nil }
+        let eaten = entries
+            .filter { $0.date >= cookedAt && $0.name == dish.name }
+            .reduce(0.0) { $0 + ($1.grams ?? 0) }
+        return DishBatch.state(cookedAt: cookedAt,
+                               totalGrams: dish.batchGrams,
+                               eatenGrams: eaten,
+                               servingGrams: dish.defaultServingGrams > 0 ? dish.defaultServingGrams : nil,
+                               now: now)
+    }
+
+    /// Начать партию: сварили столько-то и сегодня.
+    func startBatch(of dish: Dish, grams: Double, cookedAt: Date = Date()) {
+        guard grams > 0 else { return }
+        dish.batchGrams = grams
+        dish.cookedAt = cookedAt
+        dish.updatedAt = Date()
+        persistDishes()
+    }
+
+    /// Закрыть партию: доели или выбросили. Рецепт остаётся.
+    func endBatch(of dish: Dish) {
+        dish.batchGrams = 0
+        dish.cookedAt = nil
+        dish.updatedAt = Date()
+        persistDishes()
+    }
+
+    /// Блюда, у которых сейчас есть живая партия, — и что про них сказать.
+    func liveBatches(now: Date = Date()) -> [(dish: Dish, state: DishBatch.State)] {
+        dishes.compactMap { dish in
+            guard let state = batchState(of: dish, now: now), !state.isFinished else { return nil }
+            return (dish, state)
+        }
+        // Первым то, что испортится раньше: это и есть порядок срочности.
+        .sorted { $0.state.goodUntil < $1.state.goodUntil }
+    }
+
+    /// Что сказать про сваренное — одной строкой, или ничего.
+    ///
+    /// Берём самую срочную партию: испорченное важнее кончающегося, а из двух
+    /// кастрюль — та, что испортится раньше. Говорить про обе разом значит
+    /// превратить экран в список дел по холодильнику.
+    func batchHint(now: Date = Date()) -> (dish: Dish, advice: DishBatch.Advice)? {
+        let live = liveBatches(now: now)
+        let spoken = live.compactMap { item -> (dish: Dish, advice: DishBatch.Advice)? in
+            guard let advice = DishBatch.advice(item.state, now: now) else { return nil }
+            return (item.dish, advice)
+        }
+        // Порядок срочности: испортилось, доесть сегодня, пора готовить.
+        return spoken.min { left, right in rank(left.advice) < rank(right.advice) }
+    }
+
+    private func rank(_ advice: DishBatch.Advice) -> Int {
+        switch advice {
+        case .spoiled:   return 0
+        case .eatToday:  return 1
+        case .cookAgain: return 2
+        }
+    }
+
+    /// Ингредиент, пересчитанный из сухого в готовое.
+    ///
+    /// Человек кладёт в блюдо сто грамм сухих макарон, а ест двести пятьдесят
+    /// отварных — и взвешивает на тарелке именно их. Пересчёт делался руками:
+    /// сварить, взвесить, спросить у чужой нейросети, сколько вышло на сто
+    /// грамм. Теперь это одно число у продукта.
+    ///
+    /// Калории и макросы на сто грамм делим, вес умножаем: энергия та же,
+    /// просто размазана по большему весу. Если коэффициента нет, продукт
+    /// возвращается как есть — варится не всё.
+    func cooked(_ ingredient: DishIngredient) -> DishIngredient {
+        guard let factor = cookingYield(forFoodNamed: ingredient.foodName),
+              CookingYield.isPlausible(factor) else { return ingredient }
+        var cooked = ingredient
+        cooked.grams = CookingYield.cookedGrams(dry: ingredient.grams, factor: factor)
+        cooked.caloriesPer100g = Int(CookingYield.cookedPer100g(
+            dryPer100g: Double(ingredient.caloriesPer100g), factor: factor).rounded())
+        cooked.macrosPer100g = CookingYield.cookedMacros(
+            dryPer100g: ingredient.macrosPer100g, factor: factor)
+        return cooked
+    }
+
+    /// Запомнить, во сколько раз продукт тяжелеет при варке.
+    ///
+    /// Своё измерение, а не справочник: у каждой плиты и кастрюли оно своё.
+    func setCookingYield(_ factor: Double, forFoodNamed name: String) {
+        guard CookingYield.isPlausible(factor),
+              let food = customFoods.first(where: { $0.name == name }) else { return }
+        food.cookingYield = factor
+        food.updatedAt = Date()
+        persistCustomFoods()
+    }
+
+    /// Коэффициент уваривания продукта: свой, если его мерили, иначе
+    /// справочный по категории. nil — продукт не варится.
+    func cookingYield(forFoodNamed name: String) -> Double? {
+        if let own = customFoods.first(where: { $0.name == name })?.cookingYield { return own }
+        guard let category = category(ofProductNamed: name) else { return nil }
+        return CookingYield.reference[category]
+    }
+
     /// Что человек обычно собирает в это окно — приём целиком.
     ///
     /// Полгода, как и у пар: привычный завтрак не меняется за месяц, а у

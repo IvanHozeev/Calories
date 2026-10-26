@@ -114,6 +114,56 @@ struct NewDishSheet: View {
         return String(format: "%.\(digits)f \(nutrient.unit)", amount)
     }
 
+    /// Партия: одна сваренная кастрюля.
+    ///
+    /// Блюдо — это рецепт, он живёт вечно; партия кончается в четверг. Пока
+    /// они были одним, галерея копила съеденное, а остаток человек считал в
+    /// уме, вычитая съеденное из того, что сварил.
+    @ViewBuilder
+    private func batchSection(_ dish: Dish) -> some View {
+        Section {
+            if let state = store.batchState(of: dish) {
+                LabeledContent("Осталось") {
+                    Text(verbatim: remainingText(state))
+                        .font(.app(.body, weight: .medium))
+                        .monospacedDigit()
+                }
+                if let runsOut = state.runsOutOn {
+                    LabeledContent("Хватит до") {
+                        Text(verbatim: runsOut.formatted(.dateTime.day().month(.abbreviated)))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                LabeledContent("Свежее до") {
+                    Text(verbatim: state.goodUntil.formatted(.dateTime.day().month(.abbreviated)))
+                        .foregroundStyle(.secondary)
+                }
+                Button("Партия кончилась", role: .destructive) {
+                    store.endBatch(of: dish)
+                }
+            } else {
+                Button("Сварил") {
+                    // Сколько сварено — вес состава: человек только что его и
+                    // собрал из того, что положил в кастрюлю.
+                    store.startBatch(of: dish, grams: totalGrams)
+                }
+                .disabled(totalGrams <= 0)
+            }
+        } header: {
+            Text("Партия")
+        } footer: {
+            explain("Отметь, что сварил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть.").map { Text($0) }
+        }
+    }
+
+    /// Остаток словами: граммы и, если известна порция, сколько это раз.
+    private func remainingText(_ state: DishBatch.State) -> String {
+        let grams = String(format: "%.0f \(String(localized: "г"))", state.remainingGrams)
+        guard let servings = state.remainingServings, servings >= 0.5 else { return grams }
+        return String(format: String(localized: "%1$@ · %2$@ порции"),
+                      grams, String(format: "%.1f", servings))
+    }
+
     private func applyGrams(to ingredient: DishIngredient) {
         defer { gramsEditTarget = nil }
         let value = gramsEditText.decimalValueOrZero
@@ -213,6 +263,12 @@ struct NewDishSheet: View {
                 }
             }
 
+            // Партия — только у сохранённого блюда: отмечать «сварено», пока
+            // блюда ещё нет, нечего.
+            if let dish = editingDish {
+                batchSection(dish)
+            }
+
             if let profile = nutrientProfile, !profile.per100g.isEmpty {
                 Section {
                     ForEach(Micronutrient.allCases) { nutrient in
@@ -287,7 +343,10 @@ struct NewDishSheet: View {
         }
         .sheet(isPresented: $showingIngredientPicker) {
             IngredientPickerSheet(store: store) { ingredient in
-                ingredients.append(ingredient)
+                // Сухое превращаем в готовое сразу: в блюдо идёт то, что
+                // окажется в тарелке. Калории при этом те же — вода их не
+                // несёт, — меняется только вес.
+                ingredients.append(store.cooked(ingredient))
             }
         }
         .onAppear {

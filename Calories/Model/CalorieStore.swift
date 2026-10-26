@@ -1590,6 +1590,15 @@ final class CalorieStore {
         rebuildCaches()
     }
 
+    /// Сохранить правку своего продукта и пересобрать то, что из него
+    /// считается. Нужно там, где меняется одно поле и городить ради него
+    /// полный `updateCustomFood` с десятком аргументов незачем.
+    func persistCustomFoods() {
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        customFoods.sort { $0.name < $1.name }
+        rebuildCaches()
+    }
+
     func addDish(name: String, ingredients: [DishIngredient], servingGrams: Double = 0) {
         let dish = Dish(name: name, ingredients: ingredients)
         dish.defaultServingGrams = servingGrams
@@ -1597,6 +1606,13 @@ final class CalorieStore {
         context.insert(dish)
         do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         dishes = [dish] + dishes
+        rebuildCaches()
+    }
+
+    /// Сохранить правку блюда и пересобрать то, что из него считается.
+    /// Для случаев, где меняется одно поле — например, партия.
+    func persistDishes() {
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
         rebuildCaches()
     }
 

@@ -951,7 +951,9 @@ struct AddEntryView: View {
                 addToDraft(item)
             }
         case .dish(let dish):
-            DishQuantityView(dish: dish, onAddAndSave: addAndSave, isPushed: true) { item in
+            DishQuantityView(dish: dish, onAddAndSave: addAndSave,
+                             remainingGrams: store.batchState(of: dish)?.remainingGrams,
+                             isPushed: true) { item in
                 addToDraft(item)
             }
         case .edit(let itemID):

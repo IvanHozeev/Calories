@@ -239,16 +239,32 @@ struct DishQuantityView: View {
 
     init(dish: Dish, addTitle: LocalizedStringKey = "В приём пищи",
          onAddAndSave: ((MealItem) -> Void)? = nil,
+         remainingGrams: Double? = nil,
          isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
         self.dish = dish
         self.addTitle = addTitle
         self.onAddAndSave = onAddAndSave
+        self.remainingGrams = remainingGrams
         self.onAdd = onAdd
-        let defaultGrams = dish.servingGrams
+        // Предлагаем то, что действительно есть.
+        //
+        // В кастрюле осталось двести грамм, а порция по умолчанию четыреста —
+        // подставлять четыреста значит предлагать съесть то, чего нет, и
+        // заставлять человека вычитать самому. Если остатка меньше порции,
+        // берём остаток: доесть то, что есть, — обычный конец партии.
+        let defaultGrams: Double
+        if let remainingGrams, remainingGrams > 0, remainingGrams < dish.servingGrams {
+            defaultGrams = remainingGrams
+        } else {
+            defaultGrams = dish.servingGrams
+        }
         _grams = State(initialValue: defaultGrams)
         _gramsText = State(initialValue: "\(Int(defaultGrams))")
     }
+
+    /// Сколько этого блюда ещё осталось в партии. nil — партии нет.
+    private let remainingGrams: Double?
 
     private var calories: Int {
         Int((Double(dish.caloriesPer100g) * grams / 100).rounded())

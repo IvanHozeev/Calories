@@ -455,9 +455,16 @@ struct SleepAnalysisTests {
 
     private let calendar = Calendar.current
 
+    /// «Вчера в 23:40», а не «двадцать шесть часов назад».
+    ///
+    /// Прибавлять день и часы одной операцией нельзя: в сутки перевода
+    /// стрелок их не двадцать четыре, и двадцать три часа от полуночи
+    /// попадают в 22:40. Ночь из-за этого выходила на час длиннее, и весь
+    /// разбор сна падал раз в полгода на ровном месте.
     private func at(_ day: Int, _ hour: Int, _ minute: Int = 0) -> Date {
         let base = calendar.startOfDay(for: Date())
-        return calendar.date(byAdding: .init(day: day, hour: hour, minute: minute), to: base)!
+        let shifted = calendar.date(byAdding: .day, value: day, to: base)!
+        return calendar.date(bySettingHour: hour, minute: minute, second: 0, of: shifted)!
     }
 
     private func segment(_ from: Date, _ to: Date) -> SleepAnalysis.Segment {
@@ -548,10 +555,13 @@ struct RestingPulseTests {
 
     private let calendar = Calendar.current
 
+    /// Час ставим, а не прибавляем: в сутки перевода стрелок их не двадцать
+    /// четыре, и «вчера в 23:00» сдвигается на час.
     private func hour(_ day: Int, _ hour: Int, _ average: Double) -> RestingPulse.Hour {
         let base = calendar.startOfDay(for: Date())
-        return .init(start: calendar.date(byAdding: .init(day: day, hour: hour), to: base)!,
-                     average: average)
+        let shifted = calendar.date(byAdding: .day, value: day, to: base)!
+        let start = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: shifted)!
+        return .init(start: start, average: average)
     }
 
     /// Дно ночи, а не среднее по ней: среднее тянут вверх пробуждения и

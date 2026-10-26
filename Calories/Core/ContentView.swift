@@ -40,6 +40,8 @@ struct ContentView: View {
     @State private var ringIsAway = false
     /// Высота списка и то, сколько у него снизу занято таббаром. Из этих
     /// двух считается, сколько места осталось кольцу.
+    /// Блюдо, которое открываем из подсказки про сваренное.
+    @State private var openingDish: Dish?
     @State private var listHeight: CGFloat = 0
     @State private var listBottomInset: CGFloat = 0
 
@@ -50,7 +52,11 @@ struct ContentView: View {
     /// Нижняя граница не для красоты: на маленьком экране с крупным шрифтом
     /// без неё кольцо схлопнулось бы в точку.
     private var summaryHeight: CGFloat {
-        max(listHeight - listBottomInset - 8, 420)
+        // Строка взвешивания приходит не каждый день, и платить за неё
+        // должен экран, а не кольцо: без добавки она отъедала бы у знака
+        // свою высоту, потому что блок фиксирован.
+        let weighIn: CGFloat = (store.profile == nil || !store.hasWeighedToday) ? 52 : 0
+        return max(listHeight - listBottomInset - 8, 420) + weighIn
     }
     private let quickActions = QuickActionRouter.shared
 
@@ -137,6 +143,9 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingFasting) {
                 FastingView(store: store)
+            }
+            .navigationDestination(item: $openingDish) { dish in
+                NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
             }
             .navigationDestination(isPresented: $showingPlan) {
                 PlanView(store: store)
@@ -426,6 +435,54 @@ private extension ContentView {
             // поменьше» — и заодно кольцо перестаёт упираться в плитки.
             .padding(.vertical, 14)
 
+            // Взвешивание — сразу под кольцом.
+            //
+            // Это первое дело дня и то, из чего считается вся остальная
+            // картина: без утреннего веса ни тренд, ни расход не сдвинутся.
+            // В хвосте экрана, под плитками и напоминаниями, строка
+            // попадалась на глаза последней — когда до весов уже не дойти.
+            if store.profile == nil {
+                NavigationLink {
+                    SettingsView(store: store)
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.questionmark")
+                            .font(.app(.footnote))
+                        Text("Заполнить профиль")
+                            .font(.app(.caption))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption2))
+                    }
+                    .foregroundStyle(.blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.blue.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            } else if !store.hasWeighedToday {
+                Button {
+                    todaySheet = .weight
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "scalemass")
+                            .font(.app(.footnote))
+                        Text("Взвешивание")
+                            .font(.app(.caption))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption2))
+                    }
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.orange.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+            }
+
             // Экран читается как отъезд камеры: кольцо и макросы —
             // сегодняшний день, дальше ближайший приём (часы),
             // голодание (ближайшие дни), план (недели вперёд) и
@@ -485,14 +542,15 @@ private extension ContentView {
     private var hasDayHints: Bool {
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
+        if store.batchHint() != nil { return true }
         if store.calorieBankBonus != 0 { return true }
-        if !store.isPremium, store.plan == nil { return true }
-        if store.profile == nil { return true }
-        return !store.hasWeighedToday
+        return !store.isPremium && store.plan == nil
     }
 
-    /// Подсказки дня: голодание, недельный обзор, банк калорий, напоминание
-    /// взвеситься.
+    /// Подсказки дня: голодание, недельный обзор, банк калорий.
+    ///
+    /// Взвешивание отсюда уехало под кольцо: это не напоминание в хвосте, а
+    /// первое дело дня, из которого считается всё остальное.
     ///
     /// Своей строкой под первым экраном, а не внутри него.
     ///
@@ -519,6 +577,13 @@ private extension ContentView {
             // глаза последней, когда она нужнее всего.
             if let hint = store.fastingHint() {
                 FastingStrip(hint: hint) { showingFasting = true }
+            }
+
+            // Сваренное напоминает о себе само: доесть, пока не испортилось,
+            // или приготовить, пока не кончилось. Одна строка на самую
+            // срочную кастрюлю — список дел по холодильнику тут не нужен.
+            if let hint = store.batchHint() {
+                batchRow(hint.dish, hint.advice)
             }
 
             // Недельный обзор зовёт только когда есть о чём говорить:
@@ -587,48 +652,53 @@ private extension ContentView {
                 .buttonStyle(.plain)
             }
 
-            if store.profile == nil {
-                NavigationLink {
-                    SettingsView(store: store)
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "person.crop.circle.badge.questionmark")
-                            .font(.app(.footnote))
-                        Text("Заполнить профиль")
-                            .font(.app(.caption))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                    }
-                    .foregroundStyle(.blue)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.blue.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-            } else if !store.hasWeighedToday {
-                Button {
-                    todaySheet = .weight
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "scalemass")
-                            .font(.app(.footnote))
-                        Text("Взвешивание")
-                            .font(.app(.caption))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                    }
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.orange.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-            }
         }
+    }
+
+    /// Строка про сваренное: что именно и что с этим делать.
+    private func batchRow(_ dish: Dish, _ advice: DishBatch.Advice) -> some View {
+        let text: String
+        let color: Color
+        switch advice {
+        case .spoiled:
+            text = String(format: String(localized: "%@ — четвёртый день, лучше не есть"), dish.name)
+            color = ProgressRing.overColors[0]
+        case let .eatToday(servings):
+            if let servings, servings >= 0.5 {
+                text = String(format: String(localized: "%1$@ — доесть сегодня, осталось %2$@ порции"),
+                              dish.name, String(format: "%.1f", servings))
+            } else {
+                text = String(format: String(localized: "%@ — доесть сегодня"), dish.name)
+            }
+            color = .orange
+        case let .cookAgain(runsOut):
+            text = String(format: String(localized: "%1$@ кончится %2$@ — пора готовить"),
+                          dish.name, runsOut.formatted(.dateTime.day().month(.abbreviated)))
+            color = MacroKind.carbs.color
+        }
+        return Button {
+            // Ведём туда, где партия и живёт: в само блюдо, где её можно
+            // закрыть или сварить заново.
+            openingDish = dish
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "takeoutbag.and.cup.and.straw")
+                    .font(.app(.footnote))
+                Text(verbatim: text)
+                    .font(.app(.caption))
+                    .multilineTextAlignment(.leading)
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.app(.caption2))
+            }
+            .foregroundStyle(color)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(color.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("batchHint")
     }
 
     /// Съеденное за день: приёмы пищи по порядку, в каждом свои строки.

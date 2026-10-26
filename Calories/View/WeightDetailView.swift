@@ -14,10 +14,6 @@ struct WeightDetailView: View {
         store.weightHistory(lastDays: rangeDays)
     }
 
-    private var recentCalorieDays: [DaySummary] {
-        store.lastDays(rangeDays)
-    }
-
     /// Изменение за период — по тренду на краях, а не по двум сырым числам:
     /// иначе солёный ужин в последний день превращается в «набрал килограмм».
     private var weightChange: Double? {
@@ -114,15 +110,6 @@ struct WeightDetailView: View {
                 }
                 .glassRow()
             }
-
-            Section {
-                WeeklyChartView(days: recentCalorieDays)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-            } footer: {
-                explain("Сравни динамику веса с калорийностью выше — если вес не двигается, а цель по калориям — дефицит, стоит перепроверить норму в профиле.").map { Text($0) }
-            }
-            .glassRow()
 
             if !store.weightEntries.isEmpty {
                 Section("Все записи") {

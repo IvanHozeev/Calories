@@ -42,7 +42,7 @@ struct PinLineKey: PreferenceKey {
     }
 }
 
-/// Состояние переезда: что в шапке сейчас, что подъезжает и насколько.
+/// Какая секция сейчас под шапкой.
 ///
 /// Отдельным наблюдаемым объектом, а не состоянием экрана. Прокрутка меняет
 /// его десятки раз в секунду, и будь это `@State` экрана — на каждом кадре
@@ -52,14 +52,6 @@ struct PinLineKey: PreferenceKey {
 final class SectionHeadState {
     /// Имя, стоящее в шапке.
     private(set) var current: String?
-    /// Имя, которое подъезжает ему на смену.
-    private(set) var next: String?
-    /// Доля пути от 0 до 1: ноль — ещё ничего не началось, единица — смена.
-    private(set) var blend: CGFloat = 0
-
-    /// Длина дорожки перехода в точках. Сорок — путь, который палец проходит
-    /// заметно, но не настолько долго, чтобы шапка жила в полупрозрачности.
-    static let handover: CGFloat = 40
 
     /// - Parameter order: секции в том порядке, в каком они на экране. Без
     ///   него имя держалось бы только пока виден сам заголовок.
@@ -74,9 +66,6 @@ final class SectionHeadState {
         }
 
         let reached = unique.filter { $0.y <= rest + 1 }.max { $0.y < $1.y }?.label
-        let upcoming = unique
-            .filter { $0.y > rest + 1 && $0.label != reached }
-            .min { $0.y < $1.y }
 
         // Имя держится всю секцию, а не пока виден её заголовок.
         //
@@ -91,30 +80,24 @@ final class SectionHeadState {
         if let reached {
             current = reached
         } else if let firstBelow = unique.min(by: { $0.y < $1.y }),
-                  let index = order.firstIndex(of: firstBelow.label), index > 0 {
-            current = order[index - 1]
+                  let index = order.firstIndex(of: firstBelow.label) {
+            // Заголовок первой видимой секции ещё ниже шапки — значит мы в
+            // той, что перед ней. Для самой первой секции «перед ней»
+            // ничего нет: человек в начале списка.
+            current = index > 0 ? order[index - 1] : nil
+        } else if unique.isEmpty, current != nil {
+            // Ни одного заголовка в кадре.
+            //
+            // У длинной категории — а в каталоге их десятки строк — соседние
+            // заголовки оба за пределами экрана: предыдущий уехал вверх,
+            // следующий ещё далеко внизу. Сбрасывать здесь имя значит
+            // посреди «Круп и хлеба» показывать «Рацион», что и происходило.
+            // Молчание списка — не повод менять ответ: мы всё там же.
         } else {
-            // Выше первой секции — значит человек в начале списка.
             current = nil
-        }
-        if let upcoming, upcoming.y - rest < Self.handover {
-            next = upcoming.label
-            // Сглаживание: у краёв дорожки движение замедляется, и переход
-            // не выглядит линейной протяжкой.
-            let raw = 1 - (upcoming.y - rest) / Self.handover
-            blend = raw * raw * (3 - 2 * raw)
-        } else {
-            next = nil
-            blend = 0
         }
     }
 
-    /// Насколько погасить сам заголовок секции: он уходит в шапку, а не
-    /// остаётся на экране вторым экземпляром.
-    func opacity(of label: String) -> Double {
-        if label == current { return Double(max(0, 1 - blend * 1.45)) }
-        return 1
-    }
 }
 
 extension View {
@@ -140,35 +123,3 @@ extension View {
     }
 }
 
-/// Пара имён в шапке: уходящее и подъезжающее.
-///
-/// Отдельной вьюхой — чтобы прокрутка перерисовывала её, а не весь экран.
-/// Прозрачности не встречаются на половине пути: уходящее гаснет на первых
-/// двух третях, приходящее проявляется на последней. Встречаясь посередине,
-/// оба по половине, они читались как смаз.
-struct SectionHeadTitle: View {
-    let state: SectionHeadState
-    /// Имя экрана — то, что стоит в шапке, пока ни одна секция не доехала.
-    let fallback: String
-
-    var body: some View {
-        ZStack {
-            title(state.current ?? fallback)
-                .opacity(1 - min(1, Double(state.blend) * 1.45))
-                .offset(y: -11 * state.blend)
-            if let next = state.next {
-                title(next)
-                    .opacity(max(0, (Double(state.blend) - 0.32) / 0.68))
-                    .offset(y: 13 * (1 - state.blend))
-            }
-        }
-        .frame(height: 34)
-        .clipped()
-    }
-
-    private func title(_ text: String) -> some View {
-        Text(verbatim: text)
-            .font(.app(.headline, weight: .bold))
-            .lineLimit(1)
-    }
-}

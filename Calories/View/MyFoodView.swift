@@ -162,14 +162,13 @@ struct MyFoodView: View {
         .onPreferenceChange(SectionHeadKey.self) { heads in
             head.update(heads: heads, order: sectionOrder, pinLine: pinLine)
         }
-        // Своё имя у экрана скрыто: его показывает пара в центре шапки,
-        // которая умеет меняться на имя категории.
-        .navigationTitle("")
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                SectionHeadTitle(state: head, fallback: String(localized: "Рацион"))
-            }
-        }
+        // Заголовок системный, как у «Сегодня» и «Профиля»: тот же кегль,
+        // то же поведение при прокрутке. Своя пара имён в центре шапки
+        // выглядела чужой — другой размер, другое место, другая анимация.
+        // Меняется только текст: имя экрана или имя категории, до которой
+        // доехали.
+        .navigationTitle(head.current ?? String(localized: "Рацион"))
+        .toolbarTitleDisplayMode(.inlineLarge)
         // На краю прокрутки iOS 26 режет содержимое под шапкой прямой линией,
         // и под заголовком это читается как второй бар.
         .scrollEdgeEffectStyle(.soft, for: .top)
@@ -281,7 +280,8 @@ struct MyFoodView: View {
                         record(item)
                     }
                 case .dish(let dish):
-                    DishQuantityView(dish: dish) { item in
+                    DishQuantityView(dish: dish,
+                                     remainingGrams: store.batchState(of: dish)?.remainingGrams) { item in
                         record(item)
                     }
                 }
@@ -344,6 +344,16 @@ struct MyFoodView: View {
         }
     }
 
+    /// Остаток партии строкой блюда — или nil, когда партии нет.
+    private func batchDetail(_ dish: Dish) -> String? {
+        guard let state = store.batchState(of: dish), !state.isFinished else { return nil }
+        if let servings = state.remainingServings, servings >= 0.5 {
+            return String(format: String(localized: "осталось %@ порции"),
+                          String(format: "%.1f", servings))
+        }
+        return String(format: String(localized: "осталось %.0f г"), state.remainingGrams)
+    }
+
     @ViewBuilder
     private func dishesSection(_ filteredDishes: [Dish]) -> some View {
         if filteredDishes.isEmpty {
@@ -365,7 +375,11 @@ struct MyFoodView: View {
                             calories: dish.totalCalories,
                             portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                             macros: dish.totalMacros,
-                            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
+                            // У сваренного вместо числа ингредиентов —
+                            // остаток: про рецепт человек и так знает, а
+                            // сколько ещё есть в холодильнике — нет.
+                            detail: batchDetail(dish)
+                                ?? "\(dish.ingredients.count) \(String(localized: "ингр."))",
                             icons: store.foodCategories(of: dish).map(\.icon),
                             leadingMacros: dish.macrosPer100g,
                             traits: dish.traits
@@ -421,7 +435,6 @@ struct MyFoodView: View {
                     Label(category.title, systemImage: category.icon)
                         // Гаснет, уезжая в шапку: имя не должно стоять в двух
                         // местах разом.
-                        .opacity(head.opacity(of: category.title))
                         .tracksSectionHead(category.title)
                 }
             }
@@ -469,7 +482,6 @@ struct MyFoodView: View {
                     Label(category.title, systemImage: category.icon)
                         // Гаснет, уезжая в шапку: имя не должно стоять в двух
                         // местах разом.
-                        .opacity(head.opacity(of: category.title))
                         .tracksSectionHead(category.title)
                 }
             }

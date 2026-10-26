@@ -23,6 +23,9 @@ struct NewFoodSheet: View {
     @State private var category = FoodCategory.other
     /// Пусто — значит обычные 100 г.
     @State private var servingGrams = ""
+    /// Два веса для уваривания: сухое и то, что вышло.
+    @State private var dryWeight = ""
+    @State private var cookedWeight = ""
     /// Витамины, взятые из каталога, и строка, из которой они взяты.
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
@@ -308,6 +311,7 @@ struct NewFoodSheet: View {
             dataSection
             packageSection
             servingSection
+            cookingSection
             donorSection
             vitaminsSection
         }
@@ -344,6 +348,13 @@ struct NewFoodSheet: View {
                         } else {
                             store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID,
                                                micronutrientsAreEstimated: linkedIsEstimate)
+                        }
+                        // Коэффициент — отдельно от остальных полей: он
+                        // появляется не у всякого продукта, и проталкивать
+                        // его через подпись сохранения значило бы менять её
+                        // ради того, что бывает у двух категорий из двенадцати.
+                        if let factor = learnedYield {
+                            store.setCookingYield(factor, forFoodNamed: name)
                         }
                         dismiss()
                     }
@@ -566,6 +577,64 @@ private extension NewFoodSheet {
     } footer: {
         explain("Это значение будет подставляться при добавлении продукта в приём пищи.").map { Text($0) }
     }
+    }
+
+    /// Уваривание: сколько готового выходит из сухого.
+    ///
+    /// Спрашиваем не коэффициент, а два веса — их человек и так знает,
+    /// потому что взвешивает. Коэффициент приложение посчитает само; просить
+    /// «2.5» у того, кто держит в руках кастрюлю, значит заставлять считать
+    /// в уме то, ради чего он сюда и пришёл.
+    @ViewBuilder
+    var cookingSection: some View {
+        if showsCookingSection {
+            Section {
+                HStack {
+                    Text("Сухого")
+                    Spacer()
+                    TextField("100", text: $dryWeight)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 70)
+                    Text("г").foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Вышло готового")
+                    Spacer()
+                    TextField("250", text: $cookedWeight)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 70)
+                    Text("г").foregroundStyle(.secondary)
+                }
+                if let factor = learnedYield {
+                    LabeledContent("В тарелке") {
+                        Text(verbatim: String(format: String(localized: "%1$@ ккал на 100 г, ×%2$@"),
+                                              String(Int(CookingYield.cookedPer100g(
+                                                dryPer100g: Double(enteredCalories), factor: factor).rounded())),
+                                              String(format: "%.1f", factor)))
+                            .font(.app(.body, weight: .medium))
+                            .monospacedDigit()
+                    }
+                }
+            } header: {
+                Text("Уваривание")
+            } footer: {
+                explain("Сварил, взвесил — приложение запомнит, во сколько раз продукт тяжелеет, и дальше будет считать это само. Калории при варке не меняются: вода их не несёт, просто вес растёт.").map { Text($0) }
+            }
+        }
+    }
+
+    /// Показываем только тому, что варят: у мяса «уваривание» означает потерю
+    /// воды, и это другой расчёт, который мы не делаем.
+    private var showsCookingSection: Bool {
+        category == .grains || category == .legumes
+    }
+
+    /// Коэффициент по двум весам — или nil, если числа не складываются.
+    private var learnedYield: Double? {
+        CookingYield.learn(dry: dryWeight.decimalValueOrZero,
+                           cooked: cookedWeight.decimalValueOrZero)
     }
 
     /// Витамины из базы: подобранные по названию и цифрам плюс поиск руками.

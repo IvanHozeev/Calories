@@ -138,7 +138,11 @@ struct NewDishSheet: View {
                     Text(verbatim: state.goodUntil.formatted(.dateTime.day().month(.abbreviated)))
                         .foregroundStyle(.secondary)
                 }
-                Button("Партия кончилась", role: .destructive) {
+                // Просто закрыть — и всё. Допрос «доел или выбросил» с
+                // дописыванием остатка одним приёмом был лишней работой на
+                // ровном месте: человек закрывает партию, чтобы завести
+                // новую, а не чтобы отчитаться.
+                Button("Закрыть партию", role: .destructive) {
                     store.endBatch(of: dish)
                 }
             } else {

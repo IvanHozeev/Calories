@@ -52,11 +52,13 @@ struct ContentView: View {
     /// Нижняя граница не для красоты: на маленьком экране с крупным шрифтом
     /// без неё кольцо схлопнулось бы в точку.
     private var summaryHeight: CGFloat {
-        // Строка взвешивания приходит не каждый день, и платить за неё
-        // должен экран, а не кольцо: без добавки она отъедала бы у знака
+        // Подсказки дня живут под кольцом — все в одном месте, чтобы их не
+        // искать по экрану. Приходят они не каждый день, и платить за них
+        // должен экран, а не кольцо: без добавки каждая отъедала бы у знака
         // свою высоту, потому что блок фиксирован.
         let weighIn: CGFloat = (store.profile == nil || !store.hasWeighedToday) ? 52 : 0
-        return max(listHeight - listBottomInset - 8, 420) + weighIn
+        let batch: CGFloat = store.batchHint() == nil ? 0 : 52
+        return max(listHeight - listBottomInset - 8, 420) + weighIn + batch
     }
     private let quickActions = QuickActionRouter.shared
 
@@ -435,6 +437,13 @@ private extension ContentView {
             // поменьше» — и заодно кольцо перестаёт упираться в плитки.
             .padding(.vertical, 14)
 
+            // Сваренное напоминает о себе само: доесть, пока не испортилось,
+            // или приготовить, пока не кончилось. Одна строка на самую
+            // срочную кастрюлю — список дел по холодильнику тут не нужен.
+            if let hint = store.batchHint() {
+                batchRow(hint.dish, hint.advice)
+            }
+
             // Взвешивание — сразу под кольцом.
             //
             // Это первое дело дня и то, из чего считается вся остальная
@@ -542,7 +551,6 @@ private extension ContentView {
     private var hasDayHints: Bool {
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
-        if store.batchHint() != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         return !store.isPremium && store.plan == nil
     }
@@ -577,13 +585,6 @@ private extension ContentView {
             // глаза последней, когда она нужнее всего.
             if let hint = store.fastingHint() {
                 FastingStrip(hint: hint) { showingFasting = true }
-            }
-
-            // Сваренное напоминает о себе само: доесть, пока не испортилось,
-            // или приготовить, пока не кончилось. Одна строка на самую
-            // срочную кастрюлю — список дел по холодильнику тут не нужен.
-            if let hint = store.batchHint() {
-                batchRow(hint.dish, hint.advice)
             }
 
             // Недельный обзор зовёт только когда есть о чём говорить:

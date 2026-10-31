@@ -85,9 +85,19 @@ extension CalorieStore {
     /// раньше, было из прошлой кастрюли.
     func batchState(of dish: Dish, now: Date = Date()) -> DishBatch.State? {
         guard let cookedAt = dish.cookedAt, dish.batchGrams > 0 else { return nil }
+        // По составу записи, а не по её имени.
+        //
+        // Та же ловушка, что была с клетчаткой: приёмы здесь почти всегда
+        // составные, и запись называется склейкой — «Паста с тунцом, Хлеб».
+        // Имени блюда среди имён записей нет, и остаток не двигался вовсе:
+        // человек съел пять порций из восьми, а кастрюля всё ещё полная.
         let eaten = entries
-            .filter { $0.date >= cookedAt && $0.name == dish.name }
-            .reduce(0.0) { $0 + ($1.grams ?? 0) }
+            .filter { $0.date >= cookedAt }
+            .reduce(0.0) { total, entry in
+                total + entry.composition
+                    .filter { $0.name == dish.name }
+                    .reduce(0.0) { $0 + ($1.grams ?? 0) }
+            }
         return DishBatch.state(cookedAt: cookedAt,
                                totalGrams: dish.batchGrams,
                                eatenGrams: eaten,
@@ -96,10 +106,15 @@ extension CalorieStore {
     }
 
     /// Начать партию: сварили столько-то и сегодня.
-    func startBatch(of dish: Dish, grams: Double, cookedAt: Date = Date()) {
+    ///
+    /// Отсчёт — с начала дня, а не с минуты нажатия. Варят и едят в один
+    /// день: человек сварил утром, пообедал, а отметить партию вспомнил
+    /// вечером — и видел полную кастрюлю, хотя съел из неё уже две порции.
+    /// Записи этого блюда за сегодня принадлежат этой кастрюле.
+    func startBatch(of dish: Dish, grams: Double, cookedAt: Date? = nil) {
         guard grams > 0 else { return }
         dish.batchGrams = grams
-        dish.cookedAt = cookedAt
+        dish.cookedAt = cookedAt ?? Calendar.current.startOfDay(for: Date())
         dish.updatedAt = Date()
         persistDishes()
     }

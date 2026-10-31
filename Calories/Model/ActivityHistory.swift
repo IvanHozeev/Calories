@@ -152,6 +152,32 @@ struct ActivityHistory: Sendable {
         defaults.set(data, forKey: Self.key)
     }
 
+    /// Записывает активные калории, заменяя прежнее значение, а не выбирая
+    /// большее.
+    ///
+    /// Большее здесь нельзя: когда прочитанное число оказывается завышенным —
+    /// источники сложились, браслет досинхронизировал день дважды, — максимум
+    /// запоминает завышенное навсегда, и «обычный день» ещё месяц меряется по
+    /// нему. Запрос к «Здоровью» знает про день больше, чем наша прошлая
+    /// запись, поэтому последнее слово за ним. День, про который ответ молчит,
+    /// не трогаем: молчание — это «не знаю», а не «ноль».
+    func rememberEnergy(_ incoming: [ActivityDay]) {
+        guard !incoming.isEmpty else { return }
+        let calendar = Calendar.current
+        var byDay: [Date: ActivityDay] = [:]
+        for day in days { byDay[calendar.startOfDay(for: day.date)] = day }
+        for day in incoming {
+            guard let calories = day.activeCalories, calories > 0 else { continue }
+            let key = calendar.startOfDay(for: day.date)
+            var merged = byDay[key] ?? ActivityDay(date: key, steps: 0)
+            merged.activeCalories = calories
+            byDay[key] = merged
+        }
+        let kept = byDay.values.sorted { $0.date < $1.date }.suffix(Self.limit)
+        guard let data = try? JSONEncoder().encode(Array(kept)) else { return }
+        defaults.set(data, forKey: Self.key)
+    }
+
     /// Заменяет историю целиком — восстановление из копии.
     func replace(with days: [ActivityDay]) {
         let kept = days.sorted { $0.date < $1.date }.suffix(Self.limit)

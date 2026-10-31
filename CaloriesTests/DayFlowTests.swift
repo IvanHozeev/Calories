@@ -659,6 +659,25 @@ struct StepAdjustmentTests {
         #expect(ActivityAdjustment.baseline(from: days)?.steps == nil)
     }
 
+    /// Калории меряются той же меркой, что и шаги.
+    ///
+    /// Иначе «обычный день» собирался из килокалорий часов и браслета вперемешку,
+    /// а сегодняшний день мерялся одним источником — и выходил ленивым просто
+    /// потому, что его не с чем складывать.
+    @Test func changingTheSourceStartsTheEnergyCountOverToo() {
+        var days = history(Array(repeating: 10_000, count: 20))
+        days = days.enumerated().map { index, day in
+            var day = day
+            day.stepSource = "phone"
+            day.activeCalories = 700 + index
+            return day
+        }
+        #expect(ActivityAdjustment.baseline(from: days)?.activeCalories != nil)
+
+        days[days.count - 1].stepSource = "band"
+        #expect(ActivityAdjustment.baseline(from: days)?.activeCalories == nil)
+    }
+
     /// Среднее помнит, по чьим шагам оно посчитано.
     ///
     /// Без этого прежняя мерка переживала смену источника: телефонные 10 652

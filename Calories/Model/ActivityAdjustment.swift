@@ -88,8 +88,12 @@ enum ActivityAdjustment {
         // другое. После смены источника счёт начинается заново — это честнее,
         // чем сравнивать сегодняшний день с чужой меркой.
         let current = currentSource(in: history)
-        let steps = days.filter { $0.stepSource == current }.map(\.steps).filter { $0 > 0 }
-        let energy = days.compactMap(\.activeCalories).filter { $0 > 0 }
+        let sameSource = days.filter { $0.stepSource == current }
+        let steps = sameSource.map(\.steps).filter { $0 > 0 }
+        // Калории меряются той же меркой: часы и браслет расходятся между
+        // собой не меньше, чем в шагах, и среднее из чужих дней сравнивать с
+        // сегодняшним нечестно.
+        let energy = sameSource.compactMap(\.activeCalories).filter { $0 > 0 }
         let result = Baseline(steps: mean(steps), activeCalories: mean(energy), source: current)
         return result.isEmpty ? nil : result
     }

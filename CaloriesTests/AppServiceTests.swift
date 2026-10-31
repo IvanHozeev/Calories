@@ -64,6 +64,40 @@ struct StepHistoryTests {
         #expect(history.days.first?.steps == 9_500)
     }
 
+    /// Прочитанное из «Здоровья» число калорий заменяет прежнее, а не спорит
+    /// с ним за максимум.
+    ///
+    /// Пока слияние брало большее, завышенный день — источники сложились,
+    /// браслет досинхронизировал его дважды — оставался завышенным навсегда, и
+    /// «обычный день» ещё месяц мерялся по нему.
+    @Test func aCorrectedEnergyReadingReplacesTheInflatedOne() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberEnergy([ActivityDay(date: day(-1), steps: 0, activeCalories: 1_600)])
+        history.rememberEnergy([ActivityDay(date: day(-1), steps: 0, activeCalories: 820)])
+
+        #expect(history.days.first?.activeCalories == 820)
+    }
+
+    /// Молчание «Здоровья» про день — это «не знаю», а не «ноль».
+    @Test func aSilentDayKeepsWhatWasAlreadyThere() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberEnergy([ActivityDay(date: day(-1), steps: 0, activeCalories: 820)])
+        history.rememberEnergy([ActivityDay(date: day(-1), steps: 0, activeCalories: 0)])
+
+        #expect(history.days.first?.activeCalories == 820)
+    }
+
+    /// Калории приходят своим запросом и про шаги ничего не знают.
+    @Test func rememberingEnergyKeepsTheStepsAndTheirSource() {
+        let history = ActivityHistory(defaults: defaults)
+        history.rememberSteps([ActivityDay(date: day(-1), steps: 9_000)], source: "band")
+        history.rememberEnergy([ActivityDay(date: day(-1), steps: 0, activeCalories: 820)])
+
+        #expect(history.days.first?.steps == 9_000)
+        #expect(history.days.first?.stepSource == "band")
+        #expect(history.days.first?.activeCalories == 820)
+    }
+
     @Test func historyKeepsAtMostAYear() {
         let history = ActivityHistory(defaults: defaults)
         history.remember((0..<(ActivityHistory.limit + 20)).map { ActivityDay(date: day(-$0), steps: 1_000 + $0) })

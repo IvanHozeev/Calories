@@ -164,6 +164,7 @@ final class StepStore {
         fetchStepsToday()
         fetchDistanceToday()
         fetchActiveCaloriesToday()
+        fetchActiveCaloriesHistory(days: 90)
         // Читаем заметно больше, чем показываем. Данные с браслета доезжают в
         // «Здоровье» с опозданием и задним числом: спросив только последний
         // месяц, мы бы так и не увидели дни, которые синхронизировались уже
@@ -182,8 +183,7 @@ final class StepStore {
     private func rememberActiveCaloriesToday(_ calories: Int) {
         guard calories > 0 else { return }
         let today = Calendar.current.startOfDay(for: Date())
-        let steps = history.steps(on: today) ?? stepsToday
-        history.remember([ActivityDay(date: today, steps: steps, activeCalories: calories)])
+        history.rememberEnergy([ActivityDay(date: today, steps: 0, activeCalories: calories)])
     }
 
     private func updateDerivedStats() {
@@ -226,6 +226,27 @@ final class StepStore {
         ])
     }
 
+    /// Сколько вышло у самого полного источника, а не у всех вместе.
+    ///
+    /// Складывать источники нельзя: браслет, часы и телефон меряют один и тот
+    /// же день целиком, а не разные его куски. `HKStatisticsQuery` про это не
+    /// знает и честно суммирует всё, что лежит, — и день с двумя работающими
+    /// источниками выходит вдвое длиннее, чем был. Приложение «Здоровье» такое
+    /// схлопывает по своему приоритету источников, но наружу его не отдаёт,
+    /// поэтому берём наибольшее: источник, который видел больше всех, видел
+    /// этот день полнее всех.
+    ///
+    /// Когда разбивки нет — а её нет у старых проб и у пустого ответа — берём
+    /// общую сумму: одному источнику складываться не с кем.
+    nonisolated static func best(_ stats: HKStatistics?, in unit: HKUnit) -> Double {
+        guard let stats else { return 0 }
+        let total = stats.sumQuantity()?.doubleValue(for: unit) ?? 0
+        guard let sources = stats.sources, sources.count > 1 else { return total }
+        return sources
+            .compactMap { stats.sumQuantity(for: $0)?.doubleValue(for: unit) }
+            .max() ?? total
+    }
+
     /// Спрашивает «Здоровье», кто вообще пишет сюда шаги.
     private func fetchSources() {
         let query = HKSourceQuery(sampleType: HKQuantityType(.stepCount),
@@ -253,9 +274,9 @@ final class StepStore {
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
-            options: .cumulativeSum
+            options: [.cumulativeSum, .separateBySource]
         ) { [weak self] _, result, _ in
-            let steps = Int(result?.sumQuantity()?.doubleValue(for: .count()) ?? 0)
+            let steps = Int(Self.best(result, in: .count()))
             Task { @MainActor [weak self] in
                 self?.stepsToday = steps
                 self?.updateGoalStreak()
@@ -327,12 +348,50 @@ final class StepStore {
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
-            options: .cumulativeSum
+            options: [.cumulativeSum, .separateBySource]
         ) { [weak self] _, result, _ in
-            let kcal = Int(result?.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0)
+            let kcal = Int(Self.best(result, in: .kilocalorie()))
             Task { @MainActor [weak self] in
                 self?.activeCaloriesToday = kcal
                 self?.rememberActiveCaloriesToday(kcal)
+            }
+        }
+        healthStore.execute(query)
+    }
+
+    /// Активные калории за прошедшие дни, а не только за сегодня.
+    ///
+    /// Раньше их писал только `rememberActiveCaloriesToday` — то есть в
+    /// «обычный день» попадали ровно те дни, когда приложение открывали.
+    /// Открывают его не каждый день и чаще в те, когда есть что записать, так
+    /// что мерка собиралась из дней смещённых, а не из всех подряд. Теперь
+    /// спрашиваем весь период сразу, и мерка стоит на тех же днях, с которыми
+    /// её потом сравнивают.
+    private func fetchActiveCaloriesHistory(days: Int) {
+        let type = HKQuantityType(.activeEnergyBurned)
+        let calendar = Calendar.current
+        let end = Date()
+        guard let start = calendar.date(byAdding: .day, value: -(days - 1), to: calendar.startOfDay(for: end)) else { return }
+        var interval = DateComponents()
+        interval.day = 1
+        let query = HKStatisticsCollectionQuery(
+            quantityType: type,
+            quantitySamplePredicate: samplePredicate(from: start, to: end),
+            options: [.cumulativeSum, .separateBySource],
+            anchorDate: start,
+            intervalComponents: interval
+        )
+        query.initialResultsHandler = { [weak self] _, results, _ in
+            var days: [ActivityDay] = []
+            results?.enumerateStatistics(from: start, to: end) { stats, _ in
+                let kcal = Int(Self.best(stats, in: .kilocalorie()))
+                guard kcal > 0 else { return }
+                days.append(ActivityDay(date: stats.startDate, steps: 0, activeCalories: kcal))
+            }
+            let finalDays = days
+            guard !finalDays.isEmpty else { return }
+            Task { @MainActor [weak self] in
+                self?.history.rememberEnergy(finalDays)
             }
         }
         healthStore.execute(query)
@@ -345,9 +404,9 @@ final class StepStore {
         let query = HKStatisticsQuery(
             quantityType: type,
             quantitySamplePredicate: predicate,
-            options: .cumulativeSum
+            options: [.cumulativeSum, .separateBySource]
         ) { [weak self] _, result, _ in
-            let km = (result?.sumQuantity()?.doubleValue(for: .meter()) ?? 0) / 1000
+            let km = Self.best(result, in: .meter()) / 1000
             Task { @MainActor [weak self] in
                 self?.distanceTodayKm = km
                 self?.groupDefaults?.set(km, forKey: "widget_distance_km")
@@ -542,14 +601,14 @@ final class StepStore {
         let query = HKStatisticsCollectionQuery(
             quantityType: type,
             quantitySamplePredicate: samplePredicate(from: start, to: end),
-            options: .cumulativeSum,
+            options: [.cumulativeSum, .separateBySource],
             anchorDate: start,
             intervalComponents: interval
         )
         query.initialResultsHandler = { [weak self] _, results, _ in
             var days: [ActivityDay] = []
             results?.enumerateStatistics(from: start, to: end) { stats, _ in
-                let steps = Int(stats.sumQuantity()?.doubleValue(for: .count()) ?? 0)
+                let steps = Int(Self.best(stats, in: .count()))
                 days.append(ActivityDay(date: stats.startDate, steps: steps))
             }
             let finalDays = days

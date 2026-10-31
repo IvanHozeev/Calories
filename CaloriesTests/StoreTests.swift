@@ -87,20 +87,45 @@ struct CalorieStoreTests {
         #expect(!store.trialEnded)
     }
 
+    /// От полудня и по календарным суткам: иначе поздно вечером запись «через
+    /// час» уезжала на следующие сутки, а в день перевода часов сами сутки
+    /// длятся не 86 400 секунд, и «пятнадцать суток назад» промахивалось на
+    /// день — тест насчитывал три дня вместо двух.
     @Test func trialSummary_countsLoggedDaysWithinTheTrial() {
-        // От полудня: иначе поздно вечером запись «через час» уезжала на
-        // следующие сутки, и тест насчитывал три дня вместо двух.
         let calendar = Calendar.current
-        let start = calendar.date(byAdding: .hour, value: 12,
-                                  to: calendar.startOfDay(for: Date().addingTimeInterval(-15 * 86_400)))!
+        let start = noon(daysAgo: 15)
         store.startTrialIfNeeded(now: start)
-        store.add(name: "A", calories: 500, date: start.addingTimeInterval(86_400))
-        store.add(name: "B", calories: 500, date: start.addingTimeInterval(2 * 86_400))
-        store.add(name: "C", calories: 500, date: start.addingTimeInterval(2 * 86_400 + 3600))
+        store.add(name: "A", calories: 500, date: calendar.date(byAdding: .day, value: 1, to: start)!)
+        store.add(name: "B", calories: 500, date: calendar.date(byAdding: .day, value: 2, to: start)!)
+        store.add(name: "C", calories: 500, date: calendar.date(byAdding: .hour, value: 49, to: start)!)
         // Запись после конца пробного периода в итог не входит.
         store.add(name: "D", calories: 500, date: Date())
         #expect(store.trialSummary?.loggedDays == 2)
     }
+
+    /// День, в который пробный период кончился, в итог не идёт.
+    ///
+    /// Он начался до того часа, в который период кончился, и пока границы
+    /// сравнивались в разных единицах — день с мгновением, — в итог попадал
+    /// весь день целиком, вместе с едой, записанной уже после конца.
+    @Test func theDayTheTrialRanOutIsNotCounted() {
+        let calendar = Calendar.current
+        // Четырнадцать суток назад — значит период кончается сегодня в полдень.
+        let start = noon(daysAgo: CalorieStore.trialDays)
+        store.startTrialIfNeeded(now: start)
+        store.add(name: "A", calories: 500, date: calendar.date(byAdding: .day, value: 1, to: start)!)
+        store.add(name: "B", calories: 500, date: Date())
+
+        #expect(store.trialSummary?.loggedDays == 1)
+    }
+
+    /// Полдень столько-то суток назад — по календарю, а не по секундам.
+    private func noon(daysAgo: Int) -> Date {
+        let calendar = Calendar.current
+        let day = calendar.date(byAdding: .day, value: -daysAgo, to: calendar.startOfDay(for: Date()))!
+        return calendar.date(byAdding: .hour, value: 12, to: day)!
+    }
+
 
     @Test func weekStrip_goesBackToTheFirstEntryAndEndsToday() {
         #expect(store.weekStripWeeks().count == 1)

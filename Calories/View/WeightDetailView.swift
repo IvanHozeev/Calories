@@ -114,8 +114,14 @@ struct WeightDetailView: View {
             if !store.weightEntries.isEmpty {
                 Section("Все записи") {
                     ForEach(store.weightEntries.reversed()) { entry in
-                        HStack {
+                        HStack(spacing: 6) {
                             Text(entry.date.formatted(.dateTime.day().month(.wide)))
+                            // Время — тише даты, но на своём месте: два
+                            // взвешивания в один день иначе читаются как сбой,
+                            // а утреннее и вечернее — это разные числа.
+                            Text(entry.date.formatted(.dateTime.hour().minute()))
+                                .font(.app(.footnote))
+                                .foregroundStyle(.secondary)
                             Spacer()
                             Text(verbatim: "\(AddWeightView.format(entry.weightKg)) \(String(localized: "кг"))")
                                 .foregroundStyle(.secondary)
@@ -142,4 +148,5 @@ struct WeightDetailView: View {
                 .presentationDetents([.height(AddWeightView.sheetHeight)])
         }
     }
+
 }

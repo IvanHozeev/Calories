@@ -49,8 +49,16 @@ struct MicroTags: View {
     }
 
     private func tag(_ text: String, color: Color) -> some View {
+        // Значку нужна его ширина целиком.
+        //
+        // В тесной строке SwiftUI сжимал его вместе с остальным, и «Fib» —
+        // самый длинный из значков — переносился на две строки: «Fi» и «b»
+        // под ним. Место здесь уступает название продукта, оно и так с
+        // многоточием.
         Text(verbatim: text)
             .font(.app(.caption2, weight: .bold))
+            .lineLimit(1)
+            .fixedSize()
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)

@@ -27195,7 +27195,7 @@
         }
       }
     },
-    "точно": {
+    "Точно": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -27206,25 +27206,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "belastbar"
+            "value": "Belastbar"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "solid"
+            "value": "Solid"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "fiable"
+            "value": "Fiable"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "fiable"
+            "value": "Fiable"
           }
         },
         "he": {
@@ -27236,12 +27236,12 @@
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "confiável"
+            "value": "Confiável"
           }
         }
       }
     },
-    "примерно": {
+    "Примерно": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -27252,25 +27252,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "ungefähr"
+            "value": "Ungefähr"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "rough"
+            "value": "Rough"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "aproximado"
+            "value": "Aproximado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "approximatif"
+            "value": "Approximatif"
           }
         },
         "he": {
@@ -27282,12 +27282,12 @@
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "aproximado"
+            "value": "Aproximado"
           }
         }
       }
     },
-    "грубо": {
+    "Грубо": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -27298,25 +27298,25 @@
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "sehr grob"
+            "value": "Sehr grob"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "very rough"
+            "value": "Very rough"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "muy aproximado"
+            "value": "Muy aproximado"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "très approximatif"
+            "value": "Très approximatif"
           }
         },
         "he": {
@@ -27328,12 +27328,12 @@
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "muito aproximado"
+            "value": "Muito aproximado"
           }
         }
       }
     },
-    "витамины": {
+    "Витамины": {
       "localizations": {
         "ar": {
           "stringUnit": {
@@ -27350,19 +27350,19 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "vitamins"
+            "value": "Vitamins"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "vitaminas"
+            "value": "Vitaminas"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "vitamines"
+            "value": "Vitamines"
           }
         },
         "he": {
@@ -27374,7 +27374,7 @@
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "vitaminas"
+            "value": "Vitaminas"
           }
         }
       }

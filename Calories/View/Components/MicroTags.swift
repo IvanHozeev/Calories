@@ -41,7 +41,7 @@ struct MicroTags: View {
             .foregroundStyle(.secondary)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
-            .background(Color.secondary.opacity(0.12), in: Capsule())
+            .chipSurface(tint: .secondary)
     }
 
     private func color(for nutrient: Micronutrient) -> Color {
@@ -62,7 +62,35 @@ struct MicroTags: View {
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
-            .background(color.opacity(0.12), in: Capsule())
+            .chipSurface(tint: color)
+    }
+}
+
+/// Поверхность значка: стекло там, где оно не портит форму, краска там, где
+/// портит.
+///
+/// Капсула значка высотой около двадцати точек, то есть со скруглением
+/// вдвое меньше того, на котором системное стекло ещё держит форму. На
+/// iOS 26 вокруг него вдобавок есть поле — а значков в строке три подряд, и
+/// их поля складываются в серую кляксу под строкой. Поэтому стекло только
+/// с 27, а цвет на нём остаётся за буквой: сам материал бесцветный, иначе
+/// ряд значков снова станет самым пёстрым местом экрана.
+struct ChipSurface: ViewModifier {
+    let tint: Color
+
+    func body(content: Content) -> some View {
+        if #available(iOS 27, *) {
+            content.liquidGlass(in: Capsule())
+        } else {
+            content.background(tint.opacity(0.12), in: Capsule())
+        }
+    }
+}
+
+extension View {
+    /// Подложка значка: стекло там, где оно не портит форму.
+    func chipSurface(tint: Color) -> some View {
+        modifier(ChipSurface(tint: tint))
     }
 }
 

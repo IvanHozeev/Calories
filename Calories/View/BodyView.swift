@@ -379,12 +379,14 @@ struct BodyView: View {
                     }
                     Spacer(minLength: 8)
                     if let fact = store.adaptiveTDEE, usesFact {
+                        // Тем же материалом, что значки витаминов в дневнике:
+                        // стекло с 27, краска ниже — см. `ChipSurface`.
                         Text(verbatim: fact.confidence.title)
-                            .font(.app(.caption2))
+                            .font(.app(.caption2, weight: .semibold))
                             .foregroundStyle(ProgressRing.kcalColors[0])
                             .padding(.horizontal, 8)
                             .padding(.vertical, 3)
-                            .background(ProgressRing.kcalColors[0].opacity(0.15), in: Capsule())
+                            .chipSurface(tint: ProgressRing.kcalColors[0])
                     }
                     Image(systemName: "chevron.right")
                         .font(.app(.caption2, weight: .semibold))
@@ -778,7 +780,10 @@ private extension BodyView {
                 isEmbedded: true
             )
         } label: {
-            Label("Приёмы пищи", systemImage: "fork.knife")
+            // Без значка: соседние строки профиля — пол, вес, рост, возраст,
+            // замеры — идут без них, и одна картинка посреди голых строк
+            // читается как сбой, а не как знак. Либо всем, либо никому.
+            Text("Приёмы пищи")
         }
         .accessibilityIdentifier("openMealSchedule")
     }

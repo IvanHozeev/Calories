@@ -58,9 +58,10 @@ enum AdaptiveTDEE {
 
         var title: String {
             switch self {
-            case .high:   return String(localized: "точно")
-            case .medium: return String(localized: "примерно")
-            case .low:    return String(localized: "грубо")
+            // С заглавной: это значок, а не часть фразы.
+            case .high:   return String(localized: "Точно")
+            case .medium: return String(localized: "Примерно")
+            case .low:    return String(localized: "Грубо")
             }
         }
     }

@@ -42,13 +42,13 @@ struct FoodRow: View {
     private var vitaminOffer: some View {
         HStack(spacing: 3) {
             Image(systemName: "sparkles")
-            Text("витамины")
+            Text("Витамины")
         }
         .font(.app(.caption2, weight: .semibold))
         .foregroundStyle(.teal)
         .padding(.horizontal, 6)
         .padding(.vertical, 3)
-        .background(Color.teal.opacity(0.14), in: Capsule())
+        .chipSurface(tint: .teal)
         .accessibilityLabel(Text("Можно взять витамины из базы"))
         .accessibilityIdentifier("vitaminOffer")
     }
@@ -60,21 +60,20 @@ struct FoodRow: View {
             // в поиске помещалось пять продуктов. Ярусы остаются — макросы
             // не стоит склеивать с подписью, — а воздух между ними убран.
             VStack(alignment: .leading, spacing: 3) {
-                // Значки свойств — рядом с названием: это про сам продукт,
-                // а не про порцию, и читаются они до цифр.
-                HStack(alignment: .firstTextBaseline, spacing: 5) {
-                    Text(name)
-                        .lineLimit(2)
-                    ForEach(traits) { trait in
-                        Image(systemName: trait.symbol)
-                            .font(.app(.caption))
-                            .foregroundStyle(trait.color)
-                            .accessibilityLabel(Text(verbatim: trait.title))
-                    }
-                }
+                Text(name)
+                    .lineLimit(2)
+                    // Выключка строки — по интерфейсу, а не по буквам:
+                    // см. ту же правку в строке дневника.
+                    .multilineTextAlignment(.leading)
 
                 // Та же строка подписей, что и в дневнике: ячейки продукта
                 // должны читаться одинаково, где бы они ни стояли.
+                //
+                // Значки свойств стоят здесь же, а не у названия. У названия
+                // огонёк висел вторым словом и ломал строку в самом неудобном
+                // месте — длинное имя переносилось, а значок уезжал за ним.
+                // Здесь он стоит в ряду с граммами и значком категории, то
+                // есть среди таких же примет продукта.
                 HStack(spacing: 6) {
                     if let detail {
                         Text(verbatim: detail)
@@ -89,6 +88,20 @@ struct FoodRow: View {
                             }
                         }
                         .accessibilityHidden(true)
+                    }
+                    // Без капсулы: соседи по строке — граммы и значок
+                    // категории — стоят голыми, и подложка под одним значком
+                    // делала его кнопкой, которой он не является. Отделяется
+                    // он тем же, чем отделены они друг от друга, — точкой.
+                    if !traits.isEmpty {
+                        Text(verbatim: "·")
+                        HStack(spacing: 4) {
+                            ForEach(traits) { trait in
+                                Image(systemName: trait.symbol)
+                                    .foregroundStyle(trait.color)
+                                    .accessibilityLabel(Text(verbatim: trait.title))
+                            }
+                        }
                     }
                 }
                 .font(.app(.caption))

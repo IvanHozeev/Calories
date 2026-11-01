@@ -10,9 +10,8 @@ struct MeasurementsView: View {
     /// Какое место показывает график. Талия — то, ради чего берут ленту чаще
     /// всего, и начинать разумно с неё.
     @State private var chartSite: MeasurementSite = .waist
-    /// У какого вывода раскрыто пояснение. Один за раз: два развёрнутых
-    /// абзаца подряд — это снова тот экран, с которого всё начиналось.
-    @State private var openInsight: String?
+    /// Вывод, объяснение которого сейчас показывают листом.
+    @State private var shownInsight: BodyInsight?
 
     var body: some View {
         List {
@@ -65,6 +64,44 @@ struct MeasurementsView: View {
         .fullScreenCover(isPresented: $showingEntry) {
             MeasurementEntrySheet(store: store, isPresented: $showingEntry)
         }
+        .sheet(item: $shownInsight) { insight in
+            insightSheet(insight)
+        }
+    }
+
+    /// Объяснение вывода — отдельным листом.
+    ///
+    /// Высота фиксирована, длинный текст прокручивается внутри: мерить абзац
+    /// заранее нечем — шрифт в приложении выбирает человек, и под Nunito те
+    /// же слова занимают не столько же места, сколько под системным.
+    private func insightSheet(_ insight: BodyInsight) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(insight.title)
+                        .font(.app(.headline))
+                    Spacer()
+                    Text(insight.verdictLabel)
+                        .font(.app(.caption, weight: .semibold))
+                        .foregroundStyle(insight.verdict.color)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(insight.verdict.color.opacity(0.12), in: Capsule())
+                }
+                Text(insight.value)
+                    .font(.app(size: 34, weight: .bold))
+                    .monospacedDigit()
+                Text(insight.explanation)
+                    .font(.app(.callout))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
+        }
+        .scrollIndicators(.hidden)
+        .presentationDetents([.height(300)])
+        .presentationDragIndicator(.visible)
     }
 
     /// Как место менялось от сеанса к сеансу.
@@ -158,17 +195,18 @@ struct MeasurementsView: View {
         }
     }
 
-    /// Выводы: число и вердикт сразу, объяснение — по требованию.
+    /// Выводы: число и вердикт в строке, объяснение — листом по тапу.
     ///
     /// Шесть выводов, у каждого абзац в три строки, — и экран становится
     /// лекцией: чтобы дойти от первого числа до последнего, приходится
-    /// пролистать то, что прочитали один раз и запомнили. Абзац никуда не
-    /// делся, он раскрывается тапом по строке — так же, как раскрываются
-    /// колёсики в параметрах тела.
+    /// пролистать то, что прочитали один раз и запомнили.
+    ///
+    /// Раскрытием прямо в строке это не решается: абзац приходит в список,
+    /// который под ним едет, и как ни разводи анимации, соседние строки
+    /// прыгают. Лист ничего не двигает — он просто приезжает поверх.
     private func resultsSection(_ insights: [BodyInsight], measuredOn date: Date) -> some View {
         Section {
             ForEach(insights) { insight in
-                let isOpen = openInsight == insight.id
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(insight.title)
@@ -187,26 +225,17 @@ struct MeasurementsView: View {
                             .font(.app(size: 20, weight: .bold))
                             .monospacedDigit()
                         Spacer()
-                        Image(systemName: "chevron.down")
-                            .font(.app(.caption2, weight: .semibold))
+                        // «i», а не шеврон: шеврон ведёт вглубь, а здесь
+                        // подробности о самой строке и возврат в то же место.
+                        Image(systemName: "info.circle")
+                            .font(.app(.footnote))
                             .foregroundStyle(.tertiary)
-                            .rotationEffect(.degrees(isOpen ? 180 : 0))
-                    }
-                    if isOpen {
-                        Text(insight.explanation)
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .padding(.vertical, 2)
                 // Тап ловится всей строкой, а не только текстом.
                 .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation(.snappy(duration: 0.22)) {
-                        openInsight = isOpen ? nil : insight.id
-                    }
-                }
+                .onTapGesture { shownInsight = insight }
                 .accessibilityElement(children: .combine)
                 .accessibilityHint(Text("Показать объяснение"))
             }

@@ -6,108 +6,39 @@ struct EditEntrySheet: View {
     var isEmbedded: Bool = false
     @Environment(\.dismiss) private var dismiss
 
-    @State private var name: String
-    @State private var calories: String
-    @State private var protein: String
-    @State private var fat: String
-    @State private var carbs: String
-    @State private var grams: String
     @State private var date: Date
-
-    private enum Field: Hashable { case name, calories, grams, protein, fat, carbs }
-    @FocusState private var focusedField: Field?
     @State private var confirmingDelete = false
 
-    /// Исходная порция — от неё считаем пропорцию при правке веса.
-    private let originalGrams: Double?
-
-    /// Составной приём правится по частям: у каждой свой вес, и калории с БЖУ
+    /// Приём правится по частям: у каждой свой вес, и калории с БЖУ
     /// пересчитываются по ней одной.
     ///
-    /// Раньше состав показывался справкой, а правились общие числа приёма —
-    /// то есть съел на сто граммов меньше творога, а поправить мог только
-    /// итог, пересчитав его в уме. Теперь правится то, что человек менял в
-    /// реальности: сколько чего он съел.
+    /// Частей бывает и одна — запись из единственного продукта это тот же
+    /// приём, просто короткий. Раньше у неё был свой вид: четыре поля ввода
+    /// вместо строки, и один и тот же экран выглядел по-разному в зависимости
+    /// от того, сколько в записи еды.
     @State private var parts: [EntryComponent]
-    @State private var partGrams: [String]
+    /// Часть, которой правят вес: индекс открытого экрана порции.
+    @State private var editingPart: Int?
     /// Сколько каждая часть весила и стоила изначально — база для пропорции.
     private let basis: [EntryComponent]
-    @FocusState private var focusedPart: Int?
 
-    private var isComposed: Bool { parts.count > 1 }
+    /// Составной приём хранит состав отдельно; у записи из одного продукта
+    /// состава нет — и дописывать его при правке веса не нужно.
+    private let isComposed: Bool
 
     private var partsCalories: Int { parts.reduce(0) { $0 + $1.calories } }
     private var partsMacros: Macros { parts.reduce(Macros.zero) { $0 + $1.macros } }
-
-    private func number(_ text: String) -> Double {
-        text.decimalValueOrZero
-    }
-
-    private var draftMacros: Macros {
-        isComposed ? partsMacros : Macros(protein: number(protein), fat: number(fat), carbs: number(carbs))
-    }
-
-    private var draftCalories: Int { isComposed ? partsCalories : Int(number(calories)) }
-
-    /// Пусто вместо нуля: подсказка «0» понятнее введённого нуля, который не
-    /// отличить от намеренно указанного.
-    private static func tenths(_ value: Double) -> String {
-        guard value > 0 else { return "" }
-        return String(format: "%g", (value * 10).rounded() / 10)
-    }
-
-    /// Пересчитывает калории и БЖУ пропорционально новому весу.
-    /// Самая частая правка записи — «съел больше, чем записал», и вручную пересчитывать
-    /// четыре числа никто не станет.
-    private func rescale(to newGrams: Double) {
-        guard let originalGrams, originalGrams > 0, newGrams > 0 else { return }
-        let factor = newGrams / originalGrams
-        calories = "\(Int((Double(entry.calories) * factor).rounded()))"
-        protein = String(format: "%g", (entry.protein * factor * 10).rounded() / 10)
-        fat = String(format: "%g", (entry.fat * factor * 10).rounded() / 10)
-        carbs = String(format: "%g", (entry.carbs * factor * 10).rounded() / 10)
-    }
 
     init(store: CalorieStore, entry: FoodEntry, isEmbedded: Bool = false) {
         self.store = store
         self.entry = entry
         self.isEmbedded = isEmbedded
-        _name = State(initialValue: entry.name)
-        _calories = State(initialValue: "\(entry.calories)")
-        // До десятых: в базе лежат значения с плавающей запятой, и «%g» без
-        // округления показывал «3.5999999999999996» вместо «3.6».
-        _protein = State(initialValue: Self.tenths(entry.protein))
-        _fat = State(initialValue: Self.tenths(entry.fat))
-        _carbs = State(initialValue: Self.tenths(entry.carbs))
-        _grams = State(initialValue: entry.grams.map { String(format: "%g", $0) } ?? "")
         _date = State(initialValue: entry.date)
-        originalGrams = entry.grams
-        basis = entry.components
-        _parts = State(initialValue: entry.components)
-        _partGrams = State(initialValue: entry.components.map { part in
-            part.grams.map { String(format: "%g", $0) } ?? ""
-        })
-    }
-
-    /// Поле макроса с постоянными подписями: какой это макрос и в чём измеряется.
-    ///
-    /// Раньше название стояло подсказкой поля и исчезало на первом же символе —
-    /// в строке оставались три голых числа. Буква вместо слова, потому что полей
-    /// три в ряд, и теми же цветами, что макросы везде в приложении: перекос
-    /// тогда считывается глазом, а не прочтением.
-    private func unitField(_ short: LocalizedStringKey, color: Color,
-                           text: Binding<String>, field: Field) -> some View {
-        HStack(spacing: 3) {
-            Text(short)
-                .font(.app(.caption2, weight: .bold))
-                .foregroundStyle(color)
-            TextField("0", text: text)
-                .keyboardType(.decimalPad)
-                .focused($focusedField, equals: field)
-            Text("г")
-                .font(.app(.caption2))
-                .foregroundStyle(.secondary)
-        }
+        // `composition`, а не `components`: у записи из одного продукта он
+        // пуст, и она сама себе единственная часть.
+        basis = entry.composition
+        _parts = State(initialValue: entry.composition)
+        isComposed = !entry.components.isEmpty
     }
 
     var body: some View {
@@ -118,37 +49,52 @@ struct EditEntrySheet: View {
         }
     }
 
-    /// Строка части приёма: что это и сколько его было.
+    /// Строка части — та же, что в составе блюда.
+    ///
+    /// Здесь стояла своя: калории серым и без единицы, зажатые между
+    /// названием и полем ввода веса. «180» без «ккал» — не число, а загадка,
+    /// и два списка, которые читают одними глазами, выглядели по-разному.
+    /// Теперь вес подписью под названием, калории справа со словом —
+    /// ровно как ингредиент блюда.
     private func partRow(_ index: Int) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(verbatim: parts[index].name)
-                .font(.app(.subheadline))
-                .lineLimit(2)
-            Spacer(minLength: 8)
-            Text(verbatim: "\(parts[index].calories)")
-                .font(.app(.caption))
-                .foregroundStyle(.tertiary)
-                .monospacedDigit()
-            // Вес правится, только если он известен: у распознанного по фото
-            // или записанного порцией менять нечего.
-            if basis[index].grams != nil {
-                TextField("Вес", text: Binding(
-                    get: { partGrams[index] },
-                    set: { partGrams[index] = $0; rescalePart(index, to: $0.decimalValueOrZero) }
-                ))
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .frame(width: 64)
-                .focused($focusedPart, equals: index)
-                Text("г")
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: parts[index].name)
+                    .multilineTextAlignment(.leading)
+                // Вес известен не всегда: у распознанного по фото или
+                // записанного порцией его нет вовсе — и править там нечего.
+                Text(verbatim: basis[index].grams == nil
+                     ? String(localized: "порция")
+                     : String(format: "%g \(String(localized: "г"))", parts[index].grams ?? 0))
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
-            } else {
-                Text("порция")
-                    .font(.app(.caption))
-                    .foregroundStyle(.tertiary)
             }
+            Spacer()
+            Text(verbatim: "\(parts[index].calories) \(String(localized: "ккал"))")
+                .foregroundStyle(.secondary)
         }
+        // Тап, а не свайп: экран порции здесь тот же, что при добавлении, —
+        // с ценой ста граммов, макросами и шагом веса. Свайп прятал правку
+        // за жестом, о котором неоткуда узнать, и отдавал ей одно поле там,
+        // где человек привык видеть весь продукт.
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard basis[index].grams != nil else { return }
+            editingPart = index
+        }
+    }
+
+    /// Часть в виде продукта «на сто граммов» — экран порции считает от него.
+    ///
+    /// Своих чисел на сто граммов у части нет: она записана тем весом,
+    /// которым её съели. Пересчитываем обратно.
+    private func per100g(_ part: EntryComponent, grams: Double) -> FoodItem {
+        let factor = 100 / grams
+        return FoodItem(name: part.name,
+                        caloriesPer100g: Int((Double(part.calories) * factor).rounded()),
+                        protein: part.macros.protein * factor,
+                        fat: part.macros.fat * factor,
+                        carbs: part.macros.carbs * factor)
     }
 
     /// Пересчитывает одну часть под новый вес — пропорционально её исходным
@@ -162,97 +108,65 @@ struct EditEntrySheet: View {
         Form {
             Section {
                 VStack(spacing: 10) {
-                    Text(verbatim: "\(draftCalories) \(String(localized: "ккал"))")
+                    Text(verbatim: "\(partsCalories) \(String(localized: "ккал"))")
                         .font(.app(size: 34, weight: .bold))
                         .foregroundStyle(.green)
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                         .contentTransition(.numericText())
-                    MacroTags(macros: draftMacros)
-                    if draftMacros.protein > 0 || draftMacros.fat > 0 || draftMacros.carbs > 0 {
-                        MacroSplitBar(macros: draftMacros)
+                    MacroTags(macros: partsMacros)
+                    if partsMacros.protein > 0 || partsMacros.fat > 0 || partsMacros.carbs > 0 {
+                        MacroSplitBar(macros: partsMacros)
                             .padding(.top, 2)
                     }
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
-                .animation(.easeInOut(duration: 0.2), value: draftCalories)
+                .animation(.easeInOut(duration: 0.2), value: partsCalories)
             }
             .listRowBackground(Color.clear)
 
-            // Составной приём правится по частям: строка на продукт, у каждой
-            // свой вес. Общие поля калорий и БЖУ для него не показываются —
-            // они складываются из частей, и править их отдельно значило бы
-            // разойтись с составом.
-            if isComposed {
-                Section {
-                    ForEach(parts.indices, id: \.self) { index in
-                        partRow(index)
-                    }
-                } header: {
-                    Text("Приём пищи")
-                } footer: {
-                    explain("Вес каждой части правится отдельно: калории и БЖУ этой части пересчитываются пропорционально, а итог складывается заново.").map { Text($0) }
+            // Дата и время — сразу под итогом и своей секцией.
+            //
+            // Это не часть приёма, а его место в дне: раньше строка стояла
+            // в хвосте, за составом и полями, и правили её чаще, чем всё
+            // остальное вместе взятое — записал задним числом, поправил час.
+            //
+            // Подпись ушла в заголовок секции, а строка осталась двум
+            // колёсикам: день слева, час справа. Подпись и два колёсика в
+            // одной строке делили её на три неравные части, и строка читалась
+            // теснее, чем в ней было смысла.
+            Section {
+                // Одно колёсико на обе половины, а не два по краям строки.
+                //
+                // Колёсико даты держит ширину под самую длинную форму — под
+                // «1 нояб. 2026 г.» — и прижимает к её правому краю то, что
+                // показывает сейчас. Поэтому «28.10.2026» отъезжало от левого
+                // края строки, а «1 нояб. 2026 г.» нет: обе капсулы кончались
+                // в одной точке, а начинались в разных. Ни выключкой, ни
+                // `fixedSize` это не лечится — ширину выбирает сам контрол.
+                //
+                // С одним колёсиком система ставит капсулы вплотную друг к
+                // другу и сама отвечает за промежуток между ними.
+                HStack {
+                    DatePicker("Дата и время", selection: $date, in: ...Date(),
+                               displayedComponents: [.date, .hourAndMinute])
+                        .labelsHidden()
+                    Spacer(minLength: 0)
                 }
+            } header: {
+                Text("Дата и время")
+            }
 
-                Section {
-                    DatePicker(
-                        "Дата и время",
-                        selection: $date,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
+            // Приём правится по частям — одна в нём или шесть.
+            Section {
+                ForEach(parts.indices, id: \.self) { index in
+                    partRow(index)
                 }
-            } else {
-                Section {
-                    TextField("Название", text: $name)
-                        .focused($focusedField, equals: .name)
-                    // Единицы подписями справа от каждого поля, а не в подсказке:
-                    // подсказка исчезает на первом символе, и в строке остаются
-                    // голые числа — какое из них граммы, а какое килокалории,
-                    // приходится вспоминать.
-                    HStack {
-                        TextField("Калории", text: $calories)
-                            .keyboardType(.numberPad)
-                            .focused($focusedField, equals: .calories)
-                        Text("ккал")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                        Divider()
-                        TextField("Вес", text: $grams)
-                            .keyboardType(.decimalPad)
-                            .focused($focusedField, equals: .grams)
-                            .foregroundStyle(.secondary)
-                            .onChange(of: grams) { _, newValue in
-                                guard focusedField == .grams else { return }
-                                rescale(to: number(newValue))
-                            }
-                        Text("г")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                    }
-                    // Разделитель без этого начинается от подписи с единицей: у поля
-                    // ввода нет своей направляющей, и её берут от первого текста.
-                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-                    HStack(spacing: 10) {
-                        unitField("Б", color: MacroKind.protein.color, text: $protein, field: .protein)
-                        unitField("Ж", color: MacroKind.fat.color, text: $fat, field: .fat)
-                        unitField("У", color: MacroKind.carbs.color, text: $carbs, field: .carbs)
-                    }
-                    .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-                    DatePicker(
-                        "Дата и время",
-                        selection: $date,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                } header: {
-                    Text("Приём пищи")
-                } footer: {
-                    if originalGrams != nil {
-                        Text("При изменении веса калории и БЖУ пересчитываются пропорционально.")
-                    }
-                }
+            } header: {
+                Text("Приём пищи")
+            } footer: {
+                explain("Тап по части открывает её экран порции: калории и БЖУ пересчитываются пропорционально новому весу, а итог складывается заново.").map { Text($0) }
             }
 
             Section {
@@ -267,6 +181,19 @@ struct EditEntrySheet: View {
         // iOS 26 всплывает пузырём у края экрана — с одной кнопкой «Удалить»,
         // без видимой отмены и поверх собственного заголовка. Для одного
         // вопроса с двумя ответами правильное место — по центру.
+        .navigationDestination(item: $editingPart) { index in
+            if index < parts.count, let grams = parts[index].grams, grams > 0 {
+                FoodQuantityView(food: per100g(parts[index], grams: grams),
+                                 grams: grams,
+                                 addTitle: "Готово",
+                                 isPushed: true) { edited in
+                    rescalePart(index, to: edited.grams ?? grams)
+                    // Закрываем сами: экран показан из этого состояния,
+                    // убрать его надо тем же, чем открыли.
+                    editingPart = nil
+                }
+            }
+        }
         .alert("Удалить запись?", isPresented: $confirmingDelete) {
             Button("Отмена", role: .cancel) {}
             Button("Удалить", role: .destructive) {
@@ -279,8 +206,8 @@ struct EditEntrySheet: View {
 
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)
-        .screenTitle(name.isEmpty ? String(localized: "Редактировать") : name,
-                     eyebrow: name.isEmpty ? nil : String(localized: "Редактировать"),
+        .screenTitle(entry.name.isEmpty ? String(localized: "Редактировать") : entry.name,
+                     eyebrow: entry.name.isEmpty ? nil : String(localized: "Редактировать"),
                      lines: 2,
                      cancelTitle: isEmbedded ? nil : String(localized: "Отмена"),
                      trailingButtons: 1)
@@ -292,29 +219,22 @@ struct EditEntrySheet: View {
             }
             ToolbarItem(placement: .confirmationAction) {
                 CheckmarkButton {
-                    if isComposed {
-                        // Итог складывается из частей, а не берётся из полей:
-                        // у составного приёма своих чисел нет.
-                        let total = parts.compactMap(\.grams).reduce(0, +)
-                        store.updateEntry(entry, name: entry.name, calories: partsCalories,
-                                          macros: partsMacros,
-                                          grams: total > 0 ? total : nil,
-                                          date: date, components: parts)
-                        dismiss()
-                        return
-                    }
-                    guard let cal = Int(calories),
-                          !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                    let macros = Macros(
-                        protein: protein.decimalValueOrZero,
-                        fat: fat.decimalValueOrZero,
-                        carbs: carbs.decimalValueOrZero
-                    )
-                    let gramsValue = grams.decimalValue
-                    store.updateEntry(entry, name: name, calories: cal, macros: macros, grams: gramsValue, date: date)
+                    // Итог складывается из частей, а не берётся из полей:
+                    // своих чисел у приёма нет ни когда частей шесть, ни
+                    // когда она одна.
+                    let total = parts.compactMap(\.grams).reduce(0, +)
+                    store.updateEntry(entry,
+                                      name: entry.name,
+                                      calories: partsCalories,
+                                      macros: partsMacros,
+                                      grams: total > 0 ? total : nil,
+                                      date: date,
+                                      // Состав дописываем только тому, у кого
+                                      // он был: записи из одного продукта он
+                                      // не нужен, она сама себе состав.
+                                      components: isComposed ? parts : nil)
                     dismiss()
                 }
-                .disabled(!isComposed && (name.trimmingCharacters(in: .whitespaces).isEmpty || Int(calories) == nil))
                 .fontWeight(.semibold)
             }
         }

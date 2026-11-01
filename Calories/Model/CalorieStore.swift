@@ -378,7 +378,32 @@ final class CalorieStore {
         let goalDescriptor = FetchDescriptor<GoalRecord>(sortBy: [SortDescriptor(\.date, order: .forward)])
         goalRecords = (try? context.fetch(goalDescriptor)) ?? []
 
+        restoreCroppedNames()
         rebuildCaches()
+    }
+
+    /// Возвращает полные имена приёмам, обрезанным по длине.
+    ///
+    /// Склейка имён резалась на шестидесяти знаках ещё при сохранении, и
+    /// многоточие уезжало в базу. На экране это выглядело сломанной вёрсткой,
+    /// а чинить было нечего: так и записано. Состав приёма хранится целиком,
+    /// поэтому имя восстанавливается из него.
+    ///
+    /// Один раз: дальше имена приходят целыми.
+    private func restoreCroppedNames() {
+        let key = "entry_names_uncropped"
+        guard !defaults.bool(forKey: key) else { return }
+        defaults.set(true, forKey: key)
+
+        var repaired = false
+        for entry in entries where entry.name.hasSuffix("…") {
+            let parts = entry.components.map(\.name).filter { !$0.isEmpty }
+            guard parts.count > 1 else { continue }
+            entry.name = parts.joined(separator: ", ")
+            repaired = true
+        }
+        guard repaired else { return }
+        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
     }
 
     /// Подтянуть норму плана к расходу, от которого её считают.
@@ -541,47 +566,9 @@ final class CalorieStore {
         consumedToday = todayEntries.reduce(0) { $0 + $1.calories }
         macrosToday = todayEntries.reduce(Macros.zero) { $0 + $1.macros }
 
-        let grouped = Dictionary(grouping: todayEntries) { MealPeriod.period(for: $0.date) }
-        // День читается сверху вниз, как он и прожит: завтрак, обед, ужин.
-        //
-        // Раньше список был перевёрнут — сначала свежее, — и это спорило и с
-        // жанром (все дневники еды идут хронологически), и с нашим же экраном
-        // расписания, где приёмы стоят по времени. Хуже того, секции
-        // сортировались по времени последней записи: добавил еду — и секция
-        // уезжала наверх, то есть анимировалась перестановка секций, а её
-        // список делает рывком. При неподвижном порядке остаётся чистая
-        // вставка строки, которую SwiftUI анимирует гладко.
-        //
-        // Внутри приёма — тоже по времени: порядок, в котором ели.
-        groupedTodayEntries = MealPeriod.allCases.compactMap { period in
-            guard let entries = grouped[period], !entries.isEmpty else { return nil }
-            return (period, entries.sorted { $0.date < $1.date })
-        }
-        .sorted { lhs, rhs in
-            // Порядок — по часам, а не по типу приёма.
-            //
-            // «Перекус» живёт с 23:00 до 05:00, и раньше он безусловно уходил
-            // в конец списка. Для перекуса в полночь это верно, а для
-            // перекуса в 00:05 — нет: тот же календарный день, и съеден он
-            // раньше завтрака, а показывался под обедом, будто его ещё не
-            // было. Время первой записи секции отвечает на это само, и
-            // ночному перекусу не нужно особого правила.
-            //
-            // Именно первой, а не последней: минимум секции не двигается,
-            // когда в неё добавляют ещё еды, — иначе секции перескакивали бы
-            // местами на каждую запись, а список делает это рывком.
-            let left = lhs.entries.first?.date ?? .distantFuture
-            let right = rhs.entries.first?.date ?? .distantFuture
-            if left != right { return left < right }
-            return order(of: lhs.period) < order(of: rhs.period)
-        }
+        groupedTodayEntries = MealPeriod.group(todayEntries)
     }
 
-    /// Место приёма в дне — на случай, когда две секции начались секунда
-    /// в секунду: тогда решает порядок суток.
-    private func order(of period: MealPeriod) -> Int {
-        MealPeriod.allCases.firstIndex(of: period) ?? 0
-    }
 
     /// Дневные сводки: все дни, последняя неделя и история.
     private func rebuildDays(_ calendar: Calendar) {

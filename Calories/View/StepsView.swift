@@ -257,7 +257,6 @@ private struct GoalPickerSheet: View {
 private struct StepsContentView: View {
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
-    @State private var ringRestingY: CGFloat?
     @State private var ringPull: CGFloat = 0
     @AppStorage("use_imperial") private var useImperial = false
 
@@ -282,6 +281,14 @@ private struct StepsContentView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
+        // Перетяг — у списка, а не по положению кольца: см. тот же приём на
+        // «Сегодня». Запомненный покой устаревает, стоит содержимому над
+        // кольцом изменить высоту, и кольцо начинает поворачиваться само.
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
+        } action: { _, pull in
+            ringPull = pull
+        }
         .refreshable {
             await viewModel.refresh()
         }
@@ -341,20 +348,6 @@ private struct StepsContentView: View {
             RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday,
                      spinTicket: viewModel.refreshTicket, pullAngle: Double(ringPull) * 1.4) {
                 ringLabel
-            }
-            // Насколько список стянут вниз: кольцо поворачивается за пальцем.
-            // Покой — первое положение, которое увидели.
-            .background {
-                GeometryReader { geometry in
-                    Color.clear
-                        .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
-                            guard let resting = ringRestingY else {
-                                ringRestingY = y
-                                return
-                            }
-                            ringPull = max(0, y - resting)
-                        }
-                }
             }
 
             HStack(spacing: 0) {

@@ -49,6 +49,9 @@ struct ScreenTitle: View {
                            weight: .bold))
                 .lineLimit(isCompact ? compactLines : 2)
                 .minimumScaleFactor(0.7)
+                // Заголовком бывает название записи, а оно бывает на иврите:
+                // без этого оно уезжало к правому краю шапки.
+                .multilineTextAlignment(.leading)
             if let subtitle {
                 Text(verbatim: subtitle)
                     .font(.app(.caption2))

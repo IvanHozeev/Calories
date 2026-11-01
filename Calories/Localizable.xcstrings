@@ -9925,53 +9925,6 @@
         }
       }
     },
-    "витамины": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "فيتامينات"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vitamine"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "vitamins"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "vitaminas"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "vitamines"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ויטמינים"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "vitaminas"
-          }
-        }
-      }
-    },
     "Витамины и минералы": {
       "localizations": {
         "ar": {
@@ -12845,52 +12798,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cogumelos"
-          }
-        }
-      }
-    },
-    "грубо": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تقريبي جدًا"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sehr grob"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "very rough"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "muy aproximado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "très approximatif"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גס מאוד"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "muito aproximado"
           }
         }
       }
@@ -27238,6 +27145,236 @@
           "stringUnit": {
             "state": "translated",
             "value": "O umbigo é um pouco mais largo que a cintura estreita — é assim mesmo. A gordura visceral aparece nessa diferença, e dois centímetros não dizem nada sobre ela."
+          }
+        }
+      }
+    },
+    "Тап по части открывает её экран порции: калории и БЖУ пересчитываются пропорционально новому весу, а итог складывается заново.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النقر على جزء يفتح شاشة الحصة الخاصة به: تُعاد حساب السعرات والعناصر على الوزن الجديد، ويُجمع الإجمالي من جديد."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Tipp auf einen Teil öffnet dessen Portionsbildschirm: Kalorien und Makros werden auf das neue Gewicht umgerechnet, die Summe neu gebildet."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tapping a part opens its portion screen: calories and macros are rescaled to the new weight, and the total is added up again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al tocar una parte se abre su pantalla de ración: las calorías y los macros se recalculan según el nuevo peso y el total se vuelve a sumar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un appui sur une partie ouvre son écran de portion : calories et macros sont recalculées pour le nouveau poids, et le total est refait."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הקשה על חלק פותחת את מסך המנה שלו: הקלוריות והמאקרו מחושבים מחדש למשקל החדש, והסכום נאסף שוב."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tocar numa parte abre o ecrã de porção dela: calorias e macros são recalculados para o novo peso e o total é somado de novo."
+          }
+        }
+      }
+    },
+    "точно": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "موثوق"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "belastbar"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "solid"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fiable"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fiable"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מהימן"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "confiável"
+          }
+        }
+      }
+    },
+    "примерно": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقريبي"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ungefähr"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rough"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aproximado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "approximatif"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בערך"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aproximado"
+          }
+        }
+      }
+    },
+    "грубо": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تقريبي جدًا"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sehr grob"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "very rough"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muy aproximado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "très approximatif"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גס מאוד"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "muito aproximado"
+          }
+        }
+      }
+    },
+    "витамины": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فيتامينات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vitamine"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vitamins"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vitaminas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vitamines"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ויטמינים"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vitaminas"
           }
         }
       }
@@ -42873,52 +43010,6 @@
         }
       }
     },
-    "примерно": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تقريبي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ungefähr"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "rough"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "aproximado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "approximatif"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בערך"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "aproximado"
-          }
-        }
-      }
-    },
     "Принять": {
       "extractionState": "manual",
       "localizations": {
@@ -53650,52 +53741,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tofu"
-          }
-        }
-      }
-    },
-    "точно": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "موثوق"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "belastbar"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "solid"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "fiable"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "fiable"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מהימן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "confiável"
           }
         }
       }

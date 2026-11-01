@@ -127,6 +127,25 @@ struct ContentView: View {
             }
             .listStyle(.insetGrouped)
             .scrollIndicators(.hidden)
+            // Перетяг спрашиваем у самого списка, а не вычисляем по тому, где
+            // оказалось кольцо.
+            //
+            // Кольцо запоминало своё положение в покое — первое, которое
+            // увидело, — и дальше считало перетягом любое отклонение от него.
+            // Но блок первого экрана меняет высоту в тот же день: приходит
+            // строка взвешивания, приходит подсказка про сваренное, и каждая
+            // забирает свои пятьдесят две точки. Кольцо съезжает вниз, запомненный
+            // покой остаётся наверху — и кольцо считает, что список стянут,
+            // когда он стоит. Отсюда и поворот, появлявшийся сам собой, и
+            // рывок на возврате: оно возвращалось не на место, а к чужой
+            // отметке.
+            //
+            // У списка это число есть без всяких отметок.
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
+            } action: { _, pull in
+                ringPull.offset = pull
+            }
             .onChange(of: copiedEntryID) { _, id in
                 guard let id else { return }
                 withAnimation(.snappy) { scroll.scrollTo(id, anchor: .center) }
@@ -367,14 +386,6 @@ struct ContentView: View {
 extension ContentView {
     /// Время приёма пищи: когда ел. Если записей несколько — от первой до
     /// последней, потому что приём редко укладывается в минуту.
-    static func mealTime(_ entries: [FoodEntry]) -> String {
-        let dates = entries.map(\.date).sorted()
-        guard let first = dates.first, let last = dates.last else { return "" }
-        let time = Date.FormatStyle.dateTime.hour().minute()
-        let start = first.formatted(time)
-        let end = last.formatted(time)
-        return start == end ? start : "\(start) – \(end)"
-    }
 }
 
 // MARK: - Части экрана «Сегодня»
@@ -799,7 +810,7 @@ private extension ContentView {
                         .font(.app(.subheadline, weight: .semibold))
                         .foregroundStyle(.primary)
                     Spacer()
-                    Text(verbatim: Self.mealTime(group.entries))
+                    Text(verbatim: MealPeriod.time(of: group.entries))
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
@@ -968,8 +979,6 @@ private struct PullableRing: View {
     /// Кольцо ушло под шапку — там его подменяет миниатюра.
     var onAway: (Bool) -> Void = { _ in }
 
-    /// Где кольцо стоит, когда список в покое.
-    @State private var restingY: CGFloat?
     @State private var isAway = false
     /// Насколько кольцо уже ушло под шапку, 0…1.
     ///
@@ -1020,11 +1029,6 @@ private struct PullableRing: View {
                             isAway = away
                             onAway(away)
                         }
-                        guard let resting = restingY else {
-                            restingY = y
-                            return
-                        }
-                        pull.offset = max(0, y - resting)
                     }
             }
         }

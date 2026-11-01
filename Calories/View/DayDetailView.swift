@@ -39,9 +39,15 @@ struct DayDetailView: View {
             // с подписью «пока ничего не добавлено» под ним — два
             // предложения о том, что в этот день человек не ел, хотя об
             // этом уже сказали числа выше.
-            if !day.entries.isEmpty {
-                Section("Приёмы пищи") {
-                    ForEach(day.entries) { entry in
+            // Приёмы пищи — теми же секциями, что и на «Сегодня».
+            //
+            // Здесь еда лежала одним плоским списком, без приёмов и без
+            // времени: тот же день выглядел по-разному в зависимости от
+            // того, с какой стороны на него смотрят — из дневника или из
+            // истории.
+            ForEach(MealPeriod.group(day.entries), id: \.period) { group in
+                Section {
+                    ForEach(group.entries) { entry in
                         NavigationLink {
                             EditEntrySheet(store: store, entry: entry, isEmbedded: true)
                         } label: {
@@ -69,6 +75,18 @@ struct DayDetailView: View {
                             .tint(.blue)
                         }
                     }
+                } header: {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(LocalizedStringKey(group.period.rawValue))
+                            .font(.app(.subheadline, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        Text(verbatim: MealPeriod.time(of: group.entries))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    .textCase(nil)
                 }
             }
         }

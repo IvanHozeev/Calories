@@ -96,6 +96,26 @@ enum BarWidth {
         if let window = scene?.keyWindow?.bounds.width, window > 0 { return window }
         return scene?.screen.bounds.width ?? 393
     }
+
+    /// Ширина кнопки-надписи в шапке — «Отмена» и ей подобных.
+    ///
+    /// Шеврон «назад» всегда сорок четыре точки, а надпись — столько, сколько
+    /// в ней букв: «Отмена» заметно шире шеврона, а по-немецки шире ещё. Пока
+    /// под неё отводили те же сорок четыре, заголовок листа начинался под
+    /// кнопкой и приезжал обрезанным слева — «вой продукт» вместо «Свой
+    /// продукт».
+    ///
+    /// Поэтому меряем саму надпись тем же шрифтом, которым её рисует панель,
+    /// и добавляем поля капсулы.
+    /// Шрифты живут на главной очереди, а шапка строится только там —
+    /// `inBar` вызывается из тела вьюхи и ниоткуда больше.
+    nonisolated static func textButton(_ title: String) -> CGFloat {
+        MainActor.assumeIsolated {
+            let font = UIFont.preferredFont(forTextStyle: .body)
+            let text = (title as NSString).size(withAttributes: [.font: font]).width
+            return max(44, text.rounded(.up) + 32)
+        }
+    }
 }
 
 extension View {
@@ -105,9 +125,10 @@ extension View {
     /// Отдельный отступ под «назад» сверх этого — ровно то, что отодвигало
     /// каждый заголовок вправо: слот и так начинается после кнопки. А взять всю
     /// панель целиком — наоборот, увести его за левый край.
-    func inBar(back: Bool = true, trailingButtons: Int = 0) -> some View {
+    func inBar(back: Bool = true, cancelTitle: String? = nil, trailingButtons: Int = 0) -> some View {
+        let leading = cancelTitle.map(BarWidth.textButton) ?? (back ? 44 : 0)
         let width = BarWidth.current - 48
-            - (back ? 44 : 0)
+            - leading
             - CGFloat(trailingButtons) * 46
         return frame(width: max(120, width), alignment: .leading)
     }
@@ -123,10 +144,14 @@ extension View {
     ///
     /// Системный заголовок при этом прячется — два заголовка в одной шапке
     /// спорят за одно место, и побеждает не тот, что нужен.
+    /// - Parameter cancelTitle: надпись кнопки слева, когда там не шеврон, а
+    ///   слово: у листа это «Отмена». Нужна, чтобы заголовок знал, сколько
+    ///   места занято, — по букве, а не по догадке.
     func screenTitle(_ title: String,
                      eyebrow: String? = nil,
                      lines: Int = 1,
                      backButton: Bool = true,
+                     cancelTitle: String? = nil,
                      trailingButtons: Int = 0) -> some View {
         navigationTitle(title)
             .hiddenNavigationTitle()
@@ -135,7 +160,8 @@ extension View {
                 ToolbarItem(placement: .principal) {
                     ScreenTitle(title: title, eyebrow: eyebrow,
                                 isCompact: true, compactLines: lines)
-                        .inBar(back: backButton, trailingButtons: trailingButtons)
+                        .inBar(back: backButton, cancelTitle: cancelTitle,
+                               trailingButtons: trailingButtons)
                 }
             }
     }

@@ -328,7 +328,9 @@ struct NewFoodSheet: View {
             // и свайп вниз упирается в неё вместо того, чтобы её убрать.
             .scrollDismissesKeyboard(.interactively)
             .screenTitle(isEditing ? String(localized: "Редактировать")
-                       : String(localized: "Свой продукт"), trailingButtons: 1)
+                       : String(localized: "Свой продукт"),
+                         cancelTitle: isEmbedded ? nil : String(localized: "Отмена"),
+                         trailingButtons: 1)
             .toolbar {
                 if !isEmbedded {
                     ToolbarItem(placement: .cancellationAction) {

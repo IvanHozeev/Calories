@@ -281,7 +281,9 @@ struct EditEntrySheet: View {
         .scrollDismissesKeyboard(.interactively)
         .screenTitle(name.isEmpty ? String(localized: "Редактировать") : name,
                      eyebrow: name.isEmpty ? nil : String(localized: "Редактировать"),
-                     lines: 2, trailingButtons: 1)
+                     lines: 2,
+                     cancelTitle: isEmbedded ? nil : String(localized: "Отмена"),
+                     trailingButtons: 1)
         .toolbar {
             if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {

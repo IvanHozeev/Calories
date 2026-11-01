@@ -64,14 +64,14 @@ struct AddEntryView: View {
     /// порция, потом сам экран добавления, — и запись еды выглядела медленной.
     /// Переходом внутри одного стека закрывать нечего, кроме самого экрана.
     enum ServingTarget: Identifiable, Hashable {
-        case food(FoodItem, savable: Bool, quickSave: Bool)
+        case food(FoodItem, grams: Double?, savable: Bool, quickSave: Bool)
         case dish(Dish)
         /// Уже добавленный продукт — поправить вес, если ошиблись.
         case edit(itemID: UUID)
 
         var id: String {
             switch self {
-            case .food(let food, _, _): return "food-\(food.id.uuidString)"
+            case .food(let food, _, _, _): return "food-\(food.id.uuidString)"
             case .dish(let dish):       return "dish-\(dish.id.uuidString)"
             case .edit(let itemID):     return "edit-\(itemID.uuidString)"
             }
@@ -270,7 +270,7 @@ struct AddEntryView: View {
                     case .food(let food, let savable):
                         foodRow(food)
                             .contentShape(Rectangle())
-                            .onTapGesture { openServing(.food(food, savable: savable, quickSave: true)) }
+                            .onTapGesture { openServing(.food(food, grams: nil, savable: savable, quickSave: true)) }
                     case .dish(let dish):
                         dishRow(dish)
                             .contentShape(Rectangle())
@@ -309,7 +309,7 @@ struct AddEntryView: View {
                     // по пустому месту строки пропадает впустую.
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { openServing(.food(food, savable: true, quickSave: false)) }
+                        .onTapGesture { openServing(.food(food, grams: nil, savable: true, quickSave: false)) }
                 }
             }
         }
@@ -717,11 +717,23 @@ struct AddEntryView: View {
                 detail: String(format: String(localized: "%lld раз"), item.times))
     }
 
-    private func addPair(_ item: MealPairs.Suggestion) {
-        withAnimation(.snappy) {
-            draftItems.append(MealItem(name: item.name, calories: item.calories,
-                                       macros: item.macros, grams: item.grams))
-        }
+    /// Открывает подсказку экраном порции — тем же, каким открывается любой
+    /// продукт.
+    ///
+    /// Тап клал её в приём сразу, с уже подобранным весом. Вес этот — медиана
+    /// по дневнику, и попадает он не всегда: поправить можно было только
+    /// вторым тапом, уже по строке черновика. Продукт в приложении всегда
+    /// открывается порцией, а подсказка — такой же продукт, просто с
+    /// угаданным весом; угаданное и подставляем в поле.
+    private func openPair(_ item: MealPairs.Suggestion) {
+        let grams = item.grams ?? 100
+        // Свой или встроенный продукт — с категорией, значками и витаминами.
+        // Подсказка приходит из дневника, где от продукта осталось имя и вес,
+        // поэтому запасной вариант пересчитываем обратно на сто граммов.
+        let food = store.foodNamed(item.name)
+            ?? per100g(MealItem(name: item.name, calories: item.calories,
+                                macros: item.macros, grams: grams), grams: grams)
+        openServing(.food(food, grams: grams, savable: false, quickSave: true))
     }
 
     /// Строка «обычно вместе» — та же `FoodRow`, что и везде.
@@ -783,7 +795,7 @@ struct AddEntryView: View {
                 ForEach(pairs) { item in
                     pairRow(item)
                         .contentShape(Rectangle())
-                        .onTapGesture { addPair(item) }
+                        .onTapGesture { openPair(item) }
                 }
             } header: {
                 Text("Обычно вместе")
@@ -827,7 +839,7 @@ struct AddEntryView: View {
                 ForEach(shownRecentFoods) { food in
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { openServing(.food(food, savable: false, quickSave: true)) }
+                        .onTapGesture { openServing(.food(food, grams: nil, savable: false, quickSave: true)) }
                 }
                 ForEach(shownRecentDishes) { dish in
                     dishRow(dish)
@@ -874,7 +886,7 @@ struct AddEntryView: View {
                     ForEach(foods) { food in
                         foodRow(food)
                             .contentShape(Rectangle())
-                            .onTapGesture { openServing(.food(food, savable: false, quickSave: true)) }
+                            .onTapGesture { openServing(.food(food, grams: nil, savable: false, quickSave: true)) }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
                                 store.deleteCustomFood(food)
@@ -930,7 +942,7 @@ struct AddEntryView: View {
                         ForEach(foods) { food in
                             foodRow(food)
                                 .contentShape(Rectangle())
-                                .onTapGesture { openServing(.food(food, savable: true, quickSave: true)) }
+                                .onTapGesture { openServing(.food(food, grams: nil, savable: true, quickSave: true)) }
                         }
                     } header: {
                         Label(category.title, systemImage: category.icon)
@@ -948,9 +960,10 @@ struct AddEntryView: View {
     @ViewBuilder
     private func servingScreen(_ target: ServingTarget) -> some View {
         switch target {
-        case .food(let food, let savable, let quickSave):
+        case .food(let food, let grams, let savable, let quickSave):
             FoodQuantityView(
                 food: food,
+                grams: grams,
                 onSave: saveAction(for: food, enabled: savable),
                 onAddAndSave: quickAction(enabled: quickSave),
                 isPushed: true,

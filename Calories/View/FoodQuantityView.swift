@@ -170,6 +170,22 @@ struct FoodQuantityView: View {
             // «Готово» при правке висело маленькой плашкой посреди экрана над
             // клавиатурой и не читалось как главное действие.
             HStack(spacing: 10) {
+                // Второй сценарий: не копить приём пищи, а записать продукт сразу.
+                if let onAddAndSave {
+                    Button {
+                        onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                    } label: {
+                        Text("Сохранить")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(.green)
+                    .accessibilityIdentifier("addAndSave")
+                    .accessibilityLabel("Добавить и сохранить")
+                }
+
                 Button {
                     // Клавиатуру убираем до ухода: иначе она остаётся поднятой
                     // над вернувшимся списком и накрывает панель «Сохранить».
@@ -188,22 +204,6 @@ struct FoodQuantityView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .accessibilityIdentifier("addToMeal")
-
-                // Второй сценарий: не копить приём пищи, а записать продукт сразу.
-                if let onAddAndSave {
-                    Button {
-                        onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
-                    } label: {
-                        Text("Сохранить")
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(.green)
-                    .accessibilityIdentifier("addAndSave")
-                    .accessibilityLabel("Добавить и сохранить")
-                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -375,6 +375,21 @@ struct DishQuantityView: View {
         }
         .safeAreaInset(edge: .bottom) {
             HStack(spacing: 10) {
+                if let onAddAndSave {
+                    Button {
+                        onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
+                    } label: {
+                        Text("Сохранить")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(.green)
+                    .accessibilityIdentifier("addAndSave")
+                    .accessibilityLabel("Добавить и сохранить")
+                }
+
                 Button {
                     gramsFocused = false
                     onAdd(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
@@ -387,21 +402,6 @@ struct DishQuantityView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .accessibilityIdentifier("addToMeal")
-
-                if let onAddAndSave {
-                    Button {
-                        onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
-                    } label: {
-                        Text("Сохранить")
-                            .fontWeight(.semibold)
-                            .padding(.horizontal, 6)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(.green)
-                    .accessibilityIdentifier("addAndSave")
-                    .accessibilityLabel("Добавить и сохранить")
-                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)

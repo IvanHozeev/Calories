@@ -443,6 +443,33 @@ struct BodyAnalysisTests {
         #expect(insights.first { $0.id == "glutesPelvis" }?.value == "+15.0 см")
     }
 
+    /// Пояснение идёт за вердиктом, а не стоит одно на все случаи.
+    ///
+    /// Настоящий случай: талия и пупок один в один — 71 и 71. Вердикт зелёный,
+    /// «живот плоский», а под ним тот же текст, что и у выступающего живота:
+    /// «типичный признак висцерального жира». Приложение пугало ровно того,
+    /// у кого всё в порядке.
+    @Test func theBellyExplanationFollowsTheVerdict() throws {
+        let flat = sample()
+        flat.waistCm = 71
+        flat.beltCm = 71
+        let bulging = sample()
+        bulging.waistCm = 71
+        bulging.beltCm = 80
+
+        let flatInsight = try #require(BodyAnalysis.insights(measurement: flat, profile: nil)
+            .first { $0.id == "beltWaist" })
+        let bulgingInsight = try #require(BodyAnalysis.insights(measurement: bulging, profile: nil)
+            .first { $0.id == "beltWaist" })
+
+        #expect(flatInsight.verdict == .excellent)
+        #expect(bulgingInsight.verdict == .watch)
+        // Сравниваем тексты между собой, а не с литералом: набор идёт на
+        // английской локали, и русская строка тут не вернётся.
+        #expect(flatInsight.explanation != bulgingInsight.explanation,
+                "Плоскому животу нельзя объяснять, что это признак висцерального жира")
+    }
+
     @Test func pelvisMetrics_absentWithoutPelvisMeasurement() {
         let m = sample()
         m.pelvisCm = 0

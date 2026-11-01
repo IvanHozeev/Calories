@@ -7,6 +7,12 @@ struct MeasurementsView: View {
     var store: CalorieStore
 
     @State private var showingEntry = false
+    /// Какое место показывает график. Талия — то, ради чего берут ленту чаще
+    /// всего, и начинать разумно с неё.
+    @State private var chartSite: MeasurementSite = .waist
+    /// У какого вывода раскрыто пояснение. Один за раз: два развёрнутых
+    /// абзаца подряд — это снова тот экран, с которого всё начиналось.
+    @State private var openInsight: String?
 
     var body: some View {
         List {
@@ -17,6 +23,7 @@ struct MeasurementsView: View {
                 } else {
                     resultsSection(insights, measuredOn: latest.date)
                 }
+                dynamicsSection
                 girthsSection(latest)
             } else {
                 Section { emptyState } .listRowBackground(Color.clear).listRowSeparator(.hidden)
@@ -58,6 +65,50 @@ struct MeasurementsView: View {
         .fullScreenCover(isPresented: $showingEntry) {
             MeasurementEntrySheet(store: store, isPresented: $showingEntry)
         }
+    }
+
+    /// Как место менялось от сеанса к сеансу.
+    ///
+    /// Место выбирается списком, а не вкладками: мест тринадцать, и сегментами
+    /// они в шапку не помещаются.
+    @ViewBuilder
+    private var dynamicsSection: some View {
+        let sites = chartableSites
+        if !sites.isEmpty {
+            let shown = sites.contains(chartSite) ? chartSite : sites[0]
+            Section {
+                Picker("Место", selection: Binding(
+                    get: { shown },
+                    set: { chartSite = $0 }
+                )) {
+                    ForEach(sites) { site in
+                        Text(site.title).tag(site)
+                    }
+                }
+                .accessibilityIdentifier("chartSite")
+                MeasurementChart(points: chartPoints(shown))
+                    .listRowInsets(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
+            } header: {
+                Text("Динамика")
+            } footer: {
+                Text("Место появляется здесь с третьего сеанса: по двум точкам линию можно провести через что угодно.")
+            }
+            .glassRow()
+        }
+    }
+
+    /// Места, которые снимали достаточно раз, чтобы линия что-то значила.
+    private var chartableSites: [MeasurementSite] {
+        MeasurementSite.allCases.filter { site in
+            store.measurements.count { $0.best(site) > 0 } >= MeasurementChart.minimumSessions
+        }
+    }
+
+    private func chartPoints(_ site: MeasurementSite) -> [MeasurementChart.Point] {
+        store.measurements
+            .filter { $0.best(site) > 0 }
+            .map { MeasurementChart.Point(date: $0.date, value: $0.best(site)) }
+            .sorted { $0.date < $1.date }
     }
 
     /// Обхваты и что с ними стало с прошлого раза.
@@ -107,10 +158,18 @@ struct MeasurementsView: View {
         }
     }
 
+    /// Выводы: число и вердикт сразу, объяснение — по требованию.
+    ///
+    /// Шесть выводов, у каждого абзац в три строки, — и экран становится
+    /// лекцией: чтобы дойти от первого числа до последнего, приходится
+    /// пролистать то, что прочитали один раз и запомнили. Абзац никуда не
+    /// делся, он раскрывается тапом по строке — так же, как раскрываются
+    /// колёсики в параметрах тела.
     private func resultsSection(_ insights: [BodyInsight], measuredOn date: Date) -> some View {
         Section {
             ForEach(insights) { insight in
-                VStack(alignment: .leading, spacing: 8) {
+                let isOpen = openInsight == insight.id
+                VStack(alignment: .leading, spacing: 6) {
                     HStack(alignment: .firstTextBaseline) {
                         Text(insight.title)
                             .font(.app(.subheadline))
@@ -123,15 +182,33 @@ struct MeasurementsView: View {
                             .padding(.vertical, 3)
                             .background(insight.verdict.color.opacity(0.12), in: Capsule())
                     }
-                    Text(insight.value)
-                        .font(.app(size: 20, weight: .bold))
-                        .monospacedDigit()
-                    Text(insight.explanation)
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(insight.value)
+                            .font(.app(size: 20, weight: .bold))
+                            .monospacedDigit()
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                            .font(.app(.caption2, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                            .rotationEffect(.degrees(isOpen ? 180 : 0))
+                    }
+                    if isOpen {
+                        Text(insight.explanation)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                .padding(.vertical, 6)
+                .padding(.vertical, 2)
+                // Тап ловится всей строкой, а не только текстом.
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation(.snappy(duration: 0.22)) {
+                        openInsight = isOpen ? nil : insight.id
+                    }
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityHint(Text("Показать объяснение"))
             }
         } header: {
             HStack {

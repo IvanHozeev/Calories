@@ -27012,6 +27012,236 @@
         }
       }
     },
+    "Место": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الموضع"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stelle"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Site"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מקום"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zona"
+          }
+        }
+      }
+    },
+    "Показать объяснение": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عرض الشرح"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erklärung anzeigen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show explanation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar explicación"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher l’explication"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הצג הסבר"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar explicação"
+          }
+        }
+      }
+    },
+    "Место появляется здесь с третьего сеанса: по двум точкам линию можно провести через что угодно.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يظهر الموضع هنا ابتداءً من الجلسة الثالثة: فبنقطتين يمكن رسم أي خط كان."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Stelle erscheint hier ab der dritten Sitzung: durch zwei Punkte lässt sich jede beliebige Linie legen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A site appears here from the third session on: through two points a line can be drawn any way at all."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una zona aparece aquí a partir de la tercera sesión: por dos puntos se puede trazar cualquier línea."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une zone apparaît ici à partir de la troisième séance : par deux points, on fait passer n’importe quelle ligne."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מקום מופיע כאן מהמדידה השלישית: דרך שתי נקודות אפשר להעביר כל קו שהוא."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma zona aparece aqui a partir da terceira sessão: por dois pontos passa qualquer linha."
+          }
+        }
+      }
+    },
+    "Пупок не шире узкой талии — выталкивать живот изнутри нечему. Висцеральный жир виден как раз этой разницей.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "السرة ليست أعرض من أضيق نقطة في الخصر — لا شيء يدفع البطن من الداخل. الدهون الحشوية تظهر بهذا الفارق بالذات."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Nabel ist nicht breiter als die schmale Taille — nichts drückt den Bauch von innen heraus. Genau diese Differenz zeigt viszerales Fett."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The navel is no wider than the narrow waist — nothing is pushing the belly out from inside. Visceral fat is what that very gap shows."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El ombligo no es más ancho que la cintura estrecha: nada empuja el vientre desde dentro. La grasa visceral se ve justo en esa diferencia."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nombril n’est pas plus large que la taille étroite — rien ne pousse le ventre de l’intérieur. C’est cet écart qui révèle la graisse viscérale."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הטבור אינו רחב מהמותן הצרה — אין מה שידחף את הבטן מבפנים. השומן הקרביים נראה בדיוק בהפרש הזה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O umbigo não é mais largo que a cintura estreita — nada empurra a barriga por dentro. A gordura visceral aparece justamente nessa diferença."
+          }
+        }
+      }
+    },
+    "Пупок чуть шире узкой талии — так и бывает. Висцеральный жир виден этой разницей, и пара сантиметров о нём не говорит.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "السرة أعرض قليلاً من أضيق نقطة في الخصر — وهذا معتاد. الدهون الحشوية تظهر بهذا الفارق، وسنتيمتران لا يدلّان عليها."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Nabel ist etwas breiter als die schmale Taille — so ist es meistens. Viszerales Fett zeigt sich in dieser Differenz, und ein paar Zentimeter sagen nichts darüber."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The navel is a little wider than the narrow waist — that is how it usually is. Visceral fat shows up in this gap, and a couple of centimetres say nothing about it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El ombligo es algo más ancho que la cintura estrecha: así suele ser. La grasa visceral se ve en esta diferencia, y un par de centímetros no dicen nada de ella."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le nombril est un peu plus large que la taille étroite : c’est normal. La graisse viscérale se lit dans cet écart, et deux centimètres n’en disent rien."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הטבור רחב מעט מהמותן הצרה — כך זה בדרך כלל. השומן הקרביים נראה בהפרש הזה, וכמה סנטימטרים אינם מעידים עליו."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O umbigo é um pouco mais largo que a cintura estreita — é assim mesmo. A gordura visceral aparece nessa diferença, e dois centímetros não dizem nada sobre ela."
+          }
+        }
+      }
+    },
     "на %@ кг позади плана": {
       "localizations": {
         "ar": {

@@ -232,9 +232,12 @@ struct PlanView: View {
             ResultRow(title: "Жир",
                       value: String(format: "%+.1f \(String(localized: "кг"))", change.fatDeltaKg),
                       caption: String(format: "%.1f → %.1f", change.startFatKg, change.endFatKg))
+            // Зелёным — только прибавка, которую метод способен различить.
+            // Плюс килограмм при шуме в два с лишним красился как достижение,
+            // а строкой ниже тот же килограмм назывался «на месте».
             ResultRow(title: "Сухая масса",
                       value: String(format: "%+.1f \(String(localized: "кг"))", change.leanDeltaKg),
-                      highlighted: change.verdict != .leanLoss,
+                      highlighted: change.verdict == .leanGain,
                       caption: String(format: "%.1f → %.1f", change.startLeanKg, change.endLeanKg))
 
             // Вердикт с оглядкой на то, зачем идёт фаза: «сухая держится» —
@@ -619,11 +622,16 @@ struct PlanView: View {
             if let actual = adherence.actualWeightToday {
                 ResultRow(title: "Вес",
                           value: String(format: "%.1f \(String(localized: "кг"))", actual),
-                          caption: adherence.deviationKg.map {
-                              String(format: $0 < 0
-                                     ? String(localized: "на %@ кг впереди плана")
-                                     : String(localized: "на %@ кг позади плана"),
-                                     String(format: "%.1f", abs($0)))
+                          caption: adherence.deviationKg.map { deviation in
+                              // Ноль отклонения — это «ровно по плану», а не
+                              // «на 0.0 кг позади»: округление до десятых
+                              // делало из попадания отставание.
+                              let off = abs(deviation)
+                              guard off >= 0.05 else { return String(localized: "ровно по плану") }
+                              return String(format: deviation < 0
+                                            ? String(localized: "на %@ кг впереди плана")
+                                            : String(localized: "на %@ кг позади плана"),
+                                            String(format: "%.1f", off))
                           })
             } else {
                 ResultRow(title: "Ожидаемый вес сегодня",

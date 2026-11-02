@@ -182,6 +182,58 @@ extension View {
     }
 }
 
+/// Цветная бусина под стеклом: кружок выбора цвета.
+///
+/// Цвет лежит под материалом, а не вместо него: сквозь матовое стекло он
+/// остаётся узнаваемым, но перестаёт быть плоской наклейкой. Объём даёт кант —
+/// градиентный сверху вниз, потому что свет падает сверху, — и блик по верхней
+/// дуге; тени здесь нет, шесть теней подряд на светлой строке читались бы как
+/// грязь.
+///
+/// Рукотворное стекло, а не системное, и это не экономия. У `glassEffect` на
+/// iOS 26 есть поле вокруг фигуры — это измерено на плитках «Сегодня», где
+/// шесть штук вплотную складывали свои поля в заметный прямоугольник. Здесь
+/// кружки стоят в десяти точках друг от друга, то есть ещё теснее, и поля
+/// слились бы в сплошную полосу под всей лентой.
+struct GlassBead: ViewModifier {
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var strokeColors: [Color] {
+        colorScheme == .dark
+            ? [.white.opacity(0.45), .white.opacity(0.05)]
+            : [.white.opacity(0.95), .black.opacity(0.08)]
+    }
+
+    func body(content: Content) -> some View {
+        content
+            // Материал поверх цвета — это и есть стекло: цвет виден, но уже
+            // не как заливка.
+            .overlay { Circle().fill(.ultraThinMaterial).opacity(0.28) }
+            // Блик: короткая дуга по верхней кромке, а не круглое пятно —
+            // пятно посреди бусины читается как дырка.
+            .overlay {
+                Circle()
+                    .trim(from: 0.58, to: 0.92)
+                    .stroke(Color.white.opacity(colorScheme == .dark ? 0.35 : 0.75),
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .blur(radius: 0.8)
+                    .padding(2.5)
+            }
+            .overlay {
+                Circle().strokeBorder(
+                    LinearGradient(colors: strokeColors, startPoint: .top, endPoint: .bottom),
+                    lineWidth: 1
+                )
+            }
+            .clipShape(Circle())
+    }
+}
+
+extension View {
+    /// Кружок цвета под стеклом.
+    func glassBead() -> some View { modifier(GlassBead()) }
+}
+
 /// Вдавленность: канавка, прорезанная в поверхности карточки.
 ///
 /// Приём один на кольцо, полосу и всё остальное, что показывает прогресс, поэтому

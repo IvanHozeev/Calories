@@ -586,6 +586,7 @@ private extension SettingsView {
         } label: {
             accentShape(accent)
                 .frame(width: 22, height: 22)
+                .glassBead()
                 .overlay {
                     Circle()
                         .strokeBorder(Color.primary.opacity(appAccent == accent.rawValue ? 0.7 : 0),

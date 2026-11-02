@@ -43,6 +43,7 @@ Cucumber	168409	Cucumber, with peel, raw	1.00	0.03
 Tomato	170458	Tomato juice, canned, with salt added	1.00	0.04
 Cherry tomatoes	170457	Tomatoes, red, ripe, raw, year round average	1.00	0.00
 Carrot	170393	Carrots, raw	1.00	0.01
+Roasted carrot	170394	Carrots, cooked, boiled, drained, without salt	1.00	manual
 Boiled beetroot	168506	Beets, cooked, boiled. drained, with salt	1.00	0.00
 Boiled potato	170440	Potatoes, boiled, cooked without skin, flesh, without salt	1.00	manual
 Baked potato	170033	Potatoes, baked, flesh, without salt	1.00	manual
@@ -108,6 +109,7 @@ Corn flakes	174648	Cereals ready-to-eat, RALSTON Corn Flakes	1.00	0.26
 Oat bran	168872	Oat bran, raw	1.00	0.41
 Wheat flour	169761	Wheat flour, white, all-purpose, unenriched	1.00	0.01
 Boiled chicken breast	171477	Chicken, broilers or fryers, breast, meat only, cooked, roasted	1.00	0.00
+Baked chicken tenderloin	171477	Chicken, broilers or fryers, breast, meat only, cooked, roasted	1.00	manual
 Fried chicken breast	171476	Chicken, broilers or fryers, breast, meat and skin, cooked, fried, flour	1.00	0.28
 Chicken thigh	171120	Chicken, broilers or fryers, rotisserie, original seasoning, thigh, meat only, cooked	1.00	0.15
 Chicken drumstick	172377	Chicken, broilers or fryers, drumstick, meat only, cooked, stewed	1.00	0.04
@@ -150,6 +152,7 @@ Mussels	174216	Mollusks, mussel, blue, raw	1.00	0.00
 Crab	174202	Crustaceans, crab, alaska king, cooked, moist heat	1.00	0.02
 Red caviar	174188	Fish, caviar, black and red, granular	1.00	0.54
 Egg	173424	Egg, whole, cooked, hard-boiled	1.00	0.03
+Boiled egg	173424	Egg, whole, cooked, hard-boiled	1.00	manual
 Egg white	172183	Egg, white, raw, fresh	1.00	0.01
 Egg yolk	172184	Egg, yolk, raw, fresh	1.00	0.02
 Fat-free cottage cheese	172181	Cheese, cottage, nonfat, uncreamed, dry, large or small curd	1.00	0.43

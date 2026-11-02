@@ -465,6 +465,25 @@ def main():
         print(f"ОШИБКА: совпало идентификаторов: {duplicates}", file=sys.stderr)
         return 1
 
+    # Витамины живут только в выгрузке USDA. Без неё каталог запишется голым,
+    # и состав потеряют все позиции разом — а заметно это станет не здесь, а
+    # на красном прогоне через полчаса: витамины в приложении держат и значок
+    # «богат белком», и донора в своих продуктах. Правка одной строки в ядре
+    # не должна стоить всего справочника, поэтому пересборка без выгрузки
+    # останавливается, пока в прошлом каталоге есть что терять.
+    if not args.usda and not args.check and os.path.exists(args.out):
+        try:
+            with open(args.out, encoding="utf-8") as handle:
+                had = sum(1 for item in json.load(handle) if item.get("m"))
+        except (OSError, ValueError):
+            had = 0
+        if had:
+            print(f"ОШИБКА: без --usda каталог останется без витаминов, а сейчас "
+                  f"они есть у {had} позиций. Пересобирай с выгрузкой:\n"
+                  f"  python3 {os.path.relpath(__file__, ROOT)} "
+                  f"--usda <sr_legacy.json> --core-only", file=sys.stderr)
+            return 1
+
     if args.check:
         print(f"Проверено позиций: {len(foods)}, проблем: {len(problems)}")
         return 0

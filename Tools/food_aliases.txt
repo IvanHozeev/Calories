@@ -29,6 +29,7 @@ Feta|גבינה בולגרית,פטה
 Brynza|גבינה לבנה
 Cream 10%|שמנת
 Egg|ביצה,ביצים
+Boiled egg|ביצה קשה,ביצה מבושלת
 
 # --- Белковое
 Whey protein powder|אבקת חלבון,חלבון מי גבינה,whey,whey isolate,изолят,сывороточный протеин
@@ -67,6 +68,7 @@ Banana|בננה
 Apple|תפוח
 Dates|תמר,תמרים,מגהול,medjool
 Baked potato|תפוח אדמה אפוי
+Roasted carrot|גזר אפוי
 Boiled potato|תפוח אדמה,תפוחי אדמה
 Olive oil|שמן זית
 Honey|דבש

@@ -56,6 +56,7 @@
 Помидор|Tomato|18|0.9|0.2|3.9|produce|120
 Помидоры черри|Cherry tomatoes|18|0.9|0.2|3.9|produce|15
 Морковь|Carrot|41|0.9|0.2|10|produce|80
+Морковь запечённая|Roasted carrot|50|1.1|0.3|12|produce|
 Свёкла варёная|Boiled beetroot|44|1.7|0.2|10|produce|
 Картофель варёный|Boiled potato|87|2.0|0.1|20|produce|
 Картофель печёный|Baked potato|93|2.5|0.1|21|produce|
@@ -136,6 +137,7 @@
 # --- Мясо и птица
 Куриная грудка варёная|Boiled chicken breast|165|31.0|3.6|0|meat|
 Куриная грудка жареная|Fried chicken breast|197|30.0|7.8|0|meat|
+Малое филе куриное запечённое|Baked chicken tenderloin|158|32.0|2.4|0|meat|
 Куриное бедро|Chicken thigh|209|26.0|10.9|0|meat|
 Куриная голень|Chicken drumstick|172|28.0|5.7|0|meat|
 Куриные крылья|Chicken wings|203|30.0|8.1|0|meat|
@@ -188,6 +190,7 @@
 
 # --- Молочное и яйца
 Яйцо куриное|Egg|155|13.0|11.0|1.1|dairy|55
+Яйцо варёное|Boiled egg|155|12.6|10.6|1.1|dairy|55
 Яичный белок|Egg white|52|11.0|0.2|0.7|dairy|33
 Яичный желток|Egg yolk|322|16.0|27.0|3.6|dairy|17
 Творог обезжиренный|Fat-free cottage cheese|71|18.0|0.6|3.0|dairy|

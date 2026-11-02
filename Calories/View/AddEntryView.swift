@@ -669,32 +669,20 @@ struct AddEntryView: View {
     }
 
     /// Строка подсказки: что взять и сколько.
+    ///
+    /// Та же `FoodRow`, что у «как обычно» и «обычно вместе»: своя раскладка
+    /// держала макросы и калории в одной строке с названием, и названию
+    /// оставалось полширины. Приём из двух блюд в неё не влезал никогда —
+    /// «Котлеты из филе лосося, Паста боло…» обрывалось на первом же, и
+    /// подсказка не отвечала на вопрос, что же она предлагает. Ширина нужна
+    /// названию, а приметы читаются и ярусом ниже.
     private func suggestionRow(_ item: MealSuggestions.Candidate) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: item.name)
-                    // Тем же весом, что название в любой другой строке:
-                    // подсказка стоит между «как обычно» и «недавним», и
-                    // ровным светлым текстом читалась как их подпись, а не
-                    // как такая же еда.
-                    .font(.app(.subheadline, weight: .semibold))
-                    .lineLimit(2)
-                Text(verbatim: item.parts.compactMap { part in
+        FoodRow(name: item.name,
+                calories: item.calories,
+                portion: item.parts.compactMap { part in
                     part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
-                }.joined(separator: " · "))
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-                    .monospacedDigit()
-                    .lineLimit(1)
-            }
-            Spacer(minLength: 8)
-            MacroTags(macros: item.macros, compact: true)
-            Text(verbatim: "\(item.calories)")
-                .font(.app(.subheadline, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 2)
+                }.joined(separator: " · "),
+                macros: item.macros)
     }
 
     /// Кладёт в черновик то, что обычно идёт вместе.

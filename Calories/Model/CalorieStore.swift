@@ -263,6 +263,15 @@ final class CalorieStore {
     /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
     /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
     @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
+    /// Кашрутный статус по названию продукта — тем же способом, что категория.
+    /// Записи дневника его не хранят: продукт правят, а снимок остаётся, и
+    /// статус приходится собирать обратно по имени.
+    @ObservationIgnored private(set) var kosherByFoodName: [String: KosherStatus] = [:]
+    /// Продукты, после которых ждут как после мясного: твёрдый выдержанный сыр.
+    @ObservationIgnored private(set) var hardCheeseFoodNames: Set<String> = []
+    /// Запрещённые видом. Множеством, а не словарём: ответ тут один — есть
+    /// имя в наборе или нет.
+    @ObservationIgnored private(set) var forbiddenFoodNames: Set<String> = []
     /// Состав на 100 г по названию продукта или блюда. Записи дневника его не
     /// хранят — только калории и макросы, — поэтому за витаминами приходится
     /// возвращаться к тому, из чего запись сделана.
@@ -529,6 +538,13 @@ final class CalorieStore {
             (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
             uniquingKeysWith: { _, own in own }
         )
+        let allFoods = FoodDatabase.items + customFoods
+        kosherByFoodName = Dictionary(
+            allFoods.map { ($0.name, $0.kosherStatus) },
+            uniquingKeysWith: { _, own in own }
+        )
+        hardCheeseFoodNames = Set(allFoods.filter(\.isHardCheese).map(\.name))
+        forbiddenFoodNames = Set(allFoods.filter(\.kosherForbidden).map(\.name))
         // Каталог отдаёт состав уже разобранным и не меняется, поэтому его
         // словарь строится один раз; поверх кладём свои продукты — они как раз
         // меняются, но их немного.

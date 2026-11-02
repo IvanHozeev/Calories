@@ -42,7 +42,7 @@ LINKS = os.path.join(ROOT, "Tools", "food_core_usda.tsv")
 ALIASES = os.path.join(ROOT, "Tools", "food_aliases.txt")
 RECIPES = os.path.join(ROOT, "Tools", "dish_recipes.txt")
 
-CATEGORIES = {"meat", "fish", "dairy", "legumes", "grains", "dishes",
+CATEGORIES = {"meat", "fish", "dairy", "eggs", "legumes", "grains", "dishes",
               "produce", "mushrooms", "fats", "sweets", "drinks", "other"}
 
 # Идентификаторы нутриентов в USDA. Совпадают с Micronutrient.usdaNutrientID
@@ -61,7 +61,7 @@ USDA_CATEGORIES = [
     ("Beef", "meat"), ("Pork", "meat"), ("Poultry", "meat"), ("Lamb", "meat"),
     ("Sausages", "meat"), ("Luncheon", "meat"), ("Game", "meat"), ("Veal", "meat"),
     ("Finfish", "fish"), ("Shellfish", "fish"),
-    ("Dairy", "dairy"), ("Egg", "dairy"),
+    ("Dairy", "dairy"), ("Egg", "eggs"),
     ("Legumes", "legumes"),
     ("Cereal", "grains"), ("Baked", "grains"), ("Pasta", "grains"), ("Grain", "grains"),
     ("Vegetables", "produce"), ("Fruits", "produce"),

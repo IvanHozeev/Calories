@@ -12,6 +12,9 @@ extension FoodCategory {
         case .meat:      return Color(hex: 0xE2553D)
         case .fish:      return Color(hex: 0x3FA9D6)
         case .dairy:     return Color(hex: 0x6C8CFF)
+        // Светлее бобовых, с которыми стоит рядом в круге: оттенок у них
+        // один, а различать их надо на взгляд.
+        case .eggs:      return Color(hex: 0xF4D35E)
         case .legumes:   return Color(hex: 0xC8A14A)
         case .grains:    return Color(hex: 0xE0A93B)
         case .produce:   return Color(hex: 0x4FBF6B)

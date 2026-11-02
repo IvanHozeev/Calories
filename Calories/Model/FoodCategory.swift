@@ -6,7 +6,7 @@ import Foundation
 /// Хранится строкой, а не индексом: порядок в перечислении со временем меняется,
 /// а по индексу «Рыба» однажды тихо превратилась бы в «Молочное» у всех подряд.
 enum FoodCategory: String, CaseIterable, Identifiable {
-    case meat, fish, dairy, legumes, grains, produce, mushrooms, fats, sweets, drinks, dishes, other
+    case meat, fish, dairy, eggs, legumes, grains, produce, mushrooms, fats, sweets, drinks, dishes, other
 
     var id: String { rawValue }
 
@@ -14,7 +14,11 @@ enum FoodCategory: String, CaseIterable, Identifiable {
         switch self {
         case .meat:    return String(localized: "Мясо и птица")
         case .fish:    return String(localized: "Рыба и морепродукты")
-        case .dairy:   return String(localized: "Молочное и яйца")
+        case .dairy:   return String(localized: "Молочное")
+        // Своей категорией, а не вместе с молочным. Их ищут отдельно — яйцо
+        // кладут в дневник чаще любого сыра, — и они не молочное: для того,
+        // кто считает мясное и молочное, это разные полки, а не одна.
+        case .eggs:    return String(localized: "Яйца")
         // Арахис ботанически бобовое, но искать арахисовую пасту будут рядом
         // с ореховыми, а не здесь: категории нужны для навигации, не для таксономии.
         case .legumes: return String(localized: "Бобовые")
@@ -36,6 +40,7 @@ enum FoodCategory: String, CaseIterable, Identifiable {
         case .meat:      return "fork.knife"
         case .fish:      return "fish"
         case .dairy:     return "waterbottle"
+        case .eggs:      return "oval.portrait"
         case .legumes:   return "leaf"
         case .grains:    return "basket"
         case .produce:   return "carrot"

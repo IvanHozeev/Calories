@@ -48,6 +48,19 @@ nonisolated struct CatalogFood: Codable, Identifiable, Hashable, Sendable {
 
     var foodCategory: FoodCategory { FoodCategory(rawValue: category) ?? .other }
 
+    /// Мясное, молочное или парве. Считается, а не лежит в файле: поимённый
+    /// список уточняется чаще, чем пересобирается каталог, а пересборка
+    /// требует выгрузки USDA, которой в репозитории нет.
+    var kosherStatus: KosherStatus {
+        KosherStatus.forCatalog(name: en, category: foodCategory)
+    }
+
+    /// Запрещено ли видом — свинина, заяц, морское без чешуи.
+    var kosherVerdict: KosherVerdict { KosherVerdict.forCatalog(name: en) }
+
+    /// Твёрдый выдержанный сыр: ждут после него как после мясного.
+    var isHardCheese: Bool { KosherStatus.isHardCheese(name: en) }
+
     /// Название на языке интерфейса.
     ///
     /// Каталог знает русский и английский. Для остальных шести языков честнее

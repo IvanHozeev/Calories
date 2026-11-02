@@ -673,7 +673,11 @@ struct AddEntryView: View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: item.name)
-                    .font(.app(.subheadline))
+                    // Тем же весом, что название в любой другой строке:
+                    // подсказка стоит между «как обычно» и «недавним», и
+                    // ровным светлым текстом читалась как их подпись, а не
+                    // как такая же еда.
+                    .font(.app(.subheadline, weight: .semibold))
                     .lineLimit(2)
                 Text(verbatim: item.parts.compactMap { part in
                     part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }

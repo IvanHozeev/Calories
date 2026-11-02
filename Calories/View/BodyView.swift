@@ -285,18 +285,10 @@ struct BodyView: View {
             // лежит нужное. Теперь профиль — экран о себе, а настройки за
             // шестерёнкой в его шапке, как в системных приложениях.
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                }
-                .accessibilityLabel("Настройки")
-                .accessibilityIdentifier("openSettings")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                // Взвешивание — самое частое действие на этом экране: вес
-                // пишут каждое утро, а замеры снимают раз в месяц. Замеры
-                // переехали строкой в параметры тела, к росту и весу.
+                // Взвешивание первым: вес пишут каждое утро, а в настройки
+                // заходят раз в месяц, и частое действие не должно стоять
+                // за редким. Замеры отсюда ушли строкой в параметры тела,
+                // к росту и весу.
                 Button {
                     showingWeighIn = true
                 } label: {
@@ -304,6 +296,15 @@ struct BodyView: View {
                 }
                 .accessibilityLabel("Взвеситься")
                 .accessibilityIdentifier("openWeighIn")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("Настройки")
+                .accessibilityIdentifier("openSettings")
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

@@ -21,6 +21,10 @@ struct NewFoodSheet: View {
     @State private var fat = ""
     @State private var carbs = ""
     @State private var category = FoodCategory.other
+    /// Кашрутный статус, выбранный руками. Пусто — продукт идёт за своей
+    /// категорией, и так и должно остаться, пока человек не сказал иначе.
+    @State private var kosherChoice: KosherStatus?
+    @State private var isHardCheese = false
     /// Пусто — значит обычные 100 г.
     @State private var servingGrams = ""
     /// Два веса для уваривания: сухое и то, что вышло.
@@ -358,6 +362,13 @@ struct NewFoodSheet: View {
                         if let factor = learnedYield {
                             store.setCookingYield(factor, forFoodNamed: name)
                         }
+                        // Статус — после сохранения, как и коэффициент: у
+                        // нового продукта до этого момента ещё нет объекта,
+                        // которому его поставить.
+                        if KosherSettings.shared.isEnabled {
+                            store.setKosher(kosherChoice ?? KosherStatus.byCategory(category),
+                                            hardCheese: isHardCheese, forFoodNamed: name)
+                        }
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || Int(caloriesPer100g) == nil)
@@ -369,6 +380,8 @@ struct NewFoodSheet: View {
                 // в том, что сохранение заведёт новый, а не изменит старый.
                 if let food = editingFood {
                     category = food.foodCategory
+                    kosherChoice = food.kosherOverride.flatMap(KosherStatus.init(rawValue:))
+                    isHardCheese = food.isHardCheese
                     name = food.name
                     caloriesPer100g = "\(food.caloriesPer100g)"
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
@@ -482,6 +495,26 @@ private extension NewFoodSheet {
         Picker("Категория", selection: $category) {
             ForEach(FoodCategory.allCases) { item in
                 Label(item.title, systemImage: item.icon).tag(item)
+            }
+        }
+        // Только при включённом кашруте: тому, кто его не считает, эта строка
+        // ничего не объясняет и только занимает место в и без того длинном
+        // экране.
+        if KosherSettings.shared.isEnabled {
+            Picker(selection: Binding(get: { kosherChoice ?? KosherStatus.byCategory(category) },
+                                      set: { kosherChoice = $0 })) {
+                ForEach(KosherStatus.allCases) { status in
+                    Label(status.title, systemImage: status.symbol).tag(status)
+                }
+            } label: {
+                Label("Кашрут", systemImage: "circle.lefthalf.filled")
+            }
+            // Только у молочного: у мяса и парве выдержанного сыра не бывает,
+            // а строка-ловушка, которая ничего не меняет, хуже её отсутствия.
+            if (kosherChoice ?? KosherStatus.byCategory(category)) == .dairy {
+                Toggle(isOn: $isHardCheese) {
+                    Label("Твёрдый выдержанный", systemImage: "square.grid.2x2")
+                }
             }
         }
     }

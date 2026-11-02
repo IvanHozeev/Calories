@@ -73,4 +73,23 @@ extension CalorieStore {
             }
         return KosherClock.waits(from: meals, now: now, custom: custom)
     }
+
+    /// Ставит продукту кашрутный статус руками.
+    ///
+    /// Отдельным вызовом, а не ещё двумя параметрами у `addCustomFood`: статус
+    /// появляется не у всякого продукта и только при включённом кашруте — тем
+    /// же приёмом, каким у продукта заводится коэффициент уварки.
+    ///
+    /// Совпал с тем, что даёт категория, — ничего не храним: продукт должен
+    /// ехать за своей категорией, пока человек не сказал иначе. Иначе творог,
+    /// переложенный однажды в другую категорию, навсегда остался бы с
+    /// прежним ответом.
+    func setKosher(_ status: KosherStatus, hardCheese: Bool, forFoodNamed name: String) {
+        guard let food = customFoods.first(where: { $0.name == name }) else { return }
+        let byCategory = KosherStatus.byCategory(food.foodCategory)
+        food.kosherOverride = status == byCategory ? nil : status.rawValue
+        food.isHardCheese = hardCheese
+        food.updatedAt = Date()
+        persistCustomFoods()
+    }
 }

@@ -257,3 +257,63 @@ struct KosherTests {
         #expect(store.kosherWaits(now: now).isEmpty)
     }
 }
+
+/// Настройки кашрута: что приложение помнит и чего не выдумывает.
+@MainActor
+@Suite(.serialized)
+struct KosherSettingsTests {
+
+    @Test func theDefaultCustomIsTheCommonOne() {
+        let settings = KosherSettings(defaults: TestDefaults.make())
+        #expect(!settings.isEnabled)
+        #expect(settings.afterMeat == 360)
+        // По букве закона после молочного ждать не нужно — ноль и есть
+        // значение, а не «не задано».
+        #expect(settings.afterDairy == 0)
+        #expect(settings.hardCheeseLikeMeat)
+        #expect(settings.warnsMixing)
+    }
+
+    @Test func aChosenCustomSurvivesARestart() {
+        let defaults = TestDefaults.make()
+        let first = KosherSettings(defaults: defaults)
+        first.isEnabled = true
+        first.afterMeat = 330
+        first.afterDairy = 30
+        first.hardCheeseLikeMeat = false
+
+        let second = KosherSettings(defaults: defaults)
+        #expect(second.isEnabled)
+        #expect(second.afterMeat == 330)
+        #expect(second.afterDairy == 30)
+        #expect(!second.hardCheeseLikeMeat)
+    }
+
+    /// Чужое число в настройках — не повод считать по нему.
+    @Test func anUnknownCustomFallsBackToTheCommonOne() {
+        let defaults = TestDefaults.make()
+        defaults.set(275, forKey: KosherSettings.afterMeatKey)
+        defaults.set(17, forKey: KosherSettings.afterDairyKey)
+        let settings = KosherSettings(defaults: defaults)
+        #expect(settings.afterMeat == 360)
+        #expect(settings.afterDairy == 0)
+    }
+
+    /// Обычай человек знает в часах — так он и подписан.
+    @Test func theCustomIsNamedInHoursAndMinutes() {
+        #expect(KosherWaitText.title(minutes: 0) == String(localized: "Не ждать"))
+        #expect(KosherWaitText.title(minutes: 360).contains("6"))
+        #expect(KosherWaitText.title(minutes: 330).contains("5"))
+        #expect(KosherWaitText.title(minutes: 330).contains("30"))
+        #expect(KosherWaitText.title(minutes: 30).contains("30"))
+    }
+
+    @Test func settingsHandTheCounterItsCustom() {
+        let settings = KosherSettings(defaults: TestDefaults.make())
+        settings.afterMeat = 180
+        settings.afterDairy = 60
+        let at = Date()
+        let wait = KosherClock.wait(after: .meat, at: at, custom: settings.custom)
+        #expect(wait?.until == at.addingTimeInterval(180 * 60))
+    }
+}

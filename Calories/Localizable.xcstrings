@@ -26594,6 +26594,696 @@
         }
       }
     },
+    "Мясное": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لحمي"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fleischig"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carne"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viande"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בשרי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carne"
+          }
+        }
+      }
+    },
+    "Парве": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "باروه"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parve"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parve"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parve"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parve"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פרווה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parve"
+          }
+        }
+      }
+    },
+    "Не ждать": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بدون انتظار"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Wartezeit"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No wait"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin espera"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans attente"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ללא המתנה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem espera"
+          }
+        }
+      }
+    },
+    "Кашрут": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كشروت"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaschrut"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cacherout"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כשרות"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut"
+          }
+        }
+      }
+    },
+    "Мясное и молочное": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اللحم والحليب"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fleisch und Milch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meat and dairy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carne y lácteos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viande et lait"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בשר וחלב"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Carne e laticínios"
+          }
+        }
+      }
+    },
+    "После мясного": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعد اللحم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Fleischigem"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After meat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después de carne"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Après la viande"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחרי בשרי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depois de carne"
+          }
+        }
+      }
+    },
+    "После молочного": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعد الحليب"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nach Milchigem"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After dairy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después de lácteos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Après le lait"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחרי חלבי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depois de laticínios"
+          }
+        }
+      }
+    },
+    "Твёрдый сыр как мясное": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الجبن الصلب كاللحم"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hartkäse wie Fleischiges"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard cheese counts as meat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queso curado como carne"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fromage affiné comme la viande"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גבינה קשה כבשרי"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Queijo curado como carne"
+          }
+        }
+      }
+    },
+    "Говорить о смешении": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التنبيه عند الخلط"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vor Vermischung warnen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warn about mixing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisar de mezclas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaler les mélanges"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "התרעה על ערבוב"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avisar sobre misturas"
+          }
+        }
+      }
+    },
+    "Твёрдый выдержанный": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صلب ومعتّق"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hart gereift"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard and aged"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affiné"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קשה ומיושנת"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curado"
+          }
+        }
+      }
+    },
+    "Обхват": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المحيط"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umfang"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Circumference"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Circunferencia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tour"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "היקף"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Circunferência"
+          }
+        }
+      }
+    },
+    "Сколько ждать — обычай общины, а не одно число: после мясного ждут шесть часов, пять с половиной, три или час. После молочного по букве закона ждать не нужно, но полчаса — распространённый обычай. Приложение считает по тому, как принято у вас, и говорит только время: решаете вы.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مدة الانتظار عُرف لكل طائفة، لا رقم واحد: بعد اللحم ينتظرون ست ساعات، أو خمسًا ونصفًا، أو ثلاثًا، أو ساعة. وبعد الحليب لا يوجب نص الشريعة انتظارًا، لكن نصف ساعة عُرف شائع. التطبيق يحسب وفق عُرفك ويذكر الوقت فقط: القرار قرارك."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie lange gewartet wird, ist Brauch der Gemeinde und keine einzelne Zahl: nach Fleischigem sind es sechs Stunden, fünfeinhalb, drei oder eine. Nach Milchigem verlangt der Buchstabe des Gesetzes gar keine Wartezeit, eine halbe Stunde ist jedoch weit verbreiteter Brauch. Die App rechnet nach Ihrem Brauch und nennt nur die Zeit: entscheiden müssen Sie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How long to wait is a community custom, not a single number: after meat people wait six hours, five and a half, three, or one. After dairy the letter of the law requires no wait at all, though half an hour is a widespread custom. The app counts by what is customary for you and states only the time: the decision is yours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuánto esperar es una costumbre de cada comunidad, no un único número: tras la carne se esperan seis horas, cinco y media, tres o una. Tras los lácteos la ley no exige espera alguna, aunque media hora es una costumbre extendida. La app cuenta según su costumbre y solo indica el tiempo: usted decide."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La durée d'attente est une coutume communautaire, pas un chiffre unique : après la viande, on attend six heures, cinq et demie, trois ou une. Après le lait, la lettre de la loi n'exige aucune attente, mais une demi-heure est une coutume répandue. L'app compte selon votre coutume et n'indique que le temps : la décision vous revient."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "משך ההמתנה הוא מנהג הקהילה ולא מספר אחד: אחרי בשרי ממתינים שש שעות, חמש וחצי, שלוש או שעה. אחרי חלבי אין חובת המתנה מעיקר הדין, אך חצי שעה הוא מנהג רווח. האפליקציה מחשבת לפי המנהג שלך ואומרת רק את הזמן: ההחלטה שלך."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quanto esperar é um costume de cada comunidade, não um número único: depois da carne espera-se seis horas, cinco e meia, três ou uma. Depois dos laticínios a letra da lei não exige espera, embora meia hora seja um costume difundido. O app conta pelo seu costume e indica apenas o tempo: a decisão é sua."
+          }
+        }
+      }
+    },
+    "Обычай у каждой общины свой — приложение считает по вашему.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لكل طائفة عُرفها — والتطبيق يحسب وفق عُرفك."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Gemeinde hat ihren eigenen Brauch — die App rechnet nach Ihrem."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every community has its own custom — the app counts by yours."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada comunidad tiene su costumbre: la app cuenta según la suya."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chaque communauté a sa coutume — l'app compte selon la vôtre."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לכל קהילה מנהג משלה — האפליקציה מחשבת לפי שלך."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada comunidade tem o seu costume — o app conta pelo seu."
+          }
+        }
+      }
+    },
+    "Приложение будет считать, сколько осталось до молочного после мясного и наоборот, и предупреждать, если мясное и молочное попали в одну тарелку. Кошерность продукта оно не определяет: про забой говядины по таблице калорий узнать нечего.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سيحسب التطبيق ما تبقّى حتى الحليب بعد اللحم والعكس، وينبّهك إذا اجتمع اللحم والحليب في طبق واحد. أما كون المنتج كوشير فلا يحدّده: جدول السعرات لا يقول شيئًا عن ذبح الحيوان."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die App zählt, wie lange es nach Fleischigem noch bis Milchigem dauert und umgekehrt, und warnt, wenn Fleischiges und Milchiges auf einem Teller landen. Ob ein Produkt koscher ist, stellt sie nicht fest: über die Schlachtung sagt eine Kalorientabelle nichts."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app will count how long is left before dairy after meat and the other way round, and warn when meat and dairy end up on one plate. It does not determine whether a product is kosher: a calorie table says nothing about how an animal was slaughtered."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app contará cuánto falta para los lácteos tras la carne y al revés, y avisará si carne y lácteos acaban en el mismo plato. No determina si un producto es kósher: una tabla de calorías nada dice sobre el sacrificio del animal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app comptera le temps restant avant le lait après la viande et inversement, et signalera si viande et lait se retrouvent dans la même assiette. Elle ne détermine pas si un produit est casher : une table de calories ne dit rien de l'abattage de l'animal."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "האפליקציה תחשב כמה נותר עד חלבי אחרי בשרי ולהפך, ותתריע אם בשרי וחלבי הגיעו לצלחת אחת. כשרות המוצר היא אינה קובעת: טבלת קלוריות אינה אומרת דבר על אופן השחיטה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O app contará quanto falta para os laticínios depois da carne e vice-versa, e avisará se carne e laticínios forem parar no mesmo prato. Ele não determina se um produto é kosher: uma tabela de calorias nada diz sobre o abate do animal."
+          }
+        }
+      }
+    },
+    "Счёт времени между мясным и молочным. Кошерность продукта не определяется.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يحسب الوقت بين اللحم والحليب. ولا يحدّد كون المنتج كوشير."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zählt die Zeit zwischen Fleischigem und Milchigem. Stellt nicht fest, ob ein Produkt koscher ist."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counts the time between meat and dairy. Does not determine whether a product is kosher."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuenta el tiempo entre carne y lácteos. No determina si un producto es kósher."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compte le temps entre viande et lait. Ne détermine pas si un produit est casher."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחשבת את הזמן בין בשרי לחלבי. אינה קובעת את כשרות המוצר."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conta o tempo entre carne e laticínios. Não determina se um produto é kosher."
+          }
+        }
+      }
+    },
     "Молочное и яйца": {
       "localizations": {
         "ar": {

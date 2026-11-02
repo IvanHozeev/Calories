@@ -44,7 +44,7 @@ struct EntryRow: View {
                 // многоточия. Вторая строка приходит только тогда, когда имя
                 // в одну не влезло.
                 Text(entry.name)
-                    .font(.app(.subheadline))
+                    .font(.app(.subheadline, weight: .semibold))
                     .lineLimit(2)
                     // Название идёт от левого края, даже когда оно на иврите.
                     //

@@ -10,7 +10,7 @@ struct DayRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(day.date, format: .dateTime.day().month(.wide))
-                    .font(.app(.body, weight: .medium))
+                    .font(.app(.body, weight: .semibold))
                 Text(verbatim: "\(day.entries.count) \(entriesLabel(day.entries.count))")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)

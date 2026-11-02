@@ -60,6 +60,7 @@ struct EditEntrySheet: View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: parts[index].name)
+                    .font(.app(.body, weight: .semibold))
                     .multilineTextAlignment(.leading)
                 // Вес известен не всегда: у распознанного по фото или
                 // записанного порцией его нет вовсе — и править там нечего.

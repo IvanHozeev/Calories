@@ -188,6 +188,7 @@ struct NewDishSheet: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(ingredient.foodName)
+                                .font(.app(.body, weight: .semibold))
                             Text("\(Int(ingredient.grams)) г")
                                 .font(.app(.caption))
                                 .foregroundStyle(.secondary)

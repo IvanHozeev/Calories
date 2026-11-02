@@ -53,6 +53,45 @@ struct FoodRow: View {
         .accessibilityIdentifier("vitaminOffer")
     }
 
+    /// Ярус примет: сколько ингредиентов, сколько граммов, значки категорий и
+    /// свойств. Значки параметром, потому что при нехватке места уходят
+    /// первыми именно они — см. `ViewThatFits` в теле строки.
+    private func signs(iconLimit: Int, showTraits: Bool) -> some View {
+        HStack(spacing: 6) {
+            if let detail {
+                Text(verbatim: detail)
+                Text(verbatim: "·")
+            }
+            Text(verbatim: portion)
+            if iconLimit > 0, !icons.isEmpty {
+                Text(verbatim: "·")
+                HStack(spacing: 4) {
+                    ForEach(icons.prefix(iconLimit), id: \.self) { icon in
+                        Image(systemName: icon)
+                    }
+                }
+                .accessibilityHidden(true)
+            }
+            // Без капсулы: соседи по строке — граммы и значок категории —
+            // стоят голыми, и подложка под одним значком делала его кнопкой,
+            // которой он не является. Отделяется он тем же, чем отделены они
+            // друг от друга, — точкой.
+            if showTraits, !traits.isEmpty {
+                Text(verbatim: "·")
+                HStack(spacing: 4) {
+                    ForEach(traits) { trait in
+                        Image(systemName: trait.symbol)
+                            .foregroundStyle(trait.color)
+                            .accessibilityLabel(Text(verbatim: trait.title))
+                    }
+                }
+            }
+        }
+        .font(.app(.caption))
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Строки прижаты друг к другу: три яруса (название, порция,
@@ -79,38 +118,22 @@ struct FoodRow: View {
                 // месте — длинное имя переносилось, а значок уезжал за ним.
                 // Здесь он стоит в ряду с граммами и значком категории, то
                 // есть среди таких же примет продукта.
-                HStack(spacing: 6) {
-                    if let detail {
-                        Text(verbatim: detail)
-                        Text(verbatim: "·")
-                    }
-                    Text(verbatim: portion)
-                    if !icons.isEmpty {
-                        Text(verbatim: "·")
-                        HStack(spacing: 4) {
-                            ForEach(icons.prefix(3), id: \.self) { icon in
-                                Image(systemName: icon)
-                            }
-                        }
-                        .accessibilityHidden(true)
-                    }
-                    // Без капсулы: соседи по строке — граммы и значок
-                    // категории — стоят голыми, и подложка под одним значком
-                    // делала его кнопкой, которой он не является. Отделяется
-                    // он тем же, чем отделены они друг от друга, — точкой.
-                    if !traits.isEmpty {
-                        Text(verbatim: "·")
-                        HStack(spacing: 4) {
-                            ForEach(traits) { trait in
-                                Image(systemName: trait.symbol)
-                                    .foregroundStyle(trait.color)
-                                    .accessibilityLabel(Text(verbatim: trait.title))
-                            }
-                        }
-                    }
+                // Когда всё не влезает, уступают значки, а не числа.
+                //
+                // Строка сначала переносилась по словам — и «3260 г» вставало
+                // двумя ярусами, где «326» читалось как другое число. Запрет
+                // переноса это не вылечил, а поменял: резаться стали числа,
+                // «4 ин… · 32…». Оба раза страдало главное, хотя лишнее стоит
+                // рядом: значок категории и значок свойства — приметы, они
+                // помогают узнать строку, но их отсутствие ничего не искажает.
+                // Поэтому берём первую раскладку, которая влезает целиком, и
+                // отдаём значки по одному.
+                ViewThatFits(in: .horizontal) {
+                    signs(iconLimit: 3, showTraits: true)
+                    signs(iconLimit: 1, showTraits: true)
+                    signs(iconLimit: 0, showTraits: true)
+                    signs(iconLimit: 0, showTraits: false)
                 }
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {

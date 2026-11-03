@@ -24,6 +24,7 @@ struct SettingsView: View {
     /// по типам за отведённое время. Наблюдение при этом не теряется:
     /// `@Observable` отслеживает чтение свойств в `body`, а не место хранения.
     private var backups: BackupService { .shared }
+    private var diagnostics: DiagnosticsStore { .shared }
     /// Что выбираем в системном диалоге. Один `fileImporter` на экран, а не два:
     /// два на одной вьюхе конфликтуют — работает только последний, и кнопка
     /// выбора папки не отвечала вовсе. Цель держим отдельным состоянием, а не
@@ -113,6 +114,7 @@ struct SettingsView: View {
             appearanceSection
             explanationSection
             systemSection
+            diagnosticsSection
             dataSection
             autoBackupSection
 #if DEBUG
@@ -704,6 +706,50 @@ private extension SettingsView {
         }
         .accessibilityIdentifier("openLanguage")
     }
+    }
+
+    /// Сбои — только если они были.
+    ///
+    /// Секции нет, пока приложение не падало: пустой раздел «Сбои» в
+    /// настройках читается как обещание проблем, которых не случалось. А
+    /// когда падение было, человек об этом обычно и так знает — и здесь
+    /// находит, что отправить.
+    @ViewBuilder
+    var diagnosticsSection: some View {
+        if !diagnostics.reports.isEmpty {
+            Section {
+                ForEach(diagnostics.reports) { report in
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(report.kind == .crash ? "Сбой" : "Зависание")
+                                .font(.app(.subheadline, weight: .semibold))
+                            Spacer()
+                            Text(verbatim: report.date.formatted(date: .abbreviated, time: .shortened))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(verbatim: report.detail)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                    .padding(.vertical, 2)
+                }
+                if !diagnostics.payloadFiles.isEmpty {
+                    ShareLink(items: diagnostics.payloadFiles) {
+                        Label("Отправить разработчику", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("shareDiagnostics")
+                }
+                Button("Очистить", role: .destructive) { diagnostics.clear() }
+            } header: {
+                Text("Сбои")
+            } footer: {
+                explain("Разбор падений приложение получает от системы — своего сервера у него нет, и больше об этих сбоях никто не знает. В отправленном файле нет ни дневника, ни веса: только то, где и почему приложение упало.",
+                        short: "Отчёт от системы. Дневника и веса в нём нет.").map { Text($0) }
+            }
+            .glassRow()
+        }
     }
 
     /// Выгрузка данных руками.

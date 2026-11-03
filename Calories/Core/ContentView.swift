@@ -565,6 +565,7 @@ private extension ContentView {
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
+        if needsBackupReminder { return true }
         if store.recoveryAdvice() != nil { return true }
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
@@ -609,9 +610,48 @@ private extension ContentView {
         KosherActivity.sync(waits: kosherWaits, enabled: KosherSettings.shared.isEnabled)
     }
 
+    /// Пора ли сказать, что копий дневника нет.
+    private var needsBackupReminder: Bool {
+        BackupService.needsReminder(isConfigured: BackupService.shared.isConfigured,
+                                    daysOfDiary: store.entriesByDay.count)
+    }
+
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
+            // Копий нет, а дневнику уже есть что терять.
+            //
+            // Выше всего остального, и это единственная подсказка не про еду:
+            // остальные советуют, а эта предупреждает. Синхронизации у
+            // приложения нет, контейнер удаляется вместе с ним, и выбранная
+            // папка — единственное, что стоит между годом записей и пустым
+            // экраном. Уходит навсегда, как только папка выбрана.
+            if needsBackupReminder {
+                NavigationLink {
+                    SettingsView(store: store)
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "externaldrive.badge.exclamationmark")
+                            .foregroundStyle(.orange)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Копий дневника нет")
+                                .font(.app(.subheadline, weight: .semibold))
+                            Text("Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("backupMissing")
+            }
+
             // Не пора ли подъесть — первой строкой.
             //
             // Это единственная подсказка, которая говорит остановиться, а не

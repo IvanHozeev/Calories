@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Первый запуск: тело, активность, цель с планом и итог в виде кольца.
 ///
@@ -32,11 +33,16 @@ struct OnboardingView: View {
     @State private var weekendStyle: WeekendStyle = .satSun
 
     @State private var healthAsked = false
+    @State private var showingBackupPicker = false
+    /// Вычисляемым, а не хранимым: `@Observable` следит за чтением свойств в
+    /// теле, а не за местом хранения, — и почленный инициализатор экрана от
+    /// лишнего параметра не распухает.
+    private var backups: BackupService { .shared }
     @State private var proteinTenths = Int(UserProfile.defaultProteinPerKg * 10)
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
 
     enum Step: Int, CaseIterable {
-        case welcome, explanations, sex, age, height, weight, activity, goal, cutOptions, macros, gear, health, result
+        case welcome, explanations, sex, age, height, weight, activity, goal, cutOptions, macros, gear, backup, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -110,6 +116,7 @@ struct OnboardingView: View {
                 case .cutOptions: cutOptionsStep
                 case .macros:     macrosStep
                 case .gear:       gearStep
+                case .backup:     backupStep
                 case .health:     healthStep
                 case .result:     resultStep
                 }
@@ -467,6 +474,63 @@ struct OnboardingView: View {
             }
         }
         .accessibilityElement(children: .combine)
+    }
+
+    /// Куда класть копии дневника.
+    ///
+    /// Спрашиваем здесь, пока терять нечего, — и именно поэтому. Контейнер
+    /// приложения удаляется вместе с приложением, а копия внутри него спасает
+    /// от порчи данных, но не от «удалил и поставил заново» и не от потерянного
+    /// телефона. Папка в «Файлах» или iCloud Drive лежит снаружи и переживает
+    /// и то, и другое.
+    ///
+    /// Синхронизации у приложения нет, и это не оговорка в сноске: выбранная
+    /// папка — единственное, что стоит между годом дневника и пустым экраном.
+    /// Поэтому шаг свой, а не строка в настройках, куда не заходят.
+    ///
+    /// Пропустить можно — запирать человека в онбординге из-за папки нельзя,
+    /// — но молча он мимо не пройдёт: отказ здесь явный, а на «Сегодня» потом
+    /// придёт напоминание, когда дневнику будет что терять.
+    private var backupStep: some View {
+        stepShell(title: "Копии дневника",
+                  subtitle: "Там, где их не унесёт вместе с приложением") {
+            VStack(spacing: 20) {
+                Image(systemName: backups.isConfigured
+                      ? "externaldrive.badge.checkmark" : "externaldrive.badge.icloud")
+                    .font(.app(size: 72))
+                    .foregroundStyle(backups.isConfigured ? .green : .blue)
+
+                if let folder = backups.folderName {
+                    Text(verbatim: folder)
+                        .font(.app(.body, weight: .semibold))
+                    Text("Копия будет обновляться раз в сутки, последние четырнадцать сохранятся.")
+                        .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    Text("Выбери папку в «Файлах» или iCloud Drive. Приложение само положит туда копию раз в сутки — она переживёт и переустановку, и новый телефон.")
+                        .font(.app(.body))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+
+                Button {
+                    showingBackupPicker = true
+                } label: {
+                    Label(backups.isConfigured ? "Выбрать другую папку" : "Выбрать папку",
+                          systemImage: "folder")
+                        .font(.app(.body, weight: .semibold))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 48)
+                }
+                .buttonStyle(.bordered)
+                .tint(.blue)
+                .accessibilityIdentifier("onboardingBackupFolder")
+            }
+        }
+        .fileImporter(isPresented: $showingBackupPicker, allowedContentTypes: [.folder]) { result in
+            if case .success(let url) = result { backups.useFolder(url) }
+        }
     }
 
     private var healthStep: some View {

@@ -27652,6 +27652,328 @@
         }
       }
     },
+    "Копии дневника": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ اليوميات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopien des Tagebuchs"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diary backups"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copias del diario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies du journal"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גיבויי היומן"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cópias do diário"
+          }
+        }
+      }
+    },
+    "Там, где их не унесёт вместе с приложением": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "في مكان لا تذهب فيه مع التطبيق"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dort, wo sie nicht mit der App verschwinden"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Somewhere they will not go with the app"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donde no se vayan con la app"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Là où elles ne partiront pas avec l'app"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "במקום שלא ייעלם יחד עם האפליקציה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onde não sumam junto com o app"
+          }
+        }
+      }
+    },
+    "Выбери папку в «Файлах» или iCloud Drive. Приложение само положит туда копию раз в сутки — она переживёт и переустановку, и новый телефон.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر مجلدًا في «الملفات» أو iCloud Drive. سيضع التطبيق نسخة هناك مرة كل يوم، وتبقى بعد إعادة التثبيت وبعد تغيير الهاتف."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wählen Sie einen Ordner in Dateien oder iCloud Drive. Die App legt dort täglich eine Kopie ab — sie übersteht eine Neuinstallation und ein neues Telefon."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pick a folder in Files or iCloud Drive. The app will put a copy there once a day — it survives a reinstall and a new phone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige una carpeta en Archivos o iCloud Drive. La app dejará allí una copia cada día: sobrevive a una reinstalación y a un teléfono nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez un dossier dans Fichiers ou iCloud Drive. L'app y déposera une copie chaque jour : elle survit à une réinstallation et à un nouveau téléphone."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בחר תיקייה ב״קבצים״ או ב-iCloud Drive. האפליקציה תניח שם עותק פעם ביום — הוא שורד התקנה מחדש וטלפון חדש."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha uma pasta em Ficheiros ou iCloud Drive. O app deixará lá uma cópia por dia — ela sobrevive a uma reinstalação e a um telefone novo."
+          }
+        }
+      }
+    },
+    "Копия будет обновляться раз в сутки, последние четырнадцать сохранятся.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تُحدَّث النسخة مرة كل يوم، وتُحفظ آخر أربع عشرة نسخة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Kopie wird täglich aktualisiert, die letzten vierzehn bleiben erhalten."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The copy is refreshed once a day; the last fourteen are kept."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copia se actualiza una vez al día; se guardan las últimas catorce."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La copie est actualisée une fois par jour ; les quatorze dernières sont conservées."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "העותק מתעדכן פעם ביום, וארבעה-עשר האחרונים נשמרים."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cópia é atualizada uma vez por dia; as últimas catorze ficam guardadas."
+          }
+        }
+      }
+    },
+    "Выбрать папку": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختيار مجلد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ordner wählen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a folder"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegir carpeta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un dossier"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בחירת תיקייה"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolher pasta"
+          }
+        }
+      }
+    },
+    "Копий дневника нет": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد نسخ من اليوميات"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Kopien des Tagebuchs"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No diary backups"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin copias del diario"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune copie du journal"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אין גיבוי ליומן"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem cópias do diário"
+          }
+        }
+      }
+    },
+    "Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إنها موجودة على هذا الهاتف فقط. اختر مجلدًا وستحدّث النسخة نفسها."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es existiert nur auf diesem Telefon. Wählen Sie einen Ordner, und die Kopie hält sich selbst aktuell."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It lives on this phone only. Pick a folder and the copy will keep itself up to date."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo vive en este teléfono. Elige una carpeta y la copia se mantendrá sola."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il n'existe que sur ce téléphone. Choisissez un dossier et la copie se mettra à jour seule."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הוא קיים רק בטלפון הזה. בחר תיקייה והעותק יתעדכן מעצמו."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ele vive apenas neste telefone. Escolha uma pasta e a cópia manter-se-á sozinha."
+          }
+        }
+      }
+    },
     "Молочное и яйца": {
       "localizations": {
         "ar": {

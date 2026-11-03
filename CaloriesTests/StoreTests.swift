@@ -742,3 +742,32 @@ struct DayVerdictTests {
         #expect(mark(consumed: 0, goal: 2824).verdict == .empty)
     }
 }
+
+// MARK: - Напоминание о копиях
+
+/// Копия дневника — единственное, что стоит между годом записей и пустым
+/// экраном: синхронизации у приложения нет, а контейнер удаляется вместе с
+/// ним. Папка при этом необязательна, и тот, кто прошёл мимо вопроса в
+/// онбординге, узнаёт об этом в худший момент.
+struct BackupReminderTests {
+
+    /// На пустом дневнике предлагать нечего.
+    @Test func anEmptyDiaryIsNotWorthABackup() {
+        #expect(!BackupService.needsReminder(isConfigured: false, daysOfDiary: 0))
+        #expect(!BackupService.needsReminder(isConfigured: false, daysOfDiary: 3))
+    }
+
+    /// Две недели — та граница, за которой дневник стоит дороже, чем
+    /// готовность завести его заново.
+    @Test func twoWeeksOfDiaryAreWorthIt() {
+        #expect(!BackupService.needsReminder(isConfigured: false,
+                                             daysOfDiary: BackupService.remindAfterDays - 1))
+        #expect(BackupService.needsReminder(isConfigured: false,
+                                            daysOfDiary: BackupService.remindAfterDays))
+    }
+
+    /// Папка выбрана — напоминание исчезает само и не возвращается.
+    @Test func aChosenFolderSilencesItForever() {
+        #expect(!BackupService.needsReminder(isConfigured: true, daysOfDiary: 365))
+    }
+}

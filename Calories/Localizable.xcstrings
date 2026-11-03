@@ -27560,6 +27560,98 @@
         }
       }
     },
+    "вес стоит %lld недели подряд": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوزن ثابت منذ %lld أسابيع"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "das Gewicht steht seit %lld Wochen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "weight has been flat for %lld weeks"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "el peso lleva %lld semanas parado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "le poids stagne depuis %lld semaines"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל עומד %lld שבועות"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "o peso está parado há %lld semanas"
+          }
+        }
+      }
+    },
+    "расход упал на %@ %%": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "انخفض الإنفاق بنسبة %@ %%"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "der Verbrauch ist um %@ %% gefallen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "expenditure has fallen by %@ %%"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "el gasto ha bajado un %@ %%"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "la dépense a chuté de %@ %%"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ההוצאה ירדה ב-%@ %%"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "o gasto caiu %@ %%"
+          }
+        }
+      }
+    },
     "Молочное и яйца": {
       "localizations": {
         "ar": {

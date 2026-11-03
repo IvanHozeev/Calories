@@ -565,6 +565,7 @@ private extension ContentView {
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
+        if store.recoveryAdvice() != nil { return true }
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
@@ -611,6 +612,30 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
+            // Не пора ли подъесть — первой строкой.
+            //
+            // Это единственная подсказка, которая говорит остановиться, а не
+            // сделать: остальные зовут взвеситься, доесть кастрюлю, свериться
+            // с неделей. В «Профиле», под сном и пульсом, она попадалась на
+            // глаза тому, кто и так следит, — а нужна тому, кто просто живёт
+            // по норме и не видит, что норма перестала работать.
+            if let advice = store.recoveryAdvice() {
+                Button { showingPlan = true } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: advice.verdict == .dietBreak
+                              ? "pause.circle" : "arrow.up.forward.circle")
+                            .foregroundStyle(ProgressRing.kcalColors[0])
+                        Text(verbatim: advice.text)
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("recoveryAdvice")
+            }
 
             // Отмеченный день голодания — не строка в настройках, а
             // состояние сегодняшнего дня: пустой дневник в такой день

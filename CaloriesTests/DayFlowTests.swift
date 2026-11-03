@@ -437,6 +437,73 @@ struct RecoverySignalTests {
         #expect(RecoverySignal.verdict(input(change: -0.05, pulse: 4, sleep: 1.5, sinceBreak: 1)) == .refeed)
     }
 
+    // MARK: - Признаки, которым не нужны часы
+
+    /// Главная дыра прежних правил: пульс и недосып требуют часов, а без них
+    /// признак оставался один — вес, — и пороги в два и три были недостижимы
+    /// в принципе. Половина людей не могла получить совет вообще.
+    @Test func withoutAWatchTheSignsStillAddUp() {
+        var stalled = input(weeks: 5, change: 0.1)
+        stalled.stallWeeks = 2
+        stalled.tdeeDropPercent = 8.5
+        #expect(RecoverySignal.strain(stalled) >= 3)
+        #expect(RecoverySignal.verdict(stalled) == .dietBreak)
+    }
+
+    /// Вторая неделя застоя весит столько же, сколько первая: одна бывает от
+    /// соли и перелёта, две подряд — уже не совпадение.
+    @Test func aSecondStalledWeekCountsAsASecondSign() {
+        var one = input(change: 0.0); one.stallWeeks = 1
+        var two = input(change: 0.0); two.stallWeeks = 2
+        #expect(RecoverySignal.strain(one) == 1)
+        #expect(RecoverySignal.strain(two) == 2)
+        #expect(RecoverySignal.verdict(two) == .refeed)
+    }
+
+    /// Приложение измеряет расход по факту. Его падение — самый прямой
+    /// признак того, что дефицит перестал работать, и раньше он не
+    /// учитывался вовсе.
+    @Test func aFallingExpenditureIsASignOnItsOwn() {
+        var small = input(); small.tdeeDropPercent = 5.5
+        var big = input(); big.tdeeDropPercent = 9
+        #expect(RecoverySignal.strain(small) == 1)
+        #expect(RecoverySignal.strain(big) == 2)
+        // Порог «ничего не заметили» остаётся: три процента за три недели —
+        // это погрешность весов и дневника, а не адаптация.
+        var noise = input(); noise.tdeeDropPercent = 3
+        #expect(RecoverySignal.strain(noise) == 0)
+    }
+
+    /// На крутом темпе усталость копится вдвое быстрее — и ждать тех же
+    /// восьми недель значит ждать заведомо дольше, чем нужно.
+    @Test func aSteepDeficitEarnsItsBreakSooner() {
+        var steep = input(weeks: 5); steep.weeklyRatePercent = 0.97
+        var calm = input(weeks: 5); calm.weeklyRatePercent = 0.5
+        #expect(RecoverySignal.verdict(steep) == .dietBreak)
+        #expect(RecoverySignal.verdict(calm) == .fine)
+    }
+
+    /// Разбор настоящего случая: ноябрь 2026, пятая неделя дефицита темпом
+    /// 0,97 %, вес стоит две с половиной недели, измеренный расход упал с
+    /// 3639 до 3328. Приложение тогда сказало «всё идёт как задумано» —
+    /// и это была ошибка, ради которой правила и переписаны.
+    @Test func theCaseThatWasMissed() throws {
+        var real = RecoverySignal.Input(
+            isCutting: true,
+            weeksInDeficit: 5,
+            weeklyChangeKg: 0.16,
+            plannedWeeklyKg: 0.73,
+            weeksSinceBreak: 5
+        )
+        real.stallWeeks = 2
+        real.weeklyRatePercent = 0.97
+        real.tdeeDropPercent = (3639 - 3328) / 3639 * 100
+
+        #expect(RecoverySignal.verdict(real) == .dietBreak)
+        let text = try #require(RecoverySignal.reason(real))
+        #expect(!text.isEmpty)
+    }
+
     /// Совет называет причину: без неё это гадание, а не совет.
     @Test func theAdviceNamesWhatItSaw() throws {
         let text = try #require(RecoverySignal.reason(input(change: -0.05, pulse: 4)))

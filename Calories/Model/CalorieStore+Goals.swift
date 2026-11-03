@@ -617,6 +617,9 @@ extension CalorieStore {
             input.weeklyChangeKg = today - weekAgo
         }
         input.plannedWeeklyKg = plan.weight(atStartOfPhaseAt: index) * phase.weeklyRatePercent / 100
+        input.weeklyRatePercent = phase.weeklyRatePercent
+        input.stallWeeks = stallWeeks(now: now, plannedWeeklyKg: input.plannedWeeklyKg)
+        input.tdeeDropPercent = tdeeDropPercent(now: now)
 
         input.pulseRise = restingPulse(now: now)?.rise
         // Недосып берём средний за неделю: одна короткая ночь бывает у всех.
@@ -632,6 +635,44 @@ extension CalorieStore {
     }
 
     /// Совет одной строкой — или nil, когда всё идёт как задумано.
+    /// Сколько недель подряд вес стоит.
+    ///
+    /// Идём назад по неделям, пока каждая следующая не двигала тренд больше
+    /// чем на треть плана. По тренду, а не по отдельным утрам: одно
+    /// взвешивание ничего не значит, а вопрос здесь про недели.
+    ///
+    /// Шесть недель — потолок: дальше считать незачем, отдыхать и так давно
+    /// пора, а каждая неделя стоит прохода по дневнику.
+    private func stallWeeks(now: Date, plannedWeeklyKg: Double?) -> Int {
+        guard let planned = plannedWeeklyKg, planned > 0 else { return 0 }
+        let calendar = Calendar.current
+        var weeks = 0
+        for step in 0..<6 {
+            guard let later = calendar.date(byAdding: .day, value: -step * 7, to: now),
+                  let earlier = calendar.date(byAdding: .day, value: -(step + 1) * 7, to: now),
+                  let a = weightTrend(on: later), let b = weightTrend(on: earlier) else { break }
+            guard -(a - b) < planned * RecoverySignal.stallShare else { break }
+            weeks += 1
+        }
+        return weeks
+    }
+
+    /// Насколько просел измеренный расход за три недели, в процентах.
+    ///
+    /// Три недели, а не одна: расход считается по сглаженному весу и
+    /// съеденному, и за семь дней он гуляет вместе с водой. За три гуляние
+    /// усредняется, а тренд остаётся.
+    ///
+    /// nil, пока истории нет: расход здесь измеренный, и до того, как факт
+    /// накопился, говорить не о чем.
+    private func tdeeDropPercent(now: Date, days: Int = 21) -> Double? {
+        let calendar = Calendar.current
+        guard let then = calendar.date(byAdding: .day, value: -days, to: now),
+              let before = expenditure(on: then), before > 0,
+              let current = expenditure(on: now) else { return nil }
+        return max(0, (before - current) / before * 100)
+    }
+
     func recoveryAdvice(now: Date = Date()) -> (verdict: RecoverySignal.Verdict, text: String)? {
         let input = recoveryInput(now: now)
         guard let text = RecoverySignal.reason(input, brief: ExplanationSettings.shared.level == .expert)

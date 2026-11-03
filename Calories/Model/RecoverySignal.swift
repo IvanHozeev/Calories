@@ -28,6 +28,23 @@ enum RecoverySignal {
         var pulseRise: Int? = nil
         /// Насколько сон короче обычного, часов (среднее за неделю).
         var sleepShortfall: Double = 0
+        /// Сколько недель подряд вес стоит. Ноль — идёт как задумано.
+        ///
+        /// Длительность, а не «встал ли на этой неделе»: одна неделя бывает
+        /// у всех — соль, перелёт, плохой сон. Две подряд — это уже не
+        /// совпадение, и считать их за один признак значит не заметить
+        /// разницы между случайностью и адаптацией.
+        var stallWeeks: Int = 0
+        /// Насколько просел измеренный расход за три недели, в процентах.
+        ///
+        /// Самый прямой признак из всех: приложение считает расход по факту —
+        /// по съеденному и по весу, — и его падение и есть то, что обычно
+        /// называют «дефицит перестал работать». Остальные признаки косвенны
+        /// рядом с ним.
+        var tdeeDropPercent: Double? = nil
+        /// Темп фазы, процентов веса в неделю. Чем он круче, тем быстрее
+        /// копится усталость — и тем раньше нужен отдых.
+        var weeklyRatePercent: Double? = nil
         /// Брали ли диет-брейк недавно — второй подряд предлагать незачем.
         var weeksSinceBreak: Int? = nil
         /// Идёт ли разгрузочная неделя в зале. nil — соседнего приложения нет
@@ -56,17 +73,51 @@ enum RecoverySignal {
     static let weeksBeforeBreakWithDeload = 4
     /// Вес считается вставшим, если за неделю ушло меньше трети плана.
     static let stallShare = 1.0 / 3
+    /// Насколько должен просесть измеренный расход, чтобы это считалось
+    /// признаком. Пять процентов — больше, чем дают погрешность весов и
+    /// неточность дневника за три недели.
+    static let notableTDEEDrop = 5.0
+    /// А насколько — чтобы признак перевесил любой другой. Восемь процентов
+    /// за три недели означают, что расход уходит быстрее, чем вес.
+    static let severeTDEEDrop = 8.0
+    /// Темп, с которого дефицит считается крутым. Полпроцента в неделю тело
+    /// терпит долго, процент — нет.
+    static let steepRatePercent = 0.8
+    /// Сколько недель дефицита терпит крутой темп.
+    static let weeksBeforeBreakWhenSteep = 5
+
+    /// Через сколько недель дефицита брейк нужен независимо от самочувствия.
+    ///
+    /// Восемь недель — срок для спокойного темпа. На крутом усталость копится
+    /// вдвое быстрее, и ждать тех же восьми недель значит ждать заведомо
+    /// дольше, чем нужно.
+    static func weeksBeforeBreak(rate: Double?) -> Int {
+        guard let rate, rate >= steepRatePercent else { return weeksBeforeBreak }
+        return weeksBeforeBreakWhenSteep
+    }
 
     /// Признаки, по которым судим. Один — совпадение, два — уже сигнал.
     static func strain(_ input: Input) -> Int {
         var count = 0
-        if let change = input.weeklyChangeKg, let planned = input.plannedWeeklyKg, planned > 0,
-           -change < planned * stallShare {
-            count += 1
+        // Застой считается по длительности: вторая неделя подряд весит
+        // столько же, сколько первая, — вместе они дают два признака.
+        count += min(2, max(input.stallWeeks, isStalled(input) ? 1 : 0))
+        // Просевший расход — признак того же веса, а сильно просевший
+        // перевешивает: это уже не намёк, а измерение.
+        if let drop = input.tdeeDropPercent {
+            if drop >= severeTDEEDrop { count += 2 }
+            else if drop >= notableTDEEDrop { count += 1 }
         }
         if let rise = input.pulseRise, rise >= RestingPulse.notableRise { count += 1 }
         if input.sleepShortfall >= 1 { count += 1 }
         return count
+    }
+
+    /// Стоит ли вес прямо сейчас — по последней неделе.
+    static func isStalled(_ input: Input) -> Bool {
+        guard let change = input.weeklyChangeKg, let planned = input.plannedWeeklyKg,
+              planned > 0 else { return false }
+        return -change < planned * stallShare
     }
 
     static func verdict(_ input: Input) -> Verdict {
@@ -74,7 +125,8 @@ enum RecoverySignal {
         let recentBreak = (input.weeksSinceBreak ?? Int.max) < weeksBetweenBreaks
         // Долгий дефицит — повод для брейка сам по себе: организм устаёт и
         // тогда, когда человек этого ещё не чувствует.
-        if input.weeksInDeficit >= weeksBeforeBreak, !recentBreak { return .dietBreak }
+        if input.weeksInDeficit >= weeksBeforeBreak(rate: input.weeklyRatePercent),
+           !recentBreak { return .dietBreak }
         // Разгрузка в зале — не признак усталости, а уже принятое решение
         // отдохнуть. Тело отдыхает целиком, и держать в эту неделю прежний
         // дефицит — значит отдыхать наполовину. Повод, а не диагноз: сам по
@@ -101,22 +153,28 @@ enum RecoverySignal {
         // Про совпадение с залом говорим первым: это не наша догадка о
         // самочувствии, а то, что человек уже сам решил.
         if verdict == .dietBreak, input.gymDeload == true,
-           input.weeksInDeficit < weeksBeforeBreak {
+           input.weeksInDeficit < weeksBeforeBreak(rate: input.weeklyRatePercent) {
             return pick(
                 String(localized: "В зале идёт разгрузка — лучшей недели для диет-брейка не будет. Тело отдыхает целиком, а жир за сушку уходит так же."),
                 String(localized: "В зале разгрузка — хорошая неделя и для брейка."))
         }
 
-        if verdict == .dietBreak, input.weeksInDeficit >= weeksBeforeBreak {
+        if verdict == .dietBreak, input.weeksInDeficit >= weeksBeforeBreak(rate: input.weeklyRatePercent) {
             return String(format: pick(
                 String(localized: "Дефицит идёт %lld недель подряд. Дальше он покупается всё дороже: расход падает, тренировки тяжелеют, а вес всё равно стоит. Неделя-две поддержания вернут и то, и другое — жир за сушку уходит так же."),
                 String(localized: "Дефицит идёт %lld недель подряд — пора на неделю-две поддержания.")), input.weeksInDeficit)
         }
 
         var parts: [String] = []
-        if let change = input.weeklyChangeKg, let planned = input.plannedWeeklyKg, planned > 0,
-           -change < planned * stallShare {
+        if input.stallWeeks >= 2 {
+            parts.append(String(format: String(localized: "вес стоит %lld недели подряд"),
+                                input.stallWeeks))
+        } else if isStalled(input) {
             parts.append(String(localized: "вес за неделю почти не двинулся"))
+        }
+        if let drop = input.tdeeDropPercent, drop >= notableTDEEDrop {
+            parts.append(String(format: String(localized: "расход упал на %@ %%"),
+                                String(format: "%.0f", drop)))
         }
         if let rise = input.pulseRise, rise >= RestingPulse.notableRise {
             parts.append(String(format: String(localized: "пульс в покое выше обычного на %lld"), rise))

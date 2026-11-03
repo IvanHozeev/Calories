@@ -185,7 +185,6 @@ struct BodyView: View {
     
     
     /// Лист взвешивания с кнопки в тулбаре.
-    @State private var showingWeighIn = false
     @State private var showingSettings = false
     @State private var showingPaywall = false
 
@@ -285,19 +284,6 @@ struct BodyView: View {
             // лежит нужное. Теперь профиль — экран о себе, а настройки за
             // шестерёнкой в его шапке, как в системных приложениях.
             ToolbarItem(placement: .topBarTrailing) {
-                // Взвешивание первым: вес пишут каждое утро, а в настройки
-                // заходят раз в месяц, и частое действие не должно стоять
-                // за редким. Замеры отсюда ушли строкой в параметры тела,
-                // к росту и весу.
-                Button {
-                    showingWeighIn = true
-                } label: {
-                    Image(systemName: "scalemass")
-                }
-                .accessibilityLabel("Взвеситься")
-                .accessibilityIdentifier("openWeighIn")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingSettings = true
                 } label: {
@@ -322,12 +308,6 @@ struct BodyView: View {
         }
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
-        }
-        .sheet(isPresented: $showingWeighIn) {
-            AddWeightView(store: store)
-                // Тем же ростом, что и с «Сегодня»: лист взвешивания везде
-                // одинаковый, и полноэкранный на одно колесо веса — перебор.
-                .presentationDetents([.height(AddWeightView.sheetHeight)])
         }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
@@ -787,6 +767,16 @@ private extension BodyView {
             Text("Приёмы пищи")
         }
         .accessibilityIdentifier("openMealSchedule")
+
+        // Кашрут здесь же, по той же причине, что и расписание: это про то,
+        // как человек ест, а не про то, как приложение выглядит. Своим
+        // экраном, а не строками прямо тут: обычай выбирают однажды.
+        NavigationLink {
+            KosherView()
+        } label: {
+            Text("Кашрут")
+        }
+        .accessibilityIdentifier("openKosher")
     }
     }
 

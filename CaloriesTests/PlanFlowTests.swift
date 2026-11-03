@@ -116,28 +116,44 @@ struct DietBreakTests {
         #expect(p.weeklyRateKg(on: week(5, plus: 2)) < 0)
     }
 
-    @Test func manualBreak_startsAtNextPlanWeek() {
+    /// Брейк берут не на будущей неделе, а сейчас: иначе человек, решивший
+    /// отдохнуть сегодня, получал ещё шесть дней дефицита — и ровно в том
+    /// состоянии, из-за которого он за брейком и пришёл.
+    @Test func manualBreak_startsToday() {
         let base = plan()
-        // Середина шестой недели: брейк встанет с седьмой.
+        // Середина шестой недели: брейк встаёт с неё же.
         let today = week(5, plus: 3)
         let withBreak = base.startingDietBreak(from: today, weeks: 1)
-        #expect(withBreak.phases.map(\.durationWeeks) == [6, 1, 6])
-        #expect(withBreak.isDietBreak(on: week(6)))
-        #expect(!withBreak.isDietBreak(on: today))
+        #expect(withBreak.phases.map(\.durationWeeks) == [5, 1, 7])
+        #expect(withBreak.isDietBreak(on: today))
         #expect(withBreak.durationWeeks == base.durationWeeks + 1)
     }
 
+    /// Прошлое не двигается: недели до текущей остаются дефицитом, и
+    /// прогноз на их границе прежний. Меняется только то, что ещё впереди.
     @Test func manualBreak_keepsThePast() {
         let base = plan()
         let today = week(5, plus: 3)
         let withBreak = base.startingDietBreak(from: today, weeks: 2)
-        #expect(abs(withBreak.projectedWeight(on: today) - base.projectedWeight(on: today)) < 0.0001)
-        #expect(withBreak.phase(on: today)?.intent == .cut)
+        #expect(abs(withBreak.projectedWeight(on: week(5)) - base.projectedWeight(on: week(5))) < 0.0001)
+        #expect(withBreak.phase(on: week(4, plus: 3))?.intent == .cut)
+        #expect(withBreak.phase(on: today)?.intent == .maintenance)
     }
 
     @Test func manualBreak_onPlanWeekBoundaryStartsToday() {
         let withBreak = plan().startingDietBreak(from: week(6), weeks: 1)
         #expect(withBreak.isDietBreak(on: week(6)))
+    }
+
+    /// Передумать можно, пока идёт первая неделя брейка: он действует с
+    /// первого же дня, и кнопки «убрать» иначе не было бы вовсе.
+    @Test func breakTakenThisWeek_canStillBeCanceled() {
+        let base = plan()
+        let today = week(5, plus: 3)
+        let withBreak = base.startingDietBreak(from: today, weeks: 1)
+        #expect(withBreak.pendingManualDietBreak(on: today) != nil)
+        let restored = withBreak.cancelingPendingDietBreak(on: today)
+        #expect(restored.timeline.map(\.durationWeeks) == base.timeline.map(\.durationWeeks))
     }
 
     @Test func manualBreak_notDuringABreak() {
@@ -146,8 +162,9 @@ struct DietBreakTests {
 
     @Test func manualBreak_resetsTheScheduleCounter() {
         let withBreak = plan(cutWeeks: 12, every: 4).startingDietBreak(from: week(2, plus: 1), weeks: 1)
-        // 3 недели дефицита, ручной брейк, дальше 9 недель с брейком после каждых 4.
-        #expect(withBreak.timeline.map(\.durationWeeks) == [3, 1, 4, 1, 4, 1, 1])
+        // 2 недели дефицита, ручной брейк с текущей недели, дальше 10 недель
+        // с брейком после каждых 4.
+        #expect(withBreak.timeline.map(\.durationWeeks) == [2, 1, 4, 1, 4, 1, 2])
     }
 
     @Test func cancelingPendingBreak_restoresThePlan() {
@@ -157,6 +174,7 @@ struct DietBreakTests {
         #expect(restored.timeline.map(\.durationWeeks) == base.timeline.map(\.durationWeeks))
     }
 
+    /// Начавшийся раньше текущей недели — уже история, её не переписывают.
     @Test func startedBreak_cannotBeCanceled() {
         let withBreak = plan().startingDietBreak(from: week(5, plus: 3), weeks: 1)
         #expect(withBreak.pendingManualDietBreak(on: week(6, plus: 1)) == nil)

@@ -224,6 +224,10 @@ struct KosherWait: Equatable, Sendable {
     let eaten: KosherStatus
     /// Чего ждём.
     let blocked: KosherStatus
+    /// Когда съели. Нужно строке: она называет причину отсчёта, а не только
+    /// его конец — «после мясного в 18:40» объясняет число, которое иначе
+    /// пришлось бы принимать на веру.
+    let since: Date
     let until: Date
 
     func isOver(at now: Date = Date()) -> Bool { now >= until }
@@ -252,7 +256,7 @@ enum KosherClock {
             return nil
         }
         guard minutes > 0 else { return nil }
-        return KosherWait(eaten: status, blocked: blocked,
+        return KosherWait(eaten: status, blocked: blocked, since: date,
                           until: date.addingTimeInterval(Double(minutes) * 60))
     }
 

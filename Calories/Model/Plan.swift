@@ -682,12 +682,18 @@ struct Plan: Codable, Equatable {
 
     /// Неделя плана (с нуля), с которой встанет брейк, если попросить его сейчас.
     ///
-    /// Не сегодняшний день, а ближайшая граница недели плана: фазы считаются
-    /// целыми неделями от старта. Если сегодня и есть первый день недели — сегодня.
+    /// Текущая неделя, а не следующая. Фазы считаются целыми неделями от
+    /// старта, и округление вверх означало бы «брейк начнётся в понедельник»:
+    /// человек, который решил отдохнуть сегодня, получал ещё шесть дней
+    /// дефицита — и ровно в том состоянии, из-за которого он за брейком и
+    /// пришёл. Брейк берут не на будущей неделе, а сейчас.
+    ///
+    /// Прошлое от этого не двигается: недели до текущей остаются дефицитом,
+    /// а их цели всё равно уже зафиксированы в истории.
     func dietBreakStartWeek(from date: Date) -> Int {
         let days = max(0, Calendar.current.dateComponents([.day], from: startDate,
                                                           to: Calendar.current.startOfDay(for: date)).day ?? 0)
-        return (days + 6) / 7
+        return days / 7
     }
 
     func startDate(ofWeek week: Int) -> Date {
@@ -754,9 +760,13 @@ struct Plan: Codable, Equatable {
     /// Брейк, поставленный руками и ещё не начавшийся, — его можно убрать.
     func pendingManualDietBreak(on date: Date) -> Int? {
         var weeksBefore = 0
-        let today = Calendar.current.startOfDay(for: date)
+        // Брейк этой недели считается отменяемым, хотя формально уже идёт:
+        // он встаёт с текущей недели, то есть действует с первого же дня, и
+        // передумать можно только пока неделя не кончилась. Начавшийся
+        // раньше — уже история, её не переписывают.
+        let thisWeek = dietBreakStartWeek(from: date)
         for (index, phase) in phases.enumerated() {
-            if phase.isDietBreak, startDate(ofWeek: weeksBefore) > today { return index }
+            if phase.isDietBreak, weeksBefore >= thisWeek { return index }
             weeksBefore += phase.expandedWeeks
         }
         return nil

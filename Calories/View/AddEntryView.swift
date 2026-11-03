@@ -606,6 +606,20 @@ struct AddEntryView: View {
                     }
                 }
 
+                // Мясное с молочным — до того, как приём записан.
+                //
+                // Здесь, в черновике, а не строкой в дневнике: после записи
+                // остаётся только согласиться, а сейчас набранное ещё можно
+                // разложить по двум приёмам. Не запрет и не блокировка
+                // сохранения: приложение говорит, что видит, а решает человек.
+                if showsMixingWarning {
+                    Label("Мясное с молочным в одной тарелке", systemImage: "exclamationmark.triangle")
+                        .font(.app(.caption))
+                        .foregroundStyle(.orange)
+                        .padding(.vertical, 2)
+                        .accessibilityIdentifier("kosherMixing")
+                }
+
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Итого")
@@ -624,6 +638,16 @@ struct AddEntryView: View {
             }
             .id(Self.draftAnchor)
         }
+    }
+
+    /// Стоит ли сказать, что в приёме мясное с молочным.
+    ///
+    /// Спрашиваем настройки здесь, а не в хранилище: дневник не должен знать,
+    /// считает человек кашрут или нет.
+    private var showsMixingWarning: Bool {
+        let settings = KosherSettings.shared
+        guard settings.isEnabled, settings.warnsMixing else { return false }
+        return store.isKosherMixed(draft: draftItems)
     }
 
     /// Сколько осталось на ближайший приём.

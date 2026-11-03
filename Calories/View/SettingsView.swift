@@ -24,9 +24,6 @@ struct SettingsView: View {
     /// по типам за отведённое время. Наблюдение при этом не теряется:
     /// `@Observable` отслеживает чтение свойств в `body`, а не место хранения.
     private var backups: BackupService { .shared }
-    /// Настройки кашрута — тем же приёмом, что и копии: вычисляемым, чтобы
-    /// не раздувать почленный инициализатор этого экрана.
-    private var kosher: KosherSettings { .shared }
     /// Что выбираем в системном диалоге. Один `fileImporter` на экран, а не два:
     /// два на одной вьюхе конфликтуют — работает только последний, и кнопка
     /// выбора папки не отвечала вовсе. Цель держим отдельным состоянием, а не
@@ -115,7 +112,6 @@ struct SettingsView: View {
             // откуда в настройки и заходят.
             appearanceSection
             explanationSection
-            kosherSection
             systemSection
             dataSection
             autoBackupSection
@@ -669,68 +665,6 @@ private extension SettingsView {
     }
 
     /// Системное: единицы, язык, уведомления.
-    /// Кашрут: ожидание между мясным и молочным.
-    ///
-    /// Своей секцией и за объяснениями: это не про вид приложения и не про
-    /// систему, а про то, как человек ест. Пока тумблер выключен, строк под
-    /// ним нет — обычай спрашивают у того, кто сказал, что он у него есть.
-    var kosherSection: some View {
-    Section {
-        Toggle(isOn: Binding(get: { kosher.isEnabled },
-                             set: { kosher.isEnabled = $0 })) {
-            Label("Мясное и молочное", systemImage: "clock.arrow.2.circlepath")
-        }
-        .accessibilityIdentifier("kosherEnabled")
-
-        if kosher.isEnabled {
-            Picker(selection: Binding(get: { kosher.afterMeat },
-                                      set: { kosher.afterMeat = $0 })) {
-                ForEach(KosherCustom.afterMeatOptions, id: \.self) { minutes in
-                    Text(verbatim: KosherWaitText.title(minutes: minutes)).tag(minutes)
-                }
-            } label: {
-                Label("После мясного", systemImage: "fork.knife")
-            }
-
-            Picker(selection: Binding(get: { kosher.afterDairy },
-                                      set: { kosher.afterDairy = $0 })) {
-                ForEach(KosherCustom.afterDairyOptions, id: \.self) { minutes in
-                    Text(verbatim: KosherWaitText.title(minutes: minutes)).tag(minutes)
-                }
-            } label: {
-                Label("После молочного", systemImage: "drop")
-            }
-
-            Toggle(isOn: Binding(get: { kosher.hardCheeseLikeMeat },
-                                 set: { kosher.hardCheeseLikeMeat = $0 })) {
-                Label("Твёрдый сыр как мясное", systemImage: "square.grid.2x2")
-            }
-
-            Toggle(isOn: Binding(get: { kosher.warnsMixing },
-                                 set: { kosher.warnsMixing = $0 })) {
-                Label("Говорить о смешении", systemImage: "exclamationmark.triangle")
-            }
-        }
-    } header: {
-        Text("Кашрут")
-    } footer: {
-        kosherFooter
-    }
-    }
-
-    /// Подпись под кашрутом — отдельным свойством: у большого тела секции
-    /// компилятор перестаёт справляться с проверкой типов.
-    @ViewBuilder
-    var kosherFooter: some View {
-        if kosher.isEnabled {
-            explain("Сколько ждать — обычай общины, а не одно число: после мясного ждут шесть часов, пять с половиной, три или час. После молочного по букве закона ждать не нужно, но полчаса — распространённый обычай. Приложение считает по тому, как принято у вас, и говорит только время: решаете вы.",
-                    short: "Обычай у каждой общины свой — приложение считает по вашему.").map { Text($0) }
-        } else {
-            explain("Приложение будет считать, сколько осталось до молочного после мясного и наоборот, и предупреждать, если мясное и молочное попали в одну тарелку. Кошерность продукта оно не определяет: про забой говядины по таблице калорий узнать нечего.",
-                    short: "Счёт времени между мясным и молочным. Кошерность продукта не определяется.").map { Text($0) }
-        }
-    }
-
     var systemSection: some View {
     Section("Системное") {
         // Единицы одной строкой: «Метрическая» и «Американская» не

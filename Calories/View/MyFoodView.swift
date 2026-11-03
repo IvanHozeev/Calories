@@ -197,27 +197,34 @@ struct MyFoodView: View {
             remoteResults = (try? await FoodSearch.search(query: text)) ?? []
         }
         .toolbar {
-            // Фильтр — меню, а не полоса чипов: категорий девять, полосой они
-            // не помещаются и превращаются в горизонтальную прокрутку, где
-            // выбранная категория уезжает из виду.
-            // Раздел — своим меню, а не полосой сегментов над списком:
-            // сегменты занимали строку экрана и обрезались на длинных
-            // подписях, а выбирают раздел редко. Значок показывает текущий,
-            // поэтому по нему видно, где ты, не открывая меню.
+            // Порядок: добавить, отфильтровать, сменить раздел. Добавляют
+            // сюда каждый день, фильтруют реже, а раздел переключают совсем
+            // редко — и редкое не должно стоять первым.
+            //
+            // Все способы пополнить справочник — под одной кнопкой, как и на
+            // экране приёма пищи. Сверху штрихкод: он избавляет от ручного
+            // ввода, ниже — то, что придётся заполнять самому.
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Picker("Раздел", selection: $tab) {
-                        Label("Мои блюда", systemImage: Tab.dishes.icon).tag(Tab.dishes)
-                        Label("Мои продукты", systemImage: Tab.products.icon).tag(Tab.products)
-                        Label("База", systemImage: Tab.database.icon).tag(Tab.database)
+                    Button { showingScanner = true } label: {
+                        Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+                    }
+                    Divider()
+                    Button { showingNewFood = true } label: {
+                        Label("Новый продукт", systemImage: "plus")
+                    }
+                    Button { showingNewDish = true } label: {
+                        Label("Новое блюдо", systemImage: "fork.knife")
                     }
                 } label: {
-                    Image(systemName: tab.icon)
+                    Image(systemName: "plus")
                 }
-                .accessibilityIdentifier("sectionFilter")
-                .accessibilityLabel("Раздел")
+                .accessibilityIdentifier("addMenu")
             }
 
+            // Фильтр — меню, а не полоса чипов: категорий девять, полосой
+            // они не помещаются и превращаются в горизонтальную прокрутку,
+            // где выбранная категория уезжает из виду.
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Picker("Категория", selection: $categoryFilter) {
@@ -235,25 +242,22 @@ struct MyFoodView: View {
                 .accessibilityLabel("Категория")
             }
 
-            // Все способы пополнить справочник — под одной кнопкой, как и на
-            // экране приёма пищи. Сверху штрихкод: он избавляет от ручного ввода,
-            // ниже — то, что придётся заполнять самому.
+            // Раздел — своим меню, а не полосой сегментов над списком:
+            // сегменты занимали строку экрана и обрезались на длинных
+            // подписях, а выбирают раздел редко. Значок показывает текущий,
+            // поэтому по нему видно, где ты, не открывая меню.
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button { showingScanner = true } label: {
-                        Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
-                    }
-                    Divider()
-                    Button { showingNewFood = true } label: {
-                        Label("Новый продукт", systemImage: "plus")
-                    }
-                    Button { showingNewDish = true } label: {
-                        Label("Новое блюдо", systemImage: "fork.knife")
+                    Picker("Раздел", selection: $tab) {
+                        Label("Мои блюда", systemImage: Tab.dishes.icon).tag(Tab.dishes)
+                        Label("Мои продукты", systemImage: Tab.products.icon).tag(Tab.products)
+                        Label("База", systemImage: Tab.database.icon).tag(Tab.database)
                     }
                 } label: {
-                    Image(systemName: "plus")
+                    Image(systemName: tab.icon)
                 }
-                .accessibilityIdentifier("addMenu")
+                .accessibilityIdentifier("sectionFilter")
+                .accessibilityLabel("Раздел")
             }
 
         }

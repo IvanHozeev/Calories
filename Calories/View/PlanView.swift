@@ -381,6 +381,15 @@ struct PlanView: View {
                 let end = plan.firstNonBreakDay(from: today)
                 breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: .green,
                          detail: "Дефицит вернётся", date: end.formatted(short))
+                // Передумать можно, пока идёт первая неделя брейка: он встаёт
+                // с текущей недели, то есть сразу, и кнопки «убрать» иначе не
+                // было бы вовсе.
+                if plan.pendingManualDietBreak(on: today) != nil {
+                    Button("Убрать брейк", role: .destructive) {
+                        store.cancelPendingDietBreak()
+                    }
+                    .accessibilityIdentifier("cancelDietBreak")
+                }
             } else if plan.pendingManualDietBreak(on: today) != nil,
                       let start = plan.nextDietBreakStart(after: today) {
                 breakRow("Брейк запланирован", icon: "cup.and.saucer", tint: .green,
@@ -395,9 +404,12 @@ struct PlanView: View {
                              detail: nil, date: next.formatted(short))
                 }
                 if plan.canStartDietBreak(from: today) {
-                    let start = plan.startDate(ofWeek: plan.dietBreakStartWeek(from: today))
+                    // Брейк встаёт с текущей недели плана, то есть действует
+                    // с сегодняшнего дня. Дату начала показывать незачем —
+                    // она в прошлом или сегодня, а человеку важно, что норма
+                    // поднимется сейчас.
                     Menu {
-                        Section(String(format: String(localized: "Начнётся %@"), start.formatted(short))) {
+                        Section(String(localized: "Начнётся сегодня")) {
                             Button("На 1 неделю") { store.startDietBreak(weeks: 1) }
                             Button("На 2 недели") { store.startDietBreak(weeks: 2) }
                         }
@@ -405,9 +417,8 @@ struct PlanView: View {
                         HStack {
                             Label("Взять брейк", systemImage: "plus.circle.fill")
                             Spacer()
-                            Text(start.formatted(short))
+                            Text("Сегодня")
                                 .foregroundStyle(.secondary)
-                                .monospacedDigit()
                         }
                     }
                     .accessibilityIdentifier("startDietBreak")
@@ -416,7 +427,7 @@ struct PlanView: View {
         } header: {
             Text("Диет-брейк")
         } footer: {
-            explain("Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется.").map { Text($0) }
+            explain("Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк действует с сегодняшнего дня, финиш сдвигается на его длину, целевой вес не меняется.").map { Text($0) }
         }
     }
 

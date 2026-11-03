@@ -27284,6 +27284,282 @@
         }
       }
     },
+    "Мясное с молочным в одной тарелке": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "لحم وحليب في طبق واحد"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "Fleischiges und Milchiges auf einem Teller"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "Meat and dairy on one plate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "Carne y lácteos en un mismo plato"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "Viande et lait dans la même assiette"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "בשרי וחלבי בצלחת אחת"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "Carne e laticínios no mesmo prato"
+          }
+        }
+      }
+    },
+    "после мясного в %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "بعد اللحم في %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "nach Fleischigem um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "after meat at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "tras la carne a las %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "après la viande à %@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "אחרי בשרי ב-%@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "depois da carne às %@"
+          }
+        }
+      }
+    },
+    "после молочного в %@": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "بعد الحليب في %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "nach Milchigem um %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "after dairy at %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "tras los lácteos a las %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "après le lait à %@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "אחרי חלבי ב-%@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated"
+            ,"value": "depois dos laticínios às %@"
+          }
+        }
+      }
+    },
+    "Обычай": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "العُرف"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brauch"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Costumbre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coutume"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מנהג"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Costume"
+          }
+        }
+      }
+    },
+    "Предупреждение, пока приём ещё собирается.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تنبيه ما دامت الوجبة قيد التجميع."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Hinweis, solange die Mahlzeit noch zusammengestellt wird."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A warning while the meal is still being put together."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un aviso mientras la comida aún se está armando."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un avertissement tant que le repas est encore en cours de composition."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "התרעה בזמן שהארוחה עדיין נבנית."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um aviso enquanto a refeição ainda está a ser montada."
+          }
+        }
+      }
+    },
+    "Приложение скажет, если в собираемом приёме встретились мясное и молочное, — пока приём ещё можно разложить на два. Запретить сохранение оно не может и не должно: что у вас в тарелке, знаете вы.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سيخبرك التطبيق إذا التقى اللحم والحليب في الوجبة قيد التجميع، ما دام بالإمكان تقسيمها إلى وجبتين. ولا يستطيع منع الحفظ ولا ينبغي له: ما في طبقك تعرفه أنت."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die App sagt es, wenn Fleischiges und Milchiges in der entstehenden Mahlzeit zusammentreffen, solange sie sich noch in zwei teilen lässt. Das Speichern kann und soll sie nicht verhindern: was auf Ihrem Teller liegt, wissen Sie."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The app will say so when meat and dairy meet in the meal being assembled, while it can still be split in two. It cannot and should not block saving: what is on your plate is for you to know."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La app lo dirá cuando carne y lácteos coincidan en la comida que está armando, mientras aún puede dividirse en dos. No puede ni debe impedir guardar: lo que hay en su plato lo sabe usted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'app le signalera si viande et lait se rencontrent dans le repas en cours de composition, tant qu'il peut encore être scindé en deux. Elle ne peut ni ne doit empêcher l'enregistrement : ce qu'il y a dans votre assiette, c'est vous qui le savez."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "האפליקציה תאמר זאת אם בשרי וחלבי נפגשו בארוחה הנבנית, כל עוד אפשר לפצל אותה לשתיים. היא אינה יכולה ואינה צריכה למנוע שמירה: מה שבצלחת שלך — אתה יודע."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O app avisará quando carne e laticínios se encontrarem na refeição em montagem, enquanto ela ainda pode ser dividida em duas. Não pode nem deve impedir o salvamento: o que está no seu prato quem sabe é você."
+          }
+        }
+      }
+    },
     "Молочное и яйца": {
       "localizations": {
         "ar": {

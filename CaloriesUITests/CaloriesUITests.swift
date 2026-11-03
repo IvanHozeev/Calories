@@ -323,9 +323,9 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.buttons["openWeight"].exists, "Динамика веса должна открываться из «Тела»")
 
         // Замеры — пятой строкой в параметрах тела, рядом с ростом и весом:
-        // это такой же параметр, просто снимаемый лентой. В тулбаре теперь
-        // взвешивание — то, что делают каждое утро.
-        XCTAssertTrue(app.buttons["openWeighIn"].exists, "В тулбаре «Тела» нет взвешивания")
+        // это такой же параметр, просто снимаемый лентой. Взвешивание из
+        // этого тулбара уехало на «Сегодня»: его делают каждое утро, и ради
+        // него больше не нужно заходить в профиль.
         let measurements = app.buttons["openMeasurementsRow"]
         scrollTo(measurements, in: app)
         measurements.tap()

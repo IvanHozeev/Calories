@@ -2,6 +2,7 @@ import Foundation
 import AppKit
 import CoreGraphics
 import ImageIO
+import CoreText
 import UniformTypeIdentifiers
 
 // Знак Calories: «С» из трёх дуг — углеводы, жиры, белки. Незамкнутое кольцо макросов.
@@ -178,14 +179,76 @@ do {
 // читался как другой. Всё ещё легче иконки — он тут один на весь экран.
 let launchMarkWidth: CGFloat = 105
 
+/// Знак и название: кольцо над словом, как в подписи внизу настроек.
+///
+/// Раньше на запуске стоял один знак на 150 pt — треть ширины экрана. Знак
+/// без имени просит себя узнать, а узнавать на запуске нечего: человек и так
+/// только что нажал на иконку. С именем он перестаёт быть загадкой и
+/// становится подписью, а подписи незачем занимать треть экрана — поэтому
+/// кольцо стало меньше.
+///
+/// Состав взят у `BrandFooter`, той самой миниатюры в конце настроек: кольцо,
+/// под ним слово. Там это работает годами и читается как подпись под письмом.
+let launchMarkSize: CGFloat = 96
+/// Отношение знака к слову взято у миниатюры буквально: там кольцо 22 pt и
+/// подпись 12 pt. Первая попытка поставила слово вдвое мельче, и знак снова
+/// забирал всё внимание — то есть делала ровно то, от чего уходили.
+let launchTitleSize: CGFloat = launchMarkSize * 12 / 22
+/// Просвет — тоже как там: четыре точки при знаке в двадцать две.
+let launchGap: CGFloat = launchMarkSize * 4 / 22
+/// Вес 600. Nunito в ресурсах — изменчивый шрифт, и по умолчанию он
+/// ExtraLight: взять его как есть значит нарисовать самым тонким начертанием
+/// из возможных, чего в приложении нет нигде. Интерфейс набран
+/// `Nunito-SemiBold`, и заставка обязана совпасть с ним.
+let launchTitleWeight: CGFloat = 600
+
 func launch(scale: CGFloat, name: String) {
-    let side = 180 * scale
-    let ctx = context(Int(side), Int(side))
-    let factor = (150 * scale) / (2 * iconOuter)
-    ctx.translateBy(x: side / 2, y: side / 2)
+    // Слово набираем первым: от его ширины зависит ширина холста.
+    let fontURL = URL(fileURLWithPath: "Calories/Resources/Nunito.ttf")
+    var font = CTFontCreateWithName("HelveticaNeue-Medium" as CFString, launchTitleSize * scale, nil)
+    if let data = try? Data(contentsOf: fontURL),
+       let provider = CGDataProvider(data: data as CFData),
+       let cgFont = CGFont(provider) {
+        let plain = CTFontCreateWithGraphicsFont(cgFont, launchTitleSize * scale, nil, nil)
+        // Ось веса у изменчивого шрифта задаётся её же идентификатором.
+        if let axes = CTFontCopyVariationAxes(plain) as? [[String: Any]],
+           let axis = axes.first,
+           let id = axis[kCTFontVariationAxisIdentifierKey as String] as? NSNumber {
+            let variation: [NSNumber: NSNumber] = [id: NSNumber(value: Double(launchTitleWeight))]
+            let descriptor = CTFontDescriptorCreateWithAttributes(
+                [kCTFontVariationAttribute: variation as CFDictionary] as CFDictionary)
+            font = CTFontCreateCopyWithAttributes(plain, launchTitleSize * scale, nil, descriptor)
+        } else {
+            font = plain
+        }
+    }
+    let attributes: [NSAttributedString.Key: Any] = [
+        .font: font,
+        .foregroundColor: rgb(0x1C1C1E),
+    ]
+    let line = CTLineCreateWithAttributedString(
+        NSAttributedString(string: "Calories", attributes: attributes))
+    let bounds = CTLineGetBoundsWithOptions(line, .useOpticalBounds)
+
+    // Холст по слову, а не наоборот: оно теперь шире знака, и обрезать его
+    // полем фиксированной ширины значит однажды его обрезать.
+    let width = max(bounds.width + 32 * scale, (launchMarkSize + 32) * scale)
+    let height = (launchMarkSize + launchGap) * scale + bounds.height
+    let ctx = context(Int(width.rounded(.up)), Int(height.rounded(.up)))
+
+    let factor = (launchMarkSize * scale) / (2 * iconOuter)
+    ctx.saveGState()
+    ctx.translateBy(x: width / 2, y: height - launchMarkSize * scale / 2)
     ctx.scaleBy(x: factor, y: factor)
     ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
     googleMark(ctx, width: launchMarkWidth, outer: iconOuter)
+    ctx.restoreGState()
+
+    ctx.textPosition = CGPoint(x: (width - bounds.width) / 2 - bounds.origin.x,
+                               y: height - (launchMarkSize + launchGap) * scale
+                                  - bounds.height - bounds.origin.y)
+    CTLineDraw(line, ctx)
+
     save(ctx, name)
 }
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {

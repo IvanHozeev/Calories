@@ -21,7 +21,6 @@ import Foundation
 /// на уже запущенном приложении переход в активное состояние не наступает и
 /// намерение пролежало бы до следующего запуска.
 
-@available(iOS 18.0, *)
 private func handleControlAction(_ action: QuickAction) {
     UserDefaults(suiteName: CalorieStore.appGroup)?
         .set(action.rawValue, forKey: QuickActionRouter.controlActionKey)
@@ -30,7 +29,6 @@ private func handleControlAction(_ action: QuickAction) {
 
 /// Копия перечисления из расширения: параметр намерения — часть его подписи,
 /// и без одинакового типа в обоих бандлах идентификаторы не совпадут.
-@available(iOS 18.0, *)
 enum QuickAddOption: String, AppEnum {
     case meal
     case camera
@@ -60,7 +58,6 @@ enum QuickAddOption: String, AppEnum {
     }
 }
 
-@available(iOS 18.0, *)
 struct QuickAddIntent: AppIntent {
     static let title: LocalizedStringResource = "Быстрое добавление"
     static let description = IntentDescription("Открывает выбранный экран добавления.")
@@ -79,7 +76,6 @@ struct QuickAddIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct PhotographFoodIntent: AppIntent {
     static let title: LocalizedStringResource = "Снять еду"
     static let description = IntentDescription("Открывает камеру, чтобы разобрать блюдо по фотографии.")
@@ -92,7 +88,6 @@ struct PhotographFoodIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct ScanBarcodeIntent: AppIntent {
     static let title: LocalizedStringResource = "Сканировать штрихкод"
     static let description = IntentDescription("Открывает сканер штрихкода.")
@@ -105,7 +100,6 @@ struct ScanBarcodeIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct TakeMeasurementsIntent: AppIntent {
     static let title: LocalizedStringResource = "Снять замеры"
     static let description = IntentDescription("Открывает ввод замеров.")

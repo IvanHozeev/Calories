@@ -261,7 +261,6 @@ struct MealWidget: Widget {
 /// подписи там нет ни у одного контрола. Поэтому время живёт в виджете выше, а
 /// контрол даёт одно: нажал — открылся приём пищи. В Пункте управления подпись
 /// есть, и туда уходит ближайший приём с его временем.
-@available(iOS 18.0, *)
 struct MealControlValueProvider: ControlValueProvider {
     var previewValue: String { String(localized: "Приём пищи") }
 
@@ -276,7 +275,6 @@ struct MealControlValueProvider: ControlValueProvider {
     }
 }
 
-@available(iOS 18.0, *)
 struct MealControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.nextMeal",

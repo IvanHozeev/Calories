@@ -15,8 +15,8 @@ import WidgetKit
 /// Здесь замеры есть, а в меню на иконке их нет: система показывает там не
 /// больше четырёх пунктов, а в Пункте управления такого потолка нет.
 ///
-/// Контролы появились в iOS 18, а приложение живёт с 17.6, поэтому всё здесь
-/// под проверкой доступности.
+/// Контролы появились в iOS 18, а минимальная версия приложения — 26,
+/// поэтому проверок доступности здесь нет.
 
 private let appGroup = "group.calories.shared"
 
@@ -28,7 +28,6 @@ private let appGroup = "group.calories.shared"
 /// следующем запуске.
 private let pendingActionKey = "pending_quick_action"
 
-@available(iOS 18.0, *)
 struct PhotographFoodIntent: AppIntent {
     static let title: LocalizedStringResource = "Снять еду"
     static let description = IntentDescription("Открывает камеру, чтобы разобрать блюдо по фотографии.")
@@ -40,7 +39,6 @@ struct PhotographFoodIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct ScanBarcodeIntent: AppIntent {
     static let title: LocalizedStringResource = "Сканировать штрихкод"
     static let description = IntentDescription("Открывает сканер штрихкода.")
@@ -52,7 +50,6 @@ struct ScanBarcodeIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct QuickAddIntent: AppIntent {
     static let title: LocalizedStringResource = "Быстрое добавление"
     static let description = IntentDescription("Открывает выбранный экран добавления.")
@@ -75,7 +72,6 @@ struct QuickAddIntent: AppIntent {
 /// Значения совпадают с `QuickAction` в приложении: расширение кладёт в общий
 /// контейнер именно `rawValue`, и приложение разбирает его тем же перечислением.
 /// Разъедутся — контрол будет открывать не то, и молча.
-@available(iOS 18.0, *)
 enum QuickAddOption: String, AppEnum {
     case meal
     case camera
@@ -122,7 +118,6 @@ enum QuickAddOption: String, AppEnum {
 /// переключает то, что кнопка делает дальше. Для одной кнопки на все случаи
 /// это и нужно, а кому нужны несколько сразу — рядом лежат отдельные контролы
 /// на камеру, сканер и замеры.
-@available(iOS 18.0, *)
 struct QuickAddConfiguration: ControlConfigurationIntent {
     static let title: LocalizedStringResource = "Быстрое добавление"
     static let description = IntentDescription("Что открывать нажатием на контрол.")
@@ -134,7 +129,6 @@ struct QuickAddConfiguration: ControlConfigurationIntent {
     init(option: QuickAddOption) { self.option = option }
 }
 
-@available(iOS 18.0, *)
 struct QuickAddValueProvider: AppIntentControlValueProvider {
     func previewValue(configuration: QuickAddConfiguration) -> QuickAddOption {
         configuration.option
@@ -145,7 +139,6 @@ struct QuickAddValueProvider: AppIntentControlValueProvider {
     }
 }
 
-@available(iOS 18.0, *)
 struct QuickAddControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(kind: "ivankhozeyev.team.Calories.control.meal",
@@ -159,7 +152,6 @@ struct QuickAddControl: ControlWidget {
     }
 }
 
-@available(iOS 18.0, *)
 struct PhotographFoodControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.photo") {
@@ -172,7 +164,6 @@ struct PhotographFoodControl: ControlWidget {
     }
 }
 
-@available(iOS 18.0, *)
 struct ScanBarcodeControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.scanner") {
@@ -185,7 +176,6 @@ struct ScanBarcodeControl: ControlWidget {
     }
 }
 
-@available(iOS 18.0, *)
 struct TakeMeasurementsIntent: AppIntent {
     static let title: LocalizedStringResource = "Снять замеры"
     static let description = IntentDescription("Открывает ввод замеров.")
@@ -197,7 +187,6 @@ struct TakeMeasurementsIntent: AppIntent {
     }
 }
 
-@available(iOS 18.0, *)
 struct TakeMeasurementsControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.measurements") {

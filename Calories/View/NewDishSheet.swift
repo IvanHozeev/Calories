@@ -503,6 +503,7 @@ struct IngredientPickerSheet: View {
         FoodRow(
             name: food.name,
             calories: food.caloriesPer100g,
+            caloriesPer100g: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
             icons: [food.foodCategory.icon],

@@ -6,6 +6,9 @@ import SwiftUI
 struct FoodRow: View {
     let name: String
     let calories: Int
+    /// Калорийность ста граммов — для цвета числа. Необязательна: у приёма
+    /// пищи и у подсказки её нет, и тогда число остаётся обычным.
+    var caloriesPer100g: Int? = nil
     /// Порция, к которой относятся цифры: «100 г», «250 г».
     let portion: String
     let macros: Macros
@@ -157,8 +160,9 @@ struct FoodRow: View {
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
-                    .font(.app(.subheadline, weight: .semibold))
+                    .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
                     .monospacedDigit()
+                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)

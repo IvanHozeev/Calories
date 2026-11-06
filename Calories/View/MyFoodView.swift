@@ -316,6 +316,7 @@ struct MyFoodView: View {
                             FoodRow(
                                 name: dish.name,
                                 calories: dish.totalCalories,
+                                caloriesPer100g: dish.caloriesPer100g,
                                 portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                                 macros: dish.totalMacros,
                                 detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
@@ -377,6 +378,7 @@ struct MyFoodView: View {
                         FoodRow(
                             name: dish.name,
                             calories: dish.totalCalories,
+                            caloriesPer100g: dish.caloriesPer100g,
                             portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                             macros: dish.totalMacros,
                             // У сваренного вместо числа ингредиентов —
@@ -535,6 +537,7 @@ struct MyFoodView: View {
         return FoodRow(
             name: food.name,
             calories: kcal,
+            caloriesPer100g: food.caloriesPer100g,
             portion: "\(Int(grams)) \(String(localized: "г"))",
             macros: food.macrosPer100g.portion(grams: grams),
             icons: [food.foodCategory.icon],

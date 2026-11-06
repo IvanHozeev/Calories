@@ -1136,6 +1136,7 @@ struct AddEntryView: View {
         FoodRow(
             name: food.name,
             calories: food.caloriesPer100g,
+            caloriesPer100g: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
             icons: [food.foodCategory.icon],
@@ -1149,6 +1150,7 @@ struct AddEntryView: View {
         FoodRow(
             name: dish.name,
             calories: dish.caloriesPer100g,
+            caloriesPer100g: dish.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: dish.macrosPer100g,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",

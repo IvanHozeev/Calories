@@ -89,6 +89,13 @@ struct EntryRow: View {
 
             // «ккал» строчной подписью рядом с числом, а не под ним: слово
             // одно на весь список и повторять его столбиком незачем.
+            //
+            // Число не переносится и не ужимается ни при каких именах.
+            // Длинное имя на иврите забирало ширину первым, и на калории
+            // оставалось столько, что «337 ккал» вставало двумя ярусами:
+            // «33 ккал» и «7» под ним. Число при этом читается как другое
+            // число — ровно то, ради чего в строку и смотрят. Уступать
+            // должно имя: оно и так обрезается многоточием, и это видно.
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(verbatim: "\(entry.calories)")
                     .font(.app(.subheadline, weight: .semibold))
@@ -97,6 +104,9 @@ struct EntryRow: View {
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)
             }
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .layoutPriority(1)
         }
         .padding(.vertical, 4)
     }

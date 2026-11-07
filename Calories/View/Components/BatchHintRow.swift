@@ -6,24 +6,35 @@ import SwiftUI
     /// кроме замыкания на открытие блюда.
 struct BatchHintRow: View {
     let dish: Dish
+    let state: DishBatch.State
     let advice: DishBatch.Advice
     var onOpen: () -> Void
 
+    /// Название и сколько осталось — больше в строке ничего.
+    ///
+    /// Раньше она объясняла: «кончится 8 нояб. — пора готовить». Вывод
+    /// человек делает сам и быстрее, чем читает фразу; ему нужно только
+    /// число порций. Срочность при этом не потерялась — её несёт цвет:
+    /// испорченное красным, последний день оранжевым, запас спокойным.
     private var text: String {
         switch advice {
         case .spoiled:
             String(format: String(localized: "%@ — четвёртый день, лучше не есть"), dish.name)
-        case let .eatToday(servings):
-            if let servings, servings >= 0.5 {
-                String(format: String(localized: "%1$@ — доесть сегодня, осталось %2$@ порции"),
-                       dish.name, String(format: "%.1f", servings))
-            } else {
-                String(format: String(localized: "%@ — доесть сегодня"), dish.name)
-            }
-        case let .cookAgain(runsOut):
-            String(format: String(localized: "%1$@ кончится %2$@ — пора готовить"),
-                   dish.name, runsOut.formatted(.dateTime.day().month(.abbreviated)))
+        case .eatToday, .cookAgain:
+            remaining(dish.name, state.remainingServings)
         }
+    }
+
+    /// «Паста — осталось 2 порции». Меньше порции — граммами: «осталось
+    /// 0 порций» звучит как «ничего нет», хотя на тарелку ещё хватит.
+    private func remaining(_ name: String, _ servings: Double?) -> String {
+        guard let servings, servings >= 1 else {
+            let grams = String(format: "%.0f \(String(localized: "г"))", state.remainingGrams)
+            return String(format: String(localized: "%1$@ — осталось %2$@"), name, grams)
+        }
+        return String(format: String(localized: "%1$@ — осталось %2$@"),
+                      name, String.localizedStringWithFormat(
+                          String(localized: "%lld порции"), Int(servings)))
     }
 
     private var color: Color {

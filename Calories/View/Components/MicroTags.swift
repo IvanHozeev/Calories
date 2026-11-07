@@ -58,6 +58,13 @@ struct MicroTags: View {
 struct MicroChip: View {
     let nutrient: Micronutrient
     var compact: Bool = true
+    /// Подложку красить, а не стеклить.
+    ///
+    /// Стекло — это материал, который берёт цвет из того, что под ним. В
+    /// картинке под ним нет ничего, и `ImageRenderer` рисует вместо него
+    /// серое пятно: ровно это и случилось со значками в меню. Там, где
+    /// значок уезжает в картинку, подложка должна быть краской.
+    var painted: Bool = false
     private var color: Color { nutrient.isCeiling ? .orange : .green }
 
     var body: some View {
@@ -74,7 +81,7 @@ struct MicroChip: View {
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
-            .chipSurface(tint: color)
+            .chipSurface(tint: color, painted: painted)
     }
 }
 
@@ -89,9 +96,11 @@ struct MicroChip: View {
 /// ряд значков снова станет самым пёстрым местом экрана.
 struct ChipSurface: ViewModifier {
     let tint: Color
+    /// Краска вместо стекла — там, где стеклу не на чем держаться.
+    var painted: Bool = false
 
     func body(content: Content) -> some View {
-        if #available(iOS 27, *) {
+        if #available(iOS 27, *), !painted {
             content.liquidGlass(in: Capsule())
         } else {
             content.background(tint.opacity(0.12), in: Capsule())
@@ -101,8 +110,8 @@ struct ChipSurface: ViewModifier {
 
 extension View {
     /// Подложка значка: стекло там, где оно не портит форму.
-    func chipSurface(tint: Color) -> some View {
-        modifier(ChipSurface(tint: tint))
+    func chipSurface(tint: Color, painted: Bool = false) -> some View {
+        modifier(ChipSurface(tint: tint, painted: painted))
     }
 }
 
@@ -120,7 +129,7 @@ extension MicroChip {
     @MainActor
     static func menuImage(for nutrient: Micronutrient) -> Image? {
         if let cached = menuImages[nutrient] { return cached }
-        let renderer = ImageRenderer(content: MicroChip(nutrient: nutrient))
+        let renderer = ImageRenderer(content: MicroChip(nutrient: nutrient, painted: true))
         // Втрое: меню рисует картинку в точках, а взять её надо в пикселях
         // самого плотного экрана, иначе буквы в капсуле мылит.
         renderer.scale = 3

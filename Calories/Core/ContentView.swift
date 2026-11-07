@@ -518,7 +518,7 @@ private extension ContentView {
             // или приготовить, пока не кончилось. Одна строка на самую
             // срочную кастрюлю — список дел по холодильнику тут не нужен.
             if let hint = store.batchHint() {
-                BatchHintRow(dish: hint.dish, advice: hint.advice) {
+                BatchHintRow(dish: hint.dish, state: hint.state, advice: hint.advice) {
                     openingDish = hint.dish
                 }
             }
@@ -986,9 +986,15 @@ private struct StepsChip: View {
                         .frame(height: 32)
                     // Число обычным цветом: в цвете акцента кольцо и пешеход,
                     // а цифра читается лучше нейтральной.
+                    //
+                    // Кеглем мельче подписи и целиком: когда в шапку уезжает
+                    // кольцо, пилюле становится тесно, и «2,350» обрезалось
+                    // до «2,3». Урезанное число хуже, чем мелкое: мелкое
+                    // читается, а урезанное врёт.
                     Text(store.stepsToday.formatted())
-                        .font(.app(.subheadline, weight: .semibold))
+                        .font(.app(.footnote, weight: .semibold))
                         .monospacedDigit()
+                        .fixedSize()
                         .foregroundStyle(Color.primary)
                 } else {
                     // Без доступа — один пешеход, без подписи. Слово рядом со

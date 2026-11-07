@@ -142,11 +142,11 @@ extension CalorieStore {
     /// Берём самую срочную партию: испорченное важнее кончающегося, а из двух
     /// кастрюль — та, что испортится раньше. Говорить про обе разом значит
     /// превратить экран в список дел по холодильнику.
-    func batchHint(now: Date = Date()) -> (dish: Dish, advice: DishBatch.Advice)? {
+    func batchHint(now: Date = Date()) -> (dish: Dish, state: DishBatch.State, advice: DishBatch.Advice)? {
         let live = liveBatches(now: now)
-        let spoken = live.compactMap { item -> (dish: Dish, advice: DishBatch.Advice)? in
+        let spoken = live.compactMap { item -> (dish: Dish, state: DishBatch.State, advice: DishBatch.Advice)? in
             guard let advice = DishBatch.advice(item.state, now: now) else { return nil }
-            return (item.dish, advice)
+            return (item.dish, item.state, advice)
         }
         // Порядок срочности: испортилось, доесть сегодня, пора готовить.
         return spoken.min { left, right in rank(left.advice) < rank(right.advice) }

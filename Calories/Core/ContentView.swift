@@ -225,11 +225,10 @@ struct ContentView: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text("Сегодня")
                                 .font(.app(.title3, weight: .bold))
-                            // Дату даём сокращённой: в шапке рядом с кольцом
-                            // и четырьмя кнопками полному дню недели места
-                            // нет, а многоточие вместо половины слова хуже,
-                            // чем короткая запись целиком.
-                            Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                            // Дата целиком: день недели словом. Сокращение
+                            // «Сб, 7 нояб.» экономит место, которого хватает
+                            // и так, а читается справочником.
+                            Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
                                 .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }

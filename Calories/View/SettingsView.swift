@@ -58,7 +58,7 @@ struct SettingsView: View {
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(store.makeBackup()),
               let text = String(data: data, encoding: .utf8) else {
-            exportError = String(localized: "Не удалось собрать файл.")
+            exportError = String(localized: "Не удалось собрать файл копии.")
             return
         }
         exportDocument = ExportDocument(text: text, type: .json)
@@ -167,8 +167,8 @@ struct SettingsView: View {
         } message: { backup in
             Text("Копия от \(backup.exportedAt.formatted(date: .abbreviated, time: .shortened)): записей \(backup.entries.count), взвешиваний \(backup.weights.count). Нынешний дневник будет полностью заменён.")
         }
-        .alert("Готово", isPresented: $restoreDone) {
-            Button("OK", role: .cancel) { }
+        .alert("Копия восстановлена", isPresented: $restoreDone) {
+            Button("Понятно", role: .cancel) { }
         } message: {
             Text("Данные восстановлены из копии.")
         }
@@ -176,7 +176,7 @@ struct SettingsView: View {
             get: { restoreError != nil },
             set: { if !$0 { restoreError = nil } }
         )) {
-            Button("OK", role: .cancel) { restoreError = nil }
+            Button("Понятно", role: .cancel) { restoreError = nil }
         } message: {
             Text(restoreError ?? "")
         }
@@ -184,7 +184,7 @@ struct SettingsView: View {
             get: { exportError != nil },
             set: { if !$0 { exportError = nil } }
         )) {
-            Button("OK", role: .cancel) { exportError = nil }
+            Button("Понятно", role: .cancel) { exportError = nil }
         } message: {
             Text(exportError ?? "")
         }
@@ -420,7 +420,8 @@ struct HealthInventoryView: View {
         .overlay {
             if inventory.isChecking { ProgressView() }
             else if inventory.rows.isEmpty && inventory.failure == nil {
-                ContentUnavailableView("Смотрим", systemImage: "heart.text.square")
+                ContentUnavailableView("Смотрим", systemImage: "heart.text.square",
+                                       description: Text("Приложение спрашивает «Здоровье» про сон, шаги и пульс."))
             }
         }
         .task { await inventory.check() }

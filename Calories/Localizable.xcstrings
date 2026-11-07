@@ -24509,6 +24509,53 @@
         }
       }
     },
+    "Копия восстановлена" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تمت استعادة النسخة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sicherung wiederhergestellt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup restored"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia restaurada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauvegarde restaurée"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הגיבוי שוחזר"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cópia restaurada"
+          }
+        }
+      }
+    },
     "Копия от %@: записей %lld, взвешиваний %lld. Нынешний дневник будет полностью заменён." : {
       "localizations" : {
         "ar" : {
@@ -28499,48 +28546,49 @@
         }
       }
     },
-    "На фото не видно еды." : {
+    "На фото не видно еды. Сними заново так, чтобы блюдо попало в кадр целиком, или добавь продукт руками." : {
+      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "لا يظهر طعام في الصورة."
+            "value" : "لا يظهر طعام في الصورة. التقط صورة أخرى يظهر فيها الطبق كاملًا، أو أضف المنتج يدويًا."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf dem Foto ist kein Essen zu sehen."
+            "value" : "Auf dem Foto ist kein Essen zu sehen. Mach ein neues, auf dem das Gericht ganz im Bild ist, oder trag das Lebensmittel von Hand ein."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No food visible in the photo."
+            "value" : "No food visible in the photo. Take another one with the whole dish in frame, or add the food by hand."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se ve comida en la foto."
+            "value" : "No se ve comida en la foto. Haz otra con el plato entero en el encuadre o añade el alimento a mano."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun aliment visible sur la photo."
+            "value" : "Aucun aliment visible sur la photo. Reprends-la avec le plat entier dans le cadre, ou ajoute l’aliment à la main."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "לא נראה אוכל בתמונה."
+            "value" : "לא נראה אוכל בתמונה. צלם שוב כך שכל המנה בפריים, או הוסף את המוצר ידנית."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhum alimento visível na foto."
+            "value" : "Nenhum alimento visível na foto. Tire outra com o prato inteiro no enquadramento ou adicione o alimento à mão."
           }
         }
       }
@@ -30306,6 +30354,53 @@
         }
       }
     },
+    "Не удалось оформить подписку" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعذّر إتمام الاشتراك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Abo konnte nicht abgeschlossen werden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not start the subscription"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo activar la suscripción"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de souscrire l’abonnement"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא ניתן להפעיל את המנוי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ativar a assinatura"
+          }
+        }
+      }
+    },
     "Не удалось прочитать копию" : {
       "localizations" : {
         "ar" : {
@@ -30398,48 +30493,49 @@
         }
       }
     },
-    "Не удалось собрать файл." : {
+    "Не удалось собрать файл копии." : {
+      "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "تعذّر إنشاء الملف."
+            "value" : "تعذّر إنشاء ملف النسخة الاحتياطية."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Datei konnte nicht erstellt werden."
+            "value" : "Die Sicherungsdatei konnte nicht erstellt werden."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Could not build the file."
+            "value" : "Could not build the backup file."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo crear el archivo."
+            "value" : "No se pudo crear el archivo de copia."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible de créer le fichier."
+            "value" : "Impossible de créer le fichier de sauvegarde."
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "לא ניתן ליצור את הקובץ."
+            "value" : "לא ניתן ליצור את קובץ הגיבוי."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não foi possível criar o arquivo."
+            "value" : "Não foi possível criar o arquivo de cópia."
           }
         }
       }
@@ -39917,6 +40013,53 @@
         }
       }
     },
+    "Понятно" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "حسنًا"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles klar"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compris"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הבנתי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendi"
+          }
+        }
+      }
+    },
     "По плану" : {
       "localizations" : {
         "ar" : {
@@ -44222,6 +44365,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O app avisará quando carne e laticínios se encontrarem na refeição em montagem, enquanto ela ainda pode ser dividida em duas. Não pode nem deve impedir o salvamento: o que está no seu prato quem sabe é você."
+          }
+        }
+      }
+    },
+    "Приложение спрашивает «Здоровье» про сон, шаги и пульс." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يسأل التطبيق «الصحة» عن النوم والخطوات والنبض."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App fragt „Health“ nach Schlaf, Schritten und Puls."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app is asking Health about sleep, steps and pulse."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app está consultando a Salud sobre sueño, pasos y pulso."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’app interroge Santé sur le sommeil, les pas et le pouls."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "האפליקציה שואלת את «בריאות» על שינה, צעדים ודופק."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app está consultando a Saúde sobre sono, passos e pulso."
           }
         }
       }

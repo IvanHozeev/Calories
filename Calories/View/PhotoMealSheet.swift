@@ -137,7 +137,7 @@ struct PhotoMealSheet: View {
         do {
             let items = try await GeminiVisionService.recognize(imageData: imageData)
             guard !items.isEmpty else {
-                failure = String(localized: "На фото не видно еды.")
+                failure = String(localized: "На фото не видно еды. Сними заново так, чтобы блюдо попало в кадр целиком, или добавь продукт руками.")
                 isRecognizing = false
                 return
             }

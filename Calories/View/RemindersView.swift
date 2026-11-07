@@ -63,7 +63,7 @@ struct RemindersView: View {
             get: { store.authError != nil },
             set: { if !$0 { store.authError = nil } }
         )) {
-            Button("OK", role: .cancel) { store.authError = nil }
+            Button("Понятно", role: .cancel) { store.authError = nil }
         } message: {
             Text(store.authError ?? "")
         }

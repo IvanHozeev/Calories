@@ -101,11 +101,11 @@ struct PaywallView: View {
             if purchases.products.isEmpty { await purchases.load() }
             selectedID = purchases.subscriptions.last?.id
         }
-        .alert("Не удалось", isPresented: Binding(
+        .alert("Не удалось оформить подписку", isPresented: Binding(
             get: { purchases.purchaseError != nil },
             set: { if !$0 { purchases.purchaseError = nil } }
         )) {
-            Button("OK", role: .cancel) { purchases.purchaseError = nil }
+            Button("Понятно", role: .cancel) { purchases.purchaseError = nil }
         } message: {
             Text(purchases.purchaseError ?? "")
         }

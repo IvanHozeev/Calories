@@ -199,32 +199,18 @@ let launchMarkSize: CGFloat = 96
 let launchTitleSize: CGFloat = 28
 /// Просвет — тоже как там: четыре точки при знаке в двадцать две.
 let launchGap: CGFloat = launchMarkSize * 4 / 22
-/// Вес 600. Nunito в ресурсах — изменчивый шрифт, и по умолчанию он
-/// ExtraLight: взять его как есть значит нарисовать самым тонким начертанием
-/// из возможных, чего в приложении нет нигде. Интерфейс набран
-/// `Nunito-SemiBold`, и заставка обязана совпасть с ним.
-let launchTitleWeight: CGFloat = 600
-
 func launch(scale: CGFloat, name: String) {
     // Слово набираем первым: от его ширины зависит ширина холста.
-    let fontURL = URL(fileURLWithPath: "Calories/Resources/Nunito.ttf")
-    var font = CTFontCreateWithName("HelveticaNeue-Medium" as CFString, launchTitleSize * scale, nil)
-    if let data = try? Data(contentsOf: fontURL),
-       let provider = CGDataProvider(data: data as CFData),
-       let cgFont = CGFont(provider) {
-        let plain = CTFontCreateWithGraphicsFont(cgFont, launchTitleSize * scale, nil, nil)
-        // Ось веса у изменчивого шрифта задаётся её же идентификатором.
-        if let axes = CTFontCopyVariationAxes(plain) as? [[String: Any]],
-           let axis = axes.first,
-           let id = axis[kCTFontVariationAxisIdentifierKey as String] as? NSNumber {
-            let variation: [NSNumber: NSNumber] = [id: NSNumber(value: Double(launchTitleWeight))]
-            let descriptor = CTFontDescriptorCreateWithAttributes(
-                [kCTFontVariationAttribute: variation as CFDictionary] as CFDictionary)
-            font = CTFontCreateCopyWithAttributes(plain, launchTitleSize * scale, nil, descriptor)
-        } else {
-            font = plain
-        }
-    }
+    //
+    // Системным шрифтом, обычным весом. Nunito здесь стоял раньше — тем же,
+    // чем набран интерфейс, — и был плотнее и уже; рядом с тонкими дугами
+    // знака он читался тяжело. Системный под знаком спокойнее, и у него есть
+    // ещё одно достоинство: он один и тот же на всех языках и во всех весах,
+    // а Nunito не знает ни арабской вязи, ни иврита.
+    //
+    // Здесь это шрифт макоси, а на заставке — айоси, но это один и тот же
+    // San Francisco: картинка и её продолжение совпадают.
+    let font = NSFont.systemFont(ofSize: launchTitleSize * scale) as CTFont
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
         .foregroundColor: rgb(0x8E8E93),

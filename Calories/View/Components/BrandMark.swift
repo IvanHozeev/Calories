@@ -161,7 +161,8 @@ struct SplashView: View {
                     .frame(width: BrandLockup.markSize, height: BrandLockup.markSize)
                     .rotationEffect(.degrees(turn))
                 Text(verbatim: "Calories")
-                    .font(.brandTitle)
+                    .font(BrandLockup.titleFont)
+                    .fontDesign(BrandLockup.titleDesign)
                     .foregroundStyle(BrandLockup.ink)
             }
             .scaleEffect(dissolving ? BrandLockup.exitScale : 1)

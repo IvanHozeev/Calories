@@ -249,8 +249,8 @@ struct MyFoodView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Picker("Раздел", selection: $tab) {
-                        Label("Мои рецепты", systemImage: Tab.dishes.icon).tag(Tab.dishes)
-                        Label("Мои продукты", systemImage: Tab.products.icon).tag(Tab.products)
+                        Label("Рецепты", systemImage: Tab.dishes.icon).tag(Tab.dishes)
+                        Label("Продукты", systemImage: Tab.products.icon).tag(Tab.products)
                         Label("База", systemImage: Tab.database.icon).tag(Tab.database)
                     }
                 } label: {

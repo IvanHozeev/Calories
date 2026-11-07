@@ -245,7 +245,7 @@ struct NewDishSheet: View {
             if !ingredients.isEmpty {
                 Section {
                     HStack {
-                        TextField("Вся кастрюля", text: $servingGrams)
+                        TextField("Весь объём", text: $servingGrams)
                             .keyboardType(.decimalPad)
                         Text("г")
                             .foregroundStyle(.secondary)
@@ -424,7 +424,7 @@ struct IngredientPickerSheet: View {
     private var foodPickerView: some View {
         List {
             if !filteredCustomFoods.isEmpty {
-                Section("Мои продукты") {
+                Section("Продукты") {
                     ForEach(filteredCustomFoods) { food in
                         foodRow(food)
                             .tappableRow { select(food) }

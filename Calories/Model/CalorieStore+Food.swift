@@ -379,6 +379,11 @@ extension CalorieStore {
             .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
     }
 
+    /// Рецепт, похожий на то, что собрано в приёме. Пусто — молчим.
+    func recipeHint(for draft: [String]) -> RecipeHint.Match? {
+        RecipeHint.matches(draft: draft, dishes: dishes).first
+    }
+
     /// Сколько этого продукта кладут в блюдо. Нужно, чтобы в списке рецептов
     /// рядом с названием стояло «120 г» — по нему рецепт и узнают.
     func grams(of foodName: String, in dish: Dish) -> Double {

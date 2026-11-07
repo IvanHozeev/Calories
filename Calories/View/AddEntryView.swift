@@ -575,10 +575,29 @@ struct AddEntryView: View {
         isSearchingOFF = false
     }
 
+    /// Рецепт, на который похоже собранное. Считается от имён черновика:
+    /// пока в нём меньше двух позиций одного рецепта, здесь пусто.
+    private var recipeHint: RecipeHint.Match? {
+        store.recipeHint(for: draftItems.map(\.name))
+    }
+
     @ViewBuilder
     private var draftSection: some View {
         if !draftItems.isEmpty {
             Section("Приём пищи") {
+                // Догадка — над составом, а не под ним: она про то, что
+                // человек собирает прямо сейчас, и увидеть её он должен,
+                // пока собирает, а не дособрав.
+                if let hint = recipeHint {
+                    RecipeHintRow(match: hint) {
+                        for part in RecipeHint.missing(from: hint.dish, draft: draftItems.map(\.name)) {
+                            draftItems.append(MealItem(name: part.foodName,
+                                                       calories: part.calories,
+                                                       macros: part.macros,
+                                                       grams: part.grams))
+                        }
+                    }
+                }
                 ForEach(draftItems) { item in
                     FoodRow(
                         name: item.name,
@@ -686,7 +705,7 @@ struct AddEntryView: View {
         }
 
         if isSearching, !shownDishes.isEmpty {
-            Section("Мои рецепты") {
+            Section("Рецепты") {
                 ForEach(shownDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())

@@ -231,3 +231,73 @@ struct DishKindTests {
         #expect(dish.dishKind == .other)
     }
 }
+
+// MARK: - «Кажется, ты готовишь это»
+
+/// Подсказка — догадка, и цена ошибки у неё разная в обе стороны. Промолчать,
+/// когда человек правда готовит борщ, не страшно; предложить борщ тому, кто
+/// насыпал соли в омлет, — значит научить его не читать подсказки вовсе.
+@MainActor
+struct RecipeHintTests {
+
+    private func dish(_ name: String, _ parts: [(String, Double)]) -> Dish {
+        Dish(name: name, ingredients: parts.map {
+            DishIngredient(foodName: $0.0, caloriesPer100g: 100, macrosPer100g: .zero, grams: $0.1)
+        })
+    }
+
+    private var borsch: Dish {
+        dish("Борщ", [("Свёкла", 300), ("Капуста", 200), ("Картофель", 200),
+                      ("Соль", 5), ("Масло оливковое", 10)])
+    }
+
+    @Test func twoBigPartsLookLikeCooking() {
+        let matches = RecipeHint.matches(draft: ["Свёкла", "Капуста"], dishes: [borsch])
+        #expect(matches.first?.dish.name == "Борщ")
+        #expect(matches.first?.covered == 2)
+    }
+
+    /// Соль и масло — две позиции, но три процента веса.
+    @Test func twoSeasoningsAreNotCooking() {
+        let matches = RecipeHint.matches(draft: ["Соль", "Масло оливковое"], dishes: [borsch])
+        #expect(matches.isEmpty, "По приправам нельзя сказать, что готовят")
+    }
+
+    @Test func oneIngredientSaysNothing() {
+        #expect(RecipeHint.matches(draft: ["Свёкла"], dishes: [borsch]).isEmpty)
+    }
+
+    @Test func theCaseAndSpacesDoNotMatter() {
+        let matches = RecipeHint.matches(draft: ["  свёкла ", "КАПУСТА"], dishes: [borsch])
+        #expect(matches.count == 1)
+    }
+
+    /// Рецепт, который уже лежит в приёме целиком, предлагать незачем.
+    @Test func aRecipeAlreadyInTheMealIsNotSuggested() {
+        let matches = RecipeHint.matches(draft: ["Борщ", "Свёкла", "Капуста"], dishes: [borsch])
+        #expect(matches.isEmpty)
+    }
+
+    @Test func theCloserMatchComesFirst() {
+        let salad = dish("Салат", [("Капуста", 200), ("Свёкла", 100)])
+        let matches = RecipeHint.matches(draft: ["Свёкла", "Капуста"], dishes: [borsch, salad])
+        #expect(matches.first?.dish.name == "Салат",
+                "Салат из этих двух состоит целиком, борщ — наполовину")
+        #expect(matches.count == RecipeHint.limit)
+    }
+
+    @Test func anEmptyMealSuggestsNothing() {
+        #expect(RecipeHint.matches(draft: [], dishes: [borsch]).isEmpty)
+    }
+
+    @Test func aRecipeWithoutWeightIsSkipped() {
+        let weightless = dish("Пустой", [("Свёкла", 0), ("Капуста", 0)])
+        #expect(RecipeHint.matches(draft: ["Свёкла", "Капуста"], dishes: [weightless]).isEmpty)
+    }
+
+    /// По нажатию дописывается то, чего ещё нет, — а не весь состав заново.
+    @Test func whatIsMissingIsWhatGetsAdded() {
+        let missing = RecipeHint.missing(from: borsch, draft: ["свёкла", "Капуста"])
+        #expect(missing.map(\.foodName) == ["Картофель", "Соль", "Масло оливковое"])
+    }
+}

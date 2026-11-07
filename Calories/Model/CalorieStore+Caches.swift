@@ -251,3 +251,30 @@ extension CalorieStore {
         var hasher = Hasher()
         for food in customFoods {
             hasher.combine(food.id)
+            hasher.combine(food.name)
+            hasher.combine(food.caloriesPer100g)
+            hasher.combine(food.protein)
+            hasher.combine(food.fat)
+            hasher.combine(food.carbs)
+            hasher.combine(food.category)
+            hasher.combine(food.catalogID)
+            hasher.combine(food.micronutrientsData)
+        }
+        for dish in dishes { hasher.combine(dish.name) }
+        let signature = hasher.finalize()
+        guard signature != vitaminOffersSignature else { return }
+        vitaminOffersSignature = signature
+
+        var offered: Set<UUID> = []
+        for food in customFoods {
+            guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
+            guard nutrientProfilesByName[food.name] == nil else { continue }
+            if !FoodCatalog.donors(forName: food.name, caloriesPer100g: food.caloriesPer100g,
+                                   macrosPer100g: food.macrosPer100g,
+                                   category: food.foodCategory, limit: 1).isEmpty {
+                offered.insert(food.id)
+            }
+        }
+        foodsOfferedVitamins = offered
+    }
+}

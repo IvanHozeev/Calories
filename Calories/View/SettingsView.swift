@@ -58,7 +58,7 @@ struct SettingsView: View {
         encoder.dateEncodingStrategy = .iso8601
         guard let data = try? encoder.encode(store.makeBackup()),
               let text = String(data: data, encoding: .utf8) else {
-            exportError = String(localized: "Не удалось собрать файл.")
+            exportError = String(localized: "Не удалось собрать файл копии. Проверьте доступ к папке и попробуйте снова.")
             return
         }
         exportDocument = ExportDocument(text: text, type: .json)
@@ -162,8 +162,8 @@ struct SettingsView: View {
         } message: { backup in
             Text("Копия от \(backup.exportedAt.formatted(date: .abbreviated, time: .shortened)): записей \(backup.entries.count), взвешиваний \(backup.weights.count). Нынешний дневник будет полностью заменён.")
         }
-        .alert("Готово", isPresented: $restoreDone) {
-            Button("OK", role: .cancel) { }
+        .alert("Восстановление завершено", isPresented: $restoreDone) {
+            Button("Понятно", role: .cancel) { }
         } message: {
             Text("Данные восстановлены из копии.")
         }
@@ -171,17 +171,17 @@ struct SettingsView: View {
             get: { restoreError != nil },
             set: { if !$0 { restoreError = nil } }
         )) {
-            Button("OK", role: .cancel) { restoreError = nil }
+            Button("Понятно", role: .cancel) { restoreError = nil }
         } message: {
-            Text(restoreError ?? "")
+            Text("Файл может быть повреждён или использовать старый формат. Выберите другую папку с копией.")
         }
         .alert("Не удалось сохранить", isPresented: Binding(
             get: { exportError != nil },
             set: { if !$0 { exportError = nil } }
         )) {
-            Button("OK", role: .cancel) { exportError = nil }
+            Button("Понятно", role: .cancel) { exportError = nil }
         } message: {
-            Text(exportError ?? "")
+            Text("Проверьте доступ к выбранной папке и попробуйте снова.")
         }
     }
 }
@@ -336,7 +336,7 @@ struct DeveloperSettingsView: View {
                 Text("Распознавание фото")
             } footer: {
                 Text(geminiAPIKey.isEmpty
-                     ? "Пусто — кнопка камеры в приёме пищи не показывается."
+                     ? "Ключ Gemini не задан. Кнопка камеры в приёме пищи пока не появится. Добавьте ключ в настройках отладки."
                      : "Ключ задан: в приёме пищи появилась кнопка камеры.")
             }
 
@@ -361,7 +361,7 @@ struct DeveloperSettingsView: View {
                 Text("Источник продуктов")
             } footer: {
                 Text(fdcAPIKey.isEmpty
-                     ? "Пусто — поиск идёт в Open Food Facts, как у обычного пользователя."
+                     ? "Ключ USDA не задан. Поиск работает через Open Food Facts без витаминов и минералов."
                      : "Ключ задан: поиск идёт в USDA и приносит витамины и минералы.")
             }
         }
@@ -415,7 +415,7 @@ struct HealthInventoryView: View {
         .overlay {
             if inventory.isChecking { ProgressView() }
             else if inventory.rows.isEmpty && inventory.failure == nil {
-                ContentUnavailableView("Смотрим", systemImage: "heart.text.square")
+                ContentUnavailableView("Проверка «Здоровья»", systemImage: "heart.text.square", description: Text("Приложение проверяет доступные данные о сне, шагах и пульсе. Подождите несколько секунд."))
             }
         }
         .task { await inventory.check() }

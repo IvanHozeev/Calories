@@ -253,7 +253,7 @@ struct BodyView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        .alert("Дневная цель", isPresented: $showingGoalEditor) {
+        .alert("Задать дневную цель", isPresented: $showingGoalEditor) {
             TextField("Ккал в день", text: $goalText)
                 .keyboardType(.numberPad)
             Button("Отмена", role: .cancel) { }

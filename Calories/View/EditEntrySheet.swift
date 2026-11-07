@@ -195,7 +195,7 @@ struct EditEntrySheet: View {
                 }
             }
         }
-        .alert("Удалить запись?", isPresented: $confirmingDelete) {
+        .alert("Удалить запись", isPresented: $confirmingDelete) {
             Button("Отмена", role: .cancel) {}
             Button("Удалить", role: .destructive) {
                 store.delete(entry: entry)

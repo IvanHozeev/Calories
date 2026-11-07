@@ -300,7 +300,7 @@ struct NewDishSheet: View {
         }
         .glassRow()
         .alert(
-            "Граммы",
+            "Задать граммы",
             isPresented: Binding(get: { gramsEditTarget != nil },
                                  set: { if !$0 { gramsEditTarget = nil } }),
             presenting: gramsEditTarget
@@ -321,7 +321,7 @@ struct NewDishSheet: View {
         .interactiveDismissDisabled(!isEmbedded && hasChanges)
         // Окном, а не «диалогом действий»: на iOS 26 тот всплывает пузырём у
         // края экрана и прячет собственный заголовок.
-        .alert("Отменить изменения?", isPresented: $showDiscardAlert) {
+        .alert("Отменить изменения", isPresented: $showDiscardAlert) {
             Button("Продолжить", role: .cancel) {}
             Button("Отменить изменения", role: .destructive) { dismiss() }
         }

@@ -30,8 +30,15 @@ struct RootView: View {
     /// перестаёт справляться с выражением и валит сборку по таймауту.
     private var tabs: some View {
         TabView(selection: $selectedTab) {
-            Tab("Сегодня", image: "TodayTab", value: 0) {
+            // Кольцо тоже парой: выбранная вкладка — дуги залитые,
+            // невыбранная — полые, один их контур. Системным символам такую
+            // пару даёт сама система, нашему рисунку её пришлось нарисовать —
+            // обе формы делает `Tools/brand_assets.swift` из одних и тех же
+            // дуг, поэтому они совпадают по габаритам и перетекают без рывка.
+            Tab(value: 0) {
                 ContentView(store: store, stepStore: stepStore, ringEntrance: ringEntrance)
+            } label: {
+                Label("Сегодня", image: selectedTab == 0 ? "TodayTab" : "TodayTabOutline")
             }
 
             // Выбранная вкладка — залитым начертанием, невыбранная —

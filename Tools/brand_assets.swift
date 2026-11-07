@@ -270,3 +270,38 @@ do {
     ctx.endPDFPage()
     ctx.closePDF()
 }
+
+// Парное начертание той же вкладки: дуги полые — только их контур.
+//
+// Нужно затем, что переход между выбранной и невыбранной вкладкой система
+// играет сама, но только если есть во что перетекать. Со значком в одном
+// начертании она не анимирует ничего: подменять нечем. Контурная «С» — та же
+// форма, из которой вынули середину, поэтому заливка и контур совпадают по
+// габаритам до точки, и перетекание идёт без рывка.
+//
+// Стенка около точки при дуге в три с половиной: тоньше — рвётся на экране
+// без ретины, толще — внутри не остаётся просвета и полая дуга читается
+// сплошной.
+do {
+    let tabSide: CGFloat = 28
+    let tabWidth: CGFloat = 105
+    let factor = (tabSide / 2 - 1) / iconOuter
+    /// Толщина стенки в единицах холста: 1 pt после уменьшения.
+    let wall = 1 / factor
+    var box = CGRect(x: 0, y: 0, width: tabSide, height: tabSide)
+    let ctx = CGContext(out.appendingPathComponent("TodayTabOutline.pdf") as CFURL, mediaBox: &box, nil)!
+    ctx.beginPDFPage(nil)
+    ctx.translateBy(x: tabSide / 2, y: tabSide / 2)
+    ctx.scaleBy(x: factor, y: factor)
+    ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
+    ctx.setStrokeColor(CGColor(gray: 0, alpha: 1))
+    ctx.setLineWidth(wall)
+    ctx.setLineJoin(.round)
+    for spine in spines(width: tabWidth, outer: iconOuter) {
+        // Контур дуги, а не сама дуга: берём ту же форму и обводим её край.
+        ctx.addPath(outline(spine, tabWidth - wall))
+        ctx.strokePath()
+    }
+    ctx.endPDFPage()
+    ctx.closePDF()
+}

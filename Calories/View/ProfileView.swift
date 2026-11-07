@@ -8,24 +8,21 @@ import SwiftUI
 /// в списке — лишний шаг к тому, ради чего на вкладку и заходят. Содержимое
 /// поднято наружу, а замеры и динамика веса встали в один ряд с остальными
 /// параметрами тела.
-struct BodyView: View {
+struct ProfileView: View {
     var store: CalorieStore
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     
     /// Черновик экрана: всё, что крутят колёсами и переключателями.
-    /// Перевод профиля в него и обратно живёт в `BodyDraft`, а не здесь, —
+    /// Перевод профиля в него и обратно живёт в `ProfileDraft`, а не здесь, —
     /// раньше он был тут дважды и разошёлся.
-    @State private var draft: BodyDraft
+    @State private var draft: ProfileDraft
 
     @State private var showingGoalEditor = false
     @State private var showingBasis = false
     @State private var goalText = ""
-    @State private var showHeightPicker = false
-    @State private var showAgePicker = false
-    @State private var showProteinPicker = false
-    @State private var showFatPicker = false
-    /// Выбранный, но ещё не подтверждённый уровень активности.
-    @State private var pendingActivity: ActivityLevel?
+    /// Раскрытое колесо. Одно на экран: открыть второе, не закрыв первое,
+    /// невозможно по устройству значения, а не по внимательности.
+    @State private var openPicker: ProfilePicker?
     @AppStorage("use_imperial") private var useImperial = false
     
     private func weightDisplayText(_ tenths: Int) -> String {
@@ -49,7 +46,7 @@ struct BodyView: View {
     
     init(store: CalorieStore) {
         self.store = store
-        _draft = State(initialValue: BodyDraft(profile: store.profile,
+        _draft = State(initialValue: ProfileDraft(profile: store.profile,
                                                latestWeightKg: store.latestWeight?.weightKg))
     }
     
@@ -61,51 +58,9 @@ struct BodyView: View {
     /// режим предлагать нечестно, он молча посчитает то же самое от веса.
     private var leanMassKg: Double? { draftProfile?.leanMassKg(from: measurement) }
     
-    /// Показываем не «вы уверены», а во что именно обойдётся смена:
-    /// новую норму калорий и разницу с текущей.
-    private func activityChangeMessage(to level: ActivityLevel) -> String {
-        guard let current = draftProfile else {
-            return String(localized: "Норма калорий пересчитается.")
-        }
-        var updated = current
-        updated.activityLevel = level
-        let delta = updated.calorieTarget - current.calorieTarget
-        let sign = delta > 0 ? "+" : ""
-        return String(
-            format: String(localized: "Норма станет %d ккал вместо %d — это %@%d ккал в день."),
-            updated.calorieTarget, current.calorieTarget, sign, delta
-        )
-    }
 
-    private var activeProteinTenths: Int { draft.activeProteinTenths }
 
-    /// Что сказать, если жир вне рабочего коридора.
-    private var fatWarning: String? {
-        let perKg = Double(draft.fatTenths) / 10
-        if perKg < MacroTargets.fatComfortRange.lowerBound {
-            return String(localized: "У нижней границы. Держать так можно недолго — в пике сушки, а не всю фазу.")
-        }
-        if perKg > MacroTargets.fatComfortRange.upperBound {
-            return String(localized: "Много: каждый лишний грамм жира — это два с лишним грамма углеводов, которых не будет на тренировке.")
-        }
-        return nil
-    }
 
-    private var proteinFooter: LocalizedStringKey {
-        if leanMassKg == nil {
-            return "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса."
-        }
-        return draft.proteinBasis == .leanMass
-            ? "Для сухой массы диапазон другой — обычно 2.2–3.0 г на кг: сухой массы меньше, чем веса, а кормишь ты именно её."
-            : "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы."
-    }
-
-    private func seedLeanProteinIfNeeded() {
-        draft.seedLeanProteinIfNeeded(leanMassKg: leanMassKg)
-    }
-
-    /// Разбивка дневной нормы. Белок и жир — обязательства, углеводы — остаток;
-    /// на сушке именно остаток и есть то, чем управляешь.
     @ViewBuilder
     private func macroBudgetSection(_ profile: UserProfile) -> some View {
         let protein = profile.proteinTargetGrams(from: measurement)
@@ -161,7 +116,7 @@ struct BodyView: View {
             // Выбор цели — только без премиума. С премиумом режим задаётся
             // планом: вне плана идёт поддержание, и множитель из профиля
             // означал бы вечный дефицит по настройке, о которой забыли.
-            premiumRow
+            GoalSection(store: store, goal: $draft.goal)
             
             bodyParametersSection
 
@@ -172,16 +127,17 @@ struct BodyView: View {
             // Приёмы пищи при этом в профиле, а не в настройках приложения: это
             // про режим человека, как подъём и отбой, а не про то, как
             // приложение выглядит и куда кладёт копии.
-            nutritionSection
+            NutritionSection(store: store)
             
             // Пока норма идёт от факта, множитель активности ни на что не
             // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
             // «Как считаем» — вместе с переключателем, который его включает.
-            activityLevelSection
+            ActivityLevelSection(draft: $draft, usesFact: usesFact)
             
-            proteinSection
+            ProteinTargetSection(draft: $draft, openPicker: $openPicker,
+                                 measurement: measurement)
 
-            fatSection
+            FatTargetSection(draft: $draft, openPicker: $openPicker)
 
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
@@ -209,18 +165,6 @@ struct BodyView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
-        .alert("Сменить уровень активности?", isPresented: Binding(
-            get: { pendingActivity != nil },
-            set: { if !$0 { pendingActivity = nil } }
-        ), presenting: pendingActivity) { level in
-            Button("Отмена", role: .cancel) { pendingActivity = nil }
-            Button("Сменить") {
-                draft.activityLevel = level
-                pendingActivity = nil
-            }
-        } message: { level in
-            Text(activityChangeMessage(to: level))
-        }
         .navigationTitle("Профиль")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
@@ -286,7 +230,7 @@ struct BodyView: View {
     /// Вес при этом снова берётся из последнего взвешивания, а не из профиля:
     /// на экране должно стоять то же число, что и на весах утром.
     private func apply(_ profile: UserProfile) {
-        draft = BodyDraft(profile: profile, latestWeightKg: store.latestWeight?.weightKg)
+        draft = ProfileDraft(profile: profile, latestWeightKg: store.latestWeight?.weightKg)
     }
 
     /// Динамика за месяц: искра и изменение прямо в строке веса — тренд виден,
@@ -667,7 +611,7 @@ private struct CalculationBasisSheet: View {
 // Тело `body` было списком на триста семьдесят строк, где разделы приходилось
 // искать глазами по отступам. Каждый раздел стал свойством с явным типом: и
 // читается, и проверяется типами по частям.
-private extension BodyView {
+private extension ProfileView {
     /// Расчёт: сколько тратишь, сколько есть и сколько белка. Ради него
     /// профиль и открывают, поэтому он первый.
     @ViewBuilder
@@ -704,55 +648,6 @@ private extension BodyView {
     }
     }
 
-    /// Строка про подписку — только пока нет ни плана, ни подписки.
-    @ViewBuilder
-    var premiumRow: some View {
-    if store.plan == nil, !store.isPremium {
-        Section {
-            Picker("Цель", selection: $draft.goal) {
-                ForEach(Goal.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-        } header: {
-            Text("Цель")
-        } footer: {
-            if store.profile == nil {
-                Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")
-            }
-        }
-    }
-    }
-
-    /// Питание: переход к расписанию приёмов.
-    var nutritionSection: some View {
-    Section("Питание") {
-        NavigationLink {
-            MealScheduleSheet(
-                entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-                dailyGoal: store.adaptedTodayGoal,
-                settings: .shared,
-                store: store,
-                isEmbedded: true
-            )
-        } label: {
-            settingLabel("Приёмы пищи", systemImage: "clock")
-        }
-        .accessibilityIdentifier("openMealSchedule")
-
-        // Кашрут здесь же, по той же причине, что и расписание: это про то,
-        // как человек ест, а не про то, как приложение выглядит. Своим
-        // экраном, а не строками прямо тут: обычай выбирают однажды.
-        NavigationLink {
-            KosherView()
-        } label: {
-            settingLabel("Кашрут", systemImage: "circle.lefthalf.filled")
-        }
-        .accessibilityIdentifier("openKosher")
-    }
-    }
-
-    /// Параметры тела: то, из чего считается расход. Правят их редко, поэтому
-    /// они ниже расчёта.
     var bodyParametersSection: some View {
     Section("Параметры тела") {
         // Знак — слева, в колонке значков, и он меняется вместе с выбором:
@@ -804,11 +699,10 @@ private extension BodyView {
         }
         .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
-                showHeightPicker.toggle()
-                if showHeightPicker { showAgePicker = false; showProteinPicker = false }
+                openPicker = openPicker == .height ? nil : .height
             }
         }
-        if showHeightPicker {
+        if openPicker == .height {
             Picker("Рост", selection: $draft.heightTenths) {
                 ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
                     Text(heightDisplayText(v)).tag(v)
@@ -834,11 +728,10 @@ private extension BodyView {
         }
         .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
-                showAgePicker.toggle()
-                if showAgePicker { showHeightPicker = false; showProteinPicker = false }
+                openPicker = openPicker == .birthday ? nil : .birthday
             }
         }
-        if showAgePicker {
+        if openPicker == .birthday {
             // Колесо дат и у тех, у кого записано только число лет: иначе
             // введённое когда-то число остаётся навсегда, а дата появиться
             // не может. Открывается оно на этом числе лет, а записывается
@@ -875,142 +768,6 @@ private extension BodyView {
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
-    }
-    }
-
-    /// Уровень активности — только пока расход считается формулой. Когда он
-    /// измерен, множитель ни на что не влияет, и выбор уезжает в «Как считаем».
-    @ViewBuilder
-    var activityLevelSection: some View {
-    if !usesFact {
-    Section {
-        ForEach(ActivityLevel.allCases) { level in
-            Button {
-                // Уровень активности множит TDEE, то есть меняет норму калорий
-                // на сотни. Промахнуться по соседней строке легко, а последствие
-                // молчаливое: цифра назавтра другая, а почему — непонятно.
-                guard level != draft.activityLevel else { return }
-                pendingActivity = level
-            } label: {
-                HStack {
-                    // Цвета явные: иерархический .primary внутри кнопки
-                    // списка берёт акцент, и все пять строк были синими —
-                    // самым шумным местом профиля.
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(level.title)
-                            .foregroundStyle(Color.primary)
-                        Text(level.subtitle)
-                            .font(.app(.caption))
-                            .foregroundStyle(Color.secondary)
-                    }
-                    Spacer()
-                    if draft.activityLevel == level {
-                        Image(systemName: "checkmark")
-                            .font(.app(.subheadline, weight: .semibold))
-                            .foregroundStyle(.tint)
-                    }
-                }
-            }
-        }
-    } header: {
-        Text("Уровень активности")
-    } footer: {
-        explain("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.").map { Text($0) }
-    }
-    }
-    }
-
-    /// Норма белка: на чём считать и сколько.
-    var proteinSection: some View {
-    Section {
-        if leanMassKg != nil {
-            Picker("Считать", selection: $draft.proteinBasis) {
-                ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .accessibilityIdentifier("draft.proteinBasis")
-            .onChange(of: draft.proteinBasis) { _, basis in
-                if basis == .leanMass { seedLeanProteinIfNeeded() }
-            }
-        }
-        HStack {
-            Text(draft.proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
-            Spacer()
-            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showProteinPicker.toggle()
-                if showProteinPicker { showHeightPicker = false; showAgePicker = false }
-            }
-        }
-        if showProteinPicker {
-            Picker("Белок", selection: draft.proteinBasis == .leanMass ? $draft.proteinLeanTenths : $draft.proteinTenths) {
-                ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        if let draftProfile {
-            // Той же строкой, что и углеводы ниже: три итога одного вида —
-            // граммы макроса — и читаться они должны одинаково, цветом
-            // своего макроса. Белок и жир стояли чёрными, а углеводы
-            // фиолетовыми, будто это числа из разных мест.
-            MacroBudgetRow("Итого белка",
-                           grams: draftProfile.proteinTargetGrams(from: measurement),
-                           color: MacroKind.protein.color)
-        }
-    } header: {
-        Text("Норма белка")
-    } footer: {
-        Text(proteinFooter)
-    }
-    }
-
-    /// Норма жира и её границы.
-    var fatSection: some View {
-    Section {
-        HStack {
-            Text("Жира на кг веса")
-            Spacer()
-            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(draft.fatTenths) / 10.0))
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showFatPicker.toggle()
-                if showFatPicker {
-                    showProteinPicker = false; showHeightPicker = false; showAgePicker = false
-                }
-            }
-        }
-        if showFatPicker {
-            Picker("Жир", selection: $draft.fatTenths) {
-                // Колесо ограничено жёсткими границами: за ними не бывает
-                // осознанного выбора, только промах пальцем.
-                ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),
-                        id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        if let draftProfile {
-            MacroBudgetRow("Итого жира",
-                           grams: draftProfile.fatTargetGrams,
-                           color: MacroKind.fat.color)
-        }
-        // Вне рабочего коридора число разрешено, но о нём сказано вслух.
-        if let warning = fatWarning {
-            Label(warning, systemImage: "exclamationmark.triangle.fill")
-                .font(.app(.caption))
-                .foregroundStyle(.orange)
-        }
-    } header: {
-        Text("Норма жира")
-    } footer: {
-        explain("Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки.").map { Text($0) }
     }
     }
 

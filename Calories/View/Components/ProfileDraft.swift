@@ -19,7 +19,7 @@ import Foundation
 /// Значение, а не объект: `@State` с ним даёт `$draft.weightTenths` даром, а
 /// `Equatable` — сравнение «изменилось ли», на котором держится запись в
 /// хранилище.
-struct BodyDraft: Equatable {
+struct ProfileDraft: Equatable {
     var weightTenths: Int
     /// Рост в десятых долях сантиметра: 1805 — это 180.5.
     var heightTenths: Int

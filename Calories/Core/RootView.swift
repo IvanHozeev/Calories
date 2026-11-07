@@ -29,9 +29,9 @@ struct RootView: View {
                 ContentView(store: store, stepStore: stepStore)
             }
 
-            Tab("Профиль", systemImage: "person.crop.circle", value: 1) {
+            Tab("Профиль", systemImage: "face.dashed", value: 1) {
                 NavigationStack {
-                    BodyView(store: store)
+                    ProfileView(store: store)
                 }
             }
 
@@ -43,7 +43,7 @@ struct RootView: View {
             // свои продукты, блюда и база, — а поиск по ним лишь один из
             // способов её найти. Экран внутри назывался так с самого начала,
             // и вкладка с ним спорила.
-            Tab("Рацион", systemImage: "magnifyingglass", value: 3, role: .search) {
+            Tab("Рацион", systemImage: "fork.knife.circle.fill", value: 3, role: .search) {
                 NavigationStack {
                     MyFoodView(store: store)
                 }

@@ -382,52 +382,6 @@ final class CalorieStore {
     /// выходит ровно то, ради чего всё делалось: тратишь 4000, ешь 2700 и
     /// думаешь, что это поддержание.
     ///
-    /// Синхронизируем только когда расход изменился: иначе правка «ставить N
-    /// ккал/день» с экрана плана затиралась бы на каждой перестройке кэшей.
-    private func syncGoalWithExpenditure() {
-        guard let plan, profile != nil else { return }
-        // Своё число не трогаем: за ним нет формулы, которую можно пересчитать,
-        // а молча заменить его — значит отменить решение человека. Если из-за
-        // расхода оно устарело, об этом скажет экран плана своим предложением.
-        guard dailyGoalSource != .manual else { return }
-        let expenditure = (workingTDEE / 5).rounded() * 5
-        guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
-        defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
-        // Договорились — значит договорились до следующего обзора.
-        //
-        // Норма шла за расходом сама, и правильно шла: расход меряется, и
-        // застывшее число быстро перестаёт значить обещанное. Но человек от
-        // этого жил с цифрой, которая менялась у него за спиной: сегодня
-        // 2824, завтра 2492, и ни одного слова о том, почему. Теперь
-        // пересчёт не применяется молча — он откладывается до недельного
-        // обзора, где его показывают и спрашивают.
-        if goalWasAgreed {
-            proposeGoalChange(plan: plan)
-            return
-        }
-        // Принятый пересчёт пересчитываем так же, как его считал экран плана:
-        // человек согласился приходить к цели фазы в срок, а не на конкретное
-        // число. Иначе подтянувшиеся шаги возвращали норму к плановой, и
-        // прибавка, принятая утром, пропадала без следа.
-        let target = dailyGoalSource == .recalibrated
-            ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
-            : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
-        if target != dailyGoal { dailyGoal = target }
-    }
-
-    /// Сколько есть, чтобы прийти к цели идущей фазы в срок от нынешнего веса.
-    ///
-    /// Считается здесь, а не берётся у `adherence`: сверка собирается раньше
-    /// расхода, и на том самом пересчёте, ради которого всё затевается, у неё
-    /// в руках вчерашний расход.
-    func recalibratedGoal(now: Date = Date()) -> Int? {
-        guard let adherence, let weight = adherence.actualWeightToday else { return nil }
-        let remainingDays = adherence.phaseEnd.timeIntervalSince(now) / 86400
-        guard remainingDays > 0 else { return nil }
-        let dailyDelta = (adherence.phaseTargetWeightKg - weight) * Plan.kcalPerKg / remainingDays
-        return Int((workingTDEE + dailyDelta).rounded())
-    }
-
     /// Пересчитывает всё производное от записей дневника.
     ///
     /// Порядок шагов не случаен и держался раньше только комментариями внутри
@@ -1105,7 +1059,7 @@ final class CalorieStore {
 
     /// Норму хоть раз подтверждали вручную — значит дальше её меняют только с
     /// согласия.
-    private var goalWasAgreed: Bool { defaults.object(forKey: Keys.goalAgreedAt) is Date }
+    var goalWasAgreed: Bool { defaults.object(forKey: Keys.goalAgreedAt) is Date }
 
     /// Когда норму согласовали в последний раз.
     var goalAgreedAt: Date? { defaults.object(forKey: Keys.goalAgreedAt) as? Date }
@@ -1124,7 +1078,7 @@ final class CalorieStore {
         return Date().timeIntervalSince(agreed) >= Double(Self.reviewIntervalDays) * 86_400
     }
 
-    private func proposeGoalChange(plan: Plan) {
+    func proposeGoalChange(plan: Plan) {
         let target = dailyGoalSource == .recalibrated
             ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
             : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)

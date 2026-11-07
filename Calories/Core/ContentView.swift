@@ -23,6 +23,7 @@ struct ContentView: View {
     @State private var showingDayNutrition = false
     @State private var showingSteps = false
     @State private var showingBankInfo = false
+    @State private var showingSettings = false
     @State private var showingPaywall = false
     @State private var showingPlan = false
     /// С чего открыть добавление, если пришли по меню на иконке.
@@ -355,6 +356,9 @@ struct ContentView: View {
                                   store: store,
                                   isEmbedded: true)
             }
+            .navigationDestination(isPresented: $showingSettings) {
+                SettingsView(store: store)
+            }
             .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
@@ -468,47 +472,12 @@ private extension ContentView {
             // картина: без утреннего веса ни тренд, ни расход не сдвинутся.
             // В хвосте экрана, под плитками и напоминаниями, строка
             // попадалась на глаза последней — когда до весов уже не дойти.
-            if store.profile == nil {
-                NavigationLink {
-                    SettingsView(store: store)
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "person.crop.circle.badge.questionmark")
-                            .font(.app(.footnote))
-                        Text("Заполнить профиль")
-                            .font(.app(.caption))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                    }
-                    .foregroundStyle(.blue)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.blue.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-            } else if !store.hasWeighedToday {
-                Button {
-                    todaySheet = .weight
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "scalemass")
-                            .font(.app(.footnote))
-                        Text("Взвешивание")
-                            .font(.app(.caption))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                    }
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.orange.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-            }
+            WeighInPromptRow(
+                profileIsEmpty: store.profile == nil,
+                hasWeighedToday: store.hasWeighedToday,
+                onWeighIn: { todaySheet = .weight },
+                onOpenProfile: { showingSettings = true }
+            )
 
             // Экран читается как отъезд камеры: кольцо и макросы —
             // сегодняшний день, дальше ближайший приём (часы),

@@ -193,9 +193,22 @@ struct BodyView: View {
             // «Как считаем» — вместе с переключателем, который его включает.
             activityLevelSection
             
-            proteinSection
+            ProteinTargetSection(
+                proteinBasis: $proteinBasis,
+                proteinTenths: $proteinTenths,
+                proteinLeanTenths: $proteinLeanTenths,
+                isPickerShown: $showProteinPicker,
+                leanMassKg: leanMassKg,
+                measurement: measurement,
+                draftProfile: draftProfile,
+                footer: proteinFooter,
+                onBasisChanged: { basis in
+                    if basis == .leanMass { seedLeanProteinIfNeeded() }
+                },
+                onToggle: { showHeightPicker = false; showAgePicker = false; showFatPicker = false }
+            )
 
-            fatSection
+            FatTargetSection(
 
             if let draftProfile, store.dailyGoal > 0 {
                 MacroBudgetSection(
@@ -924,56 +937,7 @@ private extension BodyView {
     }
     }
 
-    /// Норма белка: на чём считать и сколько.
-    var proteinSection: some View {
-    Section {
-        if leanMassKg != nil {
-            Picker("Считать", selection: $proteinBasis) {
-                ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-            .accessibilityIdentifier("proteinBasis")
-            .onChange(of: proteinBasis) { _, basis in
-                if basis == .leanMass { seedLeanProteinIfNeeded() }
-            }
-        }
-        HStack {
-            Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
-            Spacer()
-            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showProteinPicker.toggle()
-                if showProteinPicker { showHeightPicker = false; showAgePicker = false }
-            }
-        }
-        if showProteinPicker {
-            Picker("Белок", selection: proteinBasis == .leanMass ? $proteinLeanTenths : $proteinTenths) {
-                ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        if let draftProfile {
-            // Той же строкой, что и углеводы ниже: три итога одного вида —
-            // граммы макроса — и читаться они должны одинаково, цветом
-            // своего макроса. Белок и жир стояли чёрными, а углеводы
-            // фиолетовыми, будто это числа из разных мест.
-            MacroBudgetRow("Итого белка",
-                           grams: draftProfile.proteinTargetGrams(from: measurement),
-                           color: MacroKind.protein.color)
-        }
-    } header: {
-        Text("Норма белка")
-    } footer: {
-        Text(proteinFooter)
-    }
-    }
 
-    FatTargetSection(
         fatTenths: $fatTenths,
         isPickerShown: $showFatPicker,
         draftProfile: draftProfile,

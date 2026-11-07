@@ -242,7 +242,7 @@ struct BodyView: View {
                     dailyGoal: store.dailyGoal
                 )
             }
-            brandSection
+            BrandFooterSection()
         }
         .sheet(isPresented: $showingBasis) {
             CalculationBasisSheet(store: store, activityLevel: $activityLevel)
@@ -809,12 +809,5 @@ private extension BodyView {
     /// измерен, множитель ни на что не влияет, и выбор уезжает в «Как считаем».
     @ViewBuilder
 
-    /// Подпись приложения в конце списка.
-    var brandSection: some View {
-        Section {
-            BrandFooter()
-                .brandFooterRow()
-        }
-    }
 
 }

@@ -45,6 +45,9 @@ struct ContentView: View {
     @State private var listHeight: CGFloat = 0
     @State private var listBottomInset: CGFloat = 0
 
+    /// Пробую настройки на экране Сегодня
+    @State private var showingSettings = false
+
     /// Высота первого экрана: ровно видимая часть списка.
     ///
     /// Полоска и плитки берут своё, остаток достаётся кольцу — поэтому блок
@@ -171,6 +174,9 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingPlan) {
                 PlanView(store: store)
             }
+            .navigationDestination(isPresented: $showingSettings) {
+                SettingsView(store: store)
+            }
             .navigationTitle("Сегодня")
             // Какое именно сегодня. «Сегодня» — слово без числа, а записи
             // в приложении о днях, и день недели с датой человек держит
@@ -267,6 +273,18 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
                         .accessibilityIdentifier("steps")
+                }
+                
+                /// Настройки теперь в Сегодня, не нужно тянуться в другую табу и экран Профиля стал чище 
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Настройки")
+                    .accessibilityIdentifier("openSettings")
                 }
             }
             .background {

@@ -57,8 +57,6 @@ struct ProfileView: View {
     /// Сухая масса известна только по снятым замерам — без них персональный
     /// режим предлагать нечестно, он молча посчитает то же самое от веса.
     private var leanMassKg: Double? { draftProfile?.leanMassKg(from: measurement) }
-    
-
 
 
     @ViewBuilder
@@ -92,13 +90,9 @@ struct ProfileView: View {
             explain("Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они.").map { Text($0) }
         }
     }
-
-
-
     
     
     /// Лист взвешивания с кнопки в тулбаре.
-    @State private var showingSettings = false
     @State private var showingPaywall = false
 
     /// Профиль, который получится из черновика. Опционален ради тех мест,
@@ -168,21 +162,8 @@ struct ProfileView: View {
         .navigationTitle("Профиль")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            // Подписка и настройки — отсюда, а не своей вкладкой внизу.
-            //
-            // «Профиль» и «Настройки» были двумя списками параметров рядом
-            // друг с другом, и человек всякий раз решал, в каком из них
-            // лежит нужное. Теперь профиль — экран о себе, а настройки за
-            // шестерёнкой в его шапке, как в системных приложениях.
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
-                }
-                .accessibilityLabel("Настройки")
-                .accessibilityIdentifier("openSettings")
-            }
+            // Подписка — отсюда, а не своей вкладкой внизу.
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingPaywall = true
@@ -193,9 +174,6 @@ struct ProfileView: View {
                 .accessibilityIdentifier("subscription")
                 .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
             }
-        }
-        .navigationDestination(isPresented: $showingSettings) {
-            SettingsView(store: store)
         }
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)

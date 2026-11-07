@@ -43,7 +43,7 @@ struct RootView: View {
             // свои продукты, блюда и база, — а поиск по ним лишь один из
             // способов её найти. Экран внутри назывался так с самого начала,
             // и вкладка с ним спорила.
-            Tab("Рацион", systemImage: "fork.knife.circle.fill", value: 3, role: .search) {
+            Tab("Рацион", systemImage: "fork.knife.circle", value: 3, role: .search) {
                 NavigationStack {
                     MyFoodView(store: store)
                 }

@@ -27,7 +27,7 @@ extension CalorieStore {
         return found
     }
 
-    private func category(ofProductNamed name: String) -> FoodCategory? {
+    func category(ofProductNamed name: String) -> FoodCategory? {
         categoryByFoodName[name]
     }
 
@@ -152,7 +152,7 @@ extension CalorieStore {
         return spoken.min { left, right in rank(left.advice) < rank(right.advice) }
     }
 
-    private func rank(_ advice: DishBatch.Advice) -> Int {
+    func rank(_ advice: DishBatch.Advice) -> Int {
         switch advice {
         case .spoiled:   return 0
         case .eatToday:  return 1
@@ -324,7 +324,7 @@ extension CalorieStore {
 
     /// Калории одного названия по категориям: продукт — своей категорией,
     /// блюдо — по ингредиентам, всё остальное — в неизвестное.
-    private func split(named name: String, calories: Int) -> [(category: FoodCategory?, calories: Int)] {
+    func split(named name: String, calories: Int) -> [(category: FoodCategory?, calories: Int)] {
         if let category = categoryByFoodName[name] { return [(category, calories)] }
         if let dish = dishes.first(where: { $0.name == name }) {
             let total = dish.ingredients.reduce(0) { $0 + $1.calories }

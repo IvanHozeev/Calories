@@ -1,4 +1,5 @@
 import Foundation
+import os
 import SwiftData
 
 /// Производные величины: цели, серии, достижения и соответствие плану.
@@ -219,7 +220,7 @@ extension CalorieStore {
         return Int((Double(base) * Self.fastEveBoost / 10).rounded() * 10)
     }
 
-    private func baseGoal(for date: Date) -> Int {
+    func baseGoal(for date: Date) -> Int {
         // Расход берём тот, что действовал в этот день: пересчитывать прошлое
         // сегодняшним числом значит задним числом менять норму, по которой
         // человек уже ел.
@@ -643,7 +644,7 @@ extension CalorieStore {
     ///
     /// Шесть недель — потолок: дальше считать незачем, отдыхать и так давно
     /// пора, а каждая неделя стоит прохода по дневнику.
-    private func stallWeeks(now: Date, plannedWeeklyKg: Double?) -> Int {
+    func stallWeeks(now: Date, plannedWeeklyKg: Double?) -> Int {
         guard let planned = plannedWeeklyKg, planned > 0 else { return 0 }
         let calendar = Calendar.current
         var weeks = 0
@@ -665,7 +666,7 @@ extension CalorieStore {
     ///
     /// nil, пока истории нет: расход здесь измеренный, и до того, как факт
     /// накопился, говорить не о чем.
-    private func tdeeDropPercent(now: Date, days: Int = 21) -> Double? {
+    func tdeeDropPercent(now: Date, days: Int = 21) -> Double? {
         let calendar = Calendar.current
         guard let then = calendar.date(byAdding: .day, value: -days, to: now),
               let before = expenditure(on: then), before > 0,
@@ -926,5 +927,129 @@ extension CalorieStore {
             phaseEnd: phaseEnd,
             trendFit: fit
         )
+    }
+
+    /// Синхронизирует норму с измеренным расходом: если расход изменился,
+    /// предлагает новую цель или откладывает до недельного обзора.
+    ///
+    /// Вызывается из rebuildCaches() при каждом пересчёте кэша.
+    func syncGoalWithExpenditure() {
+        guard let plan, profile != nil else { return }
+        // Своё число не трогаем: за ним нет формулы, которую можно пересчитать,
+        // а молча заменить его — значит отменить решение человека. Если из-за
+        // расхода оно устарело, об этом скажет экран плана своим предложением.
+        guard dailyGoalSource != .manual else { return }
+        let expenditure = (workingTDEE / 5).rounded() * 5
+        guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
+        defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
+        // Договорились — значит договорились до следующего обзора.
+        //
+        // Норма шла за расходом сама, и правильно шла: расход меряется, и
+        // застывшее число быстро перестаёт значить обещанное. Но человек от
+        // этого жил с цифрой, которая менялась у него за спиной: сегодня
+        // 2824, завтра 2492, и ни одного слова о том, почему. Теперь
+        // пересчёт не применяется молча — он откладывается до недельного
+        // обзора, где его показывают и спрашивают.
+        if goalWasAgreed {
+            proposeGoalChange(plan: plan)
+            return
+        }
+        // Принятый пересчёт пересчитываем так же, как его считал экран плана:
+        // человек согласился приходить к цели фазы в срок, а не на конкретное
+        // число. Иначе подтянувшиеся шаги возвращали норму к плановой, и
+        // прибавка, принятая утром, пропадала без следа.
+        let target = dailyGoalSource == .recalibrated
+            ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
+            : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
+        if target != dailyGoal { dailyGoal = target }
+    }
+
+    /// Сколько есть, чтобы прийти к цели идущей фазы в срок от нынешнего веса.
+    ///
+    /// Считается здесь, а не берётся у `adherence`: сверка собирается раньше
+    /// расхода, и на том самом пересчёте, ради которого всё затевается, у неё
+    /// в руках вчерашний расход.
+    func recalibratedGoal(now: Date = Date()) -> Int? {
+        guard let adherence, let weight = adherence.actualWeightToday else { return nil }
+        let remainingDays = adherence.phaseEnd.timeIntervalSince(now) / 86400
+        guard remainingDays > 0 else { return nil }
+        let dailyDelta = (adherence.phaseTargetWeightKg - weight) * Plan.kcalPerKg / remainingDays
+        return Int((workingTDEE + dailyDelta).rounded())
+    }
+
+    /// Серии: дней подряд с записями, с выполненной нормой и с белком.
+    func rebuildStreaks(_ calendar: Calendar) {
+        let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
+        streak = currentStreak
+        bestStreak = bestStreakVal
+        loggingStreak = currentLoggingStreak
+
+        let today14 = calendar.startOfDay(for: Date())
+        proteinStreak = computeProteinStreak()
+
+        streakHistory = (0..<14).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
+            return (date, isDayLogged(date), isDayKept(date))
+        }
+    }
+
+    /// Записать норму, которая стоит на экране сегодня.
+    ///
+    /// Прошедший день до сих пор получал свою норму задним числом: вечером
+    /// `lockPastGoals` считал её заново — и считал **сегодняшним** числом.
+    /// А `dailyGoal` меняется сам, вслед за измеренным расходом. В итоге день,
+    /// прожитый с нормой 2822, назавтра показывал 2492, и съеденное ровно в
+    /// норму превращалось в перебор на триста килокалорий.
+    ///
+    /// Поэтому норма дня записывается, пока день идёт: на экране и в истории
+    /// должно стоять одно и то же число. Запись обновляется на каждой
+    /// перестройке — к полуночи в ней останется то, что человек видел
+    /// последним.
+    func rememberTodaysGoal(_ goal: Int) {
+        let today = Calendar.current.startOfDay(for: Date())
+        if let existing = goalRecords.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
+            guard existing.goal != goal else { return }
+            existing.goal = goal
+        } else {
+            let record = GoalRecord(date: today, goal: goal)
+            context.insert(record)
+            goalRecords = (goalRecords + [record]).sorted { $0.date < $1.date }
+        }
+        goalsByDay[today] = goal
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
+    }
+
+    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую (адаптированную!)  эффективную цель
+    /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
+    func lockPastGoals() {
+        let today = Calendar.current.startOfDay(for: Date())
+        // Если сегодня уже лочили и goalsByDay покрывает все прошлые дни — выходим без O(n) скана
+        if goalLockedOnDay == today {
+            let entryDates = Set(entries.lazy.filter {
+                Calendar.current.startOfDay(for: $0.date) < today
+            }.map { Calendar.current.startOfDay(for: $0.date) })
+            guard !entryDates.subtracting(goalsByDay.keys).isEmpty else { return }
+        }
+        let entryDates = Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
+        let datesToLock = entryDates.subtracting(goalsByDay.keys).filter { $0 < today }
+        guard !datesToLock.isEmpty else { goalLockedOnDay = today; return }
+
+        var newRecords: [GoalRecord] = []
+        // По возрастанию даты и с немедленной записью в goalsByDay: adaptedGoal(for:)
+        // читает цели предыдущих дней недели через goal(for:), то есть из этого же словаря.
+        // Без сортировки порядок обхода Set недетерминирован, а без записи в словарь дни
+        // одной пачки считали бы банк друг от друга по неадаптированной цели — и итог
+        // зависел бы от того, когда пользователь открыл приложение, а не от данных.
+        for date in datesToLock.sorted() {
+            let lockedGoal = adaptedGoal(for: date)
+            goalsByDay[date] = lockedGoal
+            let record = GoalRecord(date: date, goal: lockedGoal)
+            context.insert(record)
+            newRecords.append(record)
+        }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
+        goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
+        goalLockedOnDay = today
+        rebuildCaches()
     }
 }

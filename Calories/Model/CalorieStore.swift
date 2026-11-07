@@ -3,25 +3,28 @@ import SwiftData
 import Observation
 import OSLog
 
-private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories", category: "CalorieStore")
+/// Журнал хранилища. Имя `logger` в этом проекте занято пофайлово — так же
+/// заведены журналы у покупок и напоминаний, — поэтому расширения в соседних
+/// файлах берут этот, общий, а не заводят третий с тем же именем.
+let storeLogger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories", category: "CalorieStore")
 
 @Observable
 @MainActor
 final class CalorieStore {
-    private let context: ModelContext
+    let context: ModelContext
     /// Хранилище настроек. Инжектится, чтобы тесты не трогали боевые UserDefaults приложения:
     /// юнит-тесты запускаются внутри процесса Calories.app, и `.standard` там — реальные данные пользователя.
     @ObservationIgnored let defaults: UserDefaults
     /// Общий с виджетом контейнер. Тесты передают nil, чтобы не переписывать боевые данные виджета.
     @ObservationIgnored let groupDefaults: UserDefaults?
 
-    private(set) var entries: [FoodEntry] = []
-    private(set) var customFoods: [FoodItem] = []
-    private(set) var dishes: [Dish] = []
-    private(set) var weightEntries: [WeightEntry] = []
-    private(set) var goalRecords: [GoalRecord] = []
-    private(set) var measurements: [BodyMeasurement] = []
-    private(set) var fastDays: [FastDay] = []
+    var entries: [FoodEntry] = []
+    var customFoods: [FoodItem] = []
+    var dishes: [Dish] = []
+    var weightEntries: [WeightEntry] = []
+    var goalRecords: [GoalRecord] = []
+    var measurements: [BodyMeasurement] = []
+    var fastDays: [FastDay] = []
     var dailyGoal: Int {
         // Кэш обязателен: adaptedTodayGoal (его читает кольцо на «Сегодня») считается только
         // в rebuildCaches(). Без этого цель меняется в графиках, но не в кольце — они расходятся,
@@ -39,7 +42,7 @@ final class CalorieStore {
     /// профиля показывало дефицит. Теперь число действует только в той фазе,
     /// под которую его записали, — дальше норма идёт по формуле плана. Числом,
     /// а не формулой, его держат ради «замедлить»: та пишет сюда пересчитанное.
-    private(set) var dailyGoalPhaseID: UUID?
+    var dailyGoalPhaseID: UUID?
 
     /// Откуда взялась дневная норма — и, значит, что с ней делать, когда
     /// изменится расход.
@@ -60,7 +63,7 @@ final class CalorieStore {
         case manual
     }
 
-    private(set) var dailyGoalSource: GoalSource = .plan
+    var dailyGoalSource: GoalSource = .plan
 
     private func setGoalSource(_ source: GoalSource) {
         dailyGoalSource = source
@@ -71,10 +74,10 @@ final class CalorieStore {
         dailyGoalPhaseID = plan?.phase(on: Date())?.id
         defaults.set(dailyGoalPhaseID?.uuidString, forKey: Keys.goalPhase)
     }
-    private(set) var profile: UserProfile?
-    private(set) var plan: Plan?
+    var profile: UserProfile?
+    var plan: Plan?
     /// Премиум куплен. Сам по себе не значит доступа: его даёт ещё и пробный период.
-    private(set) var hasPurchasedPremium: Bool {
+    var hasPurchasedPremium: Bool {
         didSet {
             defaults.set(hasPurchasedPremium, forKey: Keys.premium)
             // И в общую группу — сразу, а не до следующего пересчёта дня:
@@ -86,29 +89,7 @@ final class CalorieStore {
 
     /// Когда начался пробный период плана. Начинается один раз — при первом плане
     /// из онбординга — и заново не выдаётся, даже если план завершить и начать снова.
-    private(set) var trialStartedAt: Date?
-
-    /// Две недели, а не одна: первый вердикт «как идёт план» появляется примерно
-    /// через две недели взвешиваний. Неделя кончалась бы раньше, чем человек
-    /// увидит, за что платит.
-    static let trialDays = 14
-
-    var trialEndsAt: Date? {
-        trialStartedAt.flatMap { Calendar.current.date(byAdding: .day, value: Self.trialDays, to: $0) }
-    }
-
-    var isTrialActive: Bool {
-        guard let end = trialEndsAt else { return false }
-        return Date() < end
-    }
-
-    /// Сколько полных дней пробного периода осталось. nil — его нет или он кончился.
-    var trialDaysLeft: Int? {
-        guard isTrialActive, let end = trialEndsAt else { return nil }
-        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: Date()),
-                                                   to: Calendar.current.startOfDay(for: end)).day ?? 0
-        return max(days, 0)
-    }
+    var trialStartedAt: Date?
 
     /// Куплена пара приложений — здесь или в GymLogger.
     ///
@@ -122,20 +103,13 @@ final class CalorieStore {
     /// открывает только бандл, иначе продаём одно, а отдаём два.
     private(set) var bundleUnlocked = false
 
-    /// Доступ к платному: куплено, идёт пробный период или куплена пара.
-    /// Запись меняет только покупку.
-    var isPremium: Bool {
-        get { hasPurchasedPremium || isTrialActive || bundleUnlocked }
-        set { hasPurchasedPremium = newValue }
-    }
-
     /// Что сейчас в зале: разгрузка, тип дня, объём недели. nil — соседнего
     /// приложения нет или оно молчит.
     ///
     /// Снимок держим в памяти, а не читаем при каждом обращении: к нему
     /// ходят и вердикт недели, и подсказки дня, а меняется он несколько раз
     /// в сутки.
-    private(set) var gymState: GymBridge.State?
+    var gymState: GymBridge.State?
 
     /// Имя сегодняшней тяжёлой тренировки — или nil, когда день лёгкий,
     /// это отдых, или о дне ничего не известно.
@@ -163,52 +137,25 @@ final class CalorieStore {
 
 
 
-    /// Пробный период был и кончился, а покупки нет — пэйвол говорит об этом прямо.
-    var trialEnded: Bool {
-        trialStartedAt != nil && !isTrialActive && !hasPurchasedPremium
-    }
-
-    /// Что человек успел за пробный период: дни с записями и сдвиг веса по тренду.
-    var trialSummary: (loggedDays: Int, weightChangeKg: Double?)? {
-        guard let start = trialStartedAt, let end = trialEndsAt else { return nil }
-        // Обе границы — в сутках. Записи сложены по дням, и сравнивать день с
-        // мгновением нельзя: пробный период кончается в тот же час, в который
-        // начался, а день, в который он кончился, начался до этого часа — и
-        // попадал в итог целиком, вместе с ужином, съеденным уже после конца.
-        let calendar = Calendar.current
-        let from = calendar.startOfDay(for: start)
-        let until = calendar.startOfDay(for: end)
-        let days = entriesByDay.keys.filter { $0 >= from && $0 < until }.count
-        var change: Double?
-        if let plan, let trend = weightKg { change = trend - plan.startWeightKg }
-        return (days, change)
-    }
-
-    func startTrialIfNeeded(now: Date = Date()) {
-        guard trialStartedAt == nil else { return }
-        trialStartedAt = now
-        defaults.set(now, forKey: Keys.trialStarted)
-    }
-
     // Кэшированные производные — перестраиваются в rebuildCaches() после каждого изменения данных
-    private(set) var todayEntries: [FoodEntry] = []
-    private(set) var consumedToday: Int = 0
-    private(set) var macrosToday: Macros = .zero
-    private(set) var days: [DaySummary] = []
-    private(set) var lastSevenDays: [DaySummary] = []
-    private(set) var historyDays: [DaySummary] = []
-    private(set) var hasWeighedToday: Bool = false
-    private(set) var adherence: PlanAdherence?
+    var todayEntries: [FoodEntry] = []
+    var consumedToday: Int = 0
+    var macrosToday: Macros = .zero
+    var days: [DaySummary] = []
+    var lastSevenDays: [DaySummary] = []
+    var historyDays: [DaySummary] = []
+    var hasWeighedToday: Bool = false
+    var adherence: PlanAdherence?
     /// Что было до сегодня: законченные сушки, наборы и поддержания.
     /// Без этой памяти нельзя ответить, когда снова можно сушиться.
     private(set) var phaseHistory: [PhaseRecord] = []
     /// Расход по факту за последние две недели — что говорят дневник и весы.
-    private(set) var adaptiveTDEE: AdaptiveTDEE.Result?
+    var adaptiveTDEE: AdaptiveTDEE.Result?
     /// Он же, сглаженный между днями: цель не должна прыгать за каждым всплеском.
-    private(set) var smoothedTDEE: Double?
+    var smoothedTDEE: Double?
     /// Что у этого человека «обычный день» — в шагах и в потраченном.
     /// nil — данных ещё мало, идёт период привыкания, и поправка не работает.
-    private(set) var activityBaseline: ActivityAdjustment.Baseline?
+    var activityBaseline: ActivityAdjustment.Baseline?
     /// Считать ли норму от факта, а не от формулы. Включено, пока человек
     /// не выключил: формула ошибается на сотни калорий, и дефицит, в котором
     /// сидят, думая, что едят вдоволь, — цена этой ошибки.
@@ -228,24 +175,24 @@ final class CalorieStore {
         if usesAdaptiveTDEE, let smoothedTDEE { return smoothedTDEE }
         return profile?.tdee ?? Double(dailyGoal)
     }
-    private(set) var streak: Int = 0
-    private(set) var bestStreak: Int = 0
-    private(set) var loggingStreak: Int = 0
-    private(set) var proteinStreak: Int = 0
-    private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
-    private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
+    var streak: Int = 0
+    var bestStreak: Int = 0
+    var loggingStreak: Int = 0
+    var proteinStreak: Int = 0
+    var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
+    var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
     /// Недавнее — съеденное и заведённое вперемешку, по давности.
-    private(set) var recentFoods: [FoodItem] = []
-    private(set) var recentDishes: [Dish] = []
+    var recentFoods: [FoodItem] = []
+    var recentDishes: [Dish] = []
     /// Свои продукты, которым каталог может дать витамины, а они ещё не взяты.
     ///
     /// Считается здесь, а не в строке списка: поиск по каталогу на каждую
     /// перерисовку — тот же капкан, что уже подтормаживал ввод в поиске.
     /// Своих продуктов немного, поэтому раз на изменение данных это дёшево.
-    @ObservationIgnored private(set) var foodsOfferedVitamins: Set<UUID> = []
+    @ObservationIgnored var foodsOfferedVitamins: Set<UUID> = []
     /// Отпечаток своих продуктов, по которому видно, надо ли пересчитывать
     /// предложения витаминов. Ноль — «ещё не считали ни разу».
-    @ObservationIgnored private var vitaminOffersSignature: Int?
+    @ObservationIgnored var vitaminOffersSignature: Int?
     /// Какой макрос сегодня ведущий — тот, что ещё не закрыт.
     ///
     /// Порядок закрытия: белок, потом жир, потом углеводы. По нему красится
@@ -253,42 +200,42 @@ final class CalorieStore {
     /// что осталось добрать, а не украшает экран.
     ///
     /// nil — закрыто всё.
-    private(set) var focusMacro: MacroKind?
-    private(set) var adaptedTodayGoal: Int = 0
-    private(set) var calorieBankBonus: Int = 0
+    var focusMacro: MacroKind?
+    var adaptedTodayGoal: Int = 0
+    var calorieBankBonus: Int = 0
 
     // O(1) словари для быстрого поиска
-    @ObservationIgnored private(set) var entriesByDay: [Date: [FoodEntry]] = [:]
+    @ObservationIgnored var entriesByDay: [Date: [FoodEntry]] = [:]
     /// Категория по имени продукта. Строится один раз на обновление, потому что
     /// раньше каждая строка дневника при каждой перерисовке линейно прочёсывала
     /// и свои продукты, и встроенную базу — на каждое слово в названии приёма пищи.
-    @ObservationIgnored private(set) var categoryByFoodName: [String: FoodCategory] = [:]
+    @ObservationIgnored var categoryByFoodName: [String: FoodCategory] = [:]
     /// Кашрутный статус по названию продукта — тем же способом, что категория.
     /// Записи дневника его не хранят: продукт правят, а снимок остаётся, и
     /// статус приходится собирать обратно по имени.
-    @ObservationIgnored private(set) var kosherByFoodName: [String: KosherStatus] = [:]
+    @ObservationIgnored var kosherByFoodName: [String: KosherStatus] = [:]
     /// Продукты, после которых ждут как после мясного: твёрдый выдержанный сыр.
-    @ObservationIgnored private(set) var hardCheeseFoodNames: Set<String> = []
+    @ObservationIgnored var hardCheeseFoodNames: Set<String> = []
     /// Запрещённые видом. Множеством, а не словарём: ответ тут один — есть
     /// имя в наборе или нет.
-    @ObservationIgnored private(set) var forbiddenFoodNames: Set<String> = []
+    @ObservationIgnored var forbiddenFoodNames: Set<String> = []
     /// Состав на 100 г по названию продукта или блюда. Записи дневника его не
     /// хранят — только калории и макросы, — поэтому за витаминами приходится
     /// возвращаться к тому, из чего запись сделана.
-    @ObservationIgnored private(set) var nutrientProfilesByName: [String: NutrientProfile] = [:]
+    @ObservationIgnored var nutrientProfilesByName: [String: NutrientProfile] = [:]
     /// Дни голодания множеством — их проверяют в каждом дне серии и банка.
-    @ObservationIgnored private(set) var fastDates: Set<Date> = []
-    @ObservationIgnored private(set) var goalsByDay: [Date: Int] = [:]
+    @ObservationIgnored var fastDates: Set<Date> = []
+    @ObservationIgnored var goalsByDay: [Date: Int] = [:]
     // Кэш: день, на который уже залочены все прошлые цели — повторный вызов внутри дня бесплатен
-    @ObservationIgnored private var goalLockedOnDay: Date? = nil
+    @ObservationIgnored var goalLockedOnDay: Date? = nil
     /// Сутки, на которые собраны кэши. Всё «сегодняшнее» — consumedToday, groupedTodayEntries,
     /// streak — считается один раз в rebuildCaches(), поэтому после полуночи данные устаревают
     /// молча: приложение продолжает показывать вчерашний день, пока что-нибудь не дёрнет пересчёт.
-    @ObservationIgnored private var cachesBuiltForDay: Date = Calendar.current.startOfDay(for: Date())
+    @ObservationIgnored var cachesBuiltForDay: Date = Calendar.current.startOfDay(for: Date())
 
     nonisolated static let appGroup = "group.calories.shared"
 
-    private enum Keys {
+    enum Keys {
         static let goal = "daily_goal"
         static let adaptiveTDEE = "adaptive_tdee"
         static let adaptiveTDEEDay = "adaptive_tdee_day"
@@ -373,7 +320,7 @@ final class CalorieStore {
         // Только для тестов и только в отладочной сборке.
         if UserDefaults.standard.bool(forKey: "ui_test_reset_measurements") {
             for measurement in measurements { context.delete(measurement) }
-            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+            do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
             measurements = []
         }
 #endif
@@ -412,7 +359,7 @@ final class CalorieStore {
             repaired = true
         }
         guard repaired else { return }
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
     }
 
     /// Подтянуть норму плана к расходу, от которого её считают.
@@ -423,211 +370,15 @@ final class CalorieStore {
     /// выходит ровно то, ради чего всё делалось: тратишь 4000, ешь 2700 и
     /// думаешь, что это поддержание.
     ///
-    /// Синхронизируем только когда расход изменился: иначе правка «ставить N
-    /// ккал/день» с экрана плана затиралась бы на каждой перестройке кэшей.
-    private func syncGoalWithExpenditure() {
-        guard let plan, profile != nil else { return }
-        // Своё число не трогаем: за ним нет формулы, которую можно пересчитать,
-        // а молча заменить его — значит отменить решение человека. Если из-за
-        // расхода оно устарело, об этом скажет экран плана своим предложением.
-        guard dailyGoalSource != .manual else { return }
-        let expenditure = (workingTDEE / 5).rounded() * 5
-        guard defaults.object(forKey: Keys.goalSyncedTDEE) as? Double != expenditure else { return }
-        defaults.set(expenditure, forKey: Keys.goalSyncedTDEE)
-        // Договорились — значит договорились до следующего обзора.
-        //
-        // Норма шла за расходом сама, и правильно шла: расход меряется, и
-        // застывшее число быстро перестаёт значить обещанное. Но человек от
-        // этого жил с цифрой, которая менялась у него за спиной: сегодня
-        // 2824, завтра 2492, и ни одного слова о том, почему. Теперь
-        // пересчёт не применяется молча — он откладывается до недельного
-        // обзора, где его показывают и спрашивают.
-        if goalWasAgreed {
-            proposeGoalChange(plan: plan)
-            return
-        }
-        // Принятый пересчёт пересчитываем так же, как его считал экран плана:
-        // человек согласился приходить к цели фазы в срок, а не на конкретное
-        // число. Иначе подтянувшиеся шаги возвращали норму к плановой, и
-        // прибавка, принятая утром, пропадала без следа.
-        let target = dailyGoalSource == .recalibrated
-            ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
-            : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
-        if target != dailyGoal { dailyGoal = target }
-    }
-
-    /// Сколько есть, чтобы прийти к цели идущей фазы в срок от нынешнего веса.
-    ///
-    /// Считается здесь, а не берётся у `adherence`: сверка собирается раньше
-    /// расхода, и на том самом пересчёте, ради которого всё затевается, у неё
-    /// в руках вчерашний расход.
-    func recalibratedGoal(now: Date = Date()) -> Int? {
-        guard let adherence, let weight = adherence.actualWeightToday else { return nil }
-        let remainingDays = adherence.phaseEnd.timeIntervalSince(now) / 86400
-        guard remainingDays > 0 else { return nil }
-        let dailyDelta = (adherence.phaseTargetWeightKg - weight) * Plan.kcalPerKg / remainingDays
-        return Int((workingTDEE + dailyDelta).rounded())
-    }
-
     /// Пересчитывает всё производное от записей дневника.
     ///
     /// Порядок шагов не случаен и держался раньше только комментариями внутри
     /// одной стотридцатистрочной функции: словари нужны сводкам, сводки —
     /// сериям, расход — цели, а «Недавнее» берёт категорию из словарей.
     /// Теперь порядок виден сразу, а каждый шаг читается отдельно.
-    private func rebuildCaches() {
-        let calendar = Calendar.current
-
-        rebuildLookups(calendar)
-        rebuildToday(calendar)
-        rebuildDays(calendar)
-
-        hasWeighedToday = weightEntries.contains { calendar.isDateInToday($0.date) }
-        adherence = computePlanAdherence()
-
-        rebuildStreaks(calendar)
-        rebuildExpenditure(calendar)
-
-        // После словарей: «Недавнее» берёт из них категорию продукта.
-        rebuildRecent()
-        rebuildVitaminOffers()
-
-        cachesBuiltForDay = calendar.startOfDay(for: Date())
-        publishToWidget(calendar)
-        BodyBridge.publish(profile: profile, measurement: latestMeasurement)
-    }
-
-#if DEBUG
-    /// Сколько стоит каждый шаг перестройки — в миллисекундах.
-    ///
-    /// Перестройка идёт на каждую запись еды и на каждое потягивание списка
-    /// вниз, то есть внутри жеста, и лишние сто миллисекунд здесь человек
-    /// чувствует как подлагивание. Вопрос «что именно из этого дорого»
-    /// возникает не первый раз, и отвечать на него догадками дороже, чем
-    /// держать эти двадцать строк.
-    func rebuildTimings() -> [(step: String, ms: Double)] {
-        let calendar = Calendar.current
-        func measure(_ name: String, _ block: () -> Void) -> (String, Double) {
-            let start = Date()
-            block()
-            return (name, Date().timeIntervalSince(start) * 1000)
-        }
-        return [
-            measure("словари") { rebuildLookups(calendar) },
-            measure("сегодня") { rebuildToday(calendar) },
-            measure("дни") { rebuildDays(calendar) },
-            measure("серии") { rebuildStreaks(calendar) },
-            measure("расход") { rebuildExpenditure(calendar) },
-            measure("недавнее") { rebuildRecent() },
-            measure("витамины своим") { rebuildVitaminOffers() },
-            measure("виджет") { publishToWidget(calendar) },
-        ]
-    }
-#endif
 
     /// Словари для O(1)-обращений: день → записи, имя → категория и состав,
     /// день → зафиксированная цель.
-    private func rebuildLookups(_ calendar: Calendar) {
-        // Строим O(1)-словари один раз
-        entriesByDay = Dictionary(grouping: entries) { calendar.startOfDay(for: $0.date) }
-        // Свой продукт идёт последним и перекрывает одноимённый встроенный:
-        // так же, как в прежнем поиске, где сначала смотрели свои.
-        // Пост может идти через полночь: в наборе все сутки, которых он касается.
-        fastDates = Set(fastDays.flatMap(\.coveredDays))
-        categoryByFoodName = Dictionary(
-            (FoodDatabase.items + customFoods).map { ($0.name, $0.foodCategory) },
-            uniquingKeysWith: { _, own in own }
-        )
-        let allFoods = FoodDatabase.items + customFoods
-        kosherByFoodName = Dictionary(
-            allFoods.map { ($0.name, $0.kosherStatus) },
-            uniquingKeysWith: { _, own in own }
-        )
-        hardCheeseFoodNames = Set(allFoods.filter(\.isHardCheese).map(\.name))
-        forbiddenFoodNames = Set(allFoods.filter(\.kosherForbidden).map(\.name))
-        // Каталог отдаёт состав уже разобранным и не меняется, поэтому его
-        // словарь строится один раз; поверх кладём свои продукты — они как раз
-        // меняются, но их немного.
-        var profiles = FoodCatalog.nutrientProfilesByName
-        for food in customFoods where !food.micronutrients.isEmpty {
-            // Оценка по классу идёт в день с половинным весом: вещества у
-            // похожей еды расходятся примерно в полтора раза, и объявлять такой
-            // день изученным наравне с измеренным нельзя.
-            profiles[food.name] = NutrientProfile(
-                per100g: food.micronutrients,
-                coverage: food.micronutrientsAreEstimated ? NutrientProfile.estimateCoverage : 1)
-        }
-        // Блюда после продуктов: их состав считается по ингредиентам, а значит
-        // словарь продуктов к этому моменту должен быть уже собран.
-        for dish in dishes {
-            guard let profile = DishNutrients.profile(of: dish.ingredients,
-                                                      composition: { profiles[$0]?.per100g })
-            else { continue }
-            profiles[dish.name] = profile
-        }
-        nutrientProfilesByName = profiles
-        // uniquingKeysWith, а не uniqueKeysWithValues: последняя форма падает на повторном
-        // ключе. Две записи могут схлопнуться в один локальный день после смены часового пояса,
-        // и это был бы краш на каждом запуске без возможности выбраться.
-        goalsByDay = Dictionary(
-            goalRecords.map { (calendar.startOfDay(for: $0.date), $0.goal) },
-            uniquingKeysWith: { _, newer in newer }
-        )
-    }
-
-    /// Сегодняшний день: записи, съеденное, макросы и приёмы пищи по времени.
-    private func rebuildToday(_ calendar: Calendar) {
-        // Агрегаты за сегодня — один проход по entries
-        todayEntries = entries.filter { calendar.isDateInToday($0.date) }
-        consumedToday = todayEntries.reduce(0) { $0 + $1.calories }
-        macrosToday = todayEntries.reduce(Macros.zero) { $0 + $1.macros }
-
-        groupedTodayEntries = MealPeriod.group(todayEntries)
-    }
-
-
-    /// Дневные сводки: все дни, последняя неделя и история.
-    private func rebuildDays(_ calendar: Calendar) {
-        // Сводки по дням — один проход по сгруппированному словарю
-        // entries уже отсортированы по дате desc, порядок внутри группы сохраняется
-        let allDays = entriesByDay.map { day, dayEntries in
-            DaySummary(date: day, entries: dayEntries, goal: goal(for: day))
-        }.sorted { $0.date > $1.date }
-        days = allDays
-        let pastDays = allDays.filter { !calendar.isDateInToday($0.date) }
-
-        // Последние 7 дней включая пустые — O(7) через словарь
-        lastSevenDays = (0..<7).reversed().map { offset in
-            let date = calendar.date(byAdding: .day, value: -offset, to: Date()) ?? Date()
-            let day = calendar.startOfDay(for: date)
-            return DaySummary(date: day, entries: entriesByDay[day] ?? [], goal: goal(for: day))
-        }
-
-        // История: последние 6 дней (не сегодня) всегда + старые дни с записями
-        // Set из 6 дат для O(1) исключения из pastDays
-        let last6 = lastSevenDays.filter { !calendar.isDateInToday($0.date) }
-        let last6Dates = Set(last6.map { $0.date })
-        let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
-        historyDays = (last6 + olderDays).sorted { $0.date > $1.date }
-    }
-
-    /// Серии: дней подряд с записями, с выполненной нормой и с белком.
-    private func rebuildStreaks(_ calendar: Calendar) {
-        let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
-        streak = currentStreak
-        bestStreak = bestStreakVal
-        loggingStreak = currentLoggingStreak
-
-        let today14 = calendar.startOfDay(for: Date())
-        proteinStreak = computeProteinStreak()
-
-        streakHistory = (0..<14).reversed().compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
-            return (date, isDayLogged(date), isDayKept(date))
-        }
-    }
-
-    /// Как часто пересматривается измеренный расход, в днях.
     static let expenditureUpdateDays = 7
 
     /// Сохранённая активность по дням. Дневник её не собирает — она приходит
@@ -639,7 +390,7 @@ final class CalorieStore {
     /// четырёхсот дней из JSON стоит недёшево, а спрашивают её на каждый день
     /// недельной полоски и на каждую строку истории — то есть десятки раз за
     /// один экран.
-    private(set) var stepHistory: [ActivityDay] = []
+    var stepHistory: [ActivityDay] = []
 
     /// Та же история, но прочитанная заново.
     ///
@@ -647,225 +398,6 @@ final class CalorieStore {
     /// всё, что записано к этой минуте, а не то, что лежало в памяти с
     /// последней перестройки.
     var storedActivity: [ActivityDay] { ActivityHistory(defaults: defaults).days }
-
-    /// Расход за день — тот, что действовал в этот день.
-    ///
-    /// Без истории вчерашний день считался сегодняшним расходом: стоило
-    /// оценке поехать вниз, и вчерашняя норма задним числом становилась ниже
-    /// съеденного — зелёный день перекрашивался в оранжевый, хотя человек
-    /// ничего не менял.
-    func expenditure(on date: Date) -> Double? {
-        guard let base = baseExpenditure(on: date) else { return nil }
-        return base + activityAdjustment(on: date, expenditure: base)
-    }
-
-    /// Недельный расход без оглядки на активность этого дня.
-    private func baseExpenditure(on date: Date) -> Double? {
-        let day = Calendar.current.startOfDay(for: date)
-        guard day < Calendar.current.startOfDay(for: Date()) else { return smoothedTDEE }
-        return tdeeHistory[Self.historyKey(day)] ?? smoothedTDEE
-    }
-
-    /// Поправка за активность этого дня: насколько он был подвижнее обычного.
-    ///
-    /// Ноль, пока не набралось двух недель шагов, — и это не заглушка, а
-    /// ответ: не зная обычного дня, сравнивать не с чем.
-    func activityAdjustment(on date: Date, expenditure: Double? = nil) -> Double {
-        let calendar = Calendar.current
-        let day = calendar.startOfDay(for: date)
-        guard let base = expenditure ?? baseExpenditure(on: day) else { return 0 }
-        return ActivityAdjustment.adjustment(
-            day: activity(on: day),
-            baseline: activityBaseline,
-            weightKg: latestWeight?.weightKg ?? profile?.weightKg,
-            expenditure: base,
-            partialDay: day >= calendar.startOfDay(for: Date()))
-    }
-
-    /// Сколько человек спал перед этим днём и насколько это меньше обычного.
-    ///
-    /// Дневнику это нужно не для арифметики, а для объяснений: после короткой
-    /// ночи и вес скачет, и голод сильнее, и шагов меньше — без этой строчки
-    /// такой день выглядит просто сорванным.
-    func sleep(on date: Date) -> (hours: Double, shortfall: Double, fromBedOnly: Bool)? {
-        guard let day = activity(on: date), let hours = day.sleepHours else { return nil }
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        let from = calendar.date(byAdding: .day, value: -28, to: today) ?? today
-        let nights = stepHistory.filter { $0.date >= from }.compactMap(\.sleepHours)
-        let usual = nights.count >= 7 ? nights.reduce(0, +) / Double(nights.count) : hours
-        return (hours, SleepAnalysis.shortfall(hours: hours, usual: usual),
-                day.sleepFromBedOnly ?? false)
-    }
-
-    /// Пульс в покое сейчас и насколько он выше привычного.
-    ///
-    /// Нужен не для нормы, а для ответа на «почему вес встал, хотя я всё делаю
-    /// правильно»: неделя подряд с повышенным пульсом покоя говорит, что пора
-    /// отдохнуть, а не резать калории ещё.
-    func restingPulse(now: Date = Date()) -> (value: Int, rise: Int?)? {
-        let recent = pulses(lastDays: 7, now: now)
-        guard let latest = recent.last else { return nil }
-        return (latest, RestingPulse.rise(recent: recent, usual: pulses(lastDays: 28, now: now)))
-    }
-
-    private func pulses(lastDays count: Int, now: Date) -> [Int] {
-        let calendar = Calendar.current
-        guard let from = calendar.date(byAdding: .day, value: -count, to: calendar.startOfDay(for: now))
-        else { return [] }
-        return stepHistory.filter { $0.date >= from }.compactMap(\.restingPulse)
-    }
-
-    /// Что известно про активность этого дня.
-    func activity(on date: Date) -> ActivityDay? {
-        let calendar = Calendar.current
-        return stepHistory.first { calendar.isDate($0.date, inSameDayAs: date) }
-    }
-
-    /// История расхода по дням, как она лежит в настройках.
-    private var tdeeHistory: [String: Double] {
-        defaults.dictionary(forKey: Keys.tdeeHistory) as? [String: Double] ?? [:]
-    }
-
-    static func historyKey(_ date: Date) -> String {
-        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
-    }
-
-    /// Запоминает сегодняшний расход и подчищает старое: больше года истории
-    /// не нужно никому, а словарь в настройках лучше не растить бесконечно.
-    private func rememberTodayExpenditure(_ value: Double?, on day: Date) {
-        guard let value else { return }
-        var history = tdeeHistory
-        history[Self.historyKey(day)] = value
-        if history.count > 400 {
-            for key in history.keys.sorted().prefix(history.count - 400) { history[key] = nil }
-        }
-        defaults.set(history, forKey: Keys.tdeeHistory)
-    }
-
-    /// Измеренный расход и то, что из него считается: сглаженное значение,
-    /// цель на сегодня и банк калорий.
-    private func rebuildExpenditure(_ calendar: Calendar) {
-        // Расход по факту: пересчитывается на каждой перестройке, а сглаженное
-        // значение двигается раз в сутки — иначе одна запись еды дёргала бы
-        // цель несколько раз за день.
-        adaptiveTDEE = computeAdaptiveTDEE()
-        let today = calendar.startOfDay(for: Date())
-        if let estimate = adaptiveTDEE?.tdee {
-            let storedDay = defaults.object(forKey: Keys.adaptiveTDEEDay) as? Date
-            let stored = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
-            // Норма пересматривается раз в неделю, а не каждый день.
-            //
-            // Ежедневный пересчёт человек видит как «оно опять срезало мне
-            // калории»: окно на две недели сдвигается каждый день, оценка
-            // каждый день чуть другая, и цель ползёт. Раз в неделю — и шаг
-            // заметен, и понятно, к чему он относится; так же поступают те,
-            // кто считает расход по факту дольше всех.
-            let daysSinceUpdate = storedDay.map {
-                calendar.dateComponents([.day], from: $0, to: today).day ?? 0
-            }
-            if let stored, let daysSinceUpdate, daysSinceUpdate < Self.expenditureUpdateDays {
-                smoothedTDEE = stored
-            } else {
-                let next = AdaptiveTDEE.smoothed(previous: stored, estimate: estimate)
-                smoothedTDEE = next
-                defaults.set(next, forKey: Keys.adaptiveTDEE)
-                defaults.set(today, forKey: Keys.adaptiveTDEEDay)
-            }
-            rememberTodayExpenditure(smoothedTDEE, on: today)
-        } else {
-            smoothedTDEE = defaults.object(forKey: Keys.adaptiveTDEE) as? Double
-        }
-
-        stepHistory = ActivityHistory(defaults: defaults).days
-        refreshActivityBaseline(calendar, today: today)
-        rebuildFocusMacro()
-        syncGoalWithExpenditure()
-
-        let adapted = computeAdaptedTodayGoal()
-        adaptedTodayGoal = adapted
-        calorieBankBonus = adapted - effectiveGoal(for: Date())
-        rememberTodaysGoal(adapted)
-    }
-
-    /// Записать норму, которая стоит на экране сегодня.
-    ///
-    /// Прошедший день до сих пор получал свою норму задним числом: вечером
-    /// `lockPastGoals` считал её заново — и считал **сегодняшним** числом.
-    /// А `dailyGoal` меняется сам, вслед за измеренным расходом. В итоге день,
-    /// прожитый с нормой 2822, назавтра показывал 2492, и съеденное ровно в
-    /// норму превращалось в перебор на триста килокалорий.
-    ///
-    /// Поэтому норма дня записывается, пока день идёт: на экране и в истории
-    /// должно стоять одно и то же число. Запись обновляется на каждой
-    /// перестройке — к полуночи в ней останется то, что человек видел
-    /// последним.
-    private func rememberTodaysGoal(_ goal: Int) {
-        let today = Calendar.current.startOfDay(for: Date())
-        if let existing = goalRecords.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
-            guard existing.goal != goal else { return }
-            existing.goal = goal
-        } else {
-            let record = GoalRecord(date: today, goal: goal)
-            context.insert(record)
-            goalRecords = (goalRecords + [record]).sorted { $0.date < $1.date }
-        }
-        goalsByDay[today] = goal
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-    }
-
-    /// Пересматривает «обычный день» — раз в неделю, как и сам расход.
-    ///
-    /// Чаще не нужно: среднее за четыре недели от одного дня почти не меняется,
-    /// зато цель ползла бы каждый день. Реже — плохо: человек меняет работу,
-    /// покупает велосипед, ложится с травмой, и привычная активность у него
-    /// становится другой. Раз в неделю и подстраивается, и не дёргает.
-    private func refreshActivityBaseline(_ calendar: Calendar, today: Date) {
-        let storedDay = defaults.object(forKey: Keys.activityBaselineDay) as? Date
-        let stored = defaults.data(forKey: Keys.activityBaseline).flatMap {
-            try? JSONDecoder().decode(ActivityAdjustment.Baseline.self, from: $0)
-        }
-        let daysSince = storedDay.map { calendar.dateComponents([.day], from: $0, to: today).day ?? 0 }
-        // Среднее, посчитанное по другому источнику, — не мерка: браслет
-        // считает щедрее телефона, и обычный день по чужой линейке выглядит
-        // нагруженным. Пока новое не набралось, честнее не иметь никакого.
-        let current = ActivityAdjustment.currentSource(in: stepHistory)
-        let usable = stored.flatMap { $0.source == current ? $0 : nil }
-        if let usable, let daysSince, daysSince < Self.expenditureUpdateDays {
-            activityBaseline = usable
-            return
-        }
-        guard let fresh = ActivityAdjustment.baseline(from: stepHistory, now: today, calendar: calendar) else {
-            // Период привыкания ещё идёт. Прошлое значение при этом не стираем:
-            // если данные пропали на неделю (браслет на зарядке, отпуск без
-            // телефона), лучше держать прежнюю картину, чем выключать поправку.
-            activityBaseline = usable
-            return
-        }
-        activityBaseline = fresh
-        if let data = try? JSONEncoder().encode(fresh) {
-            defaults.set(data, forKey: Keys.activityBaseline)
-            defaults.set(today, forKey: Keys.activityBaselineDay)
-        }
-    }
-
-    /// Ведущий макрос: первый недобранный по порядку «белок → жир → углеводы».
-    private func rebuildFocusMacro() {
-        let targets: [MacroKind: Double?] = [
-            .protein: proteinTarget, .fat: fatTarget, .carbs: carbsTarget
-        ]
-        let eaten: [MacroKind: Double] = [
-            .protein: macrosToday.protein, .fat: macrosToday.fat, .carbs: macrosToday.carbs
-        ]
-        focusMacro = AppAccent.focusOrder.first { kind in
-            guard let target = targets[kind] ?? nil, target > 0 else { return false }
-            return (eaten[kind] ?? 0) < target
-        }
-        // Виджет живёт в своём процессе и до дневника не дотягивается —
-        // кладём ему готовый ответ.
-        defaults.set(focusMacro?.rawValue ?? AppAccent.kcal.rawValue, forKey: "focus_macro")
-    }
 
     /// Пересобирает кэши, если с момента последнего пересчёта сменились сутки.
     /// Дёшево, когда день тот же, поэтому вызывать можно на каждую активацию приложения.
@@ -875,180 +407,6 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-
-    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую (адаптированную!)  эффективную цель
-    /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
-    func lockPastGoals() {
-        let today = Calendar.current.startOfDay(for: Date())
-        // Если сегодня уже лочили и goalsByDay покрывает все прошлые дни — выходим без O(n) скана
-        if goalLockedOnDay == today {
-            let entryDates = Set(entries.lazy.filter {
-                Calendar.current.startOfDay(for: $0.date) < today
-            }.map { Calendar.current.startOfDay(for: $0.date) })
-            guard !entryDates.subtracting(goalsByDay.keys).isEmpty else { return }
-        }
-        let entryDates = Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
-        let datesToLock = entryDates.subtracting(goalsByDay.keys).filter { $0 < today }
-        guard !datesToLock.isEmpty else { goalLockedOnDay = today; return }
-
-        var newRecords: [GoalRecord] = []
-        // По возрастанию даты и с немедленной записью в goalsByDay: adaptedGoal(for:)
-        // читает цели предыдущих дней недели через goal(for:), то есть из этого же словаря.
-        // Без сортировки порядок обхода Set недетерминирован, а без записи в словарь дни
-        // одной пачки считали бы банк друг от друга по неадаптированной цели — и итог
-        // зависел бы от того, когда пользователь открыл приложение, а не от данных.
-        for date in datesToLock.sorted() {
-            let lockedGoal = adaptedGoal(for: date)
-            goalsByDay[date] = lockedGoal
-            let record = GoalRecord(date: date, goal: lockedGoal)
-            context.insert(record)
-            newRecords.append(record)
-        }
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
-        goalLockedOnDay = today
-        rebuildCaches()
-    }
-
-    // MARK: - Замеры тела
-
-    /// Последний сеанс замеров — по нему считается отчёт.
-    var latestMeasurement: BodyMeasurement? { measurements.first }
-
-    /// Предыдущий заполненный сеанс, чтобы показать динамику относительно него.
-    var previousMeasurement: BodyMeasurement? {
-        measurements.dropFirst().first
-    }
-
-    /// Сеанс замеров за сегодня. Если его ещё нет, заводит новый, унаследовав
-    /// обхваты прошлого: снимают обычно одно-два места, а производные величины
-    /// читаются по последнему сеансу целиком.
-    func measurementForToday() -> BodyMeasurement {
-        if let latest = latestMeasurement, Calendar.current.isDateInToday(latest.date) {
-            return latest
-        }
-        let fresh = BodyMeasurement(date: Date())
-        if let previous = latestMeasurement {
-            fresh.copyValues(from: previous)
-        }
-        addMeasurement(fresh)
-        return fresh
-    }
-
-    /// Отмечен ли день голоданием. Именно отметка, а не пустой день: забытый день
-    /// и намеренное голодание выглядят в базе одинаково, и различить их больше нечем.
-    func isFastDay(_ date: Date) -> Bool {
-        fastDates.contains(Calendar.current.startOfDay(for: date))
-    }
-
-    func fastDay(on date: Date) -> FastDay? {
-        let day = Calendar.current.startOfDay(for: date)
-        return fastDays.first { $0.coveredDays.contains(day) }
-    }
-
-    /// Ближайшее голодание — сегодня или в пределах трёх дней — и советы, которые
-    /// к месту именно сейчас. nil, когда голодания впереди нет или советовать
-    /// пока рано.
-    func fastingHint(now: Date = Date()) -> FastingHint? {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: now)
-        for offset in 0...FastingAdvice.earliestDaysBefore {
-            guard let date = calendar.date(byAdding: .day, value: offset, to: today),
-                  let fast = fastDay(on: date) else { continue }
-            let items = FastingAdvice.advice(for: fast.kind, daysBefore: offset)
-            guard !items.isEmpty else { return nil }
-            return FastingHint(date: date, kind: fast.kind, daysUntil: offset,
-                               items: items,
-                               // Обратный отсчёт — только по явным границам.
-                               // У старой отметки «днём» их нет, и отсчёт шёл
-                               // бы до полуночи, хотя пост давно кончился.
-                               interval: fast.hasExplicitInterval ? fast.interval : nil)
-        }
-        return nil
-    }
-
-    /// Ближайший пост к сегодняшнему дню: идущий, иначе последний прошедший
-    /// или ближайший запланированный. Его и открывает экран голодания.
-    func nearestFast(to moment: Date = Date()) -> FastDay? {
-        if let running = runningFast(at: moment) { return running }
-        return fastDays.min {
-            abs($0.interval.start.timeIntervalSince(moment)) < abs($1.interval.start.timeIntervalSince(moment))
-        }
-    }
-
-    /// Отметить пост промежутком: с вечера одного дня до вечера другого.
-    ///
-    /// `replacing` — отметка, которую правят. Без неё правка времени заводила
-    /// бы вторую отметку рядом с прежней, когда новое начало попадает на другие
-    /// сутки.
-    @discardableResult
-    func markFast(from start: Date, to end: Date, kind: FastKind, replacing: FastDay? = nil) -> FastDay {
-        let day = Calendar.current.startOfDay(for: start)
-        if let existing = replacing ?? fastDay(on: day) {
-            existing.kind = kind
-            existing.date = day
-            existing.startedAt = start
-            existing.endedAt = end
-            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-            rebuildCaches()
-            return existing
-        }
-        let fast = FastDay(date: day, kind: kind, startedAt: start, endedAt: end)
-        context.insert(fast)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        fastDays = (fastDays + [fast]).sorted { $0.date > $1.date }
-        rebuildCaches()
-        return fast
-    }
-
-    /// Идущий прямо сейчас пост — для обратного отсчёта на «Сегодня».
-    func runningFast(at moment: Date = Date()) -> FastDay? {
-        fastDays.first { $0.hasExplicitInterval && $0.isRunning(at: moment) }
-    }
-
-    @discardableResult
-    func markFastDay(_ date: Date = Date(), kind: FastKind) -> FastDay {
-        if let existing = fastDay(on: date) {
-            existing.kind = kind
-            do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-            rebuildCaches()
-            return existing
-        }
-        let day = FastDay(date: date, kind: kind)
-        context.insert(day)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        fastDays = (fastDays + [day]).sorted { $0.date > $1.date }
-        rebuildCaches()
-        return day
-    }
-
-    func unmarkFastDay(_ date: Date = Date()) {
-        guard let day = fastDay(on: date) else { return }
-        context.delete(day)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        fastDays.removeAll { $0.id == day.id }
-        rebuildCaches()
-    }
-
-    func addMeasurement(_ measurement: BodyMeasurement) {
-        context.insert(measurement)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        measurements = (measurements + [measurement]).sorted { $0.date > $1.date }
-    }
-
-    func deleteMeasurement(_ measurement: BodyMeasurement) {
-        context.delete(measurement)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        measurements.removeAll { $0.id == measurement.id }
-    }
-
-    func saveMeasurementEdits() {
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        measurements.sort { $0.date > $1.date }
-        // Процент жира только что изменился — пусть зал узнает об этом сразу,
-        // а не на следующей перестройке кэшей.
-        BodyBridge.publish(profile: profile, measurement: latestMeasurement)
-    }
 
     // MARK: - Изменение данных
     // Живут здесь, а не в отдельном файле: им нужны сеттеры private(set)-свойств,
@@ -1111,7 +469,7 @@ final class CalorieStore {
     /// у пользователя то, что он настроил, мы не будем.
     func startPlan(_ newPlan: Plan, remembering: Bool = true) {
         guard isPremium else {
-            logger.warning("startPlan вызван без активного премиума — игнорируем")
+            storeLogger.warning("startPlan вызван без активного премиума — игнорируем")
             return
         }
         // Запоминаем, что было до правки.
@@ -1207,7 +565,7 @@ final class CalorieStore {
                 startedAt: item.startedAt, endedAt: item.endedAt))
         }
 
-        do { try context.save() } catch { logger.error("restore save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("restore save failed: \(error)") }
 
         if let restoredProfile = backup.profile {
             profile = restoredProfile
@@ -1339,7 +697,7 @@ final class CalorieStore {
 
     /// Норму хоть раз подтверждали вручную — значит дальше её меняют только с
     /// согласия.
-    private var goalWasAgreed: Bool { defaults.object(forKey: Keys.goalAgreedAt) is Date }
+    var goalWasAgreed: Bool { defaults.object(forKey: Keys.goalAgreedAt) is Date }
 
     /// Когда норму согласовали в последний раз.
     var goalAgreedAt: Date? { defaults.object(forKey: Keys.goalAgreedAt) as? Date }
@@ -1358,7 +716,7 @@ final class CalorieStore {
         return Date().timeIntervalSince(agreed) >= Double(Self.reviewIntervalDays) * 86_400
     }
 
-    private func proposeGoalChange(plan: Plan) {
+    func proposeGoalChange(plan: Plan) {
         let target = dailyGoalSource == .recalibrated
             ? (recalibratedGoal() ?? plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE))
             : plan.dailyCalorieTarget(for: Date(), tdee: workingTDEE)
@@ -1420,7 +778,7 @@ final class CalorieStore {
         let entry = FoodEntry(name: name, calories: calories, macros: macros, grams: grams, date: date,
                               components: components)
         context.insert(entry)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         entries = ([entry] + entries).sorted { $0.date > $1.date }
         rebuildCaches()
         // Прошлая дата — нужно залочить цель; сегодняшняя — нет
@@ -1431,7 +789,7 @@ final class CalorieStore {
 
     func delete(entry: FoodEntry) {
         context.delete(entry)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         entries.removeAll { $0.id == entry.id }
         rebuildCaches()
         // Удаление не может породить новый незалоченный день — лочить не нужно
@@ -1447,7 +805,7 @@ final class CalorieStore {
         // nil — правка не знает про состав (меняли калории руками), и трогать
         // его нельзя: иначе правка веса стирала бы, из чего собран приём.
         if let components { entry.components = components }
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         entries.sort { $0.date > $1.date }
         rebuildCaches()
         lockPastGoals()
@@ -1460,7 +818,7 @@ final class CalorieStore {
         food.micronutrientsAreEstimated = micronutrientsAreEstimated
         food.updatedAt = Date()
         context.insert(food)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         customFoods = (customFoods + [food]).sorted { $0.name < $1.name }
         rebuildCaches()
     }
@@ -1485,7 +843,7 @@ final class CalorieStore {
 
     func deleteCustomFood(_ food: FoodItem) {
         context.delete(food)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         customFoods.removeAll { $0.id == food.id }
         rebuildCaches()
     }
@@ -1504,7 +862,7 @@ final class CalorieStore {
         food.fat = fat
         food.carbs = carbs
         propagate(foodNamed: previousName, renamedTo: name)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         customFoods.sort { $0.name < $1.name }
         rebuildCaches()
     }
@@ -1513,7 +871,7 @@ final class CalorieStore {
     /// считается. Нужно там, где меняется одно поле и городить ради него
     /// полный `updateCustomFood` с десятком аргументов незачем.
     func persistCustomFoods() {
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         customFoods.sort { $0.name < $1.name }
         rebuildCaches()
     }
@@ -1523,7 +881,7 @@ final class CalorieStore {
         dish.defaultServingGrams = servingGrams
         dish.updatedAt = Date()
         context.insert(dish)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         dishes = [dish] + dishes
         rebuildCaches()
     }
@@ -1531,7 +889,7 @@ final class CalorieStore {
     /// Сохранить правку блюда и пересобрать то, что из него считается.
     /// Для случаев, где меняется одно поле — например, партия.
     func persistDishes() {
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         rebuildCaches()
     }
 
@@ -1542,14 +900,14 @@ final class CalorieStore {
         dish.defaultServingGrams = servingGrams
         dish.updatedAt = Date()
         propagate(dishNamed: previousName, renamedTo: name)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         rebuildCaches()
     }
 
     func deleteDish(_ dish: Dish) {
         bakeCompositionIntoEntries(of: dish)
         context.delete(dish)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         dishes.removeAll { $0.id == dish.id }
         rebuildCaches()
     }
@@ -1608,7 +966,7 @@ final class CalorieStore {
     func addWeight(_ kg: Double, date: Date = Date()) {
         let entry = WeightEntry(weightKg: kg, date: date)
         context.insert(entry)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         weightEntries = (weightEntries + [entry]).sorted { $0.date < $1.date }
         rebuildCaches()
         if var p = profile {
@@ -1619,7 +977,7 @@ final class CalorieStore {
 
     func deleteWeight(_ entry: WeightEntry) {
         context.delete(entry)
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
+        do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
         weightEntries.removeAll { $0.id == entry.id }
         rebuildCaches()
     }
@@ -1729,142 +1087,6 @@ final class CalorieStore {
         customFood(named: name) ?? FoodDatabase.items.first { $0.name == name }
     }
 
-    private func rebuildRecent() {
-        let dishNames = Set(dishes.map(\.name))
-        // Продукт по имени: свой перекрывает встроенный — его правили руками,
-        // значит он ближе к тому, что человек действительно ест.
-        var foodByName: [String: FoodItem] = [:]
-        for food in FoodDatabase.items { foodByName[food.name] = food }
-        for food in customFoods { foodByName[food.name] = food }
-
-        var seen = Set<String>()
-        // Сперва только даты и имена: объекты дорого создавать, а нужны они
-        // лишь для верхушки списка.
-        var candidates: [(date: Date, food: FoodItem)] = []
-
-        // Записи уже отсортированы по убыванию даты, поэтому первое попавшееся
-        // имя — это последний раз, когда продукт ели.
-        for entry in entries where !dishNames.contains(entry.name) {
-            for component in entry.composition where !seen.contains(component.name) {
-                guard let food = recentFood(named: component.name, from: component, in: foodByName)
-                else { continue }
-                seen.insert(component.name)
-                candidates.append((entry.date, food))
-            }
-            // Записи, сделанные до того, как состав начали хранить: имя у них
-            // склеено из названий через запятую, и это всё, что от состава
-            // осталось. Разбираем — иначе продукт, который человек ест каждый
-            // день внутри приёма, в «Недавнем» не появится никогда.
-            guard entry.components.isEmpty else { continue }
-            for part in Self.joinedNameParts(entry.name) where !seen.contains(part) {
-                guard let food = foodByName[part] else { continue }
-                seen.insert(part)
-                candidates.append((entry.date, food))
-            }
-        }
-
-        // Недавнее — это и съеденное, и заведённое: продукт заводят ровно
-        // тогда, когда собираются им пользоваться.
-        for food in customFoods {
-            guard let updatedAt = food.updatedAt, !seen.contains(food.name) else { continue }
-            seen.insert(food.name)
-            candidates.append((updatedAt, food))
-        }
-
-        recentFoods = candidates
-            .sorted { $0.date > $1.date }
-            .prefix(Self.recentLimit)
-            .map(\.food)
-
-        var seenDishes = Set<String>()
-        var dishCandidates: [(date: Date, dish: Dish)] = []
-        for entry in entries {
-            guard !seenDishes.contains(entry.name) else { continue }
-            guard let dish = dishes.first(where: { $0.name == entry.name }) else { continue }
-            seenDishes.insert(entry.name)
-            dishCandidates.append((entry.date, dish))
-        }
-        for dish in dishes where !seenDishes.contains(dish.name) {
-            seenDishes.insert(dish.name)
-            dishCandidates.append((dish.updatedAt ?? dish.createdAt, dish))
-        }
-        recentDishes = dishCandidates
-            .sorted { $0.date > $1.date }
-            .prefix(Self.recentLimit)
-            .map(\.dish)
-    }
-
-    /// Чем показать продукт в «Недавнем».
-    ///
-    /// Сначала настоящий продукт: у него есть категория, состав и порция по
-    /// умолчанию. Если такого нет (еду записали разово, руками), собираем
-    /// продукт из самой записи — для этого нужен вес, иначе пересчитать на
-    /// сто грамм не из чего.
-    private func recentFood(named name: String, from component: EntryComponent,
-                            in foodByName: [String: FoodItem]) -> FoodItem? {
-        if let food = foodByName[name] { return food }
-        guard let grams = component.grams, grams > 0 else { return nil }
-        let factor = 100 / grams
-        return FoodItem(
-            name: name,
-            caloriesPer100g: Int((Double(component.calories) * factor).rounded()),
-            protein: component.protein * factor,
-            fat: component.fat * factor,
-            carbs: component.carbs * factor,
-            defaultGrams: grams,
-            // Записи дневника категорию не хранят: без этой строки весь
-            // список показывал «Другое».
-            category: categoryByFoodName[name] ?? .other
-        )
-    }
-
-    /// Кому из своих продуктов каталог может одолжить витамины.
-    ///
-    /// Точное совпадение по названию не считаем: там состав и так подтягивается
-    /// сам, и предлагать нечего. Смысл только в непохожих названиях — «Творог
-    /// мой» против «Творог 5%», — где связь может найти только поиск.
-    ///
-    /// Считается заново только когда изменились сами продукты, а не при каждой
-    /// перестройке кэшей. Перебор каталога стоит несколько миллисекунд на
-    /// продукт, а перестройка идёт на каждую запись еды и на каждое обновление
-    /// «Сегодня»: на семидесяти своих продуктах это давало полторы десятых
-    /// секунды на жест — ровно то подлагивание, которое видно при потягивании
-    /// списка вниз. Сами продукты меняются от силы раз в день.
-    private func rebuildVitaminOffers() {
-        // В отпечаток идёт всё, от чего зависит ответ: имя и категория решают,
-        // кого искать, калории и макросы — подойдёт ли донор по цифрам, состав
-        // и связь с каталогом — нужно ли вообще предлагать. Блюда тоже: их имена
-        // попадают в словарь составов, по которому мы отсеиваем тех, у кого
-        // состав и так есть.
-        var hasher = Hasher()
-        for food in customFoods {
-            hasher.combine(food.id)
-            hasher.combine(food.name)
-            hasher.combine(food.caloriesPer100g)
-            hasher.combine(food.protein)
-            hasher.combine(food.fat)
-            hasher.combine(food.carbs)
-            hasher.combine(food.category)
-            hasher.combine(food.catalogID)
-            hasher.combine(food.micronutrientsData)
-        }
-        for dish in dishes { hasher.combine(dish.name) }
-        let signature = hasher.finalize()
-        guard signature != vitaminOffersSignature else { return }
-        vitaminOffersSignature = signature
-
-        var offered: Set<UUID> = []
-        for food in customFoods {
-            guard food.catalogID == nil, food.micronutrients.isEmpty else { continue }
-            guard nutrientProfilesByName[food.name] == nil else { continue }
-            if !FoodCatalog.donors(forName: food.name, caloriesPer100g: food.caloriesPer100g,
-                                   macrosPer100g: food.macrosPer100g,
-                                   category: food.foodCategory, limit: 1).isEmpty {
-                offered.insert(food.id)
-            }
-        }
-        foodsOfferedVitamins = offered
-    }
 
     /// Последняя по дате запись веса.
     var latestWeight: WeightEntry? {

@@ -267,7 +267,12 @@ struct MyFoodView: View {
         }
         .sheet(isPresented: $showingNewDish) {
             NewDishSheet(store: store)
-                .presentationDetents([.medium])
+                // Половина экрана и целый: рецепт начинают с названия и
+                // одного продукта, а дособирают из десятка — и на середине
+                // список состава упирается в край листа. Вторая высота
+                // даёт дотянуть его до конца, не закрывая и не открывая
+                // заново.
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerSheet(store: store) { item in

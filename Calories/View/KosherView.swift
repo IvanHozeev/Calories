@@ -23,7 +23,7 @@ struct KosherView: View {
                                          // будет до своего конца.
                                          if !newValue { KosherActivity.end() }
                                      })) {
-                    Label("Мясное и молочное", systemImage: "clock.arrow.2.circlepath")
+                    settingLabel("Мясное и молочное", systemImage: "clock.arrow.2.circlepath")
                 }
                 .accessibilityIdentifier("kosherEnabled")
             } footer: {
@@ -42,7 +42,7 @@ struct KosherView: View {
                             Text(verbatim: KosherWaitText.title(minutes: minutes)).tag(minutes)
                         }
                     } label: {
-                        Label("После мясного", systemImage: "fork.knife")
+                        settingLabel("После мясного", systemImage: "fork.knife")
                     }
 
                     Picker(selection: Binding(get: { settings.afterDairy },
@@ -51,12 +51,12 @@ struct KosherView: View {
                             Text(verbatim: KosherWaitText.title(minutes: minutes)).tag(minutes)
                         }
                     } label: {
-                        Label("После молочного", systemImage: "drop")
+                        settingLabel("После молочного", systemImage: "drop")
                     }
 
                     Toggle(isOn: Binding(get: { settings.hardCheeseLikeMeat },
                                          set: { settings.hardCheeseLikeMeat = $0 })) {
-                        Label("Твёрдый сыр как мясное", systemImage: "square.grid.2x2")
+                        settingLabel("Твёрдый сыр как мясное", systemImage: "cube")
                     }
                 } header: {
                     Text("Обычай")
@@ -69,7 +69,7 @@ struct KosherView: View {
                 Section {
                     Toggle(isOn: Binding(get: { settings.warnsMixing },
                                          set: { settings.warnsMixing = $0 })) {
-                        Label("Говорить о смешении", systemImage: "exclamationmark.triangle")
+                        settingLabel("Говорить о смешении", systemImage: "exclamationmark.triangle")
                     }
                 } footer: {
                     explain("Приложение скажет, если в собираемом приёме встретились мясное и молочное, — пока приём ещё можно разложить на два. Запретить сохранение оно не может и не должно: что у вас в тарелке, знаете вы.",

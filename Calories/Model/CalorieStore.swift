@@ -361,7 +361,7 @@ final class CalorieStore {
     /// одной стотридцатистрочной функции: словари нужны сводкам, сводки —
     /// сериям, расход — цели, а «Недавнее» берёт категорию из словарей.
     /// Теперь порядок виден сразу, а каждый шаг читается отдельно.
-    private func rebuildCaches() {
+    func rebuildCaches() {
         let calendar = Calendar.current
 
         rebuildLookups(calendar)
@@ -534,32 +534,6 @@ final class CalorieStore {
     /// последней перестройки.
     var storedActivity: [ActivityDay] { ActivityHistory(defaults: defaults).days }
 
-    /// Записать норму, которая стоит на экране сегодня.
-    ///
-    /// Прошедший день до сих пор получал свою норму задним числом: вечером
-    /// `lockPastGoals` считал её заново — и считал **сегодняшним** числом.
-    /// А `dailyGoal` меняется сам, вслед за измеренным расходом. В итоге день,
-    /// прожитый с нормой 2822, назавтра показывал 2492, и съеденное ровно в
-    /// норму превращалось в перебор на триста килокалорий.
-    ///
-    /// Поэтому норма дня записывается, пока день идёт: на экране и в истории
-    /// должно стоять одно и то же число. Запись обновляется на каждой
-    /// перестройке — к полуночи в ней останется то, что человек видел
-    /// последним.
-    private func rememberTodaysGoal(_ goal: Int) {
-        let today = Calendar.current.startOfDay(for: Date())
-        if let existing = goalRecords.first(where: { Calendar.current.isDate($0.date, inSameDayAs: today) }) {
-            guard existing.goal != goal else { return }
-            existing.goal = goal
-        } else {
-            let record = GoalRecord(date: today, goal: goal)
-            context.insert(record)
-            goalRecords = (goalRecords + [record]).sorted { $0.date < $1.date }
-        }
-        goalsByDay[today] = goal
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-    }
-
     /// Пересобирает кэши, если с момента последнего пересчёта сменились сутки.
     /// Дёшево, когда день тот же, поэтому вызывать можно на каждую активацию приложения.
     func refreshIfDayChanged() {
@@ -567,42 +541,6 @@ final class CalorieStore {
         refresh()
         lockPastGoals()
     }
-
-
-    /// Как только день перестаёт быть сегодняшним, фиксирует его текущую (адаптированную!)  эффективную цель
-    /// снапшотом. Обновляет goalRecords в памяти напрямую — без полного DB-перечита.
-    func lockPastGoals() {
-        let today = Calendar.current.startOfDay(for: Date())
-        // Если сегодня уже лочили и goalsByDay покрывает все прошлые дни — выходим без O(n) скана
-        if goalLockedOnDay == today {
-            let entryDates = Set(entries.lazy.filter {
-                Calendar.current.startOfDay(for: $0.date) < today
-            }.map { Calendar.current.startOfDay(for: $0.date) })
-            guard !entryDates.subtracting(goalsByDay.keys).isEmpty else { return }
-        }
-        let entryDates = Set(entries.map { Calendar.current.startOfDay(for: $0.date) })
-        let datesToLock = entryDates.subtracting(goalsByDay.keys).filter { $0 < today }
-        guard !datesToLock.isEmpty else { goalLockedOnDay = today; return }
-
-        var newRecords: [GoalRecord] = []
-        // По возрастанию даты и с немедленной записью в goalsByDay: adaptedGoal(for:)
-        // читает цели предыдущих дней недели через goal(for:), то есть из этого же словаря.
-        // Без сортировки порядок обхода Set недетерминирован, а без записи в словарь дни
-        // одной пачки считали бы банк друг от друга по неадаптированной цели — и итог
-        // зависел бы от того, когда пользователь открыл приложение, а не от данных.
-        for date in datesToLock.sorted() {
-            let lockedGoal = adaptedGoal(for: date)
-            goalsByDay[date] = lockedGoal
-            let record = GoalRecord(date: date, goal: lockedGoal)
-            context.insert(record)
-            newRecords.append(record)
-        }
-        do { try context.save() } catch { logger.error("context.save failed: \(error)") }
-        goalRecords = (goalRecords + newRecords).sorted { $0.date < $1.date }
-        goalLockedOnDay = today
-        rebuildCaches()
-    }
-
 
 
     // MARK: - Изменение данных

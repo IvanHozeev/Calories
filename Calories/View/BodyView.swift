@@ -153,7 +153,7 @@ struct BodyView: View {
         // которых никто не задаёт: они остаток нормы калорий.
         Section {
             if carbs > 0 {
-                macroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
+                MacroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
             } else {
                 Label(
                     String(
@@ -172,15 +172,7 @@ struct BodyView: View {
         }
     }
 
-    private func macroBudgetRow(_ title: LocalizedStringKey, grams: Double, color: Color) -> some View {
-        HStack {
-            Text(title)
-            Spacer()
-            Text(verbatim: "\(Int(grams.rounded())) \(String(localized: "г"))")
-                .font(.app(.body, weight: .semibold))
-                .foregroundStyle(color)
-        }
-    }
+
 
     
     
@@ -951,7 +943,7 @@ private extension BodyView {
             // граммы макроса — и читаться они должны одинаково, цветом
             // своего макроса. Белок и жир стояли чёрными, а углеводы
             // фиолетовыми, будто это числа из разных мест.
-            macroBudgetRow("Итого белка",
+            MacroBudgetRow("Итого белка",
                            grams: draftProfile.proteinTargetGrams(from: measurement),
                            color: MacroKind.protein.color)
         }
@@ -990,7 +982,7 @@ private extension BodyView {
             .frame(height: 160)
         }
         if let draftProfile {
-            macroBudgetRow("Итого жира",
+            MacroBudgetRow("Итого жира",
                            grams: draftProfile.fatTargetGrams,
                            color: MacroKind.fat.color)
         }

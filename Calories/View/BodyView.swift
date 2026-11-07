@@ -973,50 +973,13 @@ private extension BodyView {
     }
     }
 
-    /// Норма жира и её границы.
-    var fatSection: some View {
-    Section {
-        HStack {
-            Text("Жира на кг веса")
-            Spacer()
-            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showFatPicker.toggle()
-                if showFatPicker {
-                    showProteinPicker = false; showHeightPicker = false; showAgePicker = false
-                }
-            }
-        }
-        if showFatPicker {
-            Picker("Жир", selection: $fatTenths) {
-                // Колесо ограничено жёсткими границами: за ними не бывает
-                // осознанного выбора, только промах пальцем.
-                ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),
-                        id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        if let draftProfile {
-            MacroBudgetRow("Итого жира",
-                           grams: draftProfile.fatTargetGrams,
-                           color: MacroKind.fat.color)
-        }
-        // Вне рабочего коридора число разрешено, но о нём сказано вслух.
-        if let warning = fatWarning {
-            Label(warning, systemImage: "exclamationmark.triangle.fill")
-                .font(.app(.caption))
-                .foregroundStyle(.orange)
-        }
-    } header: {
-        Text("Норма жира")
-    } footer: {
-        explain("Рабочий коридор — 0.6–1.2 г на кг веса, обычно 0.8. Меньше 0.5 и больше 1.5 выставить нельзя: ниже это ставка на гормоны, выше жир вытесняет углеводы, на которых работают тренировки.").map { Text($0) }
-    }
-    }
+    FatTargetSection(
+        fatTenths: $fatTenths,
+        isPickerShown: $showFatPicker,
+        draftProfile: draftProfile,
+        warning: fatWarning,
+        onToggle: { showProteinPicker = false; showHeightPicker = false; showAgePicker = false }
+    )
 
     /// Подпись приложения в конце списка.
     var brandSection: some View {

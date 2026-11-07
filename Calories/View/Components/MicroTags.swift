@@ -106,6 +106,35 @@ extension View {
     }
 }
 
+extension MicroChip {
+    /// Тот же значок картинкой — для системного меню.
+    ///
+    /// В меню своя вьюха не живёт: система берёт у пункта только заголовок и
+    /// картинку, а всё остальное отбрасывает. Поэтому значок рисуется в
+    /// картинку тем же кодом, что и везде, — иначе в меню завелась бы вторая
+    /// его версия, которая разойдётся с первой на следующей правке.
+    ///
+    /// Своим цветом, а не системным: `renderingMode(.original)` снимает
+    /// перекраску, которой меню равняет значки под один цвет, — а цвет здесь
+    /// и есть отличие потолка от цели.
+    @MainActor
+    static func menuImage(for nutrient: Micronutrient) -> Image? {
+        if let cached = menuImages[nutrient] { return cached }
+        let renderer = ImageRenderer(content: MicroChip(nutrient: nutrient))
+        // Втрое: меню рисует картинку в точках, а взять её надо в пикселях
+        // самого плотного экрана, иначе буквы в капсуле мылит.
+        renderer.scale = 3
+        guard let rendered = renderer.uiImage else { return nil }
+        let image = Image(uiImage: rendered).renderingMode(.original)
+        menuImages[nutrient] = image
+        return image
+    }
+
+    /// Готовые картинки: их дюжина, а меню открывают часто.
+    @MainActor
+    private static var menuImages: [Micronutrient: Image] = [:]
+}
+
 #Preview {
     VStack(alignment: .leading, spacing: 12) {
         MicroTags(nutrients: [.calcium, .potassium, .vitaminB12])

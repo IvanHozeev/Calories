@@ -574,9 +574,18 @@ private extension NewFoodSheet {
         if !missingNutrients.isEmpty {
             Menu {
                 ForEach(missingNutrients, id: \.self) { nutrient in
-                    Button(nutrient.title) {
+                    Button {
                         entered[nutrient] = ""
                         focusedField = .nutrient(nutrient)
+                    } label: {
+                        // Тот же значок, что в списке ниже: в меню выбирают
+                        // то, что потом увидят строкой, и узнаваться это
+                        // должно по одному и тому же знаку.
+                        if let image = MicroChip.menuImage(for: nutrient) {
+                            Label { Text(nutrient.title) } icon: { image }
+                        } else {
+                            Text(nutrient.title)
+                        }
                     }
                 }
             } label: {

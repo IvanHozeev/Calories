@@ -490,12 +490,17 @@ private extension NewFoodSheet {
     /// Как называется и к какой категории относится.
     var nameSection: some View {
     Section("Название") {
-        TextField("Название", text: $name)
-            .focused($focusedField, equals: .name)
-        Picker("Категория", selection: $category) {
+        HStack {
+            Image(systemName: "tag")
+            TextField("Название", text: $name)
+                .focused($focusedField, equals: .name)
+        }
+        Picker(selection: $category) {
             ForEach(FoodCategory.allCases) { item in
                 Label(item.title, systemImage: item.icon).tag(item)
             }
+        } label: {
+            Label("Категория", systemImage: "square.grid.2x2")
         }
         // Только при включённом кашруте: тому, кто его не считает, эта строка
         // ничего не объясняет и только занимает место в и без того длинном
@@ -513,7 +518,7 @@ private extension NewFoodSheet {
             // а строка-ловушка, которая ничего не меняет, хуже её отсутствия.
             if (kosherChoice ?? KosherStatus.byCategory(category)) == .dairy {
                 Toggle(isOn: $isHardCheese) {
-                    Label("Твёрдый выдержанный", systemImage: "square.grid.2x2")
+                    Label("Твёрдый выдержанный", systemImage: "cube")
                 }
             }
         }

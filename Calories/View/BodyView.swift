@@ -753,10 +753,7 @@ private extension BodyView {
                 isEmbedded: true
             )
         } label: {
-            // Без значка: соседние строки профиля — пол, вес, рост, возраст,
-            // замеры — идут без них, и одна картинка посреди голых строк
-            // читается как сбой, а не как знак. Либо всем, либо никому.
-            Text("Приёмы пищи")
+            Label("Приёмы пищи", systemImage: "clock")
         }
         .accessibilityIdentifier("openMealSchedule")
 
@@ -766,7 +763,7 @@ private extension BodyView {
         NavigationLink {
             KosherView()
         } label: {
-            Text("Кашрут")
+            Label("Кашрут", systemImage: "circle.lefthalf.filled")
         }
         .accessibilityIdentifier("openKosher")
     }
@@ -776,8 +773,10 @@ private extension BodyView {
     /// они ниже расчёта.
     var bodyParametersSection: some View {
     Section("Параметры тела") {
-        Picker("Пол", selection: $sex) {
+        Picker(selection: $sex) {
             ForEach(Sex.allCases) { Text($0.title).tag($0) }
+        } label: {
+            Label("Пол", systemImage: "person")
         }
         // Вес ведёт на свой экран, а не открывает колесо: он меняется
         // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
@@ -786,6 +785,7 @@ private extension BodyView {
             WeightDetailView(store: store)
         } label: {
             HStack {
+                Image(systemName: "scalemass")
                 Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
                 Spacer()
                 if let trend = weightTrend {
@@ -804,6 +804,7 @@ private extension BodyView {
         
         
         HStack {
+            Image(systemName: "arrow.up.and.down")
             Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
             Spacer()
             Text(heightDisplayText(heightTenths))
@@ -825,6 +826,7 @@ private extension BodyView {
             .frame(height: 160)
         }
         HStack {
+            Image(systemName: "calendar")
             Text("Возраст")
             Spacer()
             Text("\(ageInt) лет")
@@ -850,6 +852,7 @@ private extension BodyView {
             MeasurementsView(store: store)
         } label: {
             HStack {
+                Image(systemName: "ruler")
                 Text("Замеры")
                 Spacer()
                 if let last = store.latestMeasurement {

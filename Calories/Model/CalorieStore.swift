@@ -71,10 +71,10 @@ final class CalorieStore {
         dailyGoalPhaseID = plan?.phase(on: Date())?.id
         defaults.set(dailyGoalPhaseID?.uuidString, forKey: Keys.goalPhase)
     }
-    private(set) var profile: UserProfile?
-    private(set) var plan: Plan?
+    var profile: UserProfile?
+    var plan: Plan?
     /// Премиум куплен. Сам по себе не значит доступа: его даёт ещё и пробный период.
-    private(set) var hasPurchasedPremium: Bool {
+    var hasPurchasedPremium: Bool {
         didSet {
             defaults.set(hasPurchasedPremium, forKey: Keys.premium)
             // И в общую группу — сразу, а не до следующего пересчёта дня:
@@ -86,48 +86,7 @@ final class CalorieStore {
 
     /// Когда начался пробный период плана. Начинается один раз — при первом плане
     /// из онбординга — и заново не выдаётся, даже если план завершить и начать снова.
-    private(set) var trialStartedAt: Date?
-
-    /// Две недели, а не одна: первый вердикт «как идёт план» появляется примерно
-    /// через две недели взвешиваний. Неделя кончалась бы раньше, чем человек
-    /// увидит, за что платит.
-    static let trialDays = 14
-
-    var trialEndsAt: Date? {
-        trialStartedAt.flatMap { Calendar.current.date(byAdding: .day, value: Self.trialDays, to: $0) }
-    }
-
-    var isTrialActive: Bool {
-        guard let end = trialEndsAt else { return false }
-        return Date() < end
-    }
-
-    /// Сколько полных дней пробного периода осталось. nil — его нет или он кончился.
-    var trialDaysLeft: Int? {
-        guard isTrialActive, let end = trialEndsAt else { return nil }
-        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: Date()),
-                                                   to: Calendar.current.startOfDay(for: end)).day ?? 0
-        return max(days, 0)
-    }
-
-    /// Куплена пара приложений — здесь или в GymLogger.
-    ///
-    /// Разблокировка по соседству, а не общая подписка: она живёт в общей
-    /// папке и работает, пока оба приложения стоят на одном телефоне. Чек
-    /// соседа мы не проверяем и проверить не можем, поэтому это подарок
-    /// сверху, а не право. Сосед удалён и флага нет — приложение возвращается
-    /// к собственной покупке, а не запирается и не ругается.
-    ///
-    /// За купленный отдельно Calories GymLogger не открывается и наоборот:
-    /// открывает только бандл, иначе продаём одно, а отдаём два.
-    private(set) var bundleUnlocked = false
-
-    /// Доступ к платному: куплено, идёт пробный период или куплена пара.
-    /// Запись меняет только покупку.
-    var isPremium: Bool {
-        get { hasPurchasedPremium || isTrialActive || bundleUnlocked }
-        set { hasPurchasedPremium = newValue }
-    }
+    var trialStartedAt: Date?
 
     /// Что сейчас в зале: разгрузка, тип дня, объём недели. nil — соседнего
     /// приложения нет или оно молчит.

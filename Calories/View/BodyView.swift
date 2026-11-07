@@ -177,7 +177,22 @@ struct BodyView: View {
             // означал бы вечный дефицит по настройке, о которой забыли.
             premiumRow
             
-            bodyParametersSection
+            BodyParametersSection(
+                sex: $sex,
+                useImperial: useImperial,
+                weightText: weightDisplayText(weightTenths),
+                weightTrend: weightTrend,
+                onWeightTapped: { },
+                heightText: heightDisplayText(heightTenths),
+                heightTenths: $heightTenths,
+                showHeightPicker: $showHeightPicker,
+                onHeightTapped: { showAgePicker = false; showProteinPicker = false; showFatPicker = false },
+                ageInt: $ageInt,
+                showAgePicker: $showAgePicker,
+                onAgeTapped: { showHeightPicker = false; showProteinPicker = false; showFatPicker = false },
+                latestMeasurement: store.latestMeasurement,
+                onMeasurementsTapped: { }
+            )
 
             // Питание сразу перед нормами белка и жира: расписание приёмов и
             // эти нормы — про одно и то же, про еду. Параметры тела идут
@@ -798,102 +813,6 @@ private extension BodyView {
     }
     }
 
-    /// Параметры тела: то, из чего считается расход. Правят их редко, поэтому
-    /// они ниже расчёта.
-    var bodyParametersSection: some View {
-    Section("Параметры тела") {
-        Picker(selection: $sex) {
-            ForEach(Sex.allCases) { Text($0.title).tag($0) }
-        } label: {
-            Label("Пол", systemImage: "person")
-        }
-        // Вес ведёт на свой экран, а не открывает колесо: он меняется
-        // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
-        // Динамика переехала туда же — отдельной строке рядом делать нечего.
-        NavigationLink {
-            WeightDetailView(store: store)
-        } label: {
-            HStack {
-                Image(systemName: "scalemass")
-                Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
-                Spacer()
-                if let trend = weightTrend {
-                    Text(trend.caption)
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                    WeightSparkline(points: trend.points)
-                        .frame(width: 44, height: 18)
-                }
-                Text(weightDisplayText(weightTenths))
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .accessibilityIdentifier("openWeight")
-        
-        
-        
-        HStack {
-            Image(systemName: "arrow.up.and.down")
-            Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
-            Spacer()
-            Text(heightDisplayText(heightTenths))
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showHeightPicker.toggle()
-                if showHeightPicker { showAgePicker = false; showProteinPicker = false }
-            }
-        }
-        if showHeightPicker {
-            Picker("Рост", selection: $heightTenths) {
-                ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
-                    Text(heightDisplayText(v)).tag(v)
-                }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        HStack {
-            Image(systemName: "calendar")
-            Text("Возраст")
-            Spacer()
-            Text("\(ageInt) лет")
-                .foregroundStyle(.secondary)
-        }
-        .tappableRow {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                showAgePicker.toggle()
-                if showAgePicker { showHeightPicker = false; showProteinPicker = false }
-            }
-        }
-        if showAgePicker {
-            Picker("Возраст", selection: $ageInt) {
-                ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
-        }
-        // Замеры — пятой строкой, рядом с ростом и весом: это такой же
-        // параметр тела, просто снимаемый лентой. В тулбаре их искали
-        // глазами, потому что иконка линейки ничего не обещает.
-        NavigationLink {
-            MeasurementsView(store: store)
-        } label: {
-            HStack {
-                Image(systemName: "ruler")
-                Text("Замеры")
-                Spacer()
-                if let last = store.latestMeasurement {
-                    Text(last.date.formatted(date: .abbreviated, time: .omitted))
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .accessibilityIdentifier("openMeasurementsRow")
-    }
-    }
 
     /// Уровень активности — только пока расход считается формулой. Когда он
     /// измерен, множитель ни на что не влияет, и выбор уезжает в «Как считаем».

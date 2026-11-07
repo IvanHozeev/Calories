@@ -202,15 +202,17 @@ let launchGap: CGFloat = launchMarkSize * 4 / 22
 func launch(scale: CGFloat, name: String) {
     // Слово набираем первым: от его ширины зависит ширина холста.
     //
-    // Системным шрифтом, обычным весом. Nunito здесь стоял раньше — тем же,
-    // чем набран интерфейс, — и был плотнее и уже; рядом с тонкими дугами
-    // знака он читался тяжело. Системный под знаком спокойнее, и у него есть
-    // ещё одно достоинство: он один и тот же на всех языках и во всех весах,
-    // а Nunito не знает ни арабской вязи, ни иврита.
+    // Системным шрифтом: скруглённым, полужирным. У скруглённого круглые
+    // концы штрихов — те же, что у дуг знака над словом, — и вдвоём они
+    // читаются одной вещью. Nunito, стоявший здесь раньше, был плотнее и уже
+    // и спорил со знаком.
     //
     // Здесь это шрифт макоси, а на заставке — айоси, но это один и тот же
-    // San Francisco: картинка и её продолжение совпадают.
-    let font = NSFont.systemFont(ofSize: launchTitleSize * scale) as CTFont
+    // San Francisco: картинка и её продолжение совпадают. Веса и начертание
+    // держатся вместе с `BrandLockup`, менять только вместе.
+    let plain = NSFont.systemFont(ofSize: launchTitleSize * scale, weight: .semibold)
+    let font = (plain.fontDescriptor.withDesign(.rounded)
+                .flatMap { NSFont(descriptor: $0, size: launchTitleSize * scale) } ?? plain) as CTFont
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
         .foregroundColor: rgb(0x8E8E93),

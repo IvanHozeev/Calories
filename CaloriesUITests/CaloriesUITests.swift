@@ -54,24 +54,19 @@ final class CaloriesUITests: XCTestCase {
 
     /// Открывает настройки.
     ///
-    /// Своей вкладки у них больше нет: «Профиль» и «Настройки» были двумя
-    /// списками параметров рядом, и настройки уехали за шестерёнку в шапке
-    /// профиля — как в системных приложениях.
+    /// Своей вкладки у них нет, и в профиле их больше тоже нет: шестерёнка
+    /// стоит в шапке «Сегодня» — экрана, с которого начинают, — а профиль
+    /// остался списком про тело. За настройками не надо больше уходить на
+    /// соседнюю вкладку.
     private func openSettings(in app: XCUIApplication) {
-        let tab = app.tabBars.buttons["Profile"]
-        XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки профиля")
-        tab.tap()
-        // Сначала сам экран, потом кнопка в его шапке.
-        //
-        // «Профиль» строится не мгновенно: там и параметры тела, и расчёт
-        // расхода по истории. Ожидание сразу кнопки отмеряло пять секунд от
-        // нажатия по вкладке, и на загруженной машине они кончались раньше,
-        // чем экран появлялся, — тест падал на «нет настроек» там, где их
-        // просто ещё не нарисовали.
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10),
-                      "Вкладка профиля не открылась")
-        let gear = app.buttons["openSettings"]
-        XCTAssertTrue(gear.waitForExistence(timeout: 10), "В шапке профиля нет настроек")
+        // Сначала сам экран, потом кнопка в его шапке: на загруженной машине
+        // ожидание сразу кнопки кончалось раньше, чем приложение успевало
+        // нарисовать «Сегодня», и тест падал на «нет настроек» там, где их
+        // просто ещё не было на экране.
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
+                      "«Сегодня» не открылось")
+        let gear = app.navigationBars["Today"].buttons["openSettings"]
+        XCTAssertTrue(gear.waitForExistence(timeout: 10), "В шапке «Сегодня» нет настроек")
         gear.tap()
     }
 
@@ -234,13 +229,20 @@ final class CaloriesUITests: XCTestCase {
     }
 
     @MainActor
-    func testSettingsOpenFromTheProfile() {
+    func testSettingsOpenFromToday() {
         let app = launchApp()
         openSettings(in: app)
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5),
-                      "Шестерёнка в шапке профиля должна открывать настройки")
-        // Своей вкладки у настроек больше нет.
+                      "Шестерёнка в шапке «Сегодня» должна открывать настройки")
+        // Ни своей вкладки, ни второго входа из профиля: один вход, иначе
+        // человек гадает, который из них настоящий.
         XCTAssertFalse(app.tabBars.buttons["Settings"].exists)
+        app.navigationBars["Settings"].buttons.firstMatch.tap()
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10),
+                      "Вкладка профиля не открылась")
+        XCTAssertFalse(app.buttons["openSettings"].exists,
+                       "Из профиля настройки уехали — шестерёнки там быть не должно")
     }
 
     /// Включённое деление дня должно быть видно на «Сегодня».

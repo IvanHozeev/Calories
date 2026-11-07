@@ -155,7 +155,7 @@ struct NewDishSheet: View {
                 .disabled(totalGrams <= 0)
             }
         } header: {
-            Text("Партия")
+            Text("Приготовлено")
         } footer: {
             explain("Отметь, что сварил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть.").map { Text($0) }
         }
@@ -315,8 +315,8 @@ struct NewDishSheet: View {
         }
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)
-        .screenTitle(editingDish == nil ? String(localized: "Новое блюдо")
-                                : String(localized: "Редактировать блюдо"),
+        .screenTitle(editingDish == nil ? String(localized: "Новый рецепт")
+                                : String(localized: "Редактировать рецепт"),
                      cancelTitle: isEmbedded ? nil : String(localized: "Отмена"),
                      trailingButtons: 2)
         .interactiveDismissDisabled(!isEmbedded && hasChanges)

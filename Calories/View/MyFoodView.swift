@@ -148,7 +148,7 @@ struct MyFoodView: View {
                 if !database.isEmpty { databaseSection(database) }
                 if products.isEmpty, dishes.isEmpty, database.isEmpty, remoteResults.isEmpty, !isSearchingRemote {
                     Section {
-                        Text("Ничего не нашлось ни в своих продуктах, ни в блюдах, ни в базе.")
+                        Text("Ничего не нашлось ни в своих продуктах, ни в рецептах, ни в базе.")
                             .foregroundStyle(.secondary)
                             .font(.app(.callout))
                     }
@@ -214,7 +214,7 @@ struct MyFoodView: View {
                         Label("Новый продукт", systemImage: "plus")
                     }
                     Button { showingNewDish = true } label: {
-                        Label("Новое блюдо", systemImage: "fork.knife")
+                        Label("Новый рецепт", systemImage: "fork.knife")
                     }
                 } label: {
                     Image(systemName: "plus")
@@ -249,7 +249,7 @@ struct MyFoodView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Picker("Раздел", selection: $tab) {
-                        Label("Мои блюда", systemImage: Tab.dishes.icon).tag(Tab.dishes)
+                        Label("Мои рецепты", systemImage: Tab.dishes.icon).tag(Tab.dishes)
                         Label("Мои продукты", systemImage: Tab.products.icon).tag(Tab.products)
                         Label("База", systemImage: Tab.database.icon).tag(Tab.database)
                     }
@@ -366,7 +366,7 @@ struct MyFoodView: View {
         if filteredDishes.isEmpty {
             if trimmedQuery.isEmpty || !remoteHasOrMayHaveResults {
             Section {
-                Text(trimmedQuery.isEmpty ? "Пока нет своих блюд" : "Ничего не найдено")
+                Text(trimmedQuery.isEmpty ? "Пока нет своих рецептов" : "Ничего не найдено")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

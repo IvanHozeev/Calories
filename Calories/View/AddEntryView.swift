@@ -686,7 +686,7 @@ struct AddEntryView: View {
         }
 
         if isSearching, !shownDishes.isEmpty {
-            Section("Мои блюда") {
+            Section("Мои рецепты") {
                 ForEach(shownDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())

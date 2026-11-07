@@ -274,7 +274,7 @@ struct ContentView: View {
                             Button {
                                 todaySheet = .newDish
                             } label: {
-                                Label("Новое блюдо", systemImage: "frying.pan")
+                                Label("Новый рецепт", systemImage: "frying.pan")
                             }
                             Divider()
                             Button {

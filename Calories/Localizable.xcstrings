@@ -5097,100 +5097,6 @@
         }
       }
     },
-    "Блюда, в состав которых входит этот продукт, и сколько его там. Связь живёт по названию: продукт можно удалить, а блюдо останется с тем, что в него клали." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الأطباق التي يدخل فيها هذا المنتج، وكميته فيها. الربط بالاسم: احذف المنتج ويبقى الطبق بما وُضع فيه."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerichte, in die dieses Lebensmittel kommt, und wie viel davon. Die Verbindung läuft über den Namen: Löscht man das Lebensmittel, behält das Gericht, was darin war."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dishes this food goes into, and how much of it. The link lives by name: delete the food and the dish keeps what was put in it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Platos en los que entra este alimento y cuánto. El vínculo es por nombre: si borras el alimento, el plato conserva lo que llevaba."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les plats où cet aliment entre, et en quelle quantité. Le lien passe par le nom : supprimez l’aliment, le plat garde ce qu’on y avait mis."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "המנות שהמוצר הזה נכנס אליהן, וכמה ממנו. הקישור לפי שם: אפשר למחוק את המוצר והמנה תישאר עם מה ששמו בה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pratos em que este alimento entra e quanto. O vínculo é pelo nome: apague o alimento e o prato mantém o que levava."
-          }
-        }
-      }
-    },
-    "Блюда, в которые входит продукт, и сколько его там." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الأطباق التي تحتوي هذا المنتج وكميته."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gerichte mit diesem Lebensmittel und wie viel."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dishes this food goes into, and how much."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Platos con este alimento y cuánto."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les plats avec cet aliment, et combien."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מנות שהמוצר נכנס אליהן, וכמה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pratos com este alimento e quanto."
-          }
-        }
-      }
-    },
     "Блюда" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5931,53 +5837,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Em %@ há mais calorias, nos outros dias — menos. A média semanal permanece a mesma."
-          }
-        }
-      }
-    },
-    "В блюдах" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "في الأطباق"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In Gerichten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Used in dishes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En platos"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dans les plats"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "במנות"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em pratos"
           }
         }
       }
@@ -31100,6 +30959,53 @@
         }
       }
     },
+    "Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк действует с сегодняшнего дня, финиш сдвигается на его длину, целевой вес не меняется." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أسبوع أو أسبوعان على التثبيت. الدهون تنزل خلال فترة التنشيف كما هي، بينما يقلّ الجوع والرغبة في الانهيار بوضوح. تبدأ الاستراحة من اليوم، ويتأجّل الموعد بطولها، والوزن المستهدف لا يتغيّر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein, zwei Wochen auf Erhalt. Das Fett geht über die Diät genauso weg, Hunger und der Drang abzubrechen aber deutlich zurück. Die Pause gilt ab heute, das Ziel verschiebt sich um ihre Länge, das Zielgewicht bleibt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A week or two at maintenance. The fat still goes over the cut, while the hunger and the urge to break down ease off noticeably. The break starts today, the finish moves by its length, the target weight stays."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una o dos semanas en mantenimiento. La grasa se pierde igual durante la definición, pero el hambre y las ganas de romper la dieta bajan bastante. El descanso empieza hoy, el final se desplaza esa misma duración y el peso objetivo no cambia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une à deux semaines à l’entretien. La graisse part autant sur la sèche, tandis que la faim et l’envie de craquer baissent nettement. La pause commence aujourd’hui, la fin se décale d’autant, le poids cible ne change pas."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "שבוע־שבועיים על תחזוקה. השומן ממשיך לרדת לאורך החיטוב, והרעב והדחף להישבר יורדים משמעותית. ההפסקה מתחילה היום, הסיום נדחה באורכה, ומשקל היעד לא משתנה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma ou duas semanas em manutenção. A gordura sai igual ao longo do cutting, e a fome e a vontade de furar a dieta caem bastante. A pausa começa hoje, o fim desloca-se pelo mesmo período e o peso-alvo não muda."
+          }
+        }
+      }
+    },
     "Неделя" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31378,9 +31284,6 @@
           }
         }
       }
-    },
-    "Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк действует с сегодняшнего дня, финиш сдвигается на его длину, целевой вес не меняется." : {
-
     },
     "Недобор %lld ккал до нормы. Ускорить сушку так не выйдет: недоеденное возвращается срывом, а тело отвечает замедлением." : {
       "localizations" : {
@@ -45497,6 +45400,382 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ — restam %2$@"
+          }
+        }
+      }
+    },
+    "Мои рецепты" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وصفاتي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine Rezepte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My recipes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis recetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes recettes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המתכונים שלי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minhas receitas"
+          }
+        }
+      }
+    },
+    "Новый рецепт" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وصفة جديدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neues Rezept"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New recipe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nueva receta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle recette"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתכון חדש"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nova receita"
+          }
+        }
+      }
+    },
+    "Редактировать рецепт" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تعديل الوصفة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezept bearbeiten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit recipe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar receta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier la recette"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עריכת מתכון"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar receita"
+          }
+        }
+      }
+    },
+    "Пока нет своих рецептов" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا وصفات بعد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Rezepte"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No recipes yet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay recetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore de recettes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אין עדיין מתכונים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem receitas"
+          }
+        }
+      }
+    },
+    "Приготовлено" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مطبوخ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekocht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cooked"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cocinado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparé"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מבושל"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparado"
+          }
+        }
+      }
+    },
+    "Ничего не нашлось ни в своих продуктах, ни в рецептах, ни в базе." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لا شيء في منتجاتك ولا في وصفاتك ولا في القاعدة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nichts in deinen Lebensmitteln, Rezepten oder im Katalog."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing found in your foods, your recipes or the catalogue."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay nada en tus alimentos, tus recetas ni el catálogo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien dans tes aliments, tes recettes ou le catalogue."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "לא נמצא דבר במוצרים שלך, במתכונים או בקטלוג."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada nos seus alimentos, nas suas receitas ou no catálogo."
+          }
+        }
+      }
+    },
+    "В рецептах" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الوصفات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Rezepten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used in recipes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En recetas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans les recettes"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במתכונים"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em receitas"
+          }
+        }
+      }
+    },
+    "Рецепты, в состав которых входит этот продукт, и сколько его там. Связь живёт по названию: продукт можно удалить, а рецепт останется с тем, что в него клали." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوصفات التي يدخل فيها هذا المنتج، وكميته فيها. الربط بالاسم: احذف المنتج وتبقى الوصفة بما وُضع فيه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rezepte, in die dieses Lebensmittel kommt, und wie viel davon. Die Verbindung läuft über den Namen: Löscht man das Lebensmittel, behält das Rezept, was darin war."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recipes this food goes into, and how much of it. The link lives by name: delete the food and the recipe keeps what was put in it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recetas en las que entra este alimento y cuánto. El vínculo es por nombre: si borras el alimento, la receta conserva lo que llevaba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les recettes où cet aliment entre, et en quelle quantité. Le lien passe par le nom : supprimez l’aliment, la recette garde ce qu’on y avait mis."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המתכונים שהמוצר הזה נכנס אליהם, וכמה ממנו. הקישור לפי שם: אפשר למחוק את המוצר והמתכון יישאר עם מה ששמו בו."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receitas em que este alimento entra e quanto. O vínculo é pelo nome: apague o alimento e a receita mantém o que levava."
           }
         }
       }

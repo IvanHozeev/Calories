@@ -841,15 +841,6 @@ private extension BodyView {
         explain("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.").map { Text($0) }
     }
     }
-    }
-
-
-        fatTenths: $fatTenths,
-        isPickerShown: $showFatPicker,
-        draftProfile: draftProfile,
-        warning: fatWarning,
-        onToggle: { showProteinPicker = false; showHeightPicker = false; showAgePicker = false }
-    )
 
     /// Подпись приложения в конце списка.
     var brandSection: some View {

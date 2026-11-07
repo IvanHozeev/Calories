@@ -823,16 +823,14 @@ private extension BodyView {
     /// они ниже расчёта.
     var bodyParametersSection: some View {
     Section("Параметры тела") {
+        // Знак — слева, в колонке значков, и он меняется вместе с выбором:
+        // тот же знак, что человек видел в онбординге, стоит там же, где у
+        // соседних строк стоят символы. В самих же вариантах его нет —
+        // свёрнутый пикер показывает выбранный вариант целиком, и знак в нём
+        // выходил мелким и косым, а подпись пропадала.
         Picker(selection: $sex) {
-            // Со знаками, как в онбординге: там человек их уже видел, и
-            // в профиле он ищет глазами то же самое.
             ForEach(Sex.allCases) { option in
-                Label {
-                    Text(verbatim: option.title)
-                } icon: {
-                    Text(verbatim: option.symbol)
-                }
-                .tag(option)
+                Text(verbatim: option.title).tag(option)
             }
         } label: {
             settingLabel("Пол", glyph: sex.symbol)

@@ -754,7 +754,11 @@ struct OnboardingView: View {
     private func tileCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 10) {
-                Text(verbatim: icon).font(.app(size: 36))
+                // Знак акцентом: он текстовый, а не эмодзи, и своего цвета
+                // у него нет — без краски плитка выглядела бы выцветшей.
+                Text(verbatim: icon)
+                    .font(.app(size: 36))
+                    .foregroundStyle(.tint)
                 Text(verbatim: title)
                     .font(.app(.body, weight: .medium))
                     .foregroundStyle(.primary)

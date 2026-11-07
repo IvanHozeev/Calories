@@ -37,6 +37,29 @@ func settingLabel(_ title: LocalizedStringKey, glyph: String) -> some View {
     Label {
         Text(title).foregroundStyle(Color.primary)
     } icon: {
+        SettingGlyph(glyph: glyph)
+    }
+}
+
+/// Знак-буква в колонке значков.
+///
+/// Буква там ведёт себя не как символ системы, и поставить её «как есть» не
+/// выходит: символ рисуется заметно крупнее текста вокруг и выравнивается по
+/// своей середине, а буква набирается в размер текста и садится на базовую
+/// линию. В строке это видно сразу — знак мелкий и стоит ниже соседних.
+///
+/// Поэтому буква набирается крупнее подписи и ставится в квадрат той же
+/// высоты, какую занимает символ: тогда она попадает и в колонку значков, и
+/// в линию с остальными. Размер привязан к размеру текста — на крупном
+/// шрифте знак растёт вместе со строкой.
+private struct SettingGlyph: View {
+    let glyph: String
+    @ScaledMetric(relativeTo: .body) private var side: CGFloat = 22
+
+    var body: some View {
         Text(verbatim: glyph)
+            .font(.app(size: side))
+            .foregroundStyle(.tint)
+            .frame(width: side, height: side)
     }
 }

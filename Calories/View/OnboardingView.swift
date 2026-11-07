@@ -133,6 +133,23 @@ struct OnboardingView: View {
         }
     }
 
+    /// Цвет шага: у каждого свой, по кругу — те же четыре, что в кольце и
+    /// в надписи «Calories» внизу настроек.
+    ///
+    /// Онбординг — единственное место, где человек идёт по приложению
+    /// насквозь, и цвет здесь показывает движение: кнопка, точка и выбранная
+    /// плитка меняют цвет от шага к шагу, а пройденные точки остаются каждая
+    /// в своём. К концу полоска сверху набирается всеми цветами кольца —
+    /// тем самым, ради которого всё и затевалось.
+    private func stepColor(_ index: Int) -> Color {
+        let colors = [ProgressRing.carbColors, ProgressRing.fatColors,
+                      ProgressRing.proteinColors, ProgressRing.kcalColors].map { $0[1] }
+        return colors[index % colors.count]
+    }
+
+    /// Цвет текущего шага — им красится всё, что на нём выделено.
+    private var accent: Color { stepColor(steps.firstIndex(of: step) ?? 0) }
+
     private func go(_ offset: Int) {
         guard let index = steps.firstIndex(of: step) else { return }
         let target = min(max(index + offset, 0), steps.count - 1)
@@ -160,7 +177,7 @@ struct OnboardingView: View {
             HStack(spacing: 6) {
                 ForEach(visible.indices, id: \.self) { i in
                     Capsule()
-                        .fill(i <= current ? AnyShapeStyle(Color.green)
+                        .fill(i <= current ? AnyShapeStyle(stepColor(i + 1))
                                            : AnyShapeStyle(.channel(thickness: 6)))
                         .frame(width: i == current ? 22 : 8, height: 6)
                         .animation(.spring(duration: 0.3), value: step)
@@ -241,11 +258,11 @@ struct OnboardingView: View {
                         .background(
                             RoundedRectangle(cornerRadius: 16)
                                 .fill(ExplanationSettings.shared.level == level
-                                      ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
+                                      ? accent.opacity(0.1) : Color(.secondarySystemBackground))
                         )
                         .overlay(
                             RoundedRectangle(cornerRadius: 16)
-                                .stroke(ExplanationSettings.shared.level == level ? Color.green : Color.clear,
+                                .stroke(ExplanationSettings.shared.level == level ? accent : Color.clear,
                                         lineWidth: 1.5)
                         )
                     }
@@ -710,7 +727,7 @@ struct OnboardingView: View {
                 .font(.app(.body, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(Color.green)
+                .background(accent)
                 .foregroundStyle(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
         }
@@ -733,18 +750,18 @@ struct OnboardingView: View {
                 Spacer()
                 if selected {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(accent)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(selected ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
+                    .fill(selected ? accent.opacity(0.1) : Color(.secondarySystemBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(selected ? Color.green : Color.clear, lineWidth: 1.5)
+                    .stroke(selected ? accent : Color.clear, lineWidth: 1.5)
             )
         }
         // Без плоского стиля кнопка красит текст карточки в синий.
@@ -763,7 +780,7 @@ struct OnboardingView: View {
                     .font(.app(.body, weight: .medium))
                     .foregroundStyle(.primary)
                 if selected {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(accent)
                 } else {
                     Color.clear.frame(height: 20)
                 }
@@ -772,11 +789,11 @@ struct OnboardingView: View {
             .padding(.vertical, 20)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(selected ? Color.green.opacity(0.1) : Color(.secondarySystemBackground))
+                    .fill(selected ? accent.opacity(0.1) : Color(.secondarySystemBackground))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(selected ? Color.green : Color.clear, lineWidth: 1.5)
+                    .stroke(selected ? accent : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)

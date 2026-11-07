@@ -322,7 +322,12 @@ struct MyFoodView: View {
                                 portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
                                 macros: dish.totalMacros,
                                 detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                                icons: store.foodCategories(of: dish).map(\.icon),
+                                // Вид рецепта — первым значком, перед категориями состава:
+                            // по нему и выбирают, когда думают, что сварить.
+                            // У «другого» значка нет: сетка квадратов ничего
+                            // не говорит, а место занимает.
+                            icons: (dish.dishKind == .other ? [] : [dish.dishKind.icon])
+                                + store.foodCategories(of: dish).map(\.icon),
                                 leadingMacros: dish.macrosPer100g,
                                 traits: dish.traits
                             )
@@ -388,7 +393,12 @@ struct MyFoodView: View {
                             // сколько ещё есть в холодильнике — нет.
                             detail: batchDetail(dish)
                                 ?? "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                            icons: store.foodCategories(of: dish).map(\.icon),
+                            // Вид рецепта — первым значком, перед категориями состава:
+                            // по нему и выбирают, когда думают, что сварить.
+                            // У «другого» значка нет: сетка квадратов ничего
+                            // не говорит, а место занимает.
+                            icons: (dish.dishKind == .other ? [] : [dish.dishKind.icon])
+                                + store.foodCategories(of: dish).map(\.icon),
                             leadingMacros: dish.macrosPer100g,
                             traits: dish.traits
                         )

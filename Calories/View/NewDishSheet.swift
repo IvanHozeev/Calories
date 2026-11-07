@@ -7,6 +7,8 @@ struct NewDishSheet: View {
     var isEmbedded: Bool = false
 
     @State private var name = ""
+    /// Что это за рецепт: салат, суп, горячее, десерт, напиток.
+    @State private var kind: DishKind = .other
     /// Пусто — значит «вся кастрюля»: подставится полный вес блюда.
     @State private var servingGrams = ""
 
@@ -180,6 +182,17 @@ struct NewDishSheet: View {
         List {
             Section("Название") {
                 TextField("Борщ, куриная грудка с рисом...", text: $name)
+                // Вид — рядом с названием: он про то же самое, чем рецепт
+                // является, а не про то, из чего он собран. Собирая обед,
+                // человек думает «что на первое», и список рецептов должен
+                // отвечать на этот вопрос, а не на «из чего оно».
+                Picker(selection: $kind) {
+                    ForEach(DishKind.allCases) { item in
+                        Label(item.title, systemImage: item.icon).tag(item)
+                    }
+                } label: {
+                    settingLabel("Вид", systemImage: "square.grid.2x2")
+                }
             }
 
             // Состав сразу под названием: блюдо и есть свой состав, а порция
@@ -339,9 +352,9 @@ struct NewDishSheet: View {
                     let trimmed = name.trimmingCharacters(in: .whitespaces)
                     guard !trimmed.isEmpty, !ingredients.isEmpty else { return }
                     if let dish = editingDish {
-                        store.updateDish(dish, name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
+                        store.updateDish(dish, name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue, kind: kind)
                     } else {
-                        store.addDish(name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue)
+                        store.addDish(name: trimmed, ingredients: ingredients, servingGrams: servingGramsValue, kind: kind)
                     }
                     dismiss()
                 }
@@ -360,6 +373,7 @@ struct NewDishSheet: View {
         .onAppear {
             if let dish = editingDish {
                 name = dish.name
+                kind = dish.dishKind
                 ingredients = dish.ingredients
                 servingGrams = dish.defaultServingGrams > 0
                     ? String(format: "%g", dish.defaultServingGrams)

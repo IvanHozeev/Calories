@@ -1,6 +1,7 @@
 import Testing
 import Foundation
 import SwiftData
+import UIKit
 @testable import Calories
 
 /// Партия — одна сваренная кастрюля.
@@ -184,5 +185,49 @@ struct FoodInDishesTests {
         let salad = try! #require(store.dishes(containing: "Оливковое масло").first)
         #expect(store.grams(of: "Оливковое масло", in: salad) == 20,
                 "Один продукт может лежать в составе дважды — считаем сумму")
+    }
+}
+
+// MARK: - Вид рецепта
+
+/// Салат, суп, горячее, десерт, напиток — про место за столом, а не про полку
+/// в магазине. Проверяем то, что молча ломается: значок, которого нет в
+/// системе, рисуется пустотой и замечается только глазами.
+@MainActor
+struct DishKindTests {
+
+    @Test func everyKindHasASymbolTheSystemKnows() {
+        for kind in DishKind.allCases {
+            #expect(UIImage(systemName: kind.icon) != nil,
+                    "У вида «\(kind.rawValue)» значок \(kind.icon), которого нет в системе")
+        }
+    }
+
+    @Test func everyKindHasATitle() {
+        for kind in DishKind.allCases {
+            #expect(!kind.title.isEmpty)
+        }
+    }
+
+    /// Старые рецепты заведены до того, как вид стали спрашивать: у них
+    /// «другое», и это честный ответ, а не угадывание за человека.
+    @Test func aRecipeWithoutAKindIsOther() {
+        let dish = Dish(name: "Борщ")
+        #expect(dish.dishKind == .other)
+    }
+
+    @Test func theKindSurvivesBeingSet() {
+        let dish = Dish(name: "Борщ")
+        dish.dishKind = .soup
+        #expect(dish.kind == "soup")
+        #expect(dish.dishKind == .soup)
+    }
+
+    /// Неизвестное значение из базы не должно ронять экран: читается как
+    /// «другое». Так бывает после отката на прежнюю версию.
+    @Test func anUnknownKindReadsAsOther() {
+        let dish = Dish(name: "Борщ")
+        dish.kind = "casserole"
+        #expect(dish.dishKind == .other)
     }
 }

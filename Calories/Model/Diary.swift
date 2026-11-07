@@ -208,6 +208,18 @@ final class Dish: Identifiable {
     var totalMacros: Macros { ingredients.reduce(Macros.zero) { $0 + $1.macros } }
     var totalGrams: Double { ingredients.reduce(0) { $0 + $1.grams } }
 
+    /// Что это за рецепт: салат, суп, горячее, десерт, напиток.
+    ///
+    /// Значение по умолчанию обязательно: без него SwiftData не смигрирует
+    /// уже заведённые рецепты. «Другое» у старых — честный ответ: вид у них
+    /// никто не спрашивал, и выдумывать его за человека нельзя.
+    var kind: String = DishKind.other.rawValue
+
+    var dishKind: DishKind {
+        get { DishKind(rawValue: kind) ?? .other }
+        set { kind = newValue.rawValue }
+    }
+
     /// Когда сварили эту кастрюлю. nil — блюдо заведено как рецепт, и
     /// партии у него сейчас нет.
     ///

@@ -326,8 +326,7 @@ struct DayNutritionView: View {
                 // Подпись — такая же дверь к числу, как и сам ломоть: попасть
                 // пальцем в узкий сегмент на два процента нельзя, а в строку
                 // под кольцом можно.
-                .contentShape(Rectangle())
-                .onTapGesture {
+                .tappableRow {
                     selectedPart = selectedPart == part.id ? nil : part.id
                 }
                 .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.45)

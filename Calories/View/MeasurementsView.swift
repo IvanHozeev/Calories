@@ -234,8 +234,7 @@ struct MeasurementsView: View {
                 }
                 .padding(.vertical, 2)
                 // Тап ловится всей строкой, а не только текстом.
-                .contentShape(Rectangle())
-                .onTapGesture { shownInsight = insight }
+                .tappableRow { shownInsight = insight }
                 .accessibilityElement(children: .combine)
                 .accessibilityHint(Text("Показать объяснение"))
             }

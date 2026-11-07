@@ -412,16 +412,14 @@ struct IngredientPickerSheet: View {
                 Section("Мои продукты") {
                     ForEach(filteredCustomFoods) { food in
                         foodRow(food)
-                            .contentShape(Rectangle())
-                            .onTapGesture { select(food) }
+                            .tappableRow { select(food) }
                     }
                 }
             }
             Section("База продуктов") {
                 ForEach(filteredBuiltIn) { food in
                     foodRow(food)
-                        .contentShape(Rectangle())
-                        .onTapGesture { select(food) }
+                        .tappableRow { select(food) }
                 }
             }
         }

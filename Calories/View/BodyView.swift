@@ -817,8 +817,7 @@ private extension BodyView {
             Text(heightDisplayText(heightTenths))
                 .foregroundStyle(.secondary)
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
+        .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
                 showHeightPicker.toggle()
                 if showHeightPicker { showAgePicker = false; showProteinPicker = false }
@@ -839,8 +838,7 @@ private extension BodyView {
             Text("\(ageInt) лет")
                 .foregroundStyle(.secondary)
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
+        .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
                 showAgePicker.toggle()
                 if showAgePicker { showHeightPicker = false; showProteinPicker = false }
@@ -935,8 +933,7 @@ private extension BodyView {
             Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
                 .foregroundStyle(.secondary)
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
+        .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
                 showProteinPicker.toggle()
                 if showProteinPicker { showHeightPicker = false; showAgePicker = false }
@@ -974,8 +971,7 @@ private extension BodyView {
             Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
                 .foregroundStyle(.secondary)
         }
-        .contentShape(Rectangle())
-        .onTapGesture {
+        .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
                 showFatPicker.toggle()
                 if showFatPicker {

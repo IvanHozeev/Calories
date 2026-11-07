@@ -304,9 +304,51 @@ struct BodyView: View {
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
         }
+        // Профиль, сохранённый не отсюда, подхватываем обратно в черновик.
+        //
+        // Экран собирается раньше, чем человек заполняет онбординг: вкладки
+        // уже построены, а онбординг лежит поверх них листом. Поэтому `@State`
+        // снимал профиль, когда профиля ещё не было, и навсегда оставался с
+        // умолчаниями — семьдесят килограммов, сто семьдесят сантиметров,
+        // двадцать пять лет.
+        //
+        // Само по себе это было бы досадно, но рядом стоит обработчик выше:
+        // любая правка черновика пишет его в хранилище целиком. То есть
+        // первое же касание любой строки «Профиля» затирало введённые в
+        // онбординге вес, рост и возраст умолчаниями — молча.
+        //
+        // Сверяемся перед тем, как применять: без этого мы бы отвечали на
+        // собственную же запись и ходили по кругу.
+        .onChange(of: store.profile) { _, saved in
+            guard let saved, saved != draftProfile else { return }
+            apply(saved)
+        }
     }
     
     
+    /// Переносит сохранённый профиль в черновик экрана.
+    ///
+    /// Повторяет `init` слово в слово, и держать их рядом обязательно: разойдутся
+    /// — экран после онбординга покажет одно, а после перезапуска другое.
+    private func apply(_ profile: UserProfile) {
+        let wKg = store.latestWeight?.weightKg ?? profile.weightKg
+        weightTenths = max(300, Int((wKg * 10).rounded()))
+        let hCm = Int((profile.heightCm * 10).rounded())
+        heightTenths = hCm > 0 ? hCm : 1700
+        ageInt = profile.age
+        proteinTenths = max(10, Int((profile.proteinPerKg * 10).rounded()))
+        sex = profile.sex
+        activityLevel = profile.activityLevel
+        goal = profile.goal
+        proteinBasis = profile.proteinBasis
+        let pLean = profile.storedProteinPerLeanKg
+        proteinLeanTenths = max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded()))
+        proteinLeanIsSet = pLean != nil
+        fatTenths = min(max(Int((profile.fatPerKg * 10).rounded()),
+                            Int(MacroTargets.fatFloorPerKg * 10)),
+                        Int(MacroTargets.fatCeilingPerKg * 10))
+    }
+
     /// Динамика за месяц: искра и изменение прямо в строке веса — тренд виден,
     /// не заходя внутрь.
     private var weightTrend: (points: [Double], caption: String)? {

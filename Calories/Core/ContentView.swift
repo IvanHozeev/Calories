@@ -885,6 +885,8 @@ private struct StepsChip: View {
     var store: StepStore
     var onTap: () -> Void
 
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
+
     private var progress: Double {
         guard store.stepGoal > 0 else { return 0 }
         return min(Double(store.stepsToday) / Double(store.stepGoal), 1.0)
@@ -892,9 +894,15 @@ private struct StepsChip: View {
 
     // Цвет акцента, выбранный в настройках: кольцо шагов у него единственное
     // без своего смысла у цвета. Цель взята — зелёным, как «в норме» везде.
+    //
+    // Акцент берётся через `@AppStorage`, а не прямым чтением `UserDefaults`:
+    // обычное чтение SwiftUI не отслеживает, и пешеход оставался прежнего
+    // цвета до тех пор, пока экран не пересоберут целиком — потянув список
+    // вниз. Цвет менялся, а значок об этом не знал.
     private var tint: Color {
         progress >= 1 ? ProgressRing.kcalColors[0]
-                      : AppAccent.current.color(focus: AppAccent.storedFocusMacro)
+                      : (AppAccent(rawValue: appAccent) ?? .system)
+                            .color(focus: AppAccent.storedFocusMacro)
     }
 
     var body: some View {

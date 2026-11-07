@@ -10,6 +10,7 @@ import SwiftUI
 /// параметрами тела.
 struct BodyView: View {
     var store: CalorieStore
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     
     @State private var weightTenths: Int
     /// Рост в десятых долях сантиметра: 1805 — это 180.5.
@@ -231,13 +232,13 @@ struct BodyView: View {
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
             }
-            brandSection
         }
         .sheet(isPresented: $showingBasis) {
             CalculationBasisSheet(store: store, activityLevel: $activityLevel)
         }
         .glassRow()
         .listStyle(.insetGrouped)
+        .tint((AppAccent(rawValue: appAccent) ?? .system).color(focus: store.focusMacro))
         .alert("Дневная цель", isPresented: $showingGoalEditor) {
             TextField("Ккал в день", text: $goalText)
                 .keyboardType(.numberPad)
@@ -795,7 +796,7 @@ private extension BodyView {
                 isEmbedded: true
             )
         } label: {
-            Label("Приёмы пищи", systemImage: "clock")
+            settingLabel("Приёмы пищи", systemImage: "clock")
         }
         .accessibilityIdentifier("openMealSchedule")
 
@@ -805,7 +806,7 @@ private extension BodyView {
         NavigationLink {
             KosherView()
         } label: {
-            Label("Кашрут", systemImage: "circle.lefthalf.filled")
+            settingLabel("Кашрут", systemImage: "circle.lefthalf.filled")
         }
         .accessibilityIdentifier("openKosher")
     }
@@ -818,16 +819,17 @@ private extension BodyView {
         Picker(selection: $sex) {
             ForEach(Sex.allCases) { Text($0.title).tag($0) }
         } label: {
-            Label("Пол", systemImage: "person")
+            settingLabel("Пол", systemImage: "person")
         }
+        .id(appAccent)
         // Вес ведёт на свой экран, а не открывает колесо: он меняется
         // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
         // Динамика переехала туда же — отдельной строке рядом делать нечего.
         NavigationLink {
             WeightDetailView(store: store)
         } label: {
+            settingLabel(systemImage: "scalemass") {
             HStack {
-                Image(systemName: "scalemass")
                 Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
                 Spacer()
                 if let trend = weightTrend {
@@ -840,17 +842,19 @@ private extension BodyView {
                 Text(weightDisplayText(weightTenths))
                     .foregroundStyle(.secondary)
             }
+            }
         }
         .accessibilityIdentifier("openWeight")
         
         
         
-        HStack {
-            Image(systemName: "arrow.up.and.down")
-            Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
-            Spacer()
-            Text(heightDisplayText(heightTenths))
-                .foregroundStyle(.secondary)
+        settingLabel(systemImage: "figure.stand") {
+            HStack {
+                Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
+                Spacer()
+                Text(heightDisplayText(heightTenths))
+                    .foregroundStyle(.secondary)
+            }
         }
         .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -867,12 +871,13 @@ private extension BodyView {
             .pickerStyle(.wheel)
             .frame(height: 160)
         }
-        HStack {
-            Image(systemName: "calendar")
-            Text("Возраст")
-            Spacer()
-            Text("\(ageInt) лет")
-                .foregroundStyle(.secondary)
+        settingLabel(systemImage: "birthday.cake") {
+            HStack {
+                Text("Возраст")
+                Spacer()
+                Text("\(ageInt) лет")
+                    .foregroundStyle(.secondary)
+            }
         }
         .tappableRow {
             withAnimation(.easeInOut(duration: 0.2)) {
@@ -893,8 +898,8 @@ private extension BodyView {
         NavigationLink {
             MeasurementsView(store: store)
         } label: {
+            settingLabel(systemImage: "ruler") {
             HStack {
-                Image(systemName: "ruler")
                 Text("Замеры")
                 Spacer()
                 if let last = store.latestMeasurement {
@@ -902,6 +907,7 @@ private extension BodyView {
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
+            }
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
@@ -1044,12 +1050,5 @@ private extension BodyView {
     }
     }
 
-    /// Подпись приложения в конце списка.
-    var brandSection: some View {
-        Section {
-            BrandFooter()
-                .brandFooterRow()
-        }
-    }
 
 }

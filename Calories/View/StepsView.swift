@@ -79,6 +79,7 @@ final class StepsViewModel {
 }
 
 struct StepsNavigationView: View {
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     var store: StepStore
     @State private var viewModel: StepsViewModel
     @State private var selectedGoal: Int = 10_000
@@ -188,7 +189,8 @@ struct StepsNavigationView: View {
         VStack(spacing: 16) {
             Image(systemName: "figure.walk.circle")
                 .font(.app(size: 64))
-                .foregroundStyle(AppAccent.current.color(focus: AppAccent.storedFocusMacro))
+                .foregroundStyle((AppAccent(rawValue: appAccent) ?? .system)
+                    .color(focus: AppAccent.storedFocusMacro))
             Text("Доступ к шагам")
                 .font(.app(.title2, weight: .semibold))
             Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
@@ -255,6 +257,7 @@ private struct GoalPickerSheet: View {
 }
 
 private struct StepsContentView: View {
+    @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
     @State private var ringPull: CGFloat = 0
@@ -307,13 +310,18 @@ private struct StepsContentView: View {
     /// Цвет кольца шагов — общий акцент приложения. У шагов он ничего не
     /// означает, поэтому пусть будет тем, который человек выбрал; при выборе
     /// «По макросу» цвет берётся уже разрешённым — его кладёт дневник.
-    private static var stepsColors: [Color] {
-        let color = AppAccent.current.color(focus: AppAccent.storedFocusMacro)
+    ///
+    /// Не `static`: акцент читается через `@AppStorage`, иначе смена цвета
+    /// проходит мимо — обычное чтение `UserDefaults` SwiftUI не отслеживает,
+    /// и кольцо остаётся прежним до полной пересборки экрана.
+    private var stepsColors: [Color] {
+        let color = (AppAccent(rawValue: appAccent) ?? .system)
+            .color(focus: AppAccent.storedFocusMacro)
         return [color, color]
     }
 
     private var ringColors: [Color] {
-        viewModel.stepGoalAchieved ? ProgressRing.kcalColors : Self.stepsColors
+        viewModel.stepGoalAchieved ? ProgressRing.kcalColors : stepsColors
     }
 
     private var ringLabel: some View {
@@ -387,7 +395,7 @@ private struct StepsContentView: View {
                         x: .value("Дата", day.date, unit: .day),
                         y: .value("Шаги", day.steps)
                     )
-                    .foregroundStyle(day.steps >= store.stepGoal ? ProgressRing.kcalColors[0] : Self.stepsColors[0])
+                    .foregroundStyle(day.steps >= store.stepGoal ? ProgressRing.kcalColors[0] : stepsColors[0])
                     .cornerRadius(4)
 
                     RuleMark(y: .value("Цель", store.stepGoal))

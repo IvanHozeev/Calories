@@ -124,6 +124,11 @@ struct SettingsView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
+        // Акцент задаёт себе сам тот экран, где его и выбирают: заданного
+        // наверху, на вкладках, пикерам не хватает — своё значение они
+        // красят в цвет, снятый при сборке строки, и держат его до полной
+        // пересборки экрана.
+        .tint((AppAccent(rawValue: appAccent) ?? .system).color(focus: store.focusMacro))
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
         .screenTitle(String(localized: "Настройки"))
@@ -309,7 +314,7 @@ struct DeveloperSettingsView: View {
                     get: { store.isPremium },
                     set: { store.isPremium = $0 }
                 )) {
-                    Label("Premium", systemImage: "sparkles")
+                    settingLabel("Premium", systemImage: "sparkles")
                 }
             } header: {
                 Text("Подписка")
@@ -321,7 +326,7 @@ struct DeveloperSettingsView: View {
                 NavigationLink {
                     SleepDebugView()
                 } label: {
-                    Label("Сон: что пришло", systemImage: "bed.double")
+                    settingLabel("Сон: что пришло", systemImage: "bed.double")
                 }
             } footer: {
                 Text("Сырьё из «Здоровья» рядом с тем, что из него собрало приложение. Нужно, когда названная ночь не сходится с тем, сколько человек спал.")
@@ -344,7 +349,7 @@ struct DeveloperSettingsView: View {
                 NavigationLink {
                     HealthInventoryView()
                 } label: {
-                    Label("Что есть в «Здоровье»", systemImage: "heart.text.square")
+                    settingLabel("Что есть в «Здоровье»", systemImage: "heart.text.square")
                 }
             } header: {
                 Text("Данные браслета")
@@ -464,7 +469,7 @@ private extension SettingsView {
     var intensityRow: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Label("Насыщенность", systemImage: "drop.halffull")
+                settingLabel("Насыщенность", systemImage: "drop.halffull")
                 Spacer()
                 // Образец рядом с ползунком: цифры процентов тут ничего не
                 // говорят, а три точки макросов меняются на глазах.
@@ -509,8 +514,16 @@ private extension SettingsView {
                 Label(theme.title, systemImage: theme.icon).tag(theme.rawValue)
             }
         } label: {
-            Label("Тема", systemImage: "circle.lefthalf.filled")
+            settingLabel("Тема", systemImage: "circle.lefthalf.filled")
         }
+        // Пересобирается при смене акцента.
+        //
+        // Значение пикера рисует UIKit, и свой цвет кнопка берёт один раз,
+        // когда её создают: `.tint` сверху на неё уже не действует, и
+        // «Как в системе» оставалось прежнего цвета до полной пересборки
+        // экрана. Ключ по акценту пересоздаёт только эту строку — список
+        // при этом не прокручивается к началу, как было бы с ключом на нём.
+        .id(appAccent)
     }
 
     var fontRow: some View {
@@ -518,7 +531,7 @@ private extension SettingsView {
             FontSettingsView()
         } label: {
             HStack {
-                Label("Шрифт и размер", systemImage: "textformat")
+                settingLabel("Шрифт и размер", systemImage: "textformat")
                 Spacer()
                 Text(AppFont(rawValue: appFont)?.title ?? "")
                     .foregroundStyle(.secondary)
@@ -532,7 +545,7 @@ private extension SettingsView {
             RingSoundSettingsView()
         } label: {
             HStack {
-                Label("Звук кольца", systemImage: "speaker.wave.2")
+                settingLabel("Звук кольца", systemImage: "speaker.wave.2")
                 Spacer()
                 Text(verbatim: (RingSound(rawValue: ringSound) ?? .wheel).title)
                     .foregroundStyle(.secondary)
@@ -551,7 +564,7 @@ private extension SettingsView {
         // Цвета кружками и без названий: «Белки» в строке про цвет читались
         // как настройка макросов, а кружок говорит всё сам.
         HStack {
-            Label("Цвет", systemImage: "paintpalette")
+            settingLabel("Цвет", systemImage: "paintpalette")
             Spacer(minLength: 12)
             HStack(spacing: 10) {
                 ForEach(AppAccent.allCases) { accent in
@@ -615,16 +628,6 @@ private extension SettingsView {
     }
 }
 
-/// Строка-действие в стиле остальных экранов: текст обычным цветом, акцент —
-/// только у значка. Синие подписи на всех строках спорили с тихими плашками.
-private func rowLabel(_ title: LocalizedStringKey, systemImage: String) -> some View {
-    Label {
-        Text(title).foregroundStyle(Color.primary)
-    } icon: {
-        Image(systemName: systemImage).foregroundStyle(.tint)
-    }
-}
-
 // MARK: - Разделы настроек
 //
 // Тело `body` было списком на двести строк: разделы приходилось искать глазами
@@ -658,8 +661,9 @@ private extension SettingsView {
                 Text(verbatim: level.title).tag(level)
             }
         } label: {
-            Label("Объяснения", systemImage: "text.alignleft")
+            settingLabel("Объяснения", systemImage: "text.alignleft")
         }
+        .id(appAccent)
         .accessibilityIdentifier("explanationLevel")
     } footer: {
         Text(verbatim: ExplanationSettings.shared.level.summary)
@@ -680,13 +684,14 @@ private extension SettingsView {
             Text("кг · см").tag(false)
             Text(verbatim: "lb · in").tag(true)
         } label: {
-            Label("Единицы", systemImage: "ruler")
+            settingLabel("Единицы", systemImage: "ruler")
         }
+        .id(appAccent)
 
         NavigationLink {
             RemindersView()
         } label: {
-            Label("Напоминания", systemImage: "bell")
+            settingLabel("Напоминания", systemImage: "bell")
         }
         // Язык меняет система: свой список всё равно требовал
         // перезапуска руками, а системный экран делает это сам и
@@ -697,8 +702,11 @@ private extension SettingsView {
             }
         } label: {
             HStack {
-                Label("Язык", systemImage: "character.bubble")
-                    .foregroundStyle(Color.primary)
+                // Цвета — порознь: `foregroundStyle` на всём `Label` красил и
+                // знак, и подпись, и акцент у знака пропадал. Внутри кнопки
+                // списка иерархический стиль сам берёт акцент, поэтому
+                // подпись задаётся явно — но только подпись.
+                settingLabel("Язык", systemImage: "character.bubble")
                 Spacer()
                 // Цвета явные: иерархические внутри кнопки списка
                 // берут акцент, и язык красился синим, как ссылка.
@@ -742,7 +750,7 @@ private extension SettingsView {
                 }
                 if !diagnostics.payloadFiles.isEmpty {
                     ShareLink(items: diagnostics.payloadFiles) {
-                        Label("Отправить разработчику", systemImage: "square.and.arrow.up")
+                        settingLabel("Отправить разработчику", systemImage: "square.and.arrow.up")
                     }
                     .accessibilityIdentifier("shareDiagnostics")
                 }
@@ -763,12 +771,12 @@ private extension SettingsView {
         Button {
             prepareBackup()
         } label: {
-            rowLabel("Резервная копия (JSON)", systemImage: "arrow.down.doc")
+            settingLabel("Резервная копия (JSON)", systemImage: "arrow.down.doc")
         }
         Button {
             prepareCSV()
         } label: {
-            rowLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
+            settingLabel("Дневник таблицей (CSV)", systemImage: "tablecells")
         }
         // Вес, рост и возраст — в том виде, в каком их читает GymLogger.
         // Одно тело на два приложения: вводить его дважды и дважды забывать
@@ -776,7 +784,7 @@ private extension SettingsView {
         Button {
             prepareGymProfile()
         } label: {
-            rowLabel("Профиль для GymLogger", systemImage: "figure.strengthtraining.traditional")
+            settingLabel("Профиль для GymLogger", systemImage: "figure.strengthtraining.traditional")
         }
     } header: {
         Text("Данные")
@@ -797,13 +805,13 @@ private extension SettingsView {
             Button {
                 pick(.backupFolder)
             } label: {
-                rowLabel("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
+                settingLabel("Включить автоматическую копию", systemImage: "clock.arrow.circlepath")
             }
         }
         Button {
             pick(.backupFile)
         } label: {
-            rowLabel("Восстановить из копии", systemImage: "arrow.up.doc")
+            settingLabel("Восстановить из копии", systemImage: "arrow.up.doc")
         }
         if let error = backups.lastError {
             Text(verbatim: error)
@@ -826,7 +834,7 @@ private extension SettingsView {
         NavigationLink {
             DeveloperSettingsView(store: store)
         } label: {
-            Label("Отладка", systemImage: "hammer")
+            settingLabel("Отладка", systemImage: "hammer")
         }
     }
     }

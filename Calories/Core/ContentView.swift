@@ -41,6 +41,10 @@ struct ContentView: View {
     @State private var showingMealSchedule = false
     /// Крупное кольцо уехало под шапку — в шапке его подменяет миниатюра.
     @State private var ringIsAway = false
+    /// Поверх «Сегодня» что-то открыто.
+    private var isCovered: Bool {
+        todaySheet != nil || showingAdd || appendingTo != nil || showingMeasurements
+    }
     /// Высота списка и то, сколько у него снизу занято таббаром. Из этих
     /// двух считается, сколько места осталось кольцу.
     /// Блюдо, которое открываем из подсказки про сваренное.
@@ -495,12 +499,20 @@ private extension ContentView {
                 // только тогда, когда само изменение состояния анимировано.
                 // Короткая пружина без перелёта: знак догоняет шапку, а не
                 // прыгает в неё.
+                // Пока поверх экрана лист, кольцо не пересчитываем.
+                //
+                // iOS показывает лист, уменьшая экран под ним карточкой, и
+                // это не вёрстка, а преобразование — но в глобальных
+                // координатах оно видно: кольцо «уезжает» под шапку, хотя
+                // человек ничего не листал. На коротком листе это заметно
+                // глазом — кольцо на заднем плане съёживалось и бледнело.
                 onAway: { away in
                     withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) {
                         ringIsAway = away
                     }
                 },
-                entrance: ringEntrance
+                entrance: ringEntrance,
+                isCovered: isCovered
             )
             // Кольцу — весь остаток: высоту блока задаёт экран, полоска и
             // плитки берут своё, остальное кольцу. Так не нужно знать ни
@@ -1114,6 +1126,8 @@ private struct PullableRing: View {
     var onAway: (Bool) -> Void = { _ in }
     /// Появление при запуске: кольцо подхватывает знак заставки.
     var entrance: RingEntrance = .none
+    /// Экран закрыт листом — геометрия врёт, и слушать её нельзя.
+    var isCovered: Bool = false
 
     /// Доросло ли кольцо до своего размера.
     @State private var grown = false
@@ -1191,6 +1205,7 @@ private struct PullableRing: View {
             GeometryReader { geometry in
                 Color.clear
                     .onChange(of: geometry.frame(in: .global).minY, initial: true) { _, y in
+                        guard !isCovered else { return }
                         let height = max(geometry.size.height, 1)
                         // Доля ухода: ноль, пока низ кольца ниже шапки;
                         // единица, когда оно скрылось целиком.

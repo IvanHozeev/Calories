@@ -181,18 +181,30 @@ struct ContentView: View {
                 SettingsView(store: store)
             }
             .navigationTitle("Сегодня")
-            // Какое именно сегодня. «Сегодня» — слово без числа, а записи
-            // в приложении о днях, и день недели с датой человек держит
-            // в голове сам ровно до первого раза, когда ошибётся.
-            .navigationSubtitle(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
+            // Какое именно сегодня — в нашей же шапке, рядом с кольцом:
+            // «Сегодня» — слово без числа, а записи в приложении о днях, и
+            // день недели с датой человек держит в голове сам ровно до
+            // первого раза, когда ошибётся. Системная `.navigationSubtitle`
+            // здесь не годится — она встала бы второй такой же строкой.
             // Крупным, но в самой шапке: большой заголовок над содержимым
             // уезжает прокруткой, а «Сегодня» с датой нужны и после неё.
-            .toolbarTitleDisplayMode(.inlineLarge)
+            .toolbarTitleDisplayMode(.inline)
             .toolbar {
-                // Объединяем миниатюру кольца и меню плюса в один слот тулбара,
-                // чтобы они управляли общим пространством и анимировались вместе.
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack {
+                // Кольцо уезжает влево от «Сегодня», а не вправо к кнопкам.
+                //
+                // Справа оно стояло среди действий — плюса, шагов, настроек —
+                // и читалось ещё одной кнопкой в ряду, хотя это не действие,
+                // а то же кольцо дня, просто уехавшее под шапку. Слева от
+                // заголовка у него своё место: знак экрана перед его
+                // названием, а ряд действий справа остаётся рядом действий.
+                //
+                // Заголовок при этом наш, а не системный: `.inlineLarge`
+                // держит слева самого себя, и поставить что-либо перед ним
+                // нельзя — лишний элемент уезжает в «ещё» справа. Поэтому
+                // шапку собираем сами, повторяя системную: крупное название
+                // и дата под ним.
+                ToolbarItem(placement: .principal) {
+                    HStack(spacing: 10) {
                         if ringIsAway {
                             ProgressRing(
                                 consumed: store.consumedToday,
@@ -201,7 +213,7 @@ struct ContentView: View {
                                 proteinTarget: store.proteinTarget,
                                 fatTarget: store.fatTarget,
                                 carbsTarget: store.carbsTarget,
-                                miniature: 32,
+                                miniature: 34,
                                 onOpen: {
                                     entryAction = nil
                                     showingAdd = true
@@ -210,7 +222,25 @@ struct ContentView: View {
                             .accessibilityHidden(true)
                             .transition(.scale(scale: 0.2).combined(with: .opacity))
                         }
-                        
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Сегодня")
+                                .font(.app(.title3, weight: .bold))
+                            // Дату даём сокращённой: в шапке рядом с кольцом
+                            // и четырьмя кнопками полному дню недели места
+                            // нет, а многоточие вместо половины слова хуже,
+                            // чем короткая запись целиком.
+                            Text(Date().formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                    }
+                    // Пара точек от края: без них кольцо упирается левым
+                    // боком в кромку экрана и выглядит обрезанным.
+                    .padding(.leading, 4)
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack {
                         Menu {
                             if GeminiVisionService.isConfigured {
                                 Button {
@@ -457,7 +487,16 @@ private extension ContentView {
                     entryAction = nil
                     showingAdd = true
                 },
-                onAway: { ringIsAway = $0 },
+                // Подмена кольца миниатюрой — с анимацией, иначе её нет
+                // вовсе: `.transition` на элементе тулбара отыгрывается
+                // только тогда, когда само изменение состояния анимировано.
+                // Короткая пружина без перелёта: знак догоняет шапку, а не
+                // прыгает в неё.
+                onAway: { away in
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.9)) {
+                        ringIsAway = away
+                    }
+                },
                 entrance: ringEntrance
             )
             // Кольцу — весь остаток: высоту блока задаёт экран, полоска и

@@ -160,11 +160,11 @@ final class CalorieStore {
         if usesAdaptiveTDEE, let smoothedTDEE { return smoothedTDEE }
         return profile?.tdee ?? Double(dailyGoal)
     }
-    private(set) var streak: Int = 0
-    private(set) var bestStreak: Int = 0
-    private(set) var loggingStreak: Int = 0
-    private(set) var proteinStreak: Int = 0
-    private(set) var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
+    var streak: Int = 0
+    var bestStreak: Int = 0
+    var loggingStreak: Int = 0
+    var proteinStreak: Int = 0
+    var streakHistory: [(date: Date, hasEntries: Bool, onGoal: Bool)] = []
     private(set) var groupedTodayEntries: [(period: MealPeriod, entries: [FoodEntry])] = []
     /// Недавнее — съеденное и заведённое вперемешку, по давности.
     private(set) var recentFoods: [FoodItem] = []
@@ -495,22 +495,6 @@ final class CalorieStore {
         let last6Dates = Set(last6.map { $0.date })
         let olderDays = pastDays.filter { !last6Dates.contains($0.date) }
         historyDays = (last6 + olderDays).sorted { $0.date > $1.date }
-    }
-
-    /// Серии: дней подряд с записями, с выполненной нормой и с белком.
-    private func rebuildStreaks(_ calendar: Calendar) {
-        let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
-        streak = currentStreak
-        bestStreak = bestStreakVal
-        loggingStreak = currentLoggingStreak
-
-        let today14 = calendar.startOfDay(for: Date())
-        proteinStreak = computeProteinStreak()
-
-        streakHistory = (0..<14).reversed().compactMap { offset in
-            guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
-            return (date, isDayLogged(date), isDayKept(date))
-        }
     }
 
     /// Как часто пересматривается измеренный расход, в днях.

@@ -976,6 +976,22 @@ extension CalorieStore {
         return Int((workingTDEE + dailyDelta).rounded())
     }
 
+    /// Серии: дней подряд с записями, с выполненной нормой и с белком.
+    func rebuildStreaks(_ calendar: Calendar) {
+        let (currentStreak, bestStreakVal, currentLoggingStreak) = computeStreak()
+        streak = currentStreak
+        bestStreak = bestStreakVal
+        loggingStreak = currentLoggingStreak
+
+        let today14 = calendar.startOfDay(for: Date())
+        proteinStreak = computeProteinStreak()
+
+        streakHistory = (0..<14).reversed().compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today14) else { return nil }
+            return (date, isDayLogged(date), isDayKept(date))
+        }
+    }
+
     /// Записать норму, которая стоит на экране сегодня.
     ///
     /// Прошедший день до сих пор получал свою норму задним числом: вечером

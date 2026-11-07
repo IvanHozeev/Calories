@@ -20,5 +20,45 @@ enum BrandLockup {
     static let ink = Color(red: 0x8E / 255, green: 0x8E / 255, blue: 0x93 / 255)
     /// Шрифт приложения прямым именем, а не через выбор человека: картинка
     /// лаунч-скрина нарисована именно им, и заставка обязана совпасть.
-    static let font = "Nunito-SemiBold"
+    ///
+    /// Имя — то единственное, под которым система знает подключённый файл.
+    /// Nunito у нас изменчивый, одним файлом на все веса, и под своим именем
+    /// он зарегистрирован ровно одним — `Nunito-ExtraLight`, как называется
+    /// его начертание по умолчанию. Имена вроде `Nunito-SemiBold` живут
+    /// внутри файла как именованные экземпляры, но наружу их система не
+    /// отдаёт: `Font.custom` такое имя не находит и молча берёт системный
+    /// шрифт. Так заставка и разошлась с лаунч-скрином — на одном Nunito, на
+    /// другом SF Pro, и это было видно глазом.
+    static let font = "Nunito-ExtraLight"
+    /// Вес, которым набрано название. Задаётся осью изменчивого шрифта —
+    /// именем его не выбрать, см. выше. Тем же весом рисует картинку
+    /// `Tools/brand_assets.swift`.
+    static let titleWeight: CGFloat = 600
 }
+
+#if canImport(UIKit)
+import UIKit
+
+extension UIFont {
+    /// Nunito нужного веса: имя даёт файл, вес — ось `wght`.
+    ///
+    /// Четырёхбуквенный тег оси — то же самое число, которым его записывают
+    /// в шрифте: `wght` байтами и есть этот идентификатор.
+    static func brandNunito(size: CGFloat, weight: CGFloat = BrandLockup.titleWeight) -> UIFont {
+        let base = UIFont(name: BrandLockup.font, size: size) ?? .systemFont(ofSize: size)
+        let weightAxis = 0x77676874
+        let descriptor = base.fontDescriptor.addingAttributes([
+            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [weightAxis: weight]
+        ])
+        return UIFont(descriptor: descriptor, size: size)
+    }
+}
+
+extension Font {
+    /// Название приложения на заставке — тем же шрифтом и весом, что на
+    /// картинке лаунч-скрина.
+    static var brandTitle: Font {
+        Font(UIFont.brandNunito(size: BrandLockup.titleSize))
+    }
+}
+#endif

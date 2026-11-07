@@ -353,3 +353,37 @@ extension CalorieStore {
     /// а второй список всего подряд, по которому снова надо искать глазами.
     static let recentLimit = 12
 }
+
+// MARK: - Продукт и рецепты
+
+extension CalorieStore {
+
+    /// Блюда, в которые входит этот продукт.
+    ///
+    /// Связь ищется по имени, а не по ссылке: состав блюда — снимок, и в нём
+    /// лежат названия. Это не недоделка, а то, на чём держится история:
+    /// продукт можно удалить, а блюдо, которое из него варили, останется
+    /// с тем, что в него клали. Переименование продукт проносит через
+    /// составы сам — этим занимается `propagate(foodNamed:renamedTo:)`.
+    ///
+    /// Отсюда растёт вторая половина замысла: продукт знает свои рецепты так
+    /// же, как рецепт знает свои продукты, и открыв оливковое масло, видно,
+    /// где оно участвует.
+    func dishes(containing foodName: String) -> [Dish] {
+        let name = foodName.trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return [] }
+        return dishes
+            .filter { dish in
+                dish.ingredients.contains { $0.foodName.localizedCaseInsensitiveCompare(name) == .orderedSame }
+            }
+            .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
+    }
+
+    /// Сколько этого продукта кладут в блюдо. Нужно, чтобы в списке рецептов
+    /// рядом с названием стояло «120 г» — по нему рецепт и узнают.
+    func grams(of foodName: String, in dish: Dish) -> Double {
+        dish.ingredients
+            .filter { $0.foodName.localizedCaseInsensitiveCompare(foodName) == .orderedSame }
+            .reduce(0) { $0 + $1.grams }
+    }
+}

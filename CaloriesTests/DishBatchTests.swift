@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import SwiftData
 @testable import Calories
 
 /// Партия — одна сваренная кастрюля.
@@ -118,5 +119,70 @@ import Foundation
         let state = DishBatch.state(cookedAt: day(-10), totalGrams: 4000,
                                     eatenGrams: 400, servingGrams: 400)
         #expect(DishBatch.advice(state) == .spoiled)
+    }
+}
+
+// MARK: - Продукт знает свои блюда
+
+/// Связь продукта с блюдами ищется по имени: состав блюда — снимок, в нём
+/// лежат названия. Это держит историю: продукт можно удалить, а блюдо
+/// останется с тем, что в него клали.
+@MainActor
+@Suite(.serialized)
+struct FoodInDishesTests {
+    /// Контейнер держим полем: локальный освобождается на выходе из init,
+    /// а контекст без своего контейнера мёртв и валит весь набор трапом
+    /// внутри SwiftData.
+    private let container: ModelContainer
+    private let store: CalorieStore
+
+    init() throws {
+        container = try ModelContainer(
+            for: FoodEntry.self, FoodItem.self, WeightEntry.self, GoalRecord.self, Dish.self,
+            BodyMeasurement.self, FastDay.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        store = CalorieStore(context: container.mainContext,
+                             defaults: TestDefaults.make(), groupDefaults: nil)
+    }
+
+    private func dish(_ name: String, _ parts: [(String, Double)]) {
+        store.addDish(name: name,
+                      ingredients: parts.map {
+                          DishIngredient(foodName: $0.0, caloriesPer100g: 100,
+                                         macrosPer100g: .zero, grams: $0.1)
+                      },
+                      servingGrams: 0)
+    }
+
+    @Test func aFoodListsTheDishesItGoesInto() {
+        dish("Салат", [("Оливковое масло", 15), ("Огурец", 200)])
+        dish("Паста", [("Оливковое масло", 10), ("Спагетти", 100)])
+        dish("Каша", [("Овсянка", 80)])
+
+        let names = store.dishes(containing: "Оливковое масло").map(\.name)
+        #expect(Set(names) == ["Салат", "Паста"])
+        #expect(store.dishes(containing: "Овсянка").map(\.name) == ["Каша"])
+    }
+
+    @Test func theCaseOfTheNameDoesNotMatter() {
+        dish("Салат", [("Оливковое масло", 15)])
+        #expect(store.dishes(containing: "оливковое МАСЛО").count == 1)
+    }
+
+    @Test func aFoodInNoDishHasAnEmptyList() {
+        dish("Салат", [("Оливковое масло", 15)])
+        #expect(store.dishes(containing: "Гречка").isEmpty)
+        #expect(store.dishes(containing: "   ").isEmpty,
+                "Пустое имя не должно возвращать все блюда подряд")
+    }
+
+    /// Рядом с названием блюда стоит вес — по нему рецепт и узнают: пятнадцать
+    /// граммов масла в салате и сто в заправке это разные рецепты.
+    @Test func theAmountInTheDishIsKnown() {
+        dish("Салат", [("Оливковое масло", 15), ("Оливковое масло", 5)])
+        let salad = try! #require(store.dishes(containing: "Оливковое масло").first)
+        #expect(store.grams(of: "Оливковое масло", in: salad) == 20,
+                "Один продукт может лежать в составе дважды — считаем сумму")
     }
 }

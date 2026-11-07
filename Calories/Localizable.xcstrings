@@ -5097,6 +5097,100 @@
         }
       }
     },
+    "Блюда, в состав которых входит этот продукт, и сколько его там. Связь живёт по названию: продукт можно удалить, а блюдо останется с тем, что в него клали." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأطباق التي يدخل فيها هذا المنتج، وكميته فيها. الربط بالاسم: احذف المنتج ويبقى الطبق بما وُضع فيه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerichte, in die dieses Lebensmittel kommt, und wie viel davon. Die Verbindung läuft über den Namen: Löscht man das Lebensmittel, behält das Gericht, was darin war."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dishes this food goes into, and how much of it. The link lives by name: delete the food and the dish keeps what was put in it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Platos en los que entra este alimento y cuánto. El vínculo es por nombre: si borras el alimento, el plato conserva lo que llevaba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les plats où cet aliment entre, et en quelle quantité. Le lien passe par le nom : supprimez l’aliment, le plat garde ce qu’on y avait mis."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "המנות שהמוצר הזה נכנס אליהן, וכמה ממנו. הקישור לפי שם: אפשר למחוק את המוצר והמנה תישאר עם מה ששמו בה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pratos em que este alimento entra e quanto. O vínculo é pelo nome: apague o alimento e o prato mantém o que levava."
+          }
+        }
+      }
+    },
+    "Блюда, в которые входит продукт, и сколько его там." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأطباق التي تحتوي هذا المنتج وكميته."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gerichte mit diesem Lebensmittel und wie viel."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dishes this food goes into, and how much."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Platos con este alimento y cuánto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les plats avec cet aliment, et combien."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מנות שהמוצר נכנס אליהן, וכמה."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pratos com este alimento e quanto."
+          }
+        }
+      }
+    },
     "Блюда" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5837,6 +5931,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Em %@ há mais calorias, nos outros dias — menos. A média semanal permanece a mesma."
+          }
+        }
+      }
+    },
+    "В блюдах" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الأطباق"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Gerichten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Used in dishes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En platos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans les plats"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "במנות"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em pratos"
           }
         }
       }

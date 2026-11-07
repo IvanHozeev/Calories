@@ -321,6 +321,7 @@ struct NewFoodSheet: View {
             cookingSection
             donorSection
             vitaminsSection
+            dishesSection
         }
             .glassRow()
             .task(id: searchQuery) {
@@ -579,6 +580,40 @@ private extension NewFoodSheet {
             }
         }
     }
+    }
+
+    /// Где этот продукт участвует: блюда, в состав которых он входит.
+    ///
+    /// Половина замысла про рецепты, которую можно отдать уже сейчас: рецепт
+    /// и так помнит свои продукты, а здесь продукт показывает свои рецепты.
+    /// Открыв оливковое масло, видно, куда его кладут, — а не вспоминаешь это
+    /// сам, стоя у плиты.
+    ///
+    /// Только у заведённого продукта: у нового состав ещё никто не собирал.
+    @ViewBuilder
+    var dishesSection: some View {
+        let dishes = editingFood.map { store.dishes(containing: $0.name) } ?? []
+        if !dishes.isEmpty {
+            Section {
+                ForEach(dishes) { dish in
+                    LabeledContent {
+                        let grams = store.grams(of: editingFood?.name ?? "", in: dish)
+                        Text(verbatim: String(format: "%.0f \(String(localized: "г"))", grams))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    } label: {
+                        settingLabel(systemImage: "frying.pan") {
+                            Text(verbatim: dish.name)
+                        }
+                    }
+                }
+            } header: {
+                Text("В блюдах")
+            } footer: {
+                explain("Блюда, в состав которых входит этот продукт, и сколько его там. Связь живёт по названию: продукт можно удалить, а блюдо останется с тем, что в него клали.",
+                        short: "Блюда, в которые входит продукт, и сколько его там.").map { Text($0) }
+            }
+        }
     }
 
     /// Состав с упаковки, вписанный руками.

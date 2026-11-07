@@ -457,7 +457,9 @@ private extension ContentView {
             // или приготовить, пока не кончилось. Одна строка на самую
             // срочную кастрюлю — список дел по холодильнику тут не нужен.
             if let hint = store.batchHint() {
-                batchRow(hint.dish, hint.advice)
+                BatchHintRow(dish: hint.dish, advice: hint.advice) {
+                    openingDish = hint.dish
+                }
             }
 
             // Взвешивание — сразу под кольцом.
@@ -762,51 +764,6 @@ private extension ContentView {
     }
 
     /// Строка про сваренное: что именно и что с этим делать.
-    private func batchRow(_ dish: Dish, _ advice: DishBatch.Advice) -> some View {
-        let text: String
-        let color: Color
-        switch advice {
-        case .spoiled:
-            text = String(format: String(localized: "%@ — четвёртый день, лучше не есть"), dish.name)
-            color = ProgressRing.overColors[0]
-        case let .eatToday(servings):
-            if let servings, servings >= 0.5 {
-                text = String(format: String(localized: "%1$@ — доесть сегодня, осталось %2$@ порции"),
-                              dish.name, String(format: "%.1f", servings))
-            } else {
-                text = String(format: String(localized: "%@ — доесть сегодня"), dish.name)
-            }
-            color = .orange
-        case let .cookAgain(runsOut):
-            text = String(format: String(localized: "%1$@ кончится %2$@ — пора готовить"),
-                          dish.name, runsOut.formatted(.dateTime.day().month(.abbreviated)))
-            color = MacroKind.carbs.color
-        }
-        return Button {
-            // Ведём туда, где партия и живёт: в само блюдо, где её можно
-            // закрыть или сварить заново.
-            openingDish = dish
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "takeoutbag.and.cup.and.straw")
-                    .font(.app(.footnote))
-                Text(verbatim: text)
-                    .font(.app(.caption))
-                    .multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.app(.caption2))
-            }
-            .foregroundStyle(color)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(color.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("batchHint")
-    }
-
     /// Съеденное за день: приёмы пищи по порядку, в каждом свои строки.
     @ViewBuilder
     var diarySections: some View {

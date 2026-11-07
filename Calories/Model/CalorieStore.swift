@@ -11,7 +11,7 @@ final class CalorieStore {
     private let context: ModelContext
     /// Хранилище настроек. Инжектится, чтобы тесты не трогали боевые UserDefaults приложения:
     /// юнит-тесты запускаются внутри процесса Calories.app, и `.standard` там — реальные данные пользователя.
-    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored let defaults: UserDefaults
     /// Общий с виджетом контейнер. Тесты передают nil, чтобы не переписывать боевые данные виджета.
     @ObservationIgnored let groupDefaults: UserDefaults?
 

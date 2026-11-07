@@ -991,10 +991,14 @@ private struct StepsChip: View {
                         .monospacedDigit()
                         .foregroundStyle(Color.primary)
                 } else {
+                    // Без доступа — один пешеход, без подписи. Слово рядом со
+                    // значком не добавляло смысла, зато отнимало ширину у
+                    // даты в шапке и обрезалось само: «Ste…». Что это такое,
+                    // пешеход говорит и молча, а для голоса есть подпись
+                    // доступности ниже.
                     Image(systemName: "figure.walk")
                         .font(.app(.subheadline, weight: .medium))
-                    Text("Шаги")
-                        .font(.app(.subheadline))
+                        .frame(height: 32)
                 }
             }
             .foregroundStyle(store.isAuthorized ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))

@@ -612,14 +612,6 @@ struct AddEntryView: View {
                 // остаётся только согласиться, а сейчас набранное ещё можно
                 // разложить по двум приёмам. Не запрет и не блокировка
                 // сохранения: приложение говорит, что видит, а решает человек.
-                if showsMixingWarning {
-                    Label("Мясное с молочным в одной тарелке", systemImage: "exclamationmark.triangle")
-                        .font(.app(.caption))
-                        .foregroundStyle(.orange)
-                        .padding(.vertical, 2)
-                        .accessibilityIdentifier("kosherMixing")
-                }
-
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text("Итого")
@@ -640,149 +632,9 @@ struct AddEntryView: View {
         }
     }
 
-    /// Стоит ли сказать, что в приёме мясное с молочным.
-    ///
-    /// Спрашиваем настройки здесь, а не в хранилище: дневник не должен знать,
-    /// считает человек кашрут или нет.
-    private var showsMixingWarning: Bool {
-        let settings = KosherSettings.shared
-        guard settings.isEnabled, settings.warnsMixing else { return false }
-        return store.isKosherMixed(draft: draftItems)
-    }
 
-    /// Сколько осталось на ближайший приём.
-    ///
-    /// Ноль, когда расписание выключено: без окон «остаток приёма» не
-    /// существует, и подсказывать не от чего.
-    private var mealRemaining: Int {
-        guard MealScheduleSettings.shared.isEnabled else { return 0 }
-        guard let next = MealSchedule.nextSlot(store.todaySlots) else { return 0 }
-        return max(0, next.calories - draftTotalCalories)
-    }
 
-    private var suggestions: [MealSuggestions.Candidate] {
-        store.mealSuggestions(remaining: mealRemaining)
-    }
 
-    /// Приёмы, которые человек собирает снова и снова, — целиком.
-    private var usual: [UsualMeal.Suggestion] {
-        store.usualMeals(period: nextMealPeriod ?? MealPeriod.period(for: Date()))
-    }
-
-    /// Что человек обычно кладёт вместе с тем, что уже в приёме.
-    private var pairs: [MealPairs.Suggestion] {
-        store.pairSuggestions(draft: draftItems.map(\.name))
-    }
-
-    /// Какой приём сейчас ближайший — его именем и подписаны подсказки.
-    private var nextMealPeriod: MealPeriod? {
-        guard MealScheduleSettings.shared.isEnabled else { return nil }
-        return MealSchedule.nextSlot(store.todaySlots)?.period
-    }
-
-    /// Заголовок подсказок: какой это приём и сколько на него осталось.
-    ///
-    /// Имя приёма, а не «под остаток»: человек и так знает, что сейчас
-    /// полдник, — ему нужно число, к которому подбирать.
-    private var suggestionsTitle: String {
-        guard let period = nextMealPeriod else {
-            return String(format: String(localized: "Осталось %lld ккал"), mealRemaining)
-        }
-        return String(format: String(localized: "%1$@: %2$lld ккал"),
-                      String(localized: String.LocalizationValue(period.rawValue)), mealRemaining)
-    }
-
-    /// Строка подсказки: что взять и сколько.
-    ///
-    /// Та же `FoodRow`, что у «как обычно» и «обычно вместе»: своя раскладка
-    /// держала макросы и калории в одной строке с названием, и названию
-    /// оставалось полширины. Приём из двух блюд в неё не влезал никогда —
-    /// «Котлеты из филе лосося, Паста боло…» обрывалось на первом же, и
-    /// подсказка не отвечала на вопрос, что же она предлагает. Ширина нужна
-    /// названию, а приметы читаются и ярусом ниже.
-    private func suggestionRow(_ item: MealSuggestions.Candidate) -> some View {
-        FoodRow(name: item.name,
-                calories: item.calories,
-                portion: item.parts.compactMap { part in
-                    part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
-                }.joined(separator: " · "),
-                macros: item.macros)
-    }
-
-    /// Кладёт в черновик то, что обычно идёт вместе.
-    /// Весь набор — в черновик, одним движением и одной анимацией.
-    private func addUsual(_ item: UsualMeal.Suggestion) {
-        withAnimation(.snappy) {
-            draftItems.append(contentsOf: item.parts.map {
-                MealItem(name: $0.name, calories: $0.calories,
-                         macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                         grams: $0.grams)
-            })
-        }
-    }
-
-    /// Строка «как обычно»: состав перечислен, цена — общая.
-    ///
-    /// Та же `FoodRow`, что у всех подсказок: это такая же еда, просто сразу
-    /// несколькими позициями.
-    private func usualRow(_ item: UsualMeal.Suggestion) -> some View {
-        FoodRow(name: item.parts.map(\.name).joined(separator: ", "),
-                calories: item.calories,
-                portion: String(format: String(localized: "%lld позиции"), item.parts.count),
-                macros: item.macros,
-                detail: String(format: String(localized: "%lld раз"), item.times))
-    }
-
-    /// Открывает подсказку экраном порции — тем же, каким открывается любой
-    /// продукт.
-    ///
-    /// Тап клал её в приём сразу, с уже подобранным весом. Вес этот — медиана
-    /// по дневнику, и попадает он не всегда: поправить можно было только
-    /// вторым тапом, уже по строке черновика. Продукт в приложении всегда
-    /// открывается порцией, а подсказка — такой же продукт, просто с
-    /// угаданным весом; угаданное и подставляем в поле.
-    private func openPair(_ item: MealPairs.Suggestion) {
-        let grams = item.grams ?? 100
-        // Свой или встроенный продукт — с категорией, значками и витаминами.
-        // Подсказка приходит из дневника, где от продукта осталось имя и вес,
-        // поэтому запасной вариант пересчитываем обратно на сто граммов.
-        let food = store.foodNamed(item.name)
-            ?? per100g(MealItem(name: item.name, calories: item.calories,
-                                macros: item.macros, grams: grams), grams: grams)
-        openServing(.food(food, grams: grams, savable: false, quickSave: true))
-    }
-
-    /// Строка «обычно вместе» — та же `FoodRow`, что и везде.
-    ///
-    /// Своя строка здесь была ошибкой: рядом с «Недавним» она выглядела
-    /// гостьей — другие отступы, другой вес шрифта, калории не на своём месте.
-    /// Ячейка еды в приложении одна, и подсказка — такая же еда.
-    private func pairRow(_ item: MealPairs.Suggestion) -> some View {
-        let grams = item.grams ?? 100
-        return FoodRow(
-            name: item.name,
-            calories: item.calories,
-            portion: String(format: "%.0f \(String(localized: "г"))", grams),
-            macros: item.macros,
-            // Значки и витамины — если продукт нашёлся в своих или в базе.
-            // Подсказка приходит из дневника, где лежат только имя и вес.
-            icons: store.foodNamed(item.name).map { [$0.foodCategory.icon] } ?? [],
-            micros: store.notableMicronutrients(forFoodNamed: item.name, grams: grams),
-            traits: store.foodNamed(item.name)?.traits ?? []
-        )
-    }
-
-    /// Кладёт подсказку в черновик — уже с подобранным весом.
-    private func addSuggestion(_ item: MealSuggestions.Candidate) {
-        // Частями, а не одной строкой: дальше приём обычно правят — вчера был
-        // мёд, сегодня нет.
-        withAnimation(.snappy) {
-            draftItems.append(contentsOf: item.parts.map {
-                MealItem(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
-            })
-        }
-        scrollToTopTicket += 1
-    }
 
     /// Недавние приёмы пищи целиком — из нескольких продуктов.
     private var recentMeals: [FoodEntry] {
@@ -796,59 +648,25 @@ struct AddEntryView: View {
             topMatchesSection
         }
 
-        // Подсказка под остаток приёма — самой первой строкой и только на
-        // пустом поиске.
-        //
-        // Пришла на место «приёмов целиком»: повторять вчерашний приём
-        // полностью нужно редко, а попасть в оставшиеся 400 ккал полдника —
-        // каждый день. Приложение знает и остаток, и что человек обычно ест,
-        // поэтому подбирает порцию само: «Творог 5%, 180 г».
-        // Приём уже начат — подсказываем не «чем набрать остаток», а то, что
-        // к этому обычно идёт. Молоко без протеина человек кладёт редко, и
-        // искать второе поиском, зная наперёд, что ищешь, — лишняя работа.
-        if !isSearching, !draftItems.isEmpty, !pairs.isEmpty {
-            Section {
-                ForEach(pairs) { item in
-                    pairRow(item)
-                        .contentShape(Rectangle())
-                        .onTapGesture { openPair(item) }
-                }
-            } header: {
-                Text("Обычно вместе")
-            }
-        }
-
-        // Пока приём пуст. Как только в нём появилась первая строка, человек
-        // уже знает, что кладёт, и подсказка «Обед: 377 ккал» перестаёт быть
-        // подсказкой: она предлагает набрать то, что он набирает сам, и число
-        // в ней считается от остатка, который он прямо сейчас и меняет.
-        // Приём целиком — выше подсказок под остаток. Если такой завтрак
-        // человек собирал три утра подряд, подбирать к остатку ему нечего:
-        // он уже знает, что будет есть, и всё, что от приложения нужно, —
-        // не заставлять собирать это заново по одной позиции.
-        if !isSearching, draftItems.isEmpty, !usual.isEmpty {
-            Section {
-                ForEach(usual) { item in
-                    usualRow(item)
-                        .contentShape(Rectangle())
-                        .onTapGesture { addUsual(item) }
-                }
-            } header: {
-                Text("Как обычно")
-            }
-        }
-
-        if !isSearching, draftItems.isEmpty, !suggestions.isEmpty {
-            Section {
-                ForEach(suggestions) { item in
-                    suggestionRow(item)
-                        .contentShape(Rectangle())
-                        .onTapGesture { addSuggestion(item) }
-                }
-            } header: {
-                Text(verbatim: suggestionsTitle)
-            }
-        }
+        // Подсказки еды: «как обычно», «обычно вместе» и подбор к остатку.
+        MealSuggestionsView(store: store,
+                            draftItems: $draftItems,
+                            onAdd: { items in
+                                withAnimation(.snappy) {
+                                    draftItems.append(contentsOf: items)
+                                }
+                                scrollToTopTicket += 1
+                            },
+                            onOpenPair: { pair in
+                                let grams = pair.grams ?? 100
+                                let food = store.foodNamed(pair.name)
+                                    ?? per100g(MealItem(name: pair.name, calories: pair.calories,
+                                                        macros: pair.macros, grams: grams), grams: grams)
+                                openServing(.food(food, grams: grams, savable: false, quickSave: true))
+                            },
+                            onScrollToTop: {
+                                scrollToTopTicket += 1
+                            })
 
         if !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
             Section("Недавнее") {
@@ -1015,6 +833,7 @@ struct AddEntryView: View {
         }
     }
 
+
     /// Добавленный продукт обратно в «на 100 г», чтобы править вес тем же экраном
     /// порции. Сам продукт в приёме пищи не хранится — там уже посчитанное.
     private func per100g(_ item: MealItem, grams: Double) -> FoodItem {
@@ -1103,7 +922,7 @@ struct AddEntryView: View {
         }
         // Без поиска на экране недавнее и подсказки: пусто, когда пусто и то
         // и другое.
-        return recentFoodItems.isEmpty && recentDishItems.isEmpty && suggestions.isEmpty
+        return recentFoodItems.isEmpty && recentDishItems.isEmpty
     }
 
     private func isSaved(_ food: FoodItem) -> Bool {

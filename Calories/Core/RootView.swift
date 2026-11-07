@@ -34,10 +34,18 @@ struct RootView: View {
                 ContentView(store: store, stepStore: stepStore, ringEntrance: ringEntrance)
             }
 
-            Tab("Профиль", systemImage: "face.dashed", value: 1) {
+            // Выбранная вкладка — залитым начертанием, невыбранная —
+            // контурным. Это та самая пара, ради которой система играет
+            // переход между символами: одно перетекает в другое само, и
+            // выглядит это как в её собственных приложениях. Со значком
+            // в одном начертании анимации нет вовсе — не потому, что мы её
+            // не попросили, а потому, что перетекать не во что.
+            Tab(value: 1) {
                 NavigationStack {
                     ProfileView(store: store)
                 }
+            } label: {
+                Label("Профиль", systemImage: selectedTab == 1 ? "face.dashed.fill" : "face.dashed")
             }
 
             // Поиск — системной ролью, а не обычной вкладкой: тогда система
@@ -48,10 +56,12 @@ struct RootView: View {
             // свои продукты, блюда и база, — а поиск по ним лишь один из
             // способов её найти. Экран внутри назывался так с самого начала,
             // и вкладка с ним спорила.
-            Tab("Рацион", systemImage: "fork.knife.circle", value: 3, role: .search) {
+            Tab(value: 3, role: .search) {
                 NavigationStack {
                     MyFoodView(store: store)
                 }
+            } label: {
+                Label("Рацион", systemImage: selectedTab == 3 ? "fork.knife.circle.fill" : "fork.knife.circle")
             }
         }
         // Один цвет на всё приложение, выбранный в настройках.

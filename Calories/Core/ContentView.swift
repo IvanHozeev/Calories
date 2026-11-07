@@ -353,12 +353,16 @@ struct ContentView: View {
                         todaySheet = nil
                     }
                     .presentationDetents([.height(250)])
+                // Обе высоты у обоих: продукт и рецепт заводят по-разному —
+                // одному хватает названия и калорий, другому нужен весь
+                // состав. Пусть человек сам решает, сколько ему места, а не
+                // мы за него: лист с двумя высотами тянется в обе стороны.
                 case .newFood:
                     NewFoodSheet(store: store)
-                        .presentationDetents([.large])
+                        .presentationDetents([.medium, .large])
                 case .newDish:
                     NewDishSheet(store: store)
-                        .presentationDetents([.large])
+                        .presentationDetents([.medium, .large])
                 case .fasting:
                     NavigationStack {
                         FastingView(store: store)

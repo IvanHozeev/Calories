@@ -263,7 +263,7 @@ struct MyFoodView: View {
         }
         .sheet(isPresented: $showingNewFood) {
             NewFoodSheet(store: store)
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showingNewDish) {
             NewDishSheet(store: store)

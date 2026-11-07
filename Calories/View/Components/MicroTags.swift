@@ -58,13 +58,6 @@ struct MicroTags: View {
 struct MicroChip: View {
     let nutrient: Micronutrient
     var compact: Bool = true
-    /// Одинаковая ширина для списка: значки разной длины — «K», «Ca», «Fib» —
-    /// иначе сдвигают названия, и колонка идёт лесенкой.
-    var width: CGFloat? = nil
-
-    /// Ширина значка в списке. Под самый длинный из них — «Fib».
-    static let listWidth: CGFloat = 38
-
     private var color: Color { nutrient.isCeiling ? .orange : .green }
 
     var body: some View {
@@ -81,7 +74,6 @@ struct MicroChip: View {
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
-            .frame(minWidth: width)
             .chipSurface(tint: color)
     }
 }

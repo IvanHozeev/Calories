@@ -95,7 +95,7 @@ struct NewDishSheet: View {
         let amount = per100g * portionGrams / 100
         let share = amount / nutrient.dailyValue
         return HStack {
-            MicroChip(nutrient: nutrient, compact: false, width: MicroChip.listWidth)
+            MicroChip(nutrient: nutrient)
             Text(nutrient.title)
                 .foregroundStyle(.secondary)
             Spacer()

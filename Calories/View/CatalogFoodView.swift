@@ -138,7 +138,7 @@ struct CatalogFoodView: View {
             }
         } label: {
             HStack(spacing: 8) {
-                MicroChip(nutrient: nutrient, compact: false, width: MicroChip.listWidth)
+                MicroChip(nutrient: nutrient)
                 Text(nutrient.title)
             }
         }

@@ -393,11 +393,13 @@ struct AddEntryView: View {
                     // правят теми же движениями, что и введённое руками.
                     draftItems.append(contentsOf: items)
                 }
+                .presentationDetents([.medium])
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerSheet(store: store) { item in
                     draftItems.append(item)
                 }
+                .presentationDetents([.medium])
             }
             .onChange(of: selectedDate) { _, _ in timeAdjusted = true }
             .sheet(item: $editingFood) { food in

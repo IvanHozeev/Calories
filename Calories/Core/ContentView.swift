@@ -320,7 +320,7 @@ struct ContentView: View {
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                         todaySheet = nil
                     }
-                    .presentationDetents([.height(300)])
+                    .presentationDetents([.height(250)])
                 case .newFood:
                     NewFoodSheet(store: store)
                         .presentationDetents([.large])
@@ -343,6 +343,7 @@ struct ContentView: View {
                         store.add(name: item.name, calories: item.calories, macros: item.macros, grams: item.grams)
                         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                     }
+                    .presentationDetents([.medium])
                 }
             }
             // Замеры открываются прямо здесь, а не переходом на экран замеров:

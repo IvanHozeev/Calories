@@ -263,15 +263,17 @@ struct MyFoodView: View {
         }
         .sheet(isPresented: $showingNewFood) {
             NewFoodSheet(store: store)
-                .presentationDetents([.large])
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingNewDish) {
             NewDishSheet(store: store)
+                .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingScanner) {
             BarcodeScannerSheet(store: store) { item in
                 record(item)
             }
+            .presentationDetents([.medium])
         }
         .sheet(item: $serving) { target in
             NavigationStack {

@@ -90,7 +90,7 @@ struct MyFoodView: View {
             items = items.filter { $0.foodCategory == categoryFilter }
         }
         guard !trimmedQuery.isEmpty else { return items }
-        return items.filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+        return items.filter { $0.matches(trimmedQuery) }
     }
 
     /// Встроенная база. Она тут не для полноты: свой продукт заводят как раз

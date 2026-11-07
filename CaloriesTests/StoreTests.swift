@@ -771,3 +771,39 @@ struct BackupReminderTests {
         #expect(!BackupService.needsReminder(isConfigured: true, daysOfDiary: 365))
     }
 }
+
+// MARK: - Производитель
+
+/// Марка хранится отдельно от названия, и искать надо по обоим: у одной полки
+/// человек помнит товар, у другой — бренд.
+struct ProducerTests {
+
+    private func food(_ name: String, producer: String?) -> FoodItem {
+        let item = FoodItem(name: name, caloriesPer100g: 100, protein: 0, fat: 0, carbs: 0)
+        item.producer = producer
+        return item
+    }
+
+    @Test func theNameStillMatches() {
+        #expect(food("Пармезан", producer: "Golden").matches("пармез"))
+    }
+
+    @Test func theBrandMatchesToo() {
+        #expect(food("Пармезан", producer: "Golden").matches("gold"),
+                "Товар помнят и по марке — иначе её незачем было заводить")
+    }
+
+    @Test func somethingElseDoesNotMatch() {
+        #expect(!food("Пармезан", producer: "Golden").matches("моцарелла"))
+    }
+
+    @Test func aFoodWithoutABrandIsStillSearchable() {
+        #expect(food("Гречка", producer: nil).matches("греч"))
+        #expect(!food("Гречка", producer: nil).matches("gold"))
+    }
+
+    @Test func anEmptyQueryMatchesEverything() {
+        #expect(food("Гречка", producer: nil).matches("   "),
+                "Пустой запрос — это «не фильтруем», а не «ничего не подошло»")
+    }
+}

@@ -150,7 +150,7 @@ struct AddEntryView: View {
         guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
             return store.customFoods
         }
-        return store.customFoods.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
+        return store.customFoods.filter { $0.matches(debouncedSearch) }
     }
 
     private var filteredBuiltInFoods: [FoodItem] {
@@ -172,7 +172,7 @@ struct AddEntryView: View {
     private var recentFoodItems: [FoodItem] {
         let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return store.recentFoods }
-        return store.recentFoods.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        return store.recentFoods.filter { $0.matches(query) }
     }
 
     private var recentDishItems: [Dish] {

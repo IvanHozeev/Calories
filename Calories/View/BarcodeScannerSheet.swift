@@ -197,7 +197,8 @@ struct BarcodeScannerSheet: View {
                 protein: product.protein,
                 fat: product.fat,
                 carbs: product.carbs,
-                micronutrients: product.micronutrients
+                micronutrients: product.micronutrients,
+                producer: product.producer
             )
         }
         dismiss()

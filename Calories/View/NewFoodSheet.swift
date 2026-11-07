@@ -10,6 +10,8 @@ struct NewFoodSheet: View {
     var isEmbedded: Bool = false
 
     @State private var name = ""
+    /// Марка с упаковки. Пусто — обычный ответ: у домашней еды её нет.
+    @State private var producer = ""
     @State private var caloriesPer100g = ""
     @State private var protein = ""
     /// Клетчатка на 100 г — единственный микронутриент, который вводят руками.
@@ -49,7 +51,7 @@ struct NewFoodSheet: View {
     /// видит обогащения, а на упаковке написано то, что в банке.
     @State private var entered: [Micronutrient: String] = [:]
     private enum Field: Hashable {
-        case search, name, calories, protein, fat, carbs, fiber, donor
+        case search, name, producer, calories, protein, fat, carbs, fiber, donor
         case nutrient(Micronutrient)
     }
     @FocusState private var focusedField: Field?
@@ -351,10 +353,11 @@ struct NewFoodSheet: View {
                         let c = carbs.decimalValueOrZero
                         if let food = editingFood {
                             store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID,
-                                                  micronutrientsAreEstimated: linkedIsEstimate || (linkedCatalogID == nil && food.micronutrientsAreEstimated))
+                                                  micronutrientsAreEstimated: linkedIsEstimate || (linkedCatalogID == nil && food.micronutrientsAreEstimated),
+                                                  producer: trimmedProducer)
                         } else {
                             store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID,
-                                               micronutrientsAreEstimated: linkedIsEstimate)
+                                               micronutrientsAreEstimated: linkedIsEstimate, producer: trimmedProducer)
                         }
                         // Коэффициент — отдельно от остальных полей: он
                         // появляется не у всякого продукта, и проталкивать
@@ -384,6 +387,7 @@ struct NewFoodSheet: View {
                     kosherChoice = food.kosherOverride.flatMap(KosherStatus.init(rawValue:))
                     isHardCheese = food.isHardCheese
                     name = food.name
+                    producer = food.producer ?? ""
                     caloriesPer100g = "\(food.caloriesPer100g)"
                     protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
                     if let own = food.micronutrients[.fiber], own > 0 {
@@ -417,8 +421,16 @@ struct NewFoodSheet: View {
             }
     }
 
+    /// Пустая марка хранится как «нет», а не как пустая строка: иначе
+    /// поиск и сортировка получают значение, которого нет.
+    private var trimmedProducer: String? {
+        let trimmed = producer.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
     private func fillFrom(_ food: FoodItem) {
         name = food.name
+        producer = food.producer ?? ""
         caloriesPer100g = "\(food.caloriesPer100g)"
         protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
         fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
@@ -494,6 +506,13 @@ private extension NewFoodSheet {
         settingLabel(systemImage: "tag") {
             TextField("Название", text: $name)
                 .focused($focusedField, equals: .name)
+        }
+        // Марка отдельной строкой, а не частью названия: склеенные, они
+        // мешают поиску — «Пармезан Golden» не находится ни по марке, ни
+        // по товару целиком.
+        settingLabel(systemImage: "building.2") {
+            TextField("Производитель", text: $producer)
+                .focused($focusedField, equals: .producer)
         }
         Picker(selection: $category) {
             ForEach(FoodCategory.allCases) { item in

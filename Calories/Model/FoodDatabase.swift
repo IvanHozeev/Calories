@@ -68,6 +68,18 @@ final class FoodItem: Identifiable {
     /// что сыр остаётся молочным — меняется только время ожидания.
     var isHardCheese: Bool = false
 
+    /// Кто произвёл: марка с упаковки.
+    ///
+    /// Отдельным полем, а не частью названия, хотя сейчас пишут вместе —
+    /// «Пармезан Golden», «Дижонская горчица Reine de Dijon». Склеенные, они
+    /// мешают друг другу: поиск по «пармезан» и поиск по «Golden» одинаково
+    /// слепы, а вторая банка той же марки заводится как новый продукт.
+    ///
+    /// Необязательное: у домашней еды марки нет, и пустое поле здесь —
+    /// нормальный ответ, а не пропуск. Из Open Food Facts приезжает само:
+    /// там это отдельное поле `brands`.
+    var producer: String?
+
     /// Когда продукт завели или последний раз правили. Нужно для «Недавнего»:
     /// только что созданный продукт ищут сразу, а в общем списке по категориям
     /// он теряется среди тех, что завели полгода назад.
@@ -94,6 +106,16 @@ final class FoodItem: Identifiable {
             return decoded
         }
         set { micronutrientsData = try? JSONEncoder().encode(newValue) }
+    }
+
+    /// Подходит ли продукт под запрос. Ищем и по названию, и по марке: у
+    /// одной полки в холодильнике человек помнит товар, у другой — бренд,
+    /// и заставлять его угадывать, что из этого записано в названии, незачем.
+    func matches(_ query: String) -> Bool {
+        let trimmed = query.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return true }
+        if name.localizedCaseInsensitiveContains(trimmed) { return true }
+        return producer?.localizedCaseInsensitiveContains(trimmed) ?? false
     }
 
     var foodCategory: FoodCategory {

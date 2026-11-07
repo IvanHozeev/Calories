@@ -110,16 +110,28 @@ enum OpenFoodService {
                 fat: nutriments["fat_100g"] as? Double ?? 0,
                 carbs: nutriments["carbohydrates_100g"] as? Double ?? 0
             )
+            item.producer = producer(from: product)
             let micronutrients = micronutrients(from: nutriments)
             if !micronutrients.isEmpty { item.micronutrients = micronutrients }
             return item
         }
     }
 
+    /// Марка из ответа. В `brands` их бывает несколько через запятую —
+    /// берём первую: это головная марка, остальные обычно её линейки.
+    static func producer(from product: [String: Any]) -> String? {
+        let brands = (product["brands"] as? String ?? "")
+            .split(separator: ",")
+            .first?
+            .trimmingCharacters(in: .whitespaces)
+        guard let brands, !brands.isEmpty else { return nil }
+        return brands
+    }
+
     /// Продукт по штрихкоду. nil означает «не нашли» — для сканера это обычный
     /// исход, а не ошибка: половины местных товаров в базе просто нет.
     static func product(barcode: String) async -> BarcodeProduct? {
-        guard let url = URL(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,nutriments") else {
+        guard let url = URL(string: "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,brands,nutriments") else {
             return nil
         }
         do {
@@ -153,7 +165,8 @@ enum OpenFoodService {
             protein: nutriments["proteins_100g"] as? Double ?? 0,
             fat: nutriments["fat_100g"] as? Double ?? 0,
             carbs: nutriments["carbohydrates_100g"] as? Double ?? 0,
-            micronutrients: micronutrients(from: nutriments)
+            micronutrients: micronutrients(from: nutriments),
+            producer: producer(from: productDict)
         )
     }
 }
@@ -169,4 +182,6 @@ struct BarcodeProduct {
     let fat: Double
     let carbs: Double
     var micronutrients: Micronutrients = Micronutrients()
+    /// Марка с упаковки, если источник её знает.
+    var producer: String?
 }

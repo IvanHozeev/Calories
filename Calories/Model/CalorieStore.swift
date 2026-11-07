@@ -811,8 +811,9 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false) {
+    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, defaultGrams: defaultGrams, category: category)
+        food.producer = producer
         if !micronutrients.isEmpty { food.micronutrients = micronutrients }
         food.catalogID = catalogID
         food.micronutrientsAreEstimated = micronutrientsAreEstimated
@@ -848,8 +849,9 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false) {
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil) {
         let previousName = food.name
+        food.producer = producer
         food.micronutrients = micronutrients
         food.catalogID = catalogID
         food.micronutrientsAreEstimated = micronutrientsAreEstimated

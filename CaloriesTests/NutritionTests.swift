@@ -688,6 +688,34 @@ struct OpenFoodParsingTests {
         #expect(product?.name.contains("7290000000001") == true)
     }
 
+    @Test func aScannedProductKeepsItsBrand() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Пармезан", "brands": "Golden",
+         "nutriments": {"energy-kcal_100g": 393, "proteins_100g": 32, "fat_100g": 29}}}
+        """), barcode: "7290000000002")
+
+        #expect(product?.producer == "Golden")
+    }
+
+    /// В `brands` их бывает несколько через запятую. Берём головную: остальные
+    /// обычно её линейки, и «Danone,活性乳酸菌, Actimel» в поле марки — это
+    /// не марка, а список.
+    @Test func severalBrandsCollapseToTheFirst() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Йогурт", "brands": "Danone, Actimel",
+         "nutriments": {"energy-kcal_100g": 70}}}
+        """), barcode: "3")
+        #expect(product?.producer == "Danone")
+    }
+
+    @Test func noBrandIsNoProducer() {
+        let product = OpenFoodService.parseProduct(data("""
+        {"status": 1, "product": {"product_name": "Яблоко", "brands": "  ",
+         "nutriments": {"energy-kcal_100g": 52}}}
+        """), barcode: "4")
+        #expect(product?.producer == nil, "Пустая марка — это «нет марки», а не пустая строка")
+    }
+
     @Test func aMissingProductIsNil() {
         #expect(OpenFoodService.parseProduct(data("{\"status\": 0}"), barcode: "1") == nil)
         #expect(OpenFoodService.parseProduct(data("<html>503</html>"), barcode: "1") == nil,

@@ -135,6 +135,11 @@ struct BrandMark: View {
 /// Цикл «убежали — заполнились» обрывался посередине, и экран появлялся
 /// на полузаполненном кольце.
 struct SplashView: View {
+    /// Заставка начала уходить. Нужен отдельно от `onFinish`: кольцо дня
+    /// должно вырасти вместе с её уходом, а не после него — иначе между
+    /// двумя движениями видна пауза, и знак читается не продолженным, а
+    /// подменённым.
+    var onLeaving: () -> Void = {}
     var onFinish: () -> Void
 
     @State private var turn: Double = 0
@@ -159,7 +164,7 @@ struct SplashView: View {
                     .font(.brandTitle)
                     .foregroundStyle(BrandLockup.ink)
             }
-            .scaleEffect(dissolving ? 1.12 : 1)
+            .scaleEffect(dissolving ? BrandLockup.exitScale : 1)
             .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
@@ -167,7 +172,8 @@ struct SplashView: View {
             withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
                 turn = 360
             } completion: {
-                withAnimation(.easeOut(duration: 0.35)) {
+                onLeaving()
+                withAnimation(.easeOut(duration: BrandLockup.exitDuration)) {
                     dissolving = true
                 } completion: {
                     onFinish()

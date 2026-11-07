@@ -4,6 +4,9 @@ import SwiftData
 struct ContentView: View {
     var store: CalorieStore
     var stepStore: StepStore
+    /// Как кольцу появиться при запуске. Решает это `RootView`: только он
+    /// знает, была заставка или нет и когда она ушла.
+    var ringEntrance: RingEntrance = .none
     @State private var showingAdd = false
     /// Короткие листы с «Сегодня» — одним модификатором: несколько `.sheet`
     /// на одной вьюхе спорят, и срабатывает только последний.
@@ -454,7 +457,8 @@ private extension ContentView {
                     entryAction = nil
                     showingAdd = true
                 },
-                onAway: { ringIsAway = $0 }
+                onAway: { ringIsAway = $0 },
+                entrance: ringEntrance
             )
             // Кольцу — весь остаток: высоту блока задаёт экран, полоска и
             // плитки берут своё, остальное кольцу. Так не нужно знать ни
@@ -1056,6 +1060,26 @@ private struct PullableRing: View {
     var onOpen: () -> Void
     /// Кольцо ушло под шапку — там его подменяет миниатюра.
     var onAway: (Bool) -> Void = { _ in }
+    /// Появление при запуске: кольцо подхватывает знак заставки.
+    var entrance: RingEntrance = .none
+
+    /// Доросло ли кольцо до своего размера.
+    @State private var grown = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// Размер, с которого кольцо начинается: тот, на котором заставка
+    /// закончила. Считается из её чисел, чтобы два движения сошлись, даже
+    /// если знак на заставке когда-нибудь станет другого размера.
+    private static let splashScale = BrandLockup.markSize * BrandLockup.exitScale / ProgressRing.fullSize
+
+    /// Кольцо ещё в размере знака заставки.
+    private var atSplashSize: Bool {
+        switch entrance {
+        case .none:    return false
+        case .waiting: return true
+        case .grow:    return !grown
+        }
+    }
 
     @State private var isAway = false
     /// Насколько кольцо уже ушло под шапку, 0…1.
@@ -1088,6 +1112,24 @@ private struct PullableRing: View {
             fills: true
         )
         .padding(.top)
+        // Вырастает на месте знака заставки — и ровно пока та уходит.
+        //
+        // Той же кривой и за то же время: знак подрастает и тает, кольцо с
+        // его размера растёт и проявляется, и на экране это одно движение.
+        // Пружина здесь не годится, какой бы живой ни была: она длится
+        // дольше ухода, и кольцо доезжало уже по пустому экрану.
+        .scaleEffect(atSplashSize ? Self.splashScale : 1)
+        .opacity(atSplashSize ? 0 : 1)
+        .onChange(of: entrance) { _, phase in
+            guard phase == .grow, !grown else { return }
+            // «Уменьшение движения» заставку и так выключает; проверка здесь
+            // на случай, если её включили, пока приложение работает.
+            if reduceMotion {
+                grown = true
+            } else {
+                withAnimation(.easeOut(duration: BrandLockup.exitDuration)) { grown = true }
+            }
+        }
         // Сжимается к верхней кромке, а не к центру: знак будто втягивается
         // в шапку, куда и уезжает. До трети роста, дальше — миниатюра.
         .scaleEffect(1 - 0.34 * away, anchor: .top)

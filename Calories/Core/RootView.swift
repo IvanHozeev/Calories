@@ -20,13 +20,18 @@ struct RootView: View {
     /// настройкой (так делают UI-тесты: заставка перехватывала первые нажатия).
     @State private var showingSplash = !UIAccessibility.isReduceMotionEnabled
         && UserDefaults.standard.object(forKey: "show_launch_splash") as? Bool ?? true
+    /// Кольцо дня продолжает знак заставки: ждёт под ней и вырастает, когда
+    /// она уходит. Без заставки расти неоткуда — кольцо сразу на месте.
+    @State private var ringEntrance: RingEntrance = !UIAccessibility.isReduceMotionEnabled
+        && UserDefaults.standard.object(forKey: "show_launch_splash") as? Bool ?? true
+        ? .waiting : .none
 
     /// Вкладки отдельным свойством: вместе с модификаторами тела компилятор
     /// перестаёт справляться с выражением и валит сборку по таймауту.
     private var tabs: some View {
         TabView(selection: $selectedTab) {
             Tab("Сегодня", image: "TodayTab", value: 0) {
-                ContentView(store: store, stepStore: stepStore)
+                ContentView(store: store, stepStore: stepStore, ringEntrance: ringEntrance)
             }
 
             Tab("Профиль", systemImage: "face.dashed", value: 1) {
@@ -61,7 +66,9 @@ struct RootView: View {
         }
         .overlay {
             if showingSplash {
-                SplashView { showingSplash = false }
+                SplashView(onLeaving: { ringEntrance = .grow }) {
+                    showingSplash = false
+                }
                     // Касания проходят насквозь: заставка — украшение, а не
                     // экран, и ждать её конца, чтобы нажать, человек не должен.
                     .allowsHitTesting(false)

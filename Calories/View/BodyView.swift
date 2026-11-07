@@ -211,7 +211,11 @@ struct BodyView: View {
             // Пока норма идёт от факта, множитель активности ни на что не
             // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
             // «Как считаем» — вместе с переключателем, который его включает.
-            activityLevelSection
+            ActivityLevelSection(
+                activityLevel: $activityLevel,
+                pendingActivity: $pendingActivity,
+                usesFact: usesFact
+            )
             
             ProteinTargetSection(
                 proteinBasis: $proteinBasis,
@@ -804,43 +808,6 @@ private extension BodyView {
     /// Уровень активности — только пока расход считается формулой. Когда он
     /// измерен, множитель ни на что не влияет, и выбор уезжает в «Как считаем».
     @ViewBuilder
-    var activityLevelSection: some View {
-    if !usesFact {
-    Section {
-        ForEach(ActivityLevel.allCases) { level in
-            Button {
-                // Уровень активности множит TDEE, то есть меняет норму калорий
-                // на сотни. Промахнуться по соседней строке легко, а последствие
-                // молчаливое: цифра назавтра другая, а почему — непонятно.
-                guard level != activityLevel else { return }
-                pendingActivity = level
-            } label: {
-                HStack {
-                    // Цвета явные: иерархический .primary внутри кнопки
-                    // списка берёт акцент, и все пять строк были синими —
-                    // самым шумным местом профиля.
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(level.title)
-                            .foregroundStyle(Color.primary)
-                        Text(level.subtitle)
-                            .font(.app(.caption))
-                            .foregroundStyle(Color.secondary)
-                    }
-                    Spacer()
-                    if activityLevel == level {
-                        Image(systemName: "checkmark")
-                            .font(.app(.subheadline, weight: .semibold))
-                            .foregroundStyle(.tint)
-                    }
-                }
-            }
-        }
-    } header: {
-        Text("Уровень активности")
-    } footer: {
-        explain("Считай сумму работы и зала, а не один зал: восемь часов на ногах — это те же 300–600 ккал в день, что и пара тренировок. Множитель в любом случае приблизительный, точный расход покажет тренд веса за две-три недели.").map { Text($0) }
-    }
-    }
 
     /// Подпись приложения в конце списка.
     var brandSection: some View {

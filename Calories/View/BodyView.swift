@@ -12,21 +12,11 @@ struct BodyView: View {
     var store: CalorieStore
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     
-    @State private var weightTenths: Int
-    /// Рост в десятых долях сантиметра: 1805 — это 180.5.
-    @State private var heightTenths: Int
-    @State private var ageInt: Int
-    /// Дата рождения, если она известна. У профилей, заведённых до того, как
-    /// её стали спрашивать, её нет — тогда строка показывает число лет и
-    /// предлагает дату, а не выдумывает её.
-    @State private var birthDate: Date?
-    @State private var proteinTenths: Int
-    @State private var proteinBasis: ProteinBasis
-    @State private var proteinLeanTenths: Int
-    @State private var fatTenths: Int
-    /// Задавали ли норму на сухую массу руками. Пока нет — при первом переходе
-    /// подгоняем её так, чтобы граммы не изменились.
-    @State private var proteinLeanIsSet: Bool
+    /// Черновик экрана: всё, что крутят колёсами и переключателями.
+    /// Перевод профиля в него и обратно живёт в `BodyDraft`, а не здесь, —
+    /// раньше он был тут дважды и разошёлся.
+    @State private var draft: BodyDraft
+
     @State private var showingGoalEditor = false
     @State private var showingBasis = false
     @State private var goalText = ""
@@ -34,11 +24,8 @@ struct BodyView: View {
     @State private var showAgePicker = false
     @State private var showProteinPicker = false
     @State private var showFatPicker = false
-    @State private var sex: Sex
-    @State private var activityLevel: ActivityLevel
     /// Выбранный, но ещё не подтверждённый уровень активности.
     @State private var pendingActivity: ActivityLevel?
-    @State private var goal: Goal
     @AppStorage("use_imperial") private var useImperial = false
     
     private func weightDisplayText(_ tenths: Int) -> String {
@@ -62,27 +49,8 @@ struct BodyView: View {
     
     init(store: CalorieStore) {
         self.store = store
-        let profile = store.profile
-        let wKg = store.latestWeight?.weightKg ?? profile?.weightKg ?? 70.0
-        _weightTenths = State(initialValue: max(300, Int((wKg * 10).rounded())))
-        // Профиль хранит сантиметры, пикер работает в десятых.
-        let hCm = Int(((profile?.heightCm ?? 170) * 10).rounded())
-        _heightTenths = State(initialValue: hCm > 0 ? hCm : 1700)
-        _ageInt = State(initialValue: profile?.age ?? 25)
-        _birthDate = State(initialValue: profile?.birthDate)
-        let pKg = profile?.proteinPerKg ?? UserProfile.defaultProteinPerKg
-        _proteinTenths = State(initialValue: max(10, Int((pKg * 10).rounded())))
-        _sex = State(initialValue: profile?.sex ?? .male)
-        _activityLevel = State(initialValue: profile?.activityLevel ?? .moderate)
-        _goal = State(initialValue: profile?.goal ?? .maintenance)
-        _proteinBasis = State(initialValue: profile?.proteinBasis ?? .bodyweight)
-        let pLean = profile?.storedProteinPerLeanKg
-        _proteinLeanTenths = State(initialValue: max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded())))
-        _proteinLeanIsSet = State(initialValue: pLean != nil)
-        let fKg = profile?.fatPerKg ?? MacroTargets.fatPerKg
-        _fatTenths = State(initialValue: min(max(Int((fKg * 10).rounded()),
-                                                 Int(MacroTargets.fatFloorPerKg * 10)),
-                                             Int(MacroTargets.fatCeilingPerKg * 10)))
+        _draft = State(initialValue: BodyDraft(profile: store.profile,
+                                               latestWeightKg: store.latestWeight?.weightKg))
     }
     
     /// Обхваты для оценки жира берутся из замеров в момент расчёта, а не копируются
@@ -109,13 +77,11 @@ struct BodyView: View {
         )
     }
 
-    private var activeProteinTenths: Int {
-        proteinBasis == .leanMass ? proteinLeanTenths : proteinTenths
-    }
+    private var activeProteinTenths: Int { draft.activeProteinTenths }
 
     /// Что сказать, если жир вне рабочего коридора.
     private var fatWarning: String? {
-        let perKg = Double(fatTenths) / 10
+        let perKg = Double(draft.fatTenths) / 10
         if perKg < MacroTargets.fatComfortRange.lowerBound {
             return String(localized: "У нижней границы. Держать так можно недолго — в пике сушки, а не всю фазу.")
         }
@@ -129,19 +95,13 @@ struct BodyView: View {
         if leanMassKg == nil {
             return "Обычно 1.6–2.2 г на кг веса. Заполни замеры — и норму можно будет считать от сухой массы, а не от общего веса."
         }
-        return proteinBasis == .leanMass
+        return draft.proteinBasis == .leanMass
             ? "Для сухой массы диапазон другой — обычно 2.2–3.0 г на кг: сухой массы меньше, чем веса, а кормишь ты именно её."
             : "Обычно 1.6–2.2 г на кг веса. От сухой массы точнее: при одном весе на 12% и на 25% жира мышц разное количество, а кормишь ты мышцы."
     }
 
-    /// Смена основы не должна менять норму: она меняет то, от чего норма считается.
-    /// Поэтому при первом переходе на сухую массу подбираем число так, чтобы
-    /// граммы остались прежними — дальше его правят руками, и оно живёт своей жизнью.
     private func seedLeanProteinIfNeeded() {
-        guard !proteinLeanIsSet, let lean = leanMassKg, lean > 0 else { return }
-        let grams = Double(proteinTenths) / 10.0 * (Double(weightTenths) / 10.0)
-        proteinLeanTenths = min(50, max(10, Int((grams / lean * 10).rounded())))
-        proteinLeanIsSet = true
+        draft.seedLeanProteinIfNeeded(leanMassKg: leanMassKg)
     }
 
     /// Разбивка дневной нормы. Белок и жир — обязательства, углеводы — остаток;
@@ -186,21 +146,9 @@ struct BodyView: View {
     @State private var showingSettings = false
     @State private var showingPaywall = false
 
-    private var draftProfile: UserProfile? {
-        UserProfile(
-            weightKg: Double(weightTenths) / 10.0,
-            heightCm: Double(heightTenths) / 10,
-            age: ageInt,
-            birthDate: birthDate,
-            sex: sex,
-            activityLevel: activityLevel,
-            goal: goal,
-            proteinPerKg: Double(proteinTenths) / 10.0,
-            proteinPerLeanKg: Double(proteinLeanTenths) / 10.0,
-            proteinBasis: proteinBasis,
-            fatPerKg: Double(fatTenths) / 10.0
-        )
-    }
+    /// Профиль, который получится из черновика. Опционален ради тех мест,
+    /// где он читается как «есть ли что считать».
+    private var draftProfile: UserProfile? { draft.profile }
     
     
     var body: some View {
@@ -240,7 +188,7 @@ struct BodyView: View {
             }
         }
         .sheet(isPresented: $showingBasis) {
-            CalculationBasisSheet(store: store, activityLevel: $activityLevel)
+            CalculationBasisSheet(store: store, activityLevel: $draft.activityLevel)
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -267,7 +215,7 @@ struct BodyView: View {
         ), presenting: pendingActivity) { level in
             Button("Отмена", role: .cancel) { pendingActivity = nil }
             Button("Сменить") {
-                activityLevel = level
+                draft.activityLevel = level
                 pendingActivity = nil
             }
         } message: { level in
@@ -335,26 +283,10 @@ struct BodyView: View {
     
     /// Переносит сохранённый профиль в черновик экрана.
     ///
-    /// Повторяет `init` слово в слово, и держать их рядом обязательно: разойдутся
-    /// — экран после онбординга покажет одно, а после перезапуска другое.
+    /// Вес при этом снова берётся из последнего взвешивания, а не из профиля:
+    /// на экране должно стоять то же число, что и на весах утром.
     private func apply(_ profile: UserProfile) {
-        let wKg = store.latestWeight?.weightKg ?? profile.weightKg
-        weightTenths = max(300, Int((wKg * 10).rounded()))
-        let hCm = Int((profile.heightCm * 10).rounded())
-        heightTenths = hCm > 0 ? hCm : 1700
-        ageInt = profile.age
-        birthDate = profile.birthDate
-        proteinTenths = max(10, Int((profile.proteinPerKg * 10).rounded()))
-        sex = profile.sex
-        activityLevel = profile.activityLevel
-        goal = profile.goal
-        proteinBasis = profile.proteinBasis
-        let pLean = profile.storedProteinPerLeanKg
-        proteinLeanTenths = max(10, Int(((pLean ?? UserProfile.defaultProteinPerLeanKg) * 10).rounded()))
-        proteinLeanIsSet = pLean != nil
-        fatTenths = min(max(Int((profile.fatPerKg * 10).rounded()),
-                            Int(MacroTargets.fatFloorPerKg * 10)),
-                        Int(MacroTargets.fatCeilingPerKg * 10))
+        draft = BodyDraft(profile: profile, latestWeightKg: store.latestWeight?.weightKg)
     }
 
     /// Динамика за месяц: искра и изменение прямо в строке веса — тренд виден,
@@ -777,7 +709,7 @@ private extension BodyView {
     var premiumRow: some View {
     if store.plan == nil, !store.isPremium {
         Section {
-            Picker("Цель", selection: $goal) {
+            Picker("Цель", selection: $draft.goal) {
                 ForEach(Goal.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
@@ -828,12 +760,12 @@ private extension BodyView {
         // соседних строк стоят символы. В самих же вариантах его нет —
         // свёрнутый пикер показывает выбранный вариант целиком, и знак в нём
         // выходил мелким и косым, а подпись пропадала.
-        Picker(selection: $sex) {
+        Picker(selection: $draft.sex) {
             ForEach(Sex.allCases) { option in
                 Text(verbatim: option.title).tag(option)
             }
         } label: {
-            settingLabel("Пол", glyph: sex.symbol)
+            settingLabel("Пол", glyph: draft.sex.symbol)
         }
         .id(appAccent)
         // Вес ведёт на свой экран, а не открывает колесо: он меняется
@@ -853,7 +785,7 @@ private extension BodyView {
                     WeightSparkline(points: trend.points)
                         .frame(width: 44, height: 18)
                 }
-                Text(weightDisplayText(weightTenths))
+                Text(weightDisplayText(draft.weightTenths))
                     .foregroundStyle(.secondary)
             }
             }
@@ -866,7 +798,7 @@ private extension BodyView {
             HStack {
                 Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
                 Spacer()
-                Text(heightDisplayText(heightTenths))
+                Text(heightDisplayText(draft.heightTenths))
                     .foregroundStyle(.secondary)
             }
         }
@@ -877,7 +809,7 @@ private extension BodyView {
             }
         }
         if showHeightPicker {
-            Picker("Рост", selection: $heightTenths) {
+            Picker("Рост", selection: $draft.heightTenths) {
                 ForEach(Array(stride(from: 1000, through: 2500, by: 1)), id: \.self) { v in
                     Text(heightDisplayText(v)).tag(v)
                 }
@@ -887,15 +819,15 @@ private extension BodyView {
         }
         settingLabel(systemImage: "birthday.cake") {
             HStack {
-                Text(birthDate == nil ? "Возраст" : "День рождения")
+                Text(draft.birthDate == nil ? "Возраст" : "День рождения")
                 Spacer()
                 // Пока даты нет, показываем годы: подставить вместо них
                 // выдуманную дату значило бы соврать о дне рождения.
-                if let birthDate {
+                if let birthDate = draft.birthDate {
                     Text(birthDate.formatted(date: .abbreviated, time: .omitted))
                         .foregroundStyle(.secondary)
                 } else {
-                    Text("\(ageInt) лет")
+                    Text("\(draft.ageInt) лет")
                         .foregroundStyle(.secondary)
                 }
             }
@@ -912,10 +844,10 @@ private extension BodyView {
             // не может. Открывается оно на этом числе лет, а записывается
             // только то, что человек выбрал сам.
             DatePicker("День рождения",
-                       selection: Binding(get: { birthDate ?? UserProfile.birthDateGuess(forAge: ageInt) },
+                       selection: Binding(get: { draft.birthDate ?? UserProfile.birthDateGuess(forAge: draft.ageInt) },
                                           set: { newValue in
-                                              birthDate = newValue
-                                              ageInt = UserProfile.age(bornOn: newValue) ?? ageInt
+                                              draft.birthDate = newValue
+                                              draft.ageInt = UserProfile.age(bornOn: newValue) ?? draft.ageInt
                                           }),
                        in: UserProfile.birthDateRange(),
                        displayedComponents: .date)
@@ -957,7 +889,7 @@ private extension BodyView {
                 // Уровень активности множит TDEE, то есть меняет норму калорий
                 // на сотни. Промахнуться по соседней строке легко, а последствие
                 // молчаливое: цифра назавтра другая, а почему — непонятно.
-                guard level != activityLevel else { return }
+                guard level != draft.activityLevel else { return }
                 pendingActivity = level
             } label: {
                 HStack {
@@ -972,7 +904,7 @@ private extension BodyView {
                             .foregroundStyle(Color.secondary)
                     }
                     Spacer()
-                    if activityLevel == level {
+                    if draft.activityLevel == level {
                         Image(systemName: "checkmark")
                             .font(.app(.subheadline, weight: .semibold))
                             .foregroundStyle(.tint)
@@ -992,18 +924,18 @@ private extension BodyView {
     var proteinSection: some View {
     Section {
         if leanMassKg != nil {
-            Picker("Считать", selection: $proteinBasis) {
+            Picker("Считать", selection: $draft.proteinBasis) {
                 ForEach(ProteinBasis.allCases) { Text($0.title).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
-            .accessibilityIdentifier("proteinBasis")
-            .onChange(of: proteinBasis) { _, basis in
+            .accessibilityIdentifier("draft.proteinBasis")
+            .onChange(of: draft.proteinBasis) { _, basis in
                 if basis == .leanMass { seedLeanProteinIfNeeded() }
             }
         }
         HStack {
-            Text(proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
+            Text(draft.proteinBasis == .leanMass ? "Белка на кг сухой массы" : "Белка на кг веса")
             Spacer()
             Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(activeProteinTenths) / 10.0))
                 .foregroundStyle(.secondary)
@@ -1015,7 +947,7 @@ private extension BodyView {
             }
         }
         if showProteinPicker {
-            Picker("Белок", selection: proteinBasis == .leanMass ? $proteinLeanTenths : $proteinTenths) {
+            Picker("Белок", selection: draft.proteinBasis == .leanMass ? $draft.proteinLeanTenths : $draft.proteinTenths) {
                 ForEach(10...50, id: \.self) { Text(String(format: "%.1f", Double($0) / 10.0)).tag($0) }
             }
             .pickerStyle(.wheel)
@@ -1043,7 +975,7 @@ private extension BodyView {
         HStack {
             Text("Жира на кг веса")
             Spacer()
-            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(fatTenths) / 10.0))
+            Text(String(format: "%.1f \(String(localized: "г/кг"))", Double(draft.fatTenths) / 10.0))
                 .foregroundStyle(.secondary)
         }
         .tappableRow {
@@ -1055,7 +987,7 @@ private extension BodyView {
             }
         }
         if showFatPicker {
-            Picker("Жир", selection: $fatTenths) {
+            Picker("Жир", selection: $draft.fatTenths) {
                 // Колесо ограничено жёсткими границами: за ними не бывает
                 // осознанного выбора, только промах пальцем.
                 ForEach(Int(MacroTargets.fatFloorPerKg * 10)...Int(MacroTargets.fatCeilingPerKg * 10),

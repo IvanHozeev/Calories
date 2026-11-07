@@ -28,3 +28,15 @@ func settingLabel<Content: View>(systemImage: String,
         Image(systemName: systemImage).foregroundStyle(.tint)
     }
 }
+
+/// Строка-настройка со знаком-буквой вместо символа системы.
+///
+/// Нужна там, где подходящего символа у системы нет: знаки пола, например,
+/// среди них отсутствуют, а «♂» и «♀» понятны без перевода.
+func settingLabel(_ title: LocalizedStringKey, glyph: String) -> some View {
+    Label {
+        Text(title).foregroundStyle(Color.primary)
+    } icon: {
+        Text(verbatim: glyph)
+    }
+}

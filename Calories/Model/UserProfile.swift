@@ -14,6 +14,19 @@ enum Sex: String, Codable, CaseIterable, Identifiable {
         case .female: return String(localized: "Женский")
         }
     }
+
+    /// Знак пола. Один на онбординг и профиль: раньше он стоял прямо в
+    /// онбординге тернарником, и в профиле его взять было неоткуда — там
+    /// обходились безликим человечком, одинаковым для обоих.
+    ///
+    /// Не символ системы: мужского и женского среди них нет, а эти два знака
+    /// понятны без перевода и выглядят одинаково на всех языках.
+    var symbol: String {
+        switch self {
+        case .male: return "♂️"
+        case .female: return "♀️"
+        }
+    }
 }
 
 enum ActivityLevel: String, Codable, CaseIterable, Identifiable {

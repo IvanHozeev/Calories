@@ -256,7 +256,7 @@ struct OnboardingView: View {
         stepShell(title: "Ты...", subtitle: "Пол учитывается в формуле метаболизма") {
             HStack(spacing: 12) {
                 ForEach(Sex.allCases) { s in
-                    tileCard(icon: s == .male ? "♂️" : "♀️", title: s.title, selected: sex == s) {
+                    tileCard(icon: s.symbol, title: s.title, selected: sex == s) {
                         sex = s
                     }
                 }
@@ -443,37 +443,52 @@ struct OnboardingView: View {
     /// Чем мерить. Приложение считает по факту — по дневнику и весам, — и без
     /// инструментов считать нечего: это честнее сказать на входе, чем потом
     /// показывать человеку «данных мало».
+    /// Снаряжение — страницами, а не списком из трёх строк.
+    ///
+    /// Списком это читалось требованием: три галочки, которых у человека
+    /// может не быть, и все разом перед глазами. Страницами — знакомство:
+    /// по одной вещи за раз, крупно, и видно, что их всего три.
+    ///
+    /// Нужны ли они на самом деле, сказано в самих подписях: двое весов
+    /// обязательны, часы нет.
     private var gearStep: some View {
         stepShell(title: "Что понадобится", subtitle: "Данные нужно чем-то снимать") {
-            VStack(alignment: .leading, spacing: 18) {
-                gearLine(icon: "scalemass", title: "Напольные весы",
+            TabView {
+                gearPage(.bodyScale, color: MacroKind.protein.color, title: "Напольные весы",
                          text: explain("Взвешивания каждое утро. По их тренду видно, сколько ты на самом деле тратишь, — и норма считается от факта, а не от формулы."))
-                gearLine(icon: "square.stack.3d.up", title: "Кухонные весы",
+                gearPage(.kitchenScale, color: MacroKind.carbs.color, title: "Кухонные весы",
                          text: explain("«На глаз» ошибаются на сотни калорий в день. Взвешенная еда — это разница между «работает» и «непонятно»."))
-                gearLine(icon: "applewatch", title: "Браслет или часы",
+                gearPage(.watch, color: MacroKind.fat.color, title: "Браслет или часы",
                          text: explain("Не обязательно. Шаги и активные калории подтянутся из «Здоровья» сами, и активность перестанет быть догадкой."))
             }
+            .tabViewStyle(.page)
+            // Точки видны всегда, а не только пока листают: на светлом фоне
+            // системные по умолчанию и так еле заметны, а без них человек
+            // не узнает, что страниц несколько.
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .frame(maxWidth: .infinity, minHeight: 320)
         }
     }
 
-    /// Строка списка снаряжения. Пояснение необязательное: на коротком уровне
-    /// его нет вовсе, и остаётся только название.
-    private func gearLine(icon: String, title: LocalizedStringKey, text: LocalizedStringKey?) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: icon)
-                .font(.app(.title3))
-                .foregroundStyle(.tint)
-                .frame(width: 28)
-            VStack(alignment: .leading, spacing: 4) {
+    /// Одна страница снаряжения: рисунок, название, зачем оно.
+    private func gearPage(_ kind: GearArt.Kind, color: Color,
+                          title: LocalizedStringKey, text: LocalizedStringKey?) -> some View {
+        VStack(spacing: 20) {
+            GearArt(kind: kind, color: color)
+                .frame(height: 150)
+            VStack(spacing: 8) {
                 Text(title)
-                    .font(.app(.body, weight: .semibold))
+                    .font(.app(.title3, weight: .semibold))
                 text.map { Text($0) }
                     .font(.app(.footnote))
                     .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.horizontal, 32)
+            Spacer(minLength: 0)
         }
-        .accessibilityElement(children: .combine)
+        .padding(.top, 8)
     }
 
     /// Куда класть копии дневника.

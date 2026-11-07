@@ -817,9 +817,18 @@ private extension BodyView {
     var bodyParametersSection: some View {
     Section("Параметры тела") {
         Picker(selection: $sex) {
-            ForEach(Sex.allCases) { Text($0.title).tag($0) }
+            // Со знаками, как в онбординге: там человек их уже видел, и
+            // в профиле он ищет глазами то же самое.
+            ForEach(Sex.allCases) { option in
+                Label {
+                    Text(verbatim: option.title)
+                } icon: {
+                    Text(verbatim: option.symbol)
+                }
+                .tag(option)
+            }
         } label: {
-            settingLabel("Пол", systemImage: "person")
+            settingLabel("Пол", glyph: sex.symbol)
         }
         .id(appAccent)
         // Вес ведёт на свой экран, а не открывает колесо: он меняется

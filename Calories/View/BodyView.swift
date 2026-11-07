@@ -140,37 +140,6 @@ struct BodyView: View {
 
     /// Разбивка дневной нормы. Белок и жир — обязательства, углеводы — остаток;
     /// на сушке именно остаток и есть то, чем управляешь.
-    @ViewBuilder
-    private func macroBudgetSection(_ profile: UserProfile) -> some View {
-        let protein = profile.proteinTargetGrams(from: measurement)
-        let fat = profile.fatTargetGrams
-        let goal = Double(store.adaptedTodayGoal > 0 ? store.adaptedTodayGoal : store.dailyGoal)
-        let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
-        let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
-
-        // Белок и жир здесь не повторяем: их «итого» стоит двумя секциями выше,
-        // в самих нормах, где их и задают. Новое число тут одно — углеводы,
-        // которых никто не задаёт: они остаток нормы калорий.
-        Section {
-            if carbs > 0 {
-                MacroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
-            } else {
-                Label(
-                    String(
-                        format: String(localized: "Белок и жир не помещаются в норму: не хватает %d ккал. Подними калораж или опусти норму белка."),
-                        Int((locked - goal).rounded())
-                    ),
-                    systemImage: "exclamationmark.triangle.fill"
-                )
-                .font(.app(.footnote))
-                .foregroundStyle(.orange)
-            }
-        } header: {
-            Text("Норма углеводов")
-        } footer: {
-            explain("Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они.").map { Text($0) }
-        }
-    }
 
 
 
@@ -229,7 +198,12 @@ struct BodyView: View {
             fatSection
 
             if let draftProfile, store.dailyGoal > 0 {
-                macroBudgetSection(draftProfile)
+                MacroBudgetSection(
+                    profile: draftProfile,
+                    measurement: measurement,
+                    adaptedTodayGoal: store.adaptedTodayGoal,
+                    dailyGoal: store.dailyGoal
+                )
             }
             brandSection
         }

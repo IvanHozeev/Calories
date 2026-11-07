@@ -144,11 +144,23 @@ struct SplashView: View {
         ZStack {
             Color("LaunchBackground")
                 .opacity(dissolving ? 0 : 1)
-            BrandMark()
-                .frame(width: 150, height: 150)
-                .rotationEffect(.degrees(turn))
-                .scaleEffect(dissolving ? 1.12 : 1)
-                .opacity(dissolving ? 0 : 1)
+            // Тот же состав, что на лаунч-скрине: кольцо и название под ним,
+            // теми же размерами из `BrandLockup`. Первый кадр обязан быть
+            // его копией — иначе на запуске видно подмену, а сквозь заставку
+            // просвечивает слово с кадра под ней.
+            //
+            // Движется только кольцо: название стоит на месте, как стояло бы
+            // на самой картинке. Крутящееся слово читалось бы как сбой.
+            VStack(spacing: BrandLockup.gap) {
+                BrandMark()
+                    .frame(width: BrandLockup.markSize, height: BrandLockup.markSize)
+                    .rotationEffect(.degrees(turn))
+                Text(verbatim: "Calories")
+                    .font(.custom(BrandLockup.font, size: BrandLockup.titleSize))
+                    .foregroundStyle(BrandLockup.ink)
+            }
+            .scaleEffect(dissolving ? 1.12 : 1)
+            .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
         .task {

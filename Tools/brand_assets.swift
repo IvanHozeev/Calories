@@ -193,7 +193,10 @@ let launchMarkSize: CGFloat = 96
 /// Отношение знака к слову взято у миниатюры буквально: там кольцо 22 pt и
 /// подпись 12 pt. Первая попытка поставила слово вдвое мельче, и знак снова
 /// забирал всё внимание — то есть делала ровно то, от чего уходили.
-let launchTitleSize: CGFloat = launchMarkSize * 12 / 22
+/// Кегль надписи и её цвет держим вместе с заставкой: она продолжает этот
+/// кадр, и разойтись им нельзя. Второй экземпляр этих чисел —
+/// `BrandLockup` в Shared, менять только вместе.
+let launchTitleSize: CGFloat = 28
 /// Просвет — тоже как там: четыре точки при знаке в двадцать две.
 let launchGap: CGFloat = launchMarkSize * 4 / 22
 /// Вес 600. Nunito в ресурсах — изменчивый шрифт, и по умолчанию он
@@ -224,7 +227,7 @@ func launch(scale: CGFloat, name: String) {
     }
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
-        .foregroundColor: rgb(0x1C1C1E),
+        .foregroundColor: rgb(0x8E8E93),
     ]
     let line = CTLineCreateWithAttributedString(
         NSAttributedString(string: "Calories", attributes: attributes))

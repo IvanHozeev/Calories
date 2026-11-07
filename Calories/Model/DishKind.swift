@@ -1,16 +1,19 @@
 import Foundation
 
-/// Что это за рецепт: салат, суп, горячее, десерт, напиток.
+/// Что это за рецепт: салат, суп, горячее, соус, десерт, напиток.
 ///
 /// Не категория продукта — у того она про полку в магазине («Мясо и птица»,
 /// «Крупы и хлеб»), а здесь про место за столом. Борщ и салат из тех же
 /// овощей лежат на одной полке и готовятся по-разному; собирая обед, человек
 /// думает «что на первое», а не «из чего оно».
 ///
-/// Пять видов и «другое». Больше дробить не стоит: закуска, гарнир и соус
-/// нужны поварской книге, а не тому, кто вечером ищет, что сварить.
+/// Шесть видов и «другое». Соус среди них не случайно: его готовят отдельно
+/// от того, к чему он идёт, хранят своей банкой и кладут в разные блюда —
+/// то есть это рецепт со своей жизнью, а не часть чужого. Закуску и гарнир
+/// не добавляю: они нужны поварской книге, а не тому, кто вечером ищет,
+/// что сварить.
 enum DishKind: String, Codable, CaseIterable, Identifiable {
-    case salad, soup, main, dessert, drink, other
+    case salad, soup, main, sauce, dessert, drink, other
 
     var id: String { rawValue }
 
@@ -21,6 +24,7 @@ enum DishKind: String, Codable, CaseIterable, Identifiable {
         // «Горячее», а не «второе»: второе бывает только там, где есть
         // первое, а горячее понятно и само по себе.
         case .main:    return String(localized: "Горячее")
+        case .sauce:   return String(localized: "Соус")
         case .dessert: return String(localized: "Десерт")
         case .drink:   return String(localized: "Напиток")
         case .other:   return String(localized: "Другое")
@@ -34,6 +38,7 @@ enum DishKind: String, Codable, CaseIterable, Identifiable {
         case .salad:   return "leaf"
         case .soup:    return "takeoutbag.and.cup.and.straw"
         case .main:    return "fork.knife"
+        case .sauce:   return "drop.fill"
         case .dessert: return "birthday.cake"
         case .drink:   return "cup.and.saucer"
         case .other:   return "square.grid.2x2"

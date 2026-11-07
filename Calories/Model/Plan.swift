@@ -128,6 +128,18 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     /// прыжком на пятьсот калорий возвращает гликоген и воду, и весы за три дня
     /// показывают плюс два килограмма, которые к жиру отношения не имеют.
     var rampWeeks: Int = 0
+    /// То же самое, но днями — для переходов короче недели.
+    ///
+    /// Брейк длится неделю-две, и рампа в неделю съела бы его половину. При
+    /// этом именно вход в брейк — самый резкий переход в плане: восемьсот
+    /// калорий в один день возвращают гликоген и воду, весы за трое суток
+    /// показывают плюс два килограмма, и человек решает, что брейк «не
+    /// работает», хотя жира там нет ни грамма.
+    ///
+    /// Задано — перекрывает `rampWeeks`. Одно поле вместо другого не делаем:
+    /// у долгих фаз недели читаются лучше, а планы, сохранённые до этой
+    /// правки, несут именно их.
+    var rampDays: Int = 0
     /// Неделя поддержания после каждых N недель дефицита. nil — без брейков.
     ///
     /// Брейки не лежат в `phases` отдельными фазами: фаза «12 недель сушки,
@@ -143,6 +155,9 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     /// Эта фаза — диет-брейк: поставленный руками или разложенный из расписания.
     var isDietBreak: Bool = false
 
+    /// Длина рампы в днях — одна мерка на оба поля.
+    var effectiveRampDays: Int { rampDays > 0 ? rampDays : rampWeeks * 7 }
+
     /// Название для полосы фаз и строки плана: брейк — не просто «поддержание».
     var title: String {
         isDietBreak ? String(localized: "Диет-брейк") : intent.title
@@ -152,20 +167,21 @@ struct PlanPhase: Codable, Equatable, Identifiable {
     static let dietBreakOptions = [4, 5, 6]
 
     init(id: UUID = UUID(), intent: PlanIntent, durationWeeks: Int,
-         weeklyRatePercent: Double? = nil, rampWeeks: Int = 0,
+         weeklyRatePercent: Double? = nil, rampWeeks: Int = 0, rampDays: Int = 0,
          dietBreakEvery: Int? = nil, firstDietBreakAfter: Int? = nil, isDietBreak: Bool = false) {
         self.id = id
         self.intent = intent
         self.durationWeeks = max(1, durationWeeks)
         self.weeklyRatePercent = abs(weeklyRatePercent ?? intent.defaultWeeklyRatePercent)
         self.rampWeeks = max(0, min(rampWeeks, self.durationWeeks))
+        self.rampDays = max(0, min(rampDays, self.durationWeeks * 7))
         self.dietBreakEvery = dietBreakEvery
         self.firstDietBreakAfter = firstDietBreakAfter
         self.isDietBreak = isDietBreak
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, intent, durationWeeks, weeklyRatePercent, rampWeeks
+        case id, intent, durationWeeks, weeklyRatePercent, rampWeeks, rampDays
         case dietBreakEvery, firstDietBreakAfter, isDietBreak
     }
 
@@ -177,6 +193,7 @@ struct PlanPhase: Codable, Equatable, Identifiable {
         durationWeeks = max(1, try container.decode(Int.self, forKey: .durationWeeks))
         weeklyRatePercent = abs(try container.decode(Double.self, forKey: .weeklyRatePercent))
         rampWeeks = max(0, min(try container.decodeIfPresent(Int.self, forKey: .rampWeeks) ?? 0, durationWeeks))
+        rampDays = max(0, min(try container.decodeIfPresent(Int.self, forKey: .rampDays) ?? 0, durationWeeks * 7))
         dietBreakEvery = try container.decodeIfPresent(Int.self, forKey: .dietBreakEvery)
         firstDietBreakAfter = try container.decodeIfPresent(Int.self, forKey: .firstDietBreakAfter)
         isDietBreak = try container.decodeIfPresent(Bool.self, forKey: .isDietBreak) ?? false
@@ -484,11 +501,11 @@ struct Plan: Codable, Equatable {
         let target = weeklyRateKg(on: date) * Self.kcalPerKg / 7
         guard let index = phaseIndex(on: date), index > 0 else { return target }
         let phase = timeline[index]
-        guard phase.rampWeeks > 0 else { return target }
+        guard phase.effectiveRampDays > 0 else { return target }
 
         let phaseStart = startDate(ofPhaseAt: index)
         let daysIn = Calendar.current.dateComponents([.day], from: phaseStart, to: date).day ?? 0
-        let rampDays = Double(phase.rampWeeks * 7)
+        let rampDays = Double(phase.effectiveRampDays)
         guard Double(daysIn) < rampDays else { return target }
 
         // Линейно от нормы прошлой фазы к норме этой. Дельта прошлой берётся
@@ -497,7 +514,11 @@ struct Plan: Codable, Equatable {
         // где человек на самом деле оказался.
         let previousEnd = Calendar.current.date(byAdding: .day, value: -1, to: phaseStart) ?? phaseStart
         let from = weeklyRateKg(on: previousEnd) * Self.kcalPerKg / 7
-        let progress = rampDays > 0 ? Double(daysIn) / rampDays : 1
+        // Считаем от первого дня, а не от нулевого: иначе в день, когда
+        // человек взял брейк, норма остаётся вчерашней — он видит прежний
+        // дефицит и решает, что брейк не начался. Четыре дня рампы — это
+        // четверть, половина, три четверти, поддержание.
+        let progress = rampDays > 0 ? Double(daysIn + 1) / rampDays : 1
         return from + (target - from) * progress
     }
 
@@ -512,13 +533,28 @@ struct Plan: Codable, Equatable {
         let previousEnd = Calendar.current.date(byAdding: .day, value: -1, to: phaseStart) ?? phaseStart
         // Только вверх: переход в дефицит воду не возвращает.
         guard weeklyRateKg(on: date) > weeklyRateKg(on: previousEnd) else { return false }
-        let weeks = max(timeline[index].rampWeeks, Self.settlingWeeks)
+        // Рампа не сокращает ожидание: вода возвращается после того, как
+        // калории подняли, а не пока их поднимают.
+        let days = max(timeline[index].effectiveRampDays, Self.settlingWeeks * 7)
         let daysIn = Calendar.current.dateComponents([.day], from: phaseStart, to: date).day ?? 0
-        return daysIn < weeks * 7
+        return daysIn < days
     }
 
     /// Сколько недель весам не верят после подъёма калорий, если рампы нет.
     static let settlingWeeks = 2
+
+    /// За сколько дней калории поднимаются до поддержания на входе в брейк.
+    ///
+    /// Четыре. Подъём бывает на семьсот-восемьсот калорий, и в один день это
+    /// не столько про еду, сколько про воду: гликоген тянет за собой три
+    /// грамма воды на грамм, весы за трое суток дают плюс полтора-два
+    /// килограмма, и брейк, который должен был успокоить, пугает сильнее
+    /// дефицита. Четырьмя ступенями по двести тот же подъём проходит
+    /// незаметно.
+    ///
+    /// Не неделя: брейк длится неделю-две, и рампа в неделю съела бы его
+    /// половину — вместо отдыха вышел бы долгий выход из дефицита.
+    static let dietBreakRampDays = 4
 
     /// Насколько шире допуск по весу, пока он устаканивается.
     /// Полтора килограмма — обычный возврат гликогена и воды после дефицита.
@@ -744,7 +780,8 @@ struct Plan: Codable, Equatable {
             done.durationWeeks = position.cutWeeks
             pieces.append(done)
         }
-        pieces.append(PlanPhase(intent: .maintenance, durationWeeks: max(1, weeks), isDietBreak: true))
+        pieces.append(PlanPhase(intent: .maintenance, durationWeeks: max(1, weeks),
+                                rampDays: Self.dietBreakRampDays, isDietBreak: true))
         var rest = original
         rest.id = UUID()
         rest.durationWeeks = original.durationWeeks - position.cutWeeks

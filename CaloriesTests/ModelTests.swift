@@ -285,7 +285,15 @@ struct PlanTests {
         let middleOfRamp = plan.calorieTarget(for: cal.date(byAdding: .day, value: 35, to: plan.startDate)!, tdee: 2500)
         let afterRamp = plan.calorieTarget(for: cal.date(byAdding: .day, value: 45, to: plan.startDate)!, tdee: 2500)
 
-        #expect(firstDayOfRamp == deficitTarget, "Первый день перехода — ещё прежняя норма")
+        // Первый день перехода уже двигает норму, а не повторяет вчерашнюю.
+        //
+        // Раньше он её повторял, и на долгой рампе это было незаметно. Но у
+        // диет-брейка рампа длиной в четыре дня, и «первый день как вчера»
+        // съедал её четверть: человек брал брейк и видел прежний дефицит —
+        // то есть ровно то, от чего уходил. Правило одно на все рампы: день
+        // первый — первая ступень, день последний — уже новая норма.
+        #expect(firstDayOfRamp > deficitTarget, "Первый день перехода уже выше прежней нормы")
+        #expect(firstDayOfRamp < middleOfRamp, "И ниже середины перехода")
         #expect(middleOfRamp > deficitTarget && middleOfRamp < afterRamp, "Середина перехода — между двумя нормами")
         #expect(afterRamp == 2500, "После перехода — норма поддержания")
     }

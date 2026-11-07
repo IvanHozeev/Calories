@@ -156,6 +156,63 @@ struct DietBreakTests {
         #expect(restored.timeline.map(\.durationWeeks) == base.timeline.map(\.durationWeeks))
     }
 
+    /// Выход из дефицита ступенями, а не прыжком.
+    ///
+    /// Подъём на брейке бывает на семьсот-восемьсот калорий, и в один день
+    /// это больше про воду, чем про еду: весы за трое суток дают плюс
+    /// полтора-два килограмма, и брейк пугает сильнее дефицита.
+    @Test func breakRaisesCaloriesOverSeveralDays() {
+        let today = week(5)
+        let withBreak = plan().startingDietBreak(from: today, weeks: 2)
+        let calendar = Calendar.current
+
+        let deficit = withBreak.dailyCalorieDelta(on: calendar.date(byAdding: .day, value: -1, to: today)!)
+        #expect(deficit < 0)
+
+        // По дням рампы норма идёт вверх и ни разу не вниз.
+        var previous = deficit
+        for day in 0..<Plan.dietBreakRampDays {
+            let value = withBreak.dailyCalorieDelta(on: calendar.date(byAdding: .day, value: day, to: today)!)
+            #expect(value > previous)
+            previous = value
+        }
+
+        // К концу рампы — ровное поддержание, без остатка дефицита.
+        let settled = calendar.date(byAdding: .day, value: Plan.dietBreakRampDays, to: today)!
+        #expect(abs(withBreak.dailyCalorieDelta(on: settled)) < 0.5)
+    }
+
+    /// Первый день брейка — уже не вчерашний дефицит: ступень видна сразу,
+    /// иначе человек решит, что брейк не начался.
+    @Test func theFirstDayOfTheBreakAlreadyMovesTheGoal() {
+        let today = week(5)
+        let withBreak = plan().startingDietBreak(from: today, weeks: 2)
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)!
+        let before = withBreak.dailyCalorieDelta(on: yesterday)
+        let first = withBreak.dailyCalorieDelta(on: today)
+        #expect(first > before)
+        // И не всё сразу: до поддержания ещё далеко.
+        #expect(first < -1)
+    }
+
+    /// Рампа не сокращает срок, после которого весам снова верят: вода
+    /// возвращается после того, как калории подняли, а не пока их поднимают.
+    @Test func theRampDoesNotShortenTheSettlingPeriod() {
+        let today = week(5)
+        let withBreak = plan().startingDietBreak(from: today, weeks: 2)
+        let afterRamp = Calendar.current.date(byAdding: .day, value: Plan.dietBreakRampDays + 1, to: today)!
+        #expect(withBreak.isSettling(on: afterRamp))
+    }
+
+    /// Планы, сохранённые до появления дневной рампы, несут недельную — и
+    /// она обязана работать как прежде.
+    @Test func weeklyRampStillCounts() {
+        let phase = PlanPhase(intent: .maintenance, durationWeeks: 4, rampWeeks: 2)
+        #expect(phase.effectiveRampDays == 14)
+        let byDays = PlanPhase(intent: .maintenance, durationWeeks: 4, rampWeeks: 2, rampDays: 3)
+        #expect(byDays.effectiveRampDays == 3)
+    }
+
     @Test func manualBreak_notDuringABreak() {
         #expect(!plan(every: 4).canStartDietBreak(from: week(4)))
     }

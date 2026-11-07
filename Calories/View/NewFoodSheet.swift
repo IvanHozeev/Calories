@@ -135,6 +135,7 @@ struct NewFoodSheet: View {
     /// суточной нормы тут же, чтобы то же самое не искать ниже.
     private func enteredRow(_ nutrient: Micronutrient) -> some View {
         HStack(spacing: 8) {
+            MicroChip(nutrient: nutrient, compact: false, width: MicroChip.listWidth)
             Text(nutrient.title)
                 .foregroundStyle(.secondary)
             Spacer(minLength: 8)
@@ -718,6 +719,7 @@ private extension NewFoodSheet {
                 // список, ничего не сообщая.
                 if let amount = micronutrients[nutrient], amount > 0 {
                     HStack {
+                        MicroChip(nutrient: nutrient, compact: false, width: MicroChip.listWidth)
                         Text(nutrient.title)
                             .foregroundStyle(.secondary)
                         Spacer()

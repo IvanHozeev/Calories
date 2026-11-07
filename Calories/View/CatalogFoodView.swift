@@ -127,7 +127,7 @@ struct CatalogFoodView: View {
     private func nutrientRow(_ nutrient: Micronutrient, per100g: Double) -> some View {
         let amount = per100g * grams / 100
         let share = amount / nutrient.dailyValue
-        return LabeledContent(nutrient.title) {
+        return LabeledContent {
             HStack(spacing: 6) {
                 Text(verbatim: formatted(amount, nutrient))
                     .monospacedDigit()
@@ -135,6 +135,11 @@ struct CatalogFoodView: View {
                     .font(.app(.caption, weight: .semibold))
                     .foregroundStyle(nutrient.isCeiling ? .orange : .secondary)
                     .monospacedDigit()
+            }
+        } label: {
+            HStack(spacing: 8) {
+                MicroChip(nutrient: nutrient, compact: false, width: MicroChip.listWidth)
+                Text(nutrient.title)
             }
         }
     }

@@ -20,7 +20,7 @@ struct MicroTags: View {
     var body: some View {
         HStack(spacing: compact ? 4 : 6) {
             ForEach(nutrients.prefix(limit)) { nutrient in
-                tag(nutrient.symbol, color: color(for: nutrient))
+                MicroChip(nutrient: nutrient, compact: compact)
                     .accessibilityLabel(nutrient.title)
                     // Идентификатор не зависит от языка: тесты идут на английской
                     // локали, а подпись значка — химический символ.
@@ -44,24 +44,44 @@ struct MicroTags: View {
             .chipSurface(tint: .secondary)
     }
 
-    private func color(for nutrient: Micronutrient) -> Color {
-        nutrient.isCeiling ? .orange : .green
-    }
+}
 
-    private func tag(_ text: String, color: Color) -> some View {
+/// Один значок вещества в стеклянной капсуле.
+///
+/// Своим типом, потому что он нужен в двух разных местах: строкой продукта,
+/// где значков несколько подряд, и в списках состава — слева от названия.
+/// Там и там это одна и та же вещь, и расходиться им нельзя.
+///
+/// Цвет здесь не украшение, а единственное отличие. Натрий — потолок, а не
+/// цель: «богат натрием» это предупреждение, и зелёным вместе с кальцием он
+/// стоять не может, иначе значок читается как достоинство.
+struct MicroChip: View {
+    let nutrient: Micronutrient
+    var compact: Bool = true
+    /// Одинаковая ширина для списка: значки разной длины — «K», «Ca», «Fib» —
+    /// иначе сдвигают названия, и колонка идёт лесенкой.
+    var width: CGFloat? = nil
+
+    /// Ширина значка в списке. Под самый длинный из них — «Fib».
+    static let listWidth: CGFloat = 38
+
+    private var color: Color { nutrient.isCeiling ? .orange : .green }
+
+    var body: some View {
         // Значку нужна его ширина целиком.
         //
         // В тесной строке SwiftUI сжимал его вместе с остальным, и «Fib» —
         // самый длинный из значков — переносился на две строки: «Fi» и «b»
         // под ним. Место здесь уступает название продукта, оно и так с
         // многоточием.
-        Text(verbatim: text)
+        Text(verbatim: nutrient.symbol)
             .font(.app(.caption2, weight: .bold))
             .lineLimit(1)
             .fixedSize()
             .foregroundStyle(color)
             .padding(.horizontal, compact ? 5 : 7)
             .padding(.vertical, 3)
+            .frame(minWidth: width)
             .chipSurface(tint: color)
     }
 }

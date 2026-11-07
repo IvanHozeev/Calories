@@ -19,7 +19,10 @@ struct OnboardingView: View {
     @State private var step: Step = .welcome
 
     @State private var sex: Sex = .male
-    @State private var age = 25
+    /// Дата, а не число лет: число устаревает ровно через год, и человек об
+    /// этом не вспомнит. Колесо открывается на двадцати пяти годах — это
+    /// начальная позиция, а не ответ за человека.
+    @State private var birthDate = UserProfile.birthDateGuess(forAge: 25)
     @State private var heightInt = 175
     @State private var weightTenths = 800
     @State private var activityLevel: ActivityLevel = .moderate
@@ -42,7 +45,7 @@ struct OnboardingView: View {
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
 
     enum Step: Int, CaseIterable {
-        case welcome, explanations, sex, age, height, weight, activity, goal, cutOptions, macros, gear, backup, health, result
+        case welcome, explanations, sex, birthday, height, weight, activity, goal, cutOptions, macros, gear, backup, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -64,7 +67,8 @@ struct OnboardingView: View {
         UserProfile(
             weightKg: weightKg,
             heightCm: Double(heightInt),
-            age: age,
+            age: UserProfile.age(bornOn: birthDate) ?? 25,
+            birthDate: birthDate,
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
@@ -108,7 +112,7 @@ struct OnboardingView: View {
                 case .welcome:      welcomeStep
                 case .explanations: explanationsStep
                 case .sex:        sexStep
-                case .age:        ageStep
+                case .birthday:   birthdayStep
                 case .height:     heightStep
                 case .weight:     weightStep
                 case .activity:   activityStep
@@ -264,13 +268,22 @@ struct OnboardingView: View {
         }
     }
 
-    private var ageStep: some View {
-        stepShell(title: "Сколько лет?", subtitle: "Возраст влияет на базовый обмен") {
-            Picker("Возраст", selection: $age) {
-                ForEach(14...90, id: \.self) { Text("\($0) лет").tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(maxWidth: 240)
+    /// Спрашиваем дату, а потом считаем годы сами.
+    ///
+    /// Раньше спрашивали число лет, и оно врало: человек ставил его один раз
+    /// при установке, а базовый обмен считался от него годами. Дата не
+    /// устаревает, и заодно её проще вспомнить, чем сосчитать.
+    private var birthdayStep: some View {
+        stepShell(title: "Когда у тебя день рождения?",
+                  subtitle: "Возраст влияет на базовый обмен — считать его приложение будет само") {
+            DatePicker("День рождения",
+                       selection: $birthDate,
+                       in: UserProfile.birthDateRange(),
+                       displayedComponents: .date)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .frame(maxWidth: 280)
+                .accessibilityIdentifier("onboardingBirthDate")
         }
     }
 

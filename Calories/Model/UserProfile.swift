@@ -119,7 +119,18 @@ enum ProteinBasis: String, Codable, CaseIterable, Identifiable {
 struct UserProfile: Codable, Equatable {
     var weightKg: Double
     var heightCm: Double
-    var age: Int
+    /// Возраст числом. Остаётся ради профилей, заведённых до того, как стали
+    /// спрашивать дату, — и ради расчётов, которым нужны просто годы.
+    ///
+    /// Если дата рождения известна, за истину считается она: число лет
+    /// устаревает ровно через год после того, как его ввели, и человек об
+    /// этом не вспомнит. Поэтому читать возраст надо через `age`, а не
+    /// отсюда.
+    var storedAge: Int
+    /// Дата рождения. Необязательная: в сохранённых профилях её нет, а
+    /// обязательное поле уронило бы декодирование целиком — то есть стёрло
+    /// бы человеку профиль.
+    var birthDate: Date?
     var sex: Sex
     var activityLevel: ActivityLevel
     var goal: Goal
@@ -139,10 +150,29 @@ struct UserProfile: Codable, Equatable {
     /// и в сохранённых профилях ключа нет.
     var storedFatPerKg: Double?
 
+    /// Ключи заданы руками из-за одного из них: `storedAge` лежит в сохранённых
+    /// профилях под именем `age`. Синтезированные ключи переименовали бы его
+    /// вместе со свойством, а поле обязательное — и декодирование упало бы
+    /// целиком, то есть стёрло бы человеку профиль при первом же запуске.
+    private enum CodingKeys: String, CodingKey {
+        case weightKg
+        case heightCm
+        case storedAge = "age"
+        case birthDate
+        case sex
+        case activityLevel
+        case goal
+        case proteinPerKg
+        case storedProteinPerLeanKg
+        case storedProteinBasis
+        case storedFatPerKg
+    }
+
     init(
         weightKg: Double,
         heightCm: Double,
         age: Int,
+        birthDate: Date? = nil,
         sex: Sex,
         activityLevel: ActivityLevel,
         goal: Goal,
@@ -153,7 +183,8 @@ struct UserProfile: Codable, Equatable {
     ) {
         self.weightKg = weightKg
         self.heightCm = heightCm
-        self.age = age
+        self.storedAge = age
+        self.birthDate = birthDate
         self.sex = sex
         self.activityLevel = activityLevel
         self.goal = goal
@@ -161,6 +192,24 @@ struct UserProfile: Codable, Equatable {
         self.storedProteinPerLeanKg = proteinPerLeanKg
         self.storedProteinBasis = proteinBasis
         self.storedFatPerKg = fatPerKg
+    }
+
+    /// Полных лет: от даты рождения, если она известна.
+    ///
+    /// Считается календарём, а не делением дней на 365: високосные годы и
+    /// день рождения, пришедшийся на сегодня, иначе дают ошибку в год.
+    var age: Int {
+        get {
+            guard let birthDate else { return storedAge }
+            return Self.age(bornOn: birthDate) ?? storedAge
+        }
+        set {
+            storedAge = newValue
+            // Введённое число лет отменяет дату: иначе два источника истины
+            // разошлись бы молча, и возраст в профиле не совпадал бы с тем,
+            // что человек только что поставил.
+            birthDate = nil
+        }
     }
 
     var proteinBasis: ProteinBasis {
@@ -188,6 +237,34 @@ struct UserProfile: Codable, Equatable {
     /// Целевой жир в граммах. Считается только от общего веса: гормонам нужен
     /// абсолютный минимум жира, а не доля от сухой массы.
     var fatTargetGrams: Double { fatPerKg * weightKg }
+
+    /// Полных лет на сегодня.
+    ///
+    /// Календарём, а не делением дней на 365: високосные годы и день рождения,
+    /// пришедшийся на сегодня, иначе дают ошибку в год.
+    static func age(bornOn birthDate: Date, now: Date = Date()) -> Int? {
+        guard let years = Calendar.current.dateComponents([.year], from: birthDate, to: now).year,
+              years >= 0 else { return nil }
+        return years
+    }
+
+    /// Границы колеса даты рождения — те же, что были у колеса возраста.
+    ///
+    /// Одни на онбординг и профиль: два разных диапазона означали бы, что
+    /// введённое в онбординге нельзя поправить в профиле.
+    static func birthDateRange(now: Date = Date()) -> ClosedRange<Date> {
+        let calendar = Calendar.current
+        let oldest = calendar.date(byAdding: .year, value: -100, to: now) ?? now
+        let youngest = calendar.date(byAdding: .year, value: -5, to: now) ?? now
+        return oldest...youngest
+    }
+
+    /// С чего открывать колесо, когда даты ещё нет: столько лет назад, сколько
+    /// в профиле записано числом. Это начальная позиция колеса, а не
+    /// сохранённое значение — выдумывать человеку день рождения нельзя.
+    static func birthDateGuess(forAge age: Int, now: Date = Date()) -> Date {
+        Calendar.current.date(byAdding: .year, value: -max(0, age), to: now) ?? now
+    }
 
     static let defaultProteinPerKg: Double = 1.7
     /// Выше, чем от общего веса, и это не опечатка: сухой массы меньше, чем веса,

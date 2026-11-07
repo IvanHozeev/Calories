@@ -10395,49 +10395,49 @@
         }
       }
     },
-    "Возраст влияет на базовый обмен" : {
+    "Возраст влияет на базовый обмен — считать его приложение будет само" : {
       "extractionState" : "manual",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "العمر يؤثر على معدل الأيض الأساسي"
+            "value" : "العمر يؤثر في معدل الأيض الأساسي — والتطبيق يحسبه بنفسه"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Alter beeinflusst den Grundumsatz"
+            "value" : "Das Alter beeinflusst den Grundumsatz — die App rechnet es selbst aus"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Age affects your base metabolism"
+            "value" : "Age affects your basal metabolism — the app works it out itself"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La edad afecta el metabolismo basal"
+            "value" : "La edad influye en el metabolismo basal: la app la calcula sola"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L'âge influe sur le métabolisme de base"
+            "value" : "L’âge influe sur le métabolisme de base — l’app le calcule elle-même"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "הגיל משפיע על חילוף החומרים הבסיסי"
+            "value" : "הגיל משפיע על חילוף החומרים הבסיסי — האפליקציה מחשבת אותו בעצמה"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A idade afeta o metabolismo basal"
+            "value" : "A idade influencia o metabolismo basal — o app a calcula sozinho"
           }
         }
       }
@@ -14103,6 +14103,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dia marcado"
+          }
+        }
+      }
+    },
+    "День рождения" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عيد الميلاد"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geburtstag"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Birthday"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cumpleaños"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anniversaire"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "יום הולדת"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aniversário"
           }
         }
       }
@@ -24045,6 +24092,53 @@
         }
       }
     },
+    "Когда у тебя день рождения?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متى عيد ميلادك؟"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wann hast du Geburtstag?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When is your birthday?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuándo es tu cumpleaños?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand est ton anniversaire ?"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתי יום ההולדת שלך?"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando é o seu aniversário?"
+          }
+        }
+      }
+    },
     "Кола" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -29659,7 +29753,51 @@
       }
     },
     "Начнётся сегодня" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يبدأ اليوم"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beginnt heute"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts today"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empieza hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence aujourd’hui"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מתחיל היום"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começa hoje"
+          }
+        }
+      }
     },
     "Начни с жидкости небольшими порциями. Литр залпом после сухого дня — самый частый способ испортить себе вечер." : {
       "localizations" : {
@@ -50166,53 +50304,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quantas calorias?"
-          }
-        }
-      }
-    },
-    "Сколько лет?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "كم عمرك؟"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wie alt sind Sie?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How old are you?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cuántos años tienes?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quel âge avez-vous ?"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בן/בת כמה?"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quantos anos você tem?"
           }
         }
       }

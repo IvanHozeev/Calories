@@ -16,6 +16,10 @@ struct BodyView: View {
     /// Рост в десятых долях сантиметра: 1805 — это 180.5.
     @State private var heightTenths: Int
     @State private var ageInt: Int
+    /// Дата рождения, если она известна. У профилей, заведённых до того, как
+    /// её стали спрашивать, её нет — тогда строка показывает число лет и
+    /// предлагает дату, а не выдумывает её.
+    @State private var birthDate: Date?
     @State private var proteinTenths: Int
     @State private var proteinBasis: ProteinBasis
     @State private var proteinLeanTenths: Int
@@ -65,6 +69,7 @@ struct BodyView: View {
         let hCm = Int(((profile?.heightCm ?? 170) * 10).rounded())
         _heightTenths = State(initialValue: hCm > 0 ? hCm : 1700)
         _ageInt = State(initialValue: profile?.age ?? 25)
+        _birthDate = State(initialValue: profile?.birthDate)
         let pKg = profile?.proteinPerKg ?? UserProfile.defaultProteinPerKg
         _proteinTenths = State(initialValue: max(10, Int((pKg * 10).rounded())))
         _sex = State(initialValue: profile?.sex ?? .male)
@@ -186,6 +191,7 @@ struct BodyView: View {
             weightKg: Double(weightTenths) / 10.0,
             heightCm: Double(heightTenths) / 10,
             age: ageInt,
+            birthDate: birthDate,
             sex: sex,
             activityLevel: activityLevel,
             goal: goal,
@@ -337,6 +343,7 @@ struct BodyView: View {
         let hCm = Int((profile.heightCm * 10).rounded())
         heightTenths = hCm > 0 ? hCm : 1700
         ageInt = profile.age
+        birthDate = profile.birthDate
         proteinTenths = max(10, Int((profile.proteinPerKg * 10).rounded()))
         sex = profile.sex
         activityLevel = profile.activityLevel
@@ -882,10 +889,17 @@ private extension BodyView {
         }
         settingLabel(systemImage: "birthday.cake") {
             HStack {
-                Text("Возраст")
+                Text(birthDate == nil ? "Возраст" : "День рождения")
                 Spacer()
-                Text("\(ageInt) лет")
-                    .foregroundStyle(.secondary)
+                // Пока даты нет, показываем годы: подставить вместо них
+                // выдуманную дату значило бы соврать о дне рождения.
+                if let birthDate {
+                    Text(birthDate.formatted(date: .abbreviated, time: .omitted))
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("\(ageInt) лет")
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .tappableRow {
@@ -895,11 +909,22 @@ private extension BodyView {
             }
         }
         if showAgePicker {
-            Picker("Возраст", selection: $ageInt) {
-                ForEach(5...100, id: \.self) { Text("\($0)").tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(height: 160)
+            // Колесо дат и у тех, у кого записано только число лет: иначе
+            // введённое когда-то число остаётся навсегда, а дата появиться
+            // не может. Открывается оно на этом числе лет, а записывается
+            // только то, что человек выбрал сам.
+            DatePicker("День рождения",
+                       selection: Binding(get: { birthDate ?? UserProfile.birthDateGuess(forAge: ageInt) },
+                                          set: { newValue in
+                                              birthDate = newValue
+                                              ageInt = UserProfile.age(bornOn: newValue) ?? ageInt
+                                          }),
+                       in: UserProfile.birthDateRange(),
+                       displayedComponents: .date)
+                .datePickerStyle(.wheel)
+                .labelsHidden()
+                .frame(height: 160)
+                .accessibilityIdentifier("profileBirthDate")
         }
         // Замеры — пятой строкой, рядом с ростом и весом: это такой же
         // параметр тела, просто снимаемый лентой. В тулбаре их искали

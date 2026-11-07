@@ -647,3 +647,111 @@ struct SharedPiecesTests {
         #expect(grouped.first { $0.0 == .dairy }?.1.count == 2)
     }
 }
+
+// MARK: - День рождения
+
+/// Возраст теперь считается от даты, а не хранится числом, — и важнее всего
+/// здесь не сам расчёт, а то, что профили, заведённые до этой правки,
+/// по-прежнему читаются. Поле возраста обязательное: не прочитался бы ключ —
+/// не прочитался бы весь профиль, то есть человек потерял бы его целиком.
+struct BirthDateTests {
+
+    private func profile(birthDate: Date?, age: Int = 30) -> UserProfile {
+        UserProfile(weightKg: 80, heightCm: 180, age: age, birthDate: birthDate,
+                    sex: .male, activityLevel: .moderate, goal: .fatLoss,
+                    proteinPerKg: 2.0)
+    }
+
+    @Test func ageComesFromTheDateWhenThereIsOne() {
+        let born = Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12))!
+        let now = Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 7))!
+        #expect(UserProfile.age(bornOn: born, now: now) == 36)
+    }
+
+    @Test func theDayBeforeTheBirthdayTheAgeIsStillTheOldOne() {
+        let born = Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12))!
+        let eve = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 11))!
+        #expect(UserProfile.age(bornOn: born, now: eve) == 35)
+        let birthday = Calendar.current.date(from: DateComponents(year: 2026, month: 3, day: 12))!
+        #expect(UserProfile.age(bornOn: born, now: birthday) == 36)
+    }
+
+    /// То, ради чего всё и затевалось: число лет устаревает, дата — нет.
+    @Test func theDateDoesNotGoStaleTheWayANumberDid() {
+        let born = Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12))!
+        let first = UserProfile.age(bornOn: born,
+                                    now: Calendar.current.date(from: DateComponents(year: 2026, month: 4, day: 1))!)
+        let later = UserProfile.age(bornOn: born,
+                                    now: Calendar.current.date(from: DateComponents(year: 2029, month: 4, day: 1))!)
+        #expect(first == 36)
+        #expect(later == 39)
+    }
+
+    @Test func aDateInTheFutureIsNotAnAge() {
+        let born = Calendar.current.date(byAdding: .year, value: 5, to: Date())!
+        #expect(UserProfile.age(bornOn: born) == nil)
+    }
+
+    /// Без даты профиль живёт на сохранённом числе — иначе у тех, кто завёл
+    /// его раньше, возраст стал бы нулём, а с ним и базовый обмен.
+    @Test func withoutADateTheStoredNumberIsUsed() {
+        #expect(profile(birthDate: nil, age: 41).age == 41)
+    }
+
+    /// Введённое руками число лет отменяет дату: два источника истины иначе
+    /// разъехались бы молча.
+    @Test func settingTheAgeByHandDropsTheDate() {
+        var p = profile(birthDate: Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12)))
+        p.age = 44
+        #expect(p.birthDate == nil)
+        #expect(p.age == 44)
+    }
+
+    @Test func aProfileSavedBeforeThisChangeStillDecodes() throws {
+        // Ровно то, что лежит в UserDefaults у тех, кто поставил приложение
+        // раньше: ключ `age`, и никакого `birthDate`.
+        let legacy = """
+        {"weightKg":77.5,"heightCm":180,"age":37,"sex":"male",
+         "activityLevel":"active","goal":"fatLoss","proteinPerKg":1.9}
+        """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(UserProfile.self, from: legacy)
+        #expect(decoded.birthDate == nil)
+        #expect(decoded.age == 37)
+        #expect(decoded.weightKg == 77.5)
+    }
+
+    /// И наоборот: новый профиль должен остаться читаемым для сборки, которая
+    /// про дату ещё не знает, — поэтому число лет пишется под прежним ключом.
+    @Test func theNumberIsStillWrittenUnderTheOldKey() throws {
+        let born = Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12))!
+        let data = try JSONEncoder().encode(profile(birthDate: born, age: 36))
+        let json = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(json["age"] as? Int == 36)
+        #expect(json["storedAge"] == nil)
+        #expect(json["birthDate"] != nil)
+    }
+
+    @Test func theDateSurvivesSavingAndReading() throws {
+        let born = Calendar.current.date(from: DateComponents(year: 1990, month: 3, day: 12))!
+        let data = try JSONEncoder().encode(profile(birthDate: born))
+        let back = try JSONDecoder().decode(UserProfile.self, from: data)
+        #expect(back.birthDate == born)
+    }
+
+    /// Границы колеса — те же, что были у колеса возраста: от пяти лет до ста.
+    @Test func theWheelCoversTheSameSpanTheAgeWheelDid() {
+        let now = Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 7))!
+        let range = UserProfile.birthDateRange(now: now)
+        #expect(UserProfile.age(bornOn: range.lowerBound, now: now) == 100)
+        #expect(UserProfile.age(bornOn: range.upperBound, now: now) == 5)
+    }
+
+    /// Колесо без даты открывается на сохранённом числе лет — но это только
+    /// начальная позиция, в профиль она не попадает.
+    @Test func theWheelOpensOnTheStoredNumberOfYears() {
+        let now = Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 7))!
+        let guess = UserProfile.birthDateGuess(forAge: 37, now: now)
+        #expect(UserProfile.age(bornOn: guess, now: now) == 37)
+        #expect(profile(birthDate: nil, age: 37).birthDate == nil)
+    }
+}

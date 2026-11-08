@@ -210,33 +210,48 @@ func launch(scale: CGFloat, name: String) {
     // Здесь это шрифт макоси, а на заставке — айоси, но это один и тот же
     // San Francisco: картинка и её продолжение совпадают. Веса и начертание
     // держатся вместе с `BrandLockup`, менять только вместе.
-    let plain = NSFont.systemFont(ofSize: launchTitleSize * scale, weight: .semibold)
+    //
+    // Кегль настоящий, а не умноженный на плотность экрана, — и уже холст
+    // рисуется крупнее. У San Francisco размеры оптические: рисунок буквы
+    // на восьмидесяти четырёх пунктах у́же и тоньше, чем тот же на двадцати
+    // восьми. Пока шрифт брали сразу в 28 × 3, картинка выходила на 2.8%
+    // у́же живого текста заставки — и на запуске было видно, как слово
+    // меняет начертание. Хуже того, видно по-разному: на ×1 это 28 пунктов,
+    // на ×2 — 56, на ×3 — 84, то есть три разных рисунка одного слова.
+    //
+    // Система же рисует 28 пунктов и растеризует их в плотность экрана.
+    // Делаем так же: шрифт в 28, холст в масштабе.
+    let plain = NSFont.systemFont(ofSize: launchTitleSize, weight: .semibold)
     let font = (plain.fontDescriptor.withDesign(.rounded)
-                .flatMap { NSFont(descriptor: $0, size: launchTitleSize * scale) } ?? plain) as CTFont
+                .flatMap { NSFont(descriptor: $0, size: launchTitleSize) } ?? plain) as CTFont
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
         .foregroundColor: rgb(0x8E8E93),
     ]
     let line = CTLineCreateWithAttributedString(
         NSAttributedString(string: "Calories", attributes: attributes))
+    // Размеры слова — в пунктах: холст считается в них же и масштабируется
+    // целиком, одним множителем.
     let bounds = CTLineGetBoundsWithOptions(line, .useOpticalBounds)
 
     // Холст по слову, а не наоборот: оно теперь шире знака, и обрезать его
     // полем фиксированной ширины значит однажды его обрезать.
-    let width = max(bounds.width + 32 * scale, (launchMarkSize + 32) * scale)
-    let height = (launchMarkSize + launchGap) * scale + bounds.height
-    let ctx = context(Int(width.rounded(.up)), Int(height.rounded(.up)))
+    let width = max(bounds.width + 32, launchMarkSize + 32)
+    let height = launchMarkSize + launchGap + bounds.height
+    let ctx = context(Int((width * scale).rounded(.up)), Int((height * scale).rounded(.up)))
+    // Весь холст в пунктах, плотность экрана — одним множителем сверху.
+    ctx.scaleBy(x: scale, y: scale)
 
-    let factor = (launchMarkSize * scale) / (2 * iconOuter)
+    let factor = launchMarkSize / (2 * iconOuter)
     ctx.saveGState()
-    ctx.translateBy(x: width / 2, y: height - launchMarkSize * scale / 2)
+    ctx.translateBy(x: width / 2, y: height - launchMarkSize / 2)
     ctx.scaleBy(x: factor, y: factor)
     ctx.translateBy(x: -iconCenter.x, y: -iconCenter.y)
     googleMark(ctx, width: launchMarkWidth, outer: iconOuter)
     ctx.restoreGState()
 
     ctx.textPosition = CGPoint(x: (width - bounds.width) / 2 - bounds.origin.x,
-                               y: height - (launchMarkSize + launchGap) * scale
+                               y: height - launchMarkSize - launchGap
                                   - bounds.height - bounds.origin.y)
     CTLineDraw(line, ctx)
 

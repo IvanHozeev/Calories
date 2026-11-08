@@ -317,6 +317,59 @@ struct KosherSettingsTests {
         #expect(wait?.until == at.addingTimeInterval(180 * 60))
     }
 
+    // MARK: - Островок
+
+    /// Островок один, и показывать он должен самое позднее ожидание.
+    ///
+    /// Съел мясное в шесть и молочное в семь — ждать надо дольшего: к его
+    /// концу короткое давно истекло. Показать короткое значило бы разрешить
+    /// еду раньше, чем можно.
+    @Test
+    func theIslandShowsTheWaitThatEndsLast() {
+        let now = Date()
+        let short = KosherWait(eaten: .dairy, blocked: .meat,
+                               since: now, until: now.addingTimeInterval(1800))
+        let long = KosherWait(eaten: .meat, blocked: .dairy,
+                              since: now, until: now.addingTimeInterval(6 * 3600))
+
+        #expect(KosherActivity.chosen(from: [short, long], now: now) == long)
+        // Порядок в списке ничего не решает.
+        #expect(KosherActivity.chosen(from: [long, short], now: now) == long)
+    }
+
+    /// Когда ждать нечего, островка быть не должно.
+    @Test
+    func thereIsNoIslandWithoutAWait() {
+        let now = Date()
+        #expect(KosherActivity.chosen(from: [], now: now) == nil)
+
+        // Кончилось самое позднее — значит кончились и все прочие.
+        let over = [
+            KosherWait(eaten: .meat, blocked: .dairy,
+                       since: now.addingTimeInterval(-7 * 3600), until: now.addingTimeInterval(-3600)),
+            KosherWait(eaten: .dairy, blocked: .meat,
+                       since: now.addingTimeInterval(-5 * 3600), until: now.addingTimeInterval(-60))
+        ]
+        #expect(KosherActivity.chosen(from: over, now: now) == nil)
+    }
+
+    /// Граница — это уже «кончилось»: ровно в свой срок ожидание снимается,
+    /// а не висит последнюю секунду.
+    @Test
+    func theWaitEndsExactlyOnTime() {
+        let now = Date()
+        let wait = KosherWait(eaten: .meat, blocked: .dairy, since: now, until: now)
+        #expect(KosherActivity.chosen(from: [wait], now: now) == nil)
+    }
+
+    /// Виджет своей модели не видит и читает строку — она должна совпадать
+    /// с тем, что он ждёт.
+    @Test
+    func theBlockedKindTravelsAsAString() {
+        #expect(KosherActivity.blockedName(.meat) == KosherWaitAttributes.meat)
+        #expect(KosherActivity.blockedName(.dairy) == KosherWaitAttributes.dairy)
+    }
+
     /// Истёкшее ожидание не должно ронять Живую активность.
     ///
     /// Островок считает время системным `Text(timerInterval:)`, а тот берёт

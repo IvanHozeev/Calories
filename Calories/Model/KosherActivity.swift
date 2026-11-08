@@ -18,11 +18,34 @@ enum KosherActivity {
         Activity<KosherWaitAttributes>.activities.first
     }
 
-    /// Приводит островок в соответствие с дневником.
+    /// Какое ожидание показывать: самое позднее из тех, что ещё идут.
     ///
-    /// Из нескольких ожиданий берём то, что кончится позже: островок один, а
-    /// более долгое ожидание и есть более строгое. Второе к этому моменту уже
-    /// не ограничивает — дождавшись долгого, человек дождался и короткого.
+    /// Островок один, а более долгое ожидание и есть более строгое: второе к
+    /// его концу уже не ограничивает — дождавшись долгого, человек дождался
+    /// и короткого.
+    ///
+    /// Порядок действий здесь не случаен и держится на этом же: сначала
+    /// самое позднее, потом проверка, кончилось ли оно. Наоборот было бы
+    /// ошибкой — но и так не ошибка именно потому, что раз кончилось самое
+    /// позднее, то кончились и все прочие.
+    ///
+    /// Вынесено из `sync` ради проверки: остальное в этом файле — вызовы
+    /// ActivityKit, которые без запущенного приложения не выполнить, а
+    /// выбор ожидания ошибается тихо и показывает не то число.
+    nonisolated static func chosen(from waits: [KosherWait], now: Date = Date()) -> KosherWait? {
+        guard let wait = waits.max(by: { $0.until < $1.until }), !wait.isOver(at: now) else {
+            return nil
+        }
+        return wait
+    }
+
+    /// Как ожидание называется в записи активности: виджет своей модели не
+    /// видит и читает строку.
+    nonisolated static func blockedName(_ status: KosherStatus) -> String {
+        status == .meat ? KosherWaitAttributes.meat : KosherWaitAttributes.dairy
+    }
+
+    /// Приводит островок в соответствие с дневником.
     static func sync(waits: [KosherWait], enabled: Bool) {
         // Пока кашрут выключен, ActivityKit не трогаем вовсе — даже чтобы
         // спросить, нет ли чего погасить. Выключенная функция не должна
@@ -34,11 +57,11 @@ enum KosherActivity {
             end()
             return
         }
-        guard let wait = waits.max(by: { $0.until < $1.until }), !wait.isOver() else {
+        guard let wait = chosen(from: waits) else {
             end()
             return
         }
-        let blocked = wait.blocked == .meat ? KosherWaitAttributes.meat : KosherWaitAttributes.dairy
+        let blocked = blockedName(wait.blocked)
         let state = KosherWaitAttributes.ContentState(until: wait.until)
 
         if let existing = current {

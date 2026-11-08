@@ -156,6 +156,14 @@ struct ContentView: View {
             } action: { _, pull in
                 ringPull.offset = pull
             }
+            // Клавиатура этот экран не двигает.
+            //
+            // Поля ввода здесь нет ни одного: клавиатуру поднимает лист
+            // поверх — калории, новый рецепт. Но безопасную область она
+            // сужает всем, и «Сегодня» под листом сжималось вместе с ней:
+            // кольцо уезжало вверх, мельчало, число в нём обрезалось до
+            // «3,3…». Листу клавиатура нужна, экрану под ним — нет.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .onChange(of: copiedEntryID) { _, id in
                 guard let id else { return }
                 withAnimation(.snappy) { scroll.scrollTo(id, anchor: .center) }

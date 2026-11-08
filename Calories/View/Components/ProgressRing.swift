@@ -236,7 +236,15 @@ struct ProgressRing: View {
     var body: some View {
         if fills {
             GeometryReader { geometry in
-                ring(side: min(geometry.size.width, geometry.size.height))
+                // Диаметр от ширины, а не от меньшей из сторон.
+                //
+                // По высоте он всё ломал: пока поверх экрана лист с
+                // клавиатурой, система ужимает экран под ним, остаток
+                // высоты у блока становится крошечным — и кольцо вместе с ним.
+                // Знак съёживался до монетки, а число внутри обрезалось до
+                // «3,3…». Ширина же у экрана постоянная, и размер знака от
+                // неё не пляшет.
+                ring(side: min(geometry.size.width, Self.fullSize))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {

@@ -37182,6 +37182,53 @@
         }
       }
     },
+    "Отметь, что приготовил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "علّم أنك طبخت، وسيحسب التطبيق بنفسه: كم حصة بقيت، وكم يوم تكفي، وحتى متى يصلح أكلها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Markiere es als gekocht, und die App zählt selbst: wie viele Portionen übrig sind, wie lange sie reichen und bis wann es noch essbar ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark it cooked and the app keeps the count itself: how many servings are left, how long they last, and until when it is still worth eating."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marca que ya cocinaste y la app lleva la cuenta sola: cuántas raciones quedan, para cuántos días alcanzan y hasta cuándo conviene comerlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indique que c’est cuit et l’app tient le compte : combien de portions restent, pour combien de jours, et jusqu’à quand c’est encore bon."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "סמן שבישלת — והאפליקציה תספור בעצמה: כמה מנות נותרו, לכמה ימים יספיקו, ועד מתי עוד כדאי לאכול."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marque que cozinhou e o app faz a conta sozinho: quantas porções restam, para quantos dias dá e até quando ainda vale comer."
+          }
+        }
+      }
+    },
     "Отметь, что сварил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть." : {
       "localizations" : {
         "ar" : {
@@ -45496,6 +45543,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda sem receitas"
+          }
+        }
+      }
+    },
+    "Приготовил" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "طبخت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gekocht"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cooked it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya cociné"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C’est cuit"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "בישלתי"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Já cozinhei"
           }
         }
       }

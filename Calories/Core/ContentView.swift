@@ -678,6 +678,10 @@ private extension ContentView {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
+                // Имя строке нужно тесту: он следит, чтобы кольцо на неё не
+                // наезжало. Проверять это глазами выходит плохо — наезд уже
+                // приезжал дважды.
+                .accessibilityIdentifier("weighInRow")
             }
 
             // Экран читается как отъезд камеры: кольцо и макросы —

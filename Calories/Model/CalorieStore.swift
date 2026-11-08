@@ -323,6 +323,18 @@ final class CalorieStore {
             do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
             measurements = []
         }
+
+        // Шрифт и кегль тоже переживают прогон: их выбирает один из тестов и
+        // оставляет выбранными, а следующий начинается с засечек и мелкого
+        // кегля — строки съезжают, и падает не тот тест, который виноват.
+        //
+        // Сбросом, а не подменой значения аргументом запуска: аргументы
+        // ложатся поверх хранилища и читаются раньше него, и тогда выбор,
+        // сделанный внутри теста, не прочитался бы вовсе.
+        if UserDefaults.standard.bool(forKey: "ui_test_reset_appearance") {
+            UserDefaults.standard.removeObject(forKey: "app_font")
+            UserDefaults.standard.removeObject(forKey: "app_text_size")
+        }
 #endif
 
         let dishDescriptor = FetchDescriptor<Dish>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])

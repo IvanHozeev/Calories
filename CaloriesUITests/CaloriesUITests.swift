@@ -25,7 +25,22 @@ final class CaloriesUITests: XCTestCase {
             // вкладки. Тот же флаг ставит «не сейчас» в онбординге.
             "-health_access_deferred", "YES",
             "-is_premium", premium ? "YES" : "NO",
-            "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO"
+            "-ui_test_reset_measurements", resetMeasurements ? "YES" : "NO",
+            // Шрифт и кегль — к известному состоянию, но сбросом, а не
+            // подменой значения.
+            //
+            // Их выбирает один из тестов и оставляет выбранными: следующий
+            // прогон начинался с засечек и мелкого кегля, строки съезжали, и
+            // тест про шрифт падал на собственном следе. Держалось это на
+            // том, что `Tools/test.sh` удаляет оба ключа перед прогоном, —
+            // то есть тест был верен только при запуске через скрипт, а
+            // запущенный из Xcode по одному падал.
+            //
+            // Задать их аргументом запуска нельзя: аргументы ложатся поверх
+            // хранилища и читаются раньше него, так что выбор, сделанный
+            // внутри теста, перестал бы читаться вовсе — а он-то и
+            // проверяется.
+            "-ui_test_reset_appearance", "YES"
         ]
         app.launch()
         // Ждём, пока интерфейс действительно встанет, и только потом отдаём
@@ -286,6 +301,103 @@ final class CaloriesUITests: XCTestCase {
                       "Экран приёмов пищи не открылся")
     }
 
+    // MARK: - Вёрстка
+
+    /// Кольцо не должно наезжать на полоску взвешивания.
+    ///
+    /// Наезжало дважды, и оба раза находил человек, а не набор: первый —
+    /// когда блок первого экрана схлопывался клавиатурой из-под листа,
+    /// второй — когда диаметр кольца стали считать от одной ширины, и оно
+    /// перестало умещаться в отведённую высоту. Глазами такое ловится
+    /// случайно, координатами — всегда.
+    @MainActor
+    func testTheRingDoesNotOverlapTheWeighInRow() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+
+        let ring = app.descendants(matching: .any).matching(identifier: "addFromRing").firstMatch
+        XCTAssertTrue(ring.waitForExistence(timeout: 10), "Кольца нет на экране")
+        let weighIn = app.descendants(matching: .any).matching(identifier: "weighInRow").firstMatch
+        guard weighIn.waitForExistence(timeout: 5) else {
+            // Взвесились сегодня — строки нет, и проверять нечего.
+            return
+        }
+
+        XCTAssertLessThanOrEqual(
+            ring.frame.maxY, weighIn.frame.minY,
+            "Кольцо (\(ring.frame)) наезжает на полоску взвешивания (\(weighIn.frame))")
+    }
+
+    /// Клавиатура из-под листа не трогает экран под ним.
+    ///
+    /// Лист с калориями поднимает клавиатуру, а она сужает безопасную область
+    /// всему, что ниже, — и «Сегодня» сжималось вместе с ней: кольцо мельчало,
+    /// плитки лезли на него. Проверяем по самому кольцу: его прямоугольник до
+    /// показа листа и после закрытия должен совпасть.
+    @MainActor
+    func testTheKeyboardUnderASheetLeavesTodayAlone() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+
+        let ring = app.descendants(matching: .any).matching(identifier: "addFromRing").firstMatch
+        XCTAssertTrue(ring.waitForExistence(timeout: 10), "Кольца нет на экране")
+        let before = ring.frame
+
+        app.navigationBars["Today"].buttons["addMenu"].tap()
+        let quick = app.buttons["Calories only"].firstMatch
+        XCTAssertTrue(quick.waitForExistence(timeout: 5), "В меню нет быстрых калорий")
+        quick.tap()
+        // Поле ввода с клавиатурой — ради неё лист и открывали.
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 10),
+                      "Лист открылся без клавиатуры — проверять нечего")
+
+        app.buttons["Cancel"].firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+        XCTAssertTrue(ring.waitForExistence(timeout: 10))
+
+        XCTAssertEqual(ring.frame.width, before.width, accuracy: 1,
+                       "Кольцо изменило ширину из-за клавиатуры под листом")
+        XCTAssertEqual(ring.frame.height, before.height, accuracy: 1,
+                       "Кольцо изменило высоту из-за клавиатуры под листом")
+        XCTAssertEqual(ring.frame.minY, before.minY, accuracy: 1,
+                       "Кольцо уехало по вертикали из-за клавиатуры под листом")
+    }
+
+    /// Названия вкладок начинаются на одной вертикали.
+    ///
+    /// Средний слот тулбара к левому краю не прижимается — он центрует то,
+    /// что в нём лежит, — и «Профиль» стоял посреди шапки, пока «Рацион» с
+    /// длинным названием выглядел правильным. Разницу в двадцать точек глаз
+    /// замечает только рядом, а вкладки рядом не показать.
+    @MainActor
+    func testTabTitlesShareTheSameLeftEdge() {
+        let app = launchApp()
+
+        func titleLeft(_ tab: String, bar: String) -> CGFloat {
+            if tab != "Today" { app.tabBars.buttons[tab].tap() }
+            let navBar = app.navigationBars[bar]
+            XCTAssertTrue(navBar.waitForExistence(timeout: 10), "Нет шапки «\(bar)»")
+            // Самую широкую из одноимённых: название экрана система держит в
+            // шапке дважды — наше и своё, скрытое, — и запрос по имени
+            // возвращает оба. Видимое из них шире.
+            let titles = navBar.staticTexts.allElementsBoundByIndex.filter { $0.label == bar }
+            guard let title = titles.max(by: { $0.frame.width < $1.frame.width }) else {
+                XCTFail("В шапке нет названия «\(bar)»")
+                return 0
+            }
+            return title.frame.minX
+        }
+
+        let today = titleLeft("Today", bar: "Today")
+        let profile = titleLeft("Profile", bar: "Profile")
+        let pantry = titleLeft("Pantry", bar: "Pantry")
+
+        XCTAssertEqual(profile, today, accuracy: 1,
+                       "«Профиль» начинается не там, где «Сегодня»")
+        XCTAssertEqual(pantry, today, accuracy: 1,
+                       "«Рацион» начинается не там, где «Сегодня»")
+    }
+
     /// Вкладка «Рацион» открывает экран всей еды: свои блюда, свои продукты
     /// и база. Оттуда же свой продукт правится — категорию и состав иначе
     /// поменять было негде.
@@ -301,7 +413,10 @@ final class CaloriesUITests: XCTestCase {
         let menu = app.descendants(matching: .any).matching(identifier: "sectionFilter").firstMatch
         XCTAssertTrue(menu.waitForExistence(timeout: 10), "На вкладке рациона нет выбора раздела")
         menu.tap()
-        XCTAssertTrue(app.buttons["My Foods"].firstMatch.waitForExistence(timeout: 5),
+        // «Foods», а не «My Foods»: слово «Мои» из названий разделов убрали,
+        // а тест остался с прежним — и падал с тех пор молча, потому что в
+        // обычный прогон UI-тесты не входят.
+        XCTAssertTrue(app.buttons["Foods"].firstMatch.waitForExistence(timeout: 5),
                       "В меню нет своих продуктов")
         XCTAssertTrue(app.buttons["Database"].firstMatch.exists, "И базы продуктов тоже")
         app.buttons["Database"].firstMatch.tap()

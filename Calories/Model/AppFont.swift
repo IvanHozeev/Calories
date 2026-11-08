@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Начертание шрифта приложения.
 ///
@@ -29,6 +30,18 @@ enum AppFont: String, CaseIterable, Identifiable {
     /// это свой файл шрифта, и `.fontDesign` ему только мешает — он подменяет
     /// любой подключённый шрифт системным того же дизайна.
     var design: Font.Design? {
+        switch self {
+        case .system:     return .default
+        case .rounded:    return .rounded
+        case .serif:      return .serif
+        case .monospaced: return .monospaced
+        case .nunito:     return nil
+        }
+    }
+
+    /// То же начертание для UIKit — там, где надо померить строку тем
+    /// шрифтом, которым её нарисует интерфейс.
+    var systemDesign: UIFontDescriptor.SystemDesign? {
         switch self {
         case .system:     return .default
         case .rounded:    return .rounded

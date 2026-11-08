@@ -53,10 +53,55 @@ final class SectionHeadState {
     /// Имя, стоящее в шапке.
     private(set) var current: String?
 
+    /// Куда уехал список, когда имя сменилось: вниз по нему или вверх.
+    ///
+    /// По этому имя и въезжает в шапку с той стороны, с которой пришла
+    /// секция: листаешь вниз — новое поднимается снизу, листаешь обратно —
+    /// опускается сверху. Перетекание вбок говорило бы о движении, которого
+    /// не было.
+    private(set) var rising = true
+
+    /// Последнее, что сообщили. Хранится здесь, а не состоянием экрана:
+    /// прокрутка меняет это десятки раз в секунду, и `@State` перестраивал
+    /// бы весь список на каждом кадре. Наблюдается только `current`.
+    @ObservationIgnored private var heads: [SectionHead] = []
+    @ObservationIgnored private var order: [String] = []
+    @ObservationIgnored private var pinLine: CGFloat = 0
+    @ObservationIgnored private var headTopInset: CGFloat = 16
+
     /// - Parameter order: секции в том порядке, в каком они на экране. Без
     ///   него имя держалось бы только пока виден сам заголовок.
+    /// - Parameter headTopInset: запас к линии покоя. Ноль: заголовки
+    ///   сообщают свой **нижний** край, и сравнение с линией означает ровно
+    ///   «заголовок целиком ушёл под шапку». С запасом в шестнадцать точек
+    ///   первая секция считалась достигнутой сразу: в сгруппированном списке
+    ///   её заголовок стоит в покое на десять точек ниже шапки — меньше
+    ///   запаса, — и «Профиль» на входе назывался «Расчётом», хотя заголовок
+    ///   «Расчёт» был тут же, строкой ниже.
     func update(heads: [SectionHead], order: [String],
-                pinLine: CGFloat, headTopInset: CGFloat = 16) {
+                pinLine: CGFloat, headTopInset: CGFloat = 0) {
+        self.heads = heads
+        self.order = order
+        self.pinLine = pinLine
+        self.headTopInset = headTopInset
+        recompute()
+    }
+
+    /// Линия покоя пришла отдельно — и, как правило, позже заголовков.
+    ///
+    /// Оба числа приходят предпочтениями, и порядок их не гарантирован. На
+    /// экране без строки поиска заголовки успевали первыми, расчёт шёл по
+    /// нулевой линии — а при нулевой достигнута сразу первая секция, — и
+    /// второй раз он не повторялся, пока список не тронут. Поэтому «Профиль»
+    /// на входе назывался «Расчётом», хотя заголовок «Расчёт» стоял тут же,
+    /// строкой ниже.
+    func update(pinLine: CGFloat) {
+        guard pinLine != self.pinLine else { return }
+        self.pinLine = pinLine
+        recompute()
+    }
+
+    private func recompute() {
         let rest = pinLine + headTopInset
 
         // Одна запись на секцию — та, что ближе к линии покоя. Без этого
@@ -78,13 +123,13 @@ final class SectionHeadState {
         // считается та секция, что стоит перед первой видимой: раз её
         // заголовок уже выше экрана, мы внутри неё.
         if let reached {
-            current = reached
+            apply(reached)
         } else if let firstBelow = unique.min(by: { $0.y < $1.y }),
                   let index = order.firstIndex(of: firstBelow.label) {
             // Заголовок первой видимой секции ещё ниже шапки — значит мы в
             // той, что перед ней. Для самой первой секции «перед ней»
             // ничего нет: человек в начале списка.
-            current = index > 0 ? order[index - 1] : nil
+            apply(index > 0 ? order[index - 1] : nil)
         } else if unique.isEmpty, current != nil {
             // Ни одного заголовка в кадре.
             //
@@ -94,8 +139,21 @@ final class SectionHeadState {
             // посреди «Круп и хлеба» показывать «Рацион», что и происходило.
             // Молчание списка — не повод менять ответ: мы всё там же.
         } else {
-            current = nil
+            apply(nil)
         }
+    }
+
+    /// Поставить имя и заодно решить, с какой стороны оно въедет.
+    ///
+    /// Имя экрана — ступень выше первой секции, поэтому у него место
+    /// «минус первое»: уход от него вглубь списка считается движением вниз,
+    /// возврат к нему — вверх.
+    private func apply(_ next: String?) {
+        guard next != current else { return }
+        let was = current.flatMap { order.firstIndex(of: $0) } ?? -1
+        let becomes = next.flatMap { order.firstIndex(of: $0) } ?? -1
+        rising = becomes > was
+        current = next
     }
 
 }
@@ -107,8 +165,11 @@ extension View {
             GeometryReader { geometry in
                 Color.clear.preference(
                     key: SectionHeadKey.self,
+                    // Нижний край, а не верхний: имя переезжает в шапку,
+                    // когда заголовок скрылся за ней целиком, а не когда
+                    // только коснулся её своей макушкой.
                     value: [SectionHead(label: label,
-                                        y: geometry.frame(in: .scrollView(axis: .vertical)).minY)])
+                                        y: geometry.frame(in: .scrollView(axis: .vertical)).maxY)])
             }
         }
     }

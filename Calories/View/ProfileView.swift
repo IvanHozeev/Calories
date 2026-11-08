@@ -98,8 +98,29 @@ struct ProfileView: View {
     /// Профиль, который получится из черновика. Опционален ради тех мест,
     /// где он читается как «есть ли что считать».
     private var draftProfile: UserProfile? { draft.profile }
-    
-    
+
+    /// Переезд заголовка секции в шапку — то же, что в «Рационе». Объектом,
+    /// а не состоянием экрана: прокрутка меняет его на каждом кадре, и
+    /// `@State` перестраивал бы весь список.
+    @State private var head = SectionHeadState()
+    /// Линия, на которой заголовок встаёт: верхняя безопасная зона экрана.
+    @State private var pinLine: CGFloat = 0
+
+    /// Секции в том порядке, в каком они на экране, и ровно те, что сейчас
+    /// показаны. По порядку имя держится всю длину секции, даже когда её
+    /// заголовок давно уехал за кромку; по составу — не считается текущей
+    /// та, которой на экране нет.
+    private var sectionOrder: [String] {
+        var order = [String(localized: "Расчёт")]
+        if store.plan == nil, !store.isPremium { order.append(String(localized: "Цель")) }
+        order.append(String(localized: "Параметры тела"))
+        order.append(String(localized: "Питание"))
+        if !usesFact { order.append(String(localized: "Уровень активности")) }
+        order.append(String(localized: "Норма белка"))
+        order.append(String(localized: "Норма жира"))
+        return order
+    }
+
     var body: some View {
         List {
             // Расчёт первым: ради него профиль и открывают — сколько тратишь,
@@ -159,8 +180,18 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
-        .navigationTitle("Профиль")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        // Шапка размывает содержимое под собой, а не отрезает его: иначе
+        // под ней проходит шов, а прокрученные строки обрываются по
+        // линейке. То же стоит на «Сегодня» и в «Рационе».
+        .scrollEdgeEffectStyle(.soft, for: .top)
+        .measuresPinLine()
+        .onPreferenceChange(PinLineKey.self) { pinLine = $0; head.update(pinLine: $0) }
+        .onPreferenceChange(SectionHeadKey.self) { heads in
+            head.update(heads: heads, order: sectionOrder, pinLine: pinLine)
+        }
+        // Имя секции переезжает в шапку, как в «Рационе»: список длинный, и
+        // «Профиль» наверху ничего не говорит о том, где человек сейчас.
+        .tabTitle(head.current ?? String(localized: "Профиль"), trailingRoom: 60, rising: head.rising)
         .toolbar {
             // Подписка — отсюда, а не своей вкладкой внизу.
 
@@ -602,6 +633,7 @@ private extension ProfileView {
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
         } header: {
             Text("Расчёт")
+                .tracksSectionHead(String(localized: "Расчёт"))
         } footer: {
             // Обе подписи объясняют, откуда берётся число, — на
             // коротком уровне их нет вовсе.
@@ -627,7 +659,7 @@ private extension ProfileView {
     }
 
     var bodyParametersSection: some View {
-    Section("Параметры тела") {
+    Section {
         // Знак — слева, в колонке значков, и он меняется вместе с выбором:
         // тот же знак, что человек видел в онбординге, стоит там же, где у
         // соседних строк стоят символы. В самих же вариантах его нет —
@@ -746,6 +778,12 @@ private extension ProfileView {
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
+    } header: {
+        // Заголовок отдельным блоком, а не строкой в `Section("…")`: так к
+        // нему можно привесить слежение, по которому имя секции переезжает
+        // в шапку при прокрутке.
+        Text("Параметры тела")
+            .tracksSectionHead(String(localized: "Параметры тела"))
     }
     }
 

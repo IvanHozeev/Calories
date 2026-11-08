@@ -8,7 +8,7 @@ struct NutritionSection: View {
     var store: CalorieStore
 
     var body: some View {
-        Section("Питание") {
+        Section {
             NavigationLink {
                 MealScheduleSheet(
                     entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
@@ -31,6 +31,12 @@ struct NutritionSection: View {
                 settingLabel("Кашрут", systemImage: "circle.lefthalf.filled")
             }
             .accessibilityIdentifier("openKosher")
+        } header: {
+            // Заголовок отдельным блоком, а не строкой в `Section("…")`:
+            // так к нему можно привесить слежение, по которому имя секции
+            // переезжает в шапку при прокрутке.
+            Text("Питание")
+                .tracksSectionHead(String(localized: "Питание"))
         }
     }
 }

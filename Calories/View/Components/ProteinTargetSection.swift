@@ -62,6 +62,7 @@ struct ProteinTargetSection: View {
                            color: MacroKind.protein.color)
         } header: {
             Text("Норма белка")
+                .tracksSectionHead(String(localized: "Норма белка"))
         } footer: {
             Text(footer)
         }

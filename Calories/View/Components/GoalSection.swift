@@ -17,6 +17,7 @@ struct GoalSection: View {
                 .pickerStyle(.segmented)
             } header: {
                 Text("Цель")
+                    .tracksSectionHead(String(localized: "Цель"))
             } footer: {
                 if store.profile == nil {
                     Text("Сначала сохрани профиль — план считается по твоим BMR/TDEE.")

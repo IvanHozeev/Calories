@@ -158,17 +158,15 @@ struct MyFoodView: View {
         }
         .glassRow()
         .measuresPinLine()
-        .onPreferenceChange(PinLineKey.self) { pinLine = $0 }
+        .onPreferenceChange(PinLineKey.self) { pinLine = $0; head.update(pinLine: $0) }
         .onPreferenceChange(SectionHeadKey.self) { heads in
             head.update(heads: heads, order: sectionOrder, pinLine: pinLine)
         }
-        // Заголовок системный, как у «Сегодня» и «Профиля»: тот же кегль,
-        // то же поведение при прокрутке. Своя пара имён в центре шапки
-        // выглядела чужой — другой размер, другое место, другая анимация.
-        // Меняется только текст: имя экрана или имя категории, до которой
-        // доехали.
-        .navigationTitle(head.current ?? String(localized: "Рацион"))
-        .toolbarTitleDisplayMode(.inlineLarge)
+        // Заголовок тот же, что на «Сегодня» и «Профиле»: один кегль, одно
+        // место. Своя пара имён в центре шапки выглядела чужой — другой
+        // размер, другое место, другая анимация. Меняется только текст: имя
+        // экрана или имя категории, до которой доехали.
+        .tabTitle(head.current ?? String(localized: "Рацион"), trailingRoom: 176, rising: head.rising)
         // На краю прокрутки iOS 26 режет содержимое под шапкой прямой линией,
         // и под заголовком это читается как второй бар.
         .scrollEdgeEffectStyle(.soft, for: .top)

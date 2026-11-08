@@ -316,4 +316,27 @@ struct KosherSettingsTests {
         let wait = KosherClock.wait(after: .meat, at: at, custom: settings.custom)
         #expect(wait?.until == at.addingTimeInterval(180 * 60))
     }
+
+    /// Истёкшее ожидание не должно ронять Живую активность.
+    ///
+    /// Островок считает время системным `Text(timerInterval:)`, а тот берёт
+    /// обычный диапазон дат — и Swift валит процесс, если конец оказался
+    /// раньше начала. Срок же наступает всегда, и приложение в этот момент
+    /// может не работать: активность остаётся, система продолжает её
+    /// перерисовывать, и каждая перерисовка после срока убивала расширение.
+    /// За шесть дней так набралось сто девяносто восемь падений.
+    @Test
+    func countdownRangeSurvivesAnExpiredWait() {
+        let now = Date()
+
+        let ahead = KosherWaitAttributes.countdownRange(now: now, until: now.addingTimeInterval(3600))
+        #expect(ahead.lowerBound == now)
+        #expect(ahead.upperBound == now.addingTimeInterval(3600))
+
+        // Срок прошёл час назад: диапазон пустой, но не перевёрнутый.
+        let past = KosherWaitAttributes.countdownRange(now: now, until: now.addingTimeInterval(-3600))
+        #expect(past.lowerBound == now)
+        #expect(past.upperBound == now)
+        #expect(past.lowerBound <= past.upperBound)
+    }
 }

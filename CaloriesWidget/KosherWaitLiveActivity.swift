@@ -44,8 +44,7 @@ struct KosherWaitLiveActivity: Widget {
             } compactTrailing: {
                 // Часы и минуты без секунд: шесть часов ожидания — это
                 // «5:59:42», и в компактную часть островка оно не влезает.
-                Text(timerInterval: Date()...context.state.until,
-                     countsDown: true, showsHours: true)
+                countdown(to: context.state.until, showsHours: true)
                     .font(.caption.weight(.semibold))
                     .monospacedDigit()
                     .foregroundStyle(look.tint)
@@ -91,8 +90,13 @@ struct KosherWaitLiveActivity: Widget {
     }
 
     /// Отсчёт системы: без обновлений, до секунды, с закрытым приложением.
-    private func countdown(to date: Date) -> Text {
-        Text(timerInterval: Date()...date, countsDown: true)
+    ///
+    /// Диапазон берём у `KosherWaitAttributes`: он следит, чтобы конец не
+    /// оказался раньше начала — на этом расширение падало после каждого
+    /// истёкшего ожидания.
+    private func countdown(to date: Date, showsHours: Bool = false) -> Text {
+        Text(timerInterval: KosherWaitAttributes.countdownRange(now: Date(), until: date),
+             countsDown: true, showsHours: showsHours)
     }
 }
 

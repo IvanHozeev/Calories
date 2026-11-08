@@ -327,12 +327,22 @@ struct ContentView: View {
                 GeometryReader { geometry in
                     Color.clear
                         .onChange(of: geometry.size.height, initial: true) { _, height in
+                            guard !isCovered else { return }
                             listHeight = height
                         }
                         // Таббар вычитаем по безопасной области, а не числом:
                         // высота списка приходит вместе с местом под ним, и
                         // без этого последний ряд плиток уезжал под таббар.
+                        //
+                        // Пока сверху лист — не меряем вовсе. Клавиатуру,
+                        // поднятую листом, безопасная область списка считает
+                        // своей: нижний отступ прыгает на три сотни точек,
+                        // блок первого экрана схлопывается до своего минимума,
+                        // и плитки наезжают на кольцо. Экран под листом не
+                        // меняется, значит и перемерять его нечего — мерку
+                        // берём ту, что была до показа.
                         .onChange(of: geometry.safeAreaInsets.bottom, initial: true) { _, inset in
+                            guard !isCovered else { return }
                             listBottomInset = inset
                         }
                 }

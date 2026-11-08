@@ -13,7 +13,13 @@ final class CaloriesUITests: XCTestCase {
     /// Запускаем в предсказуемых условиях: английская локаль, онбординг пропущен.
     /// Оба параметра — обычные перекрытия UserDefaults через аргументы запуска,
     /// поэтому в самом приложении не нужен тестовый код.
-    private func launchApp(premium: Bool = false, resetMeasurements: Bool = false) -> XCUIApplication {
+    /// - Parameter health: объявить доступ к «Здоровью» выданным. Нужно
+    ///   там, где экран лежит за чипом шагов: без доступа чип открывает не
+    ///   экран, а системное окно доступа, которое из теста нечем закрыть.
+    /// - Parameter seedMeasurements: посеять два сеанса замеров. История
+    ///   замеров открывается только со второго — по одному её не бывает.
+    private func launchApp(premium: Bool = false, resetMeasurements: Bool = false,
+                           health: Bool = false, seedMeasurements: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "-AppleLanguages", "(en)",
@@ -40,7 +46,9 @@ final class CaloriesUITests: XCTestCase {
             // хранилища и читаются раньше него, так что выбор, сделанный
             // внутри теста, перестал бы читаться вовсе — а он-то и
             // проверяется.
-            "-ui_test_reset_appearance", "YES"
+            "-ui_test_reset_appearance", "YES",
+            "-health_pretend_authorized", health ? "YES" : "NO",
+            "-ui_test_seed_measurements", seedMeasurements ? "YES" : "NO"
         ]
         app.launch()
         // Ждём, пока интерфейс действительно встанет, и только потом отдаём
@@ -299,6 +307,161 @@ final class CaloriesUITests: XCTestCase {
         entrance.tap()
         XCTAssertTrue(app.switches["mealScheduleToggle"].firstMatch.waitForExistence(timeout: 5),
                       "Экран приёмов пищи не открылся")
+    }
+
+    // MARK: - Каждый экран открывается
+
+    /// Доводит до экрана и возвращается обратно.
+    ///
+    /// Сеть под навигацию: не проверяет, что на экране написано, — только
+    /// что он вообще открывается и отпускает назад. Этого хватает, чтобы
+    /// поймать оборванный переход, а дороже ничего и не нужно: содержимое
+    /// каждого экрана проверяется модульными тестами там, где оно
+    /// считается.
+    @MainActor
+    private func visit(_ identifier: String, expecting title: String,
+                       in app: XCUIApplication, inList: Bool = true) {
+        let row = app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+        if inList {
+            scrollTo(row, in: app)
+        }
+        guard row.waitForExistence(timeout: 5) else {
+            XCTFail("Нет входа «\(identifier)»")
+            return
+        }
+        // Листать до того, что лежит в шапке, нечего: она на месте всегда, а
+        // свайпы увели бы список под ней и сбили бы попадание.
+        if inList {
+            scrollIntoReach(row, in: app)
+        }
+        row.tap()
+        XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10),
+                      "Не открылся «\(title)»")
+        back(from: title, in: app)
+    }
+
+    /// Назад из пушнутого экрана — кнопкой в шапке.
+    ///
+    /// По её системному имени, а не по порядку в шапке: порядок задаёт экран,
+    /// и шеврон оказывается первым не везде — на «Приёмах пищи» тап уходил не
+    /// туда. Имя у шеврона всегда `BackButton`, а подпись у него меняется,
+    /// потому что её берут с экрана, с которого вошли.
+    ///
+    /// Жест от левого края сюда не годится: он срабатывает не на каждом
+    /// экране — там, где под пальцем горизонтальная прокрутка, его забирает
+    /// она.
+    ///
+    /// Возврат проверяется по тому, что покинутый экран исчез, а не по
+    /// названию того, куда вернулись. У корневых вкладок название меняется на
+    /// прокрутке: пока тест листал «Профиль» до нужной строки, заголовок там
+    /// успевал стать «Параметрами тела», и ждать слова «Профиль» было
+    /// бессмысленно.
+    @MainActor
+    private func back(from title: String, in app: XCUIApplication) {
+        let chevron = app.navigationBars[title].buttons["BackButton"]
+        guard chevron.waitForExistence(timeout: 5) else {
+            XCTFail("На «\(title)» нет кнопки «назад»")
+            return
+        }
+        chevron.tap()
+        XCTAssertTrue(app.navigationBars[title].waitForNonExistence(timeout: 10),
+                      "«\(title)» не закрылся кнопкой «назад»")
+    }
+
+    /// Всё, что открывается с «Сегодня».
+    @MainActor
+    func testEveryScreenOffTodayOpens() {
+        // С подпиской и с доступом к «Здоровью»: без подписки полоска плана
+        // открывает не план, а предложение подписки, а без доступа чип шагов
+        // просит доступ вместо экрана. И то и другое — верное поведение, но
+        // тогда оба экрана остались бы непройденными.
+        let app = launchApp(premium: true, health: true)
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+
+        // Имя на элементе тулбара, а не внутри чипа: идентификатор на
+        // внешнем элементе перекрывает вложенные.
+        visit("steps", expecting: "Steps", in: app, inList: false)
+        // «Новый план», а не «План»: пока плана нет, экран плана и есть его
+        // настройка — показывать на нём нечего. Готовый план за той же
+        // полоской проверяет `testPlanEditorOpensFromTheToolbar`.
+        visit("planStrip", expecting: "New plan", in: app)
+        visit("allDays", expecting: "History", in: app)
+    }
+
+    /// Всё, что открывается из «Настроек», включая отладочные экраны:
+    /// они тоже ломаются, а чинить их никто не ходит, пока не понадобятся.
+    @MainActor
+    func testEverySettingsScreenOpens() {
+        let app = launchApp()
+        openSettings(in: app)
+
+        visit("openRingSound", expecting: "Ring sound", in: app)
+        visit("openFontSettings", expecting: "Font and size", in: app)
+        visit("openAutoBackup", expecting: "Automatic backup", in: app)
+
+        let debug = app.buttons["Debug"].firstMatch
+        scrollTo(debug, in: app)
+        XCTAssertTrue(debug.exists, "В настройках нет входа в отладку")
+        scrollIntoReach(debug, in: app)
+        debug.tap()
+        XCTAssertTrue(app.navigationBars["Debug"].waitForExistence(timeout: 10))
+
+        // «Что есть в Здоровье» сюда не попадает, и не потому, что экран не
+        // важен. Он при появлении сам спрашивает доступ к «Здоровью», а
+        // системное окно доступа рисует другой процесс: в дереве приложения
+        // его нет, закрыть его из теста нечем, и оно остаётся висеть — тап
+        // «назад» уходит в него, экран не закрывается, а следующий тест падает
+        // на чужом окне. Проверяется он руками.
+        for (label, title) in [("Sleep: what arrived", "Sleep: what arrived")] {
+            let row = app.buttons[label].firstMatch
+            scrollTo(row, in: app)
+            XCTAssertTrue(row.exists, "В отладке нет «\(label)»")
+            row.tap()
+            XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: 10),
+                          "Не открылся «\(title)»")
+            back(from: title, in: app)
+        }
+    }
+
+    /// Всё, что открывается из «Профиля».
+    ///
+    /// Разделён на два теста, и не ради порядка: на тест отведена минута, а
+    /// впятером эти экраны укладывались в шестьдесят две секунды — тест падал
+    /// от длины, а не от поломки. Поднять предел изнутри не вышло: XCTest
+    /// берёт его раньше, чем отрабатывает `setUp`, и остаётся при своей
+    /// минуте. Разрезать дешевле, чем договариваться с ним флагами, которых
+    /// в CI всё равно не будет.
+    @MainActor
+    func testEveryProfileScreenOpens() {
+        let app = launchApp()
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10))
+
+        visit("openWeight", expecting: "Weight and trend", in: app)
+        visit("openMealSchedule", expecting: "Meals", in: app)
+        visit("openKosher", expecting: "Kashrut", in: app)
+    }
+
+    /// Замеры и их история — вторая половина обхода «Профиля».
+    ///
+    /// История лежит за замерами, поэтому идём вглубь, а не возвращаемся на
+    /// «Профиль» между шагами. И открывается она только со второго сеанса —
+    /// отсюда посев.
+    @MainActor
+    func testTheMeasurementScreensOpen() {
+        let app = launchApp(seedMeasurements: true)
+        app.tabBars.buttons["Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10))
+
+        let measurements = app.descendants(matching: .any)
+            .matching(identifier: "openMeasurementsRow").firstMatch
+        scrollTo(measurements, in: app)
+        XCTAssertTrue(measurements.exists, "В профиле нет входа в замеры")
+        scrollIntoReach(measurements, in: app)
+        measurements.tap()
+        XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 10))
+        visit("openMeasurementHistory", expecting: "Measurement history", in: app)
+        back(from: "Measurements", in: app)
     }
 
     // MARK: - Вёрстка

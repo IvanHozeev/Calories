@@ -324,6 +324,31 @@ final class CalorieStore {
             measurements = []
         }
 
+        // Два посеянных сеанса замеров — чтобы тест доходил до истории.
+        //
+        // История замеров открывается со второго сеанса: по одному истории
+        // нет, и строки входа в неё на экране просто не бывает. Снять два
+        // сеанса через интерфейс тест мог бы — но это колёса выбора, прокрутка
+        // до каждого места и минута времени на один переход, и падало бы это
+        // на каждом сдвиге строк, не имея к навигации никакого отношения.
+        if UserDefaults.standard.bool(forKey: "ui_test_seed_measurements") {
+            for measurement in measurements { context.delete(measurement) }
+            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+            let seeded = [
+                BodyMeasurement(date: weekAgo, neckCm: 38, chestCm: 100, shouldersCm: 118,
+                                waistCm: 84, beltCm: 88, pelvisCm: 96, glutesCm: 100,
+                                bicepsLeftCm: 34, bicepsRightCm: 34,
+                                thighLeftCm: 56, thighRightCm: 56),
+                BodyMeasurement(date: Date(), neckCm: 38, chestCm: 101, shouldersCm: 119,
+                                waistCm: 82, beltCm: 86, pelvisCm: 95, glutesCm: 100,
+                                bicepsLeftCm: 35, bicepsRightCm: 35,
+                                thighLeftCm: 56, thighRightCm: 56)
+            ]
+            for measurement in seeded { context.insert(measurement) }
+            do { try context.save() } catch { storeLogger.error("context.save failed: \(error)") }
+            measurements = seeded.sorted { $0.date > $1.date }
+        }
+
         // Шрифт и кегль тоже переживают прогон: их выбирает один из тестов и
         // оставляет выбранными, а следующий начинается с засечек и мелкого
         // кегля — строки съезжают, и падает не тот тест, который виноват.

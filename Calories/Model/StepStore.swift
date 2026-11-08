@@ -103,12 +103,29 @@ final class StepStore {
             updateDerivedStats()
             updateGoalStreak()
         }
+        #if DEBUG
+        // Доступ, объявленный выданным, — только для UI-тестов.
+        //
+        // Экран шагов лежит за чипом в шапке, а чип без доступа открывает не
+        // экран, а системное окно доступа: это верное поведение, но из теста
+        // такое окно нечем закрыть — оно остаётся висеть и роняет следующий
+        // тест. Объявив доступ выданным, тест доходит до экрана тем же путём,
+        // которым до него доходит человек.
+        if defaults.bool(forKey: Self.pretendAuthorizedKey) {
+            isAuthorized = true
+            return
+        }
+        #endif
         if defaults.bool(forKey: "onboarding_completed"), !defaults.bool(forKey: Self.deferredKey) {
             requestAuthorization()
         }
     }
 
     static let deferredKey = "health_access_deferred"
+
+    #if DEBUG
+    static let pretendAuthorizedKey = "health_pretend_authorized"
+    #endif
 
     /// Ответ «не сейчас» в онбординге: без спроса окно доступа больше не всплывает.
     func deferAuthorization() {

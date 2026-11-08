@@ -286,22 +286,20 @@ final class CaloriesUITests: XCTestCase {
                       "Экран приёмов пищи не открылся")
     }
 
-    /// Вкладка поиска открывает прежний экран «Рацион»: свои блюда, свои
-    /// продукты и база. Оттуда же свой продукт правится — категорию и состав
-    /// иначе поменять было негде.
+    /// Вкладка «Рацион» открывает экран всей еды: свои блюда, свои продукты
+    /// и база. Оттуда же свой продукт правится — категорию и состав иначе
+    /// поменять было негде.
     @MainActor
-    func testSearchTabOpensTheFoodScreen() {
+    func testPantryTabOpensTheFoodScreen() {
         let app = launchApp()
-        // Вкладка называется «Рацион» («Pantry» на английской локали, на
-        // которой идёт набор): за ней лежит вся еда, а поиск — лишь способ
-        // в ней найти нужное.
+        // «Pantry» — английская локаль, на которой идёт набор.
         let tab = app.tabBars.buttons["Pantry"]
         XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки рациона")
         tab.tap()
 
         // Раздел выбирается меню в тулбаре: своих продуктов, блюд и базы.
         let menu = app.descendants(matching: .any).matching(identifier: "sectionFilter").firstMatch
-        XCTAssertTrue(menu.waitForExistence(timeout: 10), "На вкладке поиска нет выбора раздела")
+        XCTAssertTrue(menu.waitForExistence(timeout: 10), "На вкладке рациона нет выбора раздела")
         menu.tap()
         XCTAssertTrue(app.buttons["My Foods"].firstMatch.waitForExistence(timeout: 5),
                       "В меню нет своих продуктов")

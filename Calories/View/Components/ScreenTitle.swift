@@ -203,7 +203,8 @@ extension View {
     /// - Parameter rising: откуда въезжает новое имя. `true` — снизу, как
     ///   секция, к которой доехали, листая вниз; `false` — сверху.
     func tabTitle(_ title: String, trailingRoom: CGFloat = 0, rising: Bool = true) -> some View {
-        navigationTitle(title)
+        softScrollEdge()
+            .navigationTitle(title)
             .hiddenNavigationTitle()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -243,7 +244,8 @@ extension View {
                      backButton: Bool = true,
                      cancelTitle: String? = nil,
                      trailingButtons: Int = 0) -> some View {
-        navigationTitle(title)
+        softScrollEdge()
+            .navigationTitle(title)
             .hiddenNavigationTitle()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -280,5 +282,18 @@ private struct TitleRoom: ViewModifier {
         return content
             .fixedSize(horizontal: fits, vertical: true)
             .frame(width: fits ? nil : room, alignment: .leading)
+    }
+}
+
+extension View {
+    /// Шапка размывает содержимое под собой, а не отрезает его.
+    ///
+    /// По умолчанию iOS 26 режет прокрученное под шапкой прямой линией: под
+    /// ней проходит шов, а строки обрываются по линейке, и это читается как
+    /// второй бар. Экран со своим заголовком — всегда список или прокрутка,
+    /// поэтому край задаётся здесь, вместе с заголовком, а не по разу на
+    /// каждом экране: так его неоткуда забыть.
+    fileprivate func softScrollEdge() -> some View {
+        scrollEdgeEffectStyle(.soft, for: .top)
     }
 }

@@ -180,10 +180,6 @@ struct ProfileView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .scrollIndicators(.hidden)
-        // Шапка размывает содержимое под собой, а не отрезает его: иначе
-        // под ней проходит шов, а прокрученные строки обрываются по
-        // линейке. То же стоит на «Сегодня» и в «Рационе».
-        .scrollEdgeEffectStyle(.soft, for: .top)
         .measuresPinLine()
         .onPreferenceChange(PinLineKey.self) { pinLine = $0; head.update(pinLine: $0) }
         .onPreferenceChange(SectionHeadKey.self) { heads in

@@ -13,6 +13,12 @@
 
 Без аргумента берёт сборочный каталог Xcode. Если его нет — соберите проект
 (любой сборкой, хоть на симулятор) и повторите.
+
+Сборка должна быть свежее исходников, иначе проверка отвечает про вчерашний
+код. Так она однажды показала тридцать две «непереведённые» строки, которых
+в проекте уже не было: собирали в свою папку, а скрипт читал каталог Xcode
+недельной давности. Пустой ответ от устаревшей сборки хуже, чем никакого, —
+поэтому несвежую мы не разбираем вовсе, а требуем пересобрать.
 """
 import json
 import glob
@@ -36,6 +42,32 @@ def build_dirs(root: str | None) -> list[str]:
     return sorted(found, key=os.path.getmtime, reverse=True)[:1]
 
 
+def newest(paths) -> float:
+    """Время последней правки среди путей. Ноль, если путей нет."""
+    times = []
+    for path in paths:
+        try:
+            times.append(os.path.getmtime(path))
+        except OSError:
+            pass
+    return max(times, default=0.0)
+
+
+def staleness(roots: list[str]) -> float:
+    """На сколько секунд сборка отстала от исходников. Ноль — не отстала.
+
+    Сравниваем по времени правки: `.stringsdata` переписывается, когда файл
+    перекомпилировали, и для не тронутых файлов в папке остаются вчерашние.
+    Если хоть один исходник новее самого нового `.stringsdata`, ответ скрипта
+    описывает не тот код, который лежит в рабочей копии.
+    """
+    sources = newest(glob.glob("Calories*/**/*.swift", recursive=True)
+                     + glob.glob("Shared/**/*.swift", recursive=True))
+    built = newest(path for root in roots
+                   for path in glob.glob(os.path.join(root, "**", "*.stringsdata"), recursive=True))
+    return max(0.0, sources - built)
+
+
 def keys_from_stringsdata(roots: list[str]) -> dict[str, str]:
     """Ключ → файл, в котором компилятор его встретил."""
     keys: dict[str, str] = {}
@@ -49,12 +81,30 @@ def keys_from_stringsdata(roots: list[str]) -> dict[str, str]:
             source = os.path.basename(path).replace(".stringsdata", ".swift")
             # Только строки интерфейса: ярлыки Siri и Info.plist живут в
             # своих таблицах, и каталогов у них нет — им своя работа.
+            # Только строки интерфейса: ярлыки Siri и Info.plist живут в
+            # своих таблицах, и каталогов у них нет — им своя работа.
             for entry in data.get("tables", {}).get("Localizable", []):
-                if True:
-                    key = entry.get("key")
-                    if key:
-                        keys.setdefault(key, source)
+                key = entry.get("key")
+                if key:
+                    keys.setdefault(key, source)
     return keys
+
+
+def translated(entry) -> bool:
+    """Есть ли на этом языке перевод — простой строкой или по числам.
+
+    У множественных форм нет `stringUnit`: вместо него `variations.plural`
+    с ветками `one`, `few`, `many`, `other`, и у каждого языка свой набор.
+    Пока скрипт искал только простую строку, он объявлял непереведённым
+    всё, что склоняется по числу, — а это как раз те строки, где перевод
+    стоил дороже всего.
+    """
+    if not entry:
+        return False
+    if entry.get("stringUnit", {}).get("value"):
+        return True
+    plural = entry.get("variations", {}).get("plural", {})
+    return any(form.get("stringUnit", {}).get("value") for form in plural.values())
 
 
 def main() -> int:
@@ -66,6 +116,16 @@ def main() -> int:
     found = keys_from_stringsdata(roots)
     if not found:
         print(f"В {roots[0]} нет .stringsdata — соберите проект заново.")
+        return 2
+
+    behind = staleness(roots)
+    if behind > 0:
+        hours = behind / 3600
+        print(f"Сборка в {roots[0]}")
+        print(f"отстала от исходников на {hours:.1f} ч — проверять по ней нечего.")
+        print("Соберите проект в эту же папку и повторите:")
+        print("  xcodebuild -scheme Calories -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build")
+        print("или передайте свою папку сборки первым аргументом.")
         return 2
 
     catalog: dict = {}
@@ -80,8 +140,7 @@ def main() -> int:
         if not re.search(r"[А-Яа-яЁё]", key) or key in ALLOWED_RUSSIAN:
             continue
         locs = catalog.get(key, {}).get("localizations", {})
-        gaps = [lang for lang in LANGUAGES
-                if not locs.get(lang, {}).get("stringUnit", {}).get("value")]
+        gaps = [lang for lang in LANGUAGES if not translated(locs.get(lang))]
         if gaps:
             missing[key] = (source, gaps)
 

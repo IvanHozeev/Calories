@@ -114,9 +114,7 @@ struct SettingsView: View {
             appearanceSection
             explanationSection
             systemSection
-            diagnosticsSection
             dataSection
-            autoBackupSection
 #if DEBUG
             developerSection
 #endif
@@ -306,6 +304,51 @@ struct DeveloperSettingsView: View {
 
     @AppStorage("fdc_api_key") private var fdcAPIKey = ""
     @AppStorage("gemini_api_key") private var geminiAPIKey = ""
+    private var diagnostics: DiagnosticsStore { .shared }
+
+    /// Сбои — только если они были.
+    ///
+    /// Секции нет, пока приложение не падало: пустой раздел «Сбои» в
+    /// настройках читается как обещание проблем, которых не случалось. А
+    /// когда падение было, человек об этом обычно и так знает — и здесь
+    /// находит, что отправить.
+    @ViewBuilder
+    var diagnosticsSection: some View {
+        if !diagnostics.reports.isEmpty {
+            Section {
+                ForEach(diagnostics.reports) { report in
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Text(report.kind == .crash ? "Сбой" : "Зависание")
+                                .font(.app(.subheadline, weight: .semibold))
+                            Spacer()
+                            Text(verbatim: report.date.formatted(date: .abbreviated, time: .shortened))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(verbatim: report.detail)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                    .padding(.vertical, 2)
+                }
+                if !diagnostics.payloadFiles.isEmpty {
+                    ShareLink(items: diagnostics.payloadFiles) {
+                        settingLabel("Отправить разработчику", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("shareDiagnostics")
+                }
+                Button("Очистить", role: .destructive) { diagnostics.clear() }
+            } header: {
+                Text("Сбои")
+            } footer: {
+                explain("Разбор падений приложение получает от системы — своего сервера у него нет, и больше об этих сбоях никто не знает. В отправленном файле нет ни дневника, ни веса: только то, где и почему приложение упало.",
+                        short: "Отчёт от системы. Дневника и веса в нём нет.").map { Text($0) }
+            }
+            .glassRow()
+        }
+    }
 
     var body: some View {
         List {
@@ -321,6 +364,8 @@ struct DeveloperSettingsView: View {
             } footer: {
                 Text("Пока продукты StoreKit не грузятся, это единственный способ открыть платные экраны.")
             }
+
+            diagnosticsSection
 
             Section {
                 NavigationLink {
@@ -722,50 +767,6 @@ private extension SettingsView {
     }
     }
 
-    /// Сбои — только если они были.
-    ///
-    /// Секции нет, пока приложение не падало: пустой раздел «Сбои» в
-    /// настройках читается как обещание проблем, которых не случалось. А
-    /// когда падение было, человек об этом обычно и так знает — и здесь
-    /// находит, что отправить.
-    @ViewBuilder
-    var diagnosticsSection: some View {
-        if !diagnostics.reports.isEmpty {
-            Section {
-                ForEach(diagnostics.reports) { report in
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack {
-                            Text(report.kind == .crash ? "Сбой" : "Зависание")
-                                .font(.app(.subheadline, weight: .semibold))
-                            Spacer()
-                            Text(verbatim: report.date.formatted(date: .abbreviated, time: .shortened))
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                        Text(verbatim: report.detail)
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
-                    .padding(.vertical, 2)
-                }
-                if !diagnostics.payloadFiles.isEmpty {
-                    ShareLink(items: diagnostics.payloadFiles) {
-                        settingLabel("Отправить разработчику", systemImage: "square.and.arrow.up")
-                    }
-                    .accessibilityIdentifier("shareDiagnostics")
-                }
-                Button("Очистить", role: .destructive) { diagnostics.clear() }
-            } header: {
-                Text("Сбои")
-            } footer: {
-                explain("Разбор падений приложение получает от системы — своего сервера у него нет, и больше об этих сбоях никто не знает. В отправленном файле нет ни дневника, ни веса: только то, где и почему приложение упало.",
-                        short: "Отчёт от системы. Дневника и веса в нём нет.").map { Text($0) }
-            }
-            .glassRow()
-        }
-    }
-
     /// Выгрузка данных руками.
     var dataSection: some View {
     Section {
@@ -787,6 +788,26 @@ private extension SettingsView {
         } label: {
             settingLabel("Профиль для GymLogger", systemImage: "figure.strengthtraining.traditional")
         }
+        // Автоматическая копия — одной строкой со своим экраном, а не
+        // секцией из пяти кнопок. Папку выбирают один раз и больше сюда не
+        // возвращаются, а пока секция стояла целиком, она занимала в
+        // настройках больше места, чем всё, чем пользуются каждый день.
+        // Состояние при этом видно не открывая: включена ли и когда была
+        // последняя.
+        NavigationLink {
+            autoBackupDetail
+        } label: {
+            settingLabel(systemImage: "clock.arrow.circlepath") {
+                HStack {
+                    Text("Автоматическая копия")
+                    Spacer()
+                    Text(verbatim: backups.isConfigured ? lastBackupText : String(localized: "выключена"))
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .accessibilityIdentifier("openAutoBackup")
     } header: {
         Text("Данные")
     } footer: {
@@ -794,8 +815,15 @@ private extension SettingsView {
     }
     }
 
-    /// Автоматическая копия в выбранную папку.
-    var autoBackupSection: some View {
+    /// Автоматическая копия в выбранную папку — своим экраном.
+    ///
+    /// Выбор папки и восстановление идут через тот же единственный
+    /// `fileImporter`, что висит на «Настройках»: экран лежит в том же стеке,
+    /// настройки из иерархии не уходят, и диалог открывается поверх. Второй
+    /// такой же модификатор рядом не уживётся — SwiftUI оставит последний, а
+    /// остальные молча перестанут работать.
+    var autoBackupDetail: some View {
+    List {
     Section {
         if backups.isConfigured {
             LabeledContent("Папка", value: backups.folderName ?? "—")
@@ -819,11 +847,14 @@ private extension SettingsView {
                 .font(.app(.footnote))
                 .foregroundStyle(.red)
         }
-    } header: {
-        Text("Автоматическая копия")
     } footer: {
         explain("Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.").map { Text($0) }
     }
+    }
+    .glassRow()
+    .listStyle(.insetGrouped)
+    .scrollIndicators(.hidden)
+    .screenTitle(String(localized: "Автоматическая копия"))
     }
 
     /// Отладочные инструменты — только в отладочной сборке.

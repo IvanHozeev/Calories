@@ -24,6 +24,7 @@ struct MeasurementHistoryView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        .accessibilityLabel("Удалить")
                     }
                 }
             } footer: {

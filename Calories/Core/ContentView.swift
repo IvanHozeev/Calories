@@ -373,6 +373,10 @@ struct ContentView: View {
                         } label: {
                             Image(systemName: "plus")
                         }
+                        // Голосом значок не прочитать: без подписи VoiceOver
+                        // говорит «plus» — имя символа, а не действие. Там, где
+                        // у кнопки нет слова рядом, его даёт подпись.
+                        .accessibilityLabel("Добавить")
                         .accessibilityIdentifier("addMenu")
                     }
                     .animation(.spring(response: 0.3, dampingFraction: 0.8), value: ringIsAway)
@@ -1002,7 +1006,7 @@ private extension ContentView {
                         }
                         .tint(.blue)
                         .accessibilityIdentifier("copyEntry")
-                        .accessibilityLabel("Повторить")
+                        .accessibilityLabel("Повторить приём")
                         // Дополнить — это правка того же приёма, а не
                         // добавление нового: приём пищи хранится одной
                         // строкой с итогами, поэтому он становится
@@ -1015,6 +1019,7 @@ private extension ContentView {
                             Image(systemName: "pencil")
                         }
                         .tint(.indigo)
+                        .accessibilityLabel("Дополнить приём")
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
@@ -1022,6 +1027,7 @@ private extension ContentView {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        .accessibilityLabel("Удалить")
                     }
                 }
             } header: {

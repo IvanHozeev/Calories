@@ -471,6 +471,7 @@ private extension NewFoodSheet {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Очистить")
                 }
             }
 

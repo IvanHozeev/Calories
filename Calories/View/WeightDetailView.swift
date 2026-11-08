@@ -132,6 +132,7 @@ struct WeightDetailView: View {
                             } label: {
                                 Image(systemName: "trash")
                             }
+                            .accessibilityLabel("Удалить")
                         }
                     }
                 }

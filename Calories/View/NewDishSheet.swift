@@ -229,6 +229,7 @@ struct NewDishSheet: View {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        .accessibilityLabel("Удалить")
                     }
                 }
 

@@ -214,6 +214,7 @@ struct MyFoodView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Добавить")
                 .accessibilityIdentifier("addMenu")
             }
 
@@ -412,6 +413,7 @@ struct MyFoodView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        .accessibilityLabel("Удалить")
                     }
                 }
             }
@@ -494,6 +496,7 @@ struct MyFoodView: View {
                             } label: {
                                 Image(systemName: "trash")
                             }
+                            .accessibilityLabel("Удалить")
                         }
                     }
                 } header: {

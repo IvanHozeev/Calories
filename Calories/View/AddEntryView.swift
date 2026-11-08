@@ -624,6 +624,7 @@ struct AddEntryView: View {
                         } label: {
                             Image(systemName: "trash")
                         }
+                        .accessibilityLabel("Удалить")
                     }
                 }
 
@@ -718,6 +719,7 @@ struct AddEntryView: View {
                             } label: {
                                 Image(systemName: "trash")
                             }
+                            .accessibilityLabel("Удалить")
                         }
                         .swipeActions(edge: .leading) {
                             Button {
@@ -726,6 +728,7 @@ struct AddEntryView: View {
                                 Image(systemName: "pencil")
                             }
                             .tint(.blue)
+                            .accessibilityLabel("Изменить")
                         }
                 }
             }
@@ -748,6 +751,7 @@ struct AddEntryView: View {
                             } label: {
                                 Image(systemName: "trash")
                             }
+                            .accessibilityLabel("Удалить")
                         }
                         .swipeActions(edge: .leading) {
                             Button {
@@ -756,6 +760,7 @@ struct AddEntryView: View {
                                 Image(systemName: "pencil")
                             }
                             .tint(.blue)
+                            .accessibilityLabel("Изменить")
                         }
                     }
                 } header: {

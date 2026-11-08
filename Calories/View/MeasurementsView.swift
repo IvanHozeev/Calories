@@ -58,6 +58,7 @@ struct MeasurementsView: View {
                     // именно это.
                     Image(systemName: "ruler")
                 }
+                .accessibilityLabel("Снять замеры")
                 .accessibilityIdentifier("openMeasurementEntry")
             }
         }

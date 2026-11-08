@@ -60,6 +60,7 @@ struct DayDetailView: View {
                             } label: {
                                 Image(systemName: "trash")
                             }
+                            .accessibilityLabel("Удалить")
                         }
                         // Повтор прошлого приёма — сюда же, где его видно.
                         // Люди едят одно и то же, и вчерашний обед чаще
@@ -73,6 +74,7 @@ struct DayDetailView: View {
                                 Image(systemName: "plus.square.on.square")
                             }
                             .tint(.blue)
+                            .accessibilityLabel("Повторить приём")
                         }
                     }
                 } header: {
@@ -102,6 +104,7 @@ struct DayDetailView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                 }
+                .accessibilityLabel("Добавить")
             }
         }
         .fullScreenCover(isPresented: $showingAdd) {

@@ -107,7 +107,7 @@ struct EntryRow: View {
                 Text(verbatim: "\(entry.calories)")
                     .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(.primary.opacity(0.85))
+                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)

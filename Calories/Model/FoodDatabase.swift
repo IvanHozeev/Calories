@@ -175,6 +175,12 @@ enum FoodDatabase {
         FoodCatalog.search(query, limit: limit).compactMap { itemsByCatalogID[$0.id] }
     }
 
+    /// Тот же объект, что и в списках: быстрый выбор должен добавлять продукт,
+    /// а не заводить его копию с новым идентификатором.
+    @MainActor static func item(for food: CatalogFood) -> FoodItem? {
+        itemsByCatalogID[food.id]
+    }
+
     @MainActor private static func makeItem(_ food: CatalogFood) -> FoodItem {
         let item = FoodItem(name: food.localizedName,
                             caloriesPer100g: food.kcal,

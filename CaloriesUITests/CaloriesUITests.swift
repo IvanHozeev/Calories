@@ -906,6 +906,35 @@ final class CaloriesUITests: XCTestCase {
                       "Во внешнюю базу должна вести кнопка прямо из результатов")
     }
 
+    /// Фраза с весом даёт быстрый выбор: количество из строки становится
+    /// порцией, а тап кладёт продукт в приём без экрана порции.
+    ///
+    /// Проверяем на английском, потому что тесты запускаются с английским
+    /// интерфейсом: база ищет сразу по русскому и английскому названиям, и
+    /// этот же путь должен работать для обоих.
+    @MainActor
+    func testQuickAddFromQueryPutsFoodInTheMeal() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5), "Не показалась строка поиска")
+        search.tap()
+        search.typeText("cottage cheese 180")
+
+        let quick = app.descendants(matching: .any)
+            .matching(identifier: "quickAddRow0").firstMatch
+        XCTAssertTrue(quick.waitForExistence(timeout: 5),
+                      "Фраза с весом должна показывать быстрое добавление")
+        quick.tap()
+
+        // Сохранение — признак того, что продукт действительно лёг в приём:
+        // полоса с кнопкой появляется только над непустым черновиком.
+        XCTAssertTrue(app.buttons["saveMeal"].waitForExistence(timeout: 10),
+                      "Быстрый выбор должен класть продукт в приём пищи")
+    }
+
     /// Дата и время приёма стоят в тулбаре, на месте прежнего выбора источника.
     @MainActor
     func testMealTimeLivesInTheToolbar() {

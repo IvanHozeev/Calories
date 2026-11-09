@@ -146,37 +146,54 @@ struct AddEntryView: View {
         !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
+    /// Разобранный запрос: «творог 5% 180» — это продукт, жирность и вес.
+    private var parsedQuery: [FoodQuery.Item] {
+        FoodQuery.parse(debouncedSearch)
+    }
+
+    /// По чему ищем продукты. Количество из запроса убираем: продукт
+    /// называется «Творог 5%», а не «Творог 5% 180». Процент остаётся — он
+    /// часть названия и различает продукты.
+    private var effectiveSearchTerm: String {
+        let trimmed = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        guard let first = parsedQuery.first,
+              first.hasQuantity,
+              !first.name.trimmingCharacters(in: .whitespaces).isEmpty
+        else { return trimmed }
+        return first.name
+    }
+
     private var filteredCustomFoods: [FoodItem] {
-        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !effectiveSearchTerm.isEmpty else {
             return store.customFoods
         }
-        return store.customFoods.filter { $0.matches(debouncedSearch) }
+        return store.customFoods.filter { $0.matches(effectiveSearchTerm) }
     }
 
     private var filteredBuiltInFoods: [FoodItem] {
-        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !effectiveSearchTerm.isEmpty else {
             return FoodDatabase.items
         }
-        return FoodDatabase.search(debouncedSearch)
+        return FoodDatabase.search(effectiveSearchTerm)
     }
 
     private var filteredDishes: [Dish] {
-        guard !debouncedSearch.trimmingCharacters(in: .whitespaces).isEmpty else {
+        guard !effectiveSearchTerm.isEmpty else {
             return store.dishes
         }
-        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(debouncedSearch) }
+        return store.dishes.filter { $0.name.localizedCaseInsensitiveContains(effectiveSearchTerm) }
     }
 
     /// Недавнее тоже фильтруется запросом: раньше оно просто исчезало при вводе,
     /// хотя чаще всего искомое лежит именно там.
     private var recentFoodItems: [FoodItem] {
-        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        let query = effectiveSearchTerm
         guard !query.isEmpty else { return store.recentFoods }
         return store.recentFoods.filter { $0.matches(query) }
     }
 
     private var recentDishItems: [Dish] {
-        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        let query = effectiveSearchTerm
         guard !query.isEmpty else { return store.recentDishes }
         return store.recentDishes.filter { $0.name.localizedCaseInsensitiveContains(query) }
     }
@@ -220,7 +237,7 @@ struct AddEntryView: View {
     /// Сверху теперь то, что названо ровно так или начинается с запроса;
     /// продукты раньше блюд, короткие названия раньше длинных.
     private var topMatches: [TopMatch] {
-        let query = debouncedSearch.trimmingCharacters(in: .whitespaces)
+        let query = effectiveSearchTerm
         guard !query.isEmpty else { return [] }
         var seen = Set<String>()
         var candidates: [(TopMatch, Int)] = []
@@ -258,6 +275,135 @@ struct AddEntryView: View {
     /// Имена, уже показанные сверху, — ниже в секциях источников их не повторяем.
     private var topMatchNames: Set<String> {
         Set(topMatches.map { $0.name.lowercased() })
+    }
+
+    // MARK: - Быстрое добавление
+
+    /// Продукт и порция, найденные из фразы целиком. Один тап — и позиция в
+    /// приёме, без экрана порции: количество человек уже назвал.
+    private struct QuickAdd: Identifiable {
+        let food: FoodItem
+        let grams: Double
+        /// По какому названию его искали — для идентификатора строки, когда
+        /// в одной фразе несколько продуктов.
+        let queryName: String
+
+        var id: String { "\(food.id.uuidString)-\(queryName)" }
+    }
+
+    private var quickAdds: [QuickAdd] {
+        let items = parsedQuery.filter {
+            $0.hasQuantity && !$0.name.trimmingCharacters(in: .whitespaces).isEmpty
+        }
+        guard !items.isEmpty else { return [] }
+        var seen = Set<String>()
+        return items.compactMap { item in
+            guard let food = bestFood(for: item),
+                  let grams = item.grams(defaultGrams: food.defaultGrams),
+                  seen.insert(food.name.lowercased()).inserted
+            else { return nil }
+            return QuickAdd(food: food, grams: grams, queryName: item.name)
+        }
+    }
+
+    /// Лучший продукт под разобранную фразу.
+    ///
+    /// Сначала база: её поиск уже знает русские и английские названия и
+    /// синонимы, поэтому «творог 5» находится и при английском интерфейсе.
+    /// Свои и недавние продукты идут следом — но точное совпадение у них
+    /// всё равно перевешивает приблизительное у базы.
+    private func bestFood(for item: FoodQuery.Item) -> FoodItem? {
+        var candidates: [(food: FoodItem, rank: Int, source: Int, length: Int)] = []
+
+        for catalog in FoodCatalog.search(item.name, limit: 20) {
+            guard let food = FoodDatabase.item(for: catalog),
+                  let rank = catalogRank(item.name, catalog)
+            else { continue }
+            candidates.append((food, rank, 0, catalog.localizedName.count))
+        }
+        for food in store.customFoods {
+            guard let rank = FoodQuery.rank(query: item.name,
+                                            name: food.name,
+                                            producer: food.producer)
+            else { continue }
+            candidates.append((food, rank, 1, food.name.count))
+        }
+        for food in store.recentFoods {
+            guard let rank = FoodQuery.rank(query: item.name,
+                                            name: food.name,
+                                            producer: food.producer)
+            else { continue }
+            candidates.append((food, rank, 2, food.name.count))
+        }
+
+        let best = candidates.min {
+            if $0.rank != $1.rank { return $0.rank < $1.rank }
+            if $0.source != $1.source { return $0.source < $1.source }
+            return $0.length < $1.length
+        }
+        return best?.food
+    }
+
+    private func catalogRank(_ query: String, _ food: CatalogFood) -> Int? {
+        var names = [food.en, food.localizedName]
+        if let ru = food.ru { names.append(ru) }
+        names.append(contentsOf: food.aliases ?? [])
+        return FoodQuery.rank(query: query, names: names)
+    }
+
+    @ViewBuilder
+    private var quickAddSection: some View {
+        let adds = quickAdds
+        if isSearching, !adds.isEmpty {
+            Section("Быстрое добавление") {
+                ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
+                    quickAddRow(add)
+                        .contentShape(Rectangle())
+                        .onTapGesture { quickAdd(add) }
+                        .accessibilityIdentifier("quickAddRow\(index)")
+                }
+            }
+        }
+    }
+
+    private func quickAddRow(_ add: QuickAdd) -> some View {
+        let factor = add.grams / 100
+        let calories = Int((Double(add.food.caloriesPer100g) * factor).rounded())
+        return FoodRow(
+            name: add.food.name,
+            calories: calories,
+            caloriesPer100g: add.food.caloriesPer100g,
+            portion: String(format: "%.0f \(String(localized: "г"))", add.grams),
+            macros: add.food.macrosPer100g.portion(grams: add.grams),
+            icons: [add.food.foodCategory.icon],
+            micros: store.notableMicronutrients(forFoodNamed: add.food.name,
+                                                grams: add.grams),
+            offersVitamins: store.foodsOfferedVitamins.contains(add.food.id),
+            traits: add.food.traits
+        )
+    }
+
+    /// Тап по быстрой строке. В черновик, а не в дневник: приём ещё собирают,
+    /// и сохранение остаётся тем же одним движением, что и раньше.
+    private func quickAdd(_ add: QuickAdd) {
+        let item = MealItem(
+            name: add.food.name,
+            calories: Int((Double(add.food.caloriesPer100g) * add.grams / 100).rounded()),
+            macros: add.food.macrosPer100g.portion(grams: add.grams),
+            grams: add.grams
+        )
+        withAnimation(.snappy) { draftItems.append(item) }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        scrollToTopTicket += 1
+        // Один продукт — законченная фраза: строка очищается, как после
+        // обычного добавления. Несколько — оставляем остальные, за ними и
+        // пришли.
+        if quickAdds.count <= 1 {
+            Task { @MainActor in
+                searchText = ""
+                debouncedSearch = ""
+            }
+        }
     }
 
     @ViewBuilder
@@ -667,6 +813,7 @@ struct AddEntryView: View {
     @ViewBuilder
     private var browseSections: some View {
         if isSearching {
+            quickAddSection
             topMatchesSection
         }
 

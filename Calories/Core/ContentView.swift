@@ -568,6 +568,18 @@ private extension ContentView {
                       onSelect: { selectedHistoryDay = $0 },
                       onShowAll: { showingActivity = true })
 
+            // Подсказки — отдельной строкой сразу под первым экраном:
+            // свою высоту они берут у дневника, а не у кольца.
+            if hasDayHints {
+                Section {
+                    dayHints
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                }
+                .listSectionSeparator(.hidden)
+            }
+            
             PullableRing(
                 consumed: store.consumedToday,
                 goal: store.adaptedTodayGoal,
@@ -619,7 +631,7 @@ private extension ContentView {
             // дней, и между ними и так шестнадцать точек отбивки — вместе
             // выходило тридцать, и дуга, у которой наверху разрыв, висела
             // ещё ниже. Освободившееся достаётся самому знаку.
-            .padding(.bottom, 14)
+            .padding(.bottom, 30)
 
             // Сваренное напоминает о себе само: доесть, пока не испортилось,
             // или приготовить, пока не кончилось. Одна строка на самую
@@ -628,18 +640,6 @@ private extension ContentView {
                 BatchHintRow(dish: hint.dish, state: hint.state, advice: hint.advice) {
                     openingDish = hint.dish
                 }
-            }
-            
-            // Подсказки — отдельной строкой сразу под первым экраном:
-            // свою высоту они берут у дневника, а не у кольца.
-            if hasDayHints {
-                Section {
-                    dayHints
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
-                }
-                .listSectionSeparator(.hidden)
             }
 
             // Взвешивание — сразу под кольцом.

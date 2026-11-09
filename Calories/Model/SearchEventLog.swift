@@ -30,11 +30,17 @@ struct ShownItem: Codable, Equatable, Hashable {
 final class SearchEventLog {
     static let shared = SearchEventLog()
 
-    private let fileURL: URL
+    let fileURL: URL
+    /// Кэш статистики: имя продукта → (показы, выборы). Инвалидируется при каждом логе.
+    private var statsCache: [String: (shown: Int, selected: Int)] = [:]
 
-    private init() {
-        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        fileURL = documents.appendingPathComponent("search_events.json")
+    init(fileURL: URL? = nil) {
+        if let fileURL {
+            self.fileURL = fileURL
+        } else {
+            let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            self.fileURL = documents.appendingPathComponent("search_events.json")
+        }
     }
 
     /// Записать событие. Храним не более 2000 последних — файл не разрастается бесконечно.
@@ -45,6 +51,7 @@ final class SearchEventLog {
             events = Array(events.suffix(2000))
         }
         save(events)
+        statsCache = computeStats(from: events)
     }
 
     /// Загрузить все события.
@@ -56,10 +63,39 @@ final class SearchEventLog {
     /// Статистика по имени продукта: сколько раз показывалось, сколько раз выбиралось.
     /// Для ранкера: популярность и процент — признаки для сортировки.
     func stats(for name: String) -> (shown: Int, selected: Int) {
+        if let cached = statsCache[name.lowercased()] { return cached }
         let events = load()
-        let shown = events.reduce(0) { $0 + ($1.shown.contains { $0.name.lowercased() == name.lowercased() } ? 1 : 0) }
-        let selected = events.reduce(0) { $0 + ($1.selected.map { $0.name.lowercased() == name.lowercased() } == true ? 1 : 0) }
-        return (shown, selected)
+        let result = computeStats(from: events)
+        statsCache = result
+        return result[name.lowercased()] ?? (0, 0)
+    }
+
+    /// Популярность продукта: доля выборов от показов (0..1).
+    /// Если никогда не показывали — 0. Если показывали, но не выбирали — 0.
+    /// Если выбирали каждый раз — 1.
+    func popularityScore(for name: String) -> Double {
+        let s = stats(for: name)
+        guard s.shown > 0 else { return 0 }
+        return Double(s.selected) / Double(s.shown)
+    }
+
+    private func computeStats(from events: [SearchEvent]) -> [String: (shown: Int, selected: Int)] {
+        var result: [String: (shown: Int, selected: Int)] = [:]
+        for event in events {
+            for item in event.shown {
+                let key = item.name.lowercased()
+                var s = result[key] ?? (0, 0)
+                s.shown += 1
+                result[key] = s
+            }
+            if let selected = event.selected {
+                let key = selected.name.lowercased()
+                var s = result[key] ?? (0, 0)
+                s.selected += 1
+                result[key] = s
+            }
+        }
+        return result
     }
 
     private func save(_ events: [SearchEvent]) {

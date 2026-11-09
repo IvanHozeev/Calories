@@ -382,10 +382,14 @@ struct AddEntryView: View {
                         }
                     }
 
-                    // Сортируем: свой primero, потом по точности совпадения, потом по длине.
+                    // Сортируем: свой primero, потом по точности совпадения,
+                    // потом по популярности (выбирали чаще — выше), потом по длине.
                     candidates.sort {
                         if $0.source != $1.source { return $0.source < $1.source }
                         if $0.rank != $1.rank { return $0.rank < $1.rank }
+                        let popA = SearchEventLog.shared.popularityScore(for: $0.food.name)
+                        let popB = SearchEventLog.shared.popularityScore(for: $1.food.name)
+                        if popA != popB { return popA > popB }
                         return $0.length < $1.length
                     }
 

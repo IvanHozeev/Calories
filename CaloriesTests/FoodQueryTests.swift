@@ -179,4 +179,73 @@ import Foundation
         #expect(FoodQuery.rank(query: "творог 5%", names: names) == 0)
         #expect(FoodQuery.rank(query: "cottage cheese", names: names) == 1)
     }
+
+    // MARK: - Early ranker (popularity from choice log)
+
+    @Test func popularityScoreIsZeroWhenNeverShown() {
+        let log = SearchEventLog(fileURL: URL(fileURLWithPath: "/tmp/test_popularity_never_shown.json"))
+        try? FileManager.default.removeItem(at: log.fileURL)
+        #expect(log.popularityScore(for: "творог 5%") == 0)
+    }
+
+    @Test func popularityScoreIsZeroWhenShownButNeverSelected() {
+        let log = SearchEventLog(fileURL: URL(fileURLWithPath: "/tmp/test_popularity_shown.json"))
+        try? FileManager.default.removeItem(at: log.fileURL)
+        log.log(SearchEvent(
+            id: UUID(),
+            query: "творог",
+            shown: [ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1)],
+            selected: nil,
+            selectedGrams: nil,
+            timestamp: Date()
+        ))
+        #expect(log.popularityScore(for: "творог 5%") == 0)
+    }
+
+    @Test func popularityScoreIsOneWhenAlwaysSelected() {
+        let log = SearchEventLog(fileURL: URL(fileURLWithPath: "/tmp/test_popularity_always.json"))
+        try? FileManager.default.removeItem(at: log.fileURL)
+        log.log(SearchEvent(
+            id: UUID(),
+            query: "творог",
+            shown: [ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1)],
+            selected: ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1),
+            selectedGrams: 200,
+            timestamp: Date()
+        ))
+        log.log(SearchEvent(
+            id: UUID(),
+            query: "творог",
+            shown: [ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1)],
+            selected: ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1),
+            selectedGrams: 180,
+            timestamp: Date()
+        ))
+        #expect(log.popularityScore(for: "творог 5%") == 1)
+    }
+
+    @Test func popularityScoreBetweenZeroAndOne() {
+        let log = SearchEventLog(fileURL: URL(fileURLWithPath: "/tmp/test_popularity_mixed.json"))
+        try? FileManager.default.removeItem(at: log.fileURL)
+        // Показали 3 раза, выбрали 1 → score 0.333...
+        for _ in 0..<3 {
+            log.log(SearchEvent(
+                id: UUID(),
+                query: "творог",
+                shown: [ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1)],
+                selected: nil,
+                selectedGrams: nil,
+                timestamp: Date()
+            ))
+        }
+        log.log(SearchEvent(
+            id: UUID(),
+            query: "творог",
+            shown: [ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1)],
+            selected: ShownItem(name: "творог 5%", percent: 5, source: "catalog", rank: 1),
+            selectedGrams: 200,
+            timestamp: Date()
+        ))
+        #expect(log.popularityScore(for: "творог 5%") == 0.25, "ожидалось 1/4 = 0.25")
+    }
 }

@@ -14,6 +14,11 @@ struct EntryRow: View {
         entry.protein > 0 || entry.fat > 0 || entry.carbs > 0
     }
 
+    /// Доминирующий макрос записи — для цвета названия.
+    private var leadingKind: MacroKind? {
+        Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs).leadingKind
+    }
+
     /// Вес порции.
     ///
     /// У приёма из нескольких продуктов своего веса нет — он лежит у
@@ -46,6 +51,8 @@ struct EntryRow: View {
                 Text(entry.name)
                     .font(.app(.subheadline, weight: .semibold))
                     .lineLimit(2)
+                    // Название в цвете доминирующего макроса, как в строке поиска.
+                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
                     // Название идёт от левого края, даже когда оно на иврите.
                     //
                     // Текст из букв справа налево получает свою, правую
@@ -100,6 +107,7 @@ struct EntryRow: View {
                 Text(verbatim: "\(entry.calories)")
                     .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
+                    .foregroundStyle(.primary.opacity(0.85))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)

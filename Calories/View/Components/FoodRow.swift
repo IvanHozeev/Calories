@@ -115,7 +115,7 @@ struct FoodRow: View {
                     // Цвет названия — цвет доминирующего макроса порции (по граммам),
                     // чтобы сразу было видно, чем продукт «кормит». Если доминирующего
                     // нет — серый, как слово «Calories» на launch screen.
-                    .foregroundStyle(leadingKind?.color ?? .secondary)
+                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
 
                 // Та же строка подписей, что и в дневнике: ячейки продукта
                 // должны читаться одинаково, где бы они ни стояли.

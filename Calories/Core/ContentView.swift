@@ -428,11 +428,13 @@ struct ContentView: View {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
                 .presentationDetents([.medium, .large])
+                .presentationBackground(Color(.systemBackground))
             }
             .sheet(item: $appendingTo) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
                 .presentationDetents([.medium, .large])
+                .presentationBackground(Color(.systemBackground))
             }
             .sheet(item: $todaySheet) { sheet in
                 switch sheet {

@@ -111,6 +111,7 @@ struct DayDetailView: View {
             AddEntryView(store: store, initialDate: date,
                          onFinish: { showingAdd = false })
             .presentationDetents([.medium, .large])
+            .presentationBackground(Color(.systemBackground))
         }
     }
 }

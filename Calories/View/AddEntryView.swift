@@ -764,11 +764,8 @@ struct AddEntryView: View {
     /// плюсе на «Сегодня», а время приёма — строкой на этом экране.
     @ToolbarContentBuilder
     private var draftToolbar: some ToolbarContent {
-        if draftItems.isEmpty {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Отмена") { dismiss() }
-            }
-        }
+        // Кнопки «Отмена» в тулбаре нет: лист закрывается смахиванием вниз.
+        EmptyView()
     }
 
     /// Отмена и сохранение — полосой над строкой поиска.

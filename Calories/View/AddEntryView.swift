@@ -989,8 +989,6 @@ struct AddEntryView: View {
                         .onTapGesture { openServing(.dish(dish)) }
                 }
             }
-            .animation(.default, value: shownRecentFoods.map { $0.id })
-            .animation(.default, value: shownRecentDishes.map { $0.id })
         }
 
         if isSearching, !shownDishes.isEmpty {
@@ -1020,7 +1018,6 @@ struct AddEntryView: View {
                         }
                 }
             }
-            .animation(.default, value: shownDishes.map { $0.id })
         }
 
         // Свои продукты тоже разложены по категориям: их накапливается

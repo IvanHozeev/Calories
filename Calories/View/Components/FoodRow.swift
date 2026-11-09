@@ -135,12 +135,7 @@ struct FoodRow: View {
                 // помогают узнать строку, но их отсутствие ничего не искажает.
                 // Поэтому берём первую раскладку, которая влезает целиком, и
                 // отдаём значки по одному.
-                ViewThatFits(in: .horizontal) {
-                    signs(iconLimit: 3, showTraits: true)
-                    signs(iconLimit: 1, showTraits: true)
-                    signs(iconLimit: 0, showTraits: true)
-                    signs(iconLimit: 0, showTraits: false)
-                }
+                signs(iconLimit: 3, showTraits: true)
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {

@@ -384,7 +384,7 @@ struct AddEntryView: View {
                     adds.append(QuickAdd(food: food, grams: grams, queryName: item.name))
                 }
 
-                quickAddsResult = adds
+                withAnimation(.default) { quickAddsResult = adds }
             }
         }
     }
@@ -434,7 +434,9 @@ struct AddEntryView: View {
                         .onTapGesture { quickAdd(add) }
                         .accessibilityIdentifier("quickAddRow\(index)")
                 }
+                .animation(.default, value: quickAdds.map { $0.id })
             }
+            .animation(.default, value: quickAdds.map { $0.id })
         }
     }
 
@@ -495,7 +497,9 @@ struct AddEntryView: View {
                             .onTapGesture { openServing(.dish(dish)) }
                     }
                 }
+                .animation(.default, value: topMatches.map { $0.id })
             }
+            .animation(.default, value: topMatches.map { $0.id })
         }
     }
 
@@ -529,6 +533,7 @@ struct AddEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.food(food, grams: nil, savable: true, quickSave: false)) }
                 }
+                .animation(.default, value: offResults.map { $0.id })
             }
         }
     }
@@ -594,7 +599,7 @@ struct AddEntryView: View {
             .onChange(of: debouncedSearch) { _, _ in
                 quickAddsTask?.cancel()
                 quickAddsTask = Task {
-                    try? await Task.sleep(for: .milliseconds(250))
+                    try? await Task.sleep(for: .milliseconds(150))
                     guard !Task.isCancelled else { return }
                     recomputeQuickAdds()
                 }
@@ -602,7 +607,7 @@ struct AddEntryView: View {
                 // букву, а после паузы в наборе.
                 topMatchesTask?.cancel()
                 topMatchesTask = Task {
-                    try? await Task.sleep(for: .milliseconds(250))
+                    try? await Task.sleep(for: .milliseconds(150))
                     guard !Task.isCancelled else { return }
                     let query = effectiveSearchTerm
                     guard !query.isEmpty else {
@@ -629,7 +634,7 @@ struct AddEntryView: View {
                         }
                         .prefix(6)
                         .map(\.0)
-                    await MainActor.run { topMatches = result }
+                    await MainActor.run { withAnimation(.default) { topMatches = result } }
                 }
             }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {
@@ -970,6 +975,8 @@ struct AddEntryView: View {
                         .onTapGesture { openServing(.dish(dish)) }
                 }
             }
+            .animation(.default, value: shownRecentFoods.map { $0.id })
+            .animation(.default, value: shownRecentDishes.map { $0.id })
         }
 
         if isSearching, !shownDishes.isEmpty {
@@ -999,6 +1006,7 @@ struct AddEntryView: View {
                         }
                 }
             }
+            .animation(.default, value: shownDishes.map { $0.id })
         }
 
         // Свои продукты тоже разложены по категориям: их накапливается
@@ -1034,6 +1042,7 @@ struct AddEntryView: View {
                     Label(category.title, systemImage: category.icon)
                 }
             }
+            .animation(.default, value: shownCustomFoods.map { $0.id })
         }
 
         if isSearching, wantsOnlineSearch {
@@ -1060,6 +1069,7 @@ struct AddEntryView: View {
                     Text("Ничего не найдено")
                         .foregroundStyle(.secondary)
                 }
+                .animation(.default, value: shownBuiltInFoods.isEmpty)
             } else {
                 // База разложена по категориям, а не идёт одним списком из
                 // шести десятков строк. Отдельного контрола для этого не нужно:
@@ -1075,6 +1085,7 @@ struct AddEntryView: View {
                         Label(category.title, systemImage: category.icon)
                     }
                 }
+                .animation(.default, value: shownBuiltInFoods.map { $0.id })
             }
         }
     }

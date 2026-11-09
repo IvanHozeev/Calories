@@ -170,7 +170,7 @@ final class FoodEntry: Identifiable {
 }
 
 /// Ингредиент блюда — снапшот БЖУ на момент добавления, чтобы при правке продукта блюдо не ломалось.
-struct DishIngredient: Codable, Identifiable {
+struct DishIngredient: Codable, Identifiable, Hashable {
     var id: UUID = UUID()
     var foodName: String
     var caloriesPer100g: Int

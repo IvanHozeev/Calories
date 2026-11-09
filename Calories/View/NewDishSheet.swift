@@ -48,10 +48,9 @@ struct NewDishSheet: View {
         servingGrams.decimalValueOrZero
     }
     @State private var ingredients: [DishIngredient] = []
-    /// Ингредиент, которому правят вес. Одно и то же блюдо собирают из разных
-    /// количеств, и переклад ингредиента заново ради двадцати грамм — лишняя работа.
-    @State private var gramsEditTarget: DishIngredient?
-    @State private var gramsEditText = ""
+    /// Ингредиент, которому правят вес по тапу на строку состава.
+    @State private var editingIngredient: DishIngredient?
+    @State private var editingIngredientGramsText = ""
     @State private var showingIngredientPicker = false
     @State private var showDiscardAlert = false
 
@@ -172,13 +171,6 @@ struct NewDishSheet: View {
                       grams, String(format: "%.1f", servings))
     }
 
-    private func applyGrams(to ingredient: DishIngredient) {
-        defer { gramsEditTarget = nil }
-        let value = gramsEditText.decimalValueOrZero
-        guard value > 0, let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) else { return }
-        ingredients[idx].grams = value
-    }
-
     private var listContent: some View {
         List {
             Section("Название") {
@@ -212,14 +204,10 @@ struct NewDishSheet: View {
                         Text("\(ingredient.calories) ккал")
                             .foregroundStyle(.secondary)
                     }
-                    .swipeActions(edge: .leading) {
-                        Button {
-                            gramsEditText = String(format: "%g", ingredient.grams)
-                            gramsEditTarget = ingredient
-                        } label: {
-                            Label("Граммы", systemImage: "scalemass")
-                        }
-                        .tint(.blue)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        editingIngredient = ingredient
+                        editingIngredientGramsText = String(format: "%g", ingredient.grams)
                     }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
@@ -315,19 +303,6 @@ struct NewDishSheet: View {
 
         }
         .glassRow()
-        .alert(
-            "Граммы",
-            isPresented: Binding(get: { gramsEditTarget != nil },
-                                 set: { if !$0 { gramsEditTarget = nil } }),
-            presenting: gramsEditTarget
-        ) { target in
-            TextField("Граммы", text: $gramsEditText)
-                .keyboardType(.decimalPad)
-            Button("Отмена", role: .cancel) { gramsEditTarget = nil }
-            Button("Сохранить") { applyGrams(to: target) }
-        } message: { target in
-            Text(verbatim: target.foodName)
-        }
         // Свайп вниз по списку должен убирать клавиатуру, а не упираться в неё.
         .scrollDismissesKeyboard(.interactively)
         .screenTitle(editingDish == nil ? String(localized: "Новый рецепт")
@@ -372,6 +347,17 @@ struct NewDishSheet: View {
                 ingredients.append(store.cooked(ingredient))
             }
         }
+        .navigationDestination(item: $editingIngredient) { ingredient in
+            IngredientGramsView(
+                ingredient: ingredient,
+                gramsText: $editingIngredientGramsText,
+                onSave: { newGrams in
+                    if let idx = ingredients.firstIndex(where: { $0.id == ingredient.id }) {
+                        ingredients[idx].grams = newGrams
+                    }
+                }
+            )
+        }
         .onAppear {
             if let dish = editingDish {
                 name = dish.name
@@ -381,6 +367,48 @@ struct NewDishSheet: View {
                     ? String(format: "%g", dish.defaultServingGrams)
                     : ""
             }
+        }
+    }
+}
+
+/// Экран граммов одного ингредиента в рецепте.
+struct IngredientGramsView: View {
+    let ingredient: DishIngredient
+    @Binding var gramsText: String
+    let onSave: (Double) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @FocusState private var gramsFocused: Bool
+
+    var body: some View {
+        List {
+            Section(ingredient.foodName) {
+                HStack {
+                    TextField("Граммы", text: $gramsText)
+                        .keyboardType(.decimalPad)
+                        .focused($gramsFocused)
+                        .font(.app(.body, weight: .medium))
+                    Text("г")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .navigationTitle("Граммы")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Готово") {
+                    let value = gramsText.decimalValueOrZero
+                    onSave(value)
+                    dismiss()
+                }
+                .fontWeight(.semibold)
+            }
+        }
+        // Фокус с задержкой, иначе клавиатура выезжает одновременно с
+        // анимацией перехода и экран подлагивает.
+        .task {
+            try? await Task.sleep(for: .milliseconds(250))
+            gramsFocused = true
         }
     }
 }
@@ -505,6 +533,12 @@ struct IngredientPickerSheet: View {
                 }
                 .fontWeight(.semibold)
             }
+        }
+        // Фокус с задержкой, иначе клавиатура выезжает одновременно с
+        // анимацией перехода и экран подлагивает.
+        .task {
+            try? await Task.sleep(for: .milliseconds(250))
+            gramsFocused = true
         }
     }
 

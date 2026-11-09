@@ -13,7 +13,7 @@ import Foundation
 nonisolated enum FoodQuery {
 
     /// Продукт и количество из одной фразы.
-    struct Item: Equatable, Sendable {
+    struct Item: Equatable, Hashable, Sendable {
         /// Название без количества, но с процентом: «творог 5%».
         var name: String
         /// Явный вес: «180», «180 г», «0,5 кг», «200 мл».

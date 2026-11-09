@@ -59,9 +59,8 @@ struct AddEntryView: View {
 
     /// Кэш разбора запроса, чтобы не парсить строку при каждом нажатии клавиши.
     @State private var parsedQueryCache: (search: String, items: [FoodQuery.Item]) = ("", [])
-    /// Кэш быстрого добавления: поиск по каталогу и ранжирование своих продуктов
-    /// — тяжёлая работа, её не стоит повторять на каждую букву.
-    @State private var quickAddsCache: (search: String, adds: [QuickAdd]) = ("", [])
+    /// Результат быстрого добавления, вычисляемый в фоне, чтобы клавиатура не лагала.
+    @State private var quickAddsResult: [QuickAdd] = []
 
     /// Что показываем на экране порции.
     ///
@@ -306,63 +305,110 @@ struct AddEntryView: View {
     }
 
     private var quickAdds: [QuickAdd] {
-        if quickAddsCache.search == debouncedSearch {
-            return quickAddsCache.adds
-        }
-        let items = parsedQuery.filter {
+        quickAddsResult
+    }
+
+    /// Пересчитывает быстрые добавления в фоне, чтобы не блокировать клавиатуру.
+    ///
+    /// Вызывается после срабатывания дебаунса строки поиска. Каталоговый поиск
+    /// и ранжирование уходят в `Task.detached`; свои и недавние продукты — их
+    /// обычно мало — ранжируются на главном потоке уже после возвращения.
+    private func recomputeQuickAdds() {
+        let items = parsedQuery
+        let itemsWithQuantity = items.filter {
             $0.hasQuantity && !$0.name.trimmingCharacters(in: .whitespaces).isEmpty
         }
-        var seen = Set<String>()
-        let adds: [QuickAdd] = items.compactMap { item in
-            guard let food = bestFood(for: item),
-                  let grams = item.grams(defaultGrams: food.defaultGrams)
-            else { return nil }
-            guard seen.insert(food.name.lowercased()).inserted else { return nil }
-            return QuickAdd(food: food, grams: grams, queryName: item.name)
+        guard !itemsWithQuantity.isEmpty else {
+            quickAddsResult = []
+            return
         }
-        quickAddsCache = (debouncedSearch, adds)
-        return adds
+
+        Task.detached(priority: .userInitiated) {
+            // Фон: ищем лучший каталоговый продукт для каждой позиции.
+            let catalogMatches: [FoodQuery.Item: CatalogFood] = Dictionary(
+                uniqueKeysWithValues: itemsWithQuantity.compactMap { item in
+                    guard let catalog = Self.bestCatalogMatch(for: item) else { return nil }
+                    return (item, catalog)
+                }
+            )
+
+            await MainActor.run {
+                // Сохраняем ссылку на自己, чтобы не удерживать view в замыкании.
+                let customFoods = store.customFoods
+                let recentFoods = store.recentFoods
+
+                var adds: [QuickAdd] = []
+                var seen = Set<String>()
+
+                for item in itemsWithQuantity {
+                    var best: (food: FoodItem, rank: Int, source: Int, length: Int)?
+
+                    // Каталог — уже найден в фоне.
+                    if let catalog = catalogMatches[item],
+                       let food = FoodDatabase.item(for: catalog) {
+                        let rank = Self.catalogRank(item.name, catalog) ?? 0
+                        best = (food, rank, 0, catalog.localizedName.count)
+                    }
+
+                    // Свои и недавние — списки короткие, ранжируем здесь.
+                    for food in customFoods {
+                        guard let rank = FoodQuery.rank(query: item.name,
+                                                        name: food.name,
+                                                        producer: food.producer)
+                        else { continue }
+                        let candidate = (food, rank, 1, food.name.count)
+                        if best == nil ||
+                           candidate.1 < best!.1 ||
+                           (candidate.1 == best!.1 && candidate.2 < best!.2) ||
+                           (candidate.1 == best!.1 && candidate.2 == best!.2 && candidate.3 < best!.3) {
+                            best = candidate
+                        }
+                    }
+                    for food in recentFoods {
+                        guard let rank = FoodQuery.rank(query: item.name,
+                                                        name: food.name,
+                                                        producer: food.producer)
+                        else { continue }
+                        let candidate = (food, rank, 2, food.name.count)
+                        if best == nil ||
+                           candidate.1 < best!.1 ||
+                           (candidate.1 == best!.1 && candidate.2 < best!.2) ||
+                           (candidate.1 == best!.1 && candidate.2 == best!.2 && candidate.3 < best!.3) {
+                            best = candidate
+                        }
+                    }
+
+                    guard let food = best?.food,
+                          let grams = item.grams(defaultGrams: food.defaultGrams),
+                          seen.insert(food.name.lowercased()).inserted
+                    else { continue }
+
+                    adds.append(QuickAdd(food: food, grams: grams, queryName: item.name))
+                }
+
+                quickAddsResult = adds
+            }
+        }
+    }
+
+    /// Лучший каталоговый продукт под запрос — можно считать в фоне:
+    /// всё, что здесь используется, — `Sendable`.
+    private nonisolated static func bestCatalogMatch(for item: FoodQuery.Item) -> CatalogFood? {
+        var best: (food: CatalogFood, rank: Int)?
+        for catalog in FoodCatalog.search(item.name, limit: 20) {
+            guard let rank = catalogRank(item.name, catalog) else { continue }
+            if best == nil || rank < best!.rank {
+                best = (catalog, rank)
+            }
+        }
+        return best?.food
     }
 
     /// Лучший продукт под разобранную фразу.
     ///
     /// Сначала база: её поиск уже знает русские и английские названия и
     /// синонимы, поэтому «творог 5» находится и при английском интерфейсе.
-    /// Свои и недавние продукты идут следом — но точное совпадение у них
-    /// всё равно перевешивает приблизительное у базы.
-    private func bestFood(for item: FoodQuery.Item) -> FoodItem? {
-        var candidates: [(food: FoodItem, rank: Int, source: Int, length: Int)] = []
-
-        for catalog in FoodCatalog.search(item.name, limit: 20) {
-            guard let food = FoodDatabase.item(for: catalog),
-                  let rank = catalogRank(item.name, catalog)
-            else { continue }
-            candidates.append((food, rank, 0, catalog.localizedName.count))
-        }
-        for food in store.customFoods {
-            guard let rank = FoodQuery.rank(query: item.name,
-                                            name: food.name,
-                                            producer: food.producer)
-            else { continue }
-            candidates.append((food, rank, 1, food.name.count))
-        }
-        for food in store.recentFoods {
-            guard let rank = FoodQuery.rank(query: item.name,
-                                            name: food.name,
-                                            producer: food.producer)
-            else { continue }
-            candidates.append((food, rank, 2, food.name.count))
-        }
-
-        let best = candidates.min {
-            if $0.rank != $1.rank { return $0.rank < $1.rank }
-            if $0.source != $1.source { return $0.source < $1.source }
-            return $0.length < $1.length
-        }
-        return best?.food
-    }
-
-    private func catalogRank(_ query: String, _ food: CatalogFood) -> Int? {
+    private nonisolated static func catalogRank(_ query: String, _ food: CatalogFood) -> Int? {
         var names = [food.en, food.localizedName]
         if let ru = food.ru { names.append(ru) }
         names.append(contentsOf: food.aliases ?? [])
@@ -534,6 +580,9 @@ struct AddEntryView: View {
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
+            // Быстрые добавления считаем в фоне, чтобы клавиатура не лагала:
+            // дебаунс уже даёт паузу в наборе, а сам пересчёт — вне главного потока.
+            .onChange(of: debouncedSearch) { _, _ in recomputeQuickAdds() }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {
                 await searchOnlineIfNeeded()
             }

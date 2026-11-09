@@ -1327,6 +1327,7 @@ private struct PullableRing: View {
                 fills: true
             )
             .frame(width: ringSize, height: ringSize)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.top)
         }
         // Вырастает на месте знака заставки — и ровно пока та уходит.

@@ -754,7 +754,29 @@ private extension ContentView {
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
+        if dailyAdvice != nil, dailyAdvice != .none { return true }
         return !store.isPremium && store.plan == nil
+    }
+
+    /// Совет дня: одно контекстное сообщение на основе данных пользователя.
+    private var dailyAdvice: DailyAdvice? {
+        let calendar = Calendar.current
+        let lastLoggedDay = store.entriesByDay.keys.sorted().last
+        let fourteenDaysAgo = calendar.date(byAdding: .day, value: -13, to: Date()) ?? Date()
+        let recentWeights = store.weightEntries
+            .filter { $0.date >= fourteenDaysAgo }
+            .sorted { $0.date < $1.date }
+            .map { $0.weightKg }
+        return DailyAdviceEngine.advice(
+            consumedToday: store.consumedToday,
+            adaptedTodayGoal: store.adaptedTodayGoal,
+            macrosToday: store.macrosToday,
+            proteinTarget: store.proteinTarget,
+            fatTarget: store.fatTarget,
+            carbsTarget: store.carbsTarget,
+            weightTrend: recentWeights,
+            lastLoggedDay: lastLoggedDay
+        )
     }
 
     /// Подсказки дня: голодание, недельный обзор, банк калорий.
@@ -940,6 +962,26 @@ private extension ContentView {
                     .background(.ultraThinMaterial, in: Capsule())
                 }
                 .buttonStyle(.plain)
+            }
+
+            // Совет дня — одно сообщение на основе данных пользователя.
+            if let advice = dailyAdvice, advice != .none {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "lightbulb.fill")
+                        .foregroundStyle(.orange)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(advice.title)
+                            .font(.app(.subheadline, weight: .semibold))
+                            .foregroundStyle(.primary)
+                        Text(advice.body)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.vertical, 2)
+                .accessibilityIdentifier("dailyAdvice")
             }
 
         }

@@ -279,6 +279,7 @@ extension View {
                                 isCompact: true, compactLines: lines)
                         .inBar(back: backButton, cancelTitle: cancelTitle,
                                trailingButtons: trailingButtons)
+                        .padding(.leading, 16)
                 }
                 .withoutSharedBackground()
             }

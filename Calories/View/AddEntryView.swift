@@ -918,24 +918,28 @@ struct AddEntryView: View {
         }
 
         // Подсказки еды: «как обычно», «обычно вместе» и подбор к остатку.
-        MealSuggestionsView(store: store,
-                            draftItems: $draftItems,
-                            onAdd: { items in
-                                withAnimation(.snappy) {
-                                    draftItems.append(contentsOf: items)
-                                }
-                                scrollToTopTicket += 1
-                            },
-                            onOpenPair: { pair in
-                                let grams = pair.grams ?? 100
-                                let food = store.foodNamed(pair.name)
-                                    ?? per100g(MealItem(name: pair.name, calories: pair.calories,
-                                                        macros: pair.macros, grams: grams), grams: grams)
-                                openServing(.food(food, grams: grams, savable: false, quickSave: true))
-                            },
-                            onScrollToTop: {
-                                scrollToTopTicket += 1
-                            })
+        // При поиске их не показываем: человек ищет конкретный продукт, а не
+        // выбирает из привычек — и лишний пересчёт истории только лагает.
+        if !isSearching {
+            MealSuggestionsView(store: store,
+                                draftItems: $draftItems,
+                                onAdd: { items in
+                                    withAnimation(.snappy) {
+                                        draftItems.append(contentsOf: items)
+                                    }
+                                    scrollToTopTicket += 1
+                                },
+                                onOpenPair: { pair in
+                                    let grams = pair.grams ?? 100
+                                    let food = store.foodNamed(pair.name)
+                                        ?? per100g(MealItem(name: pair.name, calories: pair.calories,
+                                                            macros: pair.macros, grams: grams), grams: grams)
+                                    openServing(.food(food, grams: grams, savable: false, quickSave: true))
+                                },
+                                onScrollToTop: {
+                                    scrollToTopTicket += 1
+                                })
+        }
 
         if !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
             Section("Недавнее") {

@@ -81,6 +81,19 @@ nonisolated enum FoodQuery {
         return best
     }
 
+    /// Проверяет, что в одном из названий продукта указан заданный процент
+    /// жирности: «молоко 3%» не должно находить «молоко 1.5%».
+    static func nameContainsPercent(_ names: [String], percent: Double) -> Bool {
+        for name in names {
+            guard let match = firstMatch(percentRegex, in: name),
+                  let value = number(match.groups[0]),
+                  abs(value - percent) < 0.001
+            else { continue }
+            return true
+        }
+        return false
+    }
+
     // MARK: - Разбор
 
     private static let volumePattern = #"(\d+(?:[.,]\d+)?)\s*(мл|ml|миллилитр(?:а|ов)?|millilit(?:er|re)s?|литр(?:а|ов)?|lit(?:er|re)s?|л|l)(?![\p{L}\p{N}])"#

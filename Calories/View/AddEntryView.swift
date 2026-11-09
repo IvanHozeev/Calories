@@ -59,8 +59,11 @@ struct AddEntryView: View {
 
     /// Кэш разбора запроса, чтобы не парсить строку при каждом нажатии клавиши.
     @State private var parsedQueryCache: (search: String, items: [FoodQuery.Item]) = ("", [])
-    /// Результат быстрого добавления, вычисляемый в фоне, чтобы клавиатура не лагала.
+    /// Результат быстрого добавления, вычисляемый в фоне.
     @State private var quickAddsResult: [QuickAdd] = []
+    /// Задача пересчёта быстрых добавлений с debounce — отменяется при каждом
+    //  новом символе, чтобы клавиатура не лагала.
+    @State private var quickAddsTask: Task<Void, Never>? = nil
 
     /// Что показываем на экране порции.
     ///
@@ -352,6 +355,12 @@ struct AddEntryView: View {
 
                     // Свои и недавние — списки короткие, ранжируем здесь.
                     for food in customFoods {
+                        if let percent = item.percent {
+                            let names = [food.name, food.producer ?? ""]
+                            if !FoodQuery.nameContainsPercent(names, percent: percent) {
+                                continue
+                            }
+                        }
                         guard let rank = FoodQuery.rank(query: item.name,
                                                         name: food.name,
                                                         producer: food.producer)
@@ -365,6 +374,12 @@ struct AddEntryView: View {
                         }
                     }
                     for food in recentFoods {
+                        if let percent = item.percent {
+                            let names = [food.name, food.producer ?? ""]
+                            if !FoodQuery.nameContainsPercent(names, percent: percent) {
+                                continue
+                            }
+                        }
                         guard let rank = FoodQuery.rank(query: item.name,
                                                         name: food.name,
                                                         producer: food.producer)
@@ -396,6 +411,16 @@ struct AddEntryView: View {
     private nonisolated static func bestCatalogMatch(for item: FoodQuery.Item) -> CatalogFood? {
         var best: (food: CatalogFood, rank: Int)?
         for catalog in FoodCatalog.search(item.name, limit: 20) {
+            // Процент — жёсткое ограничение: «молоко 3%» не должно показать
+            // «молоко 1.5%».
+            if let percent = item.percent {
+                let names = [catalog.en, catalog.localizedName]
+                    + (catalog.ru.map { [$0] } ?? [])
+                    + (catalog.aliases ?? [])
+                if !FoodQuery.nameContainsPercent(names, percent: percent) {
+                    continue
+                }
+            }
             guard let rank = catalogRank(item.name, catalog) else { continue }
             if best == nil || rank < best!.rank {
                 best = (catalog, rank)
@@ -580,9 +605,17 @@ struct AddEntryView: View {
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
-            // Быстрые добавления считаем в фоне, чтобы клавиатура не лагала:
-            // дебаунс уже даёт паузу в наборе, а сам пересчёт — вне главного потока.
-            .onChange(of: debouncedSearch) { _, _ in recomputeQuickAdds() }
+            // Быстрые добавления считаем в фоне с задержкой после окончания
+            // ввода — не на каждый символ, иначе клавиатура лагает. Каждый новый
+            // символ отменяет предыдущую задачу.
+            .onChange(of: debouncedSearch) { _, _ in
+                quickAddsTask?.cancel()
+                quickAddsTask = Task {
+                    try? await Task.sleep(for: .milliseconds(150))
+                    guard !Task.isCancelled else { return }
+                    recomputeQuickAdds()
+                }
+            }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {
                 await searchOnlineIfNeeded()
             }

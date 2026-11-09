@@ -16,8 +16,11 @@ enum BrandLockup {
     static let titleSize: CGFloat = 28
     /// Просвет между кольцом и словом — как в подписи внизу настроек.
     static let gap: CGFloat = markSize * 4 / 22
-    /// Серый, а не чёрный: на запуске знак главный, название под ним — подпись.
-    static let ink = Color(red: 0x8E / 255, green: 0x8E / 255, blue: 0x93 / 255)
+    /// Черный с опаситю 0.85 на светлой теме, белый на тёмной: на запуске знак главный,
+    /// название под ним — подпись.
+    static let ink = Color(UIColor { traitCollection in
+        traitCollection.userInterfaceStyle == .dark ? UIColor.white : UIColor.black.withAlphaComponent(0.85)
+    })
     /// Название набрано системным шрифтом — скруглённым, полужирным.
     ///
     /// Не тем, которым набран интерфейс: Nunito под знаком оказался плотнее и

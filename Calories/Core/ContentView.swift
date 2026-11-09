@@ -117,30 +117,12 @@ struct ContentView: View {
             ScrollViewReader { scroll in
             List {
                 Section {
-                    summaryRing
+                    summaryCards
                         // Ровно видимая часть списка: только так кольцу
                         // достаётся весь остаток. С «не меньше» список
                         // считает высоту блока по содержимому, и кольцо
                         // получает свой минимум вместо свободного места.
                         .frame(height: summaryHeight)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
-                }
-                
-                // Подсказки дня — под кольцом, над карточками.
-                if hasDayHints {
-                    Section {
-                        dayHints
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
-                    }
-                    .listSectionSeparator(.hidden)
-                }
-                
-                Section {
-                    summaryTiles
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
@@ -582,7 +564,7 @@ private extension ContentView {
     /// Порядок читается как отъезд камеры: кольцо и макросы — это прямо
     /// сейчас, дальше ближайший приём (часы), голодание (дни), план (недели)
     /// и неделя позади.
-    var summaryRing: some View {
+    var summaryCards: some View {
         // Расписание спрашиваем один раз: строится оно примерно за миллисекунду,
         // а в теле оно нужно дважды — проверить, есть ли приёмы, и показать их.
         let slots = store.todaySlots
@@ -648,13 +630,7 @@ private extension ContentView {
             // выходило тридцать, и дуга, у которой наверху разрыв, висела
             // ещё ниже. Освободившееся достаётся самому знаку.
             .padding(.bottom, 14)
-        }
-    }
 
-    /// Карточки: быстрый приём, план, макросы — идут под подсказками дня.
-    var summaryTiles: some View {
-        let slots = store.todaySlots
-        return VStack(spacing: 16) {
             // Сваренное напоминает о себе само: доесть, пока не испортилось,
             // или приготовить, пока не кончилось. Одна строка на самую
             // срочную кастрюлю — список дел по холодильнику тут не нужен.
@@ -721,7 +697,7 @@ private extension ContentView {
             // голодание (ближайшие дни), план (недели вперёд) и
             // неделя позади. Раньше план стоял выше приёмов, хотя
             // в него заходят раз в неделю, а на ближайший приём
-            // смотрят по несколько раз в день.
+            // смотрят по нескольку раз в день.
             // Две плитки вместо двух полос.
             //
             // Полоса во всю ширину несла три слова и стрелку, остальное было
@@ -763,8 +739,11 @@ private extension ContentView {
                 focus: store.focusMacro
             )
             }
+
         }
-    }    /// Есть ли сегодня хоть одна подсказка.
+    }
+
+    /// Есть ли сегодня хоть одна подсказка.
     ///
     /// Спрашиваем до того, как строить строку: пустая строка в списке — это
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками

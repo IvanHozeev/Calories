@@ -125,6 +125,15 @@ import Foundation
         #expect(item.grams == 180)
     }
 
+    @Test func twoProductsInOnePhraseAreSplitIntoTwoQuickAdds() throws {
+        let items = FoodQuery.parse("молоко 300 протеин 40 г")
+        #expect(items.count == 2)
+        #expect(items[0].name == "молоко")
+        #expect(items[0].grams == 300)
+        #expect(items[1].name == "протеин")
+        #expect(items[1].grams == 40)
+    }
+
     @Test func aPhraseWithoutQuantityIsStillAName() throws {
         let item = try one("творог 9%")
         #expect(item.name == "творог 9%")

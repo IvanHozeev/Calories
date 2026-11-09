@@ -47,7 +47,7 @@ nonisolated enum FoodQuery {
     /// Пустые названия не возвращаются: «180» — это количество без продукта, и
     /// подставлять его не к чему.
     static func parse(_ query: String) -> [Item] {
-        split(query).compactMap(parseSingle)
+        split(query).flatMap(parseSingle)
     }
 
     /// Насколько название подходит под запрос: меньше — лучше.
@@ -123,9 +123,9 @@ nonisolated enum FoodQuery {
     private static let whitespaceRegex = try! NSRegularExpression(pattern: #"\s+"#, options: [])
     private static let spaceBeforeCommaRegex = try! NSRegularExpression(pattern: #"\s+([,.])"#, options: [])
 
-    private static func parseSingle(_ raw: String) -> Item? {
+    private static func parseSingle(_ raw: String) -> [Item] {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return nil }
+        guard !text.isEmpty else { return [] }
 
         var percent: Double?
         if let match = firstMatch(percentRegex, in: text), let value = number(match.groups[0]) {
@@ -134,25 +134,26 @@ nonisolated enum FoodQuery {
 
         var grams: Double?
         var units: Double?
+        var extractedRange: Range<String.Index>?
 
         if let match = firstMatch(volumeRegex, in: text),
            let value = number(match.groups[0]) {
             grams = value * scale(for: match.groups[1])
-            text.removeSubrange(match.range)
+            extractedRange = match.range
+        } else if let large = largeNumber(in: text) {
+            grams = large.value
+            extractedRange = large.range
         } else if let match = firstMatch(weightRegex, in: text),
                   let value = number(match.groups[0]) {
             grams = value * scale(for: match.groups[1])
-            text.removeSubrange(match.range)
+            extractedRange = match.range
         } else if let match = firstMatch(countRegex, in: text),
                   let value = number(match.groups[0]) {
             units = value
-            text.removeSubrange(match.range)
+            extractedRange = match.range
         } else if let fraction = fractionQuantity(in: text) {
             units = fraction.value
-            text.removeSubrange(fraction.range)
-        } else if let large = largeNumber(in: text) {
-            grams = large.value
-            text.removeSubrange(large.range)
+            extractedRange = fraction.range
         } else if let word = wordQuantity(in: text) {
             units = word.value
             text = word.remaining
@@ -162,12 +163,47 @@ nonisolated enum FoodQuery {
             } else {
                 units = bare.value
             }
-            text.removeSubrange(bare.range)
+            extractedRange = bare.range
         }
 
-        let name = cleanedName(text)
-        guard !name.isEmpty else { return nil }
-        return Item(name: name, grams: grams, units: units, percent: percent)
+        var result: [Item] = []
+
+        if let range = extractedRange {
+            // Текст до количества — название первой позиции,
+            // текст после — потенциальная вторая позиция.
+            let beforeName = cleanedName(String(text[text.startIndex..<range.lowerBound]))
+            let afterText = String(text[range.upperBound..<text.endIndex])
+
+            if !beforeName.isEmpty {
+                result.append(Item(name: beforeName, grams: grams, units: units, percent: percent))
+                result.append(contentsOf: parseSingle(afterText))
+            } else if grams != nil || units != nil {
+                // Количество без названия до него — приклеиваем к первой позиции после.
+                var afterItems = parseSingle(afterText)
+                if let first = afterItems.first {
+                    afterItems[0] = Item(name: first.name, grams: grams, units: units, percent: percent)
+                }
+                result.append(contentsOf: afterItems)
+            } else {
+                result.append(contentsOf: parseSingle(afterText))
+            }
+        } else if text != raw.trimmingCharacters(in: .whitespacesAndNewlines) {
+            // wordQuantity уже изменил text, остаток — название.
+            let name = cleanedName(text)
+            if !name.isEmpty {
+                result.append(Item(name: name, grams: nil, units: units, percent: percent))
+            }
+        } else {
+            let name = cleanedName(text)
+            if !name.isEmpty {
+                result.append(Item(name: name, grams: grams, units: units, percent: percent))
+            }
+        }
+
+        // Убираем мусор: единицы измерения без названия («г», «кг», «мл»).
+        result = result.filter { !$0.name.isEmpty && !isUnitOnly($0.name) }
+
+        return result
     }
 
     /// Запятая разделяет позиции, но десятичная запятая — нет: «банан 1,5» это
@@ -202,8 +238,26 @@ nonisolated enum FoodQuery {
 
     /// Кусок без продукта: «180 г», «2 кг». Он относится к предыдущему
     /// названию, а не к новой позиции списка.
+    private static let quantityOnlyRegex = try! NSRegularExpression(
+        pattern: #"^\d+(?:[.,]\d+)?\s*(?:г|кг|гр|грамм|килограмм|литр|литра|литров|мл|шт|штук|штуки|порци|%|g|kg|ml|l|lb|oz)\s*$"#,
+        options: [.caseInsensitive]
+    )
+
     private static func isQuantityOnly(_ part: String) -> Bool {
-        parseSingle(part) == nil
+        let trimmed = part.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
+        return quantityOnlyRegex.firstMatch(
+            in: trimmed,
+            range: NSRange(trimmed.startIndex..<trimmed.endIndex, in: trimmed)
+        ) != nil
+    }
+
+    /// Единица измерения без названия — не продукт: «г», «кг», «мл».
+    private static func isUnitOnly(_ name: String) -> Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        return ["г", "кг", "гр", "грамм", "килограмм", "литр", "литра", "литров",
+                "мл", "шт", "штук", "штуки", "порция", "порции",
+                "g", "kg", "ml", "l", "lb", "oz"].contains(trimmed)
     }
 
     private static func fractionQuantity(

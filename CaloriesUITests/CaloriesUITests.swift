@@ -434,8 +434,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testEveryProfileScreenOpens() {
         let app = launchApp()
-        app.tabBars.buttons["Profile"].tap()
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10))
+        openProfile(in: app)
 
         visit("openWeight", expecting: "Weight and trend", in: app)
         visit("openMealSchedule", expecting: "Meals", in: app)
@@ -450,8 +449,7 @@ final class CaloriesUITests: XCTestCase {
     @MainActor
     func testTheMeasurementScreensOpen() {
         let app = launchApp(seedMeasurements: true)
-        app.tabBars.buttons["Profile"].tap()
-        XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 10))
+        openProfile(in: app)
 
         let measurements = app.descendants(matching: .any)
             .matching(identifier: "openMeasurementsRow").firstMatch
@@ -459,9 +457,35 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(measurements.exists, "В профиле нет входа в замеры")
         scrollIntoReach(measurements, in: app)
         measurements.tap()
-        XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.navigationBars["Measurements"].waitForExistence(timeout: 10),
+                      "Строка замеров не открыла экран замеров")
         visit("openMeasurementHistory", expecting: "Measurement history", in: app)
         back(from: "Measurements", in: app)
+    }
+
+    /// Открыть «Профиль» и дождаться, пока он встанет.
+    ///
+    /// Ждём вкладку в таббаре, а не название в шапке. Заголовок корневой
+    /// вкладки меняется на прокрутке: доехав до секции, шапка называется её
+    /// именем, и «Профиль» в ней уже не пишется. Это та же ловушка, которую
+    /// обходит `back(from:in:)`, — а в начале теста она осталась, и обход
+    /// замеров падал двумя прогонами из шести. Заметил это не набор, а шесть
+    /// полных прогонов подряд: тест, падающий один раз из трёх, читается как
+    /// случайность, пока его не прогонят пять раз.
+    ///
+    /// С посеянными замерами промахов больше: на «Профиле» появляется секция
+    /// выводов, список становится выше, и у шапки есть куда переименоваться
+    /// ещё до первого жеста.
+    @MainActor
+    private func openProfile(in app: XCUIApplication) {
+        let tab = app.tabBars.buttons["Profile"]
+        XCTAssertTrue(tab.waitForExistence(timeout: 10), "В таббаре нет «Профиля»")
+        tab.tap()
+        // Признак того, что вкладка открылась, — её собственная строка, а не
+        // слово в шапке.
+        let anchor = app.descendants(matching: .any)
+            .matching(identifier: "openWeight").firstMatch
+        XCTAssertTrue(anchor.waitForExistence(timeout: 10), "«Профиль» не открылся")
     }
 
     // MARK: - Вёрстка

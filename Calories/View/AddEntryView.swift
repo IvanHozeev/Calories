@@ -787,7 +787,7 @@ struct AddEntryView: View {
         if !draftItems.isEmpty {
             HStack(spacing: 12) {
                 Button("Отмена") {
-                    withAnimation { draftItems.removeAll() }
+                    draftItems.removeAll()
                 }
                 .buttonStyle(.glass)
                 .accessibilityIdentifier("cancelMeal")

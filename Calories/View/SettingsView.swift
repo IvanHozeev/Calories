@@ -735,7 +735,7 @@ private extension SettingsView {
         .id(appAccent)
 
         NavigationLink {
-            RemindersView()
+            RemindersView(store: store)
         } label: {
             settingLabel("Напоминания", systemImage: "bell")
         }

@@ -753,7 +753,41 @@ private extension ContentView {
         if store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         if dailyAdvice != nil, dailyAdvice != .none { return true }
+        if nextMealPrompt != nil { return true }
         return !store.isPremium && store.plan == nil
+    }
+
+    /// Ближайший приём пищи, к которому пора есть: время наступило, а приём ещё не записан.
+    private var nextMealPrompt: some View {
+        Group {
+            if let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()),
+               slot.state != .done, slot.state != .missed,
+               slot.time <= Date() {
+                Button {
+                    showingAdd = true
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "clock.fill")
+                            .foregroundStyle(.orange)
+                            .font(.app(.caption))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Пора \(slot.period.timeTitle)")
+                                .font(.app(.subheadline, weight: .semibold))
+                                .foregroundStyle(.primary)
+                            Text(String(format: String(localized: "Обычно ешь в %@"), slot.time.formatted(date: .omitted, time: .shortened)))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption2))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 2)
+                }
+                .buttonStyle(.plain)
+            }
+        }
     }
 
     /// Совет дня: одно контекстное сообщение на основе данных пользователя.
@@ -823,6 +857,9 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
+            // Ближайший приём пищи — первая подсказка.
+            nextMealPrompt
+
             // Копий нет, а дневнику уже есть что терять.
             //
             // Выше всего остального, и это единственная подсказка не про еду:

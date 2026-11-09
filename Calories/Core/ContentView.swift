@@ -118,11 +118,8 @@ struct ContentView: View {
             List {
                 Section {
                     summaryCards
-                        // Ровно видимая часть списка: только так кольцу
-                        // достаётся весь остаток. С «не меньше» список
-                        // считает высоту блока по содержимому, и кольцо
-                        // получает свой минимум вместо свободного места.
-                        .frame(height: summaryHeight)
+                        // Блок по своему содержимому: кольцо не тянется на весь
+                        // экран, карточки идут за ним сразу, без пустоты между ними.
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
@@ -1325,6 +1322,7 @@ private struct PullableRing: View {
             onOpen: onOpen,
             fills: true
         )
+        .frame(width: 200, height: 200)
         .padding(.top)
         // Вырастает на месте знака заставки — и ровно пока та уходит.
         //

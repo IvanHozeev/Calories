@@ -1,23 +1,11 @@
 import SwiftUI
 
-/// Строка съеденного за день. Калории — главное число строки, поэтому они крупные
-/// и тёмные, а не серые справа. Макросы идут цветными тегами, как и везде в приложении,
-/// вместо слипшегося «Б6 Ж31 У58».
+/// Строка съеденного за день. Верстка та же, что и в «Рационе» — `FoodRow`:
+/// название, вес, макросы цветными тегами, калории справа.
 struct EntryRow: View {
     let entry: FoodEntry
     /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
     var micros: [Micronutrient] = []
-
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-
-    private var hasMacros: Bool {
-        entry.protein > 0 || entry.fat > 0 || entry.carbs > 0
-    }
-
-    /// Доминирующий макрос записи — для цвета названия.
-    private var leadingKind: MacroKind? {
-        Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs).leadingKind
-    }
 
     /// Вес порции.
     ///
@@ -43,86 +31,16 @@ struct EntryRow: View {
     }
 
     var body: some View {
-        // Два уровня вместо трёх: название с калориями сверху, всё остальное
-        // одной серой строкой под ним.
-        //
-        // Раньше уровней было три — название, подписи, макросы, — плюс
-        // «ккал» отдельной строкой справа: ячейка занимала вдвое больше, чем
-        // в ней было смысла, и в день помещалось четыре записи вместо восьми.
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            VStack(alignment: .leading, spacing: 2) {
-                // Две строки, а не одна: составной приём называется склейкой,
-                // и в одну строку из неё помещается первый продукт с хвостом
-                // многоточия. Вторая строка приходит только тогда, когда имя
-                // в одну не влезло.
-                Text(entry.name)
-                    .font(.app(.subheadline, weight: .semibold))
-                    .lineLimit(2)
-                    // Название в цвете доминирующего макроса, как в строке поиска.
-                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
-                    // Название идёт от левого края, даже когда оно на иврите.
-                    //
-                    // Текст из букв справа налево получает свою, правую
-                    // выключку: строка отъезжала к калориям, а под ней
-                    // оставалась дыра во всю ширину, где должно было начинаться
-                    // название. Направление самих букв при этом правильное и
-                    // остаётся как есть — переносится только выключка строки.
-                    // В интерфейсе на иврите `.leading` сам станет правым.
-                    .multilineTextAlignment(.leading)
-
-                // Вес — одной серой подписью под названием.
-                //
-                // Времени здесь больше нет: оно ушло в заголовок приёма пищи,
-                // где раньше дублировались калории единственной строки. Значков
-                // категорий тоже: вилка у приёма и корзина у своего продукта
-                // ничего не говорили о съеденном, а строку занимали.
-                if let portionText {
-                    Text(verbatim: portionText)
-                        .foregroundStyle(.tertiary)
-                        .font(.app(.caption))
-                        .lineLimit(1)
-                }
-
-                // Макросы — своей строкой. В одну кучу с временем и порцией
-                // они слипались: это числа, которые читают, а не подпись,
-                // которую пробегают глазом. Место экономим на пустоте, а не
-                // на том, ради чего в строку и смотрят.
-                if hasMacros || !micros.isEmpty {
-                    HStack(spacing: 8) {
-                        if hasMacros {
-                            MacroTags(macros: entry.macros, compact: true)
-                        }
-                        if !micros.isEmpty {
-                            MicroTags(nutrients: micros)
-                        }
-                    }
-                }
-            }
-
-            Spacer(minLength: 0)
-
-            // «ккал» строчной подписью рядом с числом, а не под ним: слово
-            // одно на весь список и повторять его столбиком незачем.
-            //
-            // Число не переносится и не ужимается ни при каких именах.
-            // Длинное имя на иврите забирало ширину первым, и на калории
-            // оставалось столько, что «337 ккал» вставало двумя ярусами:
-            // «33 ккал» и «7» под ним. Число при этом читается как другое
-            // число — ровно то, ради чего в строку и смотрят. Уступать
-            // должно имя: оно и так обрезается многоточием, и это видно.
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(verbatim: "\(entry.calories)")
-                    .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
-                    .monospacedDigit()
-                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
-                Text("ккал")
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
-            .lineLimit(1)
-            .fixedSize(horizontal: true, vertical: false)
-            .layoutPriority(1)
-        }
-        .padding(.vertical, 4)
+        FoodRow(
+            name: entry.name,
+            calories: entry.calories,
+            caloriesPer100g: caloriesPer100g,
+            portion: portionText ?? "",
+            macros: Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs),
+            icons: [],
+            micros: micros,
+            offersVitamins: false,
+            traits: []
+        )
     }
 }

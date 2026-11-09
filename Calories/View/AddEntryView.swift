@@ -639,7 +639,7 @@ struct AddEntryView: View {
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
             .toolbar { whenToolbar }
-            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 1)
+            .screenTitle(String(localized: "Приём пищи"), trailingButtons: 1)
             .toolbar { draftToolbar }
             .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in

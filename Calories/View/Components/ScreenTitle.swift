@@ -257,6 +257,31 @@ extension View {
                 }
             }
     }
+
+    /// Заголовок экрана в левом слоте шапки вместо центрального (.principal).
+    ///
+    /// При активном поиске iOS скрывает .principal, чтобы отдать центр под
+    /// строку поиска, и тайтл пропадает. Размещение в .topBarLeading не
+    /// скрывается — как на корневых вкладках («Сегодня», «Рацион»).
+    func topBarTitle(_ title: String,
+                     eyebrow: String? = nil,
+                     lines: Int = 1,
+                     backButton: Bool = true,
+                     cancelTitle: String? = nil,
+                     trailingButtons: Int = 0) -> some View {
+        softScrollEdge()
+            .navigationTitle(title)
+            .hiddenNavigationTitle()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    ScreenTitle(title: title, eyebrow: eyebrow,
+                                isCompact: true, compactLines: lines)
+                        .inBar(back: backButton, cancelTitle: cancelTitle,
+                               trailingButtons: trailingButtons)
+                }
+            }
+    }
 }
 
 

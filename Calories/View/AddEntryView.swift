@@ -64,6 +64,10 @@ struct AddEntryView: View {
     /// Задача пересчёта быстрых добавлений с debounce — отменяется при каждом
     //  новом символе, чтобы клавиатура не лагала.
     @State private var quickAddsTask: Task<Void, Never>? = nil
+    /// Кэш топ-сопоставлений, вычисляемый с debounce — не на каждую букву,
+    /// а после паузы в наборе.
+    @State private var topMatches: [TopMatch] = []
+    @State private var topMatchesTask: Task<Void, Never>? = nil
 
     /// Что показываем на экране порции.
     ///
@@ -252,30 +256,9 @@ struct AddEntryView: View {
     /// секции шли по источникам, а не по тому, насколько похоже название.
     /// Сверху теперь то, что названо ровно так или начинается с запроса;
     /// продукты раньше блюд, короткие названия раньше длинных.
-    private var topMatches: [TopMatch] {
-        let query = effectiveSearchTerm
-        guard !query.isEmpty else { return [] }
-        var seen = Set<String>()
-        var candidates: [(TopMatch, Int)] = []
-        func consider(_ match: TopMatch) {
-            guard let rank = Self.matchRank(match.name, query), rank <= 1 else { return }
-            guard seen.insert(match.name.lowercased()).inserted else { return }
-            candidates.append((match, rank))
-        }
-        filteredBuiltInFoods.forEach { consider(.food($0, savable: true)) }
-        filteredCustomFoods.forEach { consider(.food($0, savable: false)) }
-        recentFoodItems.forEach { consider(.food($0, savable: false)) }
-        filteredDishes.forEach { consider(.dish($0)) }
-        recentDishItems.forEach { consider(.dish($0)) }
-        return candidates
-            .sorted {
-                if $0.1 != $1.1 { return $0.1 < $1.1 }
-                if $0.0.isDish != $1.0.isDish { return !$0.0.isDish }
-                return $0.0.name.count < $1.0.name.count
-            }
-            .prefix(6)
-            .map(\.0)
-    }
+    ///
+    /// Вычисляется с debounce (см. .onChange(of: debouncedSearch) ниже),
+    /// чтобы не пересчитывать на каждую букву.
 
     private func notOnTop<T>(_ items: [T], _ name: (T) -> String) -> [T] {
         guard isSearching else { return items }
@@ -410,7 +393,7 @@ struct AddEntryView: View {
     /// всё, что здесь используется, — `Sendable`.
     private nonisolated static func bestCatalogMatch(for item: FoodQuery.Item) -> CatalogFood? {
         var best: (food: CatalogFood, rank: Int)?
-        for catalog in FoodCatalog.search(item.name, limit: 20) {
+        for catalog in FoodCatalog.search(item.name, limit: 10) {
             // Процент — жёсткое ограничение: «молоко 3%» не должно показать
             // «молоко 1.5%».
             if let percent = item.percent {
@@ -611,9 +594,42 @@ struct AddEntryView: View {
             .onChange(of: debouncedSearch) { _, _ in
                 quickAddsTask?.cancel()
                 quickAddsTask = Task {
-                    try? await Task.sleep(for: .milliseconds(150))
+                    try? await Task.sleep(for: .milliseconds(250))
                     guard !Task.isCancelled else { return }
                     recomputeQuickAdds()
+                }
+                // Топ-сопоставления считаем с таким же дебаунсом — не на каждую
+                // букву, а после паузы в наборе.
+                topMatchesTask?.cancel()
+                topMatchesTask = Task {
+                    try? await Task.sleep(for: .milliseconds(250))
+                    guard !Task.isCancelled else { return }
+                    let query = effectiveSearchTerm
+                    guard !query.isEmpty else {
+                        await MainActor.run { topMatches = [] }
+                        return
+                    }
+                    var seen = Set<String>()
+                    var candidates: [(TopMatch, Int)] = []
+                    func consider(_ match: TopMatch) {
+                        guard let rank = Self.matchRank(match.name, query), rank <= 1 else { return }
+                        guard seen.insert(match.name.lowercased()).inserted else { return }
+                        candidates.append((match, rank))
+                    }
+                    filteredBuiltInFoods.forEach { consider(.food($0, savable: true)) }
+                    filteredCustomFoods.forEach { consider(.food($0, savable: false)) }
+                    recentFoodItems.forEach { consider(.food($0, savable: false)) }
+                    filteredDishes.forEach { consider(.dish($0)) }
+                    recentDishItems.forEach { consider(.dish($0)) }
+                    let result = candidates
+                        .sorted {
+                            if $0.1 != $1.1 { return $0.1 < $1.1 }
+                            if $0.0.isDish != $1.0.isDish { return !$0.0.isDish }
+                            return $0.0.name.count < $1.0.name.count
+                        }
+                        .prefix(6)
+                        .map(\.0)
+                    await MainActor.run { topMatches = result }
                 }
             }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {
@@ -623,7 +639,7 @@ struct AddEntryView: View {
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
             .toolbar { whenToolbar }
-            .screenTitle(String(localized: "Приём пищи"), trailingButtons: 1)
+            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 1)
             .toolbar { draftToolbar }
             .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in

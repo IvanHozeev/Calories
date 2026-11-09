@@ -327,16 +327,13 @@ struct AddEntryView: View {
                 var seen = Set<String>()
 
                 for item in itemsWithQuantity {
-                    var best: (food: FoodItem, rank: Int, source: Int, length: Int)?
+                    // Собираем всех подходящих кандидатов из всех источников,
+                    // а не только одного «лучшего». Тогда при «молоко 300»
+                    // покажем все три процента с граммовкой 300, а пользователь
+                    // выберет нужное самим тапом.
+                    var candidates: [(food: FoodItem, source: Int, rank: Int, length: Int)] = []
 
-                    // Каталог — уже найден в фоне.
-                    if let catalog = catalogMatches[item],
-                       let food = FoodDatabase.item(for: catalog) {
-                        let rank = Self.catalogRank(item.name, catalog) ?? 0
-                        best = (food, rank, 0, catalog.localizedName.count)
-                    }
-
-                    // Свои и недавние — списки короткие, ранжируем здесь.
+                    // Свои продукты — primero, как просит пользователь.
                     for food in customFoods {
                         if let percent = item.percent {
                             let names = [food.name, food.producer ?? ""]
@@ -348,14 +345,9 @@ struct AddEntryView: View {
                                                         name: food.name,
                                                         producer: food.producer)
                         else { continue }
-                        let candidate = (food, rank, 1, food.name.count)
-                        if best == nil ||
-                           candidate.1 < best!.1 ||
-                           (candidate.1 == best!.1 && candidate.2 < best!.2) ||
-                           (candidate.1 == best!.1 && candidate.2 == best!.2 && candidate.3 < best!.3) {
-                            best = candidate
-                        }
+                        candidates.append((food, 0, rank, food.name.count))
                     }
+                    // Недавние — следующие.
                     for food in recentFoods {
                         if let percent = item.percent {
                             let names = [food.name, food.producer ?? ""]
@@ -367,21 +359,43 @@ struct AddEntryView: View {
                                                         name: food.name,
                                                         producer: food.producer)
                         else { continue }
-                        let candidate = (food, rank, 2, food.name.count)
-                        if best == nil ||
-                           candidate.1 < best!.1 ||
-                           (candidate.1 == best!.1 && candidate.2 < best!.2) ||
-                           (candidate.1 == best!.1 && candidate.2 == best!.2 && candidate.3 < best!.3) {
-                            best = candidate
+                        candidates.append((food, 1, rank, food.name.count))
+                    }
+                    // Каталог — в последнюю очередь.
+                    if let catalog = catalogMatches[item],
+                       let food = FoodDatabase.item(for: catalog) {
+                        if let percent = item.percent {
+                            let names = [catalog.localizedName, catalog.en]
+                                + (catalog.ru.map { [$0] } ?? [])
+                                + (catalog.aliases ?? [])
+                            if !FoodQuery.nameContainsPercent(names, percent: percent) {
+                                // пропускаем
+                            } else {
+                                let rank = Self.catalogRank(item.name, catalog) ?? 0
+                                candidates.append((food, 2, rank, catalog.localizedName.count))
+                            }
+                        } else {
+                            let rank = Self.catalogRank(item.name, catalog) ?? 0
+                            candidates.append((food, 2, rank, catalog.localizedName.count))
                         }
                     }
 
-                    guard let food = best?.food,
-                          let grams = item.grams(defaultGrams: food.defaultGrams),
-                          seen.insert(food.name.lowercased()).inserted
-                    else { continue }
+                    // Сортируем: свой primero, потом по точности совпадения, потом по длине.
+                    candidates.sort {
+                        if $0.source != $1.source { return $0.source < $1.source }
+                        if $0.rank != $1.rank { return $0.rank < $1.rank }
+                        return $0.length < $1.length
+                    }
 
-                    adds.append(QuickAdd(food: food, grams: grams, queryName: item.name))
+                    // Берём до трёх уникальных вариантов для выбора.
+                    var added = 0
+                    for cand in candidates where added < 3 {
+                        guard let grams = item.grams(defaultGrams: cand.food.defaultGrams),
+                              seen.insert(cand.food.name.lowercased()).inserted
+                        else { continue }
+                        adds.append(QuickAdd(food: cand.food, grams: grams, queryName: item.name))
+                        added += 1
+                    }
                 }
 
                 withAnimation(.default) { quickAddsResult = adds }

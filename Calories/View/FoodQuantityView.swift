@@ -133,6 +133,7 @@ struct FoodQuantityView: View {
         }
         .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbar {
             // Пополнение справочника — редкое действие, поэтому оно иконкой наверху.
             // Внизу под большим пальцем то, ради чего на экран и зашли.
@@ -365,6 +366,7 @@ struct DishQuantityView: View {
         }
         .navigationTitle(dish.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbar {
             if !isPushed {
                 ToolbarItem(placement: .cancellationAction) {

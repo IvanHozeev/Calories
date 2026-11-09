@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MyFoodView: View {
+struct PantryView: View {
     var store: CalorieStore
 
     @State private var showingNewFood = false

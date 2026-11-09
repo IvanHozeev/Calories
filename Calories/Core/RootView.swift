@@ -58,7 +58,7 @@ struct RootView: View {
             // контурного на глаз едва, и подмена проходит незамеченной.
             Tab("Рацион", systemImage: "fork.knife.circle", value: 3) {
                 NavigationStack {
-                    MyFoodView(store: store)
+                    PantryView(store: store)
                 }
             }
         }

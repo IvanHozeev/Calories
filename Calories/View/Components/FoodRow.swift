@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Строка продукта или блюда в любом списке выбора. Одна на все экраны: раньше
-/// в AddEntryView и MyFoodView лежали свои копии с рассыпанной строкой «Б12 Ж22 У41»
+/// в AddEntryView и PantryView лежали свои копии с рассыпанной строкой «Б12 Ж22 У41»
 /// и калориями серым шрифтом на втором плане.
 struct FoodRow: View {
     let name: String
@@ -164,9 +164,9 @@ struct FoodRow: View {
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
-                    .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
+                    .font(.app(.subheadline, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
+                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)

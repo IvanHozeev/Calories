@@ -580,17 +580,6 @@ private extension ContentView {
                       onSelect: { selectedHistoryDay = $0 },
                       onShowAll: { showingActivity = true })
 
-            // Ближайший приём — прямо под полоской дней, выше кольца:
-            // на него смотрят несколько раз в день, а не раз в неделю.
-            if mealSchedule.isEnabled, !slots.isEmpty {
-                MealScheduleStrip(slots: slots,
-                                  remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                  dailyGoal: store.adaptedTodayGoal) {
-                    showingMealSchedule = true
-                }
-                .tile
-            }
-
             PullableRing(
                 consumed: store.consumedToday,
                 goal: store.adaptedTodayGoal,
@@ -717,6 +706,15 @@ private extension ContentView {
             // ответа на два разных вопроса: когда есть и куда иду.
             VStack(spacing: 12) {
             HStack(spacing: 12) {
+                if mealSchedule.isEnabled, !slots.isEmpty {
+                    MealScheduleStrip(slots: slots,
+                                      remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
+                                      dailyGoal: store.adaptedTodayGoal) {
+                        showingMealSchedule = true
+                    }
+                    .tile
+                }
+
                 PlanStrip(
                     store: store,
                     onOpenPlan: { showingPlan = true },

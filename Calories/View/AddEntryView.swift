@@ -862,7 +862,7 @@ struct AddEntryView: View {
     @ViewBuilder
     private var draftSection: some View {
         if !draftItems.isEmpty {
-            Section("Приём пищи") {
+            Section {
                 // Догадка — над составом, а не под ним: она про то, что
                 // человек собирает прямо сейчас, и увидеть её он должен,
                 // пока собирает, а не дособрав.

@@ -280,6 +280,7 @@ extension View {
                         .inBar(back: backButton, cancelTitle: cancelTitle,
                                trailingButtons: trailingButtons)
                 }
+                .withoutSharedBackground()
             }
     }
 }

@@ -34,6 +34,18 @@ struct ActivityView: View {
 
     var body: some View {
         List {
+            if historyMode == .calendar {
+                Section {
+                    MonthGrid(days: store.goalHistory(days: 35)) { date in
+                        selectedDay = date
+                    }
+                    .padding(.vertical, 8)
+                }
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+            }
+
             // Сначала итог недели — то, ради чего сюда и заходят, — и только
             // потом дни, из которых он сложился.
             WeekReviewView(store: store).sections
@@ -49,29 +61,21 @@ struct ActivityView: View {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
 
-            if historyMode == .calendar {
-                Section {
-                    MonthGrid(days: store.goalHistory(days: 35)) { date in
-                        selectedDay = date
+            if historyMode != .calendar {
+                if loggedDays.isEmpty {
+                    Section {
+                        Text("Здесь появятся прошедшие дни")
+                            .font(.app(.footnote))
+                            .foregroundStyle(.secondary)
                     }
-                    .padding(.vertical, 8)
-                }
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            } else if loggedDays.isEmpty {
-                Section {
-                    Text("Здесь появятся прошедшие дни")
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Section {
-                    ForEach(loggedDays) { day in
-                        NavigationLink {
-                            DayDetailView(store: store, date: day.date)
-                        } label: {
-                            HistoryDayCard(day: day)
+                } else {
+                    Section {
+                        ForEach(loggedDays) { day in
+                            NavigationLink {
+                                DayDetailView(store: store, date: day.date)
+                            } label: {
+                                HistoryDayCard(day: day)
+                            }
                         }
                     }
                 }

@@ -107,7 +107,7 @@ struct DayDetailView: View {
                 .accessibilityLabel("Добавить")
             }
         }
-        .fullScreenCover(isPresented: $showingAdd) {
+        .sheet(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date,
                          onFinish: { showingAdd = false })
         }

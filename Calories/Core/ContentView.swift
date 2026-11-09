@@ -424,11 +424,11 @@ struct ContentView: View {
                         }
                 }
             }
-            .fullScreenCover(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
+            .sheet(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
             }
-            .fullScreenCover(item: $appendingTo) { entry in
+            .sheet(item: $appendingTo) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
             }

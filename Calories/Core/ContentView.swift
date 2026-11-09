@@ -427,10 +427,12 @@ struct ContentView: View {
             .sheet(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
                              onFinish: { showingAdd = false })
+                .presentationDetents([.medium, .large])
             }
             .sheet(item: $appendingTo) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
+                .presentationDetents([.medium, .large])
             }
             .sheet(item: $todaySheet) { sheet in
                 switch sheet {

@@ -110,6 +110,7 @@ struct DayDetailView: View {
         .sheet(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date,
                          onFinish: { showingAdd = false })
+            .presentationDetents([.medium, .large])
         }
     }
 }

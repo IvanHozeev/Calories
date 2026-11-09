@@ -609,7 +609,7 @@ private extension ContentView {
             // переваливала за высоту блока, список обрезал нижний ряд.
             // Кольцо минимум 200 точек высоты, чтобы хорошо читалось, но не
             // растягивается на весь экран — карточки под ним не должны уезжать.
-            .frame(minHeight: 200)
+            .frame(minHeight: 220)
             // Воздух снизу, но не сверху: знак берёт не весь остаток, а
             // остаток минус поле. Снизу эти четырнадцать точек держат кольцо
             // от полоски взвешивания и плиток. Сверху же над ним полоска
@@ -1310,20 +1310,25 @@ private struct PullableRing: View {
     private static let barBottom: CGFloat = 140
 
     var body: some View {
-        ProgressRing(
-            consumed: consumed,
-            goal: goal,
-            macros: macros,
-            proteinTarget: proteinTarget,
-            fatTarget: fatTarget,
-            carbsTarget: carbsTarget,
-            spinTicket: spinTicket,
-            pullAngle: Double(pull.offset) * 1.4,
-            onOpen: onOpen,
-            fills: true
-        )
-        .frame(width: 200, height: 200)
-        .padding(.top)
+        GeometryReader { geometry in
+            // Кольцо адаптивно: 55% ширины экрана, минимум 220, максимум 320 точек.
+            // На маленьких экранах (SE) — 220, на больших (Pro Max) — до 320.
+            let ringSize = min(max(geometry.size.width * 0.55, 220), 320)
+            ProgressRing(
+                consumed: consumed,
+                goal: goal,
+                macros: macros,
+                proteinTarget: proteinTarget,
+                fatTarget: fatTarget,
+                carbsTarget: carbsTarget,
+                spinTicket: spinTicket,
+                pullAngle: Double(pull.offset) * 1.4,
+                onOpen: onOpen,
+                fills: true
+            )
+            .frame(width: ringSize, height: ringSize)
+            .padding(.top)
+        }
         // Вырастает на месте знака заставки — и ровно пока та уходит.
         //
         // Той же кривой и за то же время: знак подрастает и тает, кольцо с

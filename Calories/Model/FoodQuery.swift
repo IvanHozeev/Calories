@@ -95,27 +95,42 @@ nonisolated enum FoodQuery {
     private static let leadingNumberPattern = #"^\s*(\d+(?:[.,]\d+)?)\s+"#
     private static let trailingNumberPattern = #"(?:^|\s)(\d+(?:[.,]\d+)?)\s*$"#
 
+    /// Скомпилированные регулярки — один раз, а не на каждое нажатие клавиши.
+    private static let volumeRegex = try! NSRegularExpression(pattern: volumePattern, options: [.caseInsensitive])
+    private static let weightRegex = try! NSRegularExpression(pattern: weightPattern, options: [.caseInsensitive])
+    private static let countRegex = try! NSRegularExpression(pattern: countPattern, options: [.caseInsensitive])
+    private static let percentRegex = try! NSRegularExpression(pattern: percentPattern, options: [.caseInsensitive])
+    private static let mixedFractionRegex = try! NSRegularExpression(pattern: mixedFractionPattern, options: [.caseInsensitive])
+    private static let fractionRegex = try! NSRegularExpression(pattern: fractionPattern, options: [.caseInsensitive])
+    private static let glyphFractionRegex = try! NSRegularExpression(pattern: glyphFractionPattern, options: [.caseInsensitive])
+    private static let largeNumberRegex = try! NSRegularExpression(pattern: largeNumberPattern, options: [.caseInsensitive])
+    private static let leadingNumberRegex = try! NSRegularExpression(pattern: leadingNumberPattern, options: [.caseInsensitive])
+    private static let trailingNumberRegex = try! NSRegularExpression(pattern: trailingNumberPattern, options: [.caseInsensitive])
+    private static let splitRegex = try! NSRegularExpression(pattern: #"\s*,(?!\d)\s*|\s*[;+&]\s*|\s+и\s+"#, options: [.caseInsensitive])
+    private static let whitespaceRegex = try! NSRegularExpression(pattern: #"\s+"#, options: [])
+    private static let spaceBeforeCommaRegex = try! NSRegularExpression(pattern: #"\s+([,.])"#, options: [])
+
     private static func parseSingle(_ raw: String) -> Item? {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return nil }
 
         var percent: Double?
-        if let match = firstMatch(percentPattern, in: text), let value = number(match.groups[0]) {
+        if let match = firstMatch(percentRegex, in: text), let value = number(match.groups[0]) {
             percent = value
         }
 
         var grams: Double?
         var units: Double?
 
-        if let match = firstMatch(volumePattern, in: text),
+        if let match = firstMatch(volumeRegex, in: text),
            let value = number(match.groups[0]) {
             grams = value * scale(for: match.groups[1])
             text.removeSubrange(match.range)
-        } else if let match = firstMatch(weightPattern, in: text),
+        } else if let match = firstMatch(weightRegex, in: text),
                   let value = number(match.groups[0]) {
             grams = value * scale(for: match.groups[1])
             text.removeSubrange(match.range)
-        } else if let match = firstMatch(countPattern, in: text),
+        } else if let match = firstMatch(countRegex, in: text),
                   let value = number(match.groups[0]) {
             units = value
             text.removeSubrange(match.range)
@@ -148,16 +163,11 @@ nonisolated enum FoodQuery {
     private static func split(_ query: String) -> [String] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return [] }
-        guard let regex = try? NSRegularExpression(
-            pattern: #"\s*,(?!\d)\s*|\s*[;+&]\s*|\s+и\s+"#,
-            options: [.caseInsensitive]
-        ) else { return [trimmed] }
-
         let whole = trimmed as NSString
         var parts: [String] = []
         var cursor = 0
-        for match in regex.matches(in: trimmed,
-                                   range: NSRange(location: 0, length: whole.length)) {
+        for match in splitRegex.matches(in: trimmed,
+                                        range: NSRange(location: 0, length: whole.length)) {
             let start = whole.substring(with: NSRange(location: cursor,
                                                       length: match.range.location - cursor))
             parts.append(start)
@@ -186,20 +196,20 @@ nonisolated enum FoodQuery {
     private static func fractionQuantity(
         in text: String
     ) -> (value: Double, range: Range<String.Index>)? {
-        if let match = firstMatch(mixedFractionPattern, in: text),
+        if let match = firstMatch(mixedFractionRegex, in: text),
            let whole = number(match.groups[0]),
            let numerator = number(match.groups[1]),
            let denominator = number(match.groups[2]),
            denominator > 0 {
             return (whole + numerator / denominator, match.range)
         }
-        if let match = firstMatch(fractionPattern, in: text),
+        if let match = firstMatch(fractionRegex, in: text),
            let numerator = number(match.groups[0]),
            let denominator = number(match.groups[1]),
            denominator > 0 {
             return (numerator / denominator, match.range)
         }
-        if let match = firstMatch(glyphFractionPattern, in: text),
+        if let match = firstMatch(glyphFractionRegex, in: text),
            let value = glyphFractions[text[match.range.lowerBound]] {
             return (value, match.range)
         }
@@ -209,11 +219,8 @@ nonisolated enum FoodQuery {
     private static func largeNumber(
         in text: String
     ) -> (value: Double, range: Range<String.Index>)? {
-        guard let regex = try? NSRegularExpression(pattern: largeNumberPattern,
-                                                   options: [.caseInsensitive])
-        else { return nil }
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
-        for match in regex.matches(in: text, range: range) {
+        for match in largeNumberRegex.matches(in: text, range: range) {
             guard let matchRange = Range(match.range, in: text) else { continue }
             let captured = match.range(at: 1)
             guard let captureRange = Range(captured, in: text),
@@ -228,11 +235,11 @@ nonisolated enum FoodQuery {
     private static func bareNumber(
         in text: String
     ) -> (value: Double, range: Range<String.Index>)? {
-        if let match = firstMatch(leadingNumberPattern, in: text),
+        if let match = firstMatch(leadingNumberRegex, in: text),
            let value = number(match.groups[0]) {
             return (value, match.range)
         }
-        if let match = firstMatch(trailingNumberPattern, in: text),
+        if let match = firstMatch(trailingNumberRegex, in: text),
            let value = number(match.groups[0]) {
             return (value, match.range)
         }
@@ -313,7 +320,7 @@ nonisolated enum FoodQuery {
     }
 
     private static func cleanedName(_ text: String) -> String {
-        var result = text.replacingOccurrences(of: #"\s+"#, with: " ",
+        var result = text.replacingOccurrences(of: " +", with: " ",
                                                options: .regularExpression)
         result = result.trimmingCharacters(
             in: CharacterSet.whitespacesAndNewlines
@@ -326,12 +333,9 @@ nonisolated enum FoodQuery {
     }
 
     private static func firstMatch(
-        _ pattern: String,
+        _ regex: NSRegularExpression,
         in text: String
     ) -> (range: Range<String.Index>, groups: [String])? {
-        guard let regex = try? NSRegularExpression(pattern: pattern,
-                                                   options: [.caseInsensitive])
-        else { return nil }
         let range = NSRange(text.startIndex..<text.endIndex, in: text)
         guard let match = regex.firstMatch(in: text, options: [], range: range),
               let matchRange = Range(match.range, in: text)

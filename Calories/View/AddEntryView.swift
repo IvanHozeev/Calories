@@ -57,6 +57,12 @@ struct AddEntryView: View {
     /// сеть дёргаем только когда о ней попросили, а не на каждую букву.
     @State private var wantsOnlineSearch = false
 
+    /// Кэш разбора запроса, чтобы не парсить строку при каждом нажатии клавиши.
+    @State private var parsedQueryCache: (search: String, items: [FoodQuery.Item]) = ("", [])
+    /// Кэш быстрого добавления: поиск по каталогу и ранжирование своих продуктов
+    /// — тяжёлая работа, её не стоит повторять на каждую букву.
+    @State private var quickAddsCache: (search: String, adds: [QuickAdd]) = ("", [])
+
     /// Что показываем на экране порции.
     ///
     /// Порция — деталь этого экрана, а не отдельный лист поверх него. Пока она
@@ -147,8 +153,16 @@ struct AddEntryView: View {
     }
 
     /// Разобранный запрос: «творог 5% 180» — это продукт, жирность и вес.
+    ///
+    /// Кэшируется по строке поиска: клавиатура вызывает это свойство при
+    /// каждой букве, а паттерн не меняется — нет смысла парсить заново.
     private var parsedQuery: [FoodQuery.Item] {
-        FoodQuery.parse(debouncedSearch)
+        if parsedQueryCache.search == debouncedSearch {
+            return parsedQueryCache.items
+        }
+        let items = FoodQuery.parse(debouncedSearch)
+        parsedQueryCache = (debouncedSearch, items)
+        return items
     }
 
     /// По чему ищем продукты. Количество из запроса убираем: продукт
@@ -292,18 +306,22 @@ struct AddEntryView: View {
     }
 
     private var quickAdds: [QuickAdd] {
+        if quickAddsCache.search == debouncedSearch {
+            return quickAddsCache.adds
+        }
         let items = parsedQuery.filter {
             $0.hasQuantity && !$0.name.trimmingCharacters(in: .whitespaces).isEmpty
         }
-        guard !items.isEmpty else { return [] }
         var seen = Set<String>()
-        return items.compactMap { item in
+        let adds: [QuickAdd] = items.compactMap { item in
             guard let food = bestFood(for: item),
-                  let grams = item.grams(defaultGrams: food.defaultGrams),
-                  seen.insert(food.name.lowercased()).inserted
+                  let grams = item.grams(defaultGrams: food.defaultGrams)
             else { return nil }
+            guard seen.insert(food.name.lowercased()).inserted else { return nil }
             return QuickAdd(food: food, grams: grams, queryName: item.name)
         }
+        quickAddsCache = (debouncedSearch, adds)
+        return adds
     }
 
     /// Лучший продукт под разобранную фразу.

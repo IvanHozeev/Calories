@@ -128,8 +128,7 @@ struct FoodQuantityView: View {
         //
         // Через `task`, а не `onAppear`: фокус, поставленный до конца перехода,
         // система гасит вместе с анимацией push, и клавиатура не появляется.
-        .task {
-            try? await Task.sleep(for: .milliseconds(320))
+        .onAppear {
             gramsFocused = true
         }
         .navigationTitle(food.name)
@@ -361,8 +360,7 @@ struct DishQuantityView: View {
         //
         // Через `task`, а не `onAppear`: фокус, поставленный до конца перехода,
         // система гасит вместе с анимацией push, и клавиатура не появляется.
-        .task {
-            try? await Task.sleep(for: .milliseconds(320))
+        .onAppear {
             gramsFocused = true
         }
         .navigationTitle(dish.name)

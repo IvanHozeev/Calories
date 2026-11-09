@@ -254,6 +254,20 @@ final class Dish: Identifiable {
             carbs: totalMacros.carbs / totalGrams * 100
         )
     }
+
+    /// Калории на порцию по умолчанию (servingGrams). Если порция не задана,
+    /// возвращает калории всей кастрюли.
+    var servingCalories: Int {
+        guard totalGrams > 0 else { return totalCalories }
+        return Int((Double(totalCalories) * servingGrams / totalGrams).rounded())
+    }
+
+    /// Макросы на порцию по умолчанию (servingGrams). Если порция не задана,
+    /// возвращает макросы всей кастрюли.
+    var servingMacros: Macros {
+        guard totalGrams > 0 else { return totalMacros }
+        return totalMacros.times(servingGrams / totalGrams)
+    }
 }
 
 /// Один продукт внутри записи дневника: снимок на момент записи.

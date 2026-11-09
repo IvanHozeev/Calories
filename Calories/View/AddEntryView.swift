@@ -1282,13 +1282,13 @@ struct AddEntryView: View {
     private func dishRow(_ dish: Dish) -> some View {
         FoodRow(
             name: dish.name,
-            calories: dish.totalCalories,
+            calories: dish.servingCalories,
             caloriesPer100g: dish.caloriesPer100g,
-            portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
-            macros: dish.totalMacros,
+            portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
+            macros: dish.servingMacros,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
             icons: store.foodCategories(of: dish).map(\.icon),
-            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.totalGrams),
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.servingGrams),
             traits: dish.traits
         )
     }

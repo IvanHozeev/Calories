@@ -318,10 +318,10 @@ struct PantryView: View {
                         } label: {
                             FoodRow(
                                 name: dish.name,
-                                calories: dish.totalCalories,
+                                calories: dish.servingCalories,
                                 caloriesPer100g: dish.caloriesPer100g,
-                                portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
-                                macros: dish.totalMacros,
+                                portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
+                                macros: dish.servingMacros,
                                 detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
                                 // Вид рецепта — первым значком, перед категориями состава:
                             // по нему и выбирают, когда думают, что сварить.
@@ -385,10 +385,10 @@ struct PantryView: View {
                     } label: {
                         FoodRow(
                             name: dish.name,
-                            calories: dish.totalCalories,
+                            calories: dish.servingCalories,
                             caloriesPer100g: dish.caloriesPer100g,
-                            portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
-                            macros: dish.totalMacros,
+                            portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
+                            macros: dish.servingMacros,
                             // У сваренного вместо числа ингредиентов —
                             // остаток: про рецепт человек и так знает, а
                             // сколько ещё есть в холодильнике — нет.

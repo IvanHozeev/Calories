@@ -286,6 +286,8 @@ struct AddEntryView: View {
         /// По какому названию его искали — для идентификатора строки, когда
         /// в одной фразе несколько продуктов.
         let queryName: String
+        /// Жирность из запроса — для лога выборов (ранкер на признаках).
+        let percent: Double?
 
         var id: String { "\(food.id.uuidString)-\(queryName)" }
     }
@@ -393,10 +395,20 @@ struct AddEntryView: View {
                         guard let grams = item.grams(defaultGrams: cand.food.defaultGrams),
                               seen.insert(cand.food.name.lowercased()).inserted
                         else { continue }
-                        adds.append(QuickAdd(food: cand.food, grams: grams, queryName: item.name))
+                        adds.append(QuickAdd(food: cand.food, grams: grams, queryName: item.name, percent: item.percent))
                         added += 1
                     }
                 }
+
+                // Логируем показ быстрого добавления для ранкера на признаках.
+                SearchEventLog.shared.log(SearchEvent(
+                    id: UUID(),
+                    query: effectiveSearchTerm,
+                    shown: adds.map { ShownItem(name: $0.food.name, percent: $0.percent, source: "catalog", rank: nil) },
+                    selected: nil,
+                    selectedGrams: nil,
+                    timestamp: Date()
+                ))
 
                 withAnimation(.default) { quickAddsResult = adds }
             }
@@ -482,6 +494,17 @@ struct AddEntryView: View {
         )
         withAnimation(.snappy) { draftItems.append(item) }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+        // Логируем выбор для ранкера на признаках.
+        SearchEventLog.shared.log(SearchEvent(
+            id: UUID(),
+            query: effectiveSearchTerm,
+            shown: [],
+            selected: ShownItem(name: add.food.name, percent: add.percent, source: "catalog", rank: nil),
+            selectedGrams: add.grams,
+            timestamp: Date()
+        ))
+
         scrollToTopTicket += 1
         // Один продукт — законченная фраза: строка очищается, как после
         // обычного добавления. Несколько — оставляем остальные, за ними и
@@ -648,7 +671,21 @@ struct AddEntryView: View {
                         }
                         .prefix(6)
                         .map(\.0)
-                    await MainActor.run { withAnimation(.default) { topMatches = result } }
+                    await MainActor.run {
+                        withAnimation(.default) { topMatches = result }
+                        // Логируем показ топ-сопоставлений для ранкера на признаках.
+                        SearchEventLog.shared.log(SearchEvent(
+                            id: UUID(),
+                            query: query,
+                            shown: result.map { match in
+                                ShownItem(name: match.name, percent: nil,
+                                          source: match.isDish ? "dish" : "food", rank: nil)
+                            },
+                            selected: nil,
+                            selectedGrams: nil,
+                            timestamp: Date()
+                        ))
+                    }
                 }
             }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {

@@ -1270,14 +1270,16 @@ struct AddEntryView: View {
     }
 
     private func foodRow(_ food: FoodItem) -> some View {
-        FoodRow(
+        let grams = food.defaultGrams > 0 ? food.defaultGrams : 100
+        let kcal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
+        return FoodRow(
             name: food.name,
-            calories: food.caloriesPer100g,
+            calories: kcal,
             caloriesPer100g: food.caloriesPer100g,
-            portion: "100 \(String(localized: "г"))",
-            macros: food.macrosPer100g,
+            portion: "\(Int(grams)) \(String(localized: "г"))",
+            macros: food.macrosPer100g.portion(grams: grams),
             icons: [food.foodCategory.icon],
-            micros: store.notableMicronutrients(forFoodNamed: food.name, grams: 100),
+            micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),
             traits: food.traits
         )
@@ -1286,13 +1288,13 @@ struct AddEntryView: View {
     private func dishRow(_ dish: Dish) -> some View {
         FoodRow(
             name: dish.name,
-            calories: dish.caloriesPer100g,
+            calories: dish.totalCalories,
             caloriesPer100g: dish.caloriesPer100g,
-            portion: "100 \(String(localized: "г"))",
-            macros: dish.macrosPer100g,
+            portion: String(format: "%.0f \(String(localized: "г"))", dish.totalGrams),
+            macros: dish.totalMacros,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
             icons: store.foodCategories(of: dish).map(\.icon),
-            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: 100),
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.totalGrams),
             traits: dish.traits
         )
     }

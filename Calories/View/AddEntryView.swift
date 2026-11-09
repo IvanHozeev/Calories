@@ -45,6 +45,9 @@ struct AddEntryView: View {
     @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
     @State private var editingDish: Dish? = nil
+    /// «Как обычно» — предложение usualMeal, показанное при открытии экрана из подсказки «Пора есть».
+    private let initialUsualMeal: UsualMeal.Suggestion?
+    @State private var showingUsualMeal: Bool = false
 
     @State private var offResults: [FoodItem] = []
     @State private var isSearchingOFF = false
@@ -99,11 +102,13 @@ struct AddEntryView: View {
     init(store: CalorieStore,
          initialDate: Date = Date(),
          initialAction: QuickAction? = nil,
+         initialUsualMeal: UsualMeal.Suggestion? = nil,
          appendingTo entry: FoodEntry? = nil,
          onFinish: (() -> Void)? = nil) {
         self.store = store
         self.appendingTo = entry
         self.onFinish = onFinish
+        self.initialUsualMeal = initialUsualMeal
         if let entry {
             _draftItems = State(initialValue: [
                 MealItem(name: entry.name, calories: entry.calories, macros: entry.macros, grams: entry.grams)
@@ -114,6 +119,7 @@ struct AddEntryView: View {
         // пока экран ещё выезжает, и система её молча теряет.
         _showingPhoto = State(initialValue: initialAction == .camera)
         _showingScanner = State(initialValue: initialAction == .scanner)
+        _showingUsualMeal = State(initialValue: initialUsualMeal != nil)
         // Открываем на дне, который просили, но со временем «сейчас»: для сегодняшней
         // записи это привычное поведение, а для прошедшего дня — разумная отправная точка.
         let calendar = Calendar.current
@@ -454,6 +460,34 @@ struct AddEntryView: View {
     }
 
     @ViewBuilder
+    private var usualMealSection: some View {
+        if let usual = initialUsualMeal {
+            Section("Как обычно") {
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(partsName(usual))
+                            .font(.app(.body, weight: .semibold))
+                        Text("\(usual.times) раз, в последний раз \(usual.lastEaten.formatted(date: .omitted, time: .shortened))")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Text("\(usual.calories) ккал")
+                        .font(.app(.subheadline, weight: .semibold))
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    addUsualMeal(usual)
+                }
+            }
+        }
+    }
+
+    private func partsName(_ usual: UsualMeal.Suggestion) -> String {
+        usual.parts.map(\.name).joined(separator: ", ")
+    }
+
+    @ViewBuilder
     private var quickAddSection: some View {
         let adds = quickAdds
         if isSearching, !adds.isEmpty {
@@ -519,6 +553,21 @@ struct AddEntryView: View {
                 debouncedSearch = ""
             }
         }
+    }
+
+    /// Добавить всё из «Как обычно» в черновик.
+    private func addUsualMeal(_ usual: UsualMeal.Suggestion) {
+        for part in usual.parts {
+            draftItems.append(MealItem(
+                name: part.name,
+                calories: part.calories,
+                macros: part.macros,
+                grams: part.grams
+            ))
+        }
+        showingUsualMeal = false
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        scrollToTopTicket += 1
     }
 
     @ViewBuilder
@@ -989,6 +1038,10 @@ struct AddEntryView: View {
             quickAddSection
             topMatchesSection
         }
+
+        // «Как обычно» — обычное блюдо для этого приёма, предложенное при
+        // открытии экрана из строки «Пора есть».
+        usualMealSection
 
         // Подсказки еды: «как обычно», «обычно вместе» и подбор к остатку.
         // При поиске их не показываем: человек ищет конкретный продукт, а не

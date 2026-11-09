@@ -39,6 +39,8 @@ struct ContentView: View {
     /// когда тумблер переключили на соседней.
     @State private var mealSchedule = MealScheduleSettings.shared
     @State private var showingMealSchedule = false
+    /// Что предложить при тапе на «Пора есть» — обычное блюдо для этого приёма.
+    @State private var initialUsualMeal: UsualMeal.Suggestion? = nil
     /// Крупное кольцо уехало под шапку — в шапке его подменяет миниатюра.
     @State private var ringIsAway = false
     /// Поверх «Сегодня» что-то открыто.
@@ -411,7 +413,8 @@ struct ContentView: View {
             }
             .sheet(isPresented: $showingAdd, onDismiss: { entryAction = nil }) {
                 AddEntryView(store: store, initialAction: entryAction,
-                             onFinish: { showingAdd = false })
+                             initialUsualMeal: initialUsualMeal,
+                             onFinish: { showingAdd = false; initialUsualMeal = nil })
                 .presentationDetents([.medium, .large])
                 .presentationBackground(Color(.systemBackground))
             }
@@ -763,7 +766,9 @@ private extension ContentView {
             if let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()),
                slot.state != .done, slot.state != .missed,
                slot.time <= Date() {
+                let usualMeal = store.usualMeals(period: slot.period, days: 180).first
                 Button {
+                    initialUsualMeal = usualMeal
                     showingAdd = true
                 } label: {
                     HStack(alignment: .top, spacing: 10) {

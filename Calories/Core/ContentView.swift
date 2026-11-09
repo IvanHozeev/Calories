@@ -55,21 +55,6 @@ struct ContentView: View {
     /// Пробую настройки на экране Сегодня
     @State private var showingSettings = false
 
-    /// Высота первого экрана: ровно видимая часть списка.
-    ///
-    /// Полоска и плитки берут своё, остаток достаётся кольцу — поэтому блок
-    /// кончается у таббара, а дневник начинается со следующего экрана.
-    /// Нижняя граница не для красоты: на маленьком экране с крупным шрифтом
-    /// без неё кольцо схлопнулось бы в точку.
-    private var summaryHeight: CGFloat {
-        // Подсказки дня живут под кольцом — все в одном месте, чтобы их не
-        // искать по экрану. Приходят они не каждый день, и платить за них
-        // должен экран, а не кольцо: без добавки каждая отъедала бы у знака
-        // свою высоту, потому что блок фиксирован.
-        let weighIn: CGFloat = (store.profile == nil || !store.hasWeighedToday) ? 52 : 0
-        let batch: CGFloat = store.batchHint() == nil ? 0 : 52
-        return max(listHeight - listBottomInset - 8, 420) + weighIn + batch
-    }
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -118,11 +103,8 @@ struct ContentView: View {
             List {
                 Section {
                     summaryCards
-                        // Ровно видимая часть списка: только так кольцу
-                        // достаётся весь остаток. С «не меньше» список
-                        // считает высоту блока по содержимому, и кольцо
-                        // получает свой минимум вместо свободного места.
-                        .frame(height: summaryHeight)
+                        // Блок по своему содержимому: кольцо не тянется на весь
+                        // экран, а дневник начинается сразу за ним, без пустоты.
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))

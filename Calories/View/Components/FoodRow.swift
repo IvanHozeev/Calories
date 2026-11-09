@@ -164,9 +164,9 @@ struct FoodRow: View {
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
-                    .font(.app(.subheadline, weight: .semibold))
+                    .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
                     .monospacedDigit()
-                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
+                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)

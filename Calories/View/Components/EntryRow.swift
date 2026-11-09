@@ -35,6 +35,13 @@ struct EntryRow: View {
         return String(format: "%.0f \(String(localized: "г"))", total)
     }
 
+    /// Плотность калорий на сто грамм записи: для веса шрифта цифры калорий.
+    /// Чем ниже плотность, тем жирнее цифра.
+    private var caloriesPer100g: Int? {
+        guard let grams = entry.grams, grams > 0 else { return nil }
+        return Int(Double(entry.calories) / grams * 100)
+    }
+
     var body: some View {
         // Два уровня вместо трёх: название с калориями сверху, всё остальное
         // одной серой строкой под ним.
@@ -105,9 +112,9 @@ struct EntryRow: View {
             // должно имя: оно и так обрезается многоточием, и это видно.
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(verbatim: "\(entry.calories)")
-                    .font(.app(.subheadline, weight: .semibold))
+                    .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
                     .monospacedDigit()
-                    .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
+                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.tertiary)

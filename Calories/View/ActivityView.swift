@@ -34,6 +34,18 @@ struct ActivityView: View {
 
     var body: some View {
         List {
+            // Сегментный контрол первым — над календарём и над списком дней.
+            Section {
+                Picker("Вид", selection: $historyMode) {
+                    ForEach(HistoryMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+
             if historyMode == .calendar {
                 Section {
                     MonthGrid(days: store.goalHistory(days: 35)) { date in
@@ -49,17 +61,6 @@ struct ActivityView: View {
             // Сначала итог недели — то, ради чего сюда и заходят, — и только
             // потом дни, из которых он сложился.
             WeekReviewView(store: store).sections
-
-            Section {
-                Picker("Вид", selection: $historyMode) {
-                    ForEach(HistoryMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
 
             if historyMode != .calendar {
                 if loggedDays.isEmpty {

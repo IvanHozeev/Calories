@@ -1131,11 +1131,6 @@ struct AddEntryView: View {
             // возвращаются после каждого добавленного продукта.
             .toolbar { whenToolbar }
             .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 1)
-            // При разворачивании строки поиска iOS скрывает заголовок шапки и
-            // не возвращает его при закрытии поиска. Привязка к состоянию
-            // поиска заставляет заголовок пересоздаваться при каждом
-            // открытии/закрытии строки — тогда он появляется обратно.
-            .id(searchPresented)
             .toolbar { draftToolbar }
             .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in

@@ -12,8 +12,6 @@ enum DailyAdvice: Equatable {
     /// Калорий к этому часу меньше, чем пора бы: процент от нормы и сколько
     /// килокалорий до неё осталось.
     case underGoal(percent: Int, remaining: Int)
-    /// Углеводов выше цели на 30%+.
-    case highCarbs(overGrams: Int)
     /// Вес не менялся две недели.
     case weightPlateau(days: Int)
     /// Не записывали еду 3+ дня.
@@ -28,7 +26,6 @@ enum DailyAdvice: Equatable {
         case .onTarget: return String(localized: "Норма на сегодня набрана")
         case .overGoal: return String(localized: "Сегодня перебор")
         case .underGoal: return String(localized: "Не доел до нормы")
-        case .highCarbs: return String(localized: "Углеводы сверх нормы")
         case .weightPlateau: return String(localized: "Вес стоит на месте")
         case .notLogging: return String(localized: "Ты не записывал еду")
         case .noDinnerYet: return String(localized: "Вечер, а ужина ещё нет")
@@ -44,8 +41,6 @@ enum DailyAdvice: Equatable {
             return String(format: String(localized: "На %d%% выше цели. Завтра можно есть легче."), pct)
         case .underGoal(let pct, let remaining):
             return String(format: String(localized: "Съедено %1$d%% нормы — к этому часу маловато. До цели ещё %2$d ккал."), pct, remaining)
-        case .highCarbs(let grams):
-            return String(format: String(localized: "Углеводов на %d г больше цели."), grams)
         case .weightPlateau(let days):
             return String(format: String(localized: "Вес не менялся %d дней. Пересмотри дефицит или приём пищи."), days)
         case .notLogging(let days):
@@ -65,7 +60,6 @@ enum DailyAdvice: Equatable {
         // действие, а не сводка. Поэтому вечером совет про ужин идёт первым.
         case .noDinnerYet: return 95
         case .underGoal: return 90
-        case .highCarbs: return 80
         case .weightPlateau: return 60
         // Три дня без записей — важнее, чем «пора ужинать»: советовать
         // поесть человеку, который вообще перестал вести дневник, бессмысленно.
@@ -125,13 +119,7 @@ struct DailyAdviceEngine {
         // кольцом, и второй строки про то же самое экран не заслуживает.
         // Отставание от темпа считает `isBehindPace`, а показывает плитка.
 
-        // 3. Углеводы.
-        if let ct = carbsTarget, ct > 0, macrosToday.carbs > ct * 1.3 {
-            let over = Int((macrosToday.carbs - ct).rounded())
-            candidates.append((.highCarbs(overGrams: over), 80))
-        }
-
-        // 4. Вес не менялся 14+ дней.
+        // 3. Вес не менялся 14+ дней.
         if let trend = weightTrend, trend.count >= 14 {
             let first = trend[trend.count - 14]
             let last = trend[trend.count - 1]
@@ -140,7 +128,7 @@ struct DailyAdviceEngine {
             }
         }
 
-        // 5. Не записывали еду 3+ дня.
+        // 4. Не записывали еду 3+ дня.
         if let last = lastLoggedDay {
             let daysSince = Calendar.current.dateComponents([.day], from: last, to: now).day ?? 0
             if daysSince >= 3 {
@@ -149,7 +137,7 @@ struct DailyAdviceEngine {
         }
         // Если записей вообще нет — не советуем, а молчим: первый запуск.
 
-        // 6. Вечер, а ужина нет (18:00–21:00, калорий мало).
+        // 5. Вечер, а ужина нет (18:00–21:00, калорий мало).
         //
         // Верхняя граница важна: без неё «пора ужинать» висело и в полночь,
         // то есть советовало приём пищи ровно перед сном.
@@ -171,6 +159,15 @@ struct DailyAdviceEngine {
     static func isBehindPace(eaten: Double, target: Double?, progress: Double) -> Bool {
         guard let target, target > 0, progress >= 0.5 else { return false }
         return eaten < (progress - 0.2) * target
+    }
+
+    /// Съедено заметно больше нормы — только после половины дня.
+    ///
+    /// Плотный завтрак утром не должен проходить за перебор: цель на день,
+    /// а не на утро. После полдня превышение на 30%+ — повод сказать.
+    static func isOverTarget(eaten: Double, target: Double?, progress: Double) -> Bool {
+        guard let target, target > 0, progress >= 0.5 else { return false }
+        return eaten > target * 1.3
     }
 
     /// Какая доля дня уже прошла — от подъёма до отбоя.

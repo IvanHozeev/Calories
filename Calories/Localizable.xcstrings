@@ -63032,52 +63032,6 @@
         }
       }
     },
-    "Углеводов на %d г больше цели.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d g more carbs than goal."
-          }
-        }
-      }
-    },
     "Вес стоит на месте": {
       "localizations": {
         "ar": {

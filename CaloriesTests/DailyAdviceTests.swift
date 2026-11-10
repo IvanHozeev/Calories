@@ -167,24 +167,25 @@ import Foundation
         #expect(!DailyAdviceEngine.isBehindPace(eaten: 40, target: 80, progress: 0.6))
     }
 
-    // MARK: - Углеводы
+    // MARK: - Углеводы сверх нормы в плитке
 
-    @Test func highCarbsWhenAboveThirtyPercent() {
-        let advice = DailyAdviceEngine.advice(
-            consumedToday: 2000,
-            adaptedTodayGoal: 2000,
-            macrosToday: Macros(protein: 80, fat: 60, carbs: 400),
-            proteinTarget: nil,
-            fatTarget: nil,
-            carbsTarget: 250,
-            weightTrend: nil,
-            lastLoggedDay: nil
-        )
-        if case .highCarbs(let grams) = advice {
-            #expect(grams == 150)
-        } else {
-            Issue.record("Ожидался highCarbs, получено \(advice)")
-        }
+    @Test func carbsOverTargetAfterHalfTheDay() {
+        // Прожито 80% дня, цель 250 г, съедено 330 г — больше 130% нормы.
+        #expect(DailyAdviceEngine.isOverTarget(eaten: 330, target: 250, progress: 0.8))
+    }
+
+    @Test func carbsExactlyOneThirtyIsNotOver() {
+        // Ровно 130% цели — порог строгий, это ещё не «сверх нормы».
+        #expect(!DailyAdviceEngine.isOverTarget(eaten: 325, target: 250, progress: 0.8))
+    }
+
+    @Test func carbsOverTargetInTheMorningIsNotOver() {
+        // Цель дня ещё не израсходована: плотный завтрак — не перебор.
+        #expect(!DailyAdviceEngine.isOverTarget(eaten: 400, target: 250, progress: 0.25))
+    }
+
+    @Test func carbsWithoutTargetIsNeverOver() {
+        #expect(!DailyAdviceEngine.isOverTarget(eaten: 500, target: nil, progress: 1))
     }
 
     // MARK: - Вес на плато

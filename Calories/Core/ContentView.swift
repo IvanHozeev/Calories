@@ -773,11 +773,13 @@ private extension ContentView {
         showingAdd = true
     }
 
-    /// Макросы, которые отстают от темпа дня.
+    /// Макросы, которые требуют внимания: белок и жиры — отстают от темпа,
+    /// углеводы — заметно превышают норму.
     ///
     /// Считается для плиток под кольцом: там же, где видно количество,
-    /// уместно и «добавь белка». Отдельными строками эти советы жили в
-    /// хвосте экрана и появлялись с утра, когда добрать их ещё не с чего.
+    /// уместно и «добавь белка», и «углеводы сверх нормы». Отдельными
+    /// строками эти советы жили в хвосте экрана и появлялись с утра, когда
+    /// оценивать их ещё рано.
     private var behindMacros: Set<MacroKind> {
         let progress = DailyAdviceEngine.dayProgress(wake: hourOfDay(mealSchedule.wake),
                                                      sleep: hourOfDay(mealSchedule.sleep),
@@ -792,6 +794,11 @@ private extension ContentView {
                                           target: store.fatTarget,
                                           progress: progress) {
             behind.insert(.fat)
+        }
+        if DailyAdviceEngine.isOverTarget(eaten: store.macrosToday.carbs,
+                                          target: store.carbsTarget,
+                                          progress: progress) {
+            behind.insert(.carbs)
         }
         return behind
     }

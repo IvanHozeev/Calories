@@ -41,6 +41,10 @@ struct AddEntryView: View {
     /// связывает. Именно счётчик, а не флаг: два добавления подряд должны
     /// сработать оба, а `false → true` во второй раз уже не случится.
     @State private var scrollToTopTicket = 0
+    /// Имена продуктов из разобранной фразы, уже положенные в приём.
+    /// Нужно, чтобы не скроллить после каждого продукта из «молоко 300 протеин 40»:
+    /// скроллим только когда последний из них добавлен.
+    @State private var consumedQueryNames: Set<String> = []
     @State private var showingScanner: Bool
     @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
@@ -543,16 +547,24 @@ struct AddEntryView: View {
             timestamp: Date()
         ))
 
-        scrollToTopTicket += 1
-        // Один продукт — законченная фраза: строка очищается, как после
-        // обычного добавления. Несколько — оставляем остальные, за ними и
-        // пришли.
-        if quickAdds.count <= 1 {
+        consumedQueryNames.insert(add.queryName)
+        // Продукты из разобранной фразы, которые ещё предстоит добавить.
+        let pending = parsedQuery.filter {
+            $0.hasQuantity && !$0.name.trimmingCharacters(in: .whitespaces).isEmpty
+                && !consumedQueryNames.contains($0.name)
+        }
+        if pending.isEmpty {
+            // Все продукты фразы добавлены — скроллим кверху, показываем приём,
+            // чистим поиск.
+            scrollToTopTicket += 1
             Task { @MainActor in
                 searchText = ""
                 debouncedSearch = ""
+                consumedQueryNames.removeAll()
             }
         }
+        // Иначе не скроллим: человек ещё добавляет остальные продукты фразы,
+        // и черновик — над результатами, он их видит без листования.
     }
 
     /// Добавить всё из «Как обычно» в черновик.
@@ -649,17 +661,11 @@ struct AddEntryView: View {
                 // высоту и молчит, пока время сегодняшнее; сдвинутое время
                 // подсвечивается оранжевым — это уже предупреждение.
 
-                // Пока в строке поиска что-то есть, найденное идёт выше набранного:
-                // смотрят сейчас на результаты, а список уже положенного только
-                // отодвигал бы их вниз. Пустой поиск возвращает приём пищи наверх —
-                // тогда главное на экране он.
-                if searchText.isEmpty {
-                    draftSection
-                    browseSections
-                } else {
-                    browseSections
-                    draftSection
-                }
+                // Набранные продукты всегда сверху — и при пустом поиске, и при
+                // активном. Тогда после «молоко 300» не нужно листать вниз за
+                // следующим продуктом: он остаётся на экране над результатами.
+                draftSection
+                browseSections
             }
             .onChange(of: scrollToTopTicket) { _, _ in
                 withAnimation { scroll.scrollTo(Self.draftAnchor, anchor: .top) }
@@ -682,7 +688,14 @@ struct AddEntryView: View {
                         prompt: "Поиск еды")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
-            .onChange(of: searchText) { _, _ in wantsOnlineSearch = false }
+            .onChange(of: searchText) { _, newValue in
+                wantsOnlineSearch = false
+                // Новый запрос — новый контекст: сбрасываем отслеживание
+                // продуктов из разобранной фразы.
+                if newValue.trimmingCharacters(in: .whitespaces).isEmpty {
+                    consumedQueryNames.removeAll()
+                }
+            }
             // Быстрые добавления считаем в фоне с задержкой после окончания
             // ввода — не на каждый символ, иначе клавиатура лагает. Каждый новый
             // символ отменяет предыдущую задачу.

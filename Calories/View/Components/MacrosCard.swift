@@ -20,6 +20,12 @@ struct MacrosCard: View {
     /// Клетчатка известна не по всему дню — показанное число нижнее.
     var fiberIsPartial: Bool = false
     let weightKg: Double?
+    /// Макросы, которые отстают от темпа дня.
+    ///
+    /// Тогда подпись плитки становится призывом добрать: это те же
+    /// сообщения, что раньше стояли отдельными строками в хвосте экрана, —
+    /// но рядом с самим числом, из которого они и посчитаны.
+    var behindMacros: Set<MacroKind> = []
     /// Открыть разбор дня. Раньше на карточке жили три всплывающих окошка —
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
     /// между собой было нельзя, а витаминам в таком формате места нет вовсе.
@@ -84,23 +90,25 @@ struct MacrosCard: View {
     }
 
     private func macroTile(_ kind: MacroKind, value: Double) -> some View {
-        tile(title: LocalizedStringKey(kind.title),
-             value: value,
-             target: target(for: kind),
-             color: kind.color,
-             isLeading: focus == kind,
-             gymDay: kind == .carbs ? gymDayName : nil,
-             // Имя — одной плитке, а не всем четырём.
-             //
-             // На обёртке его наследовал каждый из четырёх кнопок, и поиск по
-             // нему находил четыре элемента вместо одного. Ведут они в одно
-             // место, так что хватает и одной: белок стоит первым.
-             identifier: kind == .protein ? "openDayNutrition" : nil)
+        let isBehind = behindMacros.contains(kind)
+        return tile(title: isBehind ? kind.shortageTitle : kind.title,
+                    value: value,
+                    target: target(for: kind),
+                    color: kind.color,
+                    isLeading: focus == kind,
+                    isHint: isBehind,
+                    gymDay: kind == .carbs ? gymDayName : nil,
+                    // Имя — одной плитке, а не всем четырём.
+                    //
+                    // На обёртке его наследовал каждый из четырёх кнопок, и поиск по
+                    // нему находил четыре элемента вместо одного. Ведут они в одно
+                    // место, так что хватает и одной: белок стоит первым.
+                    identifier: kind == .protein ? "openDayNutrition" : nil)
     }
 
     /// Клетчатка — цветом углеводов: она их часть, и своего цвета у неё нет.
     private var fiberTile: some View {
-        tile(title: "Клетчатка",
+        tile(title: String(localized: "Клетчатка"),
              value: fiber,
              target: Micronutrient.fiber.dailyValue,
              color: MacroKind.carbs.color,
@@ -115,17 +123,21 @@ struct MacrosCard: View {
     /// Пока про день известно мало, вместо числа прочерк: ноль здесь означал
     /// бы «не ел», а на деле мы просто не знаем — клетчатку отдаёт не всякий
     /// источник.
-    private func tile(title: LocalizedStringKey, value: Double?, target: Double?,
-                      color: Color, isLeading: Bool, gymDay: String? = nil,
+    private func tile(title: String, value: Double?, target: Double?,
+                      color: Color, isLeading: Bool, isHint: Bool = false,
+                      gymDay: String? = nil,
                       prefix: String? = nil, identifier: String? = nil) -> some View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
         return Button(action: onOpen) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(title)
+                Text(verbatim: title)
                     .font(.app(.caption2))
                     // Подпись ведущего макроса — его цветом: приложение
                     // подсказывает, куда смотреть, не добавляя ни строчки.
-                    .foregroundStyle(isLeading ? color : Color.secondary.opacity(0.6))
+                    // Призыв добавить макрос — оранжевым: это просьба, а не
+                    // отчёт, и она не должна читаться как ещё одна подпись.
+                    .foregroundStyle(isHint ? Color.orange
+                                     : (isLeading ? color : Color.secondary.opacity(0.6)))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 

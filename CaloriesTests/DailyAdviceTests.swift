@@ -137,44 +137,34 @@ import Foundation
         Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: Date())!
     }
 
-    // MARK: - Белок
+    // MARK: - Белок отстаёт от темпа дня
 
-    @Test func lowProteinWhenBelowEightyPercent() {
-        let advice = DailyAdviceEngine.advice(
-            consumedToday: 1800,
-            adaptedTodayGoal: 2000,
-            macrosToday: Macros(protein: 40, fat: 50, carbs: 200),
-            proteinTarget: 100,
-            fatTarget: nil,
-            carbsTarget: nil,
-            weightTrend: nil,
-            lastLoggedDay: nil
-        )
-        if case .lowProtein(let grams) = advice {
-            #expect(grams == 60)
-        } else {
-            Issue.record("Ожидался lowProtein, получено \(advice)")
-        }
+    @Test func proteinIsNotBehindInTheMorning() {
+        // Прожита четверть дня: «съедено 0 из 136 г» — это утро, а не отставание.
+        #expect(!DailyAdviceEngine.isBehindPace(eaten: 0, target: 136, progress: 0.25))
     }
 
-    // MARK: - Жиры
+    @Test func proteinOnPaceIsNotBehind() {
+        // Прожито 60%, съедено 70 из 136 — идём даже с опережением.
+        #expect(!DailyAdviceEngine.isBehindPace(eaten: 70, target: 136, progress: 0.6))
+    }
 
-    @Test func lowFatWhenBelowEightyPercent() {
-        let advice = DailyAdviceEngine.advice(
-            consumedToday: 1800,
-            adaptedTodayGoal: 2000,
-            macrosToday: Macros(protein: 80, fat: 20, carbs: 200),
-            proteinTarget: nil,
-            fatTarget: 80,
-            carbsTarget: nil,
-            weightTrend: nil,
-            lastLoggedDay: nil
-        )
-        if case .lowFat(let grams) = advice {
-            #expect(grams == 60)
-        } else {
-            Issue.record("Ожидался lowFat, получено \(advice)")
-        }
+    @Test func proteinFarBehindInTheEvening() {
+        // Прожито 90%, пора бы 95 г, съедено 30 — отстаём заметно.
+        #expect(DailyAdviceEngine.isBehindPace(eaten: 30, target: 136, progress: 0.9))
+    }
+
+    @Test func proteinWithoutTargetIsNeverBehind() {
+        #expect(!DailyAdviceEngine.isBehindPace(eaten: 0, target: nil, progress: 1))
+    }
+
+    @Test func fatFarBehindInTheEvening() {
+        // Прожито 90%, пора бы 72 г жиров, съедено 20 — отстаём заметно.
+        #expect(DailyAdviceEngine.isBehindPace(eaten: 20, target: 80, progress: 0.9))
+    }
+
+    @Test func fatOnPaceIsNotBehind() {
+        #expect(!DailyAdviceEngine.isBehindPace(eaten: 40, target: 80, progress: 0.6))
     }
 
     // MARK: - Углеводы
@@ -242,9 +232,9 @@ import Foundation
         }
     }
 
-    // MARK: - Приоритет: перебор важнее белка
+    // MARK: - Приоритет: перебор важнее остальных подсказок
 
-    @Test func overGoalWinsOverLowProtein() {
+    @Test func overGoalWinsOverOtherHints() {
         let advice = DailyAdviceEngine.advice(
             consumedToday: 3000,
             adaptedTodayGoal: 2000,

@@ -12,10 +12,6 @@ enum DailyAdvice: Equatable {
     /// Калорий к этому часу меньше, чем пора бы: процент от нормы и сколько
     /// килокалорий до неё осталось.
     case underGoal(percent: Int, remaining: Int)
-    /// Белка ниже цели на 20%+.
-    case lowProtein(deficitGrams: Int)
-    /// Жиров ниже цели на 20%+.
-    case lowFat(deficitGrams: Int)
     /// Углеводов выше цели на 30%+.
     case highCarbs(overGrams: Int)
     /// Вес не менялся две недели.
@@ -32,8 +28,6 @@ enum DailyAdvice: Equatable {
         case .onTarget: return String(localized: "Норма на сегодня набрана")
         case .overGoal: return String(localized: "Сегодня перебор")
         case .underGoal: return String(localized: "Не доел до нормы")
-        case .lowProtein: return String(localized: "Добавь белка")
-        case .lowFat: return String(localized: "Добавь жиров")
         case .highCarbs: return String(localized: "Углеводы сверх нормы")
         case .weightPlateau: return String(localized: "Вес стоит на месте")
         case .notLogging: return String(localized: "Ты не записывал еду")
@@ -50,10 +44,6 @@ enum DailyAdvice: Equatable {
             return String(format: String(localized: "На %d%% выше цели. Завтра можно есть легче."), pct)
         case .underGoal(let pct, let remaining):
             return String(format: String(localized: "Съедено %1$d%% нормы — к этому часу маловато. До цели ещё %2$d ккал."), pct, remaining)
-        case .lowProtein(let grams):
-            return String(format: String(localized: "Белка маловато: добери ещё %d г."), grams)
-        case .lowFat(let grams):
-            return String(format: String(localized: "Жиров маловато: добери ещё %d г."), grams)
         case .highCarbs(let grams):
             return String(format: String(localized: "Углеводов на %d г больше цели."), grams)
         case .weightPlateau(let days):
@@ -75,7 +65,7 @@ enum DailyAdvice: Equatable {
         // действие, а не сводка. Поэтому вечером совет про ужин идёт первым.
         case .noDinnerYet: return 95
         case .underGoal: return 90
-        case .lowProtein, .lowFat, .highCarbs: return 80
+        case .highCarbs: return 80
         case .weightPlateau: return 60
         // Три дня без записей — важнее, чем «пора ужинать»: советовать
         // поесть человеку, который вообще перестал вести дневник, бессмысленно.
@@ -129,25 +119,19 @@ struct DailyAdviceEngine {
             }
         }
 
-        // 2. Белок.
-        if let pt = proteinTarget, pt > 0, macrosToday.protein < pt * 0.8 {
-            let deficit = Int((pt - macrosToday.protein).rounded())
-            candidates.append((.lowProtein(deficitGrams: deficit), 80))
-        }
+        // 2. Белок и жиры.
+        //
+        // Советом дня они больше не бывают: у каждого есть своя плитка под
+        // кольцом, и второй строки про то же самое экран не заслуживает.
+        // Отставание от темпа считает `isBehindPace`, а показывает плитка.
 
-        // 3. Жиры.
-        if let ft = fatTarget, ft > 0, macrosToday.fat < ft * 0.8 {
-            let deficit = Int((ft - macrosToday.fat).rounded())
-            candidates.append((.lowFat(deficitGrams: deficit), 80))
-        }
-
-        // 4. Углеводы.
+        // 3. Углеводы.
         if let ct = carbsTarget, ct > 0, macrosToday.carbs > ct * 1.3 {
             let over = Int((macrosToday.carbs - ct).rounded())
             candidates.append((.highCarbs(overGrams: over), 80))
         }
 
-        // 5. Вес не менялся 14+ дней.
+        // 4. Вес не менялся 14+ дней.
         if let trend = weightTrend, trend.count >= 14 {
             let first = trend[trend.count - 14]
             let last = trend[trend.count - 1]
@@ -156,7 +140,7 @@ struct DailyAdviceEngine {
             }
         }
 
-        // 6. Не записывали еду 3+ дня.
+        // 5. Не записывали еду 3+ дня.
         if let last = lastLoggedDay {
             let daysSince = Calendar.current.dateComponents([.day], from: last, to: now).day ?? 0
             if daysSince >= 3 {
@@ -165,7 +149,7 @@ struct DailyAdviceEngine {
         }
         // Если записей вообще нет — не советуем, а молчим: первый запуск.
 
-        // 7. Вечер, а ужина нет (18:00–21:00, калорий мало).
+        // 6. Вечер, а ужина нет (18:00–21:00, калорий мало).
         //
         // Верхняя граница важна: без неё «пора ужинать» висело и в полночь,
         // то есть советовало приём пищи ровно перед сном.
@@ -175,6 +159,18 @@ struct DailyAdviceEngine {
         }
 
         return candidates.max(by: { $0.1 < $1.1 })?.0 ?? .none
+    }
+
+    /// Отстаёт ли макрос от темпа дня.
+    ///
+    /// Сравниваем не с итоговой целью, а с тем, сколько пора бы съесть к
+    /// этому часу: в полдень «съедено 20 г из 136» — норма, а не повод для
+    /// подсказки. Молчим, пока не прожита половина дня, и пока отставание
+    /// меньше пятой части цели. К концу дня правило совпадает с прежним
+    /// «меньше 80% цели».
+    static func isBehindPace(eaten: Double, target: Double?, progress: Double) -> Bool {
+        guard let target, target > 0, progress >= 0.5 else { return false }
+        return eaten < (progress - 0.2) * target
     }
 
     /// Какая доля дня уже прошла — от подъёма до отбоя.

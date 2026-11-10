@@ -98,6 +98,20 @@ enum MacroKind: String, Identifiable {
         case .carbs: return String(localized: "Углеводы")
         }
     }
+
+    /// Призыв добрать макрос — вместо названия в плитке, когда он отстаёт
+    /// от темпа дня.
+    ///
+    /// Советы про белок и жиры раньше стояли отдельными строками в хвосте
+    /// экрана: далеко от числа, из которого посчитаны, и с утра, когда
+    /// добрать их ещё не с чего.
+    var shortageTitle: String {
+        switch self {
+        case .protein: return String(localized: "Добавь белка")
+        case .fat: return String(localized: "Добавь жиров")
+        case .carbs: return String(localized: "Углеводы сверх нормы")
+        }
+    }
 }
 
 /// Запись о приёме пищи. Модель SwiftData — хранится в настоящей базе данных на диске,

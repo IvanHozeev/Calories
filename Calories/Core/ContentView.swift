@@ -736,6 +736,7 @@ private extension ContentView {
                 fiber: store.micronutrients(on: Date()).fiber,
                 fiberIsPartial: store.micronutrients(on: Date()).fiberIsPartial,
                 weightKg: store.weightKg,
+                behindMacros: behindMacros,
                 onOpen: { showingDayNutrition = true },
                 gymDayName: store.gymHeavyDayName,
                 focus: store.focusMacro
@@ -770,6 +771,29 @@ private extension ContentView {
         guard let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()) else { return }
         initialUsualMeal = store.usualMeals(period: slot.period, days: 180).first
         showingAdd = true
+    }
+
+    /// Макросы, которые отстают от темпа дня.
+    ///
+    /// Считается для плиток под кольцом: там же, где видно количество,
+    /// уместно и «добавь белка». Отдельными строками эти советы жили в
+    /// хвосте экрана и появлялись с утра, когда добрать их ещё не с чего.
+    private var behindMacros: Set<MacroKind> {
+        let progress = DailyAdviceEngine.dayProgress(wake: hourOfDay(mealSchedule.wake),
+                                                     sleep: hourOfDay(mealSchedule.sleep),
+                                                     now: Date())
+        var behind: Set<MacroKind> = []
+        if DailyAdviceEngine.isBehindPace(eaten: store.macrosToday.protein,
+                                          target: store.proteinTarget,
+                                          progress: progress) {
+            behind.insert(.protein)
+        }
+        if DailyAdviceEngine.isBehindPace(eaten: store.macrosToday.fat,
+                                          target: store.fatTarget,
+                                          progress: progress) {
+            behind.insert(.fat)
+        }
+        return behind
     }
 
     /// Совет дня: одно контекстное сообщение на основе данных пользователя.

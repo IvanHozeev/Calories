@@ -62940,52 +62940,6 @@
         }
       }
     },
-    "Белка маловато: добери ещё %d г.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on protein: add %d g more."
-          }
-        }
-      }
-    },
     "Добавь жиров": {
       "localizations": {
         "ar": {
@@ -63028,52 +62982,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add fat"
-          }
-        }
-      }
-    },
-    "Жиров маловато: добери ещё %d г.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Low on fat: add %d g more."
           }
         }
       }

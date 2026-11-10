@@ -121,6 +121,10 @@ struct FoodRow: View {
                     ForEach(parts) { part in
                         Text(part.name)
                             .font(.app(.body, weight: .semibold))
+                            // Один натуральный размер — не растягиваем по ширине,
+                            // иначе «Протеин шоколадный» в узком ряду дневника
+                            // уезжает на вторую строку, хотя места хватило на одну.
+                            .fixedSize(horizontal: true, vertical: false)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                             .foregroundStyle(part.color)

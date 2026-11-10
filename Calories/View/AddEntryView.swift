@@ -491,16 +491,38 @@ struct AddEntryView: View {
         usual.parts.map(\.name).joined(separator: ", ")
     }
 
+    /// Сохранённый приём с запрошенными граммами и цветом ведущего макроса.
+    private struct UsualMatch: Identifiable {
+        let usual: UsualMeal.Suggestion
+        /// Запрошенные граммы по имени продукта (нижний регистр). nil — оставить медианные из истории.
+        let requestedGrams: [String: Double]?
+        /// Макросы крупнейшей части приема — для цвета названия (доминирующий макрос).
+        let leadingMacros: Macros
+
+        var id: String { usual.id }
+    }
+
     /// Сохранённые приёмы, которые подходят под текущий запрос.
     ///
     /// «молоко 300 протеин 40» найдёт приём «Молоко 3%, Протеин шоколадный»,
     /// который человек уже собирал 17 раз, и предложит его целиком — одним тапом.
-    private var usualMealMatches: [UsualMeal.Suggestion] {
+    /// Запрошенные граммы накладываются на части приёма по совпадению имён.
+    private var usualMealMatches: [UsualMatch] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
         }.filter { !$0.isEmpty }
         guard !terms.isEmpty else { return [] }
+
+        // Запрошенные граммы по имени продукта.
+        let requestedGrams: [String: Double] = Dictionary(
+            parsedQuery.compactMap { item in
+                guard let g = item.grams(defaultGrams: 100), g > 0 else { return nil }
+                return (item.name.trimmingCharacters(in: .whitespaces).lowercased(), g)
+            },
+            uniquingKeysWith: { $1 }
+        )
+
         let meals = store.usualMeals(period: nil, days: 180)
         return meals.filter { meal in
             meal.parts.contains { part in
@@ -508,7 +530,17 @@ struct AddEntryView: View {
                 return terms.contains { term in partName.contains(term) }
             }
         }
-        .sorted { ($0.times, $0.lastEaten) > ($1.times, $1.lastEaten) }
+        .map { meal -> UsualMatch in
+            // Крупнейшая часть по калориям — задаёт цвет названия приёма.
+            let leadingPart = meal.parts.max { $0.calories < $1.calories } ?? meal.parts.first!
+            let leadingMacros = Macros(protein: leadingPart.protein,
+                                       fat: leadingPart.fat,
+                                       carbs: leadingPart.carbs)
+            return UsualMatch(usual: meal,
+                              requestedGrams: requestedGrams.isEmpty ? nil : requestedGrams,
+                              leadingMacros: leadingMacros)
+        }
+        .sorted { ($0.usual.times, $0.usual.lastEaten) > ($1.usual.times, $1.usual.lastEaten) }
         .prefix(3)
         .map { $0 }
     }
@@ -519,10 +551,10 @@ struct AddEntryView: View {
         let usuals = usualMealMatches
         if isSearching, !adds.isEmpty || !usuals.isEmpty {
             Section("Быстрое добавление") {
-                ForEach(Array(usuals.enumerated()), id: \.element.id) { index, usual in
-                    quickUsualRow(usual)
+                ForEach(Array(usuals.enumerated()), id: \.element.id) { index, match in
+                    quickUsualRow(match)
                         .contentShape(Rectangle())
-                        .onTapGesture { addQuickUsualMeal(usual) }
+                        .onTapGesture { addQuickUsualMeal(match) }
                         .accessibilityIdentifier("quickUsualRow\(index)")
                 }
                 .animation(.default, value: usuals.map { $0.id })
@@ -540,24 +572,64 @@ struct AddEntryView: View {
     }
 
     /// Строка сохранённого приёма в быстром добавлении: состав, калории, сколько раз брали.
-    private func quickUsualRow(_ usual: UsualMeal.Suggestion) -> some View {
-        FoodRow(
-            name: usual.parts.map(\.name).joined(separator: ", "),
-            calories: usual.calories,
-            portion: String(format: String(localized: "%lld позиции"), usual.parts.count),
-            macros: usual.macros,
-            detail: String(format: String(localized: "%lld раз"), usual.times)
+    /// Название красится в цвет доминирующего макроса крупнейшей части приёма.
+    private func quickUsualRow(_ match: UsualMatch) -> some View {
+        let parts = match.requestedGrams.map { grams in
+            match.usual.parts.map { part -> MealItem in
+                let g = grams[part.name.trimmingCharacters(in: .whitespaces).lowercased()] ?? part.grams
+                let scale = (g ?? part.grams ?? 100) / (part.grams ?? 100)
+                return MealItem(
+                    name: part.name,
+                    calories: Int((Double(part.calories) * scale).rounded()),
+                    macros: Macros(protein: part.protein * scale,
+                                   fat: part.fat * scale,
+                                   carbs: part.carbs * scale),
+                    grams: g ?? part.grams
+                )
+            }
+        } ?? match.usual.parts.map {
+            MealItem(name: $0.name, calories: $0.calories,
+                     macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                     grams: $0.grams)
+        }
+
+        let totalCalories = parts.reduce(0) { $0 + $1.calories }
+        let totalMacros = parts.reduce(Macros.zero) { $0 + $1.macros }
+
+        return FoodRow(
+            name: match.usual.parts.map(\.name).joined(separator: ", "),
+            calories: totalCalories,
+            portion: String(format: String(localized: "%lld позиции"), match.usual.parts.count),
+            macros: totalMacros,
+            detail: String(format: String(localized: "%lld раз"), match.usual.times),
+            leadingMacros: match.leadingMacros
         )
     }
 
     /// Положить весь сохранённый приём в черновик — один тап, без экрана порции.
-    private func addQuickUsualMeal(_ usual: UsualMeal.Suggestion) {
+    /// Запрошенные граммы применяются к частям приёма по совпадению имён.
+    private func addQuickUsualMeal(_ match: UsualMatch) {
+        let parts = match.requestedGrams.map { grams in
+            match.usual.parts.map { part -> MealItem in
+                let g = grams[part.name.trimmingCharacters(in: .whitespaces).lowercased()] ?? part.grams
+                let scale = (g ?? part.grams ?? 100) / (part.grams ?? 100)
+                return MealItem(
+                    name: part.name,
+                    calories: Int((Double(part.calories) * scale).rounded()),
+                    macros: Macros(protein: part.protein * scale,
+                                   fat: part.fat * scale,
+                                   carbs: part.carbs * scale),
+                    grams: g ?? part.grams
+                )
+            }
+        } ?? match.usual.parts.map {
+            MealItem(name: $0.name, calories: $0.calories,
+                     macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                     grams: $0.grams)
+        }
+
         withAnimation(.snappy) {
-            draftItems.append(contentsOf: usual.parts.map {
-                MealItem(name: $0.name, calories: $0.calories,
-                         macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                         grams: $0.grams)
-            })
+            draftItems.append(contentsOf: parts)
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
 

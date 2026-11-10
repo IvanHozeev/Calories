@@ -757,20 +757,16 @@ struct AddEntryView: View {
 
     /// Строка недавнего блюда в быстром добавлении.
     ///
-    /// Калории и макросы пересчитываются под запрошенные граммы (если есть в
-    /// запросе), иначе под порцию по умолчанию (servingGrams).
+    /// Показываем блюдо как есть — с его порцией по умолчанию и калориями.
+    /// Запрошенные граммы из поиска применяются только при нажатии, когда
+    /// блюдо уходит в черновик.
     private func quickDishRow(_ match: DishMatch) -> some View {
-        let grams = match.requestedGrams ?? match.dish.servingGrams
-        let factor = grams / 100
+        let grams = match.dish.servingGrams
         return FoodRow(
             name: match.dish.name,
-            calories: Int((Double(match.dish.totalCalories) * factor).rounded()),
+            calories: match.dish.totalCalories,
             portion: String(format: "%.0f г", grams),
-            macros: Macros(
-                protein: match.dish.totalMacros.protein * factor,
-                fat: match.dish.totalMacros.fat * factor,
-                carbs: match.dish.totalMacros.carbs * factor
-            ),
+            macros: match.dish.totalMacros,
             icons: store.foodCategories(of: match.dish).map(\.icon),
             micros: store.notableMicronutrients(forFoodNamed: match.dish.name, grams: grams)
         )
@@ -793,9 +789,13 @@ struct AddEntryView: View {
     }
 
     /// Добавить недавнее блюдо в черновик — один тап.
+    ///
+    /// Если в запросе были граммы — пересчитываем под них, иначе порция
+    /// по умолчанию блюда. Доля считается от общего веса блюда.
     private func addQuickDish(_ match: DishMatch) {
         let grams = match.requestedGrams ?? match.dish.servingGrams
-        let factor = grams / 100
+        let totalGrams = match.dish.totalGrams
+        let factor = totalGrams > 0 ? grams / totalGrams : 0
         let item = MealItem(
             name: match.dish.name,
             calories: Int((Double(match.dish.totalCalories) * factor).rounded()),

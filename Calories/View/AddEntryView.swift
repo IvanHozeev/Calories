@@ -578,12 +578,13 @@ struct AddEntryView: View {
         var id: String { dish.id.uuidString }
     }
 
-    /// Недавние блюда, подходящие под запрос.
+    /// Блюда, подходящие под запрос.
     ///
     /// «Паста с туной в томатном соусе 500» — свежее блюдо, заведённое недавно.
     /// Оно ещё не набрало трёх повторов для «Как обычно», но уже есть в дневнике
-    /// — показываем его в быстром добавлении. Если в запросе есть граммы,
-    /// калории и макросы пересчитываются под них.
+    /// — показываем его в быстром добавлении. Ищем среди всех сохранённых
+    /// блюд, а не только среди последних двенадцати кэшированных — иначе
+    /// нужное блюдо может выпасть из короткого кэша.
     private var recentDishMatches: [DishMatch] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
@@ -596,17 +597,14 @@ struct AddEntryView: View {
             item.grams(defaultGrams: 100)
         }.first
 
-        return store.recentDishes.filter { dish in
+        return store.dishes.filter { dish in
             let name = dish.name.lowercased()
             return terms.contains { term in name.contains(term) }
         }
-        .sorted { ($0.updatedAt ?? dishCreated($0)) > ($1.updatedAt ?? dishCreated($1)) }
+        .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
         .prefix(3)
         .map { DishMatch(dish: $0, requestedGrams: requestedGrams) }
     }
-
-    /// Дата создания блюда — резерв, если updatedAt нет.
-    private func dishCreated(_ dish: Dish) -> Date { dish.createdAt }
 
     /// Недавние приёмы из дневника, подходящие под запрос.
     ///

@@ -99,7 +99,18 @@ enum UsualMeal {
             .filter { $0.meals.count >= minimumTimes }
             .compactMap { group -> Suggestion? in
                 guard let parts = typical(group.meals), let last = group.meals.first?.date else { return nil }
-                return Suggestion(parts: parts, times: group.meals.count, lastEaten: last)
+                // Считаем только приёмы, действительно совпадающие с типичным набором,
+                // а не всю группу похожих — иначе «Молоко 3%, Протеин шоколадный»
+                // наберёт 86 раз из-за сходных завтраков с бананом или без протеина.
+                let typicalNames = Set(parts.map { normalized($0.name) })
+                let times = group.meals.count { meal in
+                    let mealNames = Set(meal.parts.map { normalized($0.name) })
+                    let common = Double(typicalNames.intersection(mealNames).count)
+                    let biggest = Double(max(typicalNames.count, mealNames.count))
+                    return biggest > 0 && common / biggest >= sameShare
+                }
+                guard times >= minimumTimes else { return nil }
+                return Suggestion(parts: parts, times: times, lastEaten: last)
             }
             // Чаще — выше; при равной частоте ближе тот, что ели недавно.
             .sorted { ($0.times, $0.lastEaten) > ($1.times, $1.lastEaten) }

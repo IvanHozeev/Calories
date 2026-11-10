@@ -519,14 +519,6 @@ struct AddEntryView: View {
         let usuals = usualMealMatches
         if isSearching, !adds.isEmpty || !usuals.isEmpty {
             Section("Быстрое добавление") {
-                ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
-                    quickAddRow(add)
-                        .contentShape(Rectangle())
-                        .onTapGesture { quickAdd(add) }
-                        .accessibilityIdentifier("quickAddRow\(index)")
-                }
-                .animation(.default, value: quickAdds.map { $0.id })
-
                 ForEach(Array(usuals.enumerated()), id: \.element.id) { index, usual in
                     quickUsualRow(usual)
                         .contentShape(Rectangle())
@@ -534,8 +526,16 @@ struct AddEntryView: View {
                         .accessibilityIdentifier("quickUsualRow\(index)")
                 }
                 .animation(.default, value: usuals.map { $0.id })
+
+                ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
+                    quickAddRow(add)
+                        .contentShape(Rectangle())
+                        .onTapGesture { quickAdd(add) }
+                        .accessibilityIdentifier("quickAddRow\(index)")
+                }
+                .animation(.default, value: quickAdds.map { $0.id })
             }
-            .animation(.default, value: quickAdds.map { $0.id } + usuals.map { $0.id })
+            .animation(.default, value: usuals.map { $0.id } + quickAdds.map { $0.id })
         }
     }
 

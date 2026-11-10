@@ -15,8 +15,22 @@ struct MealScheduleStrip: View {
     var dailyGoal: Int = 0
     var now: Date = Date()
     var onOpen: () -> Void
+    /// Что делать, когда приём уже начался: добавить еду, а не открыть
+    /// расписание. Отдельной подсказки «Пора есть» больше нет — она говорила
+    /// про тот же приём, что и плитка, и стояла строкой ниже.
+    var onEat: (() -> Void)? = nil
 
     private var next: MealSchedule.Slot? { MealSchedule.nextSlot(slots, now: now) }
+
+    /// Приём начался, а еды за него ещё нет.
+    ///
+    /// То же условие, по которому строка звала есть: время приёма наступило,
+    /// а он не закрыт. Считается здесь, а не на экране, — иначе плитка и
+    /// строка разошлись бы в том, «пора» или ещё нет.
+    private var isTimeToEat: Bool {
+        guard let next else { return false }
+        return next.state == .current && now >= next.time
+    }
 
     private var title: String {
         guard let next else {
@@ -54,24 +68,31 @@ struct MealScheduleStrip: View {
     /// действительно добрана» не разошлись между двумя видами одного и того
     /// же.
     var tile: TodayTile {
-        TodayTile(icon: "fork.knife",
-                  tint: Color.accentColor,
-                  label: tileLabel,
-                  value: tileValue,
-                  caption: tileCaption,
-                  identifier: "mealScheduleStrip",
-                  onTap: onOpen)
+        // Тип замыкания называем явно: тернарник с необязательным замыканием
+        // в списке аргументов вешает проверку типов.
+        let tap: () -> Void = isTimeToEat ? (onEat ?? onOpen) : onOpen
+        return TodayTile(icon: isTimeToEat ? "clock.fill" : "fork.knife",
+                         tint: isTimeToEat ? .orange : Color.accentColor,
+                         label: tileLabel,
+                         value: tileValue,
+                         caption: tileCaption,
+                         identifier: "mealScheduleStrip",
+                         onTap: tap)
     }
 
     private var tileLabel: String {
         guard let next else { return String(localized: "Приёмы пищи") }
+        if isTimeToEat { return String(localized: "Пора есть") }
         return String(localized: String.LocalizationValue(next.period.rawValue))
     }
 
     /// Крупным — когда. Это и есть вопрос, с которым на плитку смотрят.
+    ///
+    /// Когда пора есть, вопрос уже другой — «что именно», поэтому крупным
+    /// идёт название приёма, а «пора есть» сказано подписью сверху.
     private var tileValue: String {
         guard let next else { return title }
-        if next.state == .current, now >= next.time { return String(localized: "Сейчас") }
+        if isTimeToEat { return String(localized: String.LocalizationValue(next.period.rawValue)) }
         return String(format: String(localized: "через %@"),
                       MealScheduleStrip.countdown(to: next.time, from: now))
     }

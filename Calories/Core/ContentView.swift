@@ -711,9 +711,9 @@ private extension ContentView {
                 if mealSchedule.isEnabled, !slots.isEmpty {
                     MealScheduleStrip(slots: slots,
                                       remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                      dailyGoal: store.adaptedTodayGoal) {
-                        showingMealSchedule = true
-                    }
+                                      dailyGoal: store.adaptedTodayGoal,
+                                      onOpen: { showingMealSchedule = true },
+                                      onEat: { addFromMealTile() })
                     .tile
                 }
 
@@ -756,43 +756,20 @@ private extension ContentView {
         if store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         if dailyAdvice != nil, dailyAdvice != .none { return true }
-        if nextMealPrompt != nil { return true }
         return !store.isPremium && store.plan == nil
     }
 
-    /// Ближайший приём пищи, к которому пора есть: время наступило, а приём ещё не записан.
-    private var nextMealPrompt: some View {
-        Group {
-            if let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()),
-               slot.state != .done, slot.state != .missed,
-               slot.time <= Date() {
-                let usualMeal = store.usualMeals(period: slot.period, days: 180).first
-                Button {
-                    initialUsualMeal = usualMeal
-                    showingAdd = true
-                } label: {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: "clock.fill")
-                            .foregroundStyle(.orange)
-                            .font(.app(.caption))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Пора \(slot.period.timeTitle)")
-                                .font(.app(.subheadline, weight: .semibold))
-                                .foregroundStyle(.primary)
-                            Text(String(format: String(localized: "Обычно ешь в %@"), slot.time.formatted(date: .omitted, time: .shortened)))
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer(minLength: 0)
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(.plain)
-            }
-        }
+    /// Тап по плитке приёма, когда пора есть: сразу добавление еды с «Как
+    /// обычно» для этого приёма.
+    ///
+    /// Раньше для этого была отдельная строка-подсказка под плитками. Она
+    /// повторяла плитку — тот же приём, то же время — и стоила строки и
+    /// второго тапа по тому же вопросу. Теперь состояние живёт в самой
+    /// плитке: её вид и её тап отвечают на «пора?» одинаково.
+    private func addFromMealTile() {
+        guard let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()) else { return }
+        initialUsualMeal = store.usualMeals(period: slot.period, days: 180).first
+        showingAdd = true
     }
 
     /// Совет дня: одно контекстное сообщение на основе данных пользователя.
@@ -873,9 +850,6 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
-            // Ближайший приём пищи — первая подсказка.
-            nextMealPrompt
-
             // Копий нет, а дневнику уже есть что терять.
             //
             // Выше всего остального, и это единственная подсказка не про еду:

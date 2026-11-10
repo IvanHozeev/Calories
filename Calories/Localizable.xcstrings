@@ -62756,52 +62756,6 @@
         }
       }
     },
-    "Обычно ешь в %@": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You usually eat at %@"
-          }
-        }
-      }
-    },
     "Перенести": {
       "localizations": {
         "ar": {
@@ -62848,48 +62802,48 @@
         }
       }
     },
-    "Пора %@": {
+    "Пора есть": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Time for %@"
+            "value": "Time to eat"
           }
         }
       }

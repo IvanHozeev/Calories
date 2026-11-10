@@ -757,16 +757,21 @@ struct AddEntryView: View {
 
     /// Строка недавнего блюда в быстром добавлении.
     ///
-    /// Показываем блюдо как есть — с его порцией по умолчанию и калориями.
-    /// Запрошенные граммы из поиска применяются только при нажатии, когда
-    /// блюдо уходит в черновик.
+    /// Калории и макросы пересчитаны под порцию по умолчанию (servingGrams),
+    /// а не показывают объём всей кастрюли.
     private func quickDishRow(_ match: DishMatch) -> some View {
         let grams = match.dish.servingGrams
+        let totalGrams = match.dish.totalGrams
+        let factor = totalGrams > 0 ? grams / totalGrams : 0
         return FoodRow(
             name: match.dish.name,
-            calories: match.dish.totalCalories,
+            calories: Int((Double(match.dish.totalCalories) * factor).rounded()),
             portion: String(format: "%.0f г", grams),
-            macros: match.dish.totalMacros,
+            macros: Macros(
+                protein: match.dish.totalMacros.protein * factor,
+                fat: match.dish.totalMacros.fat * factor,
+                carbs: match.dish.totalMacros.carbs * factor
+            ),
             icons: store.foodCategories(of: match.dish).map(\.icon),
             micros: store.notableMicronutrients(forFoodNamed: match.dish.name, grams: grams)
         )

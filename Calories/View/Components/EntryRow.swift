@@ -40,7 +40,8 @@ struct EntryRow: View {
             icons: [],
             micros: micros,
             offersVitamins: false,
-            traits: []
+            traits: [],
+            parts: entry.components.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs)) }
         )
     }
 }

@@ -131,12 +131,14 @@ struct MealSuggestionsView: View {
     }
 
     /// Строка «как обычно»: состав перечислен, цена — общая.
+    /// Каждая часть приёма красится в цвет своего доминирующего макроса.
     private func usualRow(_ item: UsualMeal.Suggestion) -> some View {
         FoodRow(name: item.parts.map(\.name).joined(separator: ", "),
                 calories: item.calories,
                 portion: String(format: String(localized: "%lld позиции"), item.parts.count),
                 macros: item.macros,
-                detail: String(format: String(localized: "%lld раз"), item.times))
+                detail: String(format: String(localized: "%lld раз"), item.times),
+                parts: item.parts.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs)) })
     }
 
     /// Открывает подсказку экраном порции — тем же, каким открывается любой

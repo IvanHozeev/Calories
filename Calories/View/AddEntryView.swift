@@ -604,32 +604,14 @@ struct AddEntryView: View {
         return Button {
             addQuickUsualMeal(match)
         } label: {
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 3) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        Text(item.name)
-                            .font(.app(.body, weight: .semibold))
-                            .foregroundStyle(item.macros.leadingKind?.color ?? .primary.opacity(0.85))
-                            .lineLimit(1)
-                    }
-                    Text(String(format: String(localized: "%lld позиции"), match.usual.parts.count))
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                    Text(String(format: String(localized: "%lld раз"), match.usual.times))
-                        .font(.app(.caption2))
-                        .foregroundStyle(.secondary)
-                }
-                Spacer(minLength: 0)
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text(verbatim: "\(totalCalories)")
-                        .font(.app(.subheadline, weight: .semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                    Text("ккал")
-                        .font(.app(.caption2))
-                        .foregroundStyle(.secondary)
-                }
-            }
+            FoodRow(
+                name: match.usual.parts.map(\.name).joined(separator: ", "),
+                calories: totalCalories,
+                portion: String(format: String(localized: "%lld позиции"), match.usual.parts.count),
+                macros: items.reduce(Macros.zero) { $0 + $1.macros },
+                detail: String(format: String(localized: "%lld раз"), match.usual.times),
+                parts: items.map { .init(name: $0.name, macros: $0.macros) }
+            )
         }
         .buttonStyle(.plain)
     }

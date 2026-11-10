@@ -343,7 +343,7 @@ struct AddEntryView: View {
                     // а не только одного «лучшего». Тогда при «молоко 300»
                     // покажем все три процента с граммовкой 300, а пользователь
                     // выберет нужное самим тапом.
-                    var candidates: [(food: FoodItem, source: Int, rank: Int, length: Int)] = []
+                    var candidates: [(food: FoodItem, source: Int, rank: Int, length: Int, updatedAt: Date?)] = []
 
                     // Свои продукты — primero, как просит пользователь.
                     for food in customFoods {
@@ -357,7 +357,7 @@ struct AddEntryView: View {
                                                         name: food.name,
                                                         producer: food.producer)
                         else { continue }
-                        candidates.append((food, 0, rank, food.name.count))
+                        candidates.append((food, 0, rank, food.name.count, food.updatedAt))
                     }
                     // Недавние — следующие.
                     for food in recentFoods {
@@ -371,7 +371,7 @@ struct AddEntryView: View {
                                                         name: food.name,
                                                         producer: food.producer)
                         else { continue }
-                        candidates.append((food, 1, rank, food.name.count))
+                        candidates.append((food, 1, rank, food.name.count, food.updatedAt))
                     }
                     // Каталог — в последнюю очередь.
                     if let catalog = catalogMatches[item],
@@ -384,22 +384,33 @@ struct AddEntryView: View {
                                 // пропускаем
                             } else {
                                 let rank = Self.catalogRank(item.name, catalog) ?? 0
-                                candidates.append((food, 2, rank, catalog.localizedName.count))
+                                candidates.append((food, 2, rank, catalog.localizedName.count, nil))
                             }
                         } else {
                             let rank = Self.catalogRank(item.name, catalog) ?? 0
-                            candidates.append((food, 2, rank, catalog.localizedName.count))
+                            candidates.append((food, 2, rank, catalog.localizedName.count, nil))
                         }
                     }
 
                     // Сортируем: свой primero, потом по точности совпадения,
-                    // потом по популярности (выбирали чаще — выше), потом по длине.
+                    // потом по популярности (выбирали чаще — выше), потом по свежести
+                    // (недавнее выше — иначе старое блюдо с накопленнойpopularity
+                    // вытесняет то, что ели вчера), потом по длине.
                     candidates.sort {
                         if $0.source != $1.source { return $0.source < $1.source }
                         if $0.rank != $1.rank { return $0.rank < $1.rank }
                         let popA = SearchEventLog.shared.popularityScore(for: $0.food.name)
                         let popB = SearchEventLog.shared.popularityScore(for: $1.food.name)
                         if popA != popB { return popA > popB }
+                        switch ($0.updatedAt, $1.updatedAt) {
+                        case let (dA?, dB?):
+                            if dA != dB { return dA > dB }
+                        case (nil, _?):
+                            return false
+                        case (_?, nil):
+                            return true
+                        default: break
+                        }
                         return $0.length < $1.length
                     }
 
@@ -532,7 +543,14 @@ struct AddEntryView: View {
             UsualMatch(usual: meal,
                        requestedGrams: requestedGrams.isEmpty ? nil : requestedGrams)
         }
-        .sorted { ($0.usual.times, $0.usual.lastEaten) > ($1.usual.times, $1.usual.lastEaten) }
+        .sorted {
+            // Недавнее выше: если ели вчера/сегодня — важнее накопленного счёта.
+            // Старое блюдо со 100 повторов не должно вытеснять то, что ели второй день подряд.
+            if $0.usual.lastEaten != $1.usual.lastEaten {
+                return $0.usual.lastEaten > $1.usual.lastEaten
+            }
+            return $0.usual.times > $1.usual.times
+        }
         .prefix(3)
         .map { $0 }
     }

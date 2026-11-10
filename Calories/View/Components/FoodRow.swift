@@ -121,7 +121,7 @@ struct FoodRow: View {
                     ForEach(parts) { part in
                         Text(part.name)
                             .font(.app(.body, weight: .semibold))
-                            .lineLimit(1)
+                            .lineLimit(2)
                             .multilineTextAlignment(.leading)
                             .foregroundStyle(part.color)
                     }

@@ -62526,48 +62526,48 @@
         }
       }
     },
-    "Недобрано %d%% к цели. Не стоит доводить до голода.": {
+    "Съедено %1$d%% нормы — к этому часу маловато. До цели ещё %2$d ккал.": {
       "localizations": {
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d%% below goal. Don't starve yourself."
+            "value": "%1$d%% of goal so far — low for this time of day. %2$d kcal left to go."
           }
         }
       }

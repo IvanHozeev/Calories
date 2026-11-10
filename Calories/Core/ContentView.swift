@@ -812,8 +812,19 @@ private extension ContentView {
             fatTarget: store.fatTarget,
             carbsTarget: store.carbsTarget,
             weightTrend: recentWeights,
-            lastLoggedDay: lastLoggedDay
+            lastLoggedDay: lastLoggedDay,
+            wakeHour: hourOfDay(mealSchedule.wake),
+            sleepHour: hourOfDay(mealSchedule.sleep)
         )
+    }
+
+    /// Час суток дробным числом: 7.5 — это 7:30.
+    ///
+    /// Нужен совету дня, чтобы сравнивать съеденное с темпом дня, а не
+    /// с итоговой нормой.
+    private func hourOfDay(_ date: Date) -> Double {
+        let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+        return Double(parts.hour ?? 0) + Double(parts.minute ?? 0) / 60
     }
 
     /// Подсказки дня: голодание, недельный обзор, банк калорий.

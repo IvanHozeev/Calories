@@ -40,22 +40,101 @@ import Foundation
         }
     }
 
-    @Test func underGoalWhenBelowEightyPercent() {
+    @Test func underGoalInTheAfternoonWhenBehindPace() {
+        // 16:00: прожито 9 из 16 часов дня — пора бы съесть ~56% нормы,
+        // а съедено 35%. Отставание на 21% — повод напомнить.
         let advice = DailyAdviceEngine.advice(
-            consumedToday: 1500,
+            consumedToday: 700,
             adaptedTodayGoal: 2000,
             macrosToday: .zero,
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
             weightTrend: nil,
-            lastLoggedDay: nil
+            lastLoggedDay: nil,
+            now: at(hour: 16)
         )
-        if case .underGoal(let pct) = advice {
-            #expect(pct == 25)
+        if case .underGoal(let pct, let remaining) = advice {
+            #expect(pct == 65)
+            #expect(remaining == 1300)
         } else {
             Issue.record("Ожидался underGoal, получено \(advice)")
         }
+    }
+
+    @Test func noUnderGoalInTheMorning() {
+        // Утром недобранная норма — это норма, а не новость.
+        let advice = DailyAdviceEngine.advice(
+            consumedToday: 0,
+            adaptedTodayGoal: 2000,
+            macrosToday: .zero,
+            proteinTarget: nil,
+            fatTarget: nil,
+            carbsTarget: nil,
+            weightTrend: nil,
+            lastLoggedDay: nil,
+            now: at(hour: 10)
+        )
+        #expect(advice == .none, "Ожидалось молчание, получено \(advice)")
+    }
+
+    @Test func noUnderGoalWhenOnPace() {
+        // 15:00 — половина дня, съедено 45% при нужных 50%. Это темп, а не
+        // отставание: молчим.
+        let advice = DailyAdviceEngine.advice(
+            consumedToday: 900,
+            adaptedTodayGoal: 2000,
+            macrosToday: .zero,
+            proteinTarget: nil,
+            fatTarget: nil,
+            carbsTarget: nil,
+            weightTrend: nil,
+            lastLoggedDay: nil,
+            now: at(hour: 15)
+        )
+        #expect(advice == .none, "Ожидалось молчание, получено \(advice)")
+    }
+
+    @Test func underGoalAtNightReportsRemaining() {
+        let advice = DailyAdviceEngine.advice(
+            consumedToday: 500,
+            adaptedTodayGoal: 2000,
+            macrosToday: .zero,
+            proteinTarget: nil,
+            fatTarget: nil,
+            carbsTarget: nil,
+            weightTrend: nil,
+            lastLoggedDay: nil,
+            now: at(hour: 22)
+        )
+        if case .underGoal(let pct, let remaining) = advice {
+            #expect(pct == 75)
+            #expect(remaining == 1500)
+        } else {
+            Issue.record("Ожидался underGoal, получено \(advice)")
+        }
+    }
+
+    @Test func dinnerHintWinsOverUnderGoalInTheEvening() {
+        // Вечером конкретное действие («пора ужинать») важнее сводки.
+        let advice = DailyAdviceEngine.advice(
+            consumedToday: 400,
+            adaptedTodayGoal: 2000,
+            macrosToday: .zero,
+            proteinTarget: nil,
+            fatTarget: nil,
+            carbsTarget: nil,
+            weightTrend: nil,
+            lastLoggedDay: nil,
+            now: at(hour: 19)
+        )
+        #expect(advice == .noDinnerYet, "Ожидался noDinnerYet, получено \(advice)")
+    }
+
+    /// Сегодняшний момент с заданным часом — чтобы советы не зависели от
+    /// того, когда запустили тесты.
+    private func at(hour: Int, minute: Int = 0) -> Date {
+        Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: Date())!
     }
 
     // MARK: - Белок

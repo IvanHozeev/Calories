@@ -491,10 +491,33 @@ struct AddEntryView: View {
         usual.parts.map(\.name).joined(separator: ", ")
     }
 
+    /// Сохранённые приёмы, которые подходят под текущий запрос.
+    ///
+    /// «молоко 300 протеин 40» найдёт приём «Молоко 3%, Протеин шоколадный»,
+    /// который человек уже собирал 17 раз, и предложит его целиком — одним тапом.
+    private var usualMealMatches: [UsualMeal.Suggestion] {
+        guard isSearching else { return [] }
+        let terms = parsedQuery.map {
+            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
+        }.filter { !$0.isEmpty }
+        guard !terms.isEmpty else { return [] }
+        let meals = store.usualMeals(period: nil, days: 180)
+        return meals.filter { meal in
+            meal.parts.contains { part in
+                let partName = part.name.lowercased()
+                return terms.contains { term in partName.contains(term) }
+            }
+        }
+        .sorted { ($0.times, $0.lastEaten) > ($1.times, $1.lastEaten) }
+        .prefix(3)
+        .map { $0 }
+    }
+
     @ViewBuilder
     private var quickAddSection: some View {
         let adds = quickAdds
-        if isSearching, !adds.isEmpty {
+        let usuals = usualMealMatches
+        if isSearching, !adds.isEmpty || !usuals.isEmpty {
             Section("Быстрое добавление") {
                 ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
                     quickAddRow(add)
@@ -503,8 +526,47 @@ struct AddEntryView: View {
                         .accessibilityIdentifier("quickAddRow\(index)")
                 }
                 .animation(.default, value: quickAdds.map { $0.id })
+
+                ForEach(Array(usuals.enumerated()), id: \.element.id) { index, usual in
+                    quickUsualRow(usual)
+                        .contentShape(Rectangle())
+                        .onTapGesture { addQuickUsualMeal(usual) }
+                        .accessibilityIdentifier("quickUsualRow\(index)")
+                }
+                .animation(.default, value: usuals.map { $0.id })
             }
-            .animation(.default, value: quickAdds.map { $0.id })
+            .animation(.default, value: quickAdds.map { $0.id } + usuals.map { $0.id })
+        }
+    }
+
+    /// Строка сохранённого приёма в быстром добавлении: состав, калории, сколько раз брали.
+    private func quickUsualRow(_ usual: UsualMeal.Suggestion) -> some View {
+        FoodRow(
+            name: usual.parts.map(\.name).joined(separator: ", "),
+            calories: usual.calories,
+            portion: String(format: String(localized: "%lld позиции"), usual.parts.count),
+            macros: usual.macros,
+            detail: String(format: String(localized: "%lld раз"), usual.times)
+        )
+    }
+
+    /// Положить весь сохранённый приём в черновик — один тап, без экрана порции.
+    private func addQuickUsualMeal(_ usual: UsualMeal.Suggestion) {
+        withAnimation(.snappy) {
+            draftItems.append(contentsOf: usual.parts.map {
+                MealItem(name: $0.name, calories: $0.calories,
+                         macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                         grams: $0.grams)
+            })
+        }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+        // Весь приём добавлен разом — фраза закончена, чистим поиск и скроллим к черновику.
+        scrollToTopTicket += 1
+        Task { @MainActor in
+            searchText = ""
+            debouncedSearch = ""
+            consumedQueryNames.removeAll()
         }
     }
 

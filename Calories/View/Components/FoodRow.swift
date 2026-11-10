@@ -71,13 +71,19 @@ struct FoodRow: View {
     /// Ярус примет: сколько ингредиентов, сколько граммов, значки категорий и
     /// свойств. Значки параметром, потому что при нехватке места уходят
     /// первыми именно они — см. `ViewThatFits` в теле строки.
-    private func signs(iconLimit: Int, showTraits: Bool) -> some View {
+    ///
+    /// Когда partes не пусты (составной приём), detail и portion не показываем:
+    /// части и так каждая на своей строке, а zusätzная строка с цифрами только
+    /// дублирует их и не влазит в рамки ячейки.
+    private func signs(iconLimit: Int, showTraits: Bool, showDetailPortion: Bool = true) -> some View {
         HStack(spacing: 6) {
-            if let detail {
+            if showDetailPortion, let detail {
                 Text(verbatim: detail)
                 Text(verbatim: "·")
             }
-            Text(verbatim: portion)
+            if showDetailPortion {
+                Text(verbatim: portion)
+            }
             if iconLimit > 0, !icons.isEmpty {
                 Text(verbatim: "·")
                 HStack(spacing: 4) {
@@ -124,7 +130,6 @@ struct FoodRow: View {
                             // Один натуральный размер — не растягиваем по ширине,
                             // иначе «Протеин шоколадный» в узком ряду дневника
                             // уезжает на вторую строку, хотя места хватило на одну.
-                            .fixedSize(horizontal: true, vertical: false)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                             .foregroundStyle(part.color)
@@ -164,7 +169,7 @@ struct FoodRow: View {
                 // помогают узнать строку, но их отсутствие ничего не искажает.
                 // Поэтому берём первую раскладку, которая влезает целиком, и
                 // отдаём значки по одному.
-                signs(iconLimit: 3, showTraits: true)
+                signs(iconLimit: 3, showTraits: true, showDetailPortion: parts.isEmpty)
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {

@@ -569,24 +569,40 @@ struct AddEntryView: View {
         return nil
     }
 
+    /// Недавнее блюдо с запрошенными граммами.
+    private struct DishMatch: Identifiable {
+        let dish: Dish
+        /// Запрошенные граммы из поиска. nil — порция по умолчанию блюда.
+        let requestedGrams: Double?
+
+        var id: String { dish.id.uuidString }
+    }
+
     /// Недавние блюда, подходящие под запрос.
     ///
     /// «Паста с туной в томатном соусе 500» — свежее блюдо, заведённое недавно.
     /// Оно ещё не набрало трёх повторов для «Как обычно», но уже есть в дневнике
-    /// — показываем его в быстром добавлении.
-    private var recentDishMatches: [Dish] {
+    /// — показываем его в быстром добавлении. Если в запросе есть граммы,
+    /// калории и макросы пересчитываются под них.
+    private var recentDishMatches: [DishMatch] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
         }.filter { !$0.isEmpty }
         guard !terms.isEmpty else { return [] }
+
+        // Запрошенные граммы из запроса (первые, если их несколько).
+        let requestedGrams: Double? = parsedQuery.compactMap { item in
+            item.grams(defaultGrams: 100)
+        }.first
+
         return store.recentDishes.filter { dish in
             let name = dish.name.lowercased()
             return terms.contains { term in name.contains(term) }
         }
         .sorted { ($0.updatedAt ?? dishCreated($0)) > ($1.updatedAt ?? dishCreated($1)) }
         .prefix(3)
-        .map { $0 }
+        .map { DishMatch(dish: $0, requestedGrams: requestedGrams) }
     }
 
     /// Дата создания блюда — резерв, если updatedAt нет.
@@ -678,7 +694,7 @@ struct AddEntryView: View {
     @ViewBuilder
     private func quickAddSectionBody(
         usuals: [UsualMatch],
-        dishes: [Dish],
+        dishes: [DishMatch],
         meals: [FoodEntry],
         entries: [FoodEntry],
         adds: [QuickAdd]
@@ -694,8 +710,6 @@ struct AddEntryView: View {
         }
 
         quickDishSection(dishes: dishes)
-        quickMealSection(meals: meals)
-        quickEntrySection(entries: entries)
 
         if !adds.isEmpty {
             ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
@@ -709,11 +723,11 @@ struct AddEntryView: View {
     }
 
     /// Блюда из недавнего в быстром добавлении.
-    private func quickDishSection(dishes: [Dish]) -> some View {
-        ForEach(Array(dishes.enumerated()), id: \.element.id) { index, dish in
-            quickDishRow(dish)
+    private func quickDishSection(dishes: [DishMatch]) -> some View {
+        ForEach(Array(dishes.enumerated()), id: \.element.id) { index, match in
+            quickDishRow(match)
                 .contentShape(Rectangle())
-                .onTapGesture { addQuickDish(dish) }
+                .onTapGesture { addQuickDish(match) }
                 .accessibilityIdentifier("quickDishRow\(index)")
         }
         .animation(.default, value: dishes.map { $0.id })
@@ -742,15 +756,23 @@ struct AddEntryView: View {
     }
 
     /// Строка недавнего блюда в быстром добавлении.
-    private func quickDishRow(_ dish: Dish) -> some View {
-        let grams = dish.servingGrams
+    ///
+    /// Калории и макросы пересчитываются под запрошенные граммы (если есть в
+    /// запросе), иначе под порцию по умолчанию (servingGrams).
+    private func quickDishRow(_ match: DishMatch) -> some View {
+        let grams = match.requestedGrams ?? match.dish.servingGrams
+        let factor = grams / 100
         return FoodRow(
-            name: dish.name,
-            calories: dish.totalCalories,
-            portion: String(format: "%.0f \(String(localized: "г"))", grams),
-            macros: dish.totalMacros,
-            icons: store.foodCategories(of: dish).map(\.icon),
-            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: grams)
+            name: match.dish.name,
+            calories: Int((Double(match.dish.totalCalories) * factor).rounded()),
+            portion: String(format: "%.0f г", grams),
+            macros: Macros(
+                protein: match.dish.totalMacros.protein * factor,
+                fat: match.dish.totalMacros.fat * factor,
+                carbs: match.dish.totalMacros.carbs * factor
+            ),
+            icons: store.foodCategories(of: match.dish).map(\.icon),
+            micros: store.notableMicronutrients(forFoodNamed: match.dish.name, grams: grams)
         )
     }
 
@@ -771,12 +793,17 @@ struct AddEntryView: View {
     }
 
     /// Добавить недавнее блюдо в черновик — один тап.
-    private func addQuickDish(_ dish: Dish) {
-        let grams = dish.servingGrams
+    private func addQuickDish(_ match: DishMatch) {
+        let grams = match.requestedGrams ?? match.dish.servingGrams
+        let factor = grams / 100
         let item = MealItem(
-            name: dish.name,
-            calories: dish.totalCalories,
-            macros: dish.totalMacros,
+            name: match.dish.name,
+            calories: Int((Double(match.dish.totalCalories) * factor).rounded()),
+            macros: Macros(
+                protein: match.dish.totalMacros.protein * factor,
+                fat: match.dish.totalMacros.fat * factor,
+                carbs: match.dish.totalMacros.carbs * factor
+            ),
             grams: grams
         )
         withAnimation(.snappy) { draftItems.append(item) }

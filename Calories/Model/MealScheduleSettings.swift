@@ -13,6 +13,11 @@ final class MealScheduleSettings {
     static let countKey = "meal_schedule_count"
     static let weighInKey = "meal_schedule_weigh_in"
     static let weighInOnKey = "meal_schedule_weigh_in_on"
+    /// Смещение конкретного приёма в минутах относительно времени по расписанию.
+    /// Ключ: "meal_offset_<period.rawValue>", значение — минуты.
+    static func mealOffsetKey(_ period: MealPeriod) -> String {
+        "meal_offset_\(period.rawValue)"
+    }
 
     /// Один экземпляр на всё приложение.
     ///
@@ -44,6 +49,15 @@ final class MealScheduleSettings {
     /// место ему в расписании, а не в баннере «не забудь».
     var weighIn: Date { didSet { defaults.set(weighIn, forKey: Self.weighInKey) } }
     var remindsWeighIn: Bool { didSet { defaults.set(remindsWeighIn, forKey: Self.weighInOnKey) } }
+
+    /// Смещение конкретного приёма в минутах. 0 — по расписанию, +
+    /// значит позже, — раньше.
+    func mealOffset(_ period: MealPeriod) -> Int {
+        defaults.integer(forKey: Self.mealOffsetKey(period))
+    }
+    func setMealOffset(_ minutes: Int, for period: MealPeriod) {
+        defaults.set(minutes, forKey: Self.mealOffsetKey(period))
+    }
 
     /// Время сегодняшнего дня по сохранённым часам и минутам: в настройках
     /// хранится момент, а нужен он каждый день заново.

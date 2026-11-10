@@ -134,6 +134,8 @@ enum MealSchedule {
         /// перевода стрелок можно было проверить тестом, не трогая часовой
         /// пояс всей машины.
         var calendar: Calendar = .current
+        /// Настройки расписания с индивидуальными смещениями приёмов.
+        var settings: MealScheduleSettings?
     }
 
     /// Времена приёмов на этот день.
@@ -141,7 +143,11 @@ enum MealSchedule {
     /// Основные стоят на своих часах и не двигаются. Промежуточные ровно
     /// посередине между соседями: второй завтрак между завтраком и обедом,
     /// полдник между обедом и ужином, второй ужин между ужином и отбоем.
+    ///
+    /// Каждый приём может быть сдвинут индивидуально через
+    /// `MealScheduleSettings.mealOffset(_:)`.
     static func times(wake: Date, sleep: Date, count: Int,
+                      settings: MealScheduleSettings? = nil,
                       calendar: Calendar = .current) -> [Date] {
         let day = calendar.startOfDay(for: wake)
         // Час ставим, а не прибавляем.
@@ -170,14 +176,21 @@ enum MealSchedule {
         let lastAllowed = bedtime.addingTimeInterval(-lastMealBeforeSleep)
 
         return periods(count: count).map { period in
+            var time: Date
             switch period {
-            case .breakfast:       return breakfast
-            case .secondBreakfast: return middle(breakfast, lunch)
-            case .lunch:           return lunch
-            case .afternoonSnack:  return middle(lunch, dinner)
-            case .dinner:          return dinner
-            default:               return middle(dinner, lastAllowed)
+            case .breakfast:       time = breakfast
+            case .secondBreakfast: time = middle(breakfast, lunch)
+            case .lunch:           time = lunch
+            case .afternoonSnack:  time = middle(lunch, dinner)
+            case .dinner:          time = dinner
+            default:               time = middle(dinner, lastAllowed)
             }
+            // Индивидуальное смещение приёма: пользователь может сдвинуть
+            // конкретный приём на любую минуту, не трогая остальные.
+            if let offset = settings?.mealOffset(period) {
+                time = calendar.date(byAdding: .minute, value: offset, to: time) ?? time
+            }
+            return time
         }
     }
 
@@ -214,7 +227,7 @@ enum MealSchedule {
     static func slots(_ input: Input) -> [Slot] {
         let wake = input.wake
         let times = times(wake: wake, sleep: input.sleep, count: input.mealCount,
-                          calendar: input.calendar)
+                          settings: input.settings, calendar: input.calendar)
         guard !times.isEmpty, input.dailyGoal > 0 else { return [] }
 
         // Границы окон — середины между соседними приёмами.
@@ -367,6 +380,7 @@ extension MealSchedule {
                     mealCount: settings.count,
                     dailyGoal: dailyGoal,
                     entries: entries,
-                    now: now))
+                    now: now,
+                    settings: settings))
     }
 }

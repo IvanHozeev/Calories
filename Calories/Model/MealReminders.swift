@@ -78,7 +78,8 @@ enum MealReminders {
             guard settings.isEnabled else { return }
             let times = MealSchedule.times(wake: settings.today(settings.wake),
                                            sleep: settings.today(settings.sleep),
-                                           count: settings.count)
+                                           count: settings.count,
+                                           settings: settings)
             let calendar = Calendar.current
             for (index, time) in times.enumerated() {
                 let content = UNMutableNotificationContent()

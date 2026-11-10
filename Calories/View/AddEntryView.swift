@@ -569,6 +569,72 @@ struct AddEntryView: View {
         return nil
     }
 
+    /// Недавние блюда, подходящие под запрос.
+    ///
+    /// «Паста с туной в томатном соусе 500» — свежее блюдо, заведённое недавно.
+    /// Оно ещё не набрало трёх повторов для «Как обычно», но уже есть в дневнике
+    /// — показываем его в быстром добавлении.
+    private var recentDishMatches: [Dish] {
+        guard isSearching else { return [] }
+        let terms = parsedQuery.map {
+            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
+        }.filter { !$0.isEmpty }
+        guard !terms.isEmpty else { return [] }
+        return store.recentDishes.filter { dish in
+            let name = dish.name.lowercased()
+            return terms.contains { term in name.contains(term) }
+        }
+        .sorted { ($0.updatedAt ?? dishCreated($0)) > ($1.updatedAt ?? dishCreated($1)) }
+        .prefix(3)
+        .map { $0 }
+    }
+
+    /// Дата создания блюда — резерв, если updatedAt нет.
+    private func dishCreated(_ dish: Dish) -> Date { dish.createdAt }
+
+    /// Недавние приёмы из дневника, подходящие под запрос.
+    ///
+    /// Составные приёмы (несколько продуктов) — через `recentMeals`, они уже
+    /// отфильтрованы и отсортированы по дате.
+    private var recentMealMatches: [FoodEntry] {
+        guard isSearching else { return [] }
+        let terms = parsedQuery.map {
+            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
+        }.filter { !$0.isEmpty }
+        guard !terms.isEmpty else { return [] }
+        return store.recentMeals(limit: 10, days: 30).filter { entry in
+            let name = entry.name.lowercased()
+            return terms.contains { term in name.contains(term) }
+        }
+        .prefix(3)
+        .map { $0 }
+    }
+
+    /// Недавние записи дневника с одним продуктом, подходящие под запрос.
+    ///
+    /// «Паста с туной» может быть записана как один продукт (без компонентов)
+    /// — тогда она не попадает ни в `recentMeals`, ни в `recentDishes`. Ищем
+    /// её среди недавних записей дневника.
+    private var recentEntryMatches: [FoodEntry] {
+        guard isSearching else { return [] }
+        let terms = parsedQuery.map {
+            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
+        }.filter { !$0.isEmpty }
+        guard !terms.isEmpty else { return [] }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
+        var seen = Set<String>()
+        return store.entries
+            .filter { $0.date >= cutoff && $0.components.isEmpty }
+            .filter { entry in
+                guard !seen.contains(entry.name.lowercased()) else { return false }
+                seen.insert(entry.name.lowercased())
+                let name = entry.name.lowercased()
+                return terms.contains { term in name.contains(term) }
+            }
+            .prefix(3)
+            .map { $0 }
+    }
+
     /// Части приёма с наложенными запрошенными граммами.
     private func scaledParts(for match: UsualMatch) -> [MealItem] {
         match.usual.parts.map { part in
@@ -589,25 +655,155 @@ struct AddEntryView: View {
     private var quickAddSection: some View {
         let adds = quickAdds
         let usuals = usualMealMatches
-        if isSearching, !adds.isEmpty || !usuals.isEmpty {
-            Section("Быстрое добавление") {
-                ForEach(Array(usuals.enumerated()), id: \.element.id) { index, match in
-                    quickUsualRow(match)
-                        .contentShape(Rectangle())
-                        .onTapGesture { addQuickUsualMeal(match) }
-                        .accessibilityIdentifier("quickUsualRow\(index)")
-                }
-                .animation(.default, value: usuals.map { $0.id })
+        let dishes = recentDishMatches
+        let meals = recentMealMatches
+        let entries = recentEntryMatches
+        let hasResults = !usuals.isEmpty || !dishes.isEmpty || !meals.isEmpty || !entries.isEmpty || !adds.isEmpty
 
-                ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
-                    quickAddRow(add)
-                        .contentShape(Rectangle())
-                        .onTapGesture { quickAdd(add) }
-                        .accessibilityIdentifier("quickAddRow\(index)")
-                }
-                .animation(.default, value: quickAdds.map { $0.id })
+        if isSearching && hasResults {
+            Section("Быстрое добавление") {
+                quickAddSectionBody(
+                    usuals: usuals,
+                    dishes: dishes,
+                    meals: meals,
+                    entries: entries,
+                    adds: adds
+                )
             }
-            .animation(.default, value: usuals.map { $0.id } + quickAdds.map { $0.id })
+        }
+    }
+
+    /// Внутри секции «Быстрое добавление» — вынесено отдельно, чтобы
+    /// компилятор не ломался на сложном условии с множеством ForEach.
+    @ViewBuilder
+    private func quickAddSectionBody(
+        usuals: [UsualMatch],
+        dishes: [Dish],
+        meals: [FoodEntry],
+        entries: [FoodEntry],
+        adds: [QuickAdd]
+    ) -> some View {
+        if !usuals.isEmpty {
+            ForEach(Array(usuals.enumerated()), id: \.element.id) { index, match in
+                quickUsualRow(match)
+                    .contentShape(Rectangle())
+                    .onTapGesture { addQuickUsualMeal(match) }
+                    .accessibilityIdentifier("quickUsualRow\(index)")
+            }
+            .animation(.default, value: usuals.map { $0.id })
+        }
+
+        quickDishSection(dishes: dishes)
+        quickMealSection(meals: meals)
+        quickEntrySection(entries: entries)
+
+        if !adds.isEmpty {
+            ForEach(Array(adds.enumerated()), id: \.element.id) { index, add in
+                quickAddRow(add)
+                    .contentShape(Rectangle())
+                    .onTapGesture { quickAdd(add) }
+                    .accessibilityIdentifier("quickAddRow\(index)")
+            }
+            .animation(.default, value: adds.map { $0.id })
+        }
+    }
+
+    /// Блюда из недавнего в быстром добавлении.
+    private func quickDishSection(dishes: [Dish]) -> some View {
+        ForEach(Array(dishes.enumerated()), id: \.element.id) { index, dish in
+            quickDishRow(dish)
+                .contentShape(Rectangle())
+                .onTapGesture { addQuickDish(dish) }
+                .accessibilityIdentifier("quickDishRow\(index)")
+        }
+        .animation(.default, value: dishes.map { $0.id })
+    }
+
+    /// Приёмы из недавнего в быстром добавлении.
+    private func quickMealSection(meals: [FoodEntry]) -> some View {
+        ForEach(Array(meals.enumerated()), id: \.element.id) { index, entry in
+            quickMealRow(entry)
+                .contentShape(Rectangle())
+                .onTapGesture { addQuickMeal(entry) }
+                .accessibilityIdentifier("quickMealRow\(index)")
+        }
+        .animation(.default, value: meals.map { $0.id })
+    }
+
+    /// Записи дневника с одним продуктом в быстром добавлении.
+    private func quickEntrySection(entries: [FoodEntry]) -> some View {
+        ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+            quickMealRow(entry)
+                .contentShape(Rectangle())
+                .onTapGesture { addQuickMeal(entry) }
+                .accessibilityIdentifier("quickEntryRow\(index)")
+        }
+        .animation(.default, value: entries.map { $0.id })
+    }
+
+    /// Строка недавнего блюда в быстром добавлении.
+    private func quickDishRow(_ dish: Dish) -> some View {
+        let grams = dish.servingGrams
+        return FoodRow(
+            name: dish.name,
+            calories: dish.totalCalories,
+            portion: String(format: "%.0f \(String(localized: "г"))", grams),
+            macros: dish.totalMacros,
+            icons: store.foodCategories(of: dish).map(\.icon),
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: grams)
+        )
+    }
+
+    /// Строка недавней записи дневника в быстром добавлении.
+    private func quickMealRow(_ entry: FoodEntry) -> some View {
+        let portions = entry.components.compactMap { part in
+            part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+        }
+        return FoodRow(
+            name: entry.name,
+            calories: entry.calories,
+            caloriesPer100g: nil,
+            portion: portions.joined(separator: " · "),
+            macros: Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs),
+            detail: entry.components.isEmpty ? nil : String(format: String(localized: "%lld позиции"), entry.components.count),
+            parts: entry.components.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs)) }
+        )
+    }
+
+    /// Добавить недавнее блюдо в черновик — один тап.
+    private func addQuickDish(_ dish: Dish) {
+        let grams = dish.servingGrams
+        let item = MealItem(
+            name: dish.name,
+            calories: dish.totalCalories,
+            macros: dish.totalMacros,
+            grams: grams
+        )
+        withAnimation(.snappy) { draftItems.append(item) }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        scrollToTopTicket += 1
+        Task { @MainActor in
+            searchText = ""
+            debouncedSearch = ""
+            consumedQueryNames.removeAll()
+        }
+    }
+
+    /// Добавить недавнюю запись дневника в черновик — один тап.
+    private func addQuickMeal(_ entry: FoodEntry) {
+        withAnimation(.snappy) {
+            draftItems.append(contentsOf: entry.components.map {
+                MealItem(name: $0.name, calories: $0.calories,
+                         macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                         grams: $0.grams)
+            })
+        }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        scrollToTopTicket += 1
+        Task { @MainActor in
+            searchText = ""
+            debouncedSearch = ""
+            consumedQueryNames.removeAll()
         }
     }
 

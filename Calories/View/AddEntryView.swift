@@ -599,7 +599,8 @@ struct AddEntryView: View {
 
         return store.dishes.filter { dish in
             let name = dish.name.lowercased()
-            return terms.contains { term in name.contains(term) }
+            // Все слова запроса должны быть в имени блюда, а не хотя бы одно.
+            return terms.allSatisfy { term in name.contains(term) }
         }
         .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
         .prefix(3)
@@ -755,10 +756,10 @@ struct AddEntryView: View {
 
     /// Строка недавнего блюда в быстром добавлении.
     ///
-    /// Калории и макросы пересчитаны под порцию по умолчанию (servingGrams),
-    /// а не показывают объём всей кастрюли.
+    /// Если в запросе были граммы — показываем их с пересчитанными калориями и
+    /// макросами. Иначе — порция по умолчанию блюда.
     private func quickDishRow(_ match: DishMatch) -> some View {
-        let grams = match.dish.servingGrams
+        let grams = match.requestedGrams ?? match.dish.servingGrams
         let totalGrams = match.dish.totalGrams
         let factor = totalGrams > 0 ? grams / totalGrams : 0
         return FoodRow(

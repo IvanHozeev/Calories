@@ -75,6 +75,13 @@ struct AddEntryView: View {
     /// а после паузы в наборе.
     @State private var topMatches: [TopMatch] = []
     @State private var topMatchesTask: Task<Void, Never>? = nil
+    /// Кэш совпадений приёмов и блюд — пересчитывается только после паузы в
+    /// вводе, а не при каждом рендере. Иначе поиск подлагивает на длинной
+    /// истории дневника.
+    @State private var usualMatchesCache: [UsualMatch] = []
+    @State private var dishMatchesCache: [DishMatch] = []
+    @State private var mealMatchesCache: [FoodEntry] = []
+    @State private var entryMatchesCache: [FoodEntry] = []
 
     /// Что показываем на экране порции.
     ///
@@ -511,12 +518,8 @@ struct AddEntryView: View {
         var id: String { usual.id }
     }
 
-    /// Сохранённые приёмы, которые подходят под текущий запрос.
-    ///
-    /// «молоко 300 протеин 40» найдёт приём «Молоко 3%, Протеин шоколадный»,
-    /// который человек уже собирал 17 раз, и предложит его целиком — одним тапом.
-    /// Запрошенные граммы накладываются на части приёма по совпадению имён.
-    private var usualMealMatches: [UsualMatch] {
+    /// Вычислить совпадения приёмов под текущий запрос.
+    private func computeUsualMatches() -> [UsualMatch] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
@@ -578,14 +581,8 @@ struct AddEntryView: View {
         var id: String { dish.id.uuidString }
     }
 
-    /// Блюда, подходящие под запрос.
-    ///
-    /// «Паста с туной в томатном соусе 500» — свежее блюдо, заведённое недавно.
-    /// Оно ещё не набрало трёх повторов для «Как обычно», но уже есть в дневнике
-    /// — показываем его в быстром добавлении. Ищем среди всех сохранённых
-    /// блюд, а не только среди последних двенадцати кэшированных — иначе
-    /// нужное блюдо может выпасть из короткого кэша.
-    private var recentDishMatches: [DishMatch] {
+    /// Вычислить совпадения блюд под текущий запрос.
+    private func computeDishMatches() -> [DishMatch] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
@@ -607,11 +604,8 @@ struct AddEntryView: View {
         .map { DishMatch(dish: $0, requestedGrams: requestedGrams) }
     }
 
-    /// Недавние приёмы из дневника, подходящие под запрос.
-    ///
-    /// Составные приёмы (несколько продуктов) — через `recentMeals`, они уже
-    /// отфильтрованы и отсортированы по дате.
-    private var recentMealMatches: [FoodEntry] {
+    /// Вычислить совпадения приёмов из дневника под текущий запрос.
+    private func computeMealMatches() -> [FoodEntry] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
@@ -625,12 +619,8 @@ struct AddEntryView: View {
         .map { $0 }
     }
 
-    /// Недавние записи дневника с одним продуктом, подходящие под запрос.
-    ///
-    /// «Паста с туной» может быть записана как один продукт (без компонентов)
-    /// — тогда она не попадает ни в `recentMeals`, ни в `recentDishes`. Ищем
-    /// её среди недавних записей дневника.
-    private var recentEntryMatches: [FoodEntry] {
+    /// Вычислить совпадения записей дневника с одним продуктом под запрос.
+    private func computeEntryMatches() -> [FoodEntry] {
         guard isSearching else { return [] }
         let terms = parsedQuery.map {
             $0.name.trimmingCharacters(in: .whitespaces).lowercased()
@@ -669,10 +659,10 @@ struct AddEntryView: View {
     @ViewBuilder
     private var quickAddSection: some View {
         let adds = quickAdds
-        let usuals = usualMealMatches
-        let dishes = recentDishMatches
-        let meals = recentMealMatches
-        let entries = recentEntryMatches
+        let usuals = usualMatchesCache
+        let dishes = dishMatchesCache
+        let meals = mealMatchesCache
+        let entries = entryMatchesCache
         let hasResults = !usuals.isEmpty || !dishes.isEmpty || !meals.isEmpty || !entries.isEmpty || !adds.isEmpty
 
         if isSearching && hasResults {
@@ -1075,6 +1065,15 @@ struct AddEntryView: View {
                     try? await Task.sleep(for: .milliseconds(150))
                     guard !Task.isCancelled else { return }
                     recomputeQuickAdds()
+                    // Совпадения приёмов и блюд тоже считаем с дебаунсом, а не
+                    /// при каждом рендере — иначе поиск подлагивает на длинной
+                    // истории дневника.
+                    await MainActor.run {
+                        usualMatchesCache = computeUsualMatches()
+                        dishMatchesCache = computeDishMatches()
+                        mealMatchesCache = computeMealMatches()
+                        entryMatchesCache = computeEntryMatches()
+                    }
                 }
                 // Топ-сопоставления считаем с таким же дебаунсом — не на каждую
                 // букву, а после паузы в наборе.

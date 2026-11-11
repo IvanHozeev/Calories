@@ -112,21 +112,39 @@ struct PlanView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 if let status, !finished {
-                    // Иконка с подписью: оранжевый треугольник без слов
-                    // не объясняет, что означает «отстаёшь от графика».
-                    HStack(spacing: 4) {
-                        Image(systemName: status.icon)
-                            .font(.app(.caption, weight: .semibold))
-                            .foregroundStyle(status.color)
-                        Text(status.title)
-                            .font(.app(.caption2, weight: .semibold))
-                            .foregroundStyle(status.color)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
+                    if plan.isDietBreak(on: Date()) {
+                        // Во время брейка вес о плане не говорит: вода и гликоген.
+                        // Показываем брейк, а не треугольник отставания.
+                        HStack(spacing: 4) {
+                            Image(systemName: "cup.and.saucer.fill")
+                                .font(.app(.caption, weight: .semibold))
+                                .foregroundStyle(.green)
+                            Text("Брейк")
+                                .font(.app(.caption2, weight: .semibold))
+                                .foregroundStyle(.green)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .padding(6)
+                        .background(Color.green.opacity(0.12), in: Capsule())
+                        .accessibilityLabel(Text("Идёт диет-брейк"))
+                    } else {
+                        // Оранжевый треугольник без подписи не объясняет,
+                        // что означает «отстаёшь от графика».
+                        HStack(spacing: 4) {
+                            Image(systemName: status.icon)
+                                .font(.app(.caption, weight: .semibold))
+                                .foregroundStyle(status.color)
+                            Text(status.title)
+                                .font(.app(.caption2, weight: .semibold))
+                                .foregroundStyle(status.color)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.8)
+                        }
+                        .padding(6)
+                        .background(status.color.opacity(0.12), in: Capsule())
+                        .accessibilityLabel(Text(verbatim: status.title))
                     }
-                    .padding(6)
-                    .background(status.color.opacity(0.12), in: Capsule())
-                    .accessibilityLabel(Text(verbatim: status.title))
                 }
             }
 
@@ -140,7 +158,7 @@ struct PlanView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                weightTrack(plan, tint: status?.color ?? .accentColor)
+                weightTrack(plan, tint: plan.isDietBreak(on: Date()) ? .green : (status?.color ?? .accentColor))
 
                 // Полоса фаз только когда их несколько: у плана из одной фазы
                 // она повторяла бы то, что уже сказано неделей и темпом.

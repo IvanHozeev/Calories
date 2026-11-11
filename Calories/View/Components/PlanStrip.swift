@@ -83,7 +83,14 @@ struct PlanStrip: View {
     private var tint: Color {
         guard store.isPremium else { return .secondary }
         if store.planOutcome != nil { return .secondary }
-        return store.plan == nil ? .secondary : (store.planAdherence()?.status.color ?? .yellow)
+        guard let plan = store.plan else { return .secondary }
+        // Во время брейка вес о плане не говорит — зелёный, а не цвет статуса.
+        if plan.isDietBreak(on: Date()) { return .green }
+        return planAdherenceColor
+    }
+
+    private var planAdherenceColor: Color {
+        store.planAdherence()?.status.color ?? .yellow
     }
 
     @ViewBuilder

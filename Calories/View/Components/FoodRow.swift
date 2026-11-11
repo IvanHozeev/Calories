@@ -45,6 +45,9 @@ struct FoodRow: View {
         let macros: Macros
         /// Вес этой части в граммах. nil — не показываем вес.
         let grams: Double?
+        /// Значки категорий части: молоко — капля, протеин — свой значок.
+        /// Пусто — строка обходится без них.
+        var icons: [String] = []
         var id: String { name }
         var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
     }
@@ -135,25 +138,37 @@ struct FoodRow: View {
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
+                    // Каждая часть приёма — одна строка: имя, вес и значки
+                    // через среднюю точку, как ярус примет у одиночного
+                    // продукта. Раньше вес висел отдельной строкой под
+                    // названием, и столбик из частей вырастал вчетверо.
                     ForEach(parts) { part in
-                        VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 5) {
                             Text(part.name)
                                 .font(.app(.body, weight: .semibold))
-                                // Один натуральный размер — не растягиваем по ширине,
-                                // иначе «Протеин шоколадный» в узком ряду дневника
-                                // уезжает на вторую строку, хотя места хватило на одну.
-                                // Эту строку я потерял, когда переделывал части в
-                                // столбик под вес: без неё текст снова меряется по
-                                // предложенной ширине и переносится раньше времени.
-                                .fixedSize(horizontal: true, vertical: false)
-                                .lineLimit(2)
+                                .lineLimit(1)
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(part.color)
-                            if let grams = part.grams, grams > 0 {
-                                Text(String(format: "%.0f г", grams))
-                                    .font(.app(.caption2))
-                                    .foregroundStyle(.secondary)
+                            // Вес и значки — одной ступенью мельче имени и
+                            // серым: это приметы части, а не её заглавие.
+                            HStack(spacing: 5) {
+                                if let grams = part.grams, grams > 0 {
+                                    Text(verbatim: "·")
+                                    Text(String(format: "%.0f г", grams))
+                                }
+                                if !part.icons.isEmpty {
+                                    Text(verbatim: "·")
+                                    HStack(spacing: 4) {
+                                        ForEach(part.icons.prefix(2), id: \.self) { icon in
+                                            Image(systemName: icon)
+                                        }
+                                    }
+                                    .accessibilityHidden(true)
+                                }
                             }
+                            .font(.app(.footnote, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                         }
                     }
                 } else {
@@ -198,7 +213,11 @@ struct FoodRow: View {
                 // помогают узнать строку, но их отсутствие ничего не искажает.
                 // Поэтому берём первую раскладку, которая влезает целиком, и
                 // отдаём значки по одному.
-                signs(iconLimit: 3, showTraits: true, showDetailPortion: parts.isEmpty)
+                // У составного приёма вес и значки стоят в строке каждой
+                // части, этой строке там нечего показывать.
+                if parts.isEmpty {
+                    signs(iconLimit: 3, showTraits: true, showDetailPortion: true)
+                }
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {
@@ -214,6 +233,10 @@ struct FoodRow: View {
                     }
                 }
             }
+            // Колонку с частями меряем раньше распорки: иначе `HStack` делит
+            // ширину между ними поровну, и строка «Протеин шоколадный · 40 г»
+            // упирается в половину экрана, хотя справа пусто.
+            .layoutPriority(1)
             // Полоски ведущего макроса здесь больше нет: о нём говорит сама
             // строка макросов — ведущая цифра крупнее и в своём цвете. Полоска
             // была вторым знаком о том же, и её ещё надо было выучить.
@@ -229,6 +252,9 @@ struct FoodRow: View {
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)
             }
+            // Число калорий меряется раньше названия: оно короткое и должно
+            // оставаться целым, а название пусть забирает остаток.
+            .layoutPriority(2)
             // Число не липнет к правому краю ячейки: без отступа «ккал»
             // упиралось в границу списка, и строка выглядела обрезанной.
             .padding(.trailing, 6)

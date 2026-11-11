@@ -138,7 +138,12 @@ struct MealSuggestionsView: View {
                 portion: String(format: String(localized: "%lld позиции"), item.parts.count),
                 macros: item.macros,
                 detail: String(format: String(localized: "%lld раз"), item.times),
-                parts: item.parts.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs), grams: $0.grams) })
+                parts: item.parts.map {
+                    .init(name: $0.name,
+                          macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
+                          grams: $0.grams,
+                          icons: store.foodNamed($0.name).map { [$0.foodCategory.icon] } ?? [])
+                })
     }
 
     /// Открывает подсказку экраном порции — тем же, каким открывается любой

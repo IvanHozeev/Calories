@@ -138,42 +138,37 @@ struct FoodRow: View {
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
-                    // Каждая часть приёма — одна строка: имя, вес и значки
-                    // через среднюю точку, как ярус примет у одиночного
-                    // продукта. Раньше вес висел отдельной строкой под
-                    // названием, и столбик из частей вырастал вчетверо.
+                    // Составной приём — каждая часть своей строкой в цвет
+                    // своего доминирующего макроса. В строке имени живёт
+                    // только значок категории, вес — под именем: если тянуть
+                    // всё в одну строку, длинное название толкает калории
+                    // к правому борту.
                     ForEach(parts) { part in
-                        HStack(spacing: 5) {
-                            Text(part.name)
-                                // Чуть мельче, чем у одиночного продукта:
-                                // в составном приёме строк несколько, и длинное
-                                // имя в одну строку упиралось в калории.
-                                .font(.app(.subheadline, weight: .semibold))
-                                .lineLimit(1)
-                                .multilineTextAlignment(.leading)
-                                .foregroundStyle(part.color)
-                            // Вес и значки — одной ступенью мельче имени и
-                            // серым: это приметы части, а не её заглавие.
-                            // Вес идёт последним: он у всех частей разный по
-                            // длине, и в конце столбик цифр не рвёт чтение имён.
+                        VStack(alignment: .leading, spacing: 1) {
                             HStack(spacing: 5) {
+                                Text(part.name)
+                                    // Чуть мельче, чем у одиночного продукта:
+                                    // в составном приёме строк несколько.
+                                    .font(.app(.subheadline, weight: .semibold))
+                                    .lineLimit(1)
+                                    .multilineTextAlignment(.leading)
+                                    .foregroundStyle(part.color)
                                 if !part.icons.isEmpty {
-                                    Text(verbatim: "·")
                                     HStack(spacing: 4) {
                                         ForEach(part.icons.prefix(2), id: \.self) { icon in
                                             Image(systemName: icon)
                                         }
                                     }
+                                    .font(.app(.caption, weight: .medium))
+                                    .foregroundStyle(.secondary)
                                     .accessibilityHidden(true)
                                 }
-                                if let grams = part.grams, grams > 0 {
-                                    Text(verbatim: "·")
-                                    Text(String(format: "%.0f г", grams))
-                                }
                             }
-                            .font(.app(.caption, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                            if let grams = part.grams, grams > 0 {
+                                Text(String(format: "%.0f г", grams))
+                                    .font(.app(.caption, weight: .medium))
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 } else {

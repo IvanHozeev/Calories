@@ -16,7 +16,6 @@ import Foundation
             proteinTarget: 80,
             fatTarget: 60,
             carbsTarget: 250,
-            weightTrend: nil,
             lastLoggedDay: yesterday
         )
         #expect(advice == .onTarget, "Ожидался .onTarget, но получил \(advice)")
@@ -30,7 +29,6 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil
         )
         if case .overGoal(let pct) = advice {
@@ -50,12 +48,11 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil,
             now: at(hour: 16)
         )
         if case .underGoal(let pct, let remaining) = advice {
-            #expect(pct == 65)
+            #expect(pct == 35, "съедено 700 из 2000 — это 35%, а не недобор в 65%")
             #expect(remaining == 1300)
         } else {
             Issue.record("Ожидался underGoal, получено \(advice)")
@@ -71,7 +68,6 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil,
             now: at(hour: 10)
         )
@@ -88,7 +84,6 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil,
             now: at(hour: 15)
         )
@@ -103,12 +98,11 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil,
             now: at(hour: 22)
         )
         if case .underGoal(let pct, let remaining) = advice {
-            #expect(pct == 75)
+            #expect(pct == 25, "съедено 500 из 2000 — это 25%, а не недобор в 75%")
             #expect(remaining == 1500)
         } else {
             Issue.record("Ожидался underGoal, получено \(advice)")
@@ -124,7 +118,6 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil,
             now: at(hour: 19)
         )
@@ -190,22 +183,87 @@ import Foundation
 
     // MARK: - Вес на плато
 
-    @Test func weightPlateauWhenNoChangeFourteenDays() {
-        let weights = Array(repeating: 75.0, count: 14)
-        let advice = DailyAdviceEngine.advice(
-            consumedToday: 2000,
-            adaptedTodayGoal: 2000,
-            macrosToday: .zero,
-            proteinTarget: nil,
-            fatTarget: nil,
-            carbsTarget: nil,
-            weightTrend: weights,
-            lastLoggedDay: nil
-        )
-        if case .weightPlateau(let days) = advice {
-            #expect(days == 14)
-        } else {
-            Issue.record("Ожидался weightPlateau, получено \(advice)")
+    /// Взвешивание за `daysAgo` дней до сейчас, в полдень.
+    private func weighIn(_ kg: Double, daysAgo: Int) -> AdviceWeighIn {
+        let day = Calendar.current.date(byAdding: .day, value: -daysAgo, to: Date())!
+        return AdviceWeighIn(date: Calendar.current.date(bySettingHour: 12, minute: 0, second: 0, of: day)!,
+                             kg: kg)
+    }
+
+    private func plateauAdvice(_ weighIns: [AdviceWeighIn]) -> DailyAdvice {
+        DailyAdviceEngine.advice(
+            consumedToday: 2000, adaptedTodayGoal: 2000, macrosToday: .zero,
+            proteinTarget: nil, fatTarget: nil, carbsTarget: nil,
+            weighIns: weighIns, lastLoggedDay: nil, now: at(hour: 12))
+    }
+
+    /// Плато видно тому, кто взвешивается раз в неделю.
+    ///
+    /// Прежнее правило требовало четырнадцать взвешиваний за четырнадцать
+    /// дней, то есть по одному в день без единого пропуска. Прежний тест
+    /// подавал четырнадцать одинаковых чисел и этого не замечал: он проверял
+    /// код, а не то, как люди взвешиваются.
+    @Test func weightPlateauIsSeenByAWeeklyWeigher() {
+        let advice = plateauAdvice([weighIn(75.0, daysAgo: 14), weighIn(75.2, daysAgo: 7),
+                                    weighIn(75.1, daysAgo: 0)])
+        #expect(advice == .weightPlateau(days: 14), "получено \(advice)")
+    }
+
+    /// Двух недель по трём взвешиваниям за последние три дня нет.
+    @Test func recentWeighInsDoNotClaimATwoWeekPlateau() {
+        let advice = plateauAdvice([weighIn(75, daysAgo: 2), weighIn(75, daysAgo: 1), weighIn(75, daysAgo: 0)])
+        #expect(advice != .weightPlateau(days: 14), "срок в три дня выдан за две недели")
+    }
+
+    @Test func twoWeighInsAreNotEnoughForAPlateau() {
+        let advice = plateauAdvice([weighIn(75, daysAgo: 14), weighIn(75, daysAgo: 0)])
+        #expect(advice != .weightPlateau(days: 14))
+    }
+
+    @Test func aMovingWeightIsNotAPlateau() {
+        let advice = plateauAdvice([weighIn(76.0, daysAgo: 14), weighIn(75.4, daysAgo: 7),
+                                    weighIn(75.0, daysAgo: 0)])
+        #expect(advice != .weightPlateau(days: 14), "минус килограмм за две недели — не плато")
+    }
+
+    // MARK: - Что съедено
+
+    /// В тексте «съедено N%» — N это съеденное.
+    ///
+    /// При пустом дне раньше писали «съедено 100% нормы».
+    @Test func underGoalReportsWhatWasEatenNotWhatIsMissing() {
+        // В 17:00 пора бы съесть 62%, а совет заговаривает при отставании больше
+        // 20 пунктов — значит, 42% и меньше.
+        for (eaten, percent) in [(0, 0), (300, 15), (700, 35)] {
+            let advice = DailyAdviceEngine.advice(
+                consumedToday: eaten, adaptedTodayGoal: 2000, macrosToday: .zero,
+                proteinTarget: nil, fatTarget: nil, carbsTarget: nil,
+                lastLoggedDay: nil, now: at(hour: 17))
+            guard case .underGoal(let pct, let remaining) = advice else {
+                Issue.record("при \(eaten) ккал ждали underGoal, получено \(advice)")
+                continue
+            }
+            #expect(pct == percent, "съедено \(eaten) из 2000 — \(percent)%, а не \(pct)%")
+            #expect(remaining == 2000 - eaten)
+        }
+    }
+
+    // MARK: - Бросившему дневник не советуют есть
+
+    /// «Нет записей» важнее «пора ужинать».
+    ///
+    /// Документация приоритетов говорила именно это, а движок держал свои числа
+    /// и отдавал вечером «пора ужинать» человеку, который три дня не открывал
+    /// дневник.
+    @Test func anAbandonedDiaryOutranksTheDinnerHint() {
+        let lastLogged = Calendar.current.date(byAdding: .day, value: -4, to: Date())!
+        for hour in [15, 19] {
+            let advice = DailyAdviceEngine.advice(
+                consumedToday: 0, adaptedTodayGoal: 2000, macrosToday: .zero,
+                proteinTarget: nil, fatTarget: nil, carbsTarget: nil,
+                lastLoggedDay: lastLogged, now: at(hour: hour))
+            if case .notLogging = advice { continue }
+            Issue.record("в \(hour):00 после четырёх дней без записей получено \(advice)")
         }
     }
 
@@ -222,7 +280,6 @@ import Foundation
             proteinTarget: nil,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: threeDaysAgo,
             now: now
         )
@@ -243,7 +300,6 @@ import Foundation
             proteinTarget: 100,
             fatTarget: nil,
             carbsTarget: nil,
-            weightTrend: nil,
             lastLoggedDay: nil
         )
         if case .overGoal = advice {

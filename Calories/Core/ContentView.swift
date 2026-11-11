@@ -807,11 +807,7 @@ private extension ContentView {
     private var dailyAdvice: DailyAdvice? {
         let calendar = Calendar.current
         let lastLoggedDay = store.entriesByDay.keys.sorted().last
-        let fourteenDaysAgo = calendar.date(byAdding: .day, value: -13, to: Date()) ?? Date()
-        let recentWeights = store.weightEntries
-            .filter { $0.date >= fourteenDaysAgo }
-            .sorted { $0.date < $1.date }
-            .map { $0.weightKg }
+        let weighIns = store.weightEntries.map { AdviceWeighIn(date: $0.date, kg: $0.weightKg) }
         return DailyAdviceEngine.advice(
             consumedToday: store.consumedToday,
             adaptedTodayGoal: store.adaptedTodayGoal,
@@ -819,7 +815,7 @@ private extension ContentView {
             proteinTarget: store.proteinTarget,
             fatTarget: store.fatTarget,
             carbsTarget: store.carbsTarget,
-            weightTrend: recentWeights,
+            weighIns: weighIns,
             lastLoggedDay: lastLoggedDay,
             wakeHour: hourOfDay(mealSchedule.wake),
             sleepHour: hourOfDay(mealSchedule.sleep)

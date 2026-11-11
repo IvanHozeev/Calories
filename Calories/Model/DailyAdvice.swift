@@ -9,10 +9,15 @@ enum DailyAdvice: Equatable {
     case onTarget
     /// Калорий набрано больше нормы на процент.
     case overGoal(percent: Int)
-    /// Калорий к этому часу меньше, чем пора бы: процент от нормы и сколько
-    /// килокалорий до неё осталось.
+    /// Калорий к этому часу меньше, чем пора бы: сколько процентов нормы уже
+    /// **съедено** и сколько килокалорий до неё осталось.
+    ///
+    /// Процент — съеденное, а не недобор: текст говорит «съедено N%», и
+    /// число обязано быть тем, что съедено. Раньше сюда клали недобор, и при
+    /// 35% съеденного человеку писали «съедено 65%», а при пустом дне —
+    /// «съедено 100%».
     case underGoal(percent: Int, remaining: Int)
-    /// Вес не менялся две недели.
+    /// Вес не менялся две недели: хватает трёх взвешиваний, растянутых на срок.
     case weightPlateau(days: Int)
     /// Не записывали еду 3+ дня.
     case notLogging(days: Int)
@@ -52,7 +57,10 @@ enum DailyAdvice: Equatable {
         }
     }
 
-    /// Приоритет: чем выше, тем раньше показываем.
+    /// Приоритет: чем выше, тем раньше показываем. Единственное место, где он
+    /// задан: движок выбирает по нему, а не по своим числам. Раньше у движка
+    /// были свои — «нет записей» там получал 40 против 96 здесь, и человеку,
+    /// бросившему дневник, вечером говорили «пора ужинать».
     var priority: Int {
         switch self {
         case .overGoal: return 100
@@ -69,6 +77,15 @@ enum DailyAdvice: Equatable {
     }
 }
 
+/// Взвешивание для совета дня: дата и вес.
+///
+/// Совету нужна дата, а не просто вес: «не менялся две недели» утверждает срок, и
+/// проверить его по голому списку чисел нельзя.
+struct AdviceWeighIn: Equatable {
+    let date: Date
+    let kg: Double
+}
+
 /// Расчёт совета дня из текущих данных.
 struct DailyAdviceEngine {
     /// Выбрать один совет — самый важный из подходящих.
@@ -79,22 +96,22 @@ struct DailyAdviceEngine {
         proteinTarget: Double?,
         fatTarget: Double?,
         carbsTarget: Double?,
-        weightTrend: [Double]?,
+        weighIns: [AdviceWeighIn] = [],
         lastLoggedDay: Date?,
         wakeHour: Double = 7,
         sleepHour: Double = 23,
         now: Date = Date()
     ) -> DailyAdvice {
-        var candidates: [(DailyAdvice, Int)] = []
+        var candidates: [DailyAdvice] = []
         let progress = dayProgress(wake: wakeHour, sleep: sleepHour, now: now)
 
         // 1. Калории vs цель.
         if adaptedTodayGoal > 0 {
             let pct = Double(consumedToday) / Double(adaptedTodayGoal) * 100
             if pct >= 95 && pct <= 105 {
-                candidates.append((.onTarget, 10))
+                candidates.append(.onTarget)
             } else if pct > 105 {
-                candidates.append((.overGoal(percent: Int((pct - 100).rounded())), 100))
+                candidates.append(.overGoal(percent: Int((pct - 100).rounded())))
             } else if pct < 80 {
                 // Сравниваем не с итоговой нормой, а с темпом дня: сколько
                 // уже пора бы съесть к этому часу, если есть от подъёма до
@@ -107,8 +124,8 @@ struct DailyAdviceEngine {
                 // сводка.
                 let expected = progress * 100
                 if progress >= 0.5, pct < expected - 20 {
-                    candidates.append((.underGoal(percent: Int((100 - pct).rounded()),
-                                                  remaining: adaptedTodayGoal - consumedToday), 90))
+                    candidates.append(.underGoal(percent: Int(pct.rounded()),
+                                                 remaining: adaptedTodayGoal - consumedToday))
                 }
             }
         }
@@ -119,20 +136,25 @@ struct DailyAdviceEngine {
         // кольцом, и второй строки про то же самое экран не заслуживает.
         // Отставание от темпа считает `isBehindPace`, а показывает плитка.
 
-        // 3. Вес не менялся 14+ дней.
-        if let trend = weightTrend, trend.count >= 14 {
-            let first = trend[trend.count - 14]
-            let last = trend[trend.count - 1]
-            if abs(last - first) < 0.5 {
-                candidates.append((.weightPlateau(days: 14), 60))
-            }
+        // 3. Вес не менялся две недели.
+        //
+        // Нужно три взвешивания, растянутых хотя бы на десять дней из
+        // четырнадцати. Раньше требовалось четырнадцать подряд — по одному в
+        // день без пропусков, и совет не срабатывал почти ни у кого: люди
+        // взвешиваются раз в несколько дней.
+        let windowStart = Calendar.current.date(byAdding: .day, value: -14, to: now) ?? now
+        let recent = weighIns.filter { $0.date >= windowStart }.sorted { $0.date < $1.date }
+        if recent.count >= 3, let first = recent.first, let last = recent.last,
+           last.date.timeIntervalSince(first.date) >= 10 * 86_400,
+           abs(last.kg - first.kg) < 0.5 {
+            candidates.append(.weightPlateau(days: 14))
         }
 
         // 4. Не записывали еду 3+ дня.
         if let last = lastLoggedDay {
             let daysSince = Calendar.current.dateComponents([.day], from: last, to: now).day ?? 0
             if daysSince >= 3 {
-                candidates.append((.notLogging(days: daysSince), 40))
+                candidates.append(.notLogging(days: daysSince))
             }
         }
         // Если записей вообще нет — не советуем, а молчим: первый запуск.
@@ -143,10 +165,10 @@ struct DailyAdviceEngine {
         // то есть советовало приём пищи ровно перед сном.
         let hour = Calendar.current.component(.hour, from: now)
         if (18..<21).contains(hour), consumedToday < adaptedTodayGoal * 2 / 3, adaptedTodayGoal > 0 {
-            candidates.append((.noDinnerYet, 95))
+            candidates.append(.noDinnerYet)
         }
 
-        return candidates.max(by: { $0.1 < $1.1 })?.0 ?? .none
+        return candidates.max(by: { $0.priority < $1.priority }) ?? .none
     }
 
     /// Отстаёт ли макрос от темпа дня.

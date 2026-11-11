@@ -97,6 +97,9 @@ struct FoodRow: View {
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(part.color)
                             if !part.traits.isEmpty {
+                                Text(verbatim: "·")
+                                    .font(.app(.caption, weight: .medium))
+                                    .foregroundStyle(.secondary)
                                 HStack(spacing: 3) {
                                     ForEach(part.traits) { trait in
                                         Image(systemName: trait.symbol)
@@ -136,6 +139,9 @@ struct FoodRow: View {
                             // нет — серый, как слово «Calories» на launch screen.
                             .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
                         if !traits.isEmpty {
+                            Text(verbatim: "·")
+                                .font(.app(.caption, weight: .medium))
+                                .foregroundStyle(.secondary)
                             HStack(spacing: 3) {
                                 ForEach(traits) { trait in
                                     Image(systemName: trait.symbol)

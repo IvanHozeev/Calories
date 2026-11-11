@@ -145,7 +145,10 @@ struct FoodRow: View {
                     ForEach(parts) { part in
                         HStack(spacing: 5) {
                             Text(part.name)
-                                .font(.app(.body, weight: .semibold))
+                                // Чуть мельче, чем у одиночного продукта:
+                                // в составном приёме строк несколько, и длинное
+                                // имя в одну строку упиралось в калории.
+                                .font(.app(.subheadline, weight: .semibold))
                                 .lineLimit(1)
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(part.color)
@@ -168,7 +171,7 @@ struct FoodRow: View {
                                     Text(String(format: "%.0f г", grams))
                                 }
                             }
-                            .font(.app(.footnote, weight: .medium))
+                            .font(.app(.caption, weight: .medium))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                         }

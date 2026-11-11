@@ -28,6 +28,9 @@ struct TodayTile: View {
     let label: String
     /// Ради чего смотрят. Одна строка, крупно.
     let value: String
+    /// Вторая строка крупного значения — между значением и подписью по размеру.
+    /// Например, темп приёма под названием фазы плана.
+    var value2: String? = nil
     /// Подробность под значением — её может и не быть.
     var caption: String?
     /// То же имя, что у полосы, из которой плитка выросла: по нему её ищут
@@ -54,6 +57,16 @@ struct TodayTile: View {
                     .minimumScaleFactor(0.75)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // Вторая строка крупного значения — между значением и подписью
+                // по размеру: например, темп под названием фазы плана.
+                if let value2 {
+                    Text(verbatim: value2)
+                        .font(.app(.caption, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
 
                 // Подпись есть не всегда: «День закрыт» — это весь ответ,
                 // добавлять к нему нечего.

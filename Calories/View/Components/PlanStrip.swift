@@ -44,12 +44,13 @@ struct PlanStrip: View {
         .accessibilityIdentifier("planStrip")
     }
 
-    /// Та же строка плиткой: крупно — неделя, подписью — фаза и темп.
+    /// Та же строка плиткой: крупно — фаза, средне — темп, подписью — неделя.
     var tile: TodayTile {
         TodayTile(icon: icon,
                   tint: tint,
                   label: String(localized: "План"),
                   value: tileValue,
+                  value2: tileValue2,
                   caption: tileCaption,
                   identifier: "planStrip",
                   onTap: store.isPremium ? onOpenPlan : onShowPaywall)
@@ -61,13 +62,17 @@ struct PlanStrip: View {
         guard let plan = store.plan else {
             return store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent).headline
         }
-        // Фактический темп веса по тренду взвешиваний, а не плановый темп фазы.
-        // Во время брейка плановый темп 0 (поддержание), а фактический может
-        // расти из-за воды и гликогена — показываем то, что происходит с весом.
-        let rate = store.planAdherence()?.observedWeeklyRateKg ?? plan.weeklyRateKg
-        let formatted = String(format: "%+.2f \(String(localized: "кг/нед"))", rate)
-        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return formatted }
-        return "\(phase.title)\n\(formatted)"
+        guard plan.timeline.count > 1, let phase = plan.currentPhase else {
+            return String(format: "%+.2f", plan.weeklyRateKg(on: Date())) + " \(String(localized: "кг/нед"))"
+        }
+        return phase.title
+    }
+
+    private var tileValue2: String? {
+        guard let plan = store.plan else { return nil }
+        guard plan.timeline.count > 1 else { return nil }
+        let rate = plan.weeklyRateKg(on: Date())
+        return String(format: "%+.2f", rate) + " \(String(localized: "кг/нед"))"
     }
 
     private var tileCaption: String? {
@@ -109,23 +114,28 @@ struct PlanStrip: View {
             Text("План завершён — посмотри итог")
                 .foregroundStyle(.secondary)
         } else if let plan = store.plan {
-            // Неделя, фаза и темп: ровно то, за чем на карточку и смотрели.
+            // Фаза, темп и неделя: ровно то, за чем на карточку и смотрели.
             // Фаза только когда их несколько — иначе она повторяет название плана.
-            Text(String(format: String(localized: "Неделя %d из %d"),
-                        plan.currentWeek, plan.durationWeeks))
+            if plan.timeline.count > 1, let phase = plan.currentPhase {
+                Text(phase.title)
+                    .font(.app(.caption, weight: .semibold))
+            }
             Text(verbatim: "·").foregroundStyle(.tertiary)
             // Фактический темп веса по тренду, а не плановый темп фазы.
             // Во время брейка плановый темп 0 (поддержание), а фактический
             // может расти из-за воды и гликогена — показываем то, что реально
             // происходит с весом, чтобы строка и плитка не врали по-разному.
             let rate = store.planAdherence()?.observedWeeklyRateKg ?? plan.weeklyRateKg
+            Text(verbatim: "·").foregroundStyle(.tertiary)
             Text(String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
+                .font(.app(.caption2))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
-            if plan.timeline.count > 1, let phase = plan.currentPhase {
-                Text(verbatim: "·").foregroundStyle(.tertiary)
-                Text(phase.title)
-            }
+            Text(verbatim: "·").foregroundStyle(.tertiary)
+            Text(String(format: String(localized: "Неделя %d из %d"),
+                        plan.currentWeek, plan.durationWeeks))
+                .font(.app(.caption2))
+                .foregroundStyle(.secondary)
         } else {
             // Без плана у премиума идёт поддержание, и строка не зовёт
             // «спланировать» вообще, а говорит, что сейчас имеет смысл.

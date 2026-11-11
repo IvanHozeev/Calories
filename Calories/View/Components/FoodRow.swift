@@ -68,17 +68,17 @@ struct FoodRow: View {
         // а имя в конце. Для латиницы и кириллицы изолятор не меняет ничего.
         var line = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
         if !traits.isEmpty {
-            line = line + Text("\u{00A0}")
+            line = line + Text("\u{00A0}\u{00A0}")
             for (index, trait) in traits.enumerated() {
-                if index > 0 { line = line + Text("\u{00A0}") }
+                if index > 0 { line = line + Text("\u{00A0}\u{00A0}") }
                 line = line + Text(Image(systemName: trait.symbol))
-                    .font(.app(.caption, weight: .medium))
+                    .font(.app(.caption2, weight: .medium))
                     .foregroundStyle(trait.color)
             }
         }
         if let weight {
-            line = line + Text("\u{00A0}")
-            line = line + Text(weight).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+            line = line + Text("\u{00A0}\u{00A0}")
+            line = line + Text(weight).font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
         }
         return line
     }
@@ -109,7 +109,7 @@ struct FoodRow: View {
             // макросы) с воздухом по шесть точек растягивали ячейку так, что
             // в поиске помещалось пять продуктов. Ярусы остаются — макросы
             // не стоит склеивать с подписью, — а воздух между ними убран.
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 5) {
                 // Составной приём — каждая часть своей строкой в цвет своего
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
@@ -121,7 +121,7 @@ struct FoodRow: View {
                     // у первой.
                     ForEach(parts) { part in
                         nameLine(text: part.name,
-                                 font: .app(.subheadline, weight: .semibold),
+                                 font: .app(.body, weight: .semibold),
                                  color: part.color,
                                  traits: part.traits,
                                  weight: part.grams.flatMap {

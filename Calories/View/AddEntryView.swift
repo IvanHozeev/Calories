@@ -343,7 +343,6 @@ struct AddEntryView: View {
                 let recentFoods = store.recentFoods
 
                 var adds: [QuickAdd] = []
-                var seen = Set<String>()
 
                 for item in itemsWithQuantity {
                     // Собираем всех подходящих кандидатов из всех источников,
@@ -423,9 +422,10 @@ struct AddEntryView: View {
 
                     // Берём до трёх уникальных вариантов для выбора.
                     var added = 0
+                    var itemSeen = Set<String>()
                     for cand in candidates where added < 3 {
                         guard let grams = item.grams(defaultGrams: cand.food.defaultGrams),
-                              seen.insert(cand.food.name.lowercased()).inserted
+                              itemSeen.insert(cand.food.name.lowercased()).inserted
                         else { continue }
                         adds.append(QuickAdd(food: cand.food, grams: grams, queryName: item.name, percent: item.percent))
                         added += 1

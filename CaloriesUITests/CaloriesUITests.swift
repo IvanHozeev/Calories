@@ -726,6 +726,55 @@ final class CaloriesUITests: XCTestCase {
                       "У записи должен появиться значок нутриента, которым продукт богат")
     }
 
+    /// Набранный приём не пропадает от случайного смахивания листа.
+    ///
+    /// Раньше лист закрывался жестом вниз, и собранный приём исчезал молча.
+    /// Теперь, пока в черновике есть продукт, смахнуть нельзя: выйти можно
+    /// «Сохранить» или «Отмена».
+    @MainActor
+    func testASwipeCannotDropAnUnsavedMeal() throws {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        search.tap()
+        search.typeText("Spinach")
+        // По метке, а не по типу: после «быстрого добавления» строка с
+        // названием может быть не статическим текстом, а кнопкой.
+        let food = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[c] 'Spinach'")).firstMatch
+        if !food.waitForExistence(timeout: 5) {
+            let labels = app.descendants(matching: .any).allElementsBoundByIndex
+                .prefix(80).map { "\($0.elementType.rawValue):\($0.label)" }
+            XCTFail("Spinach не найден. На экране: \(labels.joined(separator: " | "))")
+            return
+        }
+        food.tap()
+        addToMeal(in: app)
+
+        let save = app.buttons["saveMeal"]
+        XCTAssertTrue(save.waitForExistence(timeout: 10), "Продукт не попал в черновик")
+
+        // Тянем лист за ручку: кнопка сохранения должна остаться на экране.
+        // Не `swipeDown`: он у ручки листа в симуляторе ничего не закрывает
+        // даже без защиты, и тест зеленел бы от любого кода. Перетаскиваем
+        // от ручки до нижней кромки экрана, как делает палец.
+        let grabber = app.buttons["Sheet Grabber"]
+        XCTAssertTrue(grabber.waitForExistence(timeout: 3), "У листа нет ручки")
+        let from = grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        let to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98))
+        from.press(forDuration: 0.1, thenDragTo: to)
+        Thread.sleep(forTimeInterval: 1.0)
+        XCTAssertTrue(app.buttons["saveMeal"].exists, "Лист закрылся, и набранный приём пропал")
+
+        // Один продукт стирается «Отменой» без вопроса, и лист снова свободен.
+        app.buttons["cancelMeal"].tap()
+        XCTAssertTrue(app.buttons["saveMeal"].waitForNonExistence(timeout: 5),
+                      "«Отмена» не очистила черновик")
+    }
+
     /// Правка плана живёт в тулбаре, а не строкой в самом низу списка.
     @MainActor
     func testPlanEditorOpensFromTheToolbar() {

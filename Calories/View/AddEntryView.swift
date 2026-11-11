@@ -12,6 +12,9 @@ struct AddEntryView: View {
     @State private var searchText = ""
     @State private var debouncedSearch = ""
     @State private var draftItems: [MealItem] = []
+    /// Спрашиваем, отбросить ли набранный приём: «Отмена» в полосе черновика
+    /// стирает его целиком, и случайный тап не должен стоить собранного.
+    @State private var confirmingDiscard = false
 
     /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
     /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
@@ -1154,6 +1157,18 @@ struct AddEntryView: View {
             .toolbar { whenToolbar }
             .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 1)
             .toolbar { draftToolbar }
+            // Лист закрывался смахиванием, и набранный приём пропадал молча:
+            // жест не отличить от случайного. Пока в приёме есть набранное,
+            // смахнуть лист нельзя — выйти можно «Сохранить» или «Отмена».
+            .interactiveDismissDisabled(MealDraftGuard.hasUnsavedWork(count: draftItems.count,
+                                                                       appending: appendingTo != nil))
+            .confirmationDialog("Отбросить приём?", isPresented: $confirmingDiscard,
+                                titleVisibility: .visible) {
+                Button("Отбросить", role: .destructive) { draftItems.removeAll() }
+                Button("Продолжить", role: .cancel) { }
+            } message: {
+                Text("Набранное не сохранится.")
+            }
             .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in
                 servingScreen(target)
@@ -1271,14 +1286,19 @@ struct AddEntryView: View {
     /// поиска, со своим стеклом, и обе остаются на экране.
     ///
     /// Отмена здесь — отмена набранного, а не выход с экрана: человек собирает
-    /// приём и передумал про то, что набрал. Выход остаётся наверху слева и
-    /// возвращается туда сам, как только приём опустел.
+    /// приём и передумал про то, что набрал. Лист смахивается, как только приём
+    /// опустел; пока он есть, смахивание заблокировано.
     @ViewBuilder
     private var draftBar: some View {
         if !draftItems.isEmpty {
             HStack(spacing: 12) {
                 Button("Отмена") {
-                    draftItems.removeAll()
+                    if MealDraftGuard.needsConfirmationToDiscard(count: draftItems.count,
+                                                                 appending: appendingTo != nil) {
+                        confirmingDiscard = true
+                    } else {
+                        draftItems.removeAll()
+                    }
                 }
                 .buttonStyle(.glass)
                 .accessibilityIdentifier("cancelMeal")
@@ -1787,6 +1807,25 @@ struct AddEntryView: View {
             micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.servingGrams),
             traits: dish.traits
         )
+    }
+}
+
+/// Когда набранный приём нельзя терять молча.
+///
+/// Вынесено из экрана, чтобы правило проверялось тестом: на самом листе
+/// смахивание не нажать из юнит-теста.
+nonisolated enum MealDraftGuard {
+    /// Есть ли набранное, чего нет в дневнике. При дополнении записи первой
+    /// строкой черновика идёт она сама, и это не набранное: открыл, ничего
+    /// не добавил — закрыть можно как обычно.
+    static func hasUnsavedWork(count: Int, appending: Bool) -> Bool {
+        count > (appending ? 1 : 0)
+    }
+
+    /// Спрашивать ли, прежде чем стереть: собранный приём из двух и более
+    /// продуктов — это труд, а один продукт набирается заново за секунды.
+    static func needsConfirmationToDiscard(count: Int, appending: Bool) -> Bool {
+        count - (appending ? 1 : 0) >= 2
     }
 }
 

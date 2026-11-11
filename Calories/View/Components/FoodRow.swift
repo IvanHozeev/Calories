@@ -34,10 +34,14 @@ struct FoodRow: View {
     /// без этого, как раньше.
     var parts: [FoodPart] = []
 
-    /// Одна часть составного приёма: имя и цвет своего доминирующего макроса.
+    /// Одна часть составного приёма: имя, цвет своего доминирующего макроса
+    /// и вес в граммах — чтобы показать «Молоко 3% 300 г» вместо просто
+    /// «Молоко 3%».
     struct FoodPart: Identifiable {
         let name: String
         let macros: Macros
+        /// Вес этой части в граммах. nil — не показываем вес.
+        let grams: Double?
         var id: String { name }
         var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
     }
@@ -125,14 +129,21 @@ struct FoodRow: View {
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
                     ForEach(parts) { part in
-                        Text(part.name)
-                            .font(.app(.body, weight: .semibold))
-                            // Один натуральный размер — не растягиваем по ширине,
-                            // иначе «Протеин шоколадный» в узком ряду дневника
-                            // уезжает на вторую строку, хотя места хватило на одну.
-                            .lineLimit(2)
-                            .multilineTextAlignment(.leading)
-                            .foregroundStyle(part.color)
+                        HStack(spacing: 2) {
+                            Text(part.name)
+                                .font(.app(.body, weight: .semibold))
+                                // Один натуральный размер — не растягиваем по ширине,
+                                // иначе «Протеин шоколадный» в узком ряду дневника
+                                // уезжает на вторую строку, хотя места хватило на одну.
+                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                                .foregroundStyle(part.color)
+                            if let grams = part.grams, grams > 0 {
+                                Text(String(format: "%.0f г", grams))
+                                    .font(.app(.caption2))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                 } else {
                     Text(name)

@@ -778,7 +778,7 @@ struct AddEntryView: View {
             portion: portions.joined(separator: " · "),
             macros: Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs),
             detail: entry.components.isEmpty ? nil : String(format: String(localized: "%lld позиции"), entry.components.count),
-            parts: entry.components.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs)) }
+            parts: entry.components.map { .init(name: $0.name, macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs), grams: $0.grams) }
         )
     }
 
@@ -845,7 +845,7 @@ struct AddEntryView: View {
                 portion: String(format: String(localized: "%lld позиции"), match.usual.parts.count),
                 macros: items.reduce(Macros.zero) { $0 + $1.macros },
                 detail: String(format: String(localized: "%lld раз"), match.usual.times),
-                parts: items.map { .init(name: $0.name, macros: $0.macros) }
+                parts: items.map { .init(name: $0.name, macros: $0.macros, grams: $0.grams) }
             )
         }
         .buttonStyle(.plain)

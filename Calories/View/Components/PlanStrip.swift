@@ -61,17 +61,17 @@ struct PlanStrip: View {
         guard let plan = store.plan else {
             return store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent).headline
         }
-        return String(format: String(localized: "Неделя %d из %d"),
-                      plan.currentWeek, plan.durationWeeks)
+        let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
+        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
+        return "\(rate) · \(phase.title)"
     }
 
     private var tileCaption: String? {
         guard store.isPremium else { return String(localized: "Открыть") }
         if store.planOutcome != nil { return String(localized: "посмотри итог") }
         guard let plan = store.plan else { return nil }
-        let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
-        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
-        return "\(rate) · \(phase.title)"
+        return String(format: String(localized: "Неделя %d из %d"),
+                      plan.currentWeek, plan.durationWeeks)
     }
 
     private var icon: String {

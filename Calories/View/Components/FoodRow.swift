@@ -55,21 +55,20 @@ struct FoodRow: View {
     /// Строка названия: имя, значки свойств и вес, склеенные в один `Text`.
     ///
     /// Склейка, а не `HStack`, ради переноса: `HStack` переносить не умеет,
-    /// и точка с весом стояли у первой строки, пока имя уезжало вниз. В одном
-    /// `Text` всё течёт по словам — вес встаёт в конец последней строки.
+    /// и вес стоял у первой строки, пока имя уезжало вниз. В одном `Text`
+    /// всё течёт по словам — вес встаёт в конец последней строки.
     ///
-    /// Пробелы вокруг точки неразрывные: иначе «·» могла начать новую строку
-    /// сама, без веса за ней.
+    /// Части разделены неразрывным пробелом: точка между ними убрана,
+    /// строка читается как «Творог 5% 🌿 200 г».
     private func nameLine(text: String, font: Font, color: Color,
                           traits: [FoodTrait], weight: String?) -> Text {
-        let glued = "\u{00A0}·\u{00A0}"
         // Название оборачиваем в изолятор направления (FSI…PDI): если имя на
         // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
-        // его с точками, иконками и весом — вес окажется в начале строки,
+        // его с иконками и весом — вес окажется в начале строки,
         // а имя в конце. Для латиницы и кириллицы изолятор не меняет ничего.
         var line = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
         if !traits.isEmpty {
-            line = line + Text(glued).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+            line = line + Text("\u{00A0}")
             for (index, trait) in traits.enumerated() {
                 if index > 0 { line = line + Text("\u{00A0}") }
                 line = line + Text(Image(systemName: trait.symbol))
@@ -78,7 +77,7 @@ struct FoodRow: View {
             }
         }
         if let weight {
-            line = line + Text(glued).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+            line = line + Text("\u{00A0}")
             line = line + Text(weight).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
         }
         return line

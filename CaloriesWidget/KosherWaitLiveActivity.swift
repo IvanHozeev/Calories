@@ -73,7 +73,7 @@ struct KosherWaitLiveActivity: Widget {
                     .font(.caption2.weight(.black))
                     .kerning(0.8)
                     .foregroundStyle(look.tint)
-                countdown(to: state.until)
+                countdown(to: state.until, showsHours: true)
                     .font(.title2.weight(.bold))
                     .monospacedDigit()
                     .foregroundStyle(.white)

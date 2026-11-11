@@ -109,7 +109,7 @@ struct FoodRow: View {
             // макросы) с воздухом по шесть точек растягивали ячейку так, что
             // в поиске помещалось пять продуктов. Ярусы остаются — макросы
             // не стоит склеивать с подписью, — а воздух между ними убран.
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 3) {
                 // Составной приём — каждая часть своей строкой в цвет своего
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
@@ -121,7 +121,7 @@ struct FoodRow: View {
                     // у первой.
                     ForEach(parts) { part in
                         nameLine(text: part.name,
-                                 font: .app(.body, weight: .semibold),
+                                 font: .app(.callout, weight: .semibold),
                                  color: part.color,
                                  traits: part.traits,
                                  weight: part.grams.flatMap {
@@ -134,7 +134,7 @@ struct FoodRow: View {
                     nameLine(text: name,
                              // Название — полужирным, как и в любой строке списка:
                              // в строке оно главное, а всё под ним — приметы.
-                             font: .app(.body, weight: .semibold),
+                             font: .app(.callout, weight: .semibold),
                              // Цвет названия — цвет доминирующего макроса порции (по граммам),
                              // чтобы сразу было видно, чем продукт «кормит».
                              color: leadingKind?.color ?? .primary.opacity(0.85),

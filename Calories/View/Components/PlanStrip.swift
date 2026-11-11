@@ -81,6 +81,9 @@ struct PlanStrip: View {
     private var icon: String {
         if !store.isPremium { return "lock.fill" }
         if store.planOutcome != nil { return "flag.checkered" }
+        guard let plan = store.plan else { return "target" }
+        // Во время брейка вес о плане не говорит — бокалы, а не треугольник.
+        if plan.isDietBreak(on: Date()) { return "cup.and.saucer.fill" }
         return store.planAdherence()?.status.icon ?? "target"
     }
 

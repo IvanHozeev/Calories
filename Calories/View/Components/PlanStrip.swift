@@ -71,7 +71,7 @@ struct PlanStrip: View {
         guard let plan = store.plan else { return nil }
         let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
         guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
-        return "\(phase.title) · \(rate)"
+        return "\(rate) · \(phase.title)"
     }
 
     private var icon: String {
@@ -106,14 +106,14 @@ struct PlanStrip: View {
             // Фаза только когда их несколько — иначе она повторяет название плана.
             Text(String(format: String(localized: "Неделя %d из %d"),
                         plan.currentWeek, plan.durationWeeks))
-            if plan.timeline.count > 1, let phase = plan.currentPhase {
-                Text(verbatim: "·").foregroundStyle(.tertiary)
-                Text(phase.title)
-            }
             Text(verbatim: "·").foregroundStyle(.tertiary)
             Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
+            if plan.timeline.count > 1, let phase = plan.currentPhase {
+                Text(verbatim: "·").foregroundStyle(.tertiary)
+                Text(phase.title)
+            }
         } else {
             // Без плана у премиума идёт поддержание, и строка не зовёт
             // «спланировать» вообще, а говорит, что сейчас имеет смысл.

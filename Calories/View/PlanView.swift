@@ -885,8 +885,13 @@ struct PlanView: View {
 
         if let projectedEndDate = adherence.projectedEndDate,
            projectedEndDate > plan.endDate.addingTimeInterval(7 * 86400) {
-            Button("Сдвинуть финиш на \(Self.planDate(projectedEndDate))") {
-                store.reschedulePlan(to: projectedEndDate)
+            VStack(alignment: .leading, spacing: 8) {
+                Button("Сдвинуть финиш на \(Self.planDate(projectedEndDate))") {
+                    store.reschedulePlan(to: projectedEndDate)
+                }
+                Button("Цель под новый срок") {
+                    store.reschedulePlan(to: projectedEndDate, adjustTarget: true)
+                }
             }
         }
     }

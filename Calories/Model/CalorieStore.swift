@@ -805,9 +805,9 @@ final class CalorieStore {
         startPlan(previous, remembering: false)
     }
 
-    func reschedulePlan(to newEndDate: Date) {
+    func reschedulePlan(to newEndDate: Date, adjustTarget: Bool = false) {
         guard let plan else { return }
-        startPlan(plan.rescheduled(toEnd: newEndDate))
+        startPlan(plan.rescheduled(toEnd: newEndDate, adjustTarget: adjustTarget))
     }
 
     func add(name: String, calories: Int, macros: Macros = Macros(protein: 0, fat: 0, carbs: 0), grams: Double? = nil,

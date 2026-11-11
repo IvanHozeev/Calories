@@ -63,7 +63,7 @@ struct PlanStrip: View {
         }
         let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
         guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
-        return "\(rate) · \(phase.title)"
+        return "\(phase.title) · \(rate)"
     }
 
     private var tileCaption: String? {

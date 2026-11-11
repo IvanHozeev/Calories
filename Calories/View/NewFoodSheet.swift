@@ -313,6 +313,7 @@ struct NewFoodSheet: View {
     /// открываются одним и тем же движением, и читаться должны одинаково.
     private var formContent: some View {
         Form {
+            detailCard
             searchSection
             nameSection
             dataSection
@@ -420,6 +421,39 @@ struct NewFoodSheet: View {
                     focusedField = .search
                 }
             }
+    }
+
+    /// Карточка с деталями продукта вверху экрана редактирования — как на
+    /// экране порции: калории, БЖУ, полоска соотношения, свойства.
+    private var detailCard: some View {
+        Section {
+            VStack(spacing: 8) {
+                Text("\(enteredCalories) ккал")
+                    .font(.app(size: 28, weight: .bold))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .foregroundStyle(.green)
+                if servingToSave != 100, enteredCalories > 0 {
+                    Text("\(portionCalories) ккал / \(Int(servingToSave)) г")
+                        .font(.app(.caption2))
+                        .foregroundStyle(.secondary)
+                }
+                if hasMacros {
+                    MacrosRow(macros: draftMacros)
+                        .padding(.top, 2)
+                    MacroSplitBar(macros: draftMacros)
+                        .padding(.top, 4)
+                        .padding(.horizontal, 4)
+                }
+                let traits = editingFood?.traits ?? []
+                if !traits.isEmpty {
+                    FoodTraitLines(traits: traits)
+                        .padding(.top, 8)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
+        }
     }
 
     /// Пустая марка хранится как «нет», а не как пустая строка: иначе

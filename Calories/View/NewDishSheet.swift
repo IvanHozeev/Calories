@@ -173,6 +173,8 @@ struct NewDishSheet: View {
 
     private var listContent: some View {
         List {
+            detailCard
+
             Section("Название") {
                 TextField("Борщ, куриная грудка с рисом...", text: $name)
                 // Вид — рядом с названием: он про то же самое, чем рецепт
@@ -367,6 +369,35 @@ struct NewDishSheet: View {
                     ? String(format: "%g", dish.defaultServingGrams)
                     : ""
             }
+        }
+    }
+
+    /// Карточка с деталями блюда вверху экрана редактирования — как на
+    /// экране порции: калории, БЖУ, полоска соотношения.
+    private var detailCard: some View {
+        Section {
+            VStack(spacing: 8) {
+                Text("\(portionCalories) ккал")
+                    .font(.app(size: 28, weight: .bold))
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .foregroundStyle(.green)
+                if totalGrams > 0 {
+                    let per100g = Int((Double(totalCalories) / totalGrams * 100).rounded())
+                    Text("\(per100g) ккал / 100 г")
+                        .font(.app(.caption2))
+                        .foregroundStyle(.secondary)
+                }
+                if totalGrams > 0 {
+                    MacrosRow(macros: portionMacros)
+                        .padding(.top, 2)
+                    MacroSplitBar(macros: portionMacros)
+                        .padding(.top, 4)
+                        .padding(.horizontal, 4)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 6)
         }
     }
 }

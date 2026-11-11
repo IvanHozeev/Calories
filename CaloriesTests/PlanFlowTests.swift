@@ -486,7 +486,8 @@ struct GoalSourceTests {
         store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
                              durationWeeks: 10, startWeightKg: 77, targetWeightKg: 73))
         // Опережает план: вес ниже ожидаемого, значит есть что предложить.
-        store.addWeight(75.4, date: Date().addingTimeInterval(-7 * 86_400))
+        store.addWeight(75.4, date: Date().addingTimeInterval(-14 * 86_400))
+        store.addWeight(74.8, date: Date().addingTimeInterval(-7 * 86_400))
         store.addWeight(74.8, date: Date())
     }
 
@@ -787,7 +788,8 @@ struct PromisesAreBackedTests {
     @Test func aLivePhaseStillGetsANumberAndItIsEdible() throws {
         store.startPlan(Plan(startDate: Date().addingTimeInterval(-14 * 86_400),
                              durationWeeks: 10, startWeightKg: 77, targetWeightKg: 74))
-        store.addWeight(76.4, date: Date().addingTimeInterval(-7 * 86_400))
+        store.addWeight(76.4, date: Date().addingTimeInterval(-14 * 86_400))
+        store.addWeight(76.2, date: Date().addingTimeInterval(-7 * 86_400))
         store.addWeight(76.2, date: Date())
 
         let adherence = try #require(store.planAdherence())

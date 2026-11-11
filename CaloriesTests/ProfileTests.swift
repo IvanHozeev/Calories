@@ -801,6 +801,7 @@ struct PlanCompletionTests {
         store.startPlan(plan)
         let afterCut = 77 - 77 * 0.005 * 4
         // Вес держится на том, к чему пришли после дефицита.
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-6 * 86_400))
         store.addWeight(afterCut, date: Date().addingTimeInterval(-3 * 86_400))
         store.addWeight(afterCut, date: Date())
 
@@ -816,6 +817,7 @@ struct PlanCompletionTests {
         let plan = chainedPlan(weeksAgo: 5)
         store.startPlan(plan)
         let afterCut = 77 - 77 * 0.005 * 4
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-14 * 86_400))
         store.addWeight(afterCut, date: Date().addingTimeInterval(-8 * 86_400))
         store.addWeight(afterCut + 1.4, date: Date())
 
@@ -829,6 +831,7 @@ struct PlanCompletionTests {
         let plan = chainedPlan(weeksAgo: 6)
         store.startPlan(plan)
         let afterCut = 77 - 77 * 0.005 * 4
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-21 * 86_400))
         store.addWeight(afterCut, date: Date().addingTimeInterval(-14 * 86_400))
         store.addWeight(afterCut, date: Date())
 

@@ -213,6 +213,11 @@ extension CalorieStore {
     /// день, фаза истощения для этого не нужна. Прибавка сама уходит в углеводы:
     /// белок и жир заданы телом, углеводы — остаток нормы.
     static let fastEveBoost = 1.15
+    /// Минимальное число взвешиваний, чтобы статус плана («отстаёшь» /
+    /// «опережаешь») был надёжным. Меньше — и вес шумит сильнее, чем движется:
+    /// утренняя вода, вчерашняя соль, непрошёлший десерт — и приложение уже
+    /// обвиняет в отставании, хотя дело не в плане.
+    static let minimumWeighInsForStatus = 3
 
     func effectiveGoal(for date: Date) -> Int {
         let base = baseGoal(for: date)
@@ -829,7 +834,7 @@ extension CalorieStore {
         let actualWeightToday = recentWindow.reduce(0) { $0 + $1.weightKg } / Double(recentWindow.count)
 
         let elapsedWeeks = elapsedDays / 7
-        guard elapsedWeeks >= 1, relevantEntries.count >= 2 else {
+        guard elapsedWeeks >= 1, relevantEntries.count >= Self.minimumWeighInsForStatus else {
             return PlanAdherence(
                 expectedWeightToday: expectedWeightToday,
                 actualWeightToday: actualWeightToday,
@@ -840,7 +845,7 @@ extension CalorieStore {
                 status: .insufficientData,
                 dataGap: AdherenceDataGap(
                     weighInsLogged: relevantEntries.count,
-                    weighInsRequired: 2,
+                    weighInsRequired: Self.minimumWeighInsForStatus,
                     daysUntilTrend: max(0, 7 - Int(elapsedDays))
                 )
             )

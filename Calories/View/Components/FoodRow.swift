@@ -52,6 +52,32 @@ struct FoodRow: View {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
     }
 
+    /// Строка названия: имя, значки свойств и вес, склеенные в один `Text`.
+    ///
+    /// Склейка, а не `HStack`, ради переноса: `HStack` переносить не умеет,
+    /// и точка с весом стояли у первой строки, пока имя уезжало вниз. В одном
+    /// `Text` всё течёт по словам — вес встаёт в конец последней строки.
+    ///
+    /// Пробелы вокруг точки неразрывные: иначе «·» могла начать новую строку
+    /// сама, без веса за ней.
+    private func nameLine(text: String, font: Font, color: Color,
+                          traits: [FoodTrait], weight: String?) -> Text {
+        let glued = "\u{00A0}·\u{00A0}"
+        var line = Text(text).font(font).foregroundStyle(color)
+        if !traits.isEmpty {
+            line = line + Text(glued).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+            for (index, trait) in traits.enumerated() {
+                if index > 0 { line = line + Text("\u{00A0}") }
+                line = line + Text(Image(systemName: trait.symbol)).foregroundStyle(trait.color)
+            }
+        }
+        if let weight {
+            line = line + Text(glued).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+            line = line + Text(weight).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
+        }
+        return line
+    }
+
     /// Метка «здесь есть что взять».
     ///
     /// Мягкая и без цифр: это приглашение зайти, а не ошибка и не недостача.
@@ -85,82 +111,30 @@ struct FoodRow: View {
                 if !parts.isEmpty {
                     // Каждая часть приёма — своей строкой в цвет своего
                     // доминирующего макроса: имя, значок свойства и вес.
-                    // Длинное имя переносится на вторую строку, а не тянет
-                    // строку вправо: колонка ограничена шириной ряда.
+                    // Это один `Text`, а не `HStack`: перенос идёт по словам,
+                    // и вес встаёт в конец последней строки, а не висит
+                    // у первой.
                     ForEach(parts) { part in
-                        HStack(alignment: .firstTextBaseline, spacing: 5) {
-                            Text(part.name)
-                                // Чуть мельче, чем у одиночного продукта:
-                                // в составном приёме строк несколько.
-                                .font(.app(.subheadline, weight: .semibold))
-                                // Строк столько, сколько нужно: обрезка после
-                                // второй теряла хвост длинного названия.
-                                .multilineTextAlignment(.leading)
-                                .foregroundStyle(part.color)
-                            if !part.traits.isEmpty {
-                                Text(verbatim: "·")
-                                    .font(.app(.caption, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                                HStack(spacing: 3) {
-                                    ForEach(part.traits) { trait in
-                                        Image(systemName: trait.symbol)
-                                            .foregroundStyle(trait.color)
-                                            .accessibilityLabel(Text(verbatim: trait.title))
-                                    }
-                                }
-                                .font(.app(.caption, weight: .medium))
-                            }
-                            if let grams = part.grams, grams > 0 {
-                                Text(verbatim: "·")
-                                    .font(.app(.caption, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                                Text(String(format: "%.0f г", grams))
-                                    .font(.app(.caption, weight: .medium))
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize()
-                            }
-                        }
+                        nameLine(text: part.name,
+                                 font: .app(.subheadline, weight: .semibold),
+                                 color: part.color,
+                                 traits: part.traits,
+                                 weight: part.grams.flatMap {
+                                     $0 > 0 ? String(format: "%.0f \(String(localized: "г"))", $0) : nil
+                                 })
                     }
                 } else {
                     // Имя, значки свойств и вес — одной строкой. Длинное имя
                     // переносится, а не выталкивает калории за край.
-                    HStack(alignment: .firstTextBaseline, spacing: 5) {
-                        Text(name)
-                            // Название — полужирным, как и в любой строке списка:
-                            // в строке оно главное, а всё под ним — приметы. Пока
-                            // оно шло тем же весом, что подписи, строка читалась
-                            // ровным серым полотном, и глазу не за что было зацепиться.
-                            .font(.app(.body, weight: .semibold))
-                            // Строк столько, сколько нужно: раньше после
-                            // второй стояло многоточие и хвост названия терялся.
-                            .multilineTextAlignment(.leading)
-                            // Цвет названия — цвет доминирующего макроса порции (по граммам),
-                            // чтобы сразу было видно, чем продукт «кормит». Если доминирующего
-                            // нет — серый, как слово «Calories» на launch screen.
-                            .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
-                        if !traits.isEmpty {
-                            Text(verbatim: "·")
-                                .font(.app(.caption, weight: .medium))
-                                .foregroundStyle(.secondary)
-                            HStack(spacing: 3) {
-                                ForEach(traits) { trait in
-                                    Image(systemName: trait.symbol)
-                                        .foregroundStyle(trait.color)
-                                        .accessibilityLabel(Text(verbatim: trait.title))
-                                }
-                            }
-                            .font(.app(.caption, weight: .medium))
-                        }
-                        if !portion.isEmpty {
-                            Text(verbatim: "·")
-                                .font(.app(.caption, weight: .medium))
-                                .foregroundStyle(.secondary)
-                            Text(verbatim: portion)
-                                .font(.app(.caption, weight: .medium))
-                                .foregroundStyle(.secondary)
-                                .fixedSize()
-                        }
-                    }
+                    nameLine(text: name,
+                             // Название — полужирным, как и в любой строке списка:
+                             // в строке оно главное, а всё под ним — приметы.
+                             font: .app(.body, weight: .semibold),
+                             // Цвет названия — цвет доминирующего макроса порции (по граммам),
+                             // чтобы сразу было видно, чем продукт «кормит».
+                             color: leadingKind?.color ?? .primary.opacity(0.85),
+                             traits: traits,
+                             weight: portion.isEmpty ? nil : portion)
                 }
 
                 // Подпись слева — сколько ингредиентов у блюда. Всё остальное

@@ -555,7 +555,6 @@ struct IngredientPickerSheet: View {
             caloriesPer100g: food.caloriesPer100g,
             portion: "100 \(String(localized: "г"))",
             macros: food.macrosPer100g,
-            icons: [food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: 100),
             traits: food.traits
         )

@@ -141,8 +141,7 @@ struct MealSuggestionsView: View {
                 parts: item.parts.map {
                     .init(name: $0.name,
                           macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                          grams: $0.grams,
-                          icons: store.foodNamed($0.name).map { [$0.foodCategory.icon] } ?? [])
+                          grams: $0.grams)
                 })
     }
 
@@ -160,7 +159,6 @@ struct MealSuggestionsView: View {
             calories: item.calories,
             portion: String(format: "%.0f \(String(localized: "г"))", grams),
             macros: item.macros,
-            icons: store.foodNamed(item.name).map { [$0.foodCategory.icon] } ?? [],
             micros: store.notableMicronutrients(forFoodNamed: item.name, grams: grams),
             traits: store.foodNamed(item.name)?.traits ?? []
         )

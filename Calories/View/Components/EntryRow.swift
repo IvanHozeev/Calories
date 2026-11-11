@@ -6,9 +6,6 @@ struct EntryRow: View {
     let entry: FoodEntry
     /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
     var micros: [Micronutrient] = []
-    /// Значки категорий частей приёма по имени части: у записи в дневнике
-    /// категорий нет, они остались в базе продуктов.
-    var partIcons: (String) -> [String] = { _ in [] }
 
     /// Вес порции.
     ///
@@ -40,15 +37,13 @@ struct EntryRow: View {
             caloriesPer100g: caloriesPer100g,
             portion: portionText ?? "",
             macros: Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs),
-            icons: [],
             micros: micros,
             offersVitamins: false,
             traits: [],
             parts: entry.components.map {
                 .init(name: $0.name,
                       macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                      grams: $0.grams,
-                      icons: partIcons($0.name))
+                      grams: $0.grams)
             }
         )
     }

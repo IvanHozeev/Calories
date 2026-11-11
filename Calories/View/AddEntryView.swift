@@ -761,7 +761,6 @@ struct AddEntryView: View {
                 fat: match.dish.totalMacros.fat * factor,
                 carbs: match.dish.totalMacros.carbs * factor
             ),
-            icons: store.foodCategories(of: match.dish).map(\.icon),
             micros: store.notableMicronutrients(forFoodNamed: match.dish.name, grams: grams)
         )
     }
@@ -781,8 +780,7 @@ struct AddEntryView: View {
             parts: entry.components.map {
                 .init(name: $0.name,
                       macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                      grams: $0.grams,
-                      icons: store.foodNamed($0.name).map { [$0.foodCategory.icon] } ?? [])
+                      grams: $0.grams)
             }
         )
     }
@@ -853,8 +851,7 @@ struct AddEntryView: View {
                 parts: items.map {
                     .init(name: $0.name,
                           macros: $0.macros,
-                          grams: $0.grams,
-                          icons: store.foodNamed($0.name).map { [$0.foodCategory.icon] } ?? [])
+                          grams: $0.grams)
                 }
             )
         }
@@ -887,7 +884,6 @@ struct AddEntryView: View {
             caloriesPer100g: add.food.caloriesPer100g,
             portion: String(format: "%.0f \(String(localized: "г"))", add.grams),
             macros: add.food.macrosPer100g.portion(grams: add.grams),
-            icons: [add.food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: add.food.name,
                                                 grams: add.grams),
             offersVitamins: store.foodsOfferedVitamins.contains(add.food.id),
@@ -1758,7 +1754,6 @@ struct AddEntryView: View {
             caloriesPer100g: food.caloriesPer100g,
             portion: "\(Int(grams)) \(String(localized: "г"))",
             macros: food.macrosPer100g.portion(grams: grams),
-            icons: [food.foodCategory.icon],
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),
             traits: food.traits
@@ -1773,7 +1768,6 @@ struct AddEntryView: View {
             portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
             macros: dish.servingMacros,
             detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-            icons: store.foodCategories(of: dish).map(\.icon),
             micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.servingGrams),
             traits: dish.traits
         )

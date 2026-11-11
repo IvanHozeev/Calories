@@ -17,6 +17,9 @@ struct MeasurementsView: View {
         List {
             if let latest = store.latestMeasurement {
                 let insights = BodyAnalysis.insights(measurement: latest, profile: store.profile)
+                if let plan = store.plan {
+                    planSection(plan)
+                }
                 dynamicsSection
                 if insights.isEmpty {
                     Section { notEnoughYet } .listRowBackground(Color.clear).listRowSeparator(.hidden)
@@ -103,6 +106,35 @@ struct MeasurementsView: View {
         .scrollIndicators(.hidden)
         .presentationDetents([.height(300)])
         .presentationDragIndicator(.visible)
+    }
+
+    /// Текущая фаза плана и её темп — чтобы замеры не были отрыты от плана.
+    @ViewBuilder
+    private func planSection(_ plan: Plan) -> some View {
+        if let phaseIndex = plan.phaseIndex(on: Date()),
+           let phase = plan.currentPhase {
+            let phaseTarget = plan.weight(atStartOfPhaseAt: phaseIndex + 1)
+            let rate = plan.weeklyRateKg(on: Date())
+            let targetText = String(format: "%.1f", phaseTarget) + " " + String(localized: "кг")
+            let rateText = String(format: "%+.2f", rate) + " \(String(localized: "кг/нед"))"
+            Section {
+                HStack {
+                    Text(phase.title)
+                        .font(.app(.body, weight: .medium))
+                    Spacer()
+                    Text(rateText)
+                        .font(.app(.caption, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+                Text("Цель фазы: \(targetText)")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("План")
+            }
+            .glassRow()
+        }
     }
 
     /// Как место менялось от сеанса к сеансу.

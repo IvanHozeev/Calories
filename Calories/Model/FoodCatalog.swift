@@ -107,6 +107,9 @@ nonisolated enum FoodCatalog {
         let food: CatalogFood
         let names: [String]
         let tokens: [String]
+        /// Основы слов названий — без падежных и числовых окончаний, разобранные
+        /// один раз при сборке индекса, чтобы поиск не нормализовал их заново.
+        let stems: Set<String>
         /// Состав, разобранный один раз при сборке индекса.
         ///
         /// `CatalogFood.micronutrients` собирает словарь заново на каждое
@@ -175,9 +178,11 @@ nonisolated enum FoodCatalog {
                 .map(normalize)
                 .filter { !$0.isEmpty })
                 .sorted()
+            let tokens = names.flatMap { $0.split(separator: " ").map(String.init) }
             return Entry(food: food,
                          names: names,
-                         tokens: names.flatMap { $0.split(separator: " ").map(String.init) },
+                         tokens: tokens,
+                         stems: Set(tokens.map(FoodQuery.stemmed)),
                          micronutrients: food.micronutrients)
         }
     }
@@ -212,9 +217,12 @@ nonisolated enum FoodCatalog {
         let needle = normalize(query)
         guard !needle.isEmpty else { return Array(all.prefix(limit)) }
 
+        let needleStems = needle.split(separator: " ").map { FoodQuery.stemmed(String($0)) }
         var ranked: [(rank: Int, length: Int, food: CatalogFood)] = []
         for entry in index {
-            guard let rank = rank(entry: entry, needle: needle) else { continue }
+            guard let rank = rank(entry: entry, needle: needle)
+                    ?? stemRank(entry: entry, needleStems: needleStems)
+            else { continue }
             ranked.append((rank, entry.names.map(\.count).min() ?? 0, entry.food))
         }
         ranked.sort {
@@ -354,6 +362,22 @@ nonisolated enum FoodCatalog {
             .filter { idsWithMicronutrients.contains($0.id) }
             .prefix(limit)
             .map { $0 }
+    }
+
+    /// Форма слова: «яйца» находят «яйцо», «помидоры» — «помидор».
+    ///
+    /// Буквальное сравнение выше этого не умеет: в «яйцо куриное» нет подстроки
+    /// «яйца», и поиск по ней возвращал пусто. Поиск был воротами: быстрое
+    /// добавление берёт кандидатов отсюда и только потом ранжирует их
+    /// `FoodQuery`, который «яйца» к «яйцу» привёл бы, — но ему нечего было
+    /// ранжировать. «2 яйцо» находило продукт, «2 яйца» нет.
+    ///
+    /// Ярус самый нижний (после вхождения в середину): буквальные совпадения идут
+    /// первыми и порядок прежних запросов не меняется. Совпасть должны основы
+    /// всех слов запроса.
+    private static func stemRank(entry: Entry, needleStems: [String]) -> Int? {
+        guard !needleStems.isEmpty, needleStems.allSatisfy(entry.stems.contains) else { return nil }
+        return 4
     }
 
     private static func rank(entry: Entry, needle: String) -> Int? {

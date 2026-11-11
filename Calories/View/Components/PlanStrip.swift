@@ -81,7 +81,7 @@ struct PlanStrip: View {
     private var icon: String {
         if !store.isPremium { return "lock.fill" }
         if store.planOutcome != nil { return "flag.checkered" }
-        return "target"
+        return store.planAdherence()?.status.icon ?? "target"
     }
 
     private var tint: Color {

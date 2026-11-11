@@ -112,15 +112,21 @@ struct PlanView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 if let status, !finished {
-                    // Компактный значок вместо подписи: полная подпись статуса
-                    // ломалась на две строки и утаскивала за собой название плана.
-                    // Словами статус всё равно назван ниже, в разборе.
-                    Image(systemName: status.icon)
-                        .font(.app(.caption, weight: .semibold))
-                        .foregroundStyle(status.color)
-                        .padding(6)
-                        .background(status.color.opacity(0.12), in: Circle())
-                        .accessibilityLabel(Text(verbatim: status.title))
+                    // Иконка с подписью: оранжевый треугольник без слов
+                    // не объясняет, что означает «отстаёшь от графика».
+                    HStack(spacing: 4) {
+                        Image(systemName: status.icon)
+                            .font(.app(.caption, weight: .semibold))
+                            .foregroundStyle(status.color)
+                        Text(status.title)
+                            .font(.app(.caption2, weight: .semibold))
+                            .foregroundStyle(status.color)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    }
+                    .padding(6)
+                    .background(status.color.opacity(0.12), in: Capsule())
+                    .accessibilityLabel(Text(verbatim: status.title))
                 }
             }
 

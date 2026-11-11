@@ -112,6 +112,9 @@ struct PlanStrip: View {
                         plan.currentWeek, plan.durationWeeks))
             Text(verbatim: "·").foregroundStyle(.tertiary)
             // Фактический темп веса по тренду, а не плановый темп фазы.
+            // Во время брейка плановый темп 0 (поддержание), а фактический
+            // может расти из-за воды и гликогена — показываем то, что реально
+            // происходит с весом, чтобы строка и плитка не врали по-разному.
             let rate = store.planAdherence()?.observedWeeklyRateKg ?? plan.weeklyRateKg
             Text(String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 .foregroundStyle(.secondary)

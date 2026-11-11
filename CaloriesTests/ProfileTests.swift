@@ -831,8 +831,11 @@ struct PlanCompletionTests {
         let plan = chainedPlan(weeksAgo: 6)
         store.startPlan(plan)
         let afterCut = 77 - 77 * 0.005 * 4
-        store.addWeight(afterCut, date: Date().addingTimeInterval(-21 * 86_400))
-        store.addWeight(afterCut, date: Date().addingTimeInterval(-14 * 86_400))
+        // Все взвешивания после начала плана (6 дней назад), чтобы попасть
+        // в phaseEntries для расчёта темпа фазы.
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-5 * 86_400))
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-4 * 86_400))
+        store.addWeight(afterCut, date: Date().addingTimeInterval(-3 * 86_400))
         store.addWeight(afterCut, date: Date())
 
         let adherence = try! #require(store.planAdherence())

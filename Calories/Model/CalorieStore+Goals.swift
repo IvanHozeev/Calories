@@ -866,12 +866,15 @@ extension CalorieStore {
         let phaseEntries = weightEntries.filter { $0.date >= phaseStart }
             .map { (date: $0.date, kg: $0.weightKg) }
         let fit = WeightTrendFit.fit(phaseEntries)
-        let observedWeeklyRate = fit?.weeklyRateKg ?? (actualWeightToday - phaseStartWeight) / weeksInPhase
+        // Менее 4 взвешиваний — прямая по двум точкам не имеет погрешности,
+        // и один солёный ужин сдвигает темп на сотню граммов в неделю.
+        // Не показываем такой темп как достоверный.
+        let observedWeeklyRate = fit?.weeklyRateKg
 
         var projectedEndDate: Date?
-        if observedWeeklyRate != 0 {
+        if let rate = observedWeeklyRate, rate != 0 {
             let remainingChange = phaseTargetWeight - actualWeightToday
-            let weeksNeeded = remainingChange / observedWeeklyRate
+            let weeksNeeded = remainingChange / rate
             if weeksNeeded.isFinite, weeksNeeded > 0 {
                 projectedEndDate = Calendar.current.date(byAdding: .day, value: Int((weeksNeeded * 7).rounded()), to: today)
             }
@@ -902,9 +905,12 @@ extension CalorieStore {
         }
 
         let remainingWeeksInPhase = remainingDaysInPhase / 7
-        let projectedWeightAtPlanEnd = remainingWeeksInPhase > 0
-            ? actualWeightToday + observedWeeklyRate * remainingWeeksInPhase
-            : nil as Double?
+        let projectedWeightAtPlanEnd: Double?
+        if let rate = observedWeeklyRate, remainingWeeksInPhase > 0 {
+            projectedWeightAtPlanEnd = actualWeightToday + rate * remainingWeeksInPhase
+        } else {
+            projectedWeightAtPlanEnd = nil
+        }
 
         // Сам вердикт — у `PlanStatus`: это правила, а не расчёт, и проверять
         // их удобнее отдельно от сборки всех чисел вокруг.

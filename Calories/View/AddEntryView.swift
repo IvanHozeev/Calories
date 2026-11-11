@@ -420,15 +420,25 @@ struct AddEntryView: View {
                         return $0.length < $1.length
                     }
 
-                    // Берём до трёх уникальных вариантов для выбора.
-                    var added = 0
-                    var itemSeen = Set<String>()
-                    for cand in candidates where added < 3 {
-                        guard let grams = item.grams(defaultGrams: cand.food.defaultGrams),
-                              itemSeen.insert(cand.food.name.lowercased()).inserted
-                        else { continue }
-                        adds.append(QuickAdd(food: cand.food, grams: grams, queryName: item.name, percent: item.percent))
-                        added += 1
+                    // Если первый кандидат — точное совпадение, показываем только его,
+                    // а не все продукты, в названии которых есть слово из запроса.
+                    if let first = candidates.first, first.rank == 0 {
+                        if let grams = item.grams(defaultGrams: first.food.defaultGrams) {
+                            adds.append(QuickAdd(food: first.food, grams: grams,
+                                                 queryName: item.name, percent: item.percent))
+                        }
+                    } else {
+                        // Берём до трёх уникальных вариантов для выбора.
+                        var added = 0
+                        var itemSeen = Set<String>()
+                        for cand in candidates where added < 3 {
+                            guard let grams = item.grams(defaultGrams: cand.food.defaultGrams),
+                                  itemSeen.insert(cand.food.name.lowercased()).inserted
+                            else { continue }
+                            adds.append(QuickAdd(food: cand.food, grams: grams,
+                                                 queryName: item.name, percent: item.percent))
+                            added += 1
+                        }
                     }
                 }
 

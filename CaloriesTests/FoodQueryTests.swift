@@ -40,11 +40,11 @@ import Foundation
         #expect(try one("йогурт 200 мл").grams == 200)
     }
 
-    @Test func bareNumberBelowTwentyIsAPieceCount() throws {
+    @Test func bareNumberBelowTwentyIsGrams() throws {
         let item = try one("яйцо 2")
         #expect(item.name == "яйцо")
-        #expect(item.units == 2)
-        #expect(item.grams == nil)
+        #expect(item.grams == 2)
+        #expect(item.units == nil)
     }
 
     @Test func bareNumberAboveTwentyIsGrams() throws {
@@ -53,10 +53,11 @@ import Foundation
         #expect(item.grams == 80)
     }
 
-    @Test func decimalCommaIsNotASeparator() throws {
+    @Test func decimalCommaIsGrams() throws {
         let item = try one("банан 1,5")
         #expect(item.name == "банан")
-        #expect(item.units == 1.5)
+        #expect(item.grams == 1.5)
+        #expect(item.units == nil)
     }
 
     @Test func aNumberInsideANameIsNotAQuantity() throws {

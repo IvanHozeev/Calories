@@ -158,11 +158,10 @@ nonisolated enum FoodQuery {
             units = word.value
             text = word.remaining
         } else if let bare = bareNumber(in: text) {
-            if bare.value > 20 {
-                grams = bare.value
-            } else {
-                units = bare.value
-            }
+            // Число без единицы после названия — граммы. «Пармезан 5» =
+            // 5 г, а не 5 шт. Штуки считаются только с явной единицей
+            // («шт», «штуки», «порции») — они ловятся countPattern выше.
+            grams = bare.value
             extractedRange = bare.range
         }
 

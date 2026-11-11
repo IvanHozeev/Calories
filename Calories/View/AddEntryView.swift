@@ -498,7 +498,7 @@ struct AddEntryView: View {
                 HStack(spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(partsName(usual))
-                            .font(.app(.body, weight: .semibold))
+                            .font(.app(.callout, weight: .semibold))
                         Text("\(usual.times) раз, в последний раз \(usual.lastEaten.formatted(date: .omitted, time: .shortened))")
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)

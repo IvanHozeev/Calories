@@ -63,12 +63,18 @@ struct FoodRow: View {
     private func nameLine(text: String, font: Font, color: Color,
                           traits: [FoodTrait], weight: String?) -> Text {
         let glued = "\u{00A0}·\u{00A0}"
-        var line = Text(text).font(font).foregroundStyle(color)
+        // Название оборачиваем в изолятор направления (FSI…PDI): если имя на
+        // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
+        // его с точками, иконками и весом — вес окажется в начале строки,
+        // а имя в конце. Для латиницы и кириллицы изолятор не меняет ничего.
+        var line = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
         if !traits.isEmpty {
             line = line + Text(glued).font(.app(.caption, weight: .medium)).foregroundStyle(.secondary)
             for (index, trait) in traits.enumerated() {
                 if index > 0 { line = line + Text("\u{00A0}") }
-                line = line + Text(Image(systemName: trait.symbol)).foregroundStyle(trait.color)
+                line = line + Text(Image(systemName: trait.symbol))
+                    .font(.app(.caption, weight: .medium))
+                    .foregroundStyle(trait.color)
             }
         }
         if let weight {

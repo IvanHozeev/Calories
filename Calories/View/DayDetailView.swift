@@ -52,7 +52,9 @@ struct DayDetailView: View {
                             EditEntrySheet(store: store, entry: entry, isEmbedded: true)
                         } label: {
                             EntryRow(entry: entry,
-                                         micros: store.notableMicronutrients(for: entry))
+                                         micros: store.notableMicronutrients(for: entry),
+                                         offersVitamins: store.offersVitamins(named: entry.composition.map(\.name)),
+                                         partTraits: { store.foodNamed($0)?.traits ?? [] })
                         }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {

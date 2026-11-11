@@ -14,9 +14,6 @@ struct FoodRow: View {
     let macros: Macros
     /// Подпись слева от порции — например, число ингредиентов у блюда.
     var detail: String? = nil
-    /// Вес продукта в граммах. Показывается под названием, чтобы было видно,
-    /// сколько грамм в этой строке: «Молоко 3% 300 г».
-    var grams: Double? = nil
     /// Чем продукт богат в показанной порции.
     var micros: [Micronutrient] = []
     /// У продукта нет витаминов, но каталог может их дать — зайди и возьми.
@@ -42,6 +39,9 @@ struct FoodRow: View {
         let macros: Macros
         /// Вес этой части в граммах. nil — не показываем вес.
         let grams: Double?
+        /// Свойства части — листик, огонёк: у записи в дневнике их нет,
+        /// их приносит база продуктов по имени части.
+        var traits: [FoodTrait] = []
         var id: String { name }
         var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
     }
@@ -72,46 +72,6 @@ struct FoodRow: View {
         .accessibilityIdentifier("vitaminOffer")
     }
 
-    /// Ярус примет: сколько ингредиентов, сколько граммов, значки категорий и
-    /// свойств. Значки параметром, потому что при нехватке места уходят
-    /// первыми именно они — см. `ViewThatFits` в теле строки.
-    ///
-    /// Когда partes не пусты (составной приём), detail и portion не показываем:
-    /// части и так каждая на своей строке, а zusätzная строка с цифрами только
-    /// дублирует их и не влазит в рамки ячейки.
-    private func signs(showTraits: Bool, showDetailPortion: Bool = true) -> some View {
-        HStack(spacing: 6) {
-            if showDetailPortion, let detail {
-                Text(verbatim: detail)
-                Text(verbatim: "·")
-            }
-            if showDetailPortion {
-                Text(verbatim: portion)
-            }
-            // Без капсулы: соседи по строке — вес и значок свойства —
-            // стоят голыми, и подложка под одним значком делала его кнопкой,
-            // которой он не является. Отделяется он тем же, чем отделены они
-            // друг от друга, — точкой.
-            if showTraits, !traits.isEmpty {
-                Text(verbatim: "·")
-                HStack(spacing: 4) {
-                    ForEach(traits) { trait in
-                        Image(systemName: trait.symbol)
-                            .foregroundStyle(trait.color)
-                            .accessibilityLabel(Text(verbatim: trait.title))
-                    }
-                }
-            }
-        }
-        // Ярус примет читался слишком мелко рядом с названием: вес, порция и
-        // значки — это то, по чему строку узнают, и глазу за них цепляться
-        // не за что было. Поднимаем на ступень (caption → footnote) и даём
-        // средний вес: крупнее, но всё ещё примета, а не второй заголовок.
-        .font(.app(.footnote, weight: .medium))
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
-    }
-
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Строки прижаты друг к другу: три яруса (название, порция,
@@ -123,28 +83,44 @@ struct FoodRow: View {
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
-                    // Составной приём — каждая часть своей строкой в цвет
-                    // своего доминирующего макроса. Вес — под именем: если
-                    // тянуть всё в одну строку, длинное название толкает
-                    // калории к правому борту.
+                    // Каждая часть приёма — своей строкой в цвет своего
+                    // доминирующего макроса: имя, значок свойства и вес.
+                    // Длинное имя переносится на вторую строку, а не тянет
+                    // строку вправо: колонка ограничена шириной ряда.
                     ForEach(parts) { part in
-                        VStack(alignment: .leading, spacing: 1) {
+                        HStack(alignment: .firstTextBaseline, spacing: 5) {
                             Text(part.name)
                                 // Чуть мельче, чем у одиночного продукта:
                                 // в составном приёме строк несколько.
                                 .font(.app(.subheadline, weight: .semibold))
-                                .lineLimit(1)
+                                .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                                 .foregroundStyle(part.color)
+                            if !part.traits.isEmpty {
+                                HStack(spacing: 3) {
+                                    ForEach(part.traits) { trait in
+                                        Image(systemName: trait.symbol)
+                                            .foregroundStyle(trait.color)
+                                            .accessibilityLabel(Text(verbatim: trait.title))
+                                    }
+                                }
+                                .font(.app(.caption, weight: .medium))
+                            }
                             if let grams = part.grams, grams > 0 {
+                                Text(verbatim: "·")
+                                    .font(.app(.caption, weight: .medium))
+                                    .foregroundStyle(.secondary)
                                 Text(String(format: "%.0f г", grams))
                                     .font(.app(.caption, weight: .medium))
                                     .foregroundStyle(.secondary)
+                                    .fixedSize()
                             }
                         }
                     }
                 } else {
-                    HStack(spacing: 2) {
+                    // Имя, значки свойств и вес — одной строкой. Длинное имя
+                    // переносится, а не выталкивает калории за край.
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
                         Text(name)
                             // Название — полужирным, как и в любой строке списка:
                             // в строке оно главное, а всё под ним — приметы. Пока
@@ -159,36 +135,35 @@ struct FoodRow: View {
                             // чтобы сразу было видно, чем продукт «кормит». Если доминирующего
                             // нет — серый, как слово «Calories» на launch screen.
                             .foregroundStyle(leadingKind?.color ?? .primary.opacity(0.85))
-                        if let grams = grams, grams > 0 {
-                            Text(String(format: "%.0f г", grams))
-                                .font(.app(.caption2))
+                        if !traits.isEmpty {
+                            HStack(spacing: 3) {
+                                ForEach(traits) { trait in
+                                    Image(systemName: trait.symbol)
+                                        .foregroundStyle(trait.color)
+                                        .accessibilityLabel(Text(verbatim: trait.title))
+                                }
+                            }
+                            .font(.app(.caption, weight: .medium))
+                        }
+                        if !portion.isEmpty {
+                            Text(verbatim: "·")
+                                .font(.app(.caption, weight: .medium))
                                 .foregroundStyle(.secondary)
+                            Text(verbatim: portion)
+                                .font(.app(.caption, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .fixedSize()
                         }
                     }
                 }
 
-                // Та же строка подписей, что и в дневнике: ячейки продукта
-                // должны читаться одинаково, где бы они ни стояли.
-                //
-                // Значки свойств стоят здесь же, а не у названия. У названия
-                // огонёк висел вторым словом и ломал строку в самом неудобном
-                // месте — длинное имя переносилось, а значок уезжал за ним.
-                // Здесь он стоит в ряду с граммами и значком категории, то
-                // есть среди таких же примет продукта.
-                // Когда всё не влезает, уступают значки, а не числа.
-                //
-                // Строка сначала переносилась по словам — и «3260 г» вставало
-                // двумя ярусами, где «326» читалось как другое число. Запрет
-                // переноса это не вылечил, а поменял: резаться стали числа,
-                // «4 ин… · 32…». Оба раза страдало главное, хотя лишнее стоит
-                // рядом: значок категории и значок свойства — приметы, они
-                // помогают узнать строку, но их отсутствие ничего не искажает.
-                // Поэтому берём первую раскладку, которая влезает целиком, и
-                // отдаём значки по одному.
-                // У составного приёма вес и значки стоят в строке каждой
-                // части, этой строке там нечего показывать.
-                if parts.isEmpty {
-                    signs(showTraits: true, showDetailPortion: true)
+                // Подпись слева — сколько ингредиентов у блюда. Всё остальное
+                // уже стоит в строке названия, и отдельный ярус ей не нужен.
+                if parts.isEmpty, let detail {
+                    Text(verbatim: detail)
+                        .font(.app(.footnote, weight: .medium))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
                 }
 
                 if hasMacros || !micros.isEmpty || offersVitamins {
@@ -205,15 +180,11 @@ struct FoodRow: View {
                     }
                 }
             }
-            // Колонку с частями меряем раньше распорки: иначе `HStack` делит
-            // ширину между ними поровну, и строка «Протеин шоколадный · 40 г»
-            // упирается в половину экрана, хотя справа пусто.
+            // Колонке отдаём ровно остаток ширины ряда: имя переносится по
+            // словам и не может вытолкнуть число калорий за правый край.
+            // Без этой рамки текст берёт натуральную ширину и уезжает.
+            .frame(maxWidth: .infinity, alignment: .leading)
             .layoutPriority(1)
-            // Полоски ведущего макроса здесь больше нет: о нём говорит сама
-            // строка макросов — ведущая цифра крупнее и в своём цвете. Полоска
-            // была вторым знаком о том же, и её ещё надо было выучить.
-
-            Spacer(minLength: 0)
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")

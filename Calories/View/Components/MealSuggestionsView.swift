@@ -138,10 +138,13 @@ struct MealSuggestionsView: View {
                 portion: String(format: String(localized: "%lld позиции"), item.parts.count),
                 macros: item.macros,
                 detail: String(format: String(localized: "%lld раз"), item.times),
+                micros: store.notableMicronutrients(forParts: item.parts.map { ($0.name, $0.grams) }),
+                offersVitamins: store.offersVitamins(named: item.parts.map(\.name)),
                 parts: item.parts.map {
                     .init(name: $0.name,
                           macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                          grams: $0.grams)
+                          grams: $0.grams,
+                          traits: store.foodNamed($0.name)?.traits ?? [])
                 })
     }
 

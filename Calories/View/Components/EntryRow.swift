@@ -6,6 +6,11 @@ struct EntryRow: View {
     let entry: FoodEntry
     /// Чем запись заметно богата. Считает стор — строке неоткуда знать состав.
     var micros: [Micronutrient] = []
+    /// Продукт из базы может дать состав — тогда строке есть что предложить.
+    var offersVitamins: Bool = false
+    /// Свойства части приёма по её имени: у записи в дневнике их нет,
+    /// они остались в базе продуктов.
+    var partTraits: (String) -> [FoodTrait] = { _ in [] }
 
     /// Вес порции.
     ///
@@ -38,12 +43,13 @@ struct EntryRow: View {
             portion: portionText ?? "",
             macros: Macros(protein: entry.protein, fat: entry.fat, carbs: entry.carbs),
             micros: micros,
-            offersVitamins: false,
+            offersVitamins: offersVitamins,
             traits: [],
             parts: entry.components.map {
                 .init(name: $0.name,
                       macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                      grams: $0.grams)
+                      grams: $0.grams,
+                      traits: partTraits($0.name))
             }
         )
     }

@@ -1066,7 +1066,9 @@ private extension ContentView {
                 ForEach(group.entries) { entry in
                     NavigationLink(value: entry) {
                         EntryRow(entry: entry,
-                                 micros: store.notableMicronutrients(for: entry))
+                                 micros: store.notableMicronutrients(for: entry),
+                                 offersVitamins: store.offersVitamins(named: entry.composition.map(\.name)),
+                                 partTraits: { store.foodNamed($0)?.traits ?? [] })
                     }
                     // Копия первой: на полном свайпе срабатывает
                     // первая кнопка, а повторить съеденное просят

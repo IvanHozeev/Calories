@@ -143,9 +143,15 @@ extension CalorieStore {
         // Складываем по составу: у составного приёма имя — склейка, под
         // которой продукта нет, и значки богатства не показывались ни у
         // одного такого приёма.
+        notableMicronutrients(forParts: entry.composition.map { ($0.name, $0.grams) })
+    }
+
+    /// Чем богат приём из нескольких частей — для ещё не записанных подсказок
+    /// и сохранённых приёмов, где записи дневника ещё нет.
+    func notableMicronutrients(forParts parts: [(name: String, grams: Double?)]) -> [Micronutrient] {
         var totals = Micronutrients()
         var known = false
-        for part in entry.composition {
+        for part in parts {
             guard let grams = part.grams, grams > 0,
                   let profile = nutrientProfilesByName[part.name], profile.isTrustworthy
             else { continue }
@@ -156,6 +162,16 @@ extension CalorieStore {
         // Состав уже в граммах съеденного, поэтому «за сто грамм» здесь —
         // сами эти сто грамм.
         return totals.notable(inGrams: 100)
+    }
+
+    /// Есть ли в приёме продукт, состав которого может прийти из базы.
+    /// Метка «Витамины» у составного приёма раньше не появлялась вовсе:
+    /// у него нет своего продукта, только части.
+    func offersVitamins(named names: [String]) -> Bool {
+        names.contains { name in
+            guard let food = foodNamed(name) else { return false }
+            return foodsOfferedVitamins.contains(food.id)
+        }
     }
 
     /// Чем богат продукт в такой порции.

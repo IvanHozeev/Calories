@@ -61,9 +61,13 @@ struct PlanStrip: View {
         guard let plan = store.plan else {
             return store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent).headline
         }
-        let rate = String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg)
-        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return rate }
-        return "\(phase.title)\n\(rate)"
+        // Фактический темп веса по тренду взвешиваний, а не плановый темп фазы.
+        // Во время брейка плановый темп 0 (поддержание), а фактический может
+        // расти из-за воды и гликогена — показываем то, что происходит с весом.
+        let rate = store.planAdherence()?.observedWeeklyRateKg ?? plan.weeklyRateKg
+        let formatted = String(format: "%+.2f \(String(localized: "кг/нед"))", rate)
+        guard plan.timeline.count > 1, let phase = plan.currentPhase else { return formatted }
+        return "\(phase.title)\n\(formatted)"
     }
 
     private var tileCaption: String? {
@@ -107,7 +111,9 @@ struct PlanStrip: View {
             Text(String(format: String(localized: "Неделя %d из %d"),
                         plan.currentWeek, plan.durationWeeks))
             Text(verbatim: "·").foregroundStyle(.tertiary)
-            Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
+            // Фактический темп веса по тренду, а не плановый темп фазы.
+            let rate = store.planAdherence()?.observedWeeklyRateKg ?? plan.weeklyRateKg
+            Text(String(format: "%+.2f \(String(localized: "кг/нед"))", rate))
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
             if plan.timeline.count > 1, let phase = plan.currentPhase {

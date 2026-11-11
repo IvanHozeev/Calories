@@ -213,7 +213,10 @@ struct PlanEditorView: View {
         return phases.map { phase in
             var phase = phase
             let stored = plan.phases.first { $0.id == phase.id }
-            guard phase.dietBreakEvery != stored?.dietBreakEvery else { return phase }
+            // Если меняется и длина фазы, и расписание брейков — первый брейк
+            // может оказаться в прошлом. Сбрасываем и считаем заново.
+            guard phase.dietBreakEvery != stored?.dietBreakEvery ||
+                  phase.durationWeeks != stored?.durationWeeks else { return phase }
             phase.firstDietBreakAfter = nil
             if let every = phase.dietBreakEvery,
                let elapsed = plan.cutWeeksElapsed(inPhaseWithID: phase.id, on: Date()),
@@ -248,6 +251,9 @@ struct PlanEditorView: View {
         }
         .onDelete { offsets in
             // Последнюю не отдаём: план без единой фазы — это не план.
+            // Активный план нельзя лишить всех фаз: иначе draftPlan станет nil,
+            // кнопка «Готово» заблокируется, а план в сторе останется старым
+            // — несоответствие между тем, что человек увидел, и тем, что есть.
             guard phases.count > offsets.count else { return }
             phases.remove(atOffsets: offsets)
         }

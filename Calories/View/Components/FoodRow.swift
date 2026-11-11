@@ -132,7 +132,7 @@ struct FoodRow: View {
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
                     ForEach(parts) { part in
-                        HStack(spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(part.name)
                                 .font(.app(.body, weight: .semibold))
                                 // Один натуральный размер — не растягиваем по ширине,
@@ -143,8 +143,8 @@ struct FoodRow: View {
                                 .foregroundStyle(part.color)
                             if let grams = part.grams, grams > 0 {
                                 Text(String(format: "%.0f г", grams))
-                                    .font(.app(.caption, weight: .medium))
-                                    .foregroundStyle(.primary.opacity(0.8))
+                                    .font(.app(.caption2))
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }

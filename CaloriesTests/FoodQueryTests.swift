@@ -60,6 +60,65 @@ import Foundation
         #expect(item.units == nil)
     }
 
+    /// Одна и та же цифра читается по месту: перед названием — штуки, после — граммы.
+    ///
+    /// «2 яйца» — два яйца, «яйцо 2» — два грамма. Раньше обе фразы давали
+    /// граммы: правило про число после названия забрало и ведущее, и «2 яйца»
+    /// записывались как три килокалории.
+    @Test func aLeadingNumberIsPiecesAndATrailingOneIsGrams() throws {
+        for (phrase, name, count) in [("2 яйца", "яйца", 2.0),
+                                      ("3 банана", "банана", 3.0),
+                                      ("1,5 банана", "банана", 1.5)] {
+            let item = try one(phrase)
+            #expect(item.name == name)
+            #expect(item.units == count, "«\(phrase)» — \(count) шт")
+            #expect(item.grams == nil, "«\(phrase)» не должно становиться граммами")
+        }
+        let trailing = try one("яйцо 2")
+        #expect(trailing.grams == 2)
+        #expect(trailing.units == nil)
+    }
+
+    /// Явная единица сильнее догадки «число больше двадцати».
+    ///
+    /// Догадка стояла раньше и забирала число, не глядя на то, что за ним:
+    /// «пельмени 25 шт» становились двадцатью пятью граммами, а «шт»
+    /// выбрасывалось как лишнее.
+    @Test func anExplicitUnitBeatsTheLargeNumberGuess() throws {
+        for (phrase, name, count) in [("пельмени 25 шт", "пельмени", 25.0),
+                                      ("креветки 30 шт", "креветки", 30.0),
+                                      ("орехи 40 штук", "орехи", 40.0)] {
+            let item = try one(phrase)
+            #expect(item.name == name)
+            #expect(item.units == count, "«\(phrase)» — \(count) шт")
+            #expect(item.grams == nil)
+        }
+        #expect(try one("мука 25 кг").grams == 25_000, "килограммы не должны терять множитель")
+        #expect(try one("сыр 100 г").grams == 100)
+    }
+
+    /// Первой разбирается самая левая позиция.
+    ///
+    /// Остаток фразы разбирается дальше, как следующая позиция. Если искать
+    /// количество по виду единицы, находится последнее — «200 мл», — а «300»
+    /// остаётся в названии, и две позиции сливаются в «молоко 300 протеин».
+    @Test func theLeftmostQuantityIsTakenFirst() throws {
+        let milk = try #require(
+            { let p = FoodQuery.parse("молоко 300 протеин 200 мл"); return p.count == 2 ? p : nil }(),
+            "две позиции")
+        #expect(milk[0].name == "молоко")
+        #expect(milk[0].grams == 300)
+        #expect(milk[1].name == "протеин")
+        #expect(milk[1].grams == 200)
+
+        let dumplings = try #require(
+            { let p = FoodQuery.parse("молоко 300 пельмени 25 шт"); return p.count == 2 ? p : nil }(),
+            "две позиции")
+        #expect(dumplings[0].grams == 300)
+        #expect(dumplings[1].name == "пельмени")
+        #expect(dumplings[1].units == 25)
+    }
+
     @Test func aNumberInsideANameIsNotAQuantity() throws {
         let item = try one("хлеб 5 злаков")
         #expect(item.name == "хлеб 5 злаков")
@@ -127,8 +186,12 @@ import Foundation
     }
 
     @Test func twoProductsInOnePhraseAreSplitIntoTwoQuickAdds() throws {
-        let items = FoodQuery.parse("молоко 300 протеин 40 г")
-        #expect(items.count == 2)
+        // `#require`, а не `#expect`: после проваленной проверки на число позиций
+        // индекс `items[1]` ронял весь процесс, и один сбой прятал остальные.
+        let items = try #require(
+            { let parsed = FoodQuery.parse("молоко 300 протеин 40 г")
+              return parsed.count == 2 ? parsed : nil }(),
+            "«молоко 300 протеин 40 г» — две позиции")
         #expect(items[0].name == "молоко")
         #expect(items[0].grams == 300)
         #expect(items[1].name == "протеин")
@@ -158,6 +221,21 @@ import Foundation
     @Test func percentIsAHardConstraint() {
         #expect(FoodQuery.rank(query: "творог 9%", name: "Творог 5%") == nil)
         #expect(FoodQuery.rank(query: "творог 5%", name: "Творог 5%") == 0)
+    }
+
+    /// Десятичный процент — одно число, а не два.
+    ///
+    /// Нормализация рвала «3,2» на «3» и «2», и «молоко 2%» находило «3,2%», а
+    /// «молоко 5%» — «1,5%»: число из запроса совпадало с половиной чужого.
+    /// Что «молоко 3%» находит «3,2%» — не закреплено намеренно: это
+    /// отдельный вопрос, и решать его тестом, не решив, нельзя.
+    @Test func aDecimalPercentIsOneNumber() {
+        #expect(FoodQuery.rank(query: "молоко 2%", name: "Молоко 3,2%") == nil)
+        #expect(FoodQuery.rank(query: "молоко 5%", name: "Молоко 1,5%") == nil)
+        #expect(FoodQuery.rank(query: "молоко 3,2%", name: "Молоко 2,5%") == nil)
+        #expect(FoodQuery.rank(query: "молоко 3,2%", name: "Молоко 3,2%") == 0)
+        #expect(FoodQuery.rank(query: "молоко 3.2%", name: "Молоко 3,2%") == 0,
+                "точка и запятая — одно и то же число")
     }
 
     @Test func endingsAndTyposStillFindTheFood() {

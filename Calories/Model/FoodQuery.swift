@@ -66,19 +66,39 @@ nonisolated enum FoodQuery {
     /// интерфейса и синонимам. Каталог ищет сразу на двух языках, и выбор
     /// лучшего совпадения обязан делать так же.
     static func rank(query: String, names: [String], producer: String? = nil) -> Int? {
-        let needle = FoodCatalog.normalize(query)
+        let needle = comparable(query)
         guard !needle.isEmpty else { return nil }
-        let producer = producer.map(FoodCatalog.normalize)
+        let producer = producer.map(comparable)
         var best: Int?
         for name in names {
             guard let rank = rank(needle: needle,
-                                  name: FoodCatalog.normalize(name),
+                                  name: comparable(name),
                                   producer: producer)
             else { continue }
             best = min(best ?? rank, rank)
             if best == 0 { break }
         }
         return best
+    }
+
+    /// Десятичная запятая и точка склеивают число, а не делят его.
+    private static let decimalRegex = try! NSRegularExpression(pattern: #"(\d)[.,](\d)"#)
+
+    /// Строка для сравнения: нормализованная, но с десятичным числом целиком.
+    ///
+    /// `FoodCatalog.normalize` оставляет только буквы и цифры, а всё прочее
+    /// заменяет пробелом, поэтому «3,2%» превращалось в два числа — «3» и
+    /// «2». Для жёсткого условия на цифры это значило, что «молоко 2%» находит
+    /// «молоко 3,2%», а «молоко 5%» — «молоко 1,5%»: число из запроса
+    /// совпадало с любой половиной чужого. Здесь десятичная запятая сначала
+    /// склеивает цифры буквой — «3x2», — и токен сравнивается целиком.
+    /// Буква, а не знак, потому что знаки нормализация съест. Склейка
+    /// применяется и к запросу, и к названию, так что «3.2» и «3,2» равны.
+    private static func comparable(_ string: String) -> String {
+        let glued = decimalRegex.stringByReplacingMatches(
+            in: string, range: NSRange(string.startIndex..<string.endIndex, in: string),
+            withTemplate: "$1x$2")
+        return FoodCatalog.normalize(glued)
     }
 
     /// Проверяет, что в одном из названий продукта указан заданный процент
@@ -136,21 +156,10 @@ nonisolated enum FoodQuery {
         var units: Double?
         var extractedRange: Range<String.Index>?
 
-        if let match = firstMatch(volumeRegex, in: text),
-           let value = number(match.groups[0]) {
-            grams = value * scale(for: match.groups[1])
-            extractedRange = match.range
-        } else if let large = largeNumber(in: text) {
-            grams = large.value
-            extractedRange = large.range
-        } else if let match = firstMatch(weightRegex, in: text),
-                  let value = number(match.groups[0]) {
-            grams = value * scale(for: match.groups[1])
-            extractedRange = match.range
-        } else if let match = firstMatch(countRegex, in: text),
-                  let value = number(match.groups[0]) {
-            units = value
-            extractedRange = match.range
+        if let first = firstQuantity(in: text) {
+            grams = first.grams
+            units = first.units
+            extractedRange = first.range
         } else if let fraction = fractionQuantity(in: text) {
             units = fraction.value
             extractedRange = fraction.range
@@ -158,10 +167,18 @@ nonisolated enum FoodQuery {
             units = word.value
             text = word.remaining
         } else if let bare = bareNumber(in: text) {
-            // Число без единицы после названия — граммы. «Пармезан 5» =
-            // 5 г, а не 5 шт. Штуки считаются только с явной единицей
-            // («шт», «штуки», «порции») — они ловятся countPattern выше.
-            grams = bare.value
+            // Число без единицы читается по месту.
+            //
+            // После названия — граммы: «пармезан 5» это 5 г, а не 5 штук. Перед
+            // названием — штуки: «2 яйца» это два яйца, а не два грамма. Так
+            // эти фразы и говорят: количество штук идёт впереди, вес — следом.
+            // Правило про граммы относилось к числу после названия; ведущая
+            // цифра попала под него по недосмотру.
+            if bare.isLeading {
+                units = bare.value
+            } else {
+                grams = bare.value
+            }
             extractedRange = bare.range
         }
 
@@ -259,6 +276,47 @@ nonisolated enum FoodQuery {
                 "g", "kg", "ml", "l", "lb", "oz"].contains(trimmed)
     }
 
+    /// Первое количество в строке: объём, вес, штуки с единицей, а также
+    /// число побольше без единицы.
+    ///
+    /// Берётся самое **левое**, а при совпадении места — то, у которого есть
+    /// явная единица. Оба правила держат своё.
+    ///
+    /// Левое — потому что остаток разбирается дальше, уже как следующая
+    /// позиция: в «молоко 300 протеин 40 г» первым должно стать «молоко 300».
+    /// Если сначала искать по виду единицы, находится «40 г», а «300» остаётся
+    /// в названии — и две позиции сливаются в одну.
+    ///
+    /// Явная единица — потому что она говорит о количестве больше, чем догадка
+    /// по величине числа. Раньше догадка стояла впереди и забирала число, не
+    /// глядя на то, что за ним: «пельмени 25 шт» становились двадцатью пятью
+    /// граммами, а «шт» выбрасывалось как лишнее.
+    private static func firstQuantity(
+        in text: String
+    ) -> (grams: Double?, units: Double?, range: Range<String.Index>)? {
+        typealias Found = (grams: Double?, units: Double?, range: Range<String.Index>, explicit: Bool)
+        var found: [Found] = []
+        if let match = firstMatch(volumeRegex, in: text), let value = number(match.groups[0]) {
+            found.append((value * scale(for: match.groups[1]), nil, match.range, true))
+        }
+        if let match = firstMatch(weightRegex, in: text), let value = number(match.groups[0]) {
+            found.append((value * scale(for: match.groups[1]), nil, match.range, true))
+        }
+        if let match = firstMatch(countRegex, in: text), let value = number(match.groups[0]) {
+            found.append((nil, value, match.range, true))
+        }
+        if let large = largeNumber(in: text) {
+            found.append((large.value, nil, large.range, false))
+        }
+        let best = found.min { lhs, rhs in
+            if lhs.range.lowerBound != rhs.range.lowerBound {
+                return lhs.range.lowerBound < rhs.range.lowerBound
+            }
+            return lhs.explicit && !rhs.explicit
+        }
+        return best.map { ($0.grams, $0.units, $0.range) }
+    }
+
     private static func fractionQuantity(
         in text: String
     ) -> (value: Double, range: Range<String.Index>)? {
@@ -298,16 +356,17 @@ nonisolated enum FoodQuery {
         return nil
     }
 
+    /// Число без единицы и то, с какой стороны от названия оно стоит.
     private static func bareNumber(
         in text: String
-    ) -> (value: Double, range: Range<String.Index>)? {
+    ) -> (value: Double, range: Range<String.Index>, isLeading: Bool)? {
         if let match = firstMatch(leadingNumberRegex, in: text),
            let value = number(match.groups[0]) {
-            return (value, match.range)
+            return (value, match.range, true)
         }
         if let match = firstMatch(trailingNumberRegex, in: text),
            let value = number(match.groups[0]) {
-            return (value, match.range)
+            return (value, match.range, false)
         }
         return nil
     }

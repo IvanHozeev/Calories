@@ -17,12 +17,12 @@ struct MeasurementsView: View {
         List {
             if let latest = store.latestMeasurement {
                 let insights = BodyAnalysis.insights(measurement: latest, profile: store.profile)
+                dynamicsSection
                 if insights.isEmpty {
                     Section { notEnoughYet } .listRowBackground(Color.clear).listRowSeparator(.hidden)
                 } else {
                     resultsSection(insights, measuredOn: latest.date)
                 }
-                dynamicsSection
                 girthsSection(latest)
             } else {
                 Section { emptyState } .listRowBackground(Color.clear).listRowSeparator(.hidden)

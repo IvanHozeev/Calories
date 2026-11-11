@@ -151,11 +151,9 @@ struct FoodRow: View {
                                 .foregroundStyle(part.color)
                             // Вес и значки — одной ступенью мельче имени и
                             // серым: это приметы части, а не её заглавие.
+                            // Вес идёт последним: он у всех частей разный по
+                            // длине, и в конце столбик цифр не рвёт чтение имён.
                             HStack(spacing: 5) {
-                                if let grams = part.grams, grams > 0 {
-                                    Text(verbatim: "·")
-                                    Text(String(format: "%.0f г", grams))
-                                }
                                 if !part.icons.isEmpty {
                                     Text(verbatim: "·")
                                     HStack(spacing: 4) {
@@ -164,6 +162,10 @@ struct FoodRow: View {
                                         }
                                     }
                                     .accessibilityHidden(true)
+                                }
+                                if let grams = part.grams, grams > 0 {
+                                    Text(verbatim: "·")
+                                    Text(String(format: "%.0f г", grams))
                                 }
                             }
                             .font(.app(.footnote, weight: .medium))

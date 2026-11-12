@@ -164,6 +164,14 @@ final class CaloriesUITests: XCTestCase {
         }
     }
 
+    /// Строка продукта в результатах поиска. Ищем по метке среди любых
+    /// элементов, а не по `staticTexts["Beef"]`: этот запрос перестал находить
+    /// строку (почему именно, не выяснялось), хотя на экране она есть.
+    func foodRow(_ name: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[c] %@", name)).firstMatch
+    }
+
     /// Строка поиска живёт под тулбаром и появляется, только когда список
     /// подтягивают вниз, — поэтому в дереве её сразу может не быть.
     ///
@@ -700,7 +708,10 @@ final class CaloriesUITests: XCTestCase {
         // в «Недавнем», и на следующем запуске строк с этим названием две —
         // в недавнем и в базе. Без него тест зелёный ровно один раз на
         // чистом симуляторе, а дальше падает на «multiple matching elements».
-        let food = app.staticTexts["Spinach"].firstMatch
+        // По метке, а не по типу: после «быстрого добавления» строка с
+        // названием может быть не статическим текстом, а кнопкой.
+        let food = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label CONTAINS[c] 'Spinach'")).firstMatch
         XCTAssertTrue(food.waitForExistence(timeout: 5), "Шпината нет во встроенной базе")
         food.tap()
 
@@ -856,7 +867,7 @@ final class CaloriesUITests: XCTestCase {
         search.tap()
         search.typeText("Almonds")
 
-        let food = app.staticTexts["Almonds"]
+        let food = foodRow("Almonds", in: app)
         XCTAssertTrue(food.waitForExistence(timeout: 5), "Не открылся лист добавления еды")
         food.tap()
 
@@ -907,7 +918,7 @@ final class CaloriesUITests: XCTestCase {
         let search = revealSearchField(in: app)
         search.tap()
         search.typeText("Beef")
-        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        let row = foodRow("Beef", in: app)
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
         row.tap()
         let add = app.buttons["addToMeal"]
@@ -915,7 +926,7 @@ final class CaloriesUITests: XCTestCase {
         add.tap()
 
         // Строка приёма пищи открывает правку по обычному нажатию.
-        let draftRow = app.staticTexts.matching(identifier: "Beef").firstMatch
+        let draftRow = foodRow("Beef", in: app)
         XCTAssertTrue(draftRow.waitForExistence(timeout: 5), "Продукт не попал в приём пищи")
         draftRow.tap()
 
@@ -948,7 +959,7 @@ final class CaloriesUITests: XCTestCase {
         search.tap()
         search.typeText("Beef")
 
-        XCTAssertTrue(app.staticTexts["Beef"].firstMatch.waitForExistence(timeout: 5),
+        XCTAssertTrue(foodRow("Beef", in: app).waitForExistence(timeout: 5),
                       "Продукт из базы должен находиться без выбора источника")
         let usda = app.buttons["Search the USDA database"]
         XCTAssertTrue(usda.exists || app.staticTexts["Search the USDA database"].exists,
@@ -1081,7 +1092,7 @@ final class CaloriesUITests: XCTestCase {
         search.typeText("Beef")
 
         // Поиск идёт по всем источникам, поэтому совпадений может быть несколько
-        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        let row = foodRow("Beef", in: app)
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
         row.tap()   // ровно один тап
 
@@ -1108,7 +1119,7 @@ final class CaloriesUITests: XCTestCase {
                       "Клавиатура не поднялась после тапа по поиску")
         search.typeText("Beef")
 
-        let row = app.staticTexts.matching(identifier: "Beef").firstMatch
+        let row = foodRow("Beef", in: app)
         XCTAssertTrue(row.waitForExistence(timeout: 5), "Поиск не нашёл продукт")
 
         // Найденное — выше секции приёма пищи. Сравниваем координаты, а не

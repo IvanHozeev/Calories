@@ -11,7 +11,15 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DERIVED="${TMPDIR:-/tmp}/calories-build"
-SIM="EA9D7E37-491D-4021-9DFF-00844371F9BC"
+# Тот же проектный симулятор, что и в Tools/test.sh (iOS 27). Ищем по имени, а
+# берём по UDID: по имени xcodebuild молча добавляет «OS:latest».
+SIM=$(xcrun simctl list devices available \
+    | grep -m1 "^ *${CALORIES_DEVICE:-Calories iOS 27} (" \
+    | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')
+if [ -z "$SIM" ] && [ "${1:-}" != "phone" ]; then
+    echo "Нет симулятора «${CALORIES_DEVICE:-Calories iOS 27}»: задай CALORIES_DEVICE."
+    exit 1
+fi
 
 if [ "${1:-}" = "phone" ]; then
     # Телефон по сети числится «available (paired)», а не «connected»:

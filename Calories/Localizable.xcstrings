@@ -199,100 +199,6 @@
         }
       }
     },
-    "%@ — день углеводов": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — يوم كربوهيدرات"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — Kohlenhydrat-Tag"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — a carb day"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: día de carbohidratos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — jour glucides"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — יום פחמימות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — dia de carboidratos"
-          }
-        }
-      }
-    },
-    "%@ — доесть сегодня": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — أنهِه اليوم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — heute aufessen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — finish today"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@: termínalo hoy"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — à finir aujourd’hui"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — לסיים היום"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ — termine hoje"
-          }
-        }
-      }
-    },
     "%@ — четвёртый день, лучше не есть": {
       "localizations": {
         "ar": {
@@ -531,53 +437,6 @@
         }
       }
     },
-    "%1$@ — доесть сегодня, осталось %2$@ порции": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — أنهِه اليوم، بقي %2$@ حصص"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — heute aufessen, %2$@ Portionen übrig"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — finish today, %2$@ servings left"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@: termínalo hoy, quedan %2$@ raciones"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — à finir aujourd’hui, %2$@ portions restantes"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — לסיים היום, נותרו %2$@ מנות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ — termine hoje, restam %2$@ porções"
-          }
-        }
-      }
-    },
     "%1$@ — на %2$lld выше обычного": {
       "extractionState": "manual",
       "localizations": {
@@ -760,53 +619,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@ kcal por 100 g, ×%2$@"
-          }
-        }
-      }
-    },
-    "%1$@ кончится %2$@ — пора готовить": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ سينفد في %2$@ — حان وقت الطبخ"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ ist am %2$@ alle — Zeit zu kochen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ runs out on %2$@ — time to cook"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ se acaba el %2$@: toca cocinar"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ sera fini le %2$@ — il est temps de cuisiner"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ ייגמר ב-%2$@ — הגיע הזמן לבשל"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@ acaba em %2$@ — hora de cozinhar"
           }
         }
       }
@@ -2830,17 +2642,6 @@
         }
       }
     },
-    "70.0": {
-      "extractionState": "stale",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "70.0"
-          }
-        }
-      }
-    },
     "100": {
       "localizations": {
         "en": {
@@ -2988,19 +2789,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "FFMI (índice de massa magra)"
-          }
-        }
-      }
-    },
-    "OK": {
-      "comment": "A button that dismisses an alert.",
-      "extractionState": "stale",
-      "isCommentAutoGenerated": true,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
           }
         }
       }
@@ -3384,100 +3172,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Calorias ativas"
-          }
-        }
-      }
-    },
-    "Американская": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "إمبريالي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imperial"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imperial"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imperial"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impérial"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אימפריאלי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Imperial"
-          }
-        }
-      }
-    },
-    "Антропометрия": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "القياسات الجسمية"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropometrie"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropometry"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Antropometría"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anthropométrie"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אנתרופומטריה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Antropometria"
           }
         }
       }
@@ -7703,53 +7397,6 @@
         }
       }
     },
-    "Вердикт по весу: идёшь по графику, опережаешь или отстаёшь — и что с этим делать": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حكم على الوزن: على المسار أو متقدم أو متأخر — وماذا تفعل حيال ذلك"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Urteil nach Gewicht: im Plan, voraus oder hinterher – und was zu tun ist"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A weight verdict: on track, ahead or behind — and what to do about it"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Veredicto por el peso: vas al día, adelantado o atrasado, y qué hacer"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verdict sur le poids : dans les temps, en avance ou en retard — et quoi faire"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סיכום לפי משקל: לפי הלוח, מקדים או מאחר — ומה לעשות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Veredito pelo peso: no ritmo, adiantado ou atrasado — e o que fazer"
-          }
-        }
-      }
-    },
     "Вердикт, который не врёт": {
       "extractionState": "manual",
       "localizations": {
@@ -11193,53 +10840,6 @@
         }
       }
     },
-    "Время приёма": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "وقت الوجبة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeit der Mahlzeit"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meal time"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hora de la comida"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heure du repas"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שעת הארוחה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hora da refeição"
-          }
-        }
-      }
-    },
     "Время ужина": {
       "extractionState": "manual",
       "localizations": {
@@ -11422,53 +11022,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dom — Seg"
-          }
-        }
-      }
-    },
-    "Все дни": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "كل الأيام"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alle Tage"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All days"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todos los días"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tous les jours"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כל הימים"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todos os dias"
           }
         }
       }
@@ -14440,53 +13993,6 @@
         }
       }
     },
-    "День отмечен": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تم تعليم اليوم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tag markiert"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Day marked"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Día marcado"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jour marqué"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "היום סומן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dia marcado"
-          }
-        }
-      }
-    },
     "День рождения": {
       "extractionState": "manual",
       "localizations": {
@@ -14856,53 +14362,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pausas na dieta"
-          }
-        }
-      }
-    },
-    "Диет-брейки по расписанию или вручную": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "استراحات حمية مجدولة أو يدوية"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diätpausen nach Plan oder manuell"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Diet breaks on a schedule or by hand"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Descansos de dieta programados o manuales"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pauses diète planifiées ou manuelles"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הפסקות דיאטה לפי לוח זמנים או ידנית"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pausas na dieta programadas ou manuais"
           }
         }
       }
@@ -15277,53 +14736,6 @@
         }
       }
     },
-    "Дневная цель вернётся к расчёту по профилю. Записи о еде и весе останутся на месте.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سيعود هدفك اليومي إلى الحساب المعتمد على الملف الشخصي. تبقى سجلات الطعام والوزن كما هي."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Tagesziel kehrt zur Berechnung anhand des Profils zurück. Einträge zu Essen und Gewicht bleiben erhalten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your daily target goes back to the profile-based calculation. Food and weight entries stay untouched."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu objetivo diario volverá al cálculo basado en el perfil. Los registros de comida y peso no se verán afectados."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ton objectif quotidien reviendra au calcul basé sur le profil. Tes entrées de repas et de poids restent intactes."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "היעד היומי יחזור לחישוב לפי הפרופיל. רישומי המזון והמשקל יישארו במקומם."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sua meta diária voltará ao cálculo baseado no perfil. Os registros de comida e peso permanecerão intactos."
-          }
-        }
-      }
-    },
     "Дневник таблицей (CSV)": {
       "localizations": {
         "ar": {
@@ -15366,53 +14778,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Diário como tabela (CSV)"
-          }
-        }
-      }
-    },
-    "Дневные макросы": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الماكروز اليومية"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tagesmakros"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daily macros"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macros diarios"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macros du jour"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מאקרו יומי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macros diários"
           }
         }
       }
@@ -15786,53 +15151,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adicionar"
-          }
-        }
-      }
-    },
-    "Добавить в дневник": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أضف إلى اليوميات"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zum Tagebuch hinzufügen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add to diary"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Añadir al diario"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter au journal"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הוסף ליומן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Adicionar ao diário"
           }
         }
       }
@@ -16715,53 +16033,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Névoa"
-          }
-        }
-      }
-    },
-    "Еда": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الطعام"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Essen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Food"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comida"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nourriture"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אוכל"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comida"
           }
         }
       }
@@ -18943,53 +18214,6 @@
         }
       }
     },
-    "Замер": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "قياس"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Messung"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Measurement"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medida"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mesure"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מדידה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Medida"
-          }
-        }
-      }
-    },
     "Замеров пока нет": {
       "localizations": {
         "ar": {
@@ -19738,53 +18962,6 @@
         }
       }
     },
-    "Записи не потеряны, но приложение не смогло их прочитать. Попробуй перезапустить устройство. Не переустанавливай приложение — это сотрёт дневник.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سجلاتك لم تُفقد، لكن التطبيق لم يستطع قراءتها. جرّب إعادة تشغيل الجهاز. لا تُعد تثبيت التطبيق — فذلك سيمحو اليوميات."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deine Einträge sind nicht verloren, aber die App konnte sie nicht lesen. Starte das Gerät neu. Installiere die App nicht neu – das würde das Tagebuch löschen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your entries are not lost, but the app could not read them. Try restarting the device. Do not reinstall the app — that would erase the diary."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tus registros no se han perdido, pero la app no pudo leerlos. Prueba a reiniciar el dispositivo. No reinstales la app: eso borraría el diario."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tes entrées ne sont pas perdues, mais l'app n'a pas pu les lire. Essaie de redémarrer l'appareil. Ne réinstalle pas l'app : cela effacerait le journal."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הרישומים שלך לא אבדו, אך האפליקציה לא הצליחה לקרוא אותם. נסה להפעיל מחדש את המכשיר. אל תתקין מחדש את האפליקציה — הדבר ימחק את היומן."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seus registros não foram perdidos, mas o app não conseguiu lê-los. Tente reiniciar o dispositivo. Não reinstale o app — isso apagaria o diário."
-          }
-        }
-      }
-    },
     "Записи о еде и весе останутся": {
       "localizations": {
         "ar": {
@@ -19874,53 +19051,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O item sai do diário e o dia é recalculado sem ele."
-          }
-        }
-      }
-    },
-    "Заполните профиль, чтобы рассчитать цель": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أكمل ملفك الشخصي لحساب الهدف"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profil ausfüllen, um Ziel zu berechnen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Complete your profile to calculate your goal"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Completa tu perfil para calcular la meta"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remplissez le profil pour calculer l'objectif"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מלא את הפרופיל כדי לחשב יעד"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Preencha o perfil para calcular a meta"
           }
         }
       }
@@ -20151,53 +19281,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O denominador é osso e não muda, então uma subida aqui significa que deltoides e dorsais cresceram. Ombros / cintura melhora só com o cutting; este não."
-          }
-        }
-      }
-    },
-    "Значения из замера от %@. Поправь то, что изменилось, — остальное перенесётся.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "القيم من قياس %@. عدّل ما تغيّر — والباقي سيُنقل."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Werte aus der Messung vom %@. Ändere, was anders ist — der Rest wird übernommen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Values from the measurement on %@. Change what has changed — the rest carries over."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valores de la medición del %@. Cambia lo que cambió: el resto se conserva."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valeurs de la mesure du %@. Modifie ce qui a changé — le reste est repris."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערכים מהמדידה מ-%@. עדכן את מה שהשתנה — השאר יועתק."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valores da medição de %@. Altere o que mudou — o resto é mantido."
           }
         }
       }
@@ -20753,53 +19836,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "De %@"
-          }
-        }
-      }
-    },
-    "Из неё приложение соберёт план с темпом и сроком": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سيبني التطبيق منها خطة بوتيرة ومدة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Daraus baut die App einen Plan mit Tempo und Dauer"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The app builds a plan with a pace and a timeline from it"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Con ella la app arma un plan con ritmo y plazo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’app en tire un plan avec un rythme et une durée"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ממנה האפליקציה תבנה תוכנית עם קצב ומשך"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O app monta a partir dela um plano com ritmo e prazo"
           }
         }
       }
@@ -21549,53 +20585,6 @@
         }
       }
     },
-    "ИМТ": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "مؤشر كتلة الجسم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BMI"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BMI"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IMC"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IMC"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "BMI"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "IMC"
-          }
-        }
-      }
-    },
     "ИМТ %.1f": {
       "extractionState": "manual",
       "localizations": {
@@ -21870,53 +20859,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Histórico de medições"
-          }
-        }
-      }
-    },
-    "Источник": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "المصدر"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quelle"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Source"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuente"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Source"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מקור"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fonte"
           }
         }
       }
@@ -24425,53 +23367,6 @@
         }
       }
     },
-    "Ключ Gemini": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "مفتاح Gemini"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemini-Schlüssel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemini key"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clave de Gemini"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clé Gemini"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מפתח Gemini"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chave do Gemini"
-          }
-        }
-      }
-    },
     "Ключ USDA": {
       "extractionState": "stale",
       "localizations": {
@@ -24515,53 +23410,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Chave USDA"
-          }
-        }
-      }
-    },
-    "Ключ задан: в приёме пищи появилась кнопка камеры.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تم حفظ المفتاح: ظهر زر الكاميرا في شاشة الوجبة."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schlüssel gesetzt: Im Mahlzeiten-Screen gibt es jetzt eine Kamera-Taste."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Key set: the meal screen now has a camera button."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clave guardada: la pantalla de comida ya tiene botón de cámara."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clé enregistrée : l’écran du repas a maintenant un bouton caméra."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "המפתח נשמר: במסך הארוחה הופיע כפתור מצלמה."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chave salva: a tela da refeição agora tem botão de câmera."
           }
         }
       }
@@ -25631,53 +24479,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Balança de cozinha"
-          }
-        }
-      }
-    },
-    "Л": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "I"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "G"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ש"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "E"
           }
         }
       }
@@ -26933,53 +25734,6 @@
         }
       }
     },
-    "Метрическая": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "متري"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Metrisch"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Metric"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Métrico"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Métrique"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מטרי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Métrico"
-          }
-        }
-      }
-    },
     "ми": {
       "extractionState": "manual",
       "localizations": {
@@ -27631,53 +26385,6 @@
         }
       }
     },
-    "Можно не трогать и настроить потом в плане": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يمكنك تركها وضبطها لاحقًا في الخطة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kannst du so lassen und später im Plan einstellen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You can leave this and set it later in the plan"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puedes dejarlo y ajustarlo después en el plan"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu peux laisser ça et le régler plus tard dans le plan"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אפשר להשאיר ולכוונן אחר כך בתוכנית"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pode deixar assim e ajustar depois no plano"
-          }
-        }
-      }
-    },
     "Можно сушиться": {
       "localizations": {
         "ar": {
@@ -27720,100 +26427,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pode definir"
-          }
-        }
-      }
-    },
-    "Мои": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "خاصتي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meine"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mine"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Míos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les miens"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שלי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meus"
-          }
-        }
-      }
-    },
-    "Мои блюда": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أطباقي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meine Gerichte"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "My Dishes"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mis platos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mes plats"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "המנות שלי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meus pratos"
           }
         }
       }
@@ -27907,53 +26520,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Laticínios"
-          }
-        }
-      }
-    },
-    "Молочное и яйца": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الألبان والبيض"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Milchprodukte und Eier"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dairy and eggs"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lácteos y huevos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Produits laitiers et œufs"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חלב וביצים"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laticínios e ovos"
           }
         }
       }
@@ -30323,53 +28889,6 @@
         }
       }
     },
-    "Начнётся %@": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تبدأ %@"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beginnt %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Starts %@"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Empieza %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Commence %@"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מתחילה %@"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Começa %@"
-          }
-        }
-      }
-    },
     "Начнётся сегодня": {
       "extractionState": "manual",
       "localizations": {
@@ -30509,53 +29028,6 @@
         }
       }
     },
-    "Не забудь взвеситься сегодня": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لا تنسَ وزن نفسك اليوم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vergessen Sie nicht, sich heute zu wiegen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don't forget to weigh yourself today"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No olvides pesarte hoy"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "N'oubliez pas de vous peser aujourd'hui"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אל תשכח להישקל היום"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não esqueça de se pesar hoje"
-          }
-        }
-      }
-    },
     "Не задан ключ Gemini.": {
       "localizations": {
         "ar": {
@@ -30690,53 +29162,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Não é obrigatório. Os passos e as calorias ativas vêm sozinhos do Saúde, e a atividade deixa de ser um palpite."
-          }
-        }
-      }
-    },
-    "Не удалось": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حدث خطأ ما"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Etwas ist schiefgelaufen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Something went wrong"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Algo salió mal"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une erreur est survenue"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משהו השתבש"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Algo deu errado"
           }
         }
       }
@@ -31481,53 +29906,6 @@
         }
       }
     },
-    "Недельный цикл калорий и перенос рефида на праздник": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "دورة سعرات أسبوعية ونقل يوم التحميل إلى عطلة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wöchentlicher Kalorienzyklus und Refeed auf einen Feiertag verschieben"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weekly calorie cycling and moving a refeed to a holiday"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ciclo semanal de calorías y mover el refeed a un festivo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cycle calorique hebdomadaire et refeed déplacé sur un jour férié"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחזור קלוריות שבועי והעברת ריפיד לחג"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ciclo semanal de calorias e mover o refeed para um feriado"
-          }
-        }
-      }
-    },
     "Неделя": {
       "extractionState": "manual",
       "localizations": {
@@ -31756,53 +30134,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uma ou duas semanas em manutenção no meio do déficit. Para remover a pausa, deslize-a na lista de fases."
-          }
-        }
-      }
-    },
-    "Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк встаёт с начала недели плана, финиш сдвигается на его длину, целевой вес не меняется.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أسبوع أو اثنان على الصيانة. تُفقد الدهون بنفس القدر، لكن الجوع والرغبة في الانهيار أقل بكثير. تبدأ الاستراحة مع بداية أسبوع الخطة، ويتأخر الانتهاء بطولها، والوزن المستهدف لا يتغير."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ein, zwei Wochen Erhaltung. Fett geht in der Diät genauso verloren, Hunger und Rückfallgefahr sind aber deutlich geringer. Die Pause beginnt mit einer Planwoche, das Ende verschiebt sich um ihre Länge, das Zielgewicht bleibt."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A week or two at maintenance. Fat comes off just the same over the cut, with noticeably less hunger and urge to cave. The break starts at the beginning of a plan week, the finish moves by its length, the target weight stays."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una o dos semanas en mantenimiento. La grasa se pierde igual durante la definición, con mucha menos hambre y ganas de romper la dieta. El descanso empieza al inicio de una semana del plan, el final se retrasa lo que dure y el peso objetivo no cambia."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une ou deux semaines au maintien. La graisse part tout autant sur la sèche, avec nettement moins de faim et d’envie de craquer. La pause commence en début de semaine du plan, la fin recule d’autant, le poids cible ne change pas."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שבוע-שבועיים בתחזוקה. השומן יורד באותה מידה, והרעב והדחף להישבר נמוכים בהרבה. ההפסקה מתחילה בתחילת שבוע בתוכנית, הסיום זז באורכה, ומשקל היעד לא משתנה."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uma ou duas semanas em manutenção. A gordura sai igual no cutting, com bem menos fome e vontade de chutar o balde. A pausa começa no início de uma semana do plano, o fim é adiado pelo seu tamanho e o peso-alvo não muda."
           }
         }
       }
@@ -32689,53 +31020,6 @@
         }
       }
     },
-    "Новое блюдо": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "طبق جديد"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neues Gericht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New dish"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nuevo plato"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouveau plat"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מנה חדשה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Novo prato"
-          }
-        }
-      }
-    },
     "Новый план": {
       "localizations": {
         "ar": {
@@ -33341,100 +31625,6 @@
         }
       }
     },
-    "Норма калорий": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "هدف السعرات"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalorienziel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calorie goal"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meta de calorías"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Objectif calorique"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יעד קלוריות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meta de calorias"
-          }
-        }
-      }
-    },
-    "Норма калорий пересчитается.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سيُعاد حساب هدف السعرات."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Kalorienziel wird neu berechnet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your calorie target will be recalculated."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se recalculará tu objetivo de calorías."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ton objectif calorique sera recalculé."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יעד הקלוריות שלך יחושב מחדש."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sua meta de calorias será recalculada."
-          }
-        }
-      }
-    },
     "Норма на день поднята: заправь углеводами. В пост держит печёночный гликоген — около 100 г, и уходит он за первые 12–24 часа. Заполнить его хватает одного дня.": {
       "localizations": {
         "ar": {
@@ -33756,53 +31946,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "A meta passa a %d kcal em vez de %d: são %@%d kcal por dia."
-          }
-        }
-      }
-    },
-    "Норма считается по твоим данным, а данные нужно чем-то снимать": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الهدف يُحسب من بياناتك، وهذه البيانات يجب أن يقيسها شيء ما."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dein Ziel wird aus deinen eigenen Daten berechnet, und diese Daten muss irgendetwas erfassen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your target is calculated from your own data, and something has to capture that data."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La meta se calcula con tus propios datos, y esos datos hay que registrarlos con algo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ton objectif est calculé à partir de tes données, et ces données, il faut bien les mesurer avec quelque chose."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "המטרה מחושבת מהנתונים שלך, ואת הנתונים האלה צריך למדוד במשהו."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A meta é calculada com os seus próprios dados, e esses dados precisam ser registrados com algo."
           }
         }
       }
@@ -35621,53 +33764,6 @@
         }
       }
     },
-    "Окно открылось — запиши, что ешь.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "فُتحت النافذة — سجّل ما تأكله."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das Fenster ist offen — trag ein, was du isst."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your window is open — log what you eat."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Se abrió la ventana — registra lo que comes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La fenêtre est ouverte — note ce que tu manges."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "החלון נפתח — רשום מה אתה אוכל."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A janela abriu — registre o que você come."
-          }
-        }
-      }
-    },
     "Оливковое масло": {
       "extractionState": "stale",
       "localizations": {
@@ -35757,53 +33853,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ele vive apenas neste telefone. Escolha uma pasta e a cópia manter-se-á sozinha."
-          }
-        }
-      }
-    },
-    "Онлайн": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الإنترنت"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Online"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Online"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En línea"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En ligne"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מקוון"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Online"
           }
         }
       }
@@ -37244,53 +35293,6 @@
         }
       }
     },
-    "Открывает камеру в Calories.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يفتح الكاميرا في Calories."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Öffnet die Kamera in Calories."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opens the camera in Calories."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abre la cámara en Calories."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ouvre l'appareil photo dans Calories."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פותח את המצלמה ב־Calories."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abre a câmera no Calories."
-          }
-        }
-      }
-    },
     "Открывает камеру, чтобы разобрать блюдо по фотографии.": {
       "localizations": {
         "ar": {
@@ -38214,53 +36216,6 @@
         }
       }
     },
-    "Отметь, что сварил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "علّم أنك طبخت، وسيحسب التطبيق بنفسه: كم حصة بقيت، وكم يوم تكفي، وحتى متى يصلح أكلها."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Markiere es als gekocht, und die App zählt selbst: wie viele Portionen übrig sind, wie lange sie reichen und bis wann es noch essbar ist."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mark it cooked and the app keeps the count itself: how many servings are left, how long they last, and until when it is still worth eating."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marca que ya cocinaste y la app lleva la cuenta sola: cuántas raciones quedan, para cuántos días alcanzan y hasta cuándo conviene comerlo."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indique que c’est cuit et l’app tient le compte : combien de portions restent, pour combien de jours, et jusqu’à quand c’est encore bon."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סמן שבישלת — והאפליקציה תספור בעצמה: כמה מנות נותרו, לכמה ימים יספיקו, ועד מתי עוד כדאי לאכול."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Marque que cozinhou e o app faz a conta sozinho: quantas porções restam, para quantos dias dá e até quando ainda vale comer."
-          }
-        }
-      }
-    },
     "Отмеченный день не рвёт серию и входит в недельный банк калорий как есть — с нулём съеденного.": {
       "localizations": {
         "ar": {
@@ -38584,53 +36539,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "É daí que vem o número: %1$lld kcal por dia em média e o peso a variar %2$@ kg por semana. A fórmula não vê isto — não conhece o teu trabalho nem a adaptação ao défice."
-          }
-        }
-      }
-    },
-    "Отчёт": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التقرير"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bericht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Report"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Informe"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rapport"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "דוח"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Relatório"
           }
         }
       }
@@ -39053,53 +36961,6 @@
         }
       }
     },
-    "П": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "R"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "R"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "י"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D"
-          }
-        }
-      }
-    },
     "Папка": {
       "localizations": {
         "ar": {
@@ -39280,53 +37141,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parve"
-          }
-        }
-      }
-    },
-    "Партия": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الدفعة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Charge"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Batch"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tanda"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fournée"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מנה שבושלה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lote"
           }
         }
       }
@@ -40446,53 +38260,6 @@
         }
       }
     },
-    "План из фаз: сушка, поддержание, набор — с темпом и сроком каждой": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "خطة من مراحل: تنشيف، صيانة، زيادة — بوتيرة ومدة لكل منها"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plan aus Phasen: Diät, Erhaltung, Aufbau – jede mit Tempo und Dauer"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A plan of phases: cut, maintenance, bulk — each with its own pace and length"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plan por fases: definición, mantenimiento, volumen, cada una con su ritmo y plazo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un plan en phases : sèche, maintien, prise de masse — chacune avec son rythme et sa durée"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "תוכנית משלבים: חיטוב, תחזוקה, מסה — לכל אחד קצב ומשך"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plano em fases: cutting, manutenção, bulking — cada uma com ritmo e prazo"
-          }
-        }
-      }
-    },
     "План продолжает считать норму. Экран плана, вердикт и настройка — в Premium.": {
       "localizations": {
         "ar": {
@@ -40772,53 +38539,6 @@
         }
       }
     },
-    "По БЖУ выходит": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "وفق العناصر الكبرى"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laut Makros ergibt das"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "From macros that is"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Según los macros son"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D'après les macros"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לפי המאקרו יוצא"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pelos macros dá"
-          }
-        }
-      }
-    },
     "По БЖУ выходит другое число калорий — проверь данные с упаковки.": {
       "localizations": {
         "ar": {
@@ -40907,53 +38627,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pelo diário e pelas pesagens: cerca de %1$lld kcal por dia, com %2$lld dias de dados. A fórmula dá %3$lld."
-          }
-        }
-      }
-    },
-    "По замерам от %1$@ и %2$@. Процент жира считается лентой, у метода погрешность около ±3%% — на твоём весе это ±%3$.1f кг сухой массы, и изменения меньше этого считать нельзя.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حسب قياسَي %1$@ و%2$@. نسبة الدهون تُحسب بالشريط، وخطأ الطريقة نحو ±3%% — على وزنك هذا ±%3$.1f كجم من الكتلة الصافية، وما دون ذلك لا يُعتد به."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nach den Messungen vom %1$@ und %2$@. Der Fettanteil wird per Maßband bestimmt, die Methode irrt um etwa ±3%% — bei deinem Gewicht sind das ±%3$.1f kg Magermasse, und kleinere Änderungen zählen nicht."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "From the measurements on %1$@ and %2$@. Body fat is worked out with a tape and the method is off by about ±3%% — at your weight that is ±%3$.1f kg of lean mass, and smaller changes cannot be counted."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Según las medidas del %1$@ y del %2$@. El porcentaje de grasa se calcula con cinta y el método falla en torno a ±3%%: en tu peso son ±%3$.1f kg de masa magra, y menos que eso no cuenta."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "D'après les mesures du %1$@ et du %2$@. Le taux de gras est calculé au mètre ruban, avec une erreur d'environ ±3%% — à ton poids cela fait ±%3$.1f kg de masse maigre, et en dessous cela ne compte pas."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לפי המדידות מ-%1$@ ומ-%2$@. אחוז השומן מחושב בסרט מדידה, ולשיטה יש שגיאה של כ-±3%% — במשקל שלך זה ±%3$.1f ק\"ג מסה רזה, ושינויים קטנים מכך לא נחשבים."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pelas medições de %1$@ e %2$@. O percentual de gordura é calculado com fita e o método erra cerca de ±3%% — no seu peso são ±%3$.1f kg de massa magra, e mudanças menores não contam."
           }
         }
       }
@@ -41324,53 +38997,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Na altura dos mamilos, fita nivelada nas costas. Na expiração tranquila, sem estufar o peito."
-          }
-        }
-      }
-    },
-    "по формуле": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "حسب المعادلة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "laut Formel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "from the formula"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "según la fórmula"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "selon la formule"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לפי הנוסחה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pela fórmula"
           }
         }
       }
@@ -42254,53 +39880,6 @@
         }
       }
     },
-    "Пока нет своих блюд": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لا توجد أطباق خاصة بك بعد"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Noch keine eigenen Gerichte"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No dishes of your own yet"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aún no tienes platos propios"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas encore de plats à toi"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עדיין אין מנות משלך"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Você ainda não tem pratos próprios"
-          }
-        }
-      }
-    },
     "Пока нет своих продуктов": {
       "localizations": {
         "ar": {
@@ -42900,53 +40479,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lanche da tarde"
-          }
-        }
-      }
-    },
-    "Пользователь": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "المستخدم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Benutzer"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "User"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usuario"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Utilisateur"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משתמש"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Usuário"
           }
         }
       }
@@ -43643,53 +41175,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Última cópia"
-          }
-        }
-      }
-    },
-    "последняя неделя": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الأسبوع الأخير"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "letzte Woche"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "final week"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "última semana"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "dernière semaine"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "השבוע האחרון"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "última semana"
           }
         }
       }
@@ -44752,53 +42237,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Com o ciclo ativo, faça ajustes precisos pelo peso/duração-alvo — o cálculo (%lld kcal/dia em média) os considerará automaticamente."
-          }
-        }
-      }
-    },
-    "При изменении веса калории и БЖУ пересчитываются пропорционально.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تغيير الوزن يعيد حساب السعرات والعناصر الكبرى بالتناسب."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Beim Ändern des Gewichts werden Kalorien und Makros proportional neu berechnet."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Changing the weight rescales calories and macros proportionally."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Al cambiar el peso, las calorías y los macros se recalculan proporcionalmente."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier le poids recalcule les calories et les macros proportionnellement."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שינוי המשקל מחשב מחדש את הקלוריות והמאקרו באופן יחסי."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alterar o peso recalcula calorias e macros proporcionalmente."
           }
         }
       }
@@ -45922,53 +43360,6 @@
         }
       }
     },
-    "Прогресс": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التقدّم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fortschritt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Progress"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Progreso"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Progression"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "התקדמות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Progresso"
-          }
-        }
-      }
-    },
     "Продвинутый уровень": {
       "localizations": {
         "ar": {
@@ -46293,53 +43684,6 @@
         }
       }
     },
-    "Пропуск": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "متخطّى"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ausgelassen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skipped"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Omitido"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ignoré"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "דילוג"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ignorado"
-          }
-        }
-      }
-    },
     "Пропустить": {
       "localizations": {
         "ar": {
@@ -46382,53 +43726,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pular"
-          }
-        }
-      }
-    },
-    "Пропущенное окно не сгорает: его калории расходятся по оставшимся приёмам.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "النافذة الفائتة لا تضيع: تتوزّع سعراتها على الوجبات المتبقية."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ein verpasstes Fenster verfällt nicht: Seine Kalorien verteilen sich auf die restlichen Mahlzeiten."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A missed window isn't wasted: its calories spread across the remaining meals."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una ventana que te saltas no se pierde: sus calorías se reparten entre las comidas restantes."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une fenêtre manquée n'est pas perdue : ses calories se répartissent entre les repas restants."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "חלון שהוחמץ לא הולך לאיבוד: הקלוריות שלו מתחלקות בין הארוחות שנותרו."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uma janela perdida não se perde: as calorias dela se distribuem pelas refeições restantes."
           }
         }
       }
@@ -47269,53 +44566,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O umbigo é um pouco mais largo que a cintura estreita — é assim mesmo. A gordura visceral aparece nessa diferença, e dois centímetros não dizem nada sobre ela."
-          }
-        }
-      }
-    },
-    "Пусто — кнопка камеры в приёме пищи не показывается.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "فارغ — لا يظهر زر الكاميرا في شاشة الوجبة."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Leer – die Kamera-Taste bleibt im Mahlzeiten-Screen verborgen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Empty — the camera button stays hidden in the meal screen."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vacío: el botón de cámara no aparece en la pantalla de comida."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vide — le bouton caméra n’apparaît pas dans l’écran du repas."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ריק — כפתור המצלמה לא מופיע במסך הארוחה."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vazio — o botão de câmera não aparece na tela da refeição."
           }
         }
       }
@@ -48430,53 +45680,6 @@
         }
       }
     },
-    "Распознавание фото": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التعرّف على الصور"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fotoerkennung"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photo recognition"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconocimiento de fotos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconnaissance photo"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "זיהוי תמונות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconhecimento de fotos"
-          }
-        }
-      }
-    },
     "Расход вырос на %1$lld, до %2$lld.": {
       "extractionState": "manual",
       "localizations": {
@@ -48566,53 +45769,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gasto real"
-          }
-        }
-      }
-    },
-    "Расход по факту появится, когда наберётся две недели дневника и взвешиваний. До тех пор считаем по формуле.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يظهر الحساب الفعلي عندما يتوفر أسبوعان من سجل الطعام وقياسات الوزن. حتى ذلك الحين نحسب بالمعادلة."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der tatsächliche Verbrauch erscheint, sobald zwei Wochen Tagebuch und Wiegungen vorliegen. Bis dahin rechnen wir per Formel."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actual expenditure appears once you've logged two weeks of food and weigh-ins. Until then, we use the formula."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El gasto real aparecerá cuando tengas dos semanas de diario y pesajes registrados. Hasta entonces, usamos la fórmula."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La dépense réelle apparaîtra une fois deux semaines de journal et de pesées enregistrées. Jusque-là, on utilise la formule."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ההוצאה בפועל תופיע כשיצטברו שבועיים של יומן ושקילות. עד אז מחשבים לפי נוסחה."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O gasto real vai aparecer quando você tiver duas semanas de diário e pesagens registradas. Até então, usamos a fórmula."
           }
         }
       }
@@ -49079,53 +46235,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Editar"
-          }
-        }
-      }
-    },
-    "Редактировать блюдо": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تعديل الطبق"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gericht bearbeiten"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit dish"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Editar plato"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier le plat"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ערוך מנה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Editar prato"
           }
         }
       }
@@ -50529,53 +47638,6 @@
         }
       }
     },
-    "Сварил": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "طبختها"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gekocht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cooked it"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ya cociné"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "C’est cuit"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בישלתי"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cozinhei"
-          }
-        }
-      }
-    },
     "Сварил, взвесил — приложение запомнит, во сколько раз продукт тяжелеет, и дальше будет считать это само. Калории при варке не меняются: вода их не несёт, просто вес растёт.": {
       "localizations": {
         "ar": {
@@ -51546,53 +48608,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Silhueta pouco marcada"
-          }
-        }
-      }
-    },
-    "Симметрия": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التناظر"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Symmetrie"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Symmetry"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Simetría"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Symétrie"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "סימטריה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Simetria"
           }
         }
       }
@@ -54057,53 +51072,6 @@
         }
       }
     },
-    "Сравни динамику веса с калорийностью выше — если вес не двигается, а цель по калориям — дефицит, стоит перепроверить норму в профиле.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "قارن اتجاه الوزن بالسعرات أعلاه — إذا لم يتغير الوزن والهدف عجز، راجع ملفك الشخصي."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vergleichen Sie den Gewichtsverlauf mit den Kalorien oben — wenn das Gewicht stagniert und das Ziel ein Defizit ist, das Profil überprüfen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compare weight dynamics with the calories above — if weight isn't moving despite a calorie deficit, double-check your profile settings."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compara la tendencia de peso con las calorías de arriba — si el peso no cambia pero la meta es déficit, revisa tu perfil."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comparez la tendance du poids avec les calories ci-dessus — si le poids ne bouge pas et l'objectif est un déficit, revérifiez le profil."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "השווה את מגמת המשקל עם הקלוריות למעלה — אם המשקל לא זז אבל היעד הוא גירעון, כדאי לבדוק מחדש את היעד בפרופיל."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compare a tendência de peso com as calorias acima — se o peso não mudar e a meta for déficit, revise o perfil."
-          }
-        }
-      }
-    },
     "Сразу": {
       "extractionState": "manual",
       "localizations": {
@@ -56517,53 +53485,6 @@
         }
       }
     },
-    "Тело": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الجسم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Körper"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Body"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cuerpo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Corps"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גוף"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Corpo"
-          }
-        }
-      }
-    },
     "Тело просит передышки: %@. Сдвинь рефид на сегодня.": {
       "extractionState": "manual",
       "localizations": {
@@ -58516,59 +55437,6 @@
         }
       }
     },
-    "Углубить цель: при текущем темпе к %@ ты можешь достичь %@ кг.": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تعمّق الهدف: بالوتيرة الحالية بحلول %1$@ يمكنك الوصول إلى %2$@ كجم."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ziel vertiefen: Beim aktuellen Tempo bis %1$@ können Sie %2$@ kg erreichen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deepen goal: at your current pace by %1$@ you can reach %2$@ kg."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profundizar meta: al ritmo actual para %1$@ puedes alcanzar %2$@ kg."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Approfondir l'objectif : au rythme actuel d'ici %1$@ vous pouvez atteindre %2$@ kg."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "עמיק יעד: בקצב הנוכחי עד %1$@ תוכל להגיע ל-%2$@ ק\"ג."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aprofundar meta: no ritmo atual até %1$@ você pode atingir %2$@ kg."
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Углубить цель: при текущем темпе к %1$@ ты можешь достичь %2$@ кг."
-          }
-        }
-      }
-    },
     "уд/мин": {
       "localizations": {
         "ar": {
@@ -59778,53 +56646,6 @@
         }
       }
     },
-    "Цвет акцента": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لون التمييز"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Akzentfarbe"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accent colour"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Color de acento"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couleur d’accent"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "צבע הדגשה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cor de destaque"
-          }
-        }
-      }
-    },
     "Цвет ведёт к тому, что ещё не закрыто: пока недобран белок — синий, дальше оранжевый на жиры и фиолетовый на углеводы. Закрыто всё — цвет калорий.": {
       "extractionState": "manual",
       "localizations": {
@@ -59962,53 +56783,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Proteína-alvo"
-          }
-        }
-      }
-    },
-    "Целевой вес": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الوزن المستهدف"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zielgewicht"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Target weight"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peso objetivo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Poids cible"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "משקל יעד"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peso-alvo"
           }
         }
       }
@@ -61827,53 +58601,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Espinafre"
-          }
-        }
-      }
-    },
-    "Шрифт": {
-      "extractionState": "stale",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الخط"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Schrift"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Font"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuente"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Police"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "גופן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fonte"
           }
         }
       }

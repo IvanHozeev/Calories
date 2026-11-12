@@ -43,7 +43,7 @@ struct FoodRow: View {
         /// их приносит база продуктов по имени части.
         var traits: [FoodTrait] = []
         var id: String { name }
-        var color: Color { macros.leadingNameColor }
+        var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
     }
 
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
@@ -153,7 +153,7 @@ struct FoodRow: View {
                              font: .app(.callout, weight: .semibold),
                              // Цвет названия — цвет доминирующего макроса порции (по граммам),
                              // чтобы сразу было видно, чем продукт «кормит».
-                             color: (leadingMacros ?? macros).leadingNameColor,
+                             color: leadingKind?.color ?? .primary.opacity(0.85),
                              traits: traits,
                              weight: portion.isEmpty ? nil : portion)
                 }
@@ -207,18 +207,6 @@ struct FoodRow: View {
         // Разделитель начинается от края содержимого — там же, где полоска,
         // а не от названия, отодвинутого под неё.
         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
-    }
-}
-
-extension Macros {
-    /// Цвет названия: цвет ведущего макроса, тем гуще, чем сильнее продукт им
-    /// насыщен. Самый слабый «ведущий» читается бледнее, чистый белок или жир —
-    /// полным цветом. Без ведущего макроса — нейтральный.
-    var leadingNameColor: Color {
-        guard let kind = leadingKind, let saturation = leadingSaturation else {
-            return .primary.opacity(0.85)
-        }
-        return kind.color.opacity(0.55 + 0.45 * saturation)
     }
 }
 

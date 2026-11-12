@@ -17,6 +17,9 @@ extension CalorieStore {
 
     /// Недельный расход без оглядки на активность этого дня.
     private func baseExpenditure(on date: Date) -> Double? {
+        // Без Premium история измеренного расхода не используется: прошлые дни
+        // считаются от формулы, как и сегодняшний.
+        guard usesMeasuredExpenditure else { return nil }
         let day = Calendar.current.startOfDay(for: date)
         guard day < Calendar.current.startOfDay(for: Date()) else { return smoothedTDEE }
         return tdeeHistory[Self.historyKey(day)] ?? smoothedTDEE

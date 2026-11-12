@@ -937,6 +937,55 @@ struct AdaptiveTDEEStoreTests {
         #expect(store.workingTDEE == profile.tdee)
     }
 
+    /// Расход по факту — платная часть: экран оплаты продаёт его первым пунктом.
+    /// Без Premium норма считается по формуле, сколько бы данных ни накопилось.
+    @Test func withoutPremiumTheFormulaStillRules() throws {
+        feedLosingWeeks()
+        store.isPremium = false
+        let profile = try #require(store.profile)
+        #expect(store.adaptiveTDEE != nil,
+                "Сам расчёт идёт и без Premium: купивший увидит результат сразу, а не через две недели")
+        #expect(!store.usesMeasuredExpenditure)
+        #expect(store.workingTDEE == profile.tdee)
+        #expect(store.expenditure(on: Date()) == nil,
+                "История измеренного расхода не должна доходить до нормы прошлых и сегодняшнего дня")
+    }
+
+    @Test func premiumSwitchesTheMeasuredExpenditureOn() throws {
+        feedLosingWeeks()
+        store.isPremium = true
+        let profile = try #require(store.profile)
+        #expect(store.usesMeasuredExpenditure)
+        #expect(store.workingTDEE > profile.tdee + 500, "Факт около 4000 против 2700 по формуле")
+    }
+
+    /// Пробные две недели — это Premium: пока они идут, расход по факту работает.
+    @Test func theTrialCountsAsPremiumForTheExpenditure() throws {
+        feedLosingWeeks()
+        store.isPremium = false
+        store.startTrialIfNeeded()
+        #expect(store.usesMeasuredExpenditure)
+    }
+
+    /// Пробный период кончился, покупки нет — норма снова по формуле.
+    @Test func afterTheTrialTheNormGoesBackToTheFormula() throws {
+        feedLosingWeeks()
+        store.isPremium = false
+        let longAgo = Calendar.current.date(byAdding: .day, value: -(CalorieStore.trialDays + 5), to: Date())!
+        store.startTrialIfNeeded(now: longAgo)
+        let profile = try #require(store.profile)
+        #expect(!store.isTrialActive)
+        #expect(store.workingTDEE == profile.tdee)
+    }
+
+    /// Выключатель в профиле действует поверх Premium, а не вместо него.
+    @Test func theSwitchDoesNotGrantWhatPremiumDoesNot() throws {
+        feedLosingWeeks()
+        store.isPremium = false
+        store.usesAdaptiveTDEE = true
+        #expect(!store.usesMeasuredExpenditure)
+    }
+
     /// Без данных нечего и считать: пустой дневник не должен двигать норму.
     @Test func withoutDataThereIsNoEstimate() {
         #expect(store.adaptiveTDEE == nil)

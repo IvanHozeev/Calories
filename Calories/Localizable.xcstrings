@@ -37798,6 +37798,144 @@
         }
       }
     },
+    "Норма теперь считается по формуле, а не по твоему расходу. Расход по факту, экран плана, вердикт, банк калорий и настройка — в Premium.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أصبح المعيار يُحسب الآن بالمعادلة، لا بإنفاقك الفعلي. الإنفاق الفعلي وشاشة الخطة والحكم وبنك السعرات والضبط — في Premium."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Norm wird jetzt nach der Formel berechnet, nicht nach deinem tatsächlichen Verbrauch. Gemessener Verbrauch, Planbildschirm, Urteil, Kalorienbank und Anpassung gibt es in Premium."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your target is now calculated by formula, not by your measured expenditure. Measured expenditure, the plan screen, the verdict, the calorie bank and tuning are in Premium."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu objetivo ahora se calcula con la fórmula, no con tu gasto real. El gasto real, la pantalla del plan, el veredicto, el banco de calorías y el ajuste están en Premium."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ta cible est maintenant calculée par la formule, et non d'après ta dépense réelle. La dépense mesurée, l'écran du plan, le verdict, la banque de calories et le réglage sont dans Premium."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "היעד שלך מחושב עכשיו לפי נוסחה, לא לפי ההוצאה האמיתית שלך. הוצאה אמיתית, מסך התוכנית, פסק הדין, בנק הקלוריות והכוונון — ב-Premium."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sua meta agora é calculada pela fórmula, não pelo seu gasto medido. Gasto medido, tela do plano, veredicto, banco de calorias e ajuste estão no Premium."
+          }
+        }
+      }
+    },
+    "Недобор одного дня не пропадает: он добавляется к остальным дням недели, а перебор вычитается.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يضيع نقص يوم واحد: يُضاف إلى بقية أيام الأسبوع، ويُخصم الفائض."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was an einem Tag fehlt, geht nicht verloren: Es wird auf die übrigen Tage der Woche verteilt, ein Überschuss wird abgezogen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A day under target is not lost: it is added to the rest of the week, and an overshoot is subtracted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que falta un día no se pierde: se suma al resto de la semana, y el exceso se resta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un déficit sur un jour n'est pas perdu : il s'ajoute au reste de la semaine, et un excès est soustrait."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חסר של יום אחד לא הולך לאיבוד: הוא מתווסף ליתר ימי השבוע, וחריגה נגרעת."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que faltou em um dia não se perde: é somado ao resto da semana, e o excesso é subtraído."
+          }
+        }
+      }
+    },
+    "Расчёт по факту — в Premium. Пока норма считается по формуле.": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحساب حسب الإنفاق الفعلي — في Premium. حاليًا يُحسب المعيار بالمعادلة."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berechnung nach tatsächlichem Verbrauch gibt es in Premium. Bis dahin gilt die Formel."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calculating by measured expenditure is in Premium. Until then the target follows the formula."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El cálculo por gasto real está en Premium. Mientras tanto, el objetivo sigue la fórmula."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le calcul d'après la dépense mesurée est dans Premium. En attendant, la cible suit la formule."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חישוב לפי הוצאה אמיתית — ב-Premium. בינתיים היעד מחושב לפי נוסחה."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O cálculo pelo gasto medido está no Premium. Até lá, a meta segue a fórmula."
+          }
+        }
+      }
+    },
     "Отмена": {
       "localizations": {
         "ar": {

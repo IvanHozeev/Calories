@@ -169,10 +169,20 @@ final class CalorieStore {
         }
     }
 
-    /// Расход, от которого считается норма: факт, если он есть и включён,
+    /// Считается ли норма по измеренному расходу: тумблер включён **и** есть
+    /// Premium.
+    ///
+    /// Расход по факту — платная часть: экран оплаты продаёт его первым
+    /// пунктом. Раньше он работал у всех, и оплата обещала то, что уже было.
+    /// Одна точка, через которую идут и расчёт нормы, и всё, что показывает
+    /// число: иначе где-нибудь бесплатный пользователь продолжил бы видеть
+    /// платный расход.
+    var usesMeasuredExpenditure: Bool { usesAdaptiveTDEE && isPremium }
+
+    /// Расход, от которого считается норма: факт, если он есть и положен,
     /// иначе формула по профилю.
     var workingTDEE: Double {
-        if usesAdaptiveTDEE, let smoothedTDEE { return smoothedTDEE }
+        if usesMeasuredExpenditure, let smoothedTDEE { return smoothedTDEE }
         return profile?.tdee ?? Double(dailyGoal)
     }
     var streak: Int = 0

@@ -19,7 +19,7 @@ struct WeekReviewView {
     /// Почему предлагается именно это число.
     private func reason(for proposal: Int) -> String {
         let delta = proposal - store.dailyGoal
-        let measured = store.smoothedTDEE ?? store.adaptiveTDEE?.tdee
+        let measured = store.usesMeasuredExpenditure ? (store.smoothedTDEE ?? store.adaptiveTDEE?.tdee) : nil
         guard let measured else {
             return String(format: String(localized: "Расчёт плана на эту неделю даёт на %lld ккал в день больше."), delta)
         }

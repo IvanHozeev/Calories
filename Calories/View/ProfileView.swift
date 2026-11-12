@@ -251,7 +251,7 @@ struct ProfileView: View {
     }
     
     /// Считаем ли норму от измеренного расхода.
-    private var usesFact: Bool { store.usesAdaptiveTDEE && store.adaptiveTDEE != nil }
+    private var usesFact: Bool { store.usesMeasuredExpenditure && store.adaptiveTDEE != nil }
 
     /// Расчёт одной карточкой: крупно то, ради чего заходят, мелко — из чего
     /// оно собрано.
@@ -543,7 +543,7 @@ private struct CalculationBasisSheet: View {
     /// Множитель активности спрашиваем, только пока расход считается по
     /// формуле: измеренный расход уже знает и работу, и зал.
     private var showsActivityPicker: Bool {
-        !(store.usesAdaptiveTDEE && store.adaptiveTDEE != nil)
+        !(store.usesMeasuredExpenditure && store.adaptiveTDEE != nil)
     }
 
     /// Высота листа — под содержимое, а не половина экрана.
@@ -560,14 +560,16 @@ private struct CalculationBasisSheet: View {
         NavigationStack {
             List {
                 Section {
-                    Toggle(isOn: Binding(get: { store.usesAdaptiveTDEE },
+                    Toggle(isOn: Binding(get: { store.usesMeasuredExpenditure },
                                          set: { store.usesAdaptiveTDEE = $0 })) {
                         Text("Считать по факту")
                     }
-                    .disabled(store.adaptiveTDEE == nil)
+                    .disabled(store.adaptiveTDEE == nil || !store.isPremium)
                     .accessibilityIdentifier("useAdaptiveTDEE")
                 } footer: {
-                    if let fact = store.adaptiveTDEE {
+                    if !store.isPremium {
+                        Text("Расчёт по факту — в Premium. Пока норма считается по формуле.")
+                    } else if let fact = store.adaptiveTDEE {
                         Text(String(format: String(localized: "По дневнику и весам: около %1$lld ккал в день, данных за %2$lld дн. Формула даёт %3$lld."),
                                     Int((store.smoothedTDEE ?? fact.tdee).rounded()), fact.loggedDays,
                                     Int((store.profile?.tdee ?? 0).rounded())))
@@ -633,7 +635,7 @@ private extension ProfileView {
         } footer: {
             // Обе подписи объясняют, откуда берётся число, — на
             // коротком уровне их нет вовсе.
-            if let fact = store.adaptiveTDEE, store.usesAdaptiveTDEE {
+            if let fact = store.adaptiveTDEE, store.usesMeasuredExpenditure {
                 // Само число расхода тут не повторяем: оно уже написано
                 // крупно на карточке, и вторая его копия читалась как
                 // ещё одна цифра, которую надо сверить с первой.

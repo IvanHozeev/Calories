@@ -726,7 +726,7 @@ extension CalorieStore {
 
         input.formulaTDEE = profile?.tdee
         input.measuredTDEE = smoothedTDEE ?? adaptiveTDEE?.tdee
-        input.usesMeasuredTDEE = usesAdaptiveTDEE && adaptiveTDEE != nil
+        input.usesMeasuredTDEE = usesMeasuredExpenditure && adaptiveTDEE != nil
         return input
     }
 

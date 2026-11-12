@@ -135,7 +135,7 @@ final class QuickActionAppDelegate: NSObject, UIApplicationDelegate, UNUserNotif
         center.delegate = self
         // Действия в шторке объявляются один раз на запуск: без категории
         // напоминание об окне приходило бы без кнопок.
-        center.setNotificationCategories([MealReminders.notificationCategory])
+        center.setNotificationCategories(MealReminders.notificationCategories)
         return true
     }
 
@@ -159,8 +159,15 @@ final class QuickActionAppDelegate: NSObject, UIApplicationDelegate, UNUserNotif
             MealReminders.snooze(response.notification.request.content)
         case MealReminders.skipAction:
             break
+        case MealReminders.usualAction:
+            let raw = response.notification.request.content.userInfo[MealReminders.periodKey] as? String
+            let period = raw.flatMap(MealPeriod.init(rawValue:))
+            await MainActor.run {
+                MealReminders.handleUsualAction(period: period, store: SharedStore.shared.store)
+            }
         case UNNotificationDefaultActionIdentifier
-            where response.notification.request.content.categoryIdentifier == MealReminders.category:
+            where [MealReminders.category, MealReminders.categoryWithUsual]
+                .contains(response.notification.request.content.categoryIdentifier):
             await MainActor.run { QuickActionRouter.shared.pending = .meal }
         default:
             break

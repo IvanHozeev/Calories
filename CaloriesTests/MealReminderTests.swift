@@ -115,4 +115,61 @@ struct MealReminderTests {
                 == [MealReminders.snoozeAction, MealReminders.skipAction])
         #expect(MealReminders.snooze == 30 * 60)
     }
+
+    // MARK: - «Съел как обычно»
+
+    /// Три похожих завтрака на разные дни: столько нужно, чтобы набор стал привычным.
+    private func seedUsualBreakfast() {
+        let cal = Calendar.current
+        for daysAgo in 1...3 {
+            let day = cal.date(byAdding: .day, value: -daysAgo, to: Date()) ?? Date()
+            let morning = cal.date(bySettingHour: 8, minute: 0, second: 0, of: day) ?? day
+            let parts = [
+                EntryComponent(name: "Овсянка", calories: 150, macros: Macros(protein: 5, fat: 3, carbs: 27), grams: 200),
+                EntryComponent(name: "Банан", calories: 90, macros: Macros(protein: 1, fat: 0, carbs: 22), grams: 100),
+            ]
+            store.add(name: "Овсянка, Банан", calories: 240,
+                      macros: Macros(protein: 6, fat: 3, carbs: 49), date: morning, components: parts)
+        }
+    }
+
+    @Test func theUsualButtonLogsTheUsualMealOfThatWindow() {
+        seedUsualBreakfast()
+        let before = store.entries.count
+        let logged = MealReminders.logUsualMeal(period: .breakfast, store: store)
+        #expect(logged != nil)
+        #expect(store.entries.count == before + 1)
+        let entry = store.entries.first
+        #expect(entry?.name == "Овсянка, Банан")
+        #expect(entry?.calories == 240)
+        #expect(entry?.composition.map(\.name) == ["Овсянка", "Банан"])
+    }
+
+    @Test func withoutAUsualMealNothingIsLogged() {
+        let before = store.entries.count
+        #expect(MealReminders.logUsualMeal(period: .breakfast, store: store) == nil)
+        #expect(store.entries.count == before)
+    }
+
+    @Test func aBreakfastHabitIsNotLoggedForDinner() {
+        seedUsualBreakfast()
+        let before = store.entries.count
+        #expect(MealReminders.logUsualMeal(period: .dinner, store: store) == nil)
+        #expect(store.entries.count == before)
+    }
+
+    @Test func theUsualCategoryCarriesThreeButtonsAndTheOtherTwo() {
+        #expect(MealReminders.notificationCategoryWithUsual.actions.map(\.identifier)
+                == [MealReminders.usualAction, MealReminders.snoozeAction, MealReminders.skipAction])
+        #expect(MealReminders.notificationCategory.actions.map(\.identifier)
+                == [MealReminders.snoozeAction, MealReminders.skipAction])
+    }
+
+    @Test func plannedMealsKnowTheirWindowAndWhetherThereIsAHabit() {
+        seedUsualBreakfast()
+        let meals = MealReminders.plannedMeals(settings: settings(count: 3), store: store)
+        #expect(meals.first?.period == .breakfast)
+        #expect(meals.first?.hasUsualMeal == true)
+        #expect(meals.last?.hasUsualMeal == false)
+    }
 }

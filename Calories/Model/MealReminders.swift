@@ -20,8 +20,15 @@ private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Calories
 /// заводит где-то отдельное состояние.
 enum MealReminders {
     static let category = "MEAL_WINDOW"
+    /// Тот же приём, но с кнопкой «Съел как обычно»: её показываем только когда
+    /// у этого окна есть привычный приём. Кнопка, которая в половине случаев
+    /// отвечает «записывать нечего», хуже, чем её отсутствие.
+    static let categoryWithUsual = "MEAL_WINDOW_USUAL"
     static let snoozeAction = "MEAL_SNOOZE"
     static let skipAction = "MEAL_SKIP"
+    static let usualAction = "MEAL_USUAL"
+    /// Ключ в `userInfo` уведомления: какое окно оно открывает.
+    static let periodKey = "period"
     static let snooze: TimeInterval = 30 * 60
     /// Префикс идентификаторов: по нему снимаются старые напоминания,
     /// не трогая обычные (завтрак, обед, ужин) из настроек.
@@ -30,17 +37,43 @@ enum MealReminders {
     static var notificationCategory: UNNotificationCategory {
         UNNotificationCategory(
             identifier: category,
+            actions: [snoozeButton, skipButton],
+            intentIdentifiers: [],
+            options: []
+        )
+    }
+
+    /// С третьей кнопкой: записать привычный приём этого окна, не открывая
+    /// приложение. Идёт первой, потому что это единственное действие, которое
+    /// закрывает дело; отложить и пропустить — способы его не делать.
+    static var notificationCategoryWithUsual: UNNotificationCategory {
+        UNNotificationCategory(
+            identifier: categoryWithUsual,
             actions: [
-                UNNotificationAction(identifier: snoozeAction,
-                                     title: String(localized: "Отложить на 30 минут"),
+                UNNotificationAction(identifier: usualAction,
+                                     title: String(localized: "Съел как обычно"),
                                      options: []),
-                UNNotificationAction(identifier: skipAction,
-                                     title: String(localized: "Пропустить"),
-                                     options: []),
+                snoozeButton, skipButton,
             ],
             intentIdentifiers: [],
             options: []
         )
+    }
+
+    static var notificationCategories: Set<UNNotificationCategory> {
+        [notificationCategory, notificationCategoryWithUsual]
+    }
+
+    private static var snoozeButton: UNNotificationAction {
+        UNNotificationAction(identifier: snoozeAction,
+                             title: String(localized: "Отложить на 30 минут"),
+                             options: [])
+    }
+
+    private static var skipButton: UNNotificationAction {
+        UNNotificationAction(identifier: skipAction,
+                             title: String(localized: "Пропустить"),
+                             options: [])
     }
 
     /// Переставить напоминания под текущее расписание.
@@ -95,7 +128,10 @@ enum MealReminders {
                 content.body = meal.map(body(for:)) ?? ""
 
                 content.sound = .default
-                content.categoryIdentifier = category
+                content.categoryIdentifier = meal?.hasUsualMeal == true ? categoryWithUsual : category
+                if let period = meal?.period {
+                    content.userInfo = [periodKey: period.rawValue]
+                }
                 let parts = calendar.dateComponents([.hour, .minute], from: time)
                 let trigger = UNCalendarNotificationTrigger(dateMatching: parts, repeats: true)
                 center.add(UNNotificationRequest(identifier: "\(prefix)\(index)",
@@ -113,6 +149,11 @@ enum MealReminders {
         let title: String
         let calories: Int
         let suggestion: String?
+        /// Окно дня, которому соответствует приём: по нему кнопка «Съел как
+        /// обычно» находит, что записывать.
+        var period: MealPeriod? = nil
+        /// Есть ли у этого окна привычный приём — то есть что записывать.
+        var hasUsualMeal = false
     }
 
     /// Текст напоминания: число и пример.
@@ -143,16 +184,54 @@ enum MealReminders {
             return PlannedMeal(
                 title: String(localized: String.LocalizationValue(period.rawValue)),
                 calories: calories,
-                suggestion: store.mealSuggestions(remaining: calories).first?.name)
+                suggestion: store.mealSuggestions(remaining: calories).first?.name,
+                period: period,
+                hasUsualMeal: !store.usualMeals(period: period).isEmpty)
         }
     }
 
     /// Отложить окно: то же напоминание через полчаса, один раз.
     static func snooze(_ content: UNNotificationContent, center: UNUserNotificationCenter = .current()) {
         let copy = content.mutableCopy() as? UNMutableNotificationContent ?? UNMutableNotificationContent()
-        copy.categoryIdentifier = category
+        if copy.categoryIdentifier.isEmpty { copy.categoryIdentifier = category }
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: snooze, repeats: false)
         center.add(UNNotificationRequest(identifier: "\(prefix)snoozed-\(UUID().uuidString)",
                                          content: copy, trigger: trigger))
+    }
+
+    /// Записать привычный приём окна: то, что человек чаще всего собирал в это
+    /// время за последние полгода, — тем же составом, что и «Как обычно» на
+    /// экране добавления. Возвращает записанное, nil — привычного приёма нет
+    /// и ничего не записано.
+    @MainActor
+    @discardableResult
+    static func logUsualMeal(period: MealPeriod?, store: CalorieStore, at date: Date = Date()) -> UsualMeal.Suggestion? {
+        guard let usual = store.usualMeals(period: period).first else { return nil }
+        store.add(name: usual.parts.map(\.name).joined(separator: ", "),
+                  calories: usual.calories,
+                  macros: usual.macros,
+                  grams: nil,
+                  date: date,
+                  components: usual.parts)
+        return usual
+    }
+
+    /// Ответ на кнопку «Съел как обычно»: записать и сказать, что записано.
+    /// Приложение при этом не открывается, поэтому подтверждение — отдельное
+    /// уведомление: без него человек не узнал бы, сработала ли кнопка.
+    @MainActor
+    static func handleUsualAction(period: MealPeriod?, store: CalorieStore?,
+                                  center: UNUserNotificationCenter = .current()) {
+        let content = UNMutableNotificationContent()
+        if let store, let usual = logUsualMeal(period: period, store: store) {
+            content.title = String(localized: "Записано")
+            content.body = String(format: String(localized: "%1$@: %2$lld ккал"),
+                                  usual.parts.map(\.name).joined(separator: ", "), usual.calories)
+        } else {
+            content.title = String(localized: "Ничего не записано")
+            content.body = String(localized: "Привычного приёма для этого окна пока нет. Запиши его в приложении.")
+        }
+        center.add(UNNotificationRequest(identifier: "\(prefix)logged-\(UUID().uuidString)",
+                                         content: content, trigger: nil))
     }
 }

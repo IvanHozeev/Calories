@@ -303,7 +303,6 @@ struct DeveloperSettingsView: View {
     var store: CalorieStore
 
     @AppStorage("fdc_api_key") private var fdcAPIKey = ""
-    @AppStorage("gemini_api_key") private var geminiAPIKey = ""
     private var diagnostics: DiagnosticsStore { .shared }
 
     /// Сбои — только если они были.
@@ -375,19 +374,6 @@ struct DeveloperSettingsView: View {
                 }
             } footer: {
                 Text("Сырьё из «Здоровья» рядом с тем, что из него собрало приложение. Нужно, когда названная ночь не сходится с тем, сколько человек спал.")
-            }
-
-            Section {
-                TextField("Ключ Gemini", text: $geminiAPIKey)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .font(.caption.monospaced())
-            } header: {
-                Text("Распознавание фото")
-            } footer: {
-                Text(geminiAPIKey.isEmpty
-                     ? "Пусто — кнопка камеры в приёме пищи не показывается."
-                     : "Ключ задан: в приёме пищи появилась кнопка камеры.")
             }
 
             Section {

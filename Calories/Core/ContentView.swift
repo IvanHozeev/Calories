@@ -86,7 +86,7 @@ struct ContentView: View {
             showingMeasurements = true
         case .scanner:
             todaySheet = .scanner
-        case .meal, .camera:
+        case .meal:
             entryAction = action
             showingAdd = true
         }
@@ -305,14 +305,6 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack {
                         Menu {
-                            if GeminiVisionService.isConfigured {
-                                Button {
-                                    entryAction = .camera
-                                    showingAdd = true
-                                } label: {
-                                    Label("Снять еду", systemImage: "camera")
-                                }
-                            }
                             Button {
                                 todaySheet = .scanner
                             } label: {

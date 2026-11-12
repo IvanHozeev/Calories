@@ -12,7 +12,6 @@ struct CaloriesWidgetBundle: WidgetBundle {
         // Контролы появились в iOS 18, а минимальная версия приложения — 26,
         // поэтому проверка доступности здесь не нужна.
         QuickAddControl()
-        PhotographFoodControl()
         ScanBarcodeControl()
         TakeMeasurementsControl()
         MealControl()

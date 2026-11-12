@@ -31,49 +31,49 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "لمسح الباركود وتصوير الطعام"
+            "value" : "لمسح الباركود"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zum Scannen von Barcodes und Fotografieren von Essen"
+            "value" : "Zum Scannen von Barcodes"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To scan barcodes and photograph food"
+            "value" : "To scan barcodes"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para escanear códigos de barras y fotografiar comida"
+            "value" : "Para escanear códigos de barras"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour scanner les codes-barres et photographier les aliments"
+            "value" : "Pour scanner les codes-barres"
           }
         },
         "he" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "לסריקת ברקודים ולצילום אוכל"
+            "value" : "לסריקת ברקודים"
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Para ler códigos de barras e fotografar comida"
+            "value" : "Para ler códigos de barras"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Для сканирования штрихкодов и съёмки еды"
+            "value" : "Для сканирования штрихкодов"
           }
         }
       }

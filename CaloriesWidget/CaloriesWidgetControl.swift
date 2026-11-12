@@ -7,10 +7,10 @@ import WidgetKit
 ///
 /// Смысл тот же, что у длинного нажатия на иконку, но короче на один шаг:
 /// контрол вешается на кнопку действия или лежит в Пункте управления, и до
-/// камеры получается один жест с любого экрана. Еда — про то, чтобы не вводить
-/// руками: штрихкод, когда есть упаковка, фото — когда её нет. Замеры про
-/// другое: там ровно наоборот, руки заняты лентой, и лишний путь через «Тело»
-/// и экран замеров стоит дороже, чем сам ввод.
+/// экрана добавления получается один жест с любого экрана. Еда — про то, чтобы
+/// не вводить руками: штрихкод, когда есть упаковка. Замеры про другое: там
+/// ровно наоборот, руки заняты лентой, и лишний путь через «Тело» и экран
+/// замеров стоит дороже, чем сам ввод.
 ///
 /// Здесь замеры есть, а в меню на иконке их нет: система показывает там не
 /// больше четырёх пунктов, а в Пункте управления такого потолка нет.
@@ -27,17 +27,6 @@ private let appGroup = "group.calories.shared"
 /// сразу стирает: иначе один нажатый контрол открывал бы камеру при каждом
 /// следующем запуске.
 private let pendingActionKey = "pending_quick_action"
-
-struct PhotographFoodIntent: AppIntent {
-    static let title: LocalizedStringResource = "Снять еду"
-    static let description = IntentDescription("Открывает камеру, чтобы разобрать блюдо по фотографии.")
-    static let openAppWhenRun = true
-
-    func perform() async throws -> some IntentResult {
-        UserDefaults(suiteName: appGroup)?.set("camera", forKey: pendingActionKey)
-        return .result()
-    }
-}
 
 struct ScanBarcodeIntent: AppIntent {
     static let title: LocalizedStringResource = "Сканировать штрихкод"
@@ -74,7 +63,6 @@ struct QuickAddIntent: AppIntent {
 /// Разъедутся — контрол будет открывать не то, и молча.
 enum QuickAddOption: String, AppEnum {
     case meal
-    case camera
     case scanner
     case measurements
 
@@ -82,7 +70,6 @@ enum QuickAddOption: String, AppEnum {
 
     static let caseDisplayRepresentations: [QuickAddOption: DisplayRepresentation] = [
         .meal: DisplayRepresentation(title: "Добавить еду", image: DisplayRepresentation.Image(systemName: "fork.knife")),
-        .camera: DisplayRepresentation(title: "Снять еду", image: DisplayRepresentation.Image(systemName: "camera.fill")),
         .scanner: DisplayRepresentation(title: "Сканировать штрихкод",
                                         image: DisplayRepresentation.Image(systemName: "barcode.viewfinder")),
         .measurements: DisplayRepresentation(title: "Снять замеры", image: DisplayRepresentation.Image(systemName: "ruler"))
@@ -91,7 +78,6 @@ enum QuickAddOption: String, AppEnum {
     var symbol: String {
         switch self {
         case .meal:         return "fork.knife"
-        case .camera:       return "camera.fill"
         case .scanner:      return "barcode.viewfinder"
         case .measurements: return "ruler"
         }
@@ -100,7 +86,6 @@ enum QuickAddOption: String, AppEnum {
     var title: LocalizedStringResource {
         switch self {
         case .meal:         return "Добавить еду"
-        case .camera:       return "Снять еду"
         case .scanner:      return "Сканировать штрихкод"
         case .measurements: return "Снять замеры"
         }
@@ -149,18 +134,6 @@ struct QuickAddControl: ControlWidget {
         }
         .displayName("Быстрое добавление")
         .description("Один жест до еды, камеры, сканера или замеров. Что именно — выбирается в правке Пункта управления.")
-    }
-}
-
-struct PhotographFoodControl: ControlWidget {
-    var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "ivankhozeyev.team.Calories.control.photo") {
-            ControlWidgetButton(action: PhotographFoodIntent()) {
-                Label("Снять еду", systemImage: "camera")
-            }
-        }
-        .displayName("Снять еду")
-        .description("Открывает камеру в Calories.")
     }
 }
 

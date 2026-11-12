@@ -31,7 +31,6 @@ private func handleControlAction(_ action: QuickAction) {
 /// и без одинакового типа в обоих бандлах идентификаторы не совпадут.
 enum QuickAddOption: String, AppEnum {
     case meal
-    case camera
     case scanner
     case measurements
 
@@ -39,7 +38,6 @@ enum QuickAddOption: String, AppEnum {
 
     static let caseDisplayRepresentations: [QuickAddOption: DisplayRepresentation] = [
         .meal: DisplayRepresentation(title: "Добавить еду", image: DisplayRepresentation.Image(systemName: "fork.knife")),
-        .camera: DisplayRepresentation(title: "Снять еду", image: DisplayRepresentation.Image(systemName: "camera.fill")),
         .scanner: DisplayRepresentation(title: "Сканировать штрихкод",
                                         image: DisplayRepresentation.Image(systemName: "barcode.viewfinder")),
         .measurements: DisplayRepresentation(title: "Снять замеры", image: DisplayRepresentation.Image(systemName: "ruler"))
@@ -51,7 +49,6 @@ enum QuickAddOption: String, AppEnum {
     var action: QuickAction {
         switch self {
         case .meal:         return .meal
-        case .camera:       return .camera
         case .scanner:      return .scanner
         case .measurements: return .measurements
         }
@@ -72,18 +69,6 @@ struct QuickAddIntent: AppIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         handleControlAction(option.action)
-        return .result()
-    }
-}
-
-struct PhotographFoodIntent: AppIntent {
-    static let title: LocalizedStringResource = "Снять еду"
-    static let description = IntentDescription("Открывает камеру, чтобы разобрать блюдо по фотографии.")
-    static let openAppWhenRun = true
-
-    @MainActor
-    func perform() async throws -> some IntentResult {
-        handleControlAction(.camera)
         return .result()
     }
 }

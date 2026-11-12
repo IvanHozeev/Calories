@@ -10,7 +10,6 @@ import UserNotifications
 /// потерянные секунды ровно в тот момент, когда их нет.
 enum QuickAction: String, CaseIterable, Identifiable {
     case meal
-    case camera
     case scanner
     case weight
     case measurements
@@ -20,7 +19,6 @@ enum QuickAction: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .meal:    String(localized: "Приём пищи")
-        case .camera:  String(localized: "Снять еду")
         case .scanner: String(localized: "Сканировать штрихкод")
         case .weight:  String(localized: "Взвеситься")
         case .measurements: String(localized: "Снять замеры")
@@ -30,7 +28,6 @@ enum QuickAction: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .meal:    "fork.knife"
-        case .camera:  "camera.fill"
         case .scanner: "barcode.viewfinder"
         case .weight:  "figure.stand"
         case .measurements: "ruler"
@@ -101,13 +98,10 @@ final class QuickActionRouter {
     /// нескольку раз в день, и вытеснить ими сканер было бы плохой сделкой.
     /// В Пункте управления такого потолка нет, и контрол на замеры есть.
     ///
-    /// Меню собирается в коде, а не в Info.plist, по двум причинам. Камера ходит в
-    /// Gemini и есть не у всех — статический пункт открывал бы пустоту. И заголовки
-    /// так берутся из общего файла переводов, а не из отдельного InfoPlist.xcstrings.
+    /// Меню собирается в коде, а не в Info.plist: так заголовки берутся из общего
+    /// файла переводов, а не из отдельного InfoPlist.xcstrings.
     func refreshShortcutItems() {
-        let available: [QuickAction] = [.meal, .camera, .scanner, .weight].filter { action in
-            action != .camera || GeminiVisionService.isConfigured
-        }
+        let available: [QuickAction] = [.meal, .scanner, .weight]
         UIApplication.shared.shortcutItems = available.map(\.shortcutItem)
     }
 }

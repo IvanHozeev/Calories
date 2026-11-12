@@ -49,7 +49,6 @@ struct AddEntryView: View {
     /// скроллим только когда последний из них добавлен.
     @State private var consumedQueryNames: Set<String> = []
     @State private var showingScanner: Bool
-    @State private var showingPhoto: Bool
     @State private var editingFood: FoodItem? = nil
     @State private var editingDish: Dish? = nil
     /// «Как обычно» — предложение usualMeal, показанное при открытии экрана из подсказки «Пора есть».
@@ -131,7 +130,6 @@ struct AddEntryView: View {
         // Камера и сканер поднимаются начальным состоянием экрана, а не записью
         // после его появления: на холодном старте такая запись успевает прийти,
         // пока экран ещё выезжает, и система её молча теряет.
-        _showingPhoto = State(initialValue: initialAction == .camera)
         _showingScanner = State(initialValue: initialAction == .scanner)
         _showingUsualMeal = State(initialValue: initialUsualMeal != nil)
         // Открываем на дне, который просили, но со временем «сейчас»: для сегодняшней
@@ -1175,14 +1173,6 @@ struct AddEntryView: View {
             // Возврат из порции — это и есть момент «ищем следующий продукт».
             .onChange(of: serving) { old, new in
                 if old != nil, new == nil { resumeSearchIfNeeded() }
-            }
-            .sheet(isPresented: $showingPhoto) {
-                PhotoMealSheet { items in
-                    // Распознанное становится обычным черновиком: дальше его
-                    // правят теми же движениями, что и введённое руками.
-                    draftItems.append(contentsOf: items)
-                }
-                .presentationDetents([.medium])
             }
             .sheet(isPresented: $showingScanner) {
                 BarcodeScannerSheet(store: store) { item in

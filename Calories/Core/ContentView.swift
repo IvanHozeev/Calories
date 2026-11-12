@@ -407,13 +407,15 @@ struct ContentView: View {
                 AddEntryView(store: store, initialAction: entryAction,
                              initialUsualMeal: initialUsualMeal,
                              onFinish: { showingAdd = false; initialUsualMeal = nil })
-                .presentationDetents([.medium, .large])
+                // Во всю высоту, без половины: приём собирают с поиском, списком
+                // и черновиком, и на половине экрана помещалась строка-две, а под
+                // листом оставался живой экран «Сегодня», который при вводе
+                // перерисовывался вместе с клавиатурой.
                 .presentationBackground(Color(.systemBackground))
             }
             .sheet(item: $appendingTo) { entry in
                 AddEntryView(store: store, appendingTo: entry,
                              onFinish: { appendingTo = nil })
-                .presentationDetents([.medium, .large])
                 .presentationBackground(Color(.systemBackground))
             }
             .sheet(item: $todaySheet) { sheet in

@@ -758,12 +758,12 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(save.waitForExistence(timeout: 10), "Продукт не попал в черновик")
 
         // Тянем лист за ручку: кнопка сохранения должна остаться на экране.
-        // Не `swipeDown`: он у ручки листа в симуляторе ничего не закрывает
-        // даже без защиты, и тест зеленел бы от любого кода. Перетаскиваем
-        // от ручки до нижней кромки экрана, как делает палец.
-        let grabber = app.buttons["Sheet Grabber"]
-        XCTAssertTrue(grabber.waitForExistence(timeout: 3), "У листа нет ручки")
-        let from = grabber.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        // Не `swipeDown`: он в симуляторе ничего не закрывает даже без защиты,
+        // и тест зеленел бы от любого кода. Перетаскиваем от верха листа до
+        // нижней кромки экрана, как делает палец. Ручки у листа во всю высоту
+        // нет, а заголовок экрана собран по-своему и как элемент не находится,
+        // поэтому берёмся за точку на уровне заголовка по координатам.
+        let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.10))
         let to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.98))
         from.press(forDuration: 0.1, thenDragTo: to)
         Thread.sleep(forTimeInterval: 1.0)

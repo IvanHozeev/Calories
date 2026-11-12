@@ -47,7 +47,18 @@ nonisolated struct Macros: Codable, Hashable {
     /// И второе условие — самого макроса должно быть хотя бы пять граммов. Иначе
     /// огурец выходит «углеводным»: девять десятых его шестнадцати калорий и
     /// правда углеводы, но богатым ими его не назовёшь.
-    var leadingKind: MacroKind? {
+    var leadingKind: MacroKind? { leading?.kind }
+
+    /// Насколько продукт насыщен своим ведущим макросом: 0 — ровно на границе
+    /// «ведущего» (половина калорий), 1 — все калории из него. Нужна, чтобы
+    /// цвет названия говорил не только «белковый», но и «насколько».
+    /// У продукта без ведущего макроса — nil.
+    var leadingSaturation: Double? {
+        guard let share = leading?.share else { return nil }
+        return min(1, max(0, (share - Self.leadingShare) / (1 - Self.leadingShare)))
+    }
+
+    private var leading: (kind: MacroKind, share: Double)? {
         let kcal = [
             (MacroKind.protein, protein * MacroTargets.kcalPerProteinGram, protein),
             (MacroKind.fat, fat * MacroTargets.kcalPerFatGram, fat),
@@ -55,8 +66,9 @@ nonisolated struct Macros: Codable, Hashable {
         ]
         let total = kcal.reduce(0) { $0 + $1.1 }
         guard total > 0, let top = kcal.max(by: { $0.1 < $1.1 }) else { return nil }
-        guard top.1 / total > Self.leadingShare, top.2 >= Self.leadingMinimumGrams else { return nil }
-        return top.0
+        let share = top.1 / total
+        guard share > Self.leadingShare, top.2 >= Self.leadingMinimumGrams else { return nil }
+        return (top.0, share)
     }
 
     static let leadingShare = 0.5

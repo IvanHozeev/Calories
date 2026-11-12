@@ -43,7 +43,7 @@ struct FoodRow: View {
         /// их приносит база продуктов по имени части.
         var traits: [FoodTrait] = []
         var id: String { name }
-        var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
+        var color: Color { macros.leadingNameColor }
     }
 
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
@@ -66,19 +66,35 @@ struct FoodRow: View {
         // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
         // его с иконками и весом — вес окажется в начале строки,
         // а имя в конце. Для латиницы и кириллицы изолятор не меняет ничего.
-        var line = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
+        //
+        // Последнее слово имени идёт отдельным куском вместе с хвостом (значки
+        // и вес): между ними только неразрывные пробелы и соединитель слов, так
+        // что хвост никогда не окажется на строке один. Перенос случается раньше,
+        // перед последним словом: «Протеин со вкусом / печенья 🌿 40 г», а не
+        // «Протеин со вкусом печенья / 🌿 40 г».
+        let words = text.split(separator: " ", omittingEmptySubsequences: false)
+        let head = words.dropLast().joined(separator: " ")
+        let last = words.last.map(String.init) ?? text
+        var line = Text("")
+        if !head.isEmpty {
+            line = Text("\u{2068}\(head)\u{2069} ").font(font).foregroundStyle(color)
+        }
+        line = line + Text("\u{2068}\(last)\u{2069}").font(font).foregroundStyle(color)
+        let glue = "\u{2060}\u{00A0}\u{00A0}\u{2060}"
         if !traits.isEmpty {
-            line = line + Text("\u{00A0}\u{00A0}")
+            line = line + Text(glue)
             for (index, trait) in traits.enumerated() {
-                if index > 0 { line = line + Text("\u{00A0}\u{00A0}") }
+                if index > 0 { line = line + Text(glue) }
                 line = line + Text(Image(systemName: trait.symbol))
                     .font(.app(.caption2, weight: .medium))
                     .foregroundStyle(trait.color)
             }
         }
         if let weight {
-            line = line + Text("\u{00A0}\u{00A0}")
-            line = line + Text(weight).font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
+            // Пробел внутри «40 г» тоже неразрывный: иначе «г» уезжает отдельно.
+            line = line + Text(glue)
+            line = line + Text(weight.replacingOccurrences(of: " ", with: "\u{00A0}"))
+                .font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
         }
         return line
     }
@@ -137,7 +153,7 @@ struct FoodRow: View {
                              font: .app(.callout, weight: .semibold),
                              // Цвет названия — цвет доминирующего макроса порции (по граммам),
                              // чтобы сразу было видно, чем продукт «кормит».
-                             color: leadingKind?.color ?? .primary.opacity(0.85),
+                             color: (leadingMacros ?? macros).leadingNameColor,
                              traits: traits,
                              weight: portion.isEmpty ? nil : portion)
                 }
@@ -191,6 +207,18 @@ struct FoodRow: View {
         // Разделитель начинается от края содержимого — там же, где полоска,
         // а не от названия, отодвинутого под неё.
         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
+    }
+}
+
+extension Macros {
+    /// Цвет названия: цвет ведущего макроса, тем гуще, чем сильнее продукт им
+    /// насыщен. Самый слабый «ведущий» читается бледнее, чистый белок или жир —
+    /// полным цветом. Без ведущего макроса — нейтральный.
+    var leadingNameColor: Color {
+        guard let kind = leadingKind, let saturation = leadingSaturation else {
+            return .primary.opacity(0.85)
+        }
+        return kind.color.opacity(0.55 + 0.45 * saturation)
     }
 }
 

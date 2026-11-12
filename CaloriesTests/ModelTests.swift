@@ -39,6 +39,31 @@ struct MacrosTests {
         #expect(Macros.zero.leadingKind == nil)
     }
 
+    // MARK: - Насыщенность ведущим макросом
+
+    @Test func pureProteinIsFullySaturated() {
+        let s = Macros(protein: 80, fat: 0, carbs: 0).leadingSaturation
+        #expect(s != nil && abs(s! - 1) < 0.0001)
+    }
+
+    @Test func aFoodJustPastHalfIsBarelySaturated() {
+        // Белок 60 ккал, жир 54 ккал, углеводов нет: доля чуть больше половины.
+        let s = Macros(protein: 15, fat: 6, carbs: 0).leadingSaturation
+        #expect(s != nil && s! > 0 && s! < 0.2)
+    }
+
+    @Test func saturationGrowsWithTheShareOfTheLeader() {
+        let weak = Macros(protein: 15, fat: 6, carbs: 0).leadingSaturation ?? 0
+        let strong = Macros(protein: 31, fat: 3.6, carbs: 0).leadingSaturation ?? 0
+        let pure = Macros(protein: 80, fat: 0, carbs: 0).leadingSaturation ?? 0
+        #expect(weak < strong && strong < pure)
+    }
+
+    @Test func aFoodWithoutALeaderHasNoSaturation() {
+        #expect(Macros(protein: 20, fat: 9, carbs: 20).leadingSaturation == nil)
+        #expect(Macros.zero.leadingSaturation == nil)
+    }
+
     // MARK: - Границы жира
 
     @Test func fatBelowTheFloorIsRaisedToIt() {

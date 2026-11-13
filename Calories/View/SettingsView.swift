@@ -388,6 +388,26 @@ struct DeveloperSettingsView: View {
                 explain("Отчёт о том, какие данные реально доезжают в «Здоровье» и от кого. Нужен перед тем, как строить на них расчёты.").map { Text($0) }
             }
 
+            // Журнал поиска — файлом через «Поделиться»: с ним на Mac считают,
+            // стала ли правка поиска лучше. Это личные данные (что человек
+            // ищет и ест), в репозиторий файл не кладётся.
+            Section {
+                if FileManager.default.fileExists(atPath: SearchEventLog.shared.fileURL.path) {
+                    ShareLink(item: SearchEventLog.shared.fileURL) {
+                        settingLabel("Выгрузить журнал поиска", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("shareSearchLog")
+                } else {
+                    Text("Журнал поиска пока пуст")
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Поиск")
+            } footer: {
+                Text(verbatim: String(format: String(localized: "Событий в журнале: %lld. Файл — по событию на строку, что показали и что выбрали."),
+                                      SearchEventLog.shared.load().count))
+            }
+
             Section {
                 TextField("Ключ USDA", text: $fdcAPIKey)
                     .textInputAutocapitalization(.never)

@@ -131,4 +131,65 @@ struct SearchReplayTests {
         let queries = SearchReplay.emptyQueries([pick("манго", "Манго", at: 0)], minCount: 1)
         #expect(queries.isEmpty)
     }
+
+    // MARK: Записи с номером захода
+
+    private func show(_ query: String, _ names: [String], at seconds: TimeInterval, session: UUID) -> SearchEvent {
+        SearchEvent(id: UUID(), query: query, shown: names.map { item($0) },
+                    selected: nil, selectedGrams: nil, timestamp: start.addingTimeInterval(seconds), session: session)
+    }
+
+    private func pick(_ query: String, _ name: String, at seconds: TimeInterval, session: UUID) -> SearchEvent {
+        SearchEvent(id: UUID(), query: query, shown: [], selected: item(name),
+                    selectedGrams: 100, timestamp: start.addingTimeInterval(seconds), session: session)
+    }
+
+    /// Быстрое добавление и «Совпадения» пишутся двумя показами одного
+    /// захода; выбор из первого не должен пропадать из-за того, что вторым
+    /// записался другой список.
+    @Test func aChoiceFindsTheShowItCameFromWithinTheSession() {
+        let id = UUID()
+        let events = [
+            show("тво", ["x", "b"], at: 0, session: id),
+            show("тво", ["c", "d"], at: 1, session: id),
+            pick("тво", "x", at: 5, session: id),
+        ]
+        let score = SearchReplay.score(events, ranker: identity)
+        #expect(score.evaluated == 1)
+        #expect(score.meanReciprocalRank == 1)
+    }
+
+    /// Номер захода связывает выбор с показом и тогда, когда запрос успел
+    /// измениться и прошло больше двух минут.
+    @Test func theSessionPairsAcrossQueryChangesAndTime() {
+        let id = UUID()
+        let events = [show("тв", ["b", "x"], at: 0, session: id), pick("творог", "x", at: 300, session: id)]
+        let score = SearchReplay.score(events, ranker: identity)
+        #expect(score.evaluated == 1)
+        #expect(score.meanReciprocalRank == 0.5)
+    }
+
+    /// Выбор продукта, которого не было ни в одном показе захода (из базы
+    /// ниже), в оценку не идёт, но и не теряется: он в `skipped`.
+    @Test func aChoiceOutsideEveryShowIsSkipped() {
+        let id = UUID()
+        let events = [show("q", ["b"], at: 0, session: id), pick("q", "x", at: 5, session: id)]
+        let score = SearchReplay.score(events, ranker: identity)
+        #expect(score.evaluated == 0)
+        #expect(score.skipped == 1)
+    }
+
+    /// Чужой заход не подходит, даже с тем же запросом.
+    @Test func anotherSessionDoesNotPair() {
+        let events = [show("q", ["x"], at: 0, session: UUID()), pick("q", "x", at: 5, session: UUID())]
+        #expect(SearchReplay.score(events, ranker: identity).skipped == 1)
+    }
+
+    /// Старый журнал без номера читается, как раньше.
+    @Test func anOldLogLineWithoutASessionStillDecodes() throws {
+        let json = #"{"id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","query":"q","shown":[],"selected":null,"selectedGrams":null,"timestamp":0}"#
+        let event = try JSONDecoder().decode(SearchEvent.self, from: Data(json.utf8))
+        #expect(event.session == nil)
+        #expect(event.query == "q")
+    }
 }

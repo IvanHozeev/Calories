@@ -35,17 +35,33 @@ enum SearchReplay {
 
     /// Сводит записи в пары.
     ///
-    /// Для каждого выбора берётся **последний** предшествующий показ с тем же
-    /// запросом, не старше `window` секунд: показ пишется на каждой паузе
-    /// набора, и выбирали из того, что стояло на экране последним.
+    /// **Записи с номером захода** (`session`) сводятся внутри своего захода:
+    /// берётся последний показ этого захода, где выбранное есть среди
+    /// показанных, а если такого нет — просто последний. На одну паузу набора
+    /// лист пишет два показа (быстрое добавление и «Совпадения»), и «просто
+    /// последний» мог оказаться не тем списком, из которого выбирали.
+    ///
+    /// **Старые записи без номера** — как в ТЗ: последний предшествующий показ
+    /// с тем же запросом, не старше `window` секунд.
     static func sessions(_ events: [SearchEvent], window: TimeInterval = 120)
         -> (paired: [Session], unpaired: Int) {
         let ordered = events.sorted { $0.timestamp < $1.timestamp }
         var lastShow: [String: SearchEvent] = [:]
+        var showsInSession: [UUID: [SearchEvent]] = [:]
         var paired: [Session] = []
         var unpaired = 0
         for event in ordered {
             if let selected = event.selected {
+                if let id = event.session {
+                    let shows = showsInSession[id] ?? []
+                    guard let show = shows.last(where: { $0.shown.contains { matches($0, selected) } })
+                            ?? shows.last else {
+                        unpaired += 1
+                        continue
+                    }
+                    paired.append(Session(query: show.query, shown: show.shown, selected: selected))
+                    continue
+                }
                 guard let show = lastShow[event.query],
                       event.timestamp.timeIntervalSince(show.timestamp) <= window else {
                     unpaired += 1
@@ -53,7 +69,11 @@ enum SearchReplay {
                 }
                 paired.append(Session(query: event.query, shown: show.shown, selected: selected))
             } else if !event.shown.isEmpty {
-                lastShow[event.query] = event
+                if let id = event.session {
+                    showsInSession[id, default: []].append(event)
+                } else {
+                    lastShow[event.query] = event
+                }
             }
         }
         return (paired, unpaired)

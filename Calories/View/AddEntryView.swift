@@ -11,6 +11,9 @@ struct AddEntryView: View {
     @State private var selectedDate: Date
     @State private var searchText = ""
     @State private var debouncedSearch = ""
+    /// Номер захода в поиск для журнала: меняется, когда строка начинается
+    /// с пустой, и общий у всех показов и выбора этого захода.
+    @State private var searchSession = UUID()
     @State private var draftItems: [MealItem] = []
     /// Спрашиваем, отбросить ли набранный приём: «Отмена» в полосе черновика
     /// стирает его целиком, и случайный тап не должен стоить собранного.
@@ -456,7 +459,8 @@ struct AddEntryView: View {
                     shown: adds.map { ShownItem(name: $0.food.name, percent: $0.percent, source: "catalog", rank: nil) },
                     selected: nil,
                     selectedGrams: nil,
-                    timestamp: Date()
+                    timestamp: Date(),
+                    session: searchSession
                 ))
 
                 withAnimation(.default) { quickAddsResult = adds }
@@ -810,6 +814,7 @@ struct AddEntryView: View {
     /// Если в запросе были граммы — пересчитываем под них, иначе порция
     /// по умолчанию блюда. Доля считается от общего веса блюда.
     private func addQuickDish(_ match: DishMatch) {
+        logChoice(match.dish.name, source: "dish", grams: match.requestedGrams)
         let grams = match.requestedGrams ?? match.dish.servingGrams
         let totalGrams = match.dish.totalGrams
         let factor = totalGrams > 0 ? grams / totalGrams : 0
@@ -835,6 +840,7 @@ struct AddEntryView: View {
 
     /// Добавить недавнюю запись дневника в черновик — один тап.
     private func addQuickMeal(_ entry: FoodEntry) {
+        logChoice(entry.name, source: "meal")
         withAnimation(.snappy) {
             draftItems.append(contentsOf: entry.components.map {
                 MealItem(name: $0.name, calories: $0.calories,
@@ -884,6 +890,7 @@ struct AddEntryView: View {
     /// Положить весь сохранённый приём в черновик — один тап, без экрана порции.
     /// Запрошенные граммы применяются к частям приёма по совпадению имён.
     private func addQuickUsualMeal(_ match: UsualMatch) {
+        logChoice(partsName(match.usual), source: "usual")
         withAnimation(.snappy) {
             draftItems.append(contentsOf: scaledParts(for: match))
         }
@@ -933,7 +940,8 @@ struct AddEntryView: View {
             shown: [],
             selected: ShownItem(name: add.food.name, percent: add.percent, source: "catalog", rank: nil),
             selectedGrams: add.grams,
-            timestamp: Date()
+            timestamp: Date(),
+            session: searchSession
         ))
 
         consumedQueryNames.insert(add.queryName)
@@ -1077,8 +1085,12 @@ struct AddEntryView: View {
                         prompt: "Поиск еды")
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
-            .onChange(of: searchText) { _, newValue in
+            .onChange(of: searchText) { oldValue, newValue in
                 wantsOnlineSearch = false
+                if oldValue.trimmingCharacters(in: .whitespaces).isEmpty,
+                   !newValue.trimmingCharacters(in: .whitespaces).isEmpty {
+                    searchSession = UUID()
+                }
                 // Новый запрос — новый контекст: сбрасываем отслеживание
                 // продуктов из разобранной фразы.
                 if newValue.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -1147,7 +1159,8 @@ struct AddEntryView: View {
                             },
                             selected: nil,
                             selectedGrams: nil,
-                            timestamp: Date()
+                            timestamp: Date(),
+                            session: searchSession
                         ))
                     }
                 }
@@ -1450,7 +1463,9 @@ struct AddEntryView: View {
         // Вчерашний приём в этот же час — первой строкой, одним касанием в
         // черновик. День повторяет день чаще, чем кажется, и в такой день
         // поиск не нужен вовсе.
-        if !isSearching, let entry = yesterdayEntry {
+        // Только пока приём пуст: начатый приём уже не «как вчера», и
+        // дальше под ним нужны «Обычно вместе» и «Недавнее».
+        if !isSearching, draftItems.isEmpty, let entry = yesterdayEntry {
             Section("Вчера в это время") {
                 quickMealRow(entry)
                     .contentShape(Rectangle())
@@ -1685,7 +1700,32 @@ struct AddEntryView: View {
 
     private func openServing(_ target: ServingTarget) {
         searchWasFocused = searchFocused
+        switch target {
+        case .food(let food, _, _, _): logChoice(food.name, source: "food")
+        case .dish(let dish):          logChoice(dish.name, source: "dish")
+        case .edit:                    break
+        }
         serving = target
+    }
+
+    /// Записать в журнал поиска, что выбрали.
+    ///
+    /// Раньше выбор писался только из быстрого добавления, и нажатия на
+    /// «Совпадения», базу или «Недавнее» для журнала не существовали — то есть
+    /// большая часть того, что человек на самом деле выбирал. Пишем только
+    /// во время поиска: выбор без запроса ничего не говорит о сортировке.
+    private func logChoice(_ name: String, percent: Double? = nil, source: String, grams: Double? = nil) {
+        let query = effectiveSearchTerm
+        guard !query.isEmpty else { return }
+        SearchEventLog.shared.log(SearchEvent(
+            id: UUID(),
+            query: query,
+            shown: [],
+            selected: ShownItem(name: name, percent: percent, source: source, rank: nil),
+            selectedGrams: grams,
+            timestamp: Date(),
+            session: searchSession
+        ))
     }
 
     /// Запрос живёт ровно до попадания продукта в приём пищи: найденное уже

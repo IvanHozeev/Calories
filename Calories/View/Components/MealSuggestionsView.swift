@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Подсказки еды под чёрновиком приёма пищи: «Как обычно», «Обычно вместе» и
-/// подбор к остатку калорий.
+/// Подсказки еды под черновиком приёма пищи: «Как обычно», пока приём пуст,
+/// и «Обычно вместе», когда в нём что-то есть.
 ///
 /// Вынесен из AddEntryView: не зависит от состояния экрана, кроме черновика
 /// и выбранных продуктов.
@@ -14,17 +14,6 @@ struct MealSuggestionsView: View {
     var onOpenPair: (MealPairs.Suggestion) -> Void
     /// Прокрутить список наверх после добавления.
     var onScrollToTop: () -> Void
-
-    /// Сколько осталось до цели ближайшего приёма.
-    private var mealRemaining: Int {
-        guard MealScheduleSettings.shared.isEnabled else { return 0 }
-        guard let next = MealSchedule.nextSlot(store.todaySlots) else { return 0 }
-        return max(0, next.calories - draftItems.reduce(0) { $0 + $1.calories })
-    }
-
-    private var suggestions: [MealSuggestions.Candidate] {
-        store.mealSuggestions(remaining: mealRemaining)
-    }
 
     /// Приёмы, которые человек собирает снова и снова, — целиком.
     private var usual: [UsualMeal.Suggestion] {
@@ -42,15 +31,6 @@ struct MealSuggestionsView: View {
         return MealSchedule.nextSlot(store.todaySlots)?.period
     }
 
-    /// Заголовок подсказок: какой это приём и сколько на него осталось.
-    private var suggestionsTitle: String {
-        guard let period = nextMealPeriod else {
-            return String(format: String(localized: "Осталось %lld ккал"), mealRemaining)
-        }
-        return String(format: String(localized: "%1$@: %2$lld ккал"),
-                      String(localized: String.LocalizationValue(period.rawValue)), mealRemaining)
-    }
-
     /// Стоит ли сказать, что в приёме мясное с молочным.
     private var showsMixingWarning: Bool {
         let settings = KosherSettings.shared
@@ -59,19 +39,10 @@ struct MealSuggestionsView: View {
     }
 
     var body: some View {
-        // Подсказка под остаток приёма — только когда приём уже begun.
-        if !draftItems.isEmpty, !suggestions.isEmpty {
-            Section {
-                ForEach(suggestions) { item in
-                    suggestionRow(item)
-                        .contentShape(Rectangle())
-                        .onTapGesture { addSuggestion(item) }
-                }
-            } header: {
-                Text(verbatim: suggestionsTitle)
-            }
-        }
-
+        // Подбора к остатку приёма («Полдник: 162 ккал») здесь больше нет.
+        // Он показывался, только когда в приёме уже что-то есть, — и ровно
+        // тогда спорил с «Обычно вместе»: два списка догадок о том, что
+        // доложить, а нужен один, построенный на том, что уже в тарелке.
         // Пока приём пуст — целиком из «как обычно».
         if draftItems.isEmpty, !usual.isEmpty {
             Section {
@@ -106,16 +77,6 @@ struct MealSuggestionsView: View {
                 .padding(.vertical, 2)
                 .accessibilityIdentifier("kosherMixing")
         }
-    }
-
-    /// Строка подсказки: что взять и сколько.
-    private func suggestionRow(_ item: MealSuggestions.Candidate) -> some View {
-        FoodRow(name: item.name,
-                calories: item.calories,
-                portion: item.parts.compactMap { part in
-                    part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
-                }.joined(separator: " · "),
-                macros: item.macros)
     }
 
     /// Кладёт в черновик то, что обычно идёт вместе.
@@ -167,14 +128,5 @@ struct MealSuggestionsView: View {
         )
     }
 
-    /// Кладёт подсказку в черновик — уже с подобранным весом.
-    private func addSuggestion(_ item: MealSuggestions.Candidate) {
-        withAnimation(.snappy) {
-            draftItems.append(contentsOf: item.parts.map {
-                MealItem(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
-            })
-        }
-        onScrollToTop()
-    }
 
 }

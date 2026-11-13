@@ -62256,6 +62256,190 @@
           }
         }
       }
+    },
+    "Выбранное первым": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chosen item first"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elegido en primer lugar"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolhido em primeiro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choix en première place"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewähltes an erster Stelle"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المختار في المرتبة الأولى"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הנבחר במקום הראשון"
+          }
+        }
+      }
+    },
+    "MRR": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MRR"
+          }
+        }
+      }
+    },
+    "Пар / мимо показанного": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pairs / outside the shown list"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pares / fuera de lo mostrado"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pares / fora do mostrado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paires / hors liste affichée"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paare / außerhalb der Anzeige"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أزواج / خارج المعروض"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "זוגות / מחוץ למוצג"
+          }
+        }
+      }
+    },
+    "Ниже: как часто выбранное стояло первым, среднее место (MRR, 1 — всегда первым) и запросы, по которым ничего не нашлось.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Below: how often the chosen item was first, its mean rank (MRR, 1 means always first) and queries that found nothing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abajo: cuántas veces lo elegido estaba primero, su posición media (MRR, 1 = siempre primero) y las búsquedas sin resultados."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abaixo: com que frequência o escolhido estava em primeiro, a posição média (MRR, 1 = sempre primeiro) e as buscas sem resultado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ci-dessous : combien de fois le choix était premier, son rang moyen (MRR, 1 = toujours premier) et les recherches sans résultat."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unten: wie oft das Gewählte vorne stand, sein mittlerer Rang (MRR, 1 = immer vorne) und Suchen ohne Treffer."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "في الأسفل: كم مرة كان المختار أولًا، ومتوسط ترتيبه (MRR، 1 = دائمًا أولًا)، والبحث الذي لم يجد شيئًا."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "למטה: כמה פעמים הנבחר היה ראשון, המקום הממוצע (MRR, 1 = תמיד ראשון) וחיפושים בלי תוצאות."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

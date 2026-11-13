@@ -425,11 +425,32 @@ struct DeveloperSettingsView: View {
                     Text("Журнал поиска пока пуст")
                         .foregroundStyle(.secondary)
                 }
+                // Число «до правок»: сортировка как есть, то есть показанный
+                // порядок. С ним сравнивают любую правку поиска — «после»
+                // считается тем же расчётом с новой сортировкой.
+                let events = SearchEventLog.shared.load()
+                let score = SearchReplay.score(events) { _, shown in shown }
+                LabeledContent("Выбранное первым") {
+                    Text(verbatim: score.evaluated == 0 ? "—" : String(format: "%.0f%%", score.top1Share * 100))
+                }
+                LabeledContent("MRR") {
+                    Text(verbatim: score.evaluated == 0 ? "—" : String(format: "%.3f", score.meanReciprocalRank))
+                }
+                LabeledContent("Пар / мимо показанного") {
+                    Text(verbatim: "\(score.evaluated) / \(score.skipped)")
+                }
+                let empty = SearchReplay.emptyQueries(events, minCount: 2).prefix(8)
+                if !empty.isEmpty {
+                    Text(verbatim: empty.map { "\($0.query) ×\($0.count)" }.joined(separator: " · "))
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                }
             } header: {
                 Text("Поиск")
             } footer: {
                 Text(verbatim: String(format: String(localized: "Событий в журнале: %lld. Файл — по событию на строку, что показали и что выбрали."),
-                                      SearchEventLog.shared.load().count))
+                                      SearchEventLog.shared.load().count)
+                     + " " + String(localized: "Ниже: как часто выбранное стояло первым, среднее место (MRR, 1 — всегда первым) и запросы, по которым ничего не нашлось."))
             }
 
             Section {

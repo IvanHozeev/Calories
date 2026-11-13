@@ -11,6 +11,9 @@ struct FoodQuantityView: View {
 
     @State private var grams: Double
     @State private var gramsText: String
+    /// Штуки — у продукта «на штуку», чей вес неизвестен. Числа продукта
+    /// введены на одну штуку, и в арифметике она — сто условных единиц.
+    @State private var pieces: Double
     @FocusState private var gramsFocused: Bool
 
     /// Открыт переходом внутри стека, а не листом. Тогда «Отмена» не нужна:
@@ -36,17 +39,29 @@ struct FoodQuantityView: View {
         let g = initialGrams ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
         _grams = State(initialValue: g)
         _gramsText = State(initialValue: "\(Int(g))")
+        _pieces = State(initialValue: food.isPerUnit ? max(0.5, (initialGrams ?? 100) / 100) : 1)
     }
 
+    /// Количество в единицах, на которые введены числа продукта: граммы или
+    /// штуки, переведённые в сотни.
+    private var amount: Double { food.isPerUnit ? pieces * 100 : grams }
+
     private var calories: Int {
-        Int((Double(food.caloriesPer100g) * grams / 100).rounded())
+        Int((Double(food.caloriesPer100g) * amount / 100).rounded())
+    }
+
+    /// Что положить в приём: у продукта «на штуку» — штуки без граммов.
+    private var mealItem: MealItem {
+        MealItem(name: food.name, calories: calories, macros: macros,
+                 grams: food.isPerUnit ? nil : grams,
+                 pieces: food.isPerUnit ? pieces : nil)
     }
 
     /// Ровно сто граммов: тогда съеденное и цена ста граммов — одно число.
-    private var isHundredGrams: Bool { abs(grams - 100) < 0.5 }
+    private var isHundredGrams: Bool { abs(amount - 100) < 0.5 }
 
     private var macros: Macros {
-        food.macrosPer100g.portion(grams: grams)
+        food.macrosPer100g.portion(grams: amount)
     }
 
     var body: some View {
@@ -67,7 +82,8 @@ struct FoodQuantityView: View {
                     // Цена ста граммов — только когда она отличается от
                     // съеденного: на ста граммах это было то же число дважды.
                     if !isHundredGrams {
-                        Text("\(food.caloriesPer100g) ккал / 100 г")
+                        Text(food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
+                                            : "\(food.caloriesPer100g) ккал / 100 г")
                             .font(.app(.caption2))
                             .foregroundStyle(.secondary)
                     }
@@ -88,6 +104,18 @@ struct FoodQuantityView: View {
                 .padding(.vertical, 6)
             }
 
+            if food.isPerUnit {
+                // Штуками, а не граммами: вес у такого продукта неизвестен.
+                // Половинками — выпил полшейка, съел полбатончика.
+                Section("Количество, шт") {
+                    Stepper(value: $pieces, in: 0.5...20, step: 0.5) {
+                        Text(verbatim: PortionLabel.text(grams: nil, pieces: pieces) ?? "")
+                            .font(.app(.body, weight: .medium))
+                            .monospacedDigit()
+                    }
+                    .accessibilityIdentifier("piecesStepper")
+                }
+            } else {
             Section("Количество, г") {
                 Stepper(value: $grams, in: 5...2000, step: 10) {
                     TextField("Граммы", text: $gramsText)
@@ -108,6 +136,7 @@ struct FoodQuantityView: View {
                             }
                         }
                 }
+            }
             }
 
         }
@@ -132,7 +161,8 @@ struct FoodQuantityView: View {
         // и экран подлагивает.
         .task {
             try? await Task.sleep(for: .milliseconds(250))
-            gramsFocused = true
+            // Штуки выбирают степпером, поля с клавиатурой нет.
+            if !food.isPerUnit { gramsFocused = true }
         }
         .navigationTitle(food.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -176,7 +206,7 @@ struct FoodQuantityView: View {
                 // Второй сценарий: не копить приём пищи, а записать продукт сразу.
                 if let onAddAndSave {
                     Button {
-                        onAddAndSave(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                        onAddAndSave(mealItem)
                     } label: {
                         Text("Сохранить")
                             .fontWeight(.semibold)
@@ -197,7 +227,7 @@ struct FoodQuantityView: View {
                     // открыт листом. В стеке за это отвечает тот, кто его
                     // открыл: со строкой поиска в нижнем тулбаре `dismiss`
                     // отсюда уносил весь лист приёма пищи, а не одну порцию.
-                    onAdd(MealItem(name: food.name, calories: calories, macros: macros, grams: grams))
+                    onAdd(mealItem)
                     if !isPushed { dismiss() }
                 } label: {
                     Text(addTitle)

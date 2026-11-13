@@ -588,6 +588,7 @@ final class CalorieStore {
             food.catalogID = item.catalogID
             food.micronutrientsAreEstimated = item.micronutrientsAreEstimated ?? false
             food.updatedAt = item.updatedAt
+            food.isPerUnit = item.isPerUnit ?? false
             context.insert(food)
         }
         for item in backup.dishes {
@@ -859,9 +860,10 @@ final class CalorieStore {
         lockPastGoals()
     }
 
-    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil) {
+    func addCustomFood(name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil, isPerUnit: Bool = false) {
         let food = FoodItem(name: name, caloriesPer100g: caloriesPer100g, protein: protein, fat: fat, carbs: carbs, defaultGrams: defaultGrams, category: category)
         food.producer = producer
+        food.isPerUnit = isPerUnit
         if !micronutrients.isEmpty { food.micronutrients = micronutrients }
         food.catalogID = catalogID
         food.micronutrientsAreEstimated = micronutrientsAreEstimated
@@ -897,9 +899,10 @@ final class CalorieStore {
         rebuildCaches()
     }
 
-    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil) {
+    func updateCustomFood(_ food: FoodItem, name: String, caloriesPer100g: Int, protein: Double, fat: Double, carbs: Double, category: FoodCategory = .other, defaultGrams: Double = 100, micronutrients: Micronutrients = Micronutrients(), catalogID: Int? = nil, micronutrientsAreEstimated: Bool = false, producer: String? = nil, isPerUnit: Bool = false) {
         let previousName = food.name
         food.producer = producer
+        food.isPerUnit = isPerUnit
         food.micronutrients = micronutrients
         food.catalogID = catalogID
         food.micronutrientsAreEstimated = micronutrientsAreEstimated

@@ -39,6 +39,8 @@ struct FoodRow: View {
         let macros: Macros
         /// Вес этой части в граммах. nil — не показываем вес.
         let grams: Double?
+        /// Штуки — у продукта «на штуку», у которого граммов нет.
+        var pieces: Double? = nil
         /// Свойства части — листик, огонёк: у записи в дневнике их нет,
         /// их приносит база продуктов по имени части.
         var traits: [FoodTrait] = []
@@ -140,9 +142,7 @@ struct FoodRow: View {
                                  font: .app(.callout, weight: .semibold),
                                  color: part.color,
                                  traits: part.traits,
-                                 weight: part.grams.flatMap {
-                                     $0 > 0 ? String(format: "%.0f \(String(localized: "г"))", $0) : nil
-                                 })
+                                 weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
                     }
                 } else {
                     // Имя, значки свойств и вес — одной строкой. Длинное имя

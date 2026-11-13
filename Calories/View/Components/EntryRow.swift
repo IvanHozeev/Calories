@@ -23,6 +23,10 @@ struct EntryRow: View {
             return String(format: "%.0f \(String(localized: "г"))", grams)
         }
         let parts = entry.components
+        // Один продукт «на штуку» — так и пишем: «1 шт».
+        if parts.count == 1, let pieces = parts[0].pieces {
+            return PortionLabel.text(grams: nil, pieces: pieces)
+        }
         guard !parts.isEmpty, parts.allSatisfy({ ($0.grams ?? 0) > 0 }) else { return nil }
         let total = parts.reduce(0.0) { $0 + ($1.grams ?? 0) }
         return String(format: "%.0f \(String(localized: "г"))", total)
@@ -49,6 +53,7 @@ struct EntryRow: View {
                 .init(name: $0.name,
                       macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
                       grams: $0.grams,
+                      pieces: $0.pieces,
                       traits: partTraits($0.name))
             }
         )

@@ -50,6 +50,10 @@ struct CaloriesBackup: Codable {
         /// Когда продукт правили. Без неё восстановленные продукты выпадали бы
         /// из «Недавнего» — приложение считало бы их никогда не тронутыми.
         let updatedAt: Date?
+        /// Продукт «на штуку»: числа выше — на одну штуку, а не на 100 г.
+        /// Необязательное, как всё новое: без него старая копия читается, а
+        /// продукт восстанавливается обычным, «на 100 г».
+        var isPerUnit: Bool? = nil
     }
 
     /// Сеанс замеров. Поля перечислены плоско, а не словарём: набор мест меняется
@@ -135,7 +139,8 @@ extension CalorieStore {
                       micronutrients: $0.micronutrients.isEmpty ? nil : $0.micronutrients,
                       catalogID: $0.catalogID,
                       micronutrientsAreEstimated: $0.micronutrientsAreEstimated ? true : nil,
-                      updatedAt: $0.updatedAt)
+                      updatedAt: $0.updatedAt,
+                      isPerUnit: $0.isPerUnit ? true : nil)
             },
             dishes: dishes.map { .init(name: $0.name, createdAt: $0.createdAt, ingredients: $0.ingredients) },
             goalHistory: goalRecords.map { .init(date: $0.date, goal: $0.goal) },

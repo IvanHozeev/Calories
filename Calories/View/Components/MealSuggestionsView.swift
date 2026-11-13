@@ -85,7 +85,7 @@ struct MealSuggestionsView: View {
             draftItems.append(contentsOf: item.parts.map {
                 MealItem(name: $0.name, calories: $0.calories,
                          macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                         grams: $0.grams)
+                         grams: $0.grams, pieces: $0.pieces)
             })
         }
         onScrollToTop()

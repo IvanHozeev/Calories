@@ -789,7 +789,7 @@ struct AddEntryView: View {
     /// Строка недавней записи дневника в быстром добавлении.
     private func quickMealRow(_ entry: FoodEntry) -> some View {
         let portions = entry.components.compactMap { part in
-            part.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+            PortionLabel.text(grams: part.grams, pieces: part.pieces)
         }
         return FoodRow(
             name: entry.name,
@@ -845,7 +845,7 @@ struct AddEntryView: View {
             draftItems.append(contentsOf: entry.components.map {
                 MealItem(name: $0.name, calories: $0.calories,
                          macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
-                         grams: $0.grams)
+                         grams: $0.grams, pieces: $0.pieces)
             })
         }
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -1391,7 +1391,7 @@ struct AddEntryView: View {
                     FoodRow(
                         name: item.name,
                         calories: item.calories,
-                        portion: item.grams.map { String(format: "%.0f \(String(localized: "г"))", $0) }
+                        portion: PortionLabel.text(grams: item.grams, pieces: item.pieces)
                             ?? String(localized: "порция"),
                         macros: item.macros
                     )
@@ -1404,7 +1404,7 @@ struct AddEntryView: View {
                     // просто не отзывается.
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        guard item.grams != nil else { return }
+                        guard item.grams != nil || item.pieces != nil else { return }
                         openServing(.edit(itemID: item.id))
                     }
                     .swipeActions(edge: .trailing) {
@@ -1652,8 +1652,9 @@ struct AddEntryView: View {
                 addToDraft(item)
             }
         case .edit(let itemID):
-            if let item = draftItems.first(where: { $0.id == itemID }), let grams = item.grams, grams > 0 {
-                FoodQuantityView(food: per100g(item, grams: grams), grams: grams,
+            if let item = draftItems.first(where: { $0.id == itemID }),
+               let amount = item.pieces.map({ $0 * 100 }) ?? item.grams, amount > 0 {
+                FoodQuantityView(food: per100g(item, grams: amount, perUnit: item.pieces != nil), grams: amount,
                                  addTitle: "Готово", isPushed: true) { edited in
                     // Правим поля на месте, а не подменяем элемент целиком: у
                     // нового `MealItem` новый идентификатор, экран порции
@@ -1665,6 +1666,7 @@ struct AddEntryView: View {
                         draftItems[index].calories = edited.calories
                         draftItems[index].macros = edited.macros
                         draftItems[index].grams = edited.grams
+                        draftItems[index].pieces = edited.pieces
                     }
                     // И закрываем сами: экран показан из этого состояния,
                     // убрать его надо тем же, чем открыли.
@@ -1677,13 +1679,18 @@ struct AddEntryView: View {
 
     /// Добавленный продукт обратно в «на 100 г», чтобы править вес тем же экраном
     /// порции. Сам продукт в приёме пищи не хранится — там уже посчитанное.
-    private func per100g(_ item: MealItem, grams: Double) -> FoodItem {
+    ///
+    /// Продукт «на штуку» возвращается «на одну штуку»: `grams` для него —
+    /// штуки, переведённые в сотни.
+    private func per100g(_ item: MealItem, grams: Double, perUnit: Bool = false) -> FoodItem {
         let factor = 100 / grams
-        return FoodItem(name: item.name,
-                        caloriesPer100g: Int((Double(item.calories) * factor).rounded()),
-                        protein: item.macros.protein * factor,
-                        fat: item.macros.fat * factor,
-                        carbs: item.macros.carbs * factor)
+        let food = FoodItem(name: item.name,
+                            caloriesPer100g: Int((Double(item.calories) * factor).rounded()),
+                            protein: item.macros.protein * factor,
+                            fat: item.macros.fat * factor,
+                            carbs: item.macros.carbs * factor)
+        food.isPerUnit = perUnit
+        return food
     }
 
     /// Типы у опциональных замыканий выписаны явно: в тернарнике прямо в списке
@@ -1762,7 +1769,8 @@ struct AddEntryView: View {
         // и всё, что считается по продуктам — «Недавнее», категории рациона,
         // клетчатка, — теряет из виду половину съеденного.
         let components = draftItems.map {
-            EntryComponent(name: $0.name, calories: $0.calories, macros: $0.macros, grams: $0.grams)
+            EntryComponent(name: $0.name, calories: $0.calories, macros: $0.macros,
+                           grams: $0.grams, pieces: $0.pieces)
         }
         if let entry = appendingTo {
             store.updateEntry(entry, name: mealName, calories: draftTotalCalories,
@@ -1828,14 +1836,19 @@ struct AddEntryView: View {
     /// Своя порция показывает калории той тарелки, которую человек на самом
     /// деле положит, и открывает экран порции уже с ней.
     private func foodRow(_ food: FoodItem) -> some View {
-        let usual = usualGrams(food)
+        // Продукт «на штуку» — одна штука: граммов у него нет, и привычная
+        // порция в граммах к нему не относится.
+        let usual = food.isPerUnit ? nil : usualGrams(food)
         let grams = usual ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
         let kcal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
-        let weight = "\(Int(grams)) \(String(localized: "г"))"
+        let weight = food.isPerUnit ? (PortionLabel.text(grams: nil, pieces: 1) ?? "")
+                                    : "\(Int(grams)) \(String(localized: "г"))"
         return FoodRow(
             name: food.name,
             calories: kcal,
-            caloriesPer100g: food.caloriesPer100g,
+            // Плотность на 100 г у продукта «на штуку» неизвестна: его число —
+            // на штуку, и по нему строка изобразила бы плотность, которой нет.
+            caloriesPer100g: food.isPerUnit ? nil : food.caloriesPer100g,
             portion: usual == nil ? weight : String(format: String(localized: "обычно %@"), weight),
             macros: food.macrosPer100g.portion(grams: grams),
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),

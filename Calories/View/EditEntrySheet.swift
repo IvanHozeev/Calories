@@ -64,8 +64,9 @@ struct EditEntrySheet: View {
                     .multilineTextAlignment(.leading)
                 // Вес известен не всегда: у распознанного по фото или
                 // записанного порцией его нет вовсе — и править там нечего.
+                // У продукта «на штуку» — штуки.
                 Text(verbatim: basis[index].grams == nil
-                     ? String(localized: "порция")
+                     ? (PortionLabel.text(grams: nil, pieces: parts[index].pieces) ?? String(localized: "порция"))
                      : String(format: "%g \(String(localized: "г"))", parts[index].grams ?? 0))
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)

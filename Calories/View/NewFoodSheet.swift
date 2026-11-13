@@ -29,6 +29,9 @@ struct NewFoodSheet: View {
     @State private var isHardCheese = false
     /// Пусто — значит обычные 100 г.
     @State private var servingGrams = ""
+    /// Пищевая ценность на одну штуку, а не на 100 г: шейк, батончик, у
+    /// которых на упаковке КБЖУ всей бутылки, а вес не указан.
+    @State private var perUnit = false
     /// Два веса для уваривания: сухое и то, что вышло.
     @State private var dryWeight = ""
     @State private var cookedWeight = ""
@@ -242,7 +245,9 @@ struct NewFoodSheet: View {
         servingGrams.decimalValueOrZero
     }
 
-    private var servingToSave: Double { servingGramsValue > 0 ? servingGramsValue : 100 }
+    /// У продукта «на штуку» порция — одна штука, то есть те самые сто
+    /// условных единиц, на которые введены числа.
+    private var servingToSave: Double { !perUnit && servingGramsValue > 0 ? servingGramsValue : 100 }
 
     private func number(_ text: String) -> Double {
         text.decimalValueOrZero
@@ -356,10 +361,11 @@ struct NewFoodSheet: View {
                         if let food = editingFood {
                             store.updateCustomFood(food, name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID ?? food.catalogID,
                                                   micronutrientsAreEstimated: linkedIsEstimate || (linkedCatalogID == nil && food.micronutrientsAreEstimated),
-                                                  producer: trimmedProducer)
+                                                  producer: trimmedProducer, isPerUnit: perUnit)
                         } else {
                             store.addCustomFood(name: name, caloriesPer100g: calories, protein: p, fat: f, carbs: c, category: category, defaultGrams: servingToSave, micronutrients: micronutrients, catalogID: linkedCatalogID,
-                                               micronutrientsAreEstimated: linkedIsEstimate, producer: trimmedProducer)
+                                               micronutrientsAreEstimated: linkedIsEstimate, producer: trimmedProducer,
+                                               isPerUnit: perUnit)
                         }
                         // Коэффициент — отдельно от остальных полей: он
                         // появляется не у всякого продукта, и проталкивать
@@ -399,6 +405,7 @@ struct NewFoodSheet: View {
                     carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
                     servingGrams = food.defaultGrams > 0 && food.defaultGrams != 100
                         ? String(format: "%g", food.defaultGrams) : ""
+                    perUnit = food.isPerUnit
                     // На экране-детали фокус не забираем: иначе клавиатура
                     // выскакивает сразу после перехода и закрывает половину экрана.
                     linkedCatalogID = food.catalogID
@@ -587,7 +594,16 @@ private extension NewFoodSheet {
     /// без единиц. Поля и полоска — одно и то же, разнесённое по двум карточкам,
     /// поэтому сведены вместе: результат видно, не отрывая глаз от полей.
     var dataSection: some View {
-    Section("Данные на 100 г") {
+    Section {
+        // На 100 г — как на любой этикетке; на штуку — когда на упаковке
+        // ценность всей бутылки, а веса нет. Тогда приём пишется штуками.
+        Picker("Данные", selection: $perUnit) {
+            Text("На 100 г").tag(false)
+            Text("На 1 шт").tag(true)
+        }
+        .pickerStyle(.segmented)
+        .accessibilityIdentifier("newFoodPerUnit")
+
         macroField("Калории", text: $caloriesPer100g, unit: "ккал",
                    keyboard: .numberPad, field: .calories)
         macroField("Белки", text: $protein, unit: "г",
@@ -613,6 +629,12 @@ private extension NewFoodSheet {
                     .font(.app(.caption))
                     .foregroundStyle(.orange)
             }
+        }
+    } header: {
+        Text(perUnit ? "Данные на 1 шт" : "Данные на 100 г")
+    } footer: {
+        if perUnit {
+            Text("Калории и БЖУ всей штуки — шейка, батончика, порции. В приём он добавляется штуками, без граммов.")
         }
     }
     }
@@ -687,12 +709,19 @@ private extension NewFoodSheet {
     } header: {
         Text("Состав с упаковки")
     } footer: {
-        explain("На сто грамм, как печатают на этикетке. Вписанное точнее любого справочника и перекрывает перенесённое.").map { Text($0) }
+        if perUnit {
+            Text("На одну штуку, как калории и БЖУ выше.")
+        } else {
+            explain("На сто грамм, как печатают на этикетке. Вписанное точнее любого справочника и перекрывает перенесённое.").map { Text($0) }
+        }
     }
     }
 
-    /// Порция по умолчанию и пересчёт на неё.
+    /// Порция по умолчанию и пересчёт на неё. У продукта «на штуку» её нет:
+    /// порция и есть одна штука.
+    @ViewBuilder
     var servingSection: some View {
+    if !perUnit {
     Section {
         HStack {
             TextField("100", text: $servingGrams)
@@ -717,6 +746,7 @@ private extension NewFoodSheet {
         Text("Порция по умолчанию")
     } footer: {
         explain("Это значение будет подставляться при добавлении продукта в приём пищи.").map { Text($0) }
+    }
     }
     }
 
@@ -769,7 +799,7 @@ private extension NewFoodSheet {
     /// Показываем только тому, что варят: у мяса «уваривание» означает потерю
     /// воды, и это другой расчёт, который мы не делаем.
     private var showsCookingSection: Bool {
-        category == .grains || category == .legumes
+        !perUnit && (category == .grains || category == .legumes)
     }
 
     /// Коэффициент по двум весам — или nil, если числа не складываются.

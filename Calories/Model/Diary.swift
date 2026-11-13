@@ -292,14 +292,19 @@ nonisolated struct EntryComponent: Codable, Equatable, Hashable {
     var fat: Double
     var carbs: Double
     var grams: Double?
+    /// Сколько штук — у продукта «на штуку», чей вес неизвестен: шейк, у
+    /// которого на бутылке КБЖУ всей бутылки. Граммов тогда нет, и выдумывать
+    /// их нельзя. Необязательное: старые записи и копии читаются без него.
+    var pieces: Double?
 
-    init(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil) {
+    init(name: String, calories: Int, macros: Macros = .zero, grams: Double? = nil, pieces: Double? = nil) {
         self.name = name
         self.calories = calories
         self.protein = macros.protein
         self.fat = macros.fat
         self.carbs = macros.carbs
         self.grams = grams
+        self.pieces = pieces
     }
 
     var macros: Macros { Macros(protein: protein, fat: fat, carbs: carbs) }
@@ -332,6 +337,21 @@ struct MealItem: Identifiable {
     var calories: Int
     var macros: Macros
     var grams: Double? = nil
+    /// Штуки — у продукта «на штуку»; граммов тогда нет.
+    var pieces: Double? = nil
+}
+
+/// Как подписать количество: граммы или штуки. nil — не известно ни то ни другое.
+enum PortionLabel {
+    static func text(grams: Double?, pieces: Double?) -> String? {
+        if let pieces, pieces > 0 {
+            let number = pieces.rounded() == pieces ? String(format: "%.0f", pieces)
+                                                    : pieces.formatted(.number.precision(.fractionLength(0...1)))
+            return String(format: String(localized: "%@ шт"), number)
+        }
+        if let grams, grams > 0 { return String(format: "%.0f \(String(localized: "г"))", grams) }
+        return nil
+    }
 }
 
 /// Запись взвешивания. Модель SwiftData.

@@ -622,6 +622,18 @@ private extension ContentView {
             // ещё ниже. Освободившееся достаётся самому знаку.
             .padding(.bottom, 30)
 
+            // Открытка в день рождения — сразу под кольцом, строкой той же
+            // высоты, что взвешивание: праздник не должен отнимать у знака
+            // дня место, которое у него на первом экране.
+            if showsBirthday {
+                SwipeToDismiss(onDismiss: {
+                    withAnimation(.snappy) { dismissedHints = DismissedHints().dismiss(birthdayID) }
+                }) {
+                    BirthdayCard(age: store.profile?.birthDate.flatMap { UserProfile.age(bornOn: $0) })
+                }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+
             // Сваренное напоминает о себе само: доесть, пока не испортилось,
             // или приготовить, пока не кончилось. Одна строка на самую
             // срочную кастрюлю — список дел по холодильнику тут не нужен.
@@ -743,7 +755,6 @@ private extension ContentView {
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
-        if showsBirthday { return true }
         if mainHint != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         return false
@@ -998,16 +1009,6 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
-            // Открытка в день рождения — над подсказками, своей карточкой.
-            if showsBirthday {
-                SwipeToDismiss(onDismiss: {
-                    withAnimation(.snappy) { dismissedHints = DismissedHints().dismiss(birthdayID) }
-                }) {
-                    BirthdayCard(age: store.profile?.birthDate.flatMap { UserProfile.age(bornOn: $0) })
-                }
-                .transition(.move(edge: .leading).combined(with: .opacity))
-            }
-
             // Одна подсказка — самая срочная из очереди. Смахивание влево
             // убирает её до завтра, и на её место встаёт следующая.
             if let hint = mainHint {

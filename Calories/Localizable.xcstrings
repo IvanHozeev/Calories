@@ -61015,94 +61015,94 @@
         }
       }
     },
-    "Сегодня тебе %lld. Ешь в удовольствие: один день не решает, решает тренд.": {
+    "С днём рождения! Тебе %lld": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You turn %lld today. Enjoy your food: one day doesn't decide anything, the trend does."
+            "value": "Happy birthday! You're %lld"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hoy cumples %lld. Come a gusto: un día no decide nada, decide la tendencia."
+            "value": "¡Feliz cumpleaños! Cumples %lld"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hoje você faz %lld. Coma com prazer: um dia não decide nada, a tendência decide."
+            "value": "Feliz aniversário! Você faz %lld"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tu as %lld ans aujourd’hui. Mange avec plaisir : un jour ne décide rien, c’est la tendance qui compte."
+            "value": "Joyeux anniversaire ! Tu as %lld ans"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Heute wirst du %lld. Iss mit Genuss: Ein Tag entscheidet nichts, der Trend schon."
+            "value": "Alles Gute! Du wirst %lld"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "عمرك اليوم %lld. استمتع بطعامك: يوم واحد لا يحسم شيئًا، الاتجاه هو ما يحسم."
+            "value": "عيد ميلاد سعيد! عمرك %lld"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "היום מלאו לך %lld. תיהנה מהאוכל: יום אחד לא מכריע, המגמה מכריעה."
+            "value": "יום הולדת שמח! מלאו לך %lld"
           }
         }
       }
     },
-    "Ешь в удовольствие: один день не решает, решает тренд.": {
+    "Один день не решает, решает тренд": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enjoy your food: one day doesn't decide anything, the trend does."
+            "value": "One day doesn't decide, the trend does"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Come a gusto: un día no decide nada, decide la tendencia."
+            "value": "Un día no decide, decide la tendencia"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Coma com prazer: um dia não decide nada, a tendência decide."
+            "value": "Um dia não decide, a tendência decide"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mange avec plaisir : un jour ne décide rien, c’est la tendance qui compte."
+            "value": "Un jour ne décide rien, la tendance si"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iss mit Genuss: Ein Tag entscheidet nichts, der Trend schon."
+            "value": "Ein Tag entscheidet nichts, der Trend schon"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "استمتع بطعامك: يوم واحد لا يحسم شيئًا، الاتجاه هو ما يحسم."
+            "value": "يوم واحد لا يحسم، الاتجاه يحسم"
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "תיהנה מהאוכל: יום אחד לא מכריע, המגמה מכריעה."
+            "value": "יום אחד לא מכריע, המגמה מכריעה"
           }
         }
       }

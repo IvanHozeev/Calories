@@ -54,7 +54,8 @@ struct DayHintRow: View {
         case .batch: return "frying.pan"
         case .backup: return "externaldrive.badge.exclamationmark"
         case .weightExplainer: return "scalemass"
-        case .dailyAdvice, .calendar: return "lightbulb.fill"
+        case .calendar: return hint.urgency == DayHint.Urgency.fastingSoon ? "moon.stars" : "calendar"
+        case .dailyAdvice: return "lightbulb.fill"
         }
     }
 

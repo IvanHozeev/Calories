@@ -199,11 +199,14 @@ extension CalorieStore {
     /// в разборе плана пишет туда пересчитанное число, и живая формула молча
     /// затирала бы её на следующем же чтении.
     /// Канун отмеченного голодания: завтра не едят, а сегодня заправляются.
+    ///
+    /// Пост до темноты кануном не делает: вечером едят, и гликоген за световой
+    /// день не кончается — поднимать норму накануне незачем.
     func isFastEve(_ date: Date) -> Bool {
         let calendar = Calendar.current
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: date))
-        else { return false }
-        return isFastDay(tomorrow)
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: date)),
+              let fast = fastDay(on: tomorrow) else { return false }
+        return fast.kind != .daytime
     }
 
     /// Насколько поднимается норма накануне голодания.

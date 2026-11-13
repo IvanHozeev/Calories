@@ -72,8 +72,13 @@ final class FastDay: Identifiable {
 
 /// Сухое голодание и голодание на воде — разные вещи, и советы к ним разные.
 /// В Йом Кипур не пьют вовсе, и «пей больше воды» там вредный совет.
+///
+/// Малые посты еврейского календаря — третий вид: без еды и воды от рассвета
+/// до темноты, а вечером едят. Норму накануне для них не поднимают — гликоген
+/// за световой день не кончается, — и выход проще. Хранится строкой, поэтому
+/// старая версия приложения прочтёт такой пост как сухой, а не потеряет его.
 enum FastKind: String, Codable, CaseIterable, Identifiable {
-    case dry, water
+    case dry, water, daytime
 
     var id: String { rawValue }
 
@@ -81,6 +86,7 @@ enum FastKind: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .dry:   return String(localized: "Сухое")
         case .water: return String(localized: "На воде")
+        case .daytime: return String(localized: "До темноты")
         }
     }
 }

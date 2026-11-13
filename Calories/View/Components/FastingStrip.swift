@@ -49,7 +49,7 @@ struct FastingStrip: View {
                                               interval.end.formatted(date: .omitted, time: .shortened)))
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
-                    } else if hint.daysUntil == 1 {
+                    } else if hint.daysUntil == 1, hint.kind != .daytime {
                         // Про поднятую норму говорим прямо: цифра в кольце
                         // сегодня другая, и человек должен знать почему.
                         Text("Норма сегодня выше — заправить гликоген перед постом")

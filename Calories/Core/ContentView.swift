@@ -36,6 +36,8 @@ struct ContentView: View {
     /// истории, поэтому не на каждой перерисовке, а когда меняются
     /// взвешивания или наступает новый день.
     @State private var weightExplanation: WeightExplainer.Explanation?
+    /// Подсказка календаря, ждущая подтверждения.
+    @State private var confirmingHint: DayHint?
     @State private var showingPlan = false
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
@@ -483,6 +485,19 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingBackupSettings) {
                 SettingsView(store: store)
             }
+            .alert(confirmingHint?.title ?? "", isPresented: Binding(
+                get: { confirmingHint != nil }, set: { if !$0 { confirmingHint = nil } }
+            )) {
+                Button("Отмена", role: .cancel) { confirmingHint = nil }
+                Button("Да") {
+                    if let hint = confirmingHint { confirm(hint) }
+                    confirmingHint = nil
+                }
+            } message: {
+                if case .markFast = confirmingHint?.action {
+                    Text("Время поста можно поправить на экране голодания.")
+                }
+            }
             // Действие с иконки может прилететь и до появления экрана (холодный
             // старт), и во время работы — забираем его в обоих случаях.
             .task { consumeQuickAction(quickActions.pending) }
@@ -784,6 +799,22 @@ private extension ContentView {
         }
         if needsBackupReminder { hints += DayHint.backup(now: now) }
         if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
+        let kosher = KosherSettings.shared
+        if kosher.observesCalendar {
+            let week = Calendar.current.date(byAdding: .day, value: 7, to: now) ?? now
+            let plan = store.plan
+            hints += DayHint.calendar(
+                JewishCalendar.events(from: now, to: week, timeZone: .current),
+                now: now, enabled: true,
+                hasFast: { store.isFastDay($0) },
+                // Рефид — только в ту же неделю плана и только если его ещё
+                // можно сюда перенести: правила переноса знает план.
+                canMoveRefeed: { day in
+                    guard let plan else { return false }
+                    return Calendar.current.isDate(Plan.weekStart(for: day), inSameDayAs: Plan.weekStart(for: now))
+                        && plan.refeedSwapDay(for: day) != nil
+                })
+        }
         return hints
     }
 
@@ -822,7 +853,19 @@ private extension ContentView {
         case .openFasting: showingFasting = true
         case .openAdd: entryAction = nil; showingAdd = true
         case .backupNow: showingBackupSettings = true
+        case .markFast, .moveRefeed: confirmingHint = mainHint
         }
+    }
+
+    /// Действие подсказки календаря — после подтверждения: оно меняет
+    /// данные, а приложение само ничего не создаёт.
+    private func confirm(_ hint: DayHint) {
+        switch hint.action {
+        case .markFast(let day): store.markCalendarFast(on: day)
+        case .moveRefeed(let day): store.moveRefeed(to: day)
+        default: break
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
     /// Вид главной подсказки. У поста, обзора и копии он свой — с часами до

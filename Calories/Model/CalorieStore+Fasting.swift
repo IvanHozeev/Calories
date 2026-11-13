@@ -100,3 +100,30 @@ extension CalorieStore {
         rebuildCaches()
     }
 }
+
+// MARK: - Посты из еврейского календаря
+
+extension CalorieStore {
+    /// Отметить пост календаря на этот день — по подтверждению человека.
+    ///
+    /// Большой пост — сухой, с вечера накануне до выхода звёзд: Йом Кипур
+    /// примерно с 17:30 до 18:45, 9 ава — с 19:30 до 20:15 (Израиль, по сезону).
+    /// Точнее без места и астрономии не посчитать, поэтому время — приближение,
+    /// и его можно поправить на экране поста. Малый пост — «до темноты», без
+    /// часов: от рассвета до темноты, отмечается целым днём.
+    @discardableResult
+    func markCalendarFast(on day: Date, timeZone: TimeZone = .current) -> FastDay? {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: day)
+        guard let event = JewishCalendar.events(from: start, to: start, timeZone: timeZone)
+            .first(where: \.isFast) else { return nil }
+        guard event.kind == .majorFast else { return markFastDay(start, kind: .daytime) }
+        let (begin, finish): ((Int, Int), (Int, Int)) = event.key == "tishaBeAv" ? ((19, 30), (20, 15))
+                                                                                  : ((17, 30), (18, 45))
+        guard let eve = calendar.date(byAdding: .day, value: -1, to: start),
+              let from = calendar.date(bySettingHour: begin.0, minute: begin.1, second: 0, of: eve),
+              let to = calendar.date(bySettingHour: finish.0, minute: finish.1, second: 0, of: start)
+        else { return nil }
+        return markFast(from: from, to: to, kind: .dry)
+    }
+}

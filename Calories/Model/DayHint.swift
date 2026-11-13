@@ -21,6 +21,10 @@ struct DayHint: Equatable, Identifiable, Sendable {
     enum Action: Equatable, Sendable {
         case openAdd, openFasting, openWeeklyReview, openPlan
         case moveRefeedToday, backupNow
+        /// Отметить пост из календаря — на этот день.
+        case markFast(Date)
+        /// Перенести рефид этой недели на праздник.
+        case moveRefeed(Date)
     }
 
     /// `<источник>:<ключ>:<yyyy-MM-dd>` — один и тот же совет в один день
@@ -173,6 +177,59 @@ struct DayHint: Equatable, Identifiable, Sendable {
                         urgency: Urgency.weightExplainer,
                         expiresAt: endOfDay(now, calendar: calendar),
                         action: nil)]
+    }
+}
+
+extension DayHint {
+    /// Подсказки еврейского календаря.
+    ///
+    /// Приложение само ничего не создаёт: за три дня до поста предлагает его
+    /// отметить, в неделю праздника — перенести на него рефид. Каждое
+    /// действие подтверждает человек.
+    ///
+    /// - Parameters:
+    ///   - enabled: календарь включён (по умолчанию выключен).
+    ///   - hasFast: есть ли уже отметка поста на этот день — тогда предлагать нечего.
+    ///   - canMoveRefeed: можно ли перенести рефид на этот день — и он в той же
+    ///     неделе плана, что сегодня. Неделя плана начинается с понедельника, а
+    ///     календарная — по обычаю страны, поэтому решает план.
+    static func calendar(_ events: [JewishCalendar.Event], now: Date, enabled: Bool,
+                         hasFast: (Date) -> Bool, canMoveRefeed: (Date) -> Bool,
+                         calendar: Calendar = .current) -> [DayHint] {
+        guard enabled else { return [] }
+        let today = calendar.startOfDay(for: now)
+        let expires = endOfDay(now, calendar: calendar)
+        var hints: [DayHint] = []
+
+        for event in events where event.isFast {
+            let days = calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: event.day)).day ?? -1
+            guard (0...3).contains(days), !hasFast(event.day) else { continue }
+            let when = event.day.formatted(.dateTime.weekday(.wide).day().month(.wide))
+            hints.append(DayHint(id: "calendar:fast-\(event.key):\(dayKey(now, calendar: calendar))",
+                                 source: .calendar,
+                                 title: String(format: String(localized: "Отметить пост: %1$@, %2$@"), event.title, when),
+                                 detail: nil,
+                                 urgency: Urgency.fastingSoon,
+                                 expiresAt: expires,
+                                 action: .markFast(event.day)))
+        }
+
+        // Праздник этой недели, на который рефид ещё можно перенести, —
+        // только первый: рефид один.
+        if let feast = events.first(where: { event in
+            event.kind == .feast && calendar.startOfDay(for: event.day) >= today
+                && canMoveRefeed(event.day)
+        }) {
+            let weekday = feast.day.formatted(.dateTime.weekday(.wide))
+            hints.append(DayHint(id: "calendar:feast-\(feast.key):\(dayKey(now, calendar: calendar))",
+                                 source: .calendar,
+                                 title: String(format: String(localized: "Перенести рефид на %1$@ (%2$@)"), feast.title, weekday),
+                                 detail: nil,
+                                 urgency: Urgency.refeed,
+                                 expiresAt: expires,
+                                 action: .moveRefeed(feast.day)))
+        }
+        return hints
     }
 }
 

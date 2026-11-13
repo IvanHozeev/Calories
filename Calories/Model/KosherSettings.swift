@@ -17,6 +17,7 @@ final class KosherSettings {
     static let afterDairyKey = "kosher_after_dairy"
     static let hardCheeseKey = "kosher_hard_cheese_like_meat"
     static let warnsMixingKey = "kosher_warns_mixing"
+    static let calendarKey = "jewish_calendar_on"
 
     @MainActor static let shared = KosherSettings()
 
@@ -40,6 +41,7 @@ final class KosherSettings {
         // хочет, чтобы приложение промолчало о курице со сливками.
         hardCheeseLikeMeat = defaults.object(forKey: Self.hardCheeseKey) as? Bool ?? true
         warnsMixing = defaults.object(forKey: Self.warnsMixingKey) as? Bool ?? true
+        observesCalendar = defaults.bool(forKey: Self.calendarKey)
     }
 
     var isEnabled: Bool { didSet { defaults.set(isEnabled, forKey: Self.enabledKey) } }
@@ -48,6 +50,9 @@ final class KosherSettings {
     var hardCheeseLikeMeat: Bool { didSet { defaults.set(hardCheeseLikeMeat, forKey: Self.hardCheeseKey) } }
     /// Говорить ли о мясном с молочным в одной тарелке.
     var warnsMixing: Bool { didSet { defaults.set(warnsMixing, forKey: Self.warnsMixingKey) } }
+    /// Посты и праздники еврейского календаря подсказками на «Сегодня».
+    /// Выключено по умолчанию: обычаи различаются, и приложение их не выбирает.
+    var observesCalendar: Bool { didSet { defaults.set(observesCalendar, forKey: Self.calendarKey) } }
 
     /// То же самое в виде, в котором это нужно счётчику.
     var custom: KosherCustom {

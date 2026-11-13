@@ -43,9 +43,11 @@ struct OnboardingView: View {
     private var backups: BackupService { .shared }
     @State private var proteinTenths = Int(UserProfile.defaultProteinPerKg * 10)
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
+    /// Кашрут и посты — одним вопросом: тема одна, и включает её тот же человек.
+    @State private var observesTradition = false
 
     enum Step: Int, CaseIterable {
-        case welcome, explanations, sex, birthday, height, weight, activity, goal, cutOptions, macros, gear, backup, health, result
+        case welcome, explanations, sex, birthday, height, weight, activity, goal, cutOptions, macros, tradition, gear, backup, health, result
     }
 
     /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
@@ -119,6 +121,7 @@ struct OnboardingView: View {
                 case .goal:       goalStep
                 case .cutOptions: cutOptionsStep
                 case .macros:     macrosStep
+                case .tradition:  traditionStep
                 case .gear:       gearStep
                 case .backup:     backupStep
                 case .health:     healthStep
@@ -578,6 +581,25 @@ struct OnboardingView: View {
         }
     }
 
+    /// Кашрут, посты и праздники — одним вопросом.
+    ///
+    /// Спрашиваем, а не прячем в настройки: человек, который их соблюдает,
+    /// иначе узнал бы о кашруте и календаре случайно. Не соблюдающему вопрос
+    /// стоит одного «Далее» — по умолчанию выбрано «Нет».
+    private var traditionStep: some View {
+        stepShell(title: "Кашрут и посты", subtitle: "Можно поменять потом в профиле") {
+            VStack(spacing: 12) {
+                selectableRow(title: String(localized: "Соблюдаю"),
+                              subtitle: String(localized: "Ожидание между мясным и молочным, посты и праздники с подсказками на «Сегодня»"),
+                              selected: observesTradition) { observesTradition = true }
+                    .accessibilityIdentifier("onboardingObservesTradition")
+                selectableRow(title: String(localized: "Нет"),
+                              subtitle: String(localized: "Ни кашрута, ни календаря"),
+                              selected: !observesTradition) { observesTradition = false }
+            }
+        }
+    }
+
     private var healthStep: some View {
         stepShell(title: "Шаги", subtitle: "Приложение только читает их из «Здоровья», ничего туда не пишет") {
             VStack(spacing: 20) {
@@ -678,6 +700,10 @@ struct OnboardingView: View {
     private func finish() {
         if !healthAsked { stepStore.deferAuthorization() }
         store.updateProfile(draftProfile)
+        if observesTradition {
+            KosherSettings.shared.isEnabled = true
+            KosherSettings.shared.observesCalendar = true
+        }
         if let plan = draftPlan {
             store.startTrialIfNeeded()
             store.startPlan(plan)

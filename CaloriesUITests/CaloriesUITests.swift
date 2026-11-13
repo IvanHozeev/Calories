@@ -216,7 +216,7 @@ final class CaloriesUITests: XCTestCase {
         let health = app.buttons["onboardingHealthAccess"]
         let maintenance = app.buttons["Maintenance"]
         var taps = 0
-        while !health.exists && taps < 12 {
+        while !health.exists && taps < 14 {
             if maintenance.exists, !maintenance.isSelected {
                 // Шаг въезжает сбоку: тап посреди перехода попадал по соседнему
                 // сегменту («Набор»), и план всё равно создавался.

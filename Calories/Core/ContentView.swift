@@ -55,7 +55,6 @@ struct ContentView: View {
     @State private var listBottomInset: CGFloat = 0
 
     /// Пробую настройки на экране Сегодня
-    @State private var showingSettings = false
 
     /// Высота первого экрана: ровно видимая часть списка.
     ///
@@ -195,9 +194,6 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showingPlan) {
                 PlanView(store: store)
-            }
-            .navigationDestination(isPresented: $showingSettings) {
-                SettingsView(store: store)
             }
             .navigationTitle("Сегодня")
             // Какое именно сегодня — в нашей же шапке, рядом с кольцом:
@@ -365,18 +361,6 @@ struct ContentView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     StepsChip(store: stepStore) { showingSteps = true }
                         .accessibilityIdentifier("steps")
-                }
-                
-                /// Настройки теперь в Сегодня, не нужно тянуться в другую табу и экран Профиля стал чище 
-                
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                    }
-                    .accessibilityLabel("Настройки")
-                    .accessibilityIdentifier("openSettings")
                 }
             }
             .background {

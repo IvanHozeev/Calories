@@ -94,6 +94,7 @@ struct ProfileView: View {
     
     /// Экран оплаты со строки «Premium» внизу профиля.
     @State private var showingPaywall = false
+    @State private var showingSettings = false
 
     /// Профиль, который получится из черновика. Опционален ради тех мест,
     /// где он читается как «есть ли что считать».
@@ -210,7 +211,24 @@ struct ProfileView: View {
         }
         // Имя секции переезжает в шапку, как в «Рационе»: список длинный, и
         // «Профиль» наверху ничего не говорит о том, где человек сейчас.
-        .tabTitle(head.current ?? String(localized: "Профиль"), rising: head.rising)
+        .tabTitle(head.current ?? String(localized: "Профиль"), trailingRoom: 44, rising: head.rising)
+        .toolbar {
+            // Настройки приложения — шестерёнкой в шапке, как у системных
+            // экранов с учётной записью. На «Сегодня» она стояла третьим
+            // значком в ряду про сегодняшний день, хотя это не про него.
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityLabel("Настройки")
+                .accessibilityIdentifier("openSettings")
+            }
+        }
+        .navigationDestination(isPresented: $showingSettings) {
+            SettingsView(store: store)
+        }
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
         }

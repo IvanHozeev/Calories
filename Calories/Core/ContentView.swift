@@ -728,12 +728,38 @@ private extension ContentView {
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
         if needsBackupReminder { return true }
-        if store.recoveryAdvice() != nil { return true }
+        if mainHint != nil { return true }
         if store.fastingHint() != nil { return true }
         if store.isPremium, store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
-        if let advice = dailyAdvice, advice != .none { return true }
         return false
+    }
+
+    /// Главная подсказка дня — одна из совета дня и сигнала «пора подъесть».
+    ///
+    /// Раньше это были две строки, и они могли говорить разное одновременно:
+    /// «сегодня перебор» над «пора перерыв в диете». Теперь выбирает
+    /// `DayHintPicker` по общей шкале срочности. Пост, обзор недели, кастрюли
+    /// и копия пока своими строками — их очередь на следующем этапе.
+    private var mainHint: DayHint? {
+        let now = Date()
+        let hints = DayHint.from(dailyAdvice ?? .none, now: now)
+            + DayHint.from(recovery: store.recoveryAdvice(now: now), now: now)
+        return DayHintPicker.pick(hints, now: now, dismissed: []).main
+    }
+
+    /// Нажатие на подсказку.
+    ///
+    /// Перенос рефида пока ведёт на экран плана, как и раньше: переносить
+    /// день одним касанием со строки — изменение данных, и оно ждёт решения о
+    /// том, как подсказку подтверждать и отклонять.
+    private func perform(_ action: DayHint.Action) {
+        switch action {
+        case .openPlan, .moveRefeedToday, .openWeeklyReview: showingPlan = true
+        case .openFasting: showingFasting = true
+        case .openAdd: entryAction = nil; showingAdd = true
+        case .backupNow: break
+        }
     }
 
     /// Тап по плитке приёма, когда пора есть: сразу добавление еды с «Как
@@ -886,29 +912,10 @@ private extension ContentView {
                 .accessibilityIdentifier("backupMissing")
             }
 
-            // Не пора ли подъесть — первой строкой.
-            //
-            // Это единственная подсказка, которая говорит остановиться, а не
-            // сделать: остальные зовут взвеситься, доесть кастрюлю, свериться
-            // с неделей. В «Профиле», под сном и пульсом, она попадалась на
-            // глаза тому, кто и так следит, — а нужна тому, кто просто живёт
-            // по норме и не видит, что норма перестала работать.
-            if let advice = store.recoveryAdvice() {
-                Button { showingPlan = true } label: {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: advice.verdict == .dietBreak
-                              ? "pause.circle" : "arrow.up.forward.circle")
-                            .foregroundStyle(ProgressRing.kcalColors[0])
-                        Text(verbatim: advice.text)
-                            .font(.app(.subheadline))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("recoveryAdvice")
+            // Одна главная подсказка: совет дня или «пора подъесть», что
+            // срочнее. Выбор — в `DayHintPicker`, а не порядком строк здесь.
+            if let hint = mainHint {
+                DayHintRow(hint: hint, onTap: hint.action.map { action in { perform(action) } })
             }
 
             // Отмеченный день голодания — не строка в настройках, а
@@ -982,25 +989,7 @@ private extension ContentView {
             // и приложение выглядело закрытым. Про банк рассказывают экран
             // плана и экран оплаты — там, где о нём уже спрашивают.
 
-            // Совет дня — одно сообщение на основе данных пользователя.
-            if let advice = dailyAdvice, advice != .none {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(.orange)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(advice.title)
-                            .font(.app(.subheadline, weight: .semibold))
-                            .foregroundStyle(.primary)
-                        Text(advice.body)
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 0)
-                }
-                .padding(.vertical, 2)
-                .accessibilityIdentifier("dailyAdvice")
-            }
+
 
         }
     }

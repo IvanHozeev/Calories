@@ -123,7 +123,30 @@ struct ProfileView: View {
 
     var body: some View {
         List {
-            // Расчёт первым: ради него профиль и открывают — сколько тратишь,
+            // Подписка — самой верхней строкой, как учётная запись в
+            // Настройках, и со словом, а не звёздочками в углу: значок без
+            // подписи не говорил, что за ним оплата.
+            Section {
+                Button { showingPaywall = true } label: {
+                    HStack {
+                        Label("Premium", systemImage: "sparkles")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        if store.isPremium {
+                            Text("Активен")
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("subscription")
+            }
+
+            // Расчёт сразу под ней: ради него профиль и открывают — сколько тратишь,
             // сколько есть и сколько белка. Параметры, из которых он собран,
             // правят редко, и им место ниже.
             calculationSection
@@ -156,29 +179,6 @@ struct ProfileView: View {
 
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
-            }
-
-            // Подписка — строкой со словом, а не звёздочками в углу: значок
-            // без подписи не говорил, что за ним оплата, и оставался
-            // загадкой ровно для того, кому она и адресована.
-            Section {
-                Button { showingPaywall = true } label: {
-                    HStack {
-                        Label("Premium", systemImage: "sparkles")
-                            .foregroundStyle(.primary)
-                        Spacer()
-                        if store.isPremium {
-                            Text("Активен")
-                                .foregroundStyle(.secondary)
-                        }
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("subscription")
             }
         }
         .sheet(isPresented: $showingBasis) {

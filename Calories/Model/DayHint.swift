@@ -216,10 +216,15 @@ extension DayHint {
             let days = calendar.dateComponents([.day], from: today, to: calendar.startOfDay(for: event.day)).day ?? -1
             guard (0...3).contains(days), !hasFast(event.day) else { continue }
             let when = event.day.formatted(.dateTime.weekday(.wide).day().month(.wide))
+            // Совет к месту — тот же, что потом покажет плашка поста: за два-три
+            // дня про кофе, накануне про соль. Нужен он раньше отметки: кофе
+            // снижают постепенно, и к дню, когда пост отметят, может быть поздно.
+            let kind: FastKind = event.kind == .majorFast ? .dry : .daytime
+            let advice = FastingAdvice.advice(for: kind, daysBefore: days).first?.text
             hints.append(DayHint(id: "calendar:fast-\(event.key):\(dayKey(now, calendar: calendar))",
                                  source: .calendar,
                                  title: String(format: String(localized: "Отметить пост: %1$@, %2$@"), event.title, when),
-                                 detail: nil,
+                                 detail: advice,
                                  urgency: Urgency.fastingSoon,
                                  expiresAt: expires,
                                  action: .markFast(event.day)))

@@ -115,6 +115,24 @@ struct JewishCalendarHintTests {
         #expect(hints.contains { if case .markFast(let day) = $0.action { return day == date(2026, 9, 21, 0) } else { return false } })
     }
 
+    /// За три дня до поста к подсказке — совет про кофе: снижать его надо
+    /// постепенно, ещё до отметки поста.
+    @Test func threeDaysAheadTheHintTalksAboutCoffee() {
+        let hint = DayHint.calendar(events, now: beforeYomKippur, enabled: true,
+                                    hasFast: { _ in false }, canMoveRefeed: { _ in false }, calendar: calendar).first
+        #expect(hint?.detail != nil)
+        #expect(hint?.detail == FastingAdvice.advice(for: .dry, daysBefore: 3).first?.text)
+    }
+
+    /// Накануне — уже совет про соль, а не про кофе.
+    @Test func theDayBeforeTheHintTalksAboutSalt() {
+        let eve = date(2026, 9, 20)
+        let hint = DayHint.calendar(events, now: eve, enabled: true,
+                                    hasFast: { _ in false }, canMoveRefeed: { _ in false }, calendar: calendar).first
+        #expect(hint?.detail == FastingAdvice.advice(for: .dry, daysBefore: 1).first?.text)
+        #expect(hint?.detail != FastingAdvice.advice(for: .dry, daysBefore: 3).first?.text)
+    }
+
     // 16
     @Test func aDisabledCalendarOffersNothing() {
         let hints = DayHint.calendar(events, now: beforeYomKippur, enabled: false,

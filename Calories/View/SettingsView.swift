@@ -400,8 +400,9 @@ struct DeveloperSettingsView: View {
                     Text(verbatim: fit.map { String(format: "%.2f", $0.rSquared) } ?? "—")
                 }
                 if let fit {
-                    Text(verbatim: zip(fit.factors, fit.coefficients)
-                        .map { "\($0.rawValue): \(String(format: "%.5f", $1))" }
+                    Text(verbatim: (["baseline: " + String(format: "%+.2f", fit.baselineKg)]
+                                    + zip(fit.factors, fit.coefficients)
+                        .map { "\($0.rawValue): \(String(format: "%.5f", $1))" })
                         .joined(separator: " · "))
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)

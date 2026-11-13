@@ -265,8 +265,10 @@ extension DayHint {
             case .afterFast: return String(localized: "день поста")
             }
         }
-        let expected = String(format: "%.1f", trendKg + forecast.residualKg)
-        let delta = String(format: "%+.1f", forecast.residualKg)
+        // Ожидаемый вес — с обычным сдвигом от тренда: на сушке утренний вес
+        // и так ниже недельного среднего, и без сдвига прогноз завышал бы.
+        let expected = String(format: "%.1f", trendKg + forecast.baselineKg + forecast.residualKg)
+        let delta = String(format: "%+.1f", forecast.baselineKg + forecast.residualKg)
         let title = String(format: String(localized: "Завтра утром, скорее всего, около %1$@ кг (%2$@ к тренду): сегодня %3$@. Это вода."),
                            expected, delta, ListFormatter.localizedString(byJoining: causes))
         let parts = calendar.dateComponents([.year, .month, .day], from: now)

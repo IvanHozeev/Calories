@@ -137,4 +137,36 @@ struct WeightExplainerTests {
         let forecast = try #require(WeightExplainer.forecast(history: history(), tonight: today(residual: 0, carbs: -150)))
         #expect(forecast.residualKg < -0.4)
     }
+
+    // MARK: Запаздывающий тренд
+
+    /// На сушке вес почти каждое утро ниже недельного среднего. Этот
+    /// постоянный сдвиг не должен мешать найти причины сверх него —
+    /// без свободного члена модель на таких данных уходила в минус.
+    @Test func aLaggingTrendDoesNotHideTheCauses() throws {
+        let lagging = history().map { day -> WeightExplainer.Day in
+            var shifted = day
+            shifted.residualKg -= 0.3
+            return shifted
+        }
+        let model = try #require(WeightExplainer.fit(history: lagging))
+        #expect(model.rSquared >= 0.5)
+        #expect(abs(model.baselineKg + 0.3) < 0.1)
+        // Сегодня +0,3 к тренду при обычных −0,3 — скачок на 0,6, и это углеводы.
+        let result = try #require(WeightExplainer.explain(history: lagging, today: today(residual: 0.62, carbs: 150)))
+        #expect(result.contributions.first?.factor == .carbs)
+    }
+
+    /// Прогноз прибавляет обычный сдвиг к ожидаемому весу, но причиной его не называет.
+    @Test func theForecastCarriesTheUsualShift() throws {
+        let lagging = history().map { day -> WeightExplainer.Day in
+            var shifted = day
+            shifted.residualKg -= 0.3
+            return shifted
+        }
+        let forecast = try #require(WeightExplainer.forecast(history: lagging, tonight: today(residual: 0, carbs: 150)))
+        #expect(abs(forecast.baselineKg + 0.3) < 0.1)
+        #expect(abs(forecast.residualKg - 0.6) <= 0.15)
+        #expect(forecast.contributions.allSatisfy { $0.factor != .afterFast })
+    }
 }

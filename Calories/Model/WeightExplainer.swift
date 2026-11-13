@@ -52,6 +52,9 @@ nonisolated enum WeightExplainer {
     struct Fit: Equatable, Sendable {
         var factors: [Factor]
         var coefficients: [Double]
+        /// Постоянный сдвиг веса от тренда, кг: тренд — среднее прошлой недели,
+        /// и на сушке вес почти всегда ниже него, на наборе — выше.
+        var baselineKg: Double
         var rSquared: Double
         var pairs: Int
     }
@@ -73,20 +76,28 @@ nonisolated enum WeightExplainer {
         factors = factors.filter { factor in rows.contains { value(factor, in: $0) != 0 } }
         guard !factors.isEmpty else { return nil }
 
-        let x = rows.map { row in factors.map { value($0, in: row) } }
+        // Со свободным членом. ТЗ предлагало модель без него, но тренд здесь —
+        // среднее прошлой недели, и он запаздывает: на сушке вес почти каждое
+        // утро ниже него. Без свободного члена этот постоянный сдвиг
+        // приходилось объяснять углеводами и солью, и на настоящих данных R²
+        // уходил в минус (−0,02 у владельца 14.11). Причины теперь объясняют
+        // только то, что сверх сдвига.
+        let x = rows.map { row in [1.0] + factors.map { value($0, in: row) } }
         let y = rows.map(\.residualKg)
-        guard let beta = leastSquares(x, y) else { return nil }
+        guard let solution = leastSquares(x, y) else { return nil }
+        let baseline = solution[0]
+        let beta = Array(solution.dropFirst())
 
-        // R² относительно среднего, а не нуля: иначе модель без свободного
-        // члена выглядела бы лучше, чем есть.
+        // R² относительно среднего: доля разброса, которую модель объясняет.
         let mean = y.reduce(0, +) / Double(y.count)
         let total = y.reduce(0) { $0 + ($1 - mean) * ($1 - mean) }
         let residual = zip(x, y).reduce(0.0) { sum, pair in
-            let fitted = zip(pair.0, beta).reduce(0) { $0 + $1.0 * $1.1 }
+            let fitted = zip(pair.0, solution).reduce(0) { $0 + $1.0 * $1.1 }
             return sum + (pair.1 - fitted) * (pair.1 - fitted)
         }
         guard total > 0 else { return nil }
-        return Fit(factors: factors, coefficients: beta, rSquared: 1 - residual / total, pairs: rows.count)
+        return Fit(factors: factors, coefficients: beta, baselineKg: baseline,
+                   rSquared: 1 - residual / total, pairs: rows.count)
     }
 
     static func explain(history: [Day], today: Day) -> Explanation? {
@@ -99,8 +110,11 @@ nonisolated enum WeightExplainer {
             Contribution(factor: factor, kg: coefficient * value(factor, in: today))
         }
         let sum = contributions.reduce(0) { $0 + $1.kg }
+        // Объяснять причинами надо то, что сверх обычного сдвига от тренда.
+        let unusual = today.residualKg - model.baselineKg
         // Причины тянут в другую сторону или объясняют меньше половины — молчим.
-        guard sum * today.residualKg > 0, abs(sum) >= abs(today.residualKg) / 2 else { return nil }
+        guard unusual * today.residualKg > 0, sum * unusual > 0,
+              abs(sum) >= abs(unusual) / 2 else { return nil }
 
         let shown = contributions
             .filter { abs($0.kg) >= minimumContributionKg && $0.kg * today.residualKg > 0 }
@@ -112,8 +126,11 @@ nonisolated enum WeightExplainer {
 
     /// Прогноз завтрашнего утра по сегодняшнему дню.
     struct Forecast: Equatable, Sendable {
-        /// Ожидаемое отклонение от тренда, кг.
+        /// Отклонение от тренда, которое дают сегодняшние причины, кг.
         var residualKg: Double
+        /// Обычный сдвиг от тренда, кг: к ожидаемому весу он прибавляется,
+        /// но причиной не называется.
+        var baselineKg: Double = 0
         /// По убыванию модуля, не больше двух.
         var contributions: [Contribution]
     }
@@ -138,7 +155,7 @@ nonisolated enum WeightExplainer {
             .sorted { abs($0.kg) > abs($1.kg) }
             .prefix(2)
         guard !shown.isEmpty else { return nil }
-        return Forecast(residualKg: sum, contributions: Array(shown))
+        return Forecast(residualKg: sum, baselineKg: model.baselineKg, contributions: Array(shown))
     }
 
     private static func value(_ factor: Factor, in day: Day) -> Double {

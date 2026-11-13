@@ -83,14 +83,23 @@ struct DayHint: Equatable, Identifiable, Sendable {
         case .weightPlateau: key = "plateau"
         case .notLogging: key = "notLogging"
         case .noDinnerYet: key = "noDinnerYet"
+        case .nothingToday: key = "nothingToday"
         }
+        // Советы про еду, которую пора записать, нажимаются и открывают
+        // добавление: по строке должно быть видно, что с ней делать.
+        let action: Action? = {
+            switch advice {
+            case .nothingToday, .noDinnerYet, .underGoal: return .openAdd
+            default: return nil
+            }
+        }()
         return [DayHint(id: "dailyAdvice:\(key):\(dayKey(now, calendar: calendar))",
                         source: .dailyAdvice,
                         title: advice.title,
                         detail: advice.body,
                         urgency: advice.priority,
                         expiresAt: endOfDay(now, calendar: calendar),
-                        action: nil)]
+                        action: action)]
     }
 
     /// Сигнал «пора подъесть» — подсказкой. «Всё как задумано» подсказки не даёт.

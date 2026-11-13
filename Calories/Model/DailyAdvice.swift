@@ -23,6 +23,12 @@ enum DailyAdvice: Equatable {
     case notLogging(days: Int)
     /// Вечер, а еды почти нет — напомнить про ужин.
     case noDinnerYet
+    /// Полдня прошло, а записей нет ни одной.
+    ///
+    /// Не «пора ужинать» и не «маловато»: при нуле записей вопрос не в том,
+    /// сколько съедено, а в том, что ничего не записано. Скорее всего, человек
+    /// ел — и записать примерно лучше, чем ждать вечера.
+    case nothingToday
     /// Нет данных для совета.
     case none
 
@@ -34,6 +40,7 @@ enum DailyAdvice: Equatable {
         case .weightPlateau: return String(localized: "Вес стоит на месте")
         case .notLogging: return String(localized: "Ты не записывал еду")
         case .noDinnerYet: return String(localized: "Вечер, а ужина ещё нет")
+        case .nothingToday: return String(localized: "Сегодня ничего не записано")
         case .none: return ""
         }
     }
@@ -52,6 +59,8 @@ enum DailyAdvice: Equatable {
             return String(format: String(localized: "%d дней нет записей. Начни с одного приёма."), days)
         case .noDinnerYet:
             return String(localized: "Пора ужинать — не пропускай приём.")
+        case .nothingToday:
+            return String(localized: "Запиши, что уже съедено, — даже примерно.")
         case .none:
             return ""
         }
@@ -75,7 +84,7 @@ enum DailyAdvice: Equatable {
         case .weightPlateau: return DayHint.Urgency.plateau
         case .overGoal: return DayHint.Urgency.overGoal
         case .notLogging: return DayHint.Urgency.notLogging
-        case .noDinnerYet: return DayHint.Urgency.noDinnerYet
+        case .noDinnerYet, .nothingToday: return DayHint.Urgency.noDinnerYet
         case .underGoal: return DayHint.Urgency.underGoal
         case .onTarget, .none: return DayHint.Urgency.onTarget
         }
@@ -171,6 +180,18 @@ struct DailyAdviceEngine {
         let hour = Calendar.current.component(.hour, from: now)
         if (18..<21).contains(hour), consumedToday < adaptedTodayGoal * 2 / 3, adaptedTodayGoal > 0 {
             candidates.append(.noDinnerYet)
+        }
+
+        // 6. Полдня прошло, записей ноль. Подменяет «пора ужинать» и
+        // «маловато»: при нуле они говорят не о том.
+        if consumedToday == 0, progress >= 0.5, adaptedTodayGoal > 0 {
+            candidates.removeAll { advice in
+                switch advice {
+                case .noDinnerYet, .underGoal: return true
+                default: return false
+                }
+            }
+            candidates.append(.nothingToday)
         }
 
         return candidates.max(by: { $0.priority < $1.priority }) ?? .none

@@ -233,8 +233,9 @@ import Foundation
     /// При пустом дне раньше писали «съедено 100% нормы».
     @Test func underGoalReportsWhatWasEatenNotWhatIsMissing() {
         // В 17:00 пора бы съесть 62%, а совет заговаривает при отставании больше
-        // 20 пунктов — значит, 42% и меньше.
-        for (eaten, percent) in [(0, 0), (300, 15), (700, 35)] {
+        // 20 пунктов — значит, 42% и меньше. Ноль записей — отдельный совет
+        // «ничего не записано» (`NothingLoggedTodayTests`), здесь его нет.
+        for (eaten, percent) in [(300, 15), (700, 35)] {
             let advice = DailyAdviceEngine.advice(
                 consumedToday: eaten, adaptedTodayGoal: 2000, macrosToday: .zero,
                 proteinTarget: nil, fatTarget: nil, carbsTarget: nil,
@@ -307,5 +308,37 @@ import Foundation
         } else {
             Issue.record("Ожидался overGoal, получено \(advice)")
         }
+    }
+}
+
+/// Пустой день: «ничего не записано» вместо «пора ужинать».
+@Suite struct NothingLoggedTodayTests {
+    private func at(_ hour: Int) -> Date {
+        Calendar.current.date(bySettingHour: hour, minute: 0, second: 0, of: Date())!
+    }
+
+    private func advice(consumed: Int, now: Date) -> DailyAdvice {
+        DailyAdviceEngine.advice(consumedToday: consumed, adaptedTodayGoal: 2700,
+                                 macrosToday: .zero, proteinTarget: nil, fatTarget: nil, carbsTarget: nil,
+                                 lastLoggedDay: Calendar.current.date(byAdding: .day, value: -1, to: now),
+                                 wakeHour: 7, sleepHour: 23, now: now)
+    }
+
+    @Test func anEmptyEveningSaysNothingIsLogged() {
+        #expect(advice(consumed: 0, now: at(20)) == .nothingToday)
+    }
+
+    @Test func anEmptyMorningSaysNothing() {
+        #expect(advice(consumed: 0, now: at(9)) == .none)
+    }
+
+    @Test func aLightEveningStillCallsForDinner() {
+        #expect(advice(consumed: 900, now: at(19)) == .noDinnerYet)
+    }
+
+    /// По строке видно, что с ней делать: она открывает добавление еды.
+    @Test func theNothingLoggedHintOpensTheAddSheet() {
+        #expect(DayHint.from(.nothingToday, now: at(20)).first?.action == .openAdd)
+        #expect(DayHint.from(.onTarget, now: at(20)).first?.action == nil)
     }
 }

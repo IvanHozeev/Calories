@@ -343,13 +343,22 @@ struct ProgressRing: View {
                 .font(.app(size: 40 * scale, weight: .bold))
                 .foregroundStyle(Color.primary)
                 .contentTransition(.numericText())
-            Text("из \(goal) ккал")
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
-            Text("съедено \(consumed)")
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                .contentTransition(.numericText())
+            // В пустой день «из 2749 ккал» и «съедено 0» повторяли число
+            // над ними: остаток и есть норма, съеденного нет. Одной строки
+            // хватает, пока не появится первая запись.
+            if consumed == 0 {
+                Text("ккал")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+            } else {
+                Text("из \(goal) ккал")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                Text("съедено \(consumed)")
+                    .font(.app(.caption2))
+                    .foregroundStyle(.tertiary)
+                    .contentTransition(.numericText())
+            }
         }
         .fitsInRing(width: inner, scale: scale))
     }

@@ -1303,12 +1303,17 @@ private struct StepsChip: View {
                     // даты в шапке и обрезалось само: «Ste…». Что это такое,
                     // пешеход говорит и молча, а для голоса есть подпись
                     // доступности ниже.
+                    //
+                    // Цветом акцента, а не серым: серый пешеход между двумя
+                    // цветными кнопками читался выключенным, хотя это
+                    // приглашение подключить шаги — то есть кнопка.
                     Image(systemName: "figure.walk")
                         .font(.app(.subheadline, weight: .medium))
+                        .foregroundStyle(tint)
                         .frame(height: 32)
                 }
             }
-            .foregroundStyle(store.isAuthorized ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
+            .foregroundStyle(.primary)
             .padding(.leading, 2)
             .padding(.trailing, 6)
         }

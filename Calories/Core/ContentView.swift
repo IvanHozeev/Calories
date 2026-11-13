@@ -837,6 +837,7 @@ private extension ContentView {
 
     /// Смахнуть подсказку до завтра: на её место встаёт следующая.
     private func dismiss(_ hint: DayHint) {
+        store.hintJournal.record(.dismissed, hint)
         withAnimation(.snappy) {
             dismissedHints = DismissedHints().dismiss(hint.id)
         }
@@ -848,6 +849,7 @@ private extension ContentView {
     /// Перенос рефида пока ведёт на экран плана, как и раньше: переносить
     /// день одним касанием со строки — изменение данных без подтверждения.
     private func perform(_ action: DayHint.Action) {
+        if let hint = mainHint { store.hintJournal.record(.accepted, hint) }
         switch action {
         case .openPlan, .moveRefeedToday, .openWeeklyReview: showingPlan = true
         case .openFasting: showingFasting = true
@@ -876,10 +878,16 @@ private extension ContentView {
         switch hint.source {
         case .fasting:
             if let fasting = store.fastingHint() {
-                FastingStrip(hint: fasting) { showingFasting = true }
+                FastingStrip(hint: fasting) {
+                    store.hintJournal.record(.accepted, hint)
+                    showingFasting = true
+                }
             }
         case .weeklyReview:
-            Button { showingPlan = true } label: {
+            Button {
+                store.hintJournal.record(.accepted, hint)
+                showingPlan = true
+            } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "calendar.badge.clock")
                         .foregroundStyle(.secondary)
@@ -908,7 +916,10 @@ private extension ContentView {
             // папка — единственное, что стоит между годом записей и пустым
             // экраном. Смахнутое возвращается завтра; уходит навсегда, как
             // только папка выбрана.
-            Button { showingBackupSettings = true } label: {
+            Button {
+                store.hintJournal.record(.accepted, hint)
+                showingBackupSettings = true
+            } label: {
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "externaldrive.badge.exclamationmark")
                         .foregroundStyle(.orange)
@@ -1059,6 +1070,9 @@ private extension ContentView {
                     hintView(hint)
                 }
                 .id(hint.id)
+                // Показ — в журнал, один раз на подсказку: журнал сам
+                // отбрасывает повтор, а перерисовок за день десятки.
+                .onAppear { store.hintJournal.record(.shown, hint) }
                 .transition(.asymmetric(insertion: .opacity, removal: .move(edge: .leading).combined(with: .opacity)))
             }
 

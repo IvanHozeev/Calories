@@ -106,6 +106,10 @@ struct CaloriesBackup: Codable {
     /// метрика нагрузки — по ней видно, в какой день человек реально
     /// наработался, а в какой просто съел больше.
     let steps: [ActivityDay]?
+    /// Журнал подсказок: что показали, на что нажали, что смахнули.
+    /// Необязательный, как всё новое здесь: старые копии без него читаются, а
+    /// восстановление из такой копии журнал на телефоне не трогает.
+    var hints: [HintJournal.Event]? = nil
 }
 
 extension CalorieStore {
@@ -149,7 +153,8 @@ extension CalorieStore {
             fastDays: fastDays.map {
                 .init(date: $0.date, kind: $0.kindRaw, startedAt: $0.startedAt, endedAt: $0.endedAt)
             },
-            steps: storedActivity.isEmpty ? nil : storedActivity
+            steps: storedActivity.isEmpty ? nil : storedActivity,
+            hints: hintJournal.events.isEmpty ? nil : hintJournal.events
         )
     }
 

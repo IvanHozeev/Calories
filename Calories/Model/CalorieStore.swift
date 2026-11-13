@@ -631,6 +631,7 @@ final class CalorieStore {
         }
         dailyGoal = backup.dailyGoal
         if let steps = backup.steps { ActivityHistory(defaults: defaults).replace(with: steps) }
+        if let hints = backup.hints { hintJournal.replace(with: hints) }
 
         refresh()
     }

@@ -60968,6 +60968,144 @@
           }
         }
       }
+    },
+    "С днём рождения!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Happy birthday!"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¡Feliz cumpleaños!"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feliz aniversário!"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Joyeux anniversaire !"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles Gute zum Geburtstag!"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عيد ميلاد سعيد!"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "יום הולדת שמח!"
+          }
+        }
+      }
+    },
+    "Сегодня тебе %lld. Ешь в удовольствие: один день не решает, решает тренд.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You turn %lld today. Enjoy your food: one day doesn't decide anything, the trend does."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoy cumples %lld. Come a gusto: un día no decide nada, decide la tendencia."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoje você faz %lld. Coma com prazer: um dia não decide nada, a tendência decide."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu as %lld ans aujourd’hui. Mange avec plaisir : un jour ne décide rien, c’est la tendance qui compte."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heute wirst du %lld. Iss mit Genuss: Ein Tag entscheidet nichts, der Trend schon."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عمرك اليوم %lld. استمتع بطعامك: يوم واحد لا يحسم شيئًا، الاتجاه هو ما يحسم."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "היום מלאו לך %lld. תיהנה מהאוכל: יום אחד לא מכריע, המגמה מכריעה."
+          }
+        }
+      }
+    },
+    "Ешь в удовольствие: один день не решает, решает тренд.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enjoy your food: one day doesn't decide anything, the trend does."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Come a gusto: un día no decide nada, decide la tendencia."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coma com prazer: um dia não decide nada, a tendência decide."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mange avec plaisir : un jour ne décide rien, c’est la tendance qui compte."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iss mit Genuss: Ein Tag entscheidet nichts, der Trend schon."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استمتع بطعامك: يوم واحد لا يحسم شيئًا، الاتجاه هو ما يحسم."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "תיהנה מהאוכל: יום אחד לא מכריע, המגמה מכריעה."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

@@ -743,6 +743,7 @@ private extension ContentView {
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
+        if showsBirthday { return true }
         if mainHint != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         return false
@@ -758,7 +759,11 @@ private extension ContentView {
     /// кольцом: это не совет, а состояние запасов.
     private var hintQueue: [DayHint] {
         let now = Date()
-        var hints = DayHint.from(dailyAdvice ?? .none, now: now)
+        // В день рождения «сегодня перебор» не говорим: этот перебор
+        // сознательный, и напоминать о нём значит испортить праздник.
+        let advice = dailyAdvice ?? .none
+        let isBirthday = store.profile?.birthDate.map { UserProfile.isBirthday(bornOn: $0, now: now) } ?? false
+        var hints = DayHint.from({ if case .overGoal = advice, isBirthday { return .none } else { return advice } }(), now: now)
             + DayHint.from(recovery: store.recoveryAdvice(now: now), now: now)
         if let fasting = store.fastingHint(now: now) {
             hints += DayHint.fasting(daysUntil: fasting.daysUntil, kind: fasting.kind.rawValue, now: now)
@@ -769,6 +774,19 @@ private extension ContentView {
         if needsBackupReminder { hints += DayHint.backup(now: now) }
         if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
         return hints
+    }
+
+    /// Сегодня день рождения, и открытку ещё не смахнули.
+    private var showsBirthday: Bool {
+        guard let birthDate = store.profile?.birthDate else { return false }
+        return UserProfile.isBirthday(bornOn: birthDate) && !dismissedHints.contains(birthdayID)
+    }
+
+    /// Номер открытки — с датой, как у подсказок: смахнутая уходит до завтра,
+    /// а через год это уже другая открытка.
+    private var birthdayID: String {
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+        return String(format: "birthday:%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
 
     private var mainHint: DayHint? {
@@ -980,6 +998,16 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
+            // Открытка в день рождения — над подсказками, своей карточкой.
+            if showsBirthday {
+                SwipeToDismiss(onDismiss: {
+                    withAnimation(.snappy) { dismissedHints = DismissedHints().dismiss(birthdayID) }
+                }) {
+                    BirthdayCard(age: store.profile?.birthDate.flatMap { UserProfile.age(bornOn: $0) })
+                }
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+
             // Одна подсказка — самая срочная из очереди. Смахивание влево
             // убирает её до завтра, и на её место встаёт следующая.
             if let hint = mainHint {

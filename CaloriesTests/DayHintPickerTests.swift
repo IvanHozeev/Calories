@@ -178,3 +178,25 @@ struct DayHintPickerTests {
         #expect(DayHint.fasting(daysUntil: 5, kind: "water", now: now).isEmpty)
     }
 }
+
+/// Открытка в день рождения: когда он сегодня.
+struct BirthdayTests {
+    private let calendar = Calendar(identifier: .gregorian)
+
+    private func date(_ y: Int, _ m: Int, _ d: Int) -> Date {
+        calendar.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+    }
+
+    @Test func theSameDayAndMonthIsTheBirthday() {
+        #expect(UserProfile.isBirthday(bornOn: date(1990, 11, 13), now: date(2026, 11, 13), calendar: calendar))
+        #expect(!UserProfile.isBirthday(bornOn: date(1990, 11, 13), now: date(2026, 11, 14), calendar: calendar))
+    }
+
+    /// Родившимся 29 февраля в невисокосный год — 28-го, в високосный — 29-го.
+    @Test func aLeapDayBirthdayFallsOnTheTwentyEighth() {
+        let leap = date(2000, 2, 29)
+        #expect(UserProfile.isBirthday(bornOn: leap, now: date(2027, 2, 28), calendar: calendar))
+        #expect(!UserProfile.isBirthday(bornOn: leap, now: date(2028, 2, 28), calendar: calendar))
+        #expect(UserProfile.isBirthday(bornOn: leap, now: date(2028, 2, 29), calendar: calendar))
+    }
+}

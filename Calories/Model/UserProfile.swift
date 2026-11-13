@@ -254,6 +254,22 @@ struct UserProfile: Codable, Equatable {
         return years
     }
 
+    /// Сегодня ли день рождения.
+    ///
+    /// Родившимся 29 февраля в невисокосный год день рождения — 28-го: иначе
+    /// у них открытка приходила бы раз в четыре года.
+    static func isBirthday(bornOn birthDate: Date, now: Date = Date(), calendar: Calendar = .current) -> Bool {
+        let born = calendar.dateComponents([.month, .day], from: birthDate)
+        let today = calendar.dateComponents([.year, .month, .day], from: now)
+        guard let month = born.month, let day = born.day else { return false }
+        if month == 2, day == 29, let year = today.year,
+           calendar.range(of: .day, in: .month,
+                          for: calendar.date(from: DateComponents(year: year, month: 2)) ?? now)?.count == 28 {
+            return today.month == 2 && today.day == 28
+        }
+        return today.month == month && today.day == day
+    }
+
     /// Границы колеса даты рождения — те же, что были у колеса возраста.
     ///
     /// Одни на онбординг и профиль: два разных диапазона означали бы, что

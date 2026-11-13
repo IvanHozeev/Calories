@@ -51,6 +51,9 @@ struct DayHintRow: View {
                 content
             }
         }
+        // Одним элементом: без этого имя наследовали значок, заголовок и
+        // пояснение по отдельности, и VoiceOver читал подсказку тремя кусками.
+        .accessibilityElement(children: .combine)
         .accessibilityIdentifier("dayHintMain")
     }
 

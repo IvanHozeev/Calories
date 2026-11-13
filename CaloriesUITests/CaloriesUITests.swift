@@ -523,6 +523,18 @@ final class CaloriesUITests: XCTestCase {
             "Кольцо (\(ring.frame)) наезжает на полоску взвешивания (\(weighIn.frame))")
     }
 
+    /// Под кольцом не больше одной главной подсказки (ТЗ-1).
+    ///
+    /// Раньше советы были отдельными строками и могли говорить разное
+    /// одновременно. Теперь их выбирает одна очередь — и строка одна.
+    @MainActor
+    func testTodayShowsAtMostOneHint() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+        let hints = app.descendants(matching: .any).matching(identifier: "dayHintMain")
+        XCTAssertLessThanOrEqual(hints.count, 1, "На «Сегодня» больше одной главной подсказки")
+    }
+
     /// Клавиатура из-под листа не трогает экран под ним.
     ///
     /// Лист с калориями поднимает клавиатуру, а она сужает безопасную область

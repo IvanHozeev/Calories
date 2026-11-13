@@ -36,6 +36,9 @@ struct ContentView: View {
     /// истории, поэтому не на каждой перерисовке, а когда меняются
     /// взвешивания или наступает новый день.
     @State private var weightExplanation: WeightExplainer.Explanation?
+    /// Прогноз на завтрашнее утро. Пересчитывается вместе с дневником: он
+    /// зависит от того, что съедено сегодня, и только вечером.
+    @State private var weightForecast: (forecast: WeightExplainer.Forecast, trendKg: Double)?
     /// Подсказка календаря, ждущая подтверждения.
     @State private var confirmingHint: DayHint?
     @State private var showingPlan = false
@@ -504,6 +507,9 @@ struct ContentView: View {
             .task(id: "\(store.weightEntries.count)|\(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970)") {
                 weightExplanation = store.weightExplanation()
             }
+            .task(id: "\(store.consumedToday)|\(store.todayEntries.count)|\(store.weightEntries.count)|\(Calendar.current.component(.hour, from: Date()))") {
+                weightForecast = store.weightForecast()
+            }
             .onChange(of: quickActions.pending) { _, action in consumeQuickAction(action) }
             // Закрытие макроса — событие, а не перекраска.
             //
@@ -799,6 +805,9 @@ private extension ContentView {
         }
         if needsBackupReminder { hints += DayHint.backup(now: now) }
         if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
+        if let weightForecast {
+            hints += DayHint.forecast(weightForecast.forecast, trendKg: weightForecast.trendKg, now: now)
+        }
         let kosher = KosherSettings.shared
         if kosher.observesCalendar {
             let week = Calendar.current.date(byAdding: .day, value: 7, to: now) ?? now

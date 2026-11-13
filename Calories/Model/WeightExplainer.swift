@@ -110,6 +110,37 @@ nonisolated enum WeightExplainer {
         return Explanation(residualKg: today.residualKg, contributions: Array(shown))
     }
 
+    /// Прогноз завтрашнего утра по сегодняшнему дню.
+    struct Forecast: Equatable, Sendable {
+        /// Ожидаемое отклонение от тренда, кг.
+        var residualKg: Double
+        /// По убыванию модуля, не больше двух.
+        var contributions: [Contribution]
+    }
+
+    /// Ниже этого прогноз — обычный разброс, говорить нечего.
+    static let minimumForecastKg = 0.4
+
+    /// Прогноз на завтрашнее утро по причинам сегодняшнего дня.
+    ///
+    /// Та же модель, что у объяснения, и те же условия молчания: истории мало
+    /// или она ничего не объясняет — молчим. Отклонение `tonight` не
+    /// используется: его ещё нет.
+    static func forecast(history: [Day], tonight: Day) -> Forecast? {
+        guard let model = fit(history: history), model.rSquared >= minimumRSquared else { return nil }
+        let contributions = zip(model.factors, model.coefficients).map { factor, coefficient in
+            Contribution(factor: factor, kg: coefficient * value(factor, in: tonight))
+        }
+        let sum = contributions.reduce(0) { $0 + $1.kg }
+        guard abs(sum) >= minimumForecastKg else { return nil }
+        let shown = contributions
+            .filter { abs($0.kg) >= minimumContributionKg && $0.kg * sum > 0 }
+            .sorted { abs($0.kg) > abs($1.kg) }
+            .prefix(2)
+        guard !shown.isEmpty else { return nil }
+        return Forecast(residualKg: sum, contributions: Array(shown))
+    }
+
     private static func value(_ factor: Factor, in day: Day) -> Double {
         switch factor {
         case .carbs: return day.carbsDeltaG

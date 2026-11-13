@@ -11,9 +11,13 @@ extension CalorieStore {
     /// За сколько часов до отбоя ужин уже поздний.
     static let lateMealHoursBeforeSleep = 3.0
 
-    /// История пар «вчера → утро» и сегодняшняя пара, если сегодня взвешивались.
+    /// История пар «вчера → утро», сегодняшняя пара (если сегодня
+    /// взвешивались) и сегодняшний день как причина завтрашнего утра — для
+    /// прогноза: его отклонение ещё неизвестно и стоит нулём, а тренд, от
+    /// которого оно будет отсчитано, — `trendTomorrow`.
     func weightExplainerInput(now: Date = Date(), sleep: Date = MealScheduleSettings.shared.sleep)
-        -> (history: [WeightExplainer.Day], today: WeightExplainer.Day?) {
+        -> (history: [WeightExplainer.Day], today: WeightExplainer.Day?,
+            tonight: WeightExplainer.Day?, trendTomorrow: Double?) {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: now)
 
@@ -73,9 +77,8 @@ extension CalorieStore {
             return max(0, hour - lateFrom)
         }
 
-        func pair(for day: Date) -> WeightExplainer.Day? {
-            guard let weight = firstWeight[day], let base = trend(before: day) else { return nil }
-            let yesterday = shift(day, -1)
+        /// Причины, которые день `yesterday` оставляет следующему утру.
+        func causes(of yesterday: Date, residual: Double) -> WeightExplainer.Day? {
             let fasted = isFastDay(yesterday)
             guard fasted || carbs(on: yesterday) != nil,
                   let carbsMean = personalMean(before: yesterday, carbs) else { return nil }
@@ -84,15 +87,42 @@ extension CalorieStore {
                       let mean = personalMean(before: yesterday, sodium) else { return nil }
                 return value - mean
             }()
-            return .init(residualKg: weight - base,
+            return .init(residualKg: residual,
                          carbsDeltaG: (carbs(on: yesterday) ?? 0) - carbsMean,
                          sodiumDeltaMg: sodiumDelta,
                          lateHours: lateHours(on: yesterday),
                          afterFast: fasted)
         }
 
+        func pair(for day: Date) -> WeightExplainer.Day? {
+            guard let weight = firstWeight[day], let base = trend(before: day) else { return nil }
+            return causes(of: shift(day, -1), residual: weight - base)
+        }
+
         let history = (1...Self.explainerWindowDays).reversed().compactMap { pair(for: shift(today, -$0)) }
-        return (history, pair(for: today))
+        let tomorrow = shift(today, 1)
+        return (history, pair(for: today), causes(of: today, residual: 0), trend(before: tomorrow))
+    }
+
+    /// Прогноз на завтрашнее утро — или nil, когда честно сказать нечего.
+    ///
+    /// Только вечером, за три часа до отбоя и позже: днём еда ещё не съедена,
+    /// и прогноз гадал бы по половине дня.
+    func weightForecast(now: Date = Date(), sleep: Date = MealScheduleSettings.shared.sleep)
+        -> (forecast: WeightExplainer.Forecast, trendKg: Double)? {
+        let calendar = Calendar.current
+        let sleepParts = calendar.dateComponents([.hour, .minute], from: sleep)
+        var sleepHour = Double(sleepParts.hour ?? 23) + Double(sleepParts.minute ?? 0) / 60
+        if sleepHour < 12 { sleepHour += 24 }
+        let nowParts = calendar.dateComponents([.hour, .minute], from: now)
+        let hour = Double(nowParts.hour ?? 0) + Double(nowParts.minute ?? 0) / 60
+        guard hour >= sleepHour - Self.lateMealHoursBeforeSleep else { return nil }
+
+        let input = weightExplainerInput(now: now, sleep: sleep)
+        guard let tonight = input.tonight, let trend = input.trendTomorrow,
+              let forecast = WeightExplainer.forecast(history: input.history, tonight: tonight)
+        else { return nil }
+        return (forecast, trend)
     }
 
     /// Объяснение сегодняшнего отклонения — или nil, когда честно сказать нечего.

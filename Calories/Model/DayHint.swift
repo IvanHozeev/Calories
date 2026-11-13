@@ -57,6 +57,8 @@ struct DayHint: Equatable, Identifiable, Sendable {
         static let noDinnerYet = 92
         static let underGoal = 91
         static let weightExplainer = 80
+        /// Справка на завтра, а не совет на сегодня.
+        static let weightForecast = 60
         static let weeklyReview = 70
         static let batch = 40
         static let onTarget = 10
@@ -239,6 +241,39 @@ extension DayHint {
                                  action: .moveRefeed(feast.day)))
         }
         return hints
+    }
+}
+
+extension DayHint {
+    /// Прогноз завтрашнего утра — подсказкой. Говорит про воду и тренд, не
+    /// про жир: это предупреждение, чтобы утренний скачок не пугал.
+    static func forecast(_ forecast: WeightExplainer.Forecast, trendKg: Double, now: Date,
+                         calendar: Calendar = .current) -> [DayHint] {
+        let up = forecast.residualKg > 0
+        let causes = forecast.contributions.map { contribution -> String in
+            switch contribution.factor {
+            case .carbs: return up ? String(localized: "углеводов больше обычного")
+                                   : String(localized: "углеводов меньше обычного")
+            case .sodium: return up ? String(localized: "соли больше обычного")
+                                    : String(localized: "соли меньше обычного")
+            case .lateMeal: return String(localized: "поздний ужин")
+            case .afterFast: return String(localized: "день поста")
+            }
+        }
+        let expected = String(format: "%.1f", trendKg + forecast.residualKg)
+        let delta = String(format: "%+.1f", forecast.residualKg)
+        let title = String(format: String(localized: "Завтра утром, скорее всего, около %1$@ кг (%2$@ к тренду): сегодня %3$@. Это вода."),
+                           expected, delta, ListFormatter.localizedString(byJoining: causes))
+        let parts = calendar.dateComponents([.year, .month, .day], from: now)
+        let day = String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+        let end = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: now)) ?? now
+        return [DayHint(id: "weightExplainer:forecast-\(up ? "up" : "down"):\(day)",
+                        source: .weightExplainer,
+                        title: title,
+                        detail: nil,
+                        urgency: Urgency.weightForecast,
+                        expiresAt: end,
+                        action: nil)]
     }
 }
 

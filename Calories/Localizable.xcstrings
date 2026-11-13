@@ -62532,6 +62532,52 @@
           }
         }
       }
+    },
+    "Завтра утром, скорее всего, около %1$@ кг (%2$@ к тренду): сегодня %3$@. Это вода.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomorrow morning, probably about %1$@ kg (%2$@ against the trend): today %3$@. It's water."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mañana por la mañana, probablemente unos %1$@ kg (%2$@ frente a la tendencia): hoy %3$@. Es agua."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amanhã de manhã, provavelmente cerca de %1$@ kg (%2$@ em relação à tendência): hoje %3$@. É água."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demain matin, probablement environ %1$@ kg (%2$@ par rapport à la tendance) : aujourd’hui %3$@. C’est de l’eau."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Morgen früh wahrscheinlich etwa %1$@ kg (%2$@ gegenüber dem Trend): heute %3$@. Das ist Wasser."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صباح الغد، على الأرجح نحو %1$@ كغ (%2$@ مقارنة بالاتجاه): اليوم %3$@. إنه ماء."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחר בבוקר, כנראה בערך %1$@ ק\"ג (%2$@ מול המגמה): היום %3$@. אלה מים."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

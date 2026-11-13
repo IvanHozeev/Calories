@@ -77,4 +77,44 @@ struct WeightExplainerStoreTests {
         #expect(hint?.title.lowercased().contains("fat") == false)
         #expect(hint?.title.contains("+0.8") == true || hint?.title.contains("+0,8") == true)
     }
+
+    /// История, где вес следует за вчерашними углеводами: 0,004 кг на грамм.
+    private func seedCarbSensitiveHistory() {
+        let deltas: [Double] = (0..<45).map { Double(($0 * 37) % 300) - 150 }   // от −150 до +150, без случайности
+        for daysAgo in stride(from: 45, through: 1, by: -1) {
+            let delta = deltas[daysAgo - 1]
+            store.add(name: "Еда", calories: 2000, macros: Macros(protein: 100, fat: 60, carbs: 200 + delta),
+                      date: at(13, daysAgo: daysAgo))
+        }
+        for daysAgo in stride(from: 44, through: 0, by: -1) {
+            let yesterdayDelta = deltas[daysAgo]       // день daysAgo+1
+            store.addWeight(80 + 0.004 * yesterdayDelta, date: at(7, daysAgo: daysAgo))
+        }
+    }
+
+    /// Днём прогноза нет: еда ещё не съедена.
+    @Test func noForecastDuringTheDay() {
+        seedCarbSensitiveHistory()
+        store.add(name: "Паста", calories: 900, macros: Macros(protein: 30, fat: 20, carbs: 350), date: at(12, daysAgo: 0))
+        #expect(store.weightForecast(now: at(14, daysAgo: 0), sleep: at(23, daysAgo: 0)) == nil)
+    }
+
+    /// Вечером, за три часа до отбоя, — прогноз по съеденному сегодня.
+    @Test func anEveningForecastFollowsTodaysCarbs() throws {
+        seedCarbSensitiveHistory()
+        store.add(name: "Паста", calories: 900, macros: Macros(protein: 30, fat: 20, carbs: 350), date: at(12, daysAgo: 0))
+        let result = try #require(store.weightForecast(now: at(20, 30, daysAgo: 0), sleep: at(23, daysAgo: 0)))
+        #expect(result.forecast.residualKg > 0.4)
+        #expect(result.forecast.contributions.first?.factor == .carbs)
+        #expect(abs(result.trendKg - 80) < 0.5)
+    }
+
+    /// Строка говорит про воду и называет ожидаемый вес.
+    @Test func theForecastHintNamesTheWeightAndWater() {
+        let forecast = WeightExplainer.Forecast(residualKg: 0.6, contributions: [.init(factor: .carbs, kg: 0.6)])
+        let hint = DayHint.forecast(forecast, trendKg: 80.3, now: Date()).first
+        #expect(hint?.urgency == DayHint.Urgency.weightForecast)
+        #expect(hint?.title.contains("80.9") == true || hint?.title.contains("80,9") == true)
+        #expect(hint?.title.lowercased().contains("fat") == false)
+    }
 }

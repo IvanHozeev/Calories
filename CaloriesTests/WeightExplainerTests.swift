@@ -108,4 +108,33 @@ struct WeightExplainerTests {
         let b = WeightExplainer.explain(history: history(), today: today(residual: 0.62, carbs: 150))
         #expect(a == b)
     }
+
+    // MARK: Прогноз на завтра (5.3)
+
+    /// Сегодня на 150 г углеводов больше обычного — завтра около +0,6 кг.
+    @Test func tonightsCarbsForecastTomorrowsJump() throws {
+        let forecast = try #require(WeightExplainer.forecast(history: history(), tonight: today(residual: 0, carbs: 150)))
+        #expect(abs(forecast.residualKg - 0.6) <= 0.15)
+        #expect(forecast.contributions.first?.factor == .carbs)
+    }
+
+    /// Обычный день — прогноза нет: разброс меньше порога.
+    @Test func anOrdinaryDayForecastsNothing() {
+        #expect(WeightExplainer.forecast(history: history(), tonight: today(residual: 0, carbs: 20)) == nil)
+    }
+
+    /// Модель на истории ничего не объясняет — молчим и про завтра.
+    @Test func noForecastFromNoise() {
+        #expect(WeightExplainer.forecast(history: history(noiseOnly: true), tonight: today(residual: 0, carbs: 150)) == nil)
+    }
+
+    @Test func noForecastFromAShortHistory() {
+        #expect(WeightExplainer.forecast(history: history(days: 20), tonight: today(residual: 0, carbs: 150)) == nil)
+    }
+
+    /// Прогноз вниз тоже бывает: день поста или мало углеводов.
+    @Test func aLowCarbDayForecastsADrop() throws {
+        let forecast = try #require(WeightExplainer.forecast(history: history(), tonight: today(residual: 0, carbs: -150)))
+        #expect(forecast.residualKg < -0.4)
+    }
 }

@@ -52,6 +52,7 @@ struct DayHint: Equatable, Identifiable, Sendable {
         static let refeed = 93
         static let noDinnerYet = 92
         static let underGoal = 91
+        static let weightExplainer = 80
         static let weeklyReview = 70
         static let batch = 40
         static let onTarget = 10
@@ -145,6 +146,33 @@ struct DayHint: Equatable, Identifiable, Sendable {
                  urgency: Urgency.weeklyReview,
                  expiresAt: endOfDay(now, calendar: calendar),
                  action: .openWeeklyReview)]
+    }
+
+    /// Объяснение веса — подсказкой. Говорит «похоже на воду» и никогда не
+    /// говорит про жир; тренд называет прежним.
+    static func weight(_ explanation: WeightExplainer.Explanation, now: Date,
+                       calendar: Calendar = .current) -> [DayHint] {
+        let up = explanation.residualKg > 0
+        let causes = explanation.contributions.map { contribution -> String in
+            switch contribution.factor {
+            case .carbs: return up ? String(localized: "углеводов больше обычного")
+                                   : String(localized: "углеводов меньше обычного")
+            case .sodium: return up ? String(localized: "соли больше обычного")
+                                    : String(localized: "соли меньше обычного")
+            case .lateMeal: return String(localized: "поздний ужин")
+            case .afterFast: return String(localized: "день поста")
+            }
+        }
+        let kg = String(format: "%+.1f", explanation.residualKg)
+        let title = String(format: String(localized: "%1$@ кг к тренду: вчера %2$@. Похоже на воду, тренд прежний."),
+                           kg, ListFormatter.localizedString(byJoining: causes))
+        return [DayHint(id: "weightExplainer:\(up ? "up" : "down"):\(dayKey(now, calendar: calendar))",
+                        source: .weightExplainer,
+                        title: title,
+                        detail: nil,
+                        urgency: Urgency.weightExplainer,
+                        expiresAt: endOfDay(now, calendar: calendar),
+                        action: nil)]
     }
 }
 

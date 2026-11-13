@@ -53,7 +53,8 @@ struct DayHintRow: View {
         case .weeklyReview: return "calendar.badge.clock"
         case .batch: return "frying.pan"
         case .backup: return "externaldrive.badge.exclamationmark"
-        case .dailyAdvice, .weightExplainer, .calendar: return "lightbulb.fill"
+        case .weightExplainer: return "scalemass"
+        case .dailyAdvice, .calendar: return "lightbulb.fill"
         }
     }
 

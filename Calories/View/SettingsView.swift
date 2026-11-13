@@ -388,6 +388,30 @@ struct DeveloperSettingsView: View {
                 explain("Отчёт о том, какие данные реально доезжают в «Здоровье» и от кого. Нужен перед тем, как строить на них расчёты.").map { Text($0) }
             }
 
+            // Проверка объяснителя веса на настоящей истории: ТЗ требует
+            // показать владельцу R² и число пар. Ниже 0,2 строка про вес на
+            // «Сегодня» не появляется — расчёт молчит сам.
+            Section {
+                let fit = WeightExplainer.fit(history: store.weightExplainerInput().history)
+                LabeledContent("Пар «вчера → утро»") {
+                    Text(verbatim: "\(store.weightExplainerInput().history.count)")
+                }
+                LabeledContent("R²") {
+                    Text(verbatim: fit.map { String(format: "%.2f", $0.rSquared) } ?? "—")
+                }
+                if let fit {
+                    Text(verbatim: zip(fit.factors, fit.coefficients)
+                        .map { "\($0.rawValue): \(String(format: "%.5f", $1))" }
+                        .joined(separator: " · "))
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Объяснитель веса")
+            } footer: {
+                Text("Нужен 21 день пар и R² не ниже 0,2 — иначе строка про вес на «Сегодня» не показывается.")
+            }
+
             // Журнал поиска — файлом через «Поделиться»: с ним на Mac считают,
             // стала ли правка поиска лучше. Это личные данные (что человек
             // ищет и ест), в репозиторий файл не кладётся.

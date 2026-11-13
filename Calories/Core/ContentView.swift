@@ -32,6 +32,10 @@ struct ContentView: View {
     /// Настройки копии — с подсказки «Копий дневника нет». Шестерёнки на
     /// «Сегодня» больше нет, а настройки копии нужны прямо отсюда.
     @State private var showingBackupSettings = false
+    /// Почему вес сегодня отклонился от тренда. Считается по полугоду
+    /// истории, поэтому не на каждой перерисовке, а когда меняются
+    /// взвешивания или наступает новый день.
+    @State private var weightExplanation: WeightExplainer.Explanation?
     @State private var showingPlan = false
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
@@ -482,6 +486,9 @@ struct ContentView: View {
             // Действие с иконки может прилететь и до появления экрана (холодный
             // старт), и во время работы — забираем его в обоих случаях.
             .task { consumeQuickAction(quickActions.pending) }
+            .task(id: "\(store.weightEntries.count)|\(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970)") {
+                weightExplanation = store.weightExplanation()
+            }
             .onChange(of: quickActions.pending) { _, action in consumeQuickAction(action) }
             // Закрытие макроса — событие, а не перекраска.
             //
@@ -760,6 +767,7 @@ private extension ContentView {
             hints += DayHint.weeklyReview(proposal: proposal, now: now)
         }
         if needsBackupReminder { hints += DayHint.backup(now: now) }
+        if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
         return hints
     }
 

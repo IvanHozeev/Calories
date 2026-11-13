@@ -5,12 +5,12 @@ import SwiftUI
 /// Вместо огонька в тулбаре и отдельного экрана активности. Туда заходили ради
 /// одного — посмотреть вчерашний день, — а доходили через серию, награды и
 /// неделю макросов. Теперь прошедший день в одно нажатие прямо с главного
-/// экрана, а полная история — за кнопкой в конце полоски.
+/// экрана. Отдельного экрана истории больше нет: дальние дни — свайпом.
 ///
 /// Именно окна по семь дней до сегодня, а не недели с понедельника: в понедельник
 /// календарная неделя начиналась бы с пустого сегодня, и вчера в ней не было бы.
 /// Прошлые недели — свайпом вправо.
-/// Один день в полоске и в сетке месяца.
+/// Один день в полоске.
 ///
 /// Типом, а не кортежем: к дате, записям и попаданию в норму добавилась сама
 /// норма, и кортеж из четырёх полей читался уже хуже, чем выглядел.
@@ -63,8 +63,6 @@ struct WeekStrip: View {
     /// Недели от давней к текущей, по семь дней в каждой.
     let weeks: [[DayMark]]
     var onSelect: (Date) -> Void
-    /// История: итог недели и все прошедшие дни.
-    var onShowAll: () -> Void
 
     private let calendar = Calendar.current
 
@@ -96,37 +94,25 @@ struct WeekStrip: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-                // Листается целыми неделями: свободный скролл вставал бы
-                // посередине и резал неделю пополам. Открывается на текущей.
-                ScrollView(.horizontal) {
-                    LazyHStack(spacing: 0) {
-                        ForEach(weeks.indices, id: \.self) { index in
-                            HStack(spacing: 0) {
-                                ForEach(weeks[index], id: \.date) { day in
-                                    dayCell(day)
-                                }
-                            }
-                            .containerRelativeFrame(.horizontal)
+        // Листается целыми неделями: свободный скролл вставал бы посередине
+        // и резал неделю пополам. Открывается на текущей.
+        ScrollView(.horizontal) {
+            LazyHStack(spacing: 0) {
+                ForEach(weeks.indices, id: \.self) { index in
+                    HStack(spacing: 0) {
+                        ForEach(weeks[index], id: \.date) { day in
+                            dayCell(day)
                         }
                     }
-                    .scrollTargetLayout()
+                    .containerRelativeFrame(.horizontal)
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollIndicators(.hidden)
-                .defaultScrollAnchor(.trailing)
-                .frame(height: rowHeight)
-
-                Button(action: onShowAll) {
-                    Image(systemName: "calendar")
-                        .font(.app(.subheadline))
-                        .foregroundStyle(.tertiary)
-                        .frame(width: 30, height: 44)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("История")
-                .accessibilityIdentifier("allDays")
+            }
+            .scrollTargetLayout()
         }
+        .scrollTargetBehavior(.paging)
+        .scrollIndicators(.hidden)
+        .defaultScrollAnchor(.trailing)
+        .frame(height: rowHeight)
     }
 
     /// Сокращение дня недели с заглавной: «Пн», «Вт», «Ср».
@@ -178,15 +164,6 @@ struct WeekStrip: View {
                     .font(.app(.subheadline, weight: isToday ? .bold : .regular))
                     .monospacedDigit()
                     .foregroundStyle(isToday ? .primary : .secondary)
-                // Знак сразу под числом дня, а съеденное под ним: вердикт
-                // относится к дню, а не к числу калорий, и стоять он должен
-                // рядом с тем, о чём говорит.
-                //
-                // Условием, а не прозрачным кружком: `if` без ветки не
-                // занимает в стопке ничего, даже отбивки, — а кружок в пять
-                // точек с отбивкой по обе стороны разводил число и калории
-                // на девять точек пустоты.
-                if day.verdict == .over || day.verdict == .under { verdictMark(day.verdict) }
                 if showsEaten {
                     // Не мельче подписи дня недели и не бледнее её: десятым
                     // кеглем в третьей ступени серого число не читалось вовсе,
@@ -215,6 +192,11 @@ struct WeekStrip: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
+                // Знак под съеденным, а не над ним: число читается первым, а
+                // знак его поясняет — больше нормы или меньше. Условием, а не
+                // прозрачной заглушкой: `if` без ветки не занимает в стопке
+                // ничего, даже отбивки, а заглушка разводила бы строки.
+                if day.verdict == .over || day.verdict == .under { verdictMark(day.verdict) }
             }
             .frame(maxWidth: .infinity, minHeight: rowHeight)
             .contentShape(Rectangle())

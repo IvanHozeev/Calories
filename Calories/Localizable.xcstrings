@@ -7293,52 +7293,6 @@
         }
       }
     },
-    "В цели": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ضمن الهدف"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Im Ziel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On target"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En objetivo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dans l'objectif"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ביעד"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Na meta"
-          }
-        }
-      }
-    },
     "В этом сеансе ничего не снято": {
       "localizations": {
         "ar": {
@@ -19228,52 +19182,6 @@
         }
       }
     },
-    "Здесь появятся прошедшие дни": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ستظهر الأيام السابقة هنا"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vergangene Tage erscheinen hier"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Past days will appear here"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aquí aparecerán los días anteriores"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les jours passés apparaîtront ici"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ימים קודמים יופיעו כאן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os dias anteriores aparecerão aqui"
-          }
-        }
-      }
-    },
     "Знаменатель костный и не меняется, поэтому рост отношения — это именно набранные дельты и широчайшие. Плечи/талия растут и от одной сушки, здесь так не схитрить.": {
       "localizations": {
         "ar": {
@@ -22053,52 +21961,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Qual peso?"
-          }
-        }
-      }
-    },
-    "Календарь": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "التقويم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kalender"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendar"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendario"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendrier"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "לוח שנה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calendário"
           }
         }
       }
@@ -25859,52 +25721,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fora do horário"
-          }
-        }
-      }
-    },
-    "Мимо цели": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "خارج الهدف"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ziel verfehlt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Off target"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fuera del objetivo"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hors objectif"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מחוץ ליעד"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fora da meta"
           }
         }
       }
@@ -44745,53 +44561,6 @@
         }
       }
     },
-    "Раз в неделю приложение показывает, что посчитало, и спрашивает. До ответа держит прежнюю.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "مرة كل أسبوع يعرض التطبيق ما حسبه ويسأل. وحتى تجيب يبقي على القديم."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Einmal pro Woche zeigt die App ihre Rechnung und fragt nach. Bis zur Antwort bleibt der alte Wert."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Once a week the app shows what it worked out and asks. Until you answer it keeps the old one."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Una vez por semana la app muestra lo que calculó y pregunta. Hasta que respondas mantiene el anterior."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Une fois par semaine, l'app montre ce qu'elle a calculé et demande. Tant que tu n'as pas répondu, elle garde l'ancien."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פעם בשבוע האפליקציה מראה מה חישבה ושואלת. עד שתענה היא שומרת על הקודם."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uma vez por semana o app mostra o que calculou e pergunta. Até você responder, mantém a anterior."
-          }
-        }
-      }
-    },
     "Раз в сутки приложение само кладёт копию дневника в выбранную папку. Выбирай папку в iCloud Drive: она лежит отдельно от приложения и переживёт его удаление, а папка внутри приложения удалится вместе с ним.": {
       "localizations": {
         "ar": {
@@ -50778,52 +50547,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dormiu %@ h em média. No déficit essa é a economia mais cara: mais fome, menos força e peso parado por mais tempo."
-          }
-        }
-      }
-    },
-    "Список": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "قائمة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Liste"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "List"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lista"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Liste"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "רשימה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lista"
           }
         }
       }
@@ -60901,6 +60624,52 @@
           "stringUnit": {
             "state": "translated",
             "value": "פעיל"
+          }
+        }
+      }
+    },
+    "Раз в неделю — итог: сколько ел, куда пошёл вес и какую норму предлагает план. До твоего ответа держится прежняя.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once a week, a summary: what you ate on average, where your weight went and what target the plan suggests. Until you answer, the old one stays."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una vez por semana, un resumen: cuánto comiste, hacia dónde fue el peso y qué objetivo propone el plan. Hasta que respondas, se mantiene el anterior."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma vez por semana, um resumo: quanto você comeu, para onde foi o peso e que meta o plano sugere. Até você responder, a anterior se mantém."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une fois par semaine, un bilan : ce que tu as mangé en moyenne, où va ton poids et quel objectif le plan propose. Tant que tu n’as pas répondu, l’ancien reste."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einmal pro Woche ein Rückblick: was du im Schnitt gegessen hast, wohin das Gewicht geht und welches Ziel der Plan vorschlägt. Bis zu deiner Antwort bleibt das alte."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرة في الأسبوع ملخّص: كم أكلت في المتوسط، وإلى أين يتجه وزنك، وما الحصة التي تقترحها الخطة. وحتى تردّ تبقى الحصة السابقة."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פעם בשבוע — סיכום: כמה אכלת בממוצע, לאן הולך המשקל ואיזה יעד התוכנית מציעה. עד שתענה נשאר היעד הקודם."
           }
         }
       }

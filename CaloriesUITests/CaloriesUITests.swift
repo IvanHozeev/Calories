@@ -394,7 +394,6 @@ final class CaloriesUITests: XCTestCase {
         // настройка — показывать на нём нечего. Готовый план за той же
         // полоской проверяет `testPlanEditorOpensFromTheToolbar`.
         visit("planStrip", expecting: "New plan", in: app)
-        visit("allDays", expecting: "History", in: app)
     }
 
     /// Всё, что открывается из «Настроек», включая отладочные экраны:

@@ -46,6 +46,14 @@ struct PlanView: View {
                 adherenceSection(plan: plan, adherence: adherence)
             }
 
+            // Итог недели — сразу под вердиктом: вердикт говорит, идёт ли
+            // план, итог — из чего это сложилось за последние семь дней и
+            // какую норму план предлагает дальше. Это часть Premium, как и
+            // сам план, и сюда ведёт строка «Недельный обзор» с «Сегодня».
+            if store.planOutcome == nil {
+                WeekReviewView(store: store).sections
+            }
+
             if store.planOutcome == nil, let plan = store.plan, plan.phases.contains(where: { $0.intent == .cut }) {
                 dietBreakSection(plan)
             }

@@ -21,7 +21,6 @@ struct ContentView: View {
     }
     @State private var showingMeasurements = false
     /// Экран истории: календарь месяца, за кнопкой в конце полоски недели.
-    @State private var showingActivity = false
     @State private var selectedHistoryDay: Date?
     @State private var showingDayNutrition = false
     @State private var showingSteps = false
@@ -452,9 +451,6 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingDayNutrition) {
                 DayNutritionView(store: store)
             }
-            .navigationDestination(isPresented: $showingActivity) {
-                ActivityView(store: store)
-            }
             .navigationDestination(item: $selectedHistoryDay) { date in
                 DayDetailView(store: store, date: date)
             }
@@ -543,8 +539,7 @@ private extension ContentView {
             // потянуть список вверх, — так же, как это делает поиск в списке
             // чатов. Прокрутка её толкает, а не обходит.
             WeekStrip(weeks: store.weekStripWeeks(),
-                      onSelect: { selectedHistoryDay = $0 },
-                      onShowAll: { showingActivity = true })
+                      onSelect: { selectedHistoryDay = $0 })
 
             // Подсказки — отдельной строкой сразу под первым экраном:
             // свою высоту они берут у дневника, а не у кольца.
@@ -735,7 +730,7 @@ private extension ContentView {
         if needsBackupReminder { return true }
         if store.recoveryAdvice() != nil { return true }
         if store.fastingHint() != nil { return true }
-        if store.reviewIsDue, store.proposedGoal != nil { return true }
+        if store.isPremium, store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         if let advice = dailyAdvice, advice != .none { return true }
         return false
@@ -934,8 +929,8 @@ private extension ContentView {
             // Недельный обзор зовёт только когда есть о чём говорить:
             // прошла неделя с прошлого раза, и расчёт разошёлся с нормой
             // заметнее полусотни килокалорий. Без повода строки нет.
-            if store.reviewIsDue, let proposal = store.proposedGoal {
-                Button { showingActivity = true } label: {
+            if store.isPremium, store.reviewIsDue, let proposal = store.proposedGoal {
+                Button { showingPlan = true } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "calendar.badge.clock")
                             .foregroundStyle(.secondary)

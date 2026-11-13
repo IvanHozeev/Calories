@@ -183,7 +183,7 @@ struct WeekStrip: View {
                 // занимает в стопке ничего, даже отбивки, — а кружок в пять
                 // точек с отбивкой по обе стороны разводил число и калории
                 // на девять точек пустоты.
-                if day.verdict == .over { overDot }
+                if day.verdict == .over || day.verdict == .under { overDot }
                 if showsEaten {
                     // Не мельче подписи дня недели и не бледнее её: десятым
                     // кеглем в третьей ступени серого число не читалось вовсе,
@@ -201,7 +201,14 @@ struct WeekStrip: View {
                         // День с перебором — красным, вместе с точкой под
                         // числом: тогда перебор виден по самому числу, а не
                         // по пятну под ним, которое ещё надо соотнести.
-                        .foregroundStyle(day.verdict == .over ? ProgressRing.overColors[0] : ProgressRing.kcalColors[0])
+                        //
+                        // Недобор — так же, как перебор. На дефиците тысяча
+                        // вместо двух с половиной — не «уложился», а дыра,
+                        // которую потом закрывают срывом, и зелёным она
+                        // читалась как успех. Какой из двух промахов —
+                        // видно по самому числу.
+                        .foregroundStyle(day.verdict == .over || day.verdict == .under
+                                         ? ProgressRing.overColors[0] : ProgressRing.kcalColors[0])
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }

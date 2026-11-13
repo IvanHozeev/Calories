@@ -662,7 +662,10 @@ private extension ContentView {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
                 .buttonStyle(.plain)
-            } else if !store.hasWeighedToday {
+            } else if !store.hasWeighedToday,
+                      // Только утром: вечерний вес выше на съеденное за день
+                      // и тренд только сбивает. Из «+» взвеситься можно всегда.
+                      WeighInWindow.isOpen(now: Date(), wakeHour: hourOfDay(mealSchedule.wake)) {
                 Button {
                     todaySheet = .weight
                 } label: {
@@ -750,8 +753,8 @@ private extension ContentView {
         if store.fastingHint() != nil { return true }
         if store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
-        if dailyAdvice != nil, dailyAdvice != .none { return true }
-        return !store.isPremium && store.plan == nil
+        if let advice = dailyAdvice, advice != .none { return true }
+        return false
     }
 
     /// Тап по плитке приёма, когда пора есть: сразу добавление еды с «Как
@@ -994,21 +997,11 @@ private extension ContentView {
                     )
                     .presentationCompactAdaptation(.popover)
                 }
-            } else if !store.isPremium && store.plan == nil {
-                Button { showingPaywall = true } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "lock.fill")
-                            .foregroundStyle(.secondary)
-                        Text("Банк калорий")
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.app(.caption))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(.ultraThinMaterial, in: Capsule())
-                }
-                .buttonStyle(.plain)
             }
+            // Замка «Банк калорий» здесь больше нет: в центре первого экрана
+            // новый человек видел платную функцию, смысла которой ещё не знал,
+            // и приложение выглядело закрытым. Про банк рассказывают экран
+            // плана и экран оплаты — там, где о нём уже спрашивают.
 
             // Совет дня — одно сообщение на основе данных пользователя.
             if let advice = dailyAdvice, advice != .none {
@@ -1037,7 +1030,19 @@ private extension ContentView {
     /// Съеденное за день: приёмы пищи по порядку, в каждом свои строки.
     @ViewBuilder
     var diarySections: some View {
-        if store.todayEntries.isEmpty {
+        if store.todayEntries.isEmpty, let usual = store.usualMealNow() {
+            // В пустой день вместо пустоты — то, что обычно едят в этот час,
+            // и запись одним касанием. Значок лотка ничего не предлагал, а
+            // день, который человек начинает с привычного завтрака, не должен
+            // начинаться с поиска.
+            Section {
+                UsualMealOffer(usual: usual,
+                               period: MealPeriod.period(for: Date())) {
+                    _ = MealReminders.logUsualMeal(period: MealPeriod.period(for: Date()), store: store)
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                }
+            }
+        } else if store.todayEntries.isEmpty {
         Section {
             // Пустой лоток и есть сообщение: подпись «пока ничего не
             // добавлено» повторяла его словами, а читать её было незачем.

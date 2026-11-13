@@ -92,7 +92,7 @@ struct ProfileView: View {
     }
     
     
-    /// Лист взвешивания с кнопки в тулбаре.
+    /// Экран оплаты со строки «Premium» внизу профиля.
     @State private var showingPaywall = false
 
     /// Профиль, который получится из черновика. Опционален ради тех мест,
@@ -157,6 +157,29 @@ struct ProfileView: View {
             if let draftProfile, store.dailyGoal > 0 {
                 macroBudgetSection(draftProfile)
             }
+
+            // Подписка — строкой со словом, а не звёздочками в углу: значок
+            // без подписи не говорил, что за ним оплата, и оставался
+            // загадкой ровно для того, кому она и адресована.
+            Section {
+                Button { showingPaywall = true } label: {
+                    HStack {
+                        Label("Premium", systemImage: "sparkles")
+                            .foregroundStyle(.primary)
+                        Spacer()
+                        if store.isPremium {
+                            Text("Активен")
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("subscription")
+            }
         }
         .sheet(isPresented: $showingBasis) {
             CalculationBasisSheet(store: store, activityLevel: $draft.activityLevel)
@@ -187,21 +210,7 @@ struct ProfileView: View {
         }
         // Имя секции переезжает в шапку, как в «Рационе»: список длинный, и
         // «Профиль» наверху ничего не говорит о том, где человек сейчас.
-        .tabTitle(head.current ?? String(localized: "Профиль"), trailingRoom: 60, rising: head.rising)
-        .toolbar {
-            // Подписка — отсюда, а не своей вкладкой внизу.
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingPaywall = true
-                } label: {
-                    Image(systemName: store.isPremium ? "checkmark.seal.fill" : "sparkles")
-                        .foregroundStyle(store.isPremium ? .green : .blue)
-                }
-                .accessibilityIdentifier("subscription")
-                .accessibilityLabel(store.isPremium ? "Premium активен" : "Оформить Premium")
-            }
-        }
+        .tabTitle(head.current ?? String(localized: "Профиль"), rising: head.rising)
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
         }

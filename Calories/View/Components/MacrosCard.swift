@@ -22,9 +22,8 @@ struct MacrosCard: View {
     let weightKg: Double?
     /// Макросы, которые отстают от темпа дня.
     ///
-    /// Тогда подпись плитки становится призывом добрать: это те же
-    /// сообщения, что раньше стояли отдельными строками в хвосте экрана, —
-    /// но рядом с самим числом, из которого они и посчитаны.
+    /// Тогда в углу плитки появляется стрелка цвета макроса, а подпись
+    /// остаётся названием: показатель не теряет имя, пока отстаёт.
     var behindMacros: Set<MacroKind> = []
     /// Открыть разбор дня. Раньше на карточке жили три всплывающих окошка —
     /// по одному на макрос. Их приходилось открывать по очереди, сравнить их
@@ -91,12 +90,17 @@ struct MacrosCard: View {
 
     private func macroTile(_ kind: MacroKind, value: Double) -> some View {
         let isBehind = behindMacros.contains(kind)
-        return tile(title: isBehind ? kind.shortageTitle : kind.title,
+        // Подпись — всегда название. Пока отставание меняло её на «Добавь
+        // белка», показатель терял имя, а оранжевый цвет призыва совпадал с
+        // цветом жиров. Отставание теперь отдельным значком цвета самого
+        // макроса, а призыв словами — у голоса.
+        return tile(title: kind.title,
                     value: value,
                     target: target(for: kind),
                     color: kind.color,
                     isLeading: focus == kind,
-                    isHint: isBehind,
+                    hint: isBehind ? (symbol: kind == .carbs ? "arrow.up" : "arrow.down",
+                                      label: kind.shortageTitle) : nil,
                     gymDay: kind == .carbs ? gymDayName : nil,
                     // Имя — одной плитке, а не всем четырём.
                     //
@@ -124,7 +128,8 @@ struct MacrosCard: View {
     /// бы «не ел», а на деле мы просто не знаем — клетчатку отдаёт не всякий
     /// источник.
     private func tile(title: String, value: Double?, target: Double?,
-                      color: Color, isLeading: Bool, isHint: Bool = false,
+                      color: Color, isLeading: Bool,
+                      hint: (symbol: String, label: String)? = nil,
                       gymDay: String? = nil,
                       prefix: String? = nil, identifier: String? = nil) -> some View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
@@ -134,10 +139,7 @@ struct MacrosCard: View {
                     .font(.app(.caption2))
                     // Подпись ведущего макроса — его цветом: приложение
                     // подсказывает, куда смотреть, не добавляя ни строчки.
-                    // Призыв добавить макрос — оранжевым: это просьба, а не
-                    // отчёт, и она не должна читаться как ещё одна подпись.
-                    .foregroundStyle(isHint ? Color.orange
-                                     : (isLeading ? color : Color.secondary.opacity(0.6)))
+                    .foregroundStyle(isLeading ? color : Color.secondary.opacity(0.6))
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
 
@@ -177,12 +179,23 @@ struct MacrosCard: View {
             .padding(.vertical, 10)
             .frame(height: TodayTile.height)
             .overlay(alignment: .topTrailing) {
-                if let gymDay {
-                    GymAccent(color: color)
-                        .padding(.top, 9)
-                        .padding(.trailing, 11)
-                        .accessibilityLabel(Text(verbatim: gymDay))
+                HStack(spacing: 6) {
+                    // Отставание — стрелкой цвета самого макроса: вниз —
+                    // недобор белка или жира, вверх — углеводы сверх нормы.
+                    if let hint {
+                        Image(systemName: hint.symbol)
+                            .font(.app(.caption2, weight: .bold))
+                            .foregroundStyle(color)
+                            .accessibilityLabel(Text(verbatim: hint.label))
+                            .accessibilityIdentifier("macroBehind")
+                    }
+                    if let gymDay {
+                        GymAccent(color: color)
+                            .accessibilityLabel(Text(verbatim: gymDay))
+                    }
                 }
+                .padding(.top, 9)
+                .padding(.trailing, 11)
             }
             .contentShape(RoundedRectangle(cornerRadius: 18))
             // Стекло, собранное руками: заливка, кант и тень. Почему не

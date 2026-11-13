@@ -57,6 +57,9 @@ struct PlanStrip: View {
     }
 
     private var tileValue: String {
+        // Подписью — что внутри: «Открыть» не говорило, что откроется.
+        // «14 дней бесплатно» сюда не пишем: такой пробный период включает
+        // только онбординг, а экран оплаты, куда ведёт плитка, его не даёт.
         if !store.isPremium { return String(localized: "Персональный план") }
         if store.planOutcome != nil { return String(localized: "План завершён") }
         guard let plan = store.plan else {
@@ -76,7 +79,7 @@ struct PlanStrip: View {
     }
 
     private var tileCaption: String? {
-        guard store.isPremium else { return String(localized: "Открыть") }
+        guard store.isPremium else { return String(localized: "Срок до цели и норма по дням") }
         if store.planOutcome != nil { return String(localized: "посмотри итог") }
         guard let plan = store.plan else { return nil }
         return String(format: String(localized: "Неделя %d из %d"),
@@ -84,7 +87,8 @@ struct PlanStrip: View {
     }
 
     private var icon: String {
-        if !store.isPremium { return "lock.fill" }
+        // Не замок: с ним первый экран бесплатного выглядел закрытым.
+        if !store.isPremium { return "target" }
         if store.planOutcome != nil { return "flag.checkered" }
         guard let plan = store.plan else { return "target" }
         // Во время брейка вес о плане не говорит — бокалы, а не треугольник.

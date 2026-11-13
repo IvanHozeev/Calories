@@ -81,6 +81,12 @@ struct AddEntryView: View {
     /// вводе, а не при каждом рендере. Иначе поиск подлагивает на длинной
     /// истории дневника.
     @State private var usualMatchesCache: [UsualMatch] = []
+    /// Привычные порции продуктов по истории — считаются один раз при
+    /// открытии: история за время листа не меняется, а строк продуктов
+    /// в базе сотни, и считать для каждой заново было бы дорого.
+    @State private var usualPortions: [String: Double] = [:]
+    /// Что ели вчера около этого часа — первой строкой листа.
+    @State private var yesterdayEntry: FoodEntry?
     @State private var dishMatchesCache: [DishMatch] = []
     @State private var mealMatchesCache: [FoodEntry] = []
     @State private var entryMatchesCache: [FoodEntry] = []
@@ -975,7 +981,7 @@ struct AddEntryView: View {
                     case .food(let food, let savable):
                         foodRow(food)
                             .contentShape(Rectangle())
-                            .onTapGesture { openServing(.food(food, grams: nil, savable: savable, quickSave: true)) }
+                            .onTapGesture { openServing(.food(food, grams: usualGrams(food), savable: savable, quickSave: true)) }
                     case .dish(let dish):
                         dishRow(dish)
                             .contentShape(Rectangle())
@@ -1016,7 +1022,7 @@ struct AddEntryView: View {
                     // по пустому месту строки пропадает впустую.
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { openServing(.food(food, grams: nil, savable: true, quickSave: false)) }
+                        .onTapGesture { openServing(.food(food, grams: usualGrams(food), savable: true, quickSave: false)) }
                 }
                 .animation(.default, value: offResults.map { $0.id })
             }
@@ -1148,6 +1154,10 @@ struct AddEntryView: View {
             }
             .task(id: "\(wantsOnlineSearch)|\(searchText)") {
                 await searchOnlineIfNeeded()
+            }
+            .task {
+                usualPortions = store.usualPortions()
+                yesterdayEntry = store.entryYesterdayAtThisTime()
             }
             .scrollDismissesKeyboard(.interactively)
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
@@ -1437,6 +1447,18 @@ struct AddEntryView: View {
             topMatchesSection
         }
 
+        // Вчерашний приём в этот же час — первой строкой, одним касанием в
+        // черновик. День повторяет день чаще, чем кажется, и в такой день
+        // поиск не нужен вовсе.
+        if !isSearching, let entry = yesterdayEntry {
+            Section("Вчера в это время") {
+                quickMealRow(entry)
+                    .contentShape(Rectangle())
+                    .onTapGesture { addQuickMeal(entry) }
+                    .accessibilityIdentifier("yesterdayAtThisTime")
+            }
+        }
+
         // «Как обычно» — обычное блюдо для этого приёма, предложенное при
         // открытии экрана из строки «Пора есть».
         usualMealSection
@@ -1470,7 +1492,7 @@ struct AddEntryView: View {
                 ForEach(shownRecentFoods) { food in
                     foodRow(food)
                         .contentShape(Rectangle())
-                        .onTapGesture { openServing(.food(food, grams: nil, savable: false, quickSave: true)) }
+                        .onTapGesture { openServing(.food(food, grams: usualGrams(food), savable: false, quickSave: true)) }
                 }
                 ForEach(shownRecentDishes) { dish in
                     dishRow(dish)
@@ -1519,7 +1541,7 @@ struct AddEntryView: View {
                     ForEach(foods) { food in
                         foodRow(food)
                             .contentShape(Rectangle())
-                            .onTapGesture { openServing(.food(food, grams: nil, savable: false, quickSave: true)) }
+                            .onTapGesture { openServing(.food(food, grams: usualGrams(food), savable: false, quickSave: true)) }
                         .swipeActions(edge: .trailing) {
                             Button(role: .destructive) {
                                 store.deleteCustomFood(food)
@@ -1579,7 +1601,7 @@ struct AddEntryView: View {
                         ForEach(foods) { food in
                             foodRow(food)
                                 .contentShape(Rectangle())
-                                .onTapGesture { openServing(.food(food, grams: nil, savable: true, quickSave: true)) }
+                                .onTapGesture { openServing(.food(food, grams: usualGrams(food), savable: true, quickSave: true)) }
                         }
                     } header: {
                         Label(category.title, systemImage: category.icon)
@@ -1755,14 +1777,26 @@ struct AddEntryView: View {
         }
     }
 
+    /// Сколько этого продукта человек обычно кладёт — или nil, если привычки нет.
+    private func usualGrams(_ food: FoodItem) -> Double? {
+        usualPortions[food.name.lowercased()]
+    }
+
+    /// Строка продукта: с привычной порцией, если она есть.
+    ///
+    /// «100 г» у творога — единица измерения, а не то, сколько его едят.
+    /// Своя порция показывает калории той тарелки, которую человек на самом
+    /// деле положит, и открывает экран порции уже с ней.
     private func foodRow(_ food: FoodItem) -> some View {
-        let grams = food.defaultGrams > 0 ? food.defaultGrams : 100
+        let usual = usualGrams(food)
+        let grams = usual ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
         let kcal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
+        let weight = "\(Int(grams)) \(String(localized: "г"))"
         return FoodRow(
             name: food.name,
             calories: kcal,
             caloriesPer100g: food.caloriesPer100g,
-            portion: "\(Int(grams)) \(String(localized: "г"))",
+            portion: usual == nil ? weight : String(format: String(localized: "обычно %@"), weight),
             macros: food.macrosPer100g.portion(grams: grams),
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),

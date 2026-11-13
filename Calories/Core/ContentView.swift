@@ -26,6 +26,12 @@ struct ContentView: View {
     @State private var showingSteps = false
     @State private var showingBankInfo = false
     @State private var showingPaywall = false
+    /// Подсказки, смахнутые сегодня. Читаются при появлении экрана: завтра
+    /// набор другой, потому что в номере подсказки есть дата.
+    @State private var dismissedHints = DismissedHints().load()
+    /// Настройки копии — с подсказки «Копий дневника нет». Шестерёнки на
+    /// «Сегодня» больше нет, а настройки копии нужны прямо отсюда.
+    @State private var showingBackupSettings = false
     @State private var showingPlan = false
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
@@ -470,6 +476,9 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
+            .navigationDestination(isPresented: $showingBackupSettings) {
+                SettingsView(store: store)
+            }
             // Действие с иконки может прилететь и до появления экрана (холодный
             // старт), и во время работы — забираем его в обоих случаях.
             .task { consumeQuickAction(quickActions.pending) }
@@ -727,38 +736,122 @@ private extension ContentView {
     /// не ничто, а пустая плашка с фоном и отступами, и под плитками
     /// оставался светлый обрезок с провалом до дневника.
     private var hasDayHints: Bool {
-        if needsBackupReminder { return true }
         if mainHint != nil { return true }
-        if store.fastingHint() != nil { return true }
-        if store.isPremium, store.reviewIsDue, store.proposedGoal != nil { return true }
         if store.calorieBankBonus != 0 { return true }
         return false
     }
 
-    /// Главная подсказка дня — одна из совета дня и сигнала «пора подъесть».
+    /// Все подсказки дня в одной очереди: совет дня, «пора подъесть», пост,
+    /// недельный обзор и копия.
     ///
-    /// Раньше это были две строки, и они могли говорить разное одновременно:
-    /// «сегодня перебор» над «пора перерыв в диете». Теперь выбирает
-    /// `DayHintPicker` по общей шкале срочности. Пост, обзор недели, кастрюли
-    /// и копия пока своими строками — их очередь на следующем этапе.
-    private var mainHint: DayHint? {
+    /// Раньше это были отдельные строки, и они могли говорить разное
+    /// одновременно: «сегодня перебор» над «пора перерыв в диете». Теперь
+    /// показывается одна — самая срочная по шкале владельца, — а смахнутая
+    /// уступает место следующей. Кастрюля в холодильнике живёт отдельно, под
+    /// кольцом: это не совет, а состояние запасов.
+    private var hintQueue: [DayHint] {
         let now = Date()
-        let hints = DayHint.from(dailyAdvice ?? .none, now: now)
+        var hints = DayHint.from(dailyAdvice ?? .none, now: now)
             + DayHint.from(recovery: store.recoveryAdvice(now: now), now: now)
-        return DayHintPicker.pick(hints, now: now, dismissed: []).main
+        if let fasting = store.fastingHint(now: now) {
+            hints += DayHint.fasting(daysUntil: fasting.daysUntil, kind: fasting.kind.rawValue, now: now)
+        }
+        if store.isPremium, store.reviewIsDue, let proposal = store.proposedGoal {
+            hints += DayHint.weeklyReview(proposal: proposal, now: now)
+        }
+        if needsBackupReminder { hints += DayHint.backup(now: now) }
+        return hints
+    }
+
+    private var mainHint: DayHint? {
+        DayHintPicker.pick(hintQueue, now: Date(), dismissed: dismissedHints).main
+    }
+
+    /// Смахнуть подсказку до завтра: на её место встаёт следующая.
+    private func dismiss(_ hint: DayHint) {
+        withAnimation(.snappy) {
+            dismissedHints = DismissedHints().dismiss(hint.id)
+        }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 
     /// Нажатие на подсказку.
     ///
     /// Перенос рефида пока ведёт на экран плана, как и раньше: переносить
-    /// день одним касанием со строки — изменение данных, и оно ждёт решения о
-    /// том, как подсказку подтверждать и отклонять.
+    /// день одним касанием со строки — изменение данных без подтверждения.
     private func perform(_ action: DayHint.Action) {
         switch action {
         case .openPlan, .moveRefeedToday, .openWeeklyReview: showingPlan = true
         case .openFasting: showingFasting = true
         case .openAdd: entryAction = nil; showingAdd = true
-        case .backupNow: break
+        case .backupNow: showingBackupSettings = true
+        }
+    }
+
+    /// Вид главной подсказки. У поста, обзора и копии он свой — с часами до
+    /// выхода из поста, с предложенной нормой, с объяснением, зачем копия, —
+    /// остальные рисуются общей строкой.
+    @ViewBuilder
+    private func hintView(_ hint: DayHint) -> some View {
+        switch hint.source {
+        case .fasting:
+            if let fasting = store.fastingHint() {
+                FastingStrip(hint: fasting) { showingFasting = true }
+            }
+        case .weeklyReview:
+            Button { showingPlan = true } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "calendar.badge.clock")
+                        .foregroundStyle(.secondary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Недельный обзор")
+                            .font(.app(.subheadline, weight: .medium))
+                        if let proposal = store.proposedGoal {
+                            Text(verbatim: String(format: String(localized: "%lld ккал"), proposal))
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.app(.caption))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 2)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("weeklyReviewDue")
+        case .backup:
+            // Копий нет, а дневнику уже есть что терять. Синхронизации у
+            // приложения нет, контейнер удаляется вместе с ним, и выбранная
+            // папка — единственное, что стоит между годом записей и пустым
+            // экраном. Смахнутое возвращается завтра; уходит навсегда, как
+            // только папка выбрана.
+            Button { showingBackupSettings = true } label: {
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: "externaldrive.badge.exclamationmark")
+                        .foregroundStyle(.orange)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Копий дневника нет")
+                            .font(.app(.subheadline, weight: .semibold))
+                        Text("Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.app(.caption))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.vertical, 2)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("backupMissing")
+        default:
+            DayHintRow(hint: hint, onTap: hint.action.map { action in { perform(action) } })
         }
     }
 
@@ -879,84 +972,14 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
-            // Копий нет, а дневнику уже есть что терять.
-            //
-            // Выше всего остального, и это единственная подсказка не про еду:
-            // остальные советуют, а эта предупреждает. Синхронизации у
-            // приложения нет, контейнер удаляется вместе с ним, и выбранная
-            // папка — единственное, что стоит между годом записей и пустым
-            // экраном. Уходит навсегда, как только папка выбрана.
-            if needsBackupReminder {
-                NavigationLink {
-                    SettingsView(store: store)
-                } label: {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: "externaldrive.badge.exclamationmark")
-                            .foregroundStyle(.orange)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Копий дневника нет")
-                                .font(.app(.subheadline, weight: .semibold))
-                            Text("Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Spacer(minLength: 0)
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("backupMissing")
-            }
-
-            // Одна главная подсказка: совет дня или «пора подъесть», что
-            // срочнее. Выбор — в `DayHintPicker`, а не порядком строк здесь.
+            // Одна подсказка — самая срочная из очереди. Смахивание влево
+            // убирает её до завтра, и на её место встаёт следующая.
             if let hint = mainHint {
-                DayHintRow(hint: hint, onTap: hint.action.map { action in { perform(action) } })
-            }
-
-            // Отмеченный день голодания — не строка в настройках, а
-            // состояние сегодняшнего дня: пустой дневник в такой день
-            // должен читаться как «так и задумано», а не как провал.
-            // Голодание сегодня или в ближайшие три дня: подсказка к
-            // месту — за пару дней про кофе, накануне про соль и воду,
-            // в сам день про выход. Вся памятка — по нажатию.
-            //
-            // Выше недели: голодание — про сегодня и ближайшие дни,
-            // а неделя про прошедшие. Внизу экрана, под неделей и
-            // банком, подсказка про выход из поста попадалась на
-            // глаза последней, когда она нужнее всего.
-            if let hint = store.fastingHint() {
-                FastingStrip(hint: hint) { showingFasting = true }
-            }
-
-            // Недельный обзор зовёт только когда есть о чём говорить:
-            // прошла неделя с прошлого раза, и расчёт разошёлся с нормой
-            // заметнее полусотни килокалорий. Без повода строки нет.
-            if store.isPremium, store.reviewIsDue, let proposal = store.proposedGoal {
-                Button { showingPlan = true } label: {
-                    HStack(spacing: 10) {
-                        Image(systemName: "calendar.badge.clock")
-                            .foregroundStyle(.secondary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Недельный обзор")
-                                .font(.app(.subheadline, weight: .medium))
-                            Text(verbatim: String(format: String(localized: "%lld ккал"), proposal))
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 2)
+                SwipeToDismiss(onDismiss: { dismiss(hint) }) {
+                    hintView(hint)
                 }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("weeklyReviewDue")
+                .id(hint.id)
+                .transition(.asymmetric(insertion: .opacity, removal: .move(edge: .leading).combined(with: .opacity)))
             }
 
             if store.calorieBankBonus != 0 {

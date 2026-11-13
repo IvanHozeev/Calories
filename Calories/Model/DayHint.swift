@@ -107,6 +107,77 @@ struct DayHint: Equatable, Identifiable, Sendable {
                         expiresAt: endOfDay(now, calendar: calendar),
                         action: action)]
     }
+
+    /// Пост — подсказкой: в сам день срочнее, чем за один-три дня до него.
+    /// Вид у неё свой (`FastingStrip` с часами до выхода) — здесь только место
+    /// в очереди.
+    static func fasting(daysUntil: Int, kind: String, now: Date, calendar: Calendar = .current) -> [DayHint] {
+        guard (0...3).contains(daysUntil) else { return [] }
+        return [DayHint(id: "fasting:\(kind)-\(daysUntil):\(dayKey(now, calendar: calendar))",
+                        source: .fasting,
+                        title: daysUntil == 0 ? String(localized: "Сегодня голодание")
+                                              : String(localized: "Скоро голодание"),
+                        detail: nil,
+                        urgency: daysUntil == 0 ? Urgency.fastingToday : Urgency.fastingSoon,
+                        expiresAt: endOfDay(now, calendar: calendar),
+                        action: .openFasting)]
+    }
+
+    /// Напоминание о копии — подсказкой. Смахнутое, оно вернётся завтра:
+    /// дневник без копии теряется вместе с телефоном.
+    static func backup(now: Date, calendar: Calendar = .current) -> [DayHint] {
+        [DayHint(id: "backup:missing:\(dayKey(now, calendar: calendar))",
+                 source: .backup,
+                 title: String(localized: "Копий дневника нет"),
+                 detail: nil,
+                 urgency: Urgency.backup,
+                 expiresAt: endOfDay(now, calendar: calendar),
+                 action: .backupNow)]
+    }
+
+    /// Недельный обзор — подсказкой, с предложенной нормой в номере: новое
+    /// предложение не должно прятаться за смахнутым старым.
+    static func weeklyReview(proposal: Int, now: Date, calendar: Calendar = .current) -> [DayHint] {
+        [DayHint(id: "weeklyReview:\(proposal):\(dayKey(now, calendar: calendar))",
+                 source: .weeklyReview,
+                 title: String(localized: "Недельный обзор"),
+                 detail: nil,
+                 urgency: Urgency.weeklyReview,
+                 expiresAt: endOfDay(now, calendar: calendar),
+                 action: .openWeeklyReview)]
+    }
+}
+
+/// Смахнутые подсказки — до конца дня.
+///
+/// В номере подсказки есть дата, поэтому завтрашняя — другая и сама
+/// возвращается. Хранить вчерашние незачем: при чтении они отбрасываются,
+/// и список не растёт.
+struct DismissedHints {
+    static let key = "dismissed_day_hints"
+    let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
+
+    /// Смахнутые сегодня.
+    func load(now: Date = Date(), calendar: Calendar = .current) -> Set<String> {
+        let today = Self.todaySuffix(now, calendar: calendar)
+        return Set((defaults.stringArray(forKey: Self.key) ?? []).filter { $0.hasSuffix(today) })
+    }
+
+    /// Запомнить смахнутую и вернуть новый набор.
+    @discardableResult
+    func dismiss(_ id: String, now: Date = Date(), calendar: Calendar = .current) -> Set<String> {
+        var ids = load(now: now, calendar: calendar)
+        ids.insert(id)
+        defaults.set(Array(ids).sorted(), forKey: Self.key)
+        return ids
+    }
+
+    private static func todaySuffix(_ now: Date, calendar: Calendar) -> String {
+        let parts = calendar.dateComponents([.year, .month, .day], from: now)
+        return String(format: ":%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
+    }
 }
 
 /// Выбор одной главной подсказки.

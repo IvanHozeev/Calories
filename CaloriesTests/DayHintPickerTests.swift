@@ -137,4 +137,44 @@ struct DayHintPickerTests {
         #expect(p(.noDinnerYet) > p(.underGoal(percent: 50, remaining: 900)))
         #expect(p(.underGoal(percent: 50, remaining: 900)) > p(.onTarget))
     }
+
+    // MARK: Смахивание и очередь
+
+    /// Смахнутая уходит, на её место встаёт следующая по срочности.
+    @Test func aSwipedHintGivesWayToTheNext() {
+        let backup = DayHint.backup(now: now)
+        let review = DayHint.weeklyReview(proposal: 2400, now: now)
+        let all = backup + review
+        #expect(DayHintPicker.pick(all, now: now, dismissed: []).main?.source == .backup)
+        let after = DayHintPicker.pick(all, now: now, dismissed: [backup[0].id])
+        #expect(after.main?.source == .weeklyReview)
+    }
+
+    /// Смахнутая до конца дня: назавтра она снова в очереди.
+    @Test func aSwipeLastsUntilTomorrow() {
+        let defaults = TestDefaults.make()
+        let store = DismissedHints(defaults: defaults)
+        let id = DayHint.backup(now: now)[0].id
+        store.dismiss(id, now: now)
+        #expect(store.load(now: now).contains(id))
+        let tomorrow = now.addingTimeInterval(86_400)
+        #expect(store.load(now: tomorrow).isEmpty)
+        #expect(DayHint.backup(now: tomorrow)[0].id != id)
+    }
+
+    /// Новое предложение нормы — новая подсказка, даже если прежнюю смахнули.
+    @Test func aNewWeeklyProposalIsANewHint() {
+        #expect(DayHint.weeklyReview(proposal: 2400, now: now)[0].id
+                != DayHint.weeklyReview(proposal: 2300, now: now)[0].id)
+    }
+
+    /// Пост в сам день важнее, чем за день до него, и оба важнее перебора.
+    @Test func fastingTodayOutranksFastingSoon() {
+        let today = DayHint.fasting(daysUntil: 0, kind: "water", now: now)
+        let soon = DayHint.fasting(daysUntil: 2, kind: "water", now: now)
+        let over = DayHint.from(.overGoal(percent: 120), now: now)
+        #expect(today.first!.urgency > soon.first!.urgency)
+        #expect(DayHintPicker.pick(soon + over, now: now, dismissed: []).main?.source == .fasting)
+        #expect(DayHint.fasting(daysUntil: 5, kind: "water", now: now).isEmpty)
+    }
 }

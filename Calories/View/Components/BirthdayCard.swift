@@ -22,15 +22,13 @@ struct BirthdayCard: View {
                 .foregroundStyle(ProgressRing.kcalColors[0])
                 .symbolEffect(.bounce, value: appeared)
             VStack(alignment: .leading, spacing: 1) {
-                Text(age.map { String(format: String(localized: "С днём рождения! Тебе %lld"), $0) }
-                     ?? String(localized: "С днём рождения!"))
+                Text("С днём рождения!")
                     .font(.app(.subheadline, weight: .semibold))
-                    .lineLimit(1)
-                Text("Один день не решает, решает тренд")
+                Text(age.map { String(format: String(localized: "Сегодня тебе %lld. Ешь в удовольствие: один день не решает, решает тренд."), $0) }
+                     ?? String(localized: "Ешь в удовольствие: один день не решает, решает тренд."))
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
         }

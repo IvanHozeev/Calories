@@ -75,7 +75,7 @@ struct WeekStrip: View {
     /// шрифте фиксированная высота срезала бы нижнюю, то есть точку. Она и
     /// срезалась: при обычном кегле пятьдесят шесть точек на всё это уже
     /// не хватало.
-    @ScaledMetric(relativeTo: .subheadline) private var tallRow: CGFloat = 66
+    @ScaledMetric(relativeTo: .subheadline) private var tallRow: CGFloat = 70
     @ScaledMetric(relativeTo: .subheadline) private var shortRow: CGFloat = 44
 
     private var rowHeight: CGFloat { showsEaten ? tallRow : shortRow }
@@ -139,19 +139,22 @@ struct WeekStrip: View {
         return first.uppercased() + text.dropFirst()
     }
 
-    /// Точка дня — только у перебора.
+    /// Знак дня — только у промаха мимо нормы: «>» у перебора, «<» у недобора.
     ///
-    /// Остальных не стало. Зелёная говорила то же, что написанное под ней тем
-    /// же зелёным съеденное, а полая у сегодняшнего дня — вовсе ничего: день
-    /// идёт, судить рано, и кружок под числом читался как ещё один исход.
-    /// Там, где точки нет, её нет и в вёрстке: пустое место в пять точек
+    /// Точка у обоих была одна, и по ней нельзя было понять, в какую сторону
+    /// промах. Знак сравнения говорит это сам: съедено больше нормы или
+    /// меньше. Остальных знаков нет: зелёная точка повторяла цвет съеденного
+    /// под ней, а полая у сегодняшнего дня не говорила ничего — день идёт,
+    /// судить рано. Там, где знака нет, его нет и в вёрстке: пустое место
     /// разводило число и калории на лишний зазор.
     ///
     /// Свой красный из палитры кольца, а не системный: системный тут кричал,
-    /// а этот — тот же цвет, которым перебор нарисован в самом кольце. Один
-    /// перебор — один цвет на всё приложение.
-    private var overDot: some View {
-        Circle().fill(ProgressRing.overColors[0]).frame(width: 5, height: 5)
+    /// а этот — тот же цвет, которым перебор нарисован в самом кольце.
+    private func verdictMark(_ verdict: DayMark.Verdict) -> some View {
+        Text(verbatim: verdict == .over ? ">" : "<")
+            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .foregroundStyle(ProgressRing.overColors[0])
+            .accessibilityHidden(true)
     }
 
     /// Тихо, как шапка недели в Календаре: цвет — только точка под числом.
@@ -175,7 +178,7 @@ struct WeekStrip: View {
                     .font(.app(.subheadline, weight: isToday ? .bold : .regular))
                     .monospacedDigit()
                     .foregroundStyle(isToday ? .primary : .secondary)
-                // Точка сразу под числом дня, а съеденное под ней: вердикт
+                // Знак сразу под числом дня, а съеденное под ним: вердикт
                 // относится к дню, а не к числу калорий, и стоять он должен
                 // рядом с тем, о чём говорит.
                 //
@@ -183,7 +186,7 @@ struct WeekStrip: View {
                 // занимает в стопке ничего, даже отбивки, — а кружок в пять
                 // точек с отбивкой по обе стороны разводил число и калории
                 // на девять точек пустоты.
-                if day.verdict == .over || day.verdict == .under { overDot }
+                if day.verdict == .over || day.verdict == .under { verdictMark(day.verdict) }
                 if showsEaten {
                     // Не мельче подписи дня недели и не бледнее её: десятым
                     // кеглем в третьей ступени серого число не читалось вовсе,

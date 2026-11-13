@@ -18,6 +18,10 @@ struct SwipeToDismiss<Content: View>: View {
 
     var body: some View {
         content
+            // Жест ловится всей строкой, а не только буквами: у подсказки без
+            // действия («норма набрана») нет кнопки, и без формы касания
+            // смахнуть её можно было, только попав пальцем в текст.
+            .contentShape(Rectangle())
             .offset(x: offset)
             .opacity(1 - min(0.6, Double(-offset / max(width, 1))))
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }

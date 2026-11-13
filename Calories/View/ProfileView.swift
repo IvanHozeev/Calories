@@ -183,7 +183,9 @@ struct ProfileView: View {
             }
         }
         .sheet(isPresented: $showingBasis) {
-            CalculationBasisSheet(store: store, activityLevel: $draft.activityLevel)
+            CalculationBasisSheet(store: store, activityLevel: $draft.activityLevel,
+                                  basis: draftProfile.map(basisCaption) ?? "",
+                                  fatMethod: fatMethodText)
         }
         .glassRow()
         .listStyle(.insetGrouped)
@@ -280,213 +282,52 @@ struct ProfileView: View {
     /// Считаем ли норму от измеренного расхода.
     private var usesFact: Bool { store.usesMeasuredExpenditure && store.adaptiveTDEE != nil }
 
-    /// Расчёт одной карточкой: крупно то, ради чего заходят, мелко — из чего
-    /// оно собрано.
+    /// Строка значения: подпись слева, число справа, «i» — объяснение листом.
     ///
-    /// Шесть отдельных плашек были шестью подложками подряд и занимали пол-экрана;
-    /// девять строк списка до этого — ещё больше. Здесь один блок: сверху расход,
-    /// под чертой четыре числа строкой, ниже серым — откуда что взялось.
-    private func calculationCard(_ profile: UserProfile) -> some View {
-        let fat = profile.bodyFatPercentage(from: measurement)
-        let expenditure = usesFact ? (store.smoothedTDEE ?? profile.tdee) : profile.tdee
-        return VStack(alignment: .leading, spacing: 10) {
-            Button {
-                showingBasis = true
-            } label: {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(usesFact ? "Расход по факту" : "Расход по формуле")
-                            .font(.app(.caption2))
-                            .foregroundStyle(.tertiary)
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
-                            Text(verbatim: "\(Int(expenditure.rounded()))")
-                                .font(.app(size: 26, weight: .bold))
-                                .monospacedDigit()
-                                .foregroundStyle(Color.primary)
-                            Text("ккал")
-                                .font(.app(.caption))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
-                    Spacer(minLength: 8)
-                    if let fact = store.adaptiveTDEE, usesFact {
-                        // Тем же материалом, что значки витаминов в дневнике:
-                        // стекло с 27, краска ниже — см. `ChipSurface`.
-                        Text(verbatim: fact.confidence.title)
-                            .font(.app(.caption2, weight: .semibold))
-                            .foregroundStyle(ProgressRing.kcalColors[0])
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .chipSurface(tint: ProgressRing.kcalColors[0])
-                    }
-                    Image(systemName: "chevron.right")
-                        .font(.app(.caption2, weight: .semibold))
+    /// «i», а не шеврон: шеврон ведёт вглубь, а здесь подробности о самой
+    /// строке и возврат в то же место.
+    private func valueRow(_ title: LocalizedStringKey, systemImage: String,
+                          value: String, unit: LocalizedStringKey, detail: LocalizedStringKey? = nil,
+                          color: Color = .secondary, onInfo: (() -> Void)?) -> some View {
+        settingLabel(systemImage: systemImage) {
+            HStack(spacing: 6) {
+                Text(title)
+                if let detail {
+                    Text(detail)
+                        .font(.app(.caption))
                         .foregroundStyle(.tertiary)
                 }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("adaptiveTDEE")
-
-            Divider().opacity(0.4)
-
-            // Одной сеткой, а не двумя карточками.
-            //
-            // «Расчёт» и «Состояние» были двумя подложками подряд, и обе —
-            // про одно: сколько организм тратит и в каком он состоянии. Сон и
-            // пульс объясняют тот самый расход, что написан выше; врозь их
-            // приходилось сводить в уме. Колонки общие на оба ряда — иначе два
-            // числа в первом ряду разъезжались по половине ширины и справа
-            // оставалась дыра.
-            Grid(alignment: .topLeading, horizontalSpacing: 8, verticalSpacing: 12) {
-                GridRow {
-                // Норма, совпавшая с расходом, не показывается вовсе: на
-                // поддержании едят столько, сколько тратят, и это то же самое
-                // число, что крупно стоит выше. Писать его дважды — заставлять
-                // сверять две одинаковые цифры.
-                //
-                // Белка здесь больше нет: он не про расход, а про то, как
-                // набрать день, и живёт в макросах на «Сегодня» и в разборе.
-                let goalMatchesExpenditure = abs(Double(store.dailyGoal) - expenditure) < 5
-                if !goalMatchesExpenditure {
-                    if store.plan != nil {
-                        miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
-                            .accessibilityIdentifier("calorieTargetRow")
-                    } else {
-                        Button {
-                            goalText = String(store.dailyGoal)
-                            showingGoalEditor = true
-                        } label: {
-                            miniStat("Норма", "\(store.dailyGoal)", unit: "ккал", color: ProgressRing.kcalColors[0])
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("calorieTargetRow")
+                Spacer()
+                Text(verbatim: value)
+                    .monospacedDigit()
+                    .foregroundStyle(color)
+                Text(unit)
+                    .foregroundStyle(.secondary)
+                if let onInfo {
+                    Button(action: onInfo) {
+                        Image(systemName: "info.circle")
+                            .foregroundStyle(.tertiary)
                     }
-                }
-                // ИМТ убран: он не различает мышцы и жир и на тренированном
-                // теле показывает «избыточный вес» рядом с честными двадцатью
-                // процентами жира. Там, где он всё же участвует в расчёте —
-                // в формуле Дойренберга, — он остался в серой подписи.
-                miniStat("Жир %", String(format: "%.1f", fat), unit: "%",
-                         color: BodyFatStyle.color(for: profile.bodyFatCategory(from: measurement)))
-                    .accessibilityIdentifier("bodyFatRow")
-                    // Третья колонка пустует, когда норма совпала с расходом:
-                    // пусть числа стоят по колонкам, а не разъезжаются.
-                    Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
-                }
-
-                if hasStateNumbers {
-                    GridRow {
-                        if let sleep = store.sleep(on: Date()) {
-                            miniStat("Сон", String(format: "%.1f", sleep.hours), unit: "ч",
-                                     color: sleep.shortfall >= 1 ? ProgressRing.kcalColors[0] : Color.primary)
-                                .accessibilityIdentifier("sleepRow")
-                        }
-                        if let pulse = store.restingPulse() {
-                            miniStat("Пульс в покое", "\(pulse.value)", unit: "уд/мин",
-                                     color: RestingPulse.isNotable(rise: pulse.rise)
-                                         ? ProgressRing.kcalColors[0] : Color.primary)
-                                .accessibilityIdentifier("restingPulseRow")
-                        }
-                        if let today = todayActivity {
-                            miniStat("Сегодня", today.value, unit: today.unit, color: Color.primary)
-                                .accessibilityIdentifier("activityRow")
-                        }
-                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Как считаем")
                 }
             }
-
-            Text(verbatim: [basisCaption(profile), stateCaption]
-                    .compactMap { $0 }.joined(separator: " · "))
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                .lineLimit(2)
-                .minimumScaleFactor(0.8)
-                .fixedSize(horizontal: false, vertical: true)
-
-            // Совет — под числами и отдельной строкой: числа описывают, а он
-            // предлагает сделать. Без него сон и пульс остаются тем, на что
-            // смотрят и ничего не меняют.
-            if let advice = store.recoveryAdvice() {
-                Divider().opacity(0.4)
-                HStack(alignment: .top, spacing: 8) {
-                    Image(systemName: advice.verdict == .dietBreak ? "pause.circle" : "arrow.up.forward.circle")
-                        .font(.app(.footnote))
-                        .foregroundStyle(ProgressRing.kcalColors[0])
-                    Text(verbatim: advice.text)
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .accessibilityIdentifier("recoveryAdvice")
-            }
         }
-        .padding(12)
-        // Обычная подложка карточки списка, а не стекло: у стекла своя тень,
-        // и на светлой теме она ложилась под карточкой грязным пятном. Здесь
-        // карточка и так лежит на сером фоне списка — ей хватает заливки.
-        .background(Color(.secondarySystemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 16))
     }
 
-    /// Есть ли что показать во втором ряду сетки: ряд из трёх прочерков
-    /// хуже, чем его отсутствие.
-    private var hasStateNumbers: Bool {
-        store.sleep(on: Date()) != nil || store.restingPulse() != nil || todayActivity != nil
+    /// Как считается жир — для листа «Как считаем».
+    private var fatMethodText: String {
+        guard let draftProfile else { return "" }
+        return draftProfile.isNavyMethod(from: measurement)
+            ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
+            : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам.")
     }
 
-    /// Нагрузка сегодня: поправка в килокалориях, а пока базы нет — просто шаги.
-    private var todayActivity: (value: String, unit: LocalizedStringKey)? {
-        let delta = Int(store.activityAdjustment(on: Date()).rounded())
-        if store.activityBaseline != nil, delta != 0 {
-            return (String(format: "%+d", delta), "ккал")
-        }
-        guard let steps = store.activity(on: Date())?.steps, steps > 0 else { return nil }
-        return ("\(steps)", "шагов")
-    }
-
-    /// Серая строка под числами: то, что объясняет их, а не повторяет.
-    private var stateCaption: String? {
+    /// Откуда взялись числа — одной строкой для листа «Как считаем».
+    fileprivate func basisCaption(_ profile: UserProfile) -> String {
         var parts: [String] = []
-        if let sleep = store.sleep(on: Date()), sleep.shortfall >= 1 {
-            parts.append(String(format: String(localized: "на %@ ч меньше обычного"),
-                                String(format: "%.1f", sleep.shortfall)))
-        }
-        if let pulse = store.restingPulse(), let rise = pulse.rise, RestingPulse.isNotable(rise: pulse.rise) {
-            parts.append(String(format: String(localized: "пульс на %lld выше обычного"), rise))
-        }
-        if let day = store.activity(on: Date()), let minutes = day.workoutMinutes, minutes > 0 {
-            parts.append(String(format: String(localized: "%1$@, %2$lld мин"),
-                                day.workoutTitle ?? String(localized: "Тренировка"), minutes))
-        }
-        if let baseline = store.activityBaseline {
-            if let kcal = baseline.activeCalories {
-                parts.append(String(format: String(localized: "обычно %lld ккал активности"), kcal))
-            } else if let steps = baseline.steps {
-                parts.append(String(format: String(localized: "обычно %lld шагов"), steps))
-            }
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
-    /// Подпись под карточкой: зачем эти числа тут.
-    private var stateFooter: LocalizedStringKey? {
-        if store.activityBaseline == nil {
-            return explain("Нагрузка двигает норму дня, но сначала нужно узнать, какой день для тебя обычный, — на это уходит две недели. Сон и пульс норму не двигают: они объясняют день.",
-                           short: "Обычный день считается по двум неделям. Сон и пульс норму не двигают.")
-        }
-        if RestingPulse.isNotable(rise: store.restingPulse()?.rise) {
-            return explain("Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости. Если вес при этом встал, отдых поможет вернее, чем ещё меньше еды.")
-        }
-        return explain("Норма дня сдвигается на разницу с обычным днём: наработал больше — ешь больше. Пока день идёт, вниз она не уходит. Сон и пульс норму не двигают — они объясняют день.")
-    }
-
-    /// Откуда взялись числа — одной серой строкой.
-    private func basisCaption(_ profile: UserProfile) -> String {
-        var parts: [String] = []
-        // Формульный расход в подписи нужен только рядом с измеренным — как
-        // то, с чем его сравнивают. Когда считаем по формуле, он уже написан
-        // крупно выше, и второй раз это просто то же число.
+        // Формульный расход нужен только рядом с измеренным — как то, с чем
+        // его сравнивают. Когда считаем по формуле, он и есть число в строке.
         if usesFact {
             parts.append(String(format: String(localized: "по формуле %lld"), Int(profile.tdee.rounded())))
         }
@@ -500,30 +341,6 @@ struct ProfileView: View {
             parts.append(String(format: String(localized: "%lld дн. данных"), fact.loggedDays))
         }
         return parts.joined(separator: " · ")
-    }
-
-    private func miniStat(_ title: LocalizedStringKey, _ value: String,
-                          unit: LocalizedStringKey, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(verbatim: value)
-                    .font(.app(.subheadline, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(color)
-                Text(unit)
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
-            .lineLimit(1)
-            .minimumScaleFactor(0.7)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
     }
 
 }
@@ -565,6 +382,10 @@ private struct WeightSparkline: View {
 private struct CalculationBasisSheet: View {
     var store: CalorieStore
     @Binding var activityLevel: ActivityLevel
+    /// Из чего собран расход: формула, BMR, ИМТ, дни данных.
+    var basis: String
+    /// Каким методом считается жир.
+    var fatMethod: String
     @Environment(\.dismiss) private var dismiss
 
     /// Множитель активности спрашиваем, только пока расход считается по
@@ -572,16 +393,6 @@ private struct CalculationBasisSheet: View {
     private var showsActivityPicker: Bool {
         !(store.usesMeasuredExpenditure && store.adaptiveTDEE != nil)
     }
-
-    /// Высота листа — под содержимое, а не половина экрана.
-    ///
-    /// С `.medium` переключатель с подписью занимал треть листа, а остальное
-    /// было пустым; с выключенным «по факту» туда же не влезали пять уровней
-    /// активности, и лист приходилось листать. Поэтому две высоты: система
-    /// подрежет большую сама, если экран ниже.
-    private var sheetHeight: CGFloat { showsActivityPicker ? 545 : 215 }
-
-
 
     var body: some View {
         NavigationStack {
@@ -597,12 +408,28 @@ private struct CalculationBasisSheet: View {
                     if !store.isPremium {
                         Text("Расчёт по факту — в Premium. Пока норма считается по формуле.")
                     } else if let fact = store.adaptiveTDEE {
-                        Text(String(format: String(localized: "По дневнику и весам: около %1$lld ккал в день, данных за %2$lld дн. Формула даёт %3$lld."),
-                                    Int((store.smoothedTDEE ?? fact.tdee).rounded()), fact.loggedDays,
-                                    Int((store.profile?.tdee ?? 0).rounded())))
+                        Text(verbatim: String(format: String(localized: "По дневнику и весам: около %1$lld ккал в день, данных за %2$lld дн. Формула даёт %3$lld."),
+                                              Int((store.smoothedTDEE ?? fact.tdee).rounded()), fact.loggedDays,
+                                              Int((store.profile?.tdee ?? 0).rounded()))
+                             + " "
+                             + String(format: String(localized: "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
+                                      Int(fact.meanIntake.rounded()),
+                                      String(format: "%+.2f", fact.weeklyRateKg)))
                     } else {
                         Text("Пока по формуле. Расход по факту — после двух недель записей.")
                     }
+                }
+
+                // Справка, которая раньше висела тремя строками мелкого текста
+                // под карточкой: из чего собран расход и как считается жир.
+                Section {
+                    Text(verbatim: basis)
+                        .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
+                    Text(verbatim: fatMethod)
+                        .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 if showsActivityPicker {
@@ -634,9 +461,9 @@ private struct CalculationBasisSheet: View {
                 }
             }
         }
-        // Высота живёт здесь, а не на месте показа: она зависит от того, что
-        // сейчас в листе, и при переключении «по факту» меняется вместе с ним.
-        .presentationDetents([.height(sheetHeight)])
+        // Половина и весь экран: справки и пять уровней активности в одну
+        // фиксированную высоту не помещались.
+        .presentationDetents([.medium, .large])
     }
 }
 
@@ -651,38 +478,44 @@ private extension ProfileView {
     @ViewBuilder
     var calculationSection: some View {
     if let draftProfile {
+        // Две строки вместо карточки.
+        //
+        // Карточка несла расход, норму, жир, сон, пульс, шаги и совет — и
+        // половина этого жила где-то ещё: шаги и совет на «Сегодня», жир
+        // среди параметров тела. Сон и пульс норму не двигают, а смотреть на
+        // них здесь было незачем. Остался сам расчёт: сколько тратишь и, если
+        // норма от этого отличается, сколько есть. Как это посчитано — в «i».
         Section {
-            calculationCard(draftProfile)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+            let expenditure = usesFact ? (store.smoothedTDEE ?? draftProfile.tdee) : draftProfile.tdee
+            valueRow("Расход", systemImage: "flame",
+                     value: "\(Int(expenditure.rounded()))", unit: "ккал",
+                     detail: usesFact ? "по факту" : "по формуле",
+                     color: .primary,
+                     onInfo: { showingBasis = true })
+                .accessibilityIdentifier("adaptiveTDEE")
+
+            // Норма, совпавшая с расходом, не показывается: на поддержании
+            // это то же число строкой выше.
+            if abs(Double(store.dailyGoal) - expenditure) >= 5 {
+                valueRow("Норма", systemImage: "fork.knife",
+                         value: "\(store.dailyGoal)", unit: "ккал",
+                         color: ProgressRing.kcalColors[0], onInfo: nil)
+                    // Своё число — только без плана: с планом норму ведёт он.
+                    .tappableRow {
+                        guard store.plan == nil else { return }
+                        goalText = String(store.dailyGoal)
+                        showingGoalEditor = true
+                    }
+                    .accessibilityIdentifier("calorieTargetRow")
+            }
         } header: {
             Text("Расчёт")
                 .tracksSectionHead(String(localized: "Расчёт"))
-        } footer: {
-            // Обе подписи объясняют, откуда берётся число, — на
-            // коротком уровне их нет вовсе.
-            if let fact = store.adaptiveTDEE, store.usesMeasuredExpenditure {
-                // Само число расхода тут не повторяем: оно уже написано
-                // крупно на карточке, и вторая его копия читалась как
-                // ещё одна цифра, которую надо сверить с первой.
-                explain(String(format: String(localized: "Отсюда и число: съедено в среднем %1$lld ккал в день, вес по тренду %2$@ кг в неделю. Формула этого не видит — она не знает ни твоей работы, ни адаптации к дефициту."),
-                               Int(fact.meanIntake.rounded()),
-                               String(format: "%+.2f", fact.weeklyRateKg)))
-                    .map { Text(verbatim: $0) }
-            } else {
-                explain(draftProfile.isNavyMethod(from: measurement)
-                        ? String(localized: "Жир считается методом ВМС США по обхватам из замеров, точность ±2–3%. Чтобы уточнить, снимай их в одном и том же месте.")
-                        : String(localized: "Жир считается по формуле Дойренберга от ИМТ, точность ±5%: она не различает мышцы и жир. Сними шею и пояс в замерах — тогда включится метод по обхватам."))
-                    .map { Text(verbatim: $0) }
-            }
-            // Сон и пульс объясняются тут же: карточка теперь одна, и подпись
-            // под ней должна отвечать за всё, что в ней стоит.
-            stateFooter.map { Text($0) }
         }
     }
     }
 
+    @ViewBuilder
     var bodyParametersSection: some View {
     Section {
         // Знак — слева, в колонке значков, и он меняется вместе с выбором:
@@ -803,6 +636,17 @@ private extension ProfileView {
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
+
+        // Жир — среди параметров тела, рядом с замерами, из которых он и
+        // считается, а не в карточке расчёта, где стоял особняком.
+        if let draftProfile {
+            valueRow("Жир", systemImage: "drop",
+                     value: String(format: "%.1f", draftProfile.bodyFatPercentage(from: measurement)),
+                     unit: "%",
+                     color: BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)),
+                     onInfo: { showingBasis = true })
+                .accessibilityIdentifier("bodyFatRow")
+        }
     } header: {
         // Заголовок отдельным блоком, а не строкой в `Section("…")`: так к
         // нему можно привесить слежение, по которому имя секции переезжает

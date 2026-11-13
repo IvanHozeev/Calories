@@ -717,53 +717,6 @@
         }
       }
     },
-    "%1$@, %2$lld мин": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@، %2$lld د"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld Min."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld min"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld min"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld min"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld דק׳"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$lld min"
-          }
-        }
-      }
-    },
     "%1$@: %2$lld ккал": {
       "extractionState": "manual",
       "localizations": {
@@ -16536,52 +16489,6 @@
         }
       }
     },
-    "Жир %": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% الدهون"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% Fett"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Body Fat %"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% Grasa"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% Graisse"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% שומן"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "% Gordura"
-          }
-        }
-      }
-    },
     "Жир % (по обхватам)": {
       "localizations": {
         "ar": {
@@ -26885,53 +26792,6 @@
         }
       }
     },
-    "на %@ ч меньше обычного": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أقل بـ %@ س من المعتاد"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ Std. weniger als sonst"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ h less than usual"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ h menos de lo habitual"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ h de moins que d’habitude"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ ש׳ פחות מהרגיל"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ h a menos que o normal"
-          }
-        }
-      }
-    },
     "на %lld мин позже": {
       "localizations": {
         "ar": {
@@ -27715,53 +27575,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aponte a câmera para o código de barras"
-          }
-        }
-      }
-    },
-    "Нагрузка двигает норму дня, но сначала нужно узнать, какой день для тебя обычный, — на это уходит две недели. Сон и пульс норму не двигают: они объясняют день.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الحمل يحرّك هدف اليوم، لكن يجب أولًا معرفة شكل يومك المعتاد — وهذا يستغرق أسبوعين. النوم والنبض لا يحركان شيئًا: إنهما يفسّران اليوم."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die Belastung verschiebt das Tagesziel, doch zuerst muss klar sein, was für dich ein gewöhnlicher Tag ist – das dauert zwei Wochen. Schlaf und Puls verschieben nichts: sie erklären den Tag."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Load moves the day's target, but first the app has to learn what a usual day is for you — that takes two weeks. Sleep and heart rate move nothing: they explain the day."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La carga mueve el objetivo del día, pero antes hay que saber cómo es un día normal para ti: eso lleva dos semanas. El sueño y el pulso no mueven nada: explican el día."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La charge déplace l’objectif du jour, mais il faut d’abord savoir à quoi ressemble votre journée habituelle — cela prend deux semaines. Le sommeil et le pouls ne déplacent rien : ils expliquent la journée."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "העומס מזיז את יעד היום, אבל קודם צריך ללמוד איך נראה אצלך יום רגיל — זה לוקח שבועיים. שינה ודופק לא מזיזים כלום: הם מסבירים את היום."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A carga muda a meta do dia, mas antes é preciso saber como é um dia normal para você — isso leva duas semanas. Sono e pulso não mudam nada: eles explicam o dia."
           }
         }
       }
@@ -31197,53 +31010,6 @@
         }
       }
     },
-    "Норма дня сдвигается на разницу с обычным днём: наработал больше — ешь больше. Пока день идёт, вниз она не уходит. Сон и пульс норму не двигают — они объясняют день.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يتحرك هدف اليوم بمقدار الفرق عن اليوم المعتاد: بذلت أكثر، فكل أكثر. وما دام اليوم جاريًا فلا ينخفض. النوم والنبض لا يحركان شيئًا — إنهما يفسّران اليوم."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das Tagesziel verschiebt sich um den Unterschied zu einem gewöhnlichen Tag: mehr geleistet, mehr gegessen. Solange der Tag läuft, sinkt es nie. Schlaf und Puls verschieben nichts – sie erklären den Tag."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The day's target shifts by the difference from a usual day: work more, eat more. While the day is still running it never drops. Sleep and heart rate move nothing — they explain the day."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El objetivo del día se mueve según la diferencia con un día normal: si te mueves más, comes más. Mientras el día sigue, nunca baja. El sueño y el pulso no mueven nada: explican el día."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "L’objectif du jour bouge selon l’écart avec une journée habituelle : plus vous en faites, plus vous mangez. Tant que la journée continue, il ne baisse jamais. Le sommeil et le pouls ne déplacent rien — ils expliquent la journée."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יעד היום זז לפי ההפרש מיום רגיל: עשית יותר, תאכל יותר. כל עוד היום נמשך הוא לא יורד. שינה ודופק לא מזיזים כלום — הם מסבירים את היום."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A meta do dia muda conforme a diferença para um dia normal: trabalhou mais, come mais. Enquanto o dia corre, ela nunca cai. Sono e pulso não mudam nada — eles explicam o dia."
-          }
-        }
-      }
-    },
     "Норма дня сдвинута на %lld ккал за активность.": {
       "extractionState": "manual",
       "localizations": {
@@ -32681,100 +32447,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "normalmente %1$@ e %2$@"
-          }
-        }
-      }
-    },
-    "обычно %lld ккал активности": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "عادة %lld سعرة نشاط"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sonst %lld kcal Aktivität"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "usually %lld kcal of activity"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "normalmente %lld kcal de actividad"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "d’habitude %lld kcal d’activité"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בדרך כלל %lld קלוריות פעילות"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "normalmente %lld kcal de atividade"
-          }
-        }
-      }
-    },
-    "обычно %lld шагов": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "عادة %lld خطوة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sonst %lld Schritte"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "usually %lld steps"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "normalmente %lld pasos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "d’habitude %lld pas"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בדרך כלל %lld צעדים"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "normalmente %lld passos"
           }
         }
       }
@@ -44003,53 +43675,6 @@
         }
       }
     },
-    "Пульс в покое держится выше привычного — так бывает от недосыпа и накопленной усталости. Если вес при этом встал, отдых поможет вернее, чем ещё меньше еды.": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "نبض الراحة أعلى من المعتاد — يحدث ذلك مع قلة النوم والتعب المتراكم. وإذا توقف الوزن أيضًا فالراحة أجدى من الأكل أقل."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Der Ruhepuls liegt über dem Üblichen – das kommt von kurzen Nächten und angesammelter Müdigkeit. Wenn das Gewicht dazu stehenbleibt, hilft Erholung sicherer als noch weniger zu essen."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Resting heart rate is staying above its usual level — that happens with short nights and accumulated fatigue. If weight has stalled as well, rest will help more surely than eating even less."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La frecuencia en reposo se mantiene por encima de lo habitual: pasa con el poco sueño y el cansancio acumulado. Si además el peso se ha estancado, descansar ayudará más que comer aún menos."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "La fréquence au repos reste au-dessus de son niveau habituel — cela arrive avec le manque de sommeil et la fatigue accumulée. Si le poids stagne aussi, le repos aidera plus sûrement que manger encore moins."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הדופק במנוחה נשאר מעל הרגיל — זה קורה מחוסר שינה ומעייפות מצטברת. ואם גם המשקל נתקע, מנוחה תעזור יותר מלאכול עוד פחות."
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A frequência em repouso está acima do normal — isso acontece com noites curtas e cansaço acumulado. Se o peso também parou, descansar ajuda mais do que comer ainda menos."
-          }
-        }
-      }
-    },
     "Пульс в покое на %lld выше привычного не первый день — недовосстановление.": {
       "extractionState": "manual",
       "localizations": {
@@ -44140,53 +43765,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "A frequência em repouso está %lld batimentos acima do normal e já faz dias. Costuma ser falta de sono ou cansaço acumulado; se o peso também parou, descansar move mais do que comer ainda menos."
-          }
-        }
-      }
-    },
-    "пульс на %lld выше обычного": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "النبض أعلى بـ %lld من المعتاد"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Puls %lld über dem Üblichen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "heart rate %lld above usual"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pulso %lld por encima de lo habitual"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pouls %lld au-dessus de l’habitude"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "דופק %lld מעל הרגיל"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "pulso %lld acima do normal"
           }
         }
       }
@@ -45481,99 +45059,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O gasto subiu %1$lld, para %2$lld."
-          }
-        }
-      }
-    },
-    "Расход по факту": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الإنفاق الفعلي"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tatsächlicher Verbrauch"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actual expenditure"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gasto real"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépense réelle"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הוצאה בפועל"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gasto real"
-          }
-        }
-      }
-    },
-    "Расход по формуле": {
-      "extractionState": "manual",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الإنفاق حسب المعادلة"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verbrauch laut Formel"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spend by formula"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gasto por fórmula"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dépense selon la formule"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "הוצאה לפי נוסחה"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gasto pela fórmula"
           }
         }
       }
@@ -55149,52 +54634,6 @@
         }
       }
     },
-    "уд/мин": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "نبضة/د"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "S/min"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "bpm"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "lpm"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "bpm"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "פעימות/דק׳"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "bpm"
-          }
-        }
-      }
-    },
     "Удалить": {
       "localizations": {
         "ar": {
@@ -60669,6 +60108,144 @@
           "stringUnit": {
             "state": "translated",
             "value": "ימים מתועדים"
+          }
+        }
+      }
+    },
+    "Расход": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expenditure"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gasto"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gasto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dépense"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbrauch"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحرق"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הוצאה"
+          }
+        }
+      }
+    },
+    "по факту": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "measured"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "medido"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "medido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "mesurée"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gemessen"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فعلي"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בפועל"
+          }
+        }
+      }
+    },
+    "по формуле": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "by formula"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "por fórmula"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "por fórmula"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "par formule"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "per Formel"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بالمعادلة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לפי נוסחה"
           }
         }
       }

@@ -12,8 +12,16 @@ struct DayHintRow: View {
 
     var body: some View {
         let content = HStack(alignment: .top, spacing: 10) {
-            Image(systemName: symbol)
-                .foregroundStyle(tint)
+            Group {
+                // Подсказки календаря — звездой Давида: в SF Symbols её нет,
+                // поэтому знаком, тем же, что у переключателя в профиле.
+                if hint.source == .calendar {
+                    Text(verbatim: "\u{2721}\u{FE0E}")
+                } else {
+                    Image(systemName: symbol)
+                }
+            }
+            .foregroundStyle(tint)
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: hint.title)
                     .font(.app(.subheadline, weight: hint.detail == nil ? .regular : .semibold))
@@ -54,7 +62,7 @@ struct DayHintRow: View {
         case .batch: return "frying.pan"
         case .backup: return "externaldrive.badge.exclamationmark"
         case .weightExplainer: return "scalemass"
-        case .calendar: return hint.urgency == DayHint.Urgency.fastingSoon ? "moon.stars" : "calendar"
+        case .calendar: return "calendar"
         case .dailyAdvice: return "lightbulb.fill"
         }
     }

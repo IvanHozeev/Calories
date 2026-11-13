@@ -36,7 +36,9 @@ struct NutritionSection: View {
             // её тот же человек. Выключено по умолчанию: обычаи различаются.
             Toggle(isOn: Binding(get: { KosherSettings.shared.observesCalendar },
                                  set: { KosherSettings.shared.observesCalendar = $0 })) {
-                settingLabel("Посты и праздники", systemImage: "moon.stars")
+                // Звезда Давида знаком, а не символом системы: в SF Symbols её
+                // нет, а полумесяц со звёздами читается чужим символом.
+                settingLabel("Посты и праздники", glyph: "\u{2721}\u{FE0E}")
             }
             .accessibilityIdentifier("observesJewishCalendar")
         } header: {

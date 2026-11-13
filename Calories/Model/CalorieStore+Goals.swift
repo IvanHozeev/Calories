@@ -538,16 +538,20 @@ extension CalorieStore {
         slots(schedule: MealScheduleSettings.shared)
     }
 
-    /// Данные для итога недели: последние семь дней целиком.
+    /// Данные для итога недели: семь полных дней до сегодняшнего.
     ///
     /// Неделя, а не «с понедельника»: разбор открывают в любой день, и
     /// обрезанная неделя показывала бы в понедельник один день и ноль выводов.
+    ///
+    /// Без сегодня: день ещё идёт, и утром в нём завтрак, а не норма. Пока он
+    /// входил в неделю, среднее съеденное занижалось на долю недоеденного
+    /// сегодня, а «записано 7 из 7» считало день, которого ещё нет.
     func weekReviewInput(now: Date = Date()) -> WeekReview.Input {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: now)
         var input = WeekReview.Input()
         var days: [Date] = []
-        for offset in (0..<7).reversed() {
+        for offset in (1...7).reversed() {
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { continue }
             days.append(date)
         }
@@ -562,7 +566,7 @@ extension CalorieStore {
         input.loggedDays = input.eaten.count
 
         input.weightStart = days.first.flatMap { weightTrend(on: $0) }
-        input.weightEnd = weightTrend(on: today)
+        input.weightEnd = days.last.flatMap { weightTrend(on: $0) }
         if let plan, let index = plan.phaseIndex(on: today), index < plan.timeline.count {
             let phase = plan.timeline[index]
             if phase.intent != .maintenance, !phase.isDietBreak {

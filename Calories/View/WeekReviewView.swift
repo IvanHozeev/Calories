@@ -31,22 +31,45 @@ struct WeekReviewView {
                       Int(measured.rounded()), abs(delta))
     }
 
-    /// «7 – 13 октября»: неделя, о которой речь. Итог считается за последние
-    /// семь дней, а не за календарную неделю, — и подпись должна говорить то же.
+    /// «6 – 12 октября»: неделя, о которой речь. Итог считается за семь полных
+    /// дней до сегодняшнего, а не за календарную неделю, — и подпись должна
+    /// говорить то же.
     static func weekRange(now: Date = Date(), calendar: Calendar = .current) -> String {
-        let start = calendar.date(byAdding: .day, value: -6, to: now) ?? now
-        let sameMonth = calendar.component(.month, from: start) == calendar.component(.month, from: now)
+        let end = calendar.date(byAdding: .day, value: -1, to: now) ?? now
+        let start = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        let sameMonth = calendar.component(.month, from: start) == calendar.component(.month, from: end)
         let from = start.formatted(sameMonth ? .dateTime.day() : .dateTime.day().month(.wide))
-        return "\(from) – \(now.formatted(.dateTime.day().month(.wide)))"
+        return "\(from) – \(end.formatted(.dateTime.day().month(.wide)))"
     }
 
-    /// Секции итога недели: числа, предложение нормы и что это значит.
+    /// Секции итога недели: числа с выводами одной секцией и предложение нормы.
+    ///
+    /// Выводы — в той же секции, что числа, а не под своим заголовком «Что
+    /// это значит»: они и есть пояснение к этим трём числам, и отдельная
+    /// секция разводила число и его смысл на пол-экрана.
     @ViewBuilder
     var sections: some View {
         Section {
                 numbers
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
+                ForEach(lines) { line in
+                    HStack(alignment: .top, spacing: 10) {
+                        // Значок — только у оценки: галочка или тревога.
+                        // Кружок «i» у справочной строки ничего не открывал и
+                        // ничего не добавлял, а читался как кнопка.
+                        if let symbol = icon(line.tone) {
+                            Image(systemName: symbol)
+                                .font(.app(.footnote))
+                                .foregroundStyle(color(line.tone))
+                                .frame(width: 18)
+                        }
+                        Text(verbatim: line.text)
+                            .font(.app(.footnote))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, 2)
+                }
             } header: {
                 // Какая неделя — в самом заголовке: итог считается за
                 // последние семь дней, а не за календарную неделю.
@@ -99,32 +122,18 @@ struct WeekReviewView {
                     explain("До ответа норма остаётся прежней. Приложение считает расход по дневнику и весам, но менять число, с которым ты живёшь, без твоего ведома оно не должно.").map { Text($0) }
                 }
             }
-
-            Section {
-                ForEach(lines) { line in
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: icon(line.tone))
-                            .font(.app(.footnote))
-                            .foregroundStyle(color(line.tone))
-                            .frame(width: 18)
-                        Text(verbatim: line.text)
-                            .font(.app(.footnote))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding(.vertical, 2)
-                }
-            } header: {
-                Text("Что это значит")
-            }
     }
 
-    /// Три числа, ради которых сюда заходят: сколько ел, куда пошёл вес,
-    /// сколько дней записано.
+    /// Три числа, ради которых сюда заходят: сколько ел в день, куда пошёл
+    /// вес, в скольких днях есть записи.
+    ///
+    /// Подписи — что именно посчитано, а не одно слово: «В среднем» не
+    /// говорило, чего, а «Записано 7 из 7» — что записано.
     private var numbers: some View {
         HStack(alignment: .top, spacing: 8) {
-            cell(title: "В среднем", value: meanEaten, unit: "ккал")
+            cell(title: "Съедено в день", value: meanEaten, unit: "ккал")
             cell(title: "Вес", value: weightChange, unit: "кг")
-            cell(title: "Записано", value: "\(input.loggedDays)", unit: "из 7")
+            cell(title: "Дней с записями", value: "\(input.loggedDays)", unit: "из 7")
         }
         .padding(12)
         .frame(maxWidth: .infinity)
@@ -160,11 +169,11 @@ struct WeekReviewView {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func icon(_ tone: WeekReview.Line.Tone) -> String {
+    private func icon(_ tone: WeekReview.Line.Tone) -> String? {
         switch tone {
         case .good: return "checkmark.circle"
         case .warning: return "exclamationmark.triangle"
-        case .info: return "info.circle"
+        case .info: return nil
         }
     }
 

@@ -109,6 +109,26 @@ struct DayShortcutsTests {
         #expect(YesterdayAtThisTime.closest(to: now, among: dates) == nil)
     }
 
+    // MARK: Итог недели — семь полных дней
+
+    /// Сегодняшний день ещё идёт: в среднее и в число записанных дней он
+    /// не входит, иначе утренний завтрак занижал бы среднее за неделю.
+    @Test func theWeekReviewLeavesTodayOut() {
+        for daysAgo in 1...7 {
+            store.add(name: "Ужин", calories: 2000, date: at(19, daysAgo: daysAgo))
+        }
+        store.add(name: "Завтрак", calories: 300, date: at(0, 5))
+        let input = store.weekReviewInput()
+        #expect(input.loggedDays == 7)
+        #expect(input.eaten.allSatisfy { $0 == 2000 })
+    }
+
+    @Test func theWeekRangeEndsYesterday() {
+        let now = at(13)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: now)!
+        #expect(WeekReviewView.weekRange(now: now).hasSuffix(yesterday.formatted(.dateTime.day().month(.wide))))
+    }
+
     // MARK: Обычный приём в пустой день
 
     @Test func anEmptyDayOffersTheUsualMealOfThisHour() {

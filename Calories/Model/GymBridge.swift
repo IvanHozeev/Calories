@@ -79,6 +79,22 @@ enum GymBridge {
         var week: Week?
         var lastWorkout: LastWorkout?
         var daysSinceLastWorkout: Int?
+
+        /// Сила по неделям: сумма лучших оценочных одноповторных максимумов
+        /// основных движений человека (их GymLogger выбирает сам — четыре,
+        /// которые он делает чаще всего). Необязательное: старый GymLogger его
+        /// не пишет, и тогда про силу просто ничего не известно.
+        struct Strength: Codable, Equatable, Sendable {
+            var index: Double?
+            var history: [Point]?
+
+            struct Point: Codable, Equatable, Sendable {
+                var date: Date
+                var index: Double
+            }
+        }
+
+        var strength: Strength?
     }
 
     // MARK: - Чтение

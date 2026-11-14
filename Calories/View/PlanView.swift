@@ -272,6 +272,16 @@ struct PlanView: View {
                       highlighted: change.verdict == .leanGain,
                       caption: String(format: "%.1f → %.1f", change.startLeanKg, change.endLeanKg))
 
+            // Сила — из GymLogger: вес и жир говорят, сколько ушло, сила —
+            // какой ценой. Строки нет, если соседа нет или рядом с началом
+            // и концом не было тренировок.
+            if let strength = store.strengthChange(from: change.fromDate, to: change.toDate) {
+                ResultRow(title: "Сила",
+                          value: String(format: "%+.0f%%", strength.percent),
+                          highlighted: strength.outcome == .gain,
+                          caption: strength.outcome.title)
+            }
+
             // Вердикт с оглядкой на то, зачем идёт фаза: «сухая держится» —
             // успех на сушке и провал на наборе. Без плана остаётся прежний,
             // намерения не знающий.
@@ -361,6 +371,12 @@ struct PlanView: View {
                 ResultRow(title: "Финиш", value: String(format: "%.1f \(String(localized: "кг"))", final))
             }
             ResultRow(title: "Цель", value: String(format: "%.1f \(String(localized: "кг"))", outcome.plan.targetWeightKg))
+            if let strength = store.strengthChange(from: outcome.plan.startDate, to: Date()) {
+                ResultRow(title: "Сила",
+                          value: String(format: "%+.0f%%", strength.percent),
+                          highlighted: strength.outcome == .gain,
+                          caption: strength.outcome.title)
+            }
 
             if let shortfall = outcome.shortfallKg {
                 if outcome.reachedTarget {

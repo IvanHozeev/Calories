@@ -81,7 +81,7 @@ struct EditEntrySheet: View {
         // где человек привык видеть весь продукт.
         .contentShape(Rectangle())
         .onTapGesture {
-            guard basis[index].grams != nil else { return }
+            guard basis[index].grams != nil || basis[index].pieces != nil else { return }
             editingPart = index
         }
     }
@@ -90,13 +90,18 @@ struct EditEntrySheet: View {
     ///
     /// Своих чисел на сто граммов у части нет: она записана тем весом,
     /// которым её съели. Пересчитываем обратно.
-    private func per100g(_ part: EntryComponent, grams: Double) -> FoodItem {
+    ///
+    /// Часть «на штуку» возвращается «на одну штуку»: `grams` для неё — штуки,
+    /// переведённые в сотни.
+    private func per100g(_ part: EntryComponent, grams: Double, perUnit: Bool = false) -> FoodItem {
         let factor = 100 / grams
-        return FoodItem(name: part.name,
-                        caloriesPer100g: Int((Double(part.calories) * factor).rounded()),
-                        protein: part.macros.protein * factor,
-                        fat: part.macros.fat * factor,
-                        carbs: part.macros.carbs * factor)
+        let food = FoodItem(name: part.name,
+                            caloriesPer100g: Int((Double(part.calories) * factor).rounded()),
+                            protein: part.macros.protein * factor,
+                            fat: part.macros.fat * factor,
+                            carbs: part.macros.carbs * factor)
+        food.isPerUnit = perUnit
+        return food
     }
 
     /// Пересчитывает одну часть под новый вес — пропорционально её исходным
@@ -192,6 +197,17 @@ struct EditEntrySheet: View {
                     rescalePart(index, to: edited.grams ?? grams)
                     // Закрываем сами: экран показан из этого состояния,
                     // убрать его надо тем же, чем открыли.
+                    editingPart = nil
+                }
+            } else if index < parts.count, let pieces = parts[index].pieces, pieces > 0 {
+                // Продукт «на штуку» — тем же экраном, но штуками.
+                FoodQuantityView(food: per100g(parts[index], grams: pieces * 100, perUnit: true),
+                                 grams: pieces * 100,
+                                 addTitle: "Готово",
+                                 isPushed: true) { edited in
+                    if let newPieces = edited.pieces {
+                        parts[index] = basis[index].scaled(toPieces: newPieces)
+                    }
                     editingPart = nil
                 }
             }

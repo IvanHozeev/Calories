@@ -50,6 +50,18 @@ struct MealSuggestionsView: View {
                     usualRow(item)
                         .contentShape(Rectangle())
                         .onTapGesture { addUsual(item) }
+                        // «Как обычно, только больше» — по долгому нажатию:
+                        // еда вне дома, где порция другая, а состав тот же.
+                        .contextMenu {
+                            ForEach(EntryComponent.usualMultipliers, id: \.self) { factor in
+                                Button {
+                                    addUsual(item, times: factor)
+                                } label: {
+                                    Text(verbatim: String(format: String(localized: "Как обычно %@"),
+                                                          EntryComponent.multiplierTitle(factor)))
+                                }
+                            }
+                        }
                 }
             } header: {
                 Text("Как обычно")
@@ -80,9 +92,9 @@ struct MealSuggestionsView: View {
     }
 
     /// Кладёт в черновик то, что обычно идёт вместе.
-    private func addUsual(_ item: UsualMeal.Suggestion) {
+    private func addUsual(_ item: UsualMeal.Suggestion, times factor: Double = 1) {
         withAnimation(.snappy) {
-            draftItems.append(contentsOf: item.parts.map {
+            draftItems.append(contentsOf: item.parts.map { $0.times(factor) }.map {
                 MealItem(name: $0.name, calories: $0.calories,
                          macros: Macros(protein: $0.protein, fat: $0.fat, carbs: $0.carbs),
                          grams: $0.grams, pieces: $0.pieces)

@@ -328,6 +328,47 @@ nonisolated struct EntryComponent: Codable, Equatable, Hashable {
         copy.grams = newGrams
         return copy
     }
+
+    /// Та же еда, умноженная на `factor`: «как мой обычный ужин, только в
+    /// полтора раза больше». Множатся и калории с макросами, и вес или штуки.
+    func times(_ factor: Double) -> EntryComponent {
+        guard factor > 0 else { return self }
+        var copy = self
+        copy.calories = Int((Double(calories) * factor).rounded())
+        copy.protein = protein * factor
+        copy.fat = fat * factor
+        copy.carbs = carbs * factor
+        copy.grams = grams.map { $0 * factor }
+        copy.pieces = pieces.map { $0 * factor }
+        return copy
+    }
+
+    /// Множители для «как обычно, только больше или меньше» — еда вне дома:
+    /// в кафе порция редко совпадает с домашней, а собирать её заново по
+    /// продуктам ради одного ужина никто не станет.
+    static let usualMultipliers: [Double] = [0.5, 1.5, 2]
+
+    /// Подпись множителя: «×½», «×1½», «×2».
+    static func multiplierTitle(_ factor: Double) -> String {
+        switch factor {
+        case 0.5: return "×½"
+        case 1.5: return "×1½"
+        default: return "×" + factor.formatted(.number.precision(.fractionLength(0...1)))
+        }
+    }
+
+    /// То же для продукта «на штуку»: другое число штук.
+    func scaled(toPieces newPieces: Double) -> EntryComponent {
+        guard let pieces, pieces > 0, newPieces > 0 else { return self }
+        let factor = newPieces / pieces
+        var copy = self
+        copy.calories = Int((Double(calories) * factor).rounded())
+        copy.protein = protein * factor
+        copy.fat = fat * factor
+        copy.carbs = carbs * factor
+        copy.pieces = newPieces
+        return copy
+    }
 }
 
 /// Одна позиция в черновике приёма пищи — до нажатия «Сохранить» нигде не хранится.

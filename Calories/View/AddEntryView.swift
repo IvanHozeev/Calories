@@ -522,6 +522,17 @@ struct AddEntryView: View {
                 .onTapGesture {
                     addUsualMeal(usual)
                 }
+                // «Как обычно, только больше» — по долгому нажатию.
+                .contextMenu {
+                    ForEach(EntryComponent.usualMultipliers, id: \.self) { factor in
+                        Button {
+                            addUsualMeal(usual, times: factor)
+                        } label: {
+                            Text(verbatim: String(format: String(localized: "Как обычно %@"),
+                                                  EntryComponent.multiplierTitle(factor)))
+                        }
+                    }
+                }
             }
         }
     }
@@ -965,13 +976,14 @@ struct AddEntryView: View {
     }
 
     /// Добавить всё из «Как обычно» в черновик.
-    private func addUsualMeal(_ usual: UsualMeal.Suggestion) {
-        for part in usual.parts {
+    private func addUsualMeal(_ usual: UsualMeal.Suggestion, times factor: Double = 1) {
+        for part in usual.parts.map({ $0.times(factor) }) {
             draftItems.append(MealItem(
                 name: part.name,
                 calories: part.calories,
                 macros: part.macros,
-                grams: part.grams
+                grams: part.grams,
+                pieces: part.pieces
             ))
         }
         showingUsualMeal = false

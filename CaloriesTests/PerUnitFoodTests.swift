@@ -84,3 +84,43 @@ struct PerUnitFoodTests {
         #expect(part.grams == 200)
     }
 }
+
+/// Правка штук у записанного продукта «на штуку».
+struct PerUnitScalingTests {
+    @Test func changingPiecesRescalesTheNumbers() {
+        let shake = EntryComponent(name: "Шейк", calories: 320, macros: Macros(protein: 40, fat: 6, carbs: 25), pieces: 1)
+        let half = shake.scaled(toPieces: 0.5)
+        #expect(half.calories == 160)
+        #expect(half.protein == 20)
+        #expect(half.pieces == 0.5)
+        #expect(half.grams == nil)
+    }
+
+    @Test func aComponentWithoutPiecesIsNotRescaledByPieces() {
+        let cheese = EntryComponent(name: "Творог", calories: 200, grams: 200)
+        #expect(cheese.scaled(toPieces: 2) == cheese)
+    }
+}
+
+/// «Как мой обычный ужин, только в полтора раза больше» (5.2).
+struct UsualMultiplierTests {
+    @Test func aUsualMealTimesOneAndAHalf() {
+        let pasta = EntryComponent(name: "Паста", calories: 600, macros: Macros(protein: 20, fat: 10, carbs: 100), grams: 300)
+        let bigger = pasta.times(1.5)
+        #expect(bigger.calories == 900)
+        #expect(bigger.carbs == 150)
+        #expect(bigger.grams == 450)
+    }
+
+    @Test func piecesAreMultipliedToo() {
+        let shake = EntryComponent(name: "Шейк", calories: 320, pieces: 1)
+        #expect(shake.times(2).pieces == 2)
+        #expect(shake.times(2).grams == nil)
+    }
+
+    @Test func theMultipliersAreHalfOneAndAHalfAndDouble() {
+        #expect(EntryComponent.usualMultipliers == [0.5, 1.5, 2])
+        #expect(EntryComponent.multiplierTitle(0.5) == "×½")
+        #expect(EntryComponent.multiplierTitle(1.5) == "×1½")
+    }
+}

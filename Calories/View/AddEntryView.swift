@@ -1320,6 +1320,10 @@ struct AddEntryView: View {
                         .fontWeight(.semibold)
                 }
                 .buttonStyle(.glassProminent)
+                // Чёрная в светлой теме и белая в тёмной, как главные кнопки
+                // остальных экранов: акцент приложения настраивается, а эта
+                // кнопка должна читаться при любом.
+                .tint(.primary)
                 .accessibilityIdentifier("saveMeal")
             }
             // Стекло и крупный размер — те же, что у кнопок в тулбаре: полоса
@@ -1443,7 +1447,7 @@ struct AddEntryView: View {
                         Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
                             .font(.app(.title3, weight: .bold))
                             .monospacedDigit()
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.primary)
                             .contentTransition(.numericText())
                     }
                     MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros })
@@ -1478,11 +1482,13 @@ struct AddEntryView: View {
         // Только пока приём пуст: начатый приём уже не «как вчера», и
         // дальше под ним нужны «Обычно вместе» и «Недавнее».
         if !isSearching, draftItems.isEmpty, let entry = yesterdayEntry {
-            Section("Вчера в это время") {
+            Section {
                 quickMealRow(entry)
                     .contentShape(Rectangle())
                     .onTapGesture { addQuickMeal(entry) }
                     .accessibilityIdentifier("yesterdayAtThisTime")
+            } header: {
+                Text("Вчера в это время").listSectionTitle()
             }
         }
 
@@ -1515,7 +1521,7 @@ struct AddEntryView: View {
         }
 
         if !shownRecentFoods.isEmpty || !shownRecentDishes.isEmpty {
-            Section("Недавнее") {
+            Section {
                 ForEach(shownRecentFoods) { food in
                     foodRow(food)
                         .contentShape(Rectangle())
@@ -1526,11 +1532,13 @@ struct AddEntryView: View {
                         .contentShape(Rectangle())
                         .onTapGesture { openServing(.dish(dish)) }
                 }
+            } header: {
+                Text("Недавнее").listSectionTitle()
             }
         }
 
         if isSearching, !shownDishes.isEmpty {
-            Section("Рецепты") {
+            Section {
                 ForEach(shownDishes) { dish in
                     dishRow(dish)
                         .contentShape(Rectangle())
@@ -1555,6 +1563,8 @@ struct AddEntryView: View {
                             .accessibilityLabel("Изменить")
                         }
                 }
+            } header: {
+                Text("Рецепты").listSectionTitle()
             }
         }
 
@@ -1865,8 +1875,40 @@ struct AddEntryView: View {
             macros: food.macrosPer100g.portion(grams: grams),
             micros: store.notableMicronutrients(forFoodNamed: food.name, grams: grams),
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),
-            traits: food.traits
+            traits: food.traits,
+            quickAdd: { toggleQuick(food) },
+            isAdded: draftItems.contains { $0.name == food.name }
         )
+    }
+
+    /// Продукт в приём одним касанием — с той порцией, что стоит в строке.
+    ///
+    /// Повторное нажатие убирает его: «+» и галочка — один выключатель, и
+    /// ошибочно добавленное не приходится искать в черновике.
+    private func toggleQuick(_ food: FoodItem) {
+        if let index = draftItems.lastIndex(where: { $0.name == food.name }) {
+            withAnimation(.snappy) { _ = draftItems.remove(at: index) }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            return
+        }
+        let item = Self.quickItem(for: food, usualGrams: usualGrams(food))
+        logChoice(food.name, source: "food", grams: item.grams)
+        withAnimation(.snappy) { draftItems.append(item) }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    /// Что кладётся в приём по «+»: обычная порция, иначе порция продукта,
+    /// иначе сто граммов. Продукту «на штуку» — одна штука.
+    static func quickItem(for food: FoodItem, usualGrams: Double?) -> MealItem {
+        if food.isPerUnit {
+            return MealItem(name: food.name, calories: food.caloriesPer100g,
+                            macros: food.macrosPer100g, grams: nil, pieces: 1)
+        }
+        let grams = usualGrams ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
+        return MealItem(name: food.name,
+                        calories: Int((Double(food.caloriesPer100g) * grams / 100).rounded()),
+                        macros: food.macrosPer100g.portion(grams: grams),
+                        grams: grams, pieces: nil)
     }
 
     private func dishRow(_ dish: Dish) -> some View {

@@ -64,7 +64,7 @@ struct MealSuggestionsView: View {
                         }
                 }
             } header: {
-                Text("Как обычно")
+                Text("Как обычно").listSectionTitle()
             }
         }
 
@@ -77,7 +77,7 @@ struct MealSuggestionsView: View {
                         .onTapGesture { openPair(item) }
                 }
             } header: {
-                Text("Обычно вместе")
+                Text("Обычно вместе").listSectionTitle()
             }
         }
 

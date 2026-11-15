@@ -30,6 +30,11 @@ struct FoodRow: View {
     /// строкой в цвет своего доминирующего макроса. Одиночный продукт —
     /// без этого, как раньше.
     var parts: [FoodPart] = []
+    /// Положить в приём одним касанием, с обычной порцией. nil — кнопки нет:
+    /// в дневнике и в «Рационе» строку нажимают, чтобы открыть, а не добавить.
+    var quickAdd: (() -> Void)? = nil
+    /// Уже в приёме: кнопка рисуется галочкой, повторное нажатие убирает.
+    var isAdded: Bool = false
 
     /// Одна часть составного приёма: имя, цвет своего доминирующего макроса
     /// и вес в граммах — чтобы показать «Молоко 3% 300 г» вместо просто
@@ -121,6 +126,32 @@ struct FoodRow: View {
         .accessibilityIdentifier("vitaminOffer")
     }
 
+    /// «+» в круге; в приёме — чёрная галочка. Круг 28 точек, касание 44.
+    ///
+    /// Строка целиком открывает экран порции, и обычную порцию там
+    /// подтверждали вторым касанием. Для продукта, который едят всегда в
+    /// одном количестве, это лишнее: «+» кладёт его в приём сразу, с той
+    /// порцией, что стоит в строке.
+    private func quickAddButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle()
+                    .fill(isAdded ? Color.primary : Color.secondary.opacity(0.16))
+                Image(systemName: isAdded ? "checkmark" : "plus")
+                    .font(.app(size: 13, weight: .bold))
+                    .foregroundStyle(isAdded ? Color(.systemBackground) : Color.accentColor)
+            }
+            .frame(width: 28, height: 28)
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: "\(String(localized: "Добавить")) \(name)"))
+        .accessibilityAddTraits(isAdded ? .isSelected : [])
+        .accessibilityIdentifier("quickAdd")
+        .padding(.trailing, -6)
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Строки прижаты друг к другу: три яруса (название, порция,
@@ -140,7 +171,7 @@ struct FoodRow: View {
                     ForEach(parts) { part in
                         nameLine(text: part.name,
                                  font: .app(.callout, weight: .semibold),
-                                 color: part.color,
+                                 color: .primary,
                                  traits: part.traits,
                                  weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
                     }
@@ -151,9 +182,10 @@ struct FoodRow: View {
                              // Название — полужирным, как и в любой строке списка:
                              // в строке оно главное, а всё под ним — приметы.
                              font: .app(.callout, weight: .semibold),
-                             // Цвет названия — цвет доминирующего макроса порции (по граммам),
-                             // чтобы сразу было видно, чем продукт «кормит».
-                             color: leadingKind?.color ?? .primary.opacity(0.85),
+                             // Название чёрное: цвет макросов теперь в полоске справа
+                             // (`MacroShareBar`). Раньше им красилось и название, и
+                             // буквы под ним, и число калорий — четыре кода без подписей.
+                             color: .primary,
                              traits: traits,
                              weight: portion.isEmpty ? nil : portion)
                 }
@@ -167,11 +199,8 @@ struct FoodRow: View {
                         .lineLimit(1)
                 }
 
-                if hasMacros || !micros.isEmpty || offersVitamins {
+                if !micros.isEmpty || offersVitamins {
                     HStack(spacing: 8) {
-                        if hasMacros {
-                            MacroTags(macros: macros, compact: true, leading: leadingKind)
-                        }
                         if !micros.isEmpty {
                             MicroTags(nutrients: micros)
                         }
@@ -186,11 +215,15 @@ struct FoodRow: View {
             // Без этой рамки текст берёт натуральную ширину и уезжает.
             .frame(maxWidth: .infinity, alignment: .leading)
 
+            if hasMacros {
+                MacroShareBar(macros: macros)
+            }
+
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
                     .font(.app(.subheadline, weight: EnergyDensity.weight(caloriesPer100g)))
                     .monospacedDigit()
-                    .foregroundStyle(EnergyDensity.tint(caloriesPer100g))
+                    .foregroundStyle(.primary)
                 Text("ккал")
                     .font(.app(.caption2))
                     .foregroundStyle(.secondary)
@@ -201,7 +234,11 @@ struct FoodRow: View {
             .fixedSize()
             // Число не липнет к правому краю ячейки: без отступа «ккал»
             // упиралось в границу списка, и строка выглядела обрезанной.
-            .padding(.trailing, 6)
+            .padding(.trailing, quickAdd == nil ? 6 : 0)
+
+            if let quickAdd {
+                quickAddButton(quickAdd)
+            }
         }
         .padding(.vertical, 2)
         // Разделитель начинается от края содержимого — там же, где полоска,

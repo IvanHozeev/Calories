@@ -650,8 +650,10 @@ private extension ContentView {
             // Взвешивание отсюда ушло в общую очередь подсказок: утром оно
             // первое дело дня, но не важнее копии, поста и перерыва в диете.
             if store.profile == nil {
-                NavigationLink {
-                    SettingsView(store: store)
+                // Кнопкой, а не `NavigationLink`: ссылка в строке списка рисует
+                // системную стрелку справа от плашки, и стрелок было две.
+                Button {
+                    showingBackupSettings = true
                 } label: {
                     HStack(spacing: 10) {
                         Image(systemName: "person.crop.circle.badge.questionmark")

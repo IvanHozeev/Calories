@@ -258,16 +258,7 @@ struct OnboardingView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(ExplanationSettings.shared.level == level
-                                      ? accent.opacity(0.1) : Color(.secondarySystemBackground))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(ExplanationSettings.shared.level == level ? accent : Color.clear,
-                                        lineWidth: 1.5)
-                        )
+                        .selectionSurface(ExplanationSettings.shared.level == level, accent: accent)
                     }
                     .buttonStyle(.plain)
                 }
@@ -380,7 +371,7 @@ struct OnboardingView: View {
                         .padding(.vertical, 10)
                     }
                     .padding(.horizontal, 16)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+                    .tileSurface(cornerRadius: 20)
 
                     if ratePercent > intent.aggressiveRatePercent {
                         Label(intent == .cut
@@ -388,7 +379,7 @@ struct OnboardingView: View {
                               : "Быстрее половины процента в неделю — на наборе большая часть прибавки будет жиром.",
                               systemImage: "exclamationmark.triangle.fill")
                             .font(.app(.caption))
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(ProgressRing.overColors[0])
                     }
 
                     Text(String(format: String(localized: "План бесплатно %lld дней — за это время появится первый вердикт, как он идёт."),
@@ -466,7 +457,7 @@ struct OnboardingView: View {
                 .padding(.vertical, 12)
             }
             .padding(.horizontal, 16)
-            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+            .tileSurface(cornerRadius: 20)
         }
     }
 
@@ -546,7 +537,7 @@ struct OnboardingView: View {
                 Image(systemName: backups.isConfigured
                       ? "externaldrive.badge.checkmark" : "externaldrive.badge.icloud")
                     .font(.app(size: 72))
-                    .foregroundStyle(backups.isConfigured ? .green : .blue)
+                    .foregroundStyle(backups.isConfigured ? .green : Color.accentColor)
 
                 if let folder = backups.folderName {
                     Text(verbatim: folder)
@@ -572,7 +563,7 @@ struct OnboardingView: View {
                         .frame(height: 48)
                 }
                 .buttonStyle(.bordered)
-                .tint(.blue)
+                .tint(.accentColor)
                 .accessibilityIdentifier("onboardingBackupFolder")
             }
         }
@@ -605,7 +596,7 @@ struct OnboardingView: View {
             VStack(spacing: 20) {
                 Image(systemName: "figure.walk.circle.fill")
                     .font(.app(size: 72))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.tint)
                 Text("Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода.")
                     .font(.app(.body))
                     .foregroundStyle(.secondary)
@@ -621,7 +612,7 @@ struct OnboardingView: View {
                         .frame(height: 48)
                 }
                 .buttonStyle(.bordered)
-                .tint(.blue)
+                .tint(.accentColor)
                 .disabled(healthAsked)
                 .accessibilityIdentifier("onboardingHealthAccess")
             }
@@ -750,13 +741,9 @@ struct OnboardingView: View {
     private func primaryButton(title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.app(.body, weight: .semibold))
                 .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(accent)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
         }
+        .buttonStyle(.mainAction)
         .padding(.horizontal, 24)
         .padding(.bottom, 44)
     }
@@ -781,14 +768,7 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(selected ? accent.opacity(0.1) : Color(.secondarySystemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(selected ? accent : Color.clear, lineWidth: 1.5)
-            )
+            .selectionSurface(selected, accent: accent)
         }
         // Без плоского стиля кнопка красит текст карточки в синий.
         .buttonStyle(.plain)
@@ -813,15 +793,19 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(selected ? accent.opacity(0.1) : Color(.secondarySystemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(selected ? accent : Color.clear, lineWidth: 1.5)
-            )
+            .selectionSurface(selected, accent: accent)
         }
         .buttonStyle(.plain)
+    }
+}
+
+private extension View {
+    /// Карточка выбора: стекло, выбранная обведена цветом шага.
+    func selectionSurface(_ selected: Bool, accent: Color) -> some View {
+        tileSurface(cornerRadius: 20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(selected ? accent : Color.clear, lineWidth: 1.5)
+            )
     }
 }

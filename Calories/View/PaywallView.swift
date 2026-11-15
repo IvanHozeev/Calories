@@ -160,7 +160,10 @@ struct PaywallView: View {
             featureRow("banknote", "Банк калорий",
                        "Недобор одного дня не пропадает: он добавляется к остальным дням недели, а перебор вычитается.")
         }
-        .padding(.horizontal, 24)
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
+        .padding(.horizontal, 20)
     }
 
     /// Итоги пробного периода: то, что уже работает на человека.
@@ -214,7 +217,7 @@ struct PaywallView: View {
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
             Button("Готово") { dismiss() }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.mainAction)
                 .padding(.top, 4)
         }
         .padding(.top, 12)
@@ -228,7 +231,7 @@ struct PaywallView: View {
                 .font(.app(.headline))
                 .foregroundStyle(.green)
             Button("Готово") { dismiss() }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.mainAction)
         }
         .padding(.top, 12)
     }
@@ -295,16 +298,14 @@ struct PaywallView: View {
             } label: {
                 Group {
                     if isPurchasing {
-                        ProgressView()
+                        ProgressView().tint(Color(.systemBackground))
                     } else {
                         Text("Оформить Premium")
-                            .font(.app(.body, weight: .semibold))
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.mainAction)
             .disabled(selectedProduct == nil || isPurchasing)
 
             Text(introText(for: selectedProduct) ?? String(localized: "Отменить можно в любой момент."))

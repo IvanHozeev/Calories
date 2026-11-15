@@ -72,9 +72,14 @@ struct FoodRow: View {
     ///   на его строке — «Протеин со вкусом / печенья 🔥».
     ///
     /// Третьего, с одиноким значком, нет: он всегда рядом с последним словом.
+    ///
+    /// Вес — по желанию: у частей составного приёма он стоит в той же строке,
+    /// что название, после значков («Молоко 3% 🌿 300 г»), а не отдельной
+    /// строкой, как у одиночного продукта: иначе приём из пяти частей
+    /// занимал бы десять строк.
     @ViewBuilder
     private func nameBlock(text: String, font: Font, color: Color,
-                           traits: [FoodTrait]) -> some View {
+                           traits: [FoodTrait], weight: String? = nil) -> some View {
         // Название оборачиваем в изолятор направления (FSI…PDI): если имя на
         // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
         // его со значками. Для латиницы и кириллицы изолятор не меняет ничего.
@@ -82,12 +87,22 @@ struct FoodRow: View {
         let head = words.dropLast().joined(separator: " ")
         let last = words.last.map(String.init) ?? text
         if traits.isEmpty {
-            Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
+            // Без значков — один `Text`: перенос идёт по словам, а вес
+            // встаёт в конец последней строки. Пробел перед весом и внутри
+            // него неразрывный, чтобы «300 г» не разрывалось.
+            let name = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
+            if let weight {
+                name + Text("\u{00A0}\u{00A0}" + weight.replacingOccurrences(of: " ", with: "\u{00A0}"))
+                    .font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
+            } else {
+                name
+            }
         } else {
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color).lineLimit(1)
                     traitGlyphs(traits)
+                    weightLabel(weight)
                 }
                 VStack(alignment: .leading, spacing: 0) {
                     if !head.isEmpty {
@@ -96,9 +111,19 @@ struct FoodRow: View {
                     HStack(alignment: .firstTextBaseline, spacing: 6) {
                         Text("\u{2068}\(last)\u{2069}").font(font).foregroundStyle(color)
                         traitGlyphs(traits)
+                        weightLabel(weight)
                     }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func weightLabel(_ weight: String?) -> some View {
+        if let weight {
+            Text(verbatim: weight.replacingOccurrences(of: " ", with: "\u{00A0}"))
+                .font(.app(.caption2, weight: .medium))
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -112,8 +137,7 @@ struct FoodRow: View {
         }
     }
 
-    /// Количество — отдельной строкой под названием, везде одинаково: и у
-    /// одиночного продукта, и у каждой части составного приёма.
+    /// Количество — отдельной строкой под названием у одиночного продукта.
     private func portionLine(_ text: String) -> some View {
         Text(verbatim: text)
             .font(.app(.footnote, weight: .medium))
@@ -172,18 +196,15 @@ struct FoodRow: View {
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
-                    // Каждая часть приёма — названием со значками и весом
-                    // второй строкой, как у одиночного продукта.
+                    // Каждая часть приёма — названием, значками и весом в одной
+                    // строке: частей бывает пять, и вес отдельной строкой
+                    // удваивал бы высоту приёма.
                     ForEach(parts) { part in
-                        VStack(alignment: .leading, spacing: 1) {
-                            nameBlock(text: part.name,
-                                      font: .app(.callout, weight: .semibold),
-                                      color: .primary,
-                                      traits: part.traits)
-                            if let weight = PortionLabel.text(grams: part.grams, pieces: part.pieces) {
-                                portionLine(weight)
-                            }
-                        }
+                        nameBlock(text: part.name,
+                                  font: .app(.callout, weight: .semibold),
+                                  color: .primary,
+                                  traits: part.traits,
+                                  weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
                     }
                 } else {
                     // Имя, значки свойств и вес — одной строкой. Длинное имя

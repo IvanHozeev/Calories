@@ -60,19 +60,6 @@ struct MealImpactCard: View {
                 }
             }
             Spacer(minLength: 0)
-
-            // Калории самой порции — справа: с поднятой клавиатурой карточка
-            // продукта с этим же числом уезжает под нижнюю панель, а выбирают
-            // граммы именно по нему.
-            VStack(alignment: .trailing, spacing: 0) {
-                Text(verbatim: "\(impact.thisCalories)")
-                    .font(.app(.title3, weight: .bold))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Text("ккал")
-                    .font(.app(.caption))
-                    .foregroundStyle(.secondary)
-            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

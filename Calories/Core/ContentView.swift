@@ -626,9 +626,9 @@ private extension ContentView {
             // поверхности: праздник не должен отнимать у знака дня место,
             // которое у него на первом экране.
             if showsBirthday {
-                SwipeToDismiss(onDismiss: {
+                HintCard(onClose: {
                     withAnimation(.snappy) { dismissedHints = DismissedHints().dismiss(birthdayID) }
-                }) {
+                }, identifier: "birthdayCard") {
                     BirthdayCard(age: store.profile?.birthDate.flatMap { UserProfile.age(bornOn: $0) })
                 }
                 .transition(.move(edge: .leading).combined(with: .opacity))
@@ -637,10 +637,19 @@ private extension ContentView {
             // Сваренное напоминает о себе само: доесть, пока не испортилось,
             // или приготовить, пока не кончилось. Одна строка на самую
             // срочную кастрюлю — список дел по холодильнику тут не нужен.
-            if let hint = store.batchHint() {
-                BatchHintRow(dish: hint.dish, state: hint.state, advice: hint.advice) {
-                    openingDish = hint.dish
+            //
+            // Закрывается до завтра, как остальные: о кастрюле, которую
+            // человек и так помнит, строка с утра до вечера только мешала.
+            if let hint = store.batchHint(),
+               !dismissedHints.contains(DismissedHints.dated("batch:\(hint.dish.name)")) {
+                HintCard(onTap: { openingDish = hint.dish }, onClose: {
+                    withAnimation(.snappy) {
+                        dismissedHints = DismissedHints().dismiss(DismissedHints.dated("batch:\(hint.dish.name)"))
+                    }
+                }, identifier: "batchHint") {
+                    BatchHintRow(dish: hint.dish, state: hint.state, advice: hint.advice)
                 }
+                .transition(.move(edge: .leading).combined(with: .opacity))
             }
 
             // Без профиля нет ни нормы, ни веса, и подсказывать нечего, кроме
@@ -802,7 +811,7 @@ private extension ContentView {
         DayHintPicker.pick(hintQueue, now: Date(), dismissed: dismissedHints).main
     }
 
-    /// Смахнуть подсказку до завтра: на её место встаёт следующая.
+    /// Закрыть подсказку до завтра: на её место встаёт следующая.
     private func dismiss(_ hint: DayHint) {
         store.hintJournal.record(.dismissed, hint)
         withAnimation(.snappy) {
@@ -846,71 +855,80 @@ private extension ContentView {
         switch hint.source {
         case .fasting:
             if let fasting = store.fastingHint() {
-                FastingStrip(hint: fasting) {
-                    store.hintJournal.record(.accepted, hint)
-                    showingFasting = true
-                }
+                FastingStrip(hint: fasting)
             }
         case .weeklyReview:
-            Button {
-                store.hintJournal.record(.accepted, hint)
-                showingPlan = true
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "calendar.badge.clock")
-                        .foregroundStyle(.secondary)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Недельный обзор")
-                            .font(.app(.subheadline, weight: .medium))
-                        if let proposal = store.proposedGoal {
-                            Text(verbatim: String(format: String(localized: "%lld ккал"), proposal))
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
+            HStack(spacing: 10) {
+                Image(systemName: "calendar.badge.clock")
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Недельный обзор")
+                        .font(.app(.subheadline, weight: .medium))
+                    if let proposal = store.proposedGoal {
+                        Text(verbatim: String(format: String(localized: "%lld ккал"), proposal))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
                     }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.app(.caption))
-                        .foregroundStyle(.tertiary)
                 }
-                .padding(.vertical, 2)
-                .contentShape(Rectangle())
+                Spacer(minLength: 0)
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("weeklyReviewDue")
+            .padding(.vertical, 2)
         case .backup:
             // Копий нет, а дневнику уже есть что терять. Синхронизации у
             // приложения нет, контейнер удаляется вместе с ним, и выбранная
             // папка — единственное, что стоит между годом записей и пустым
-            // экраном. Смахнутое возвращается завтра; уходит навсегда, как
+            // экраном. Закрытое возвращается завтра; уходит навсегда, как
             // только папка выбрана.
-            Button {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "externaldrive.badge.exclamationmark")
+                    .foregroundStyle(.orange)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Копий дневника нет")
+                        .font(.app(.subheadline, weight: .semibold))
+                    Text("Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.vertical, 2)
+        default:
+            DayHintRow(hint: hint)
+        }
+    }
+
+    /// Что делает тап по подсказке. nil — подсказка только сообщает.
+    private func hintAction(_ hint: DayHint) -> (() -> Void)? {
+        switch hint.source {
+        case .fasting:
+            guard store.fastingHint() != nil else { return nil }
+            return {
+                store.hintJournal.record(.accepted, hint)
+                showingFasting = true
+            }
+        case .weeklyReview:
+            return {
+                store.hintJournal.record(.accepted, hint)
+                showingPlan = true
+            }
+        case .backup:
+            return {
                 store.hintJournal.record(.accepted, hint)
                 showingBackupSettings = true
-            } label: {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "externaldrive.badge.exclamationmark")
-                        .foregroundStyle(.orange)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Копий дневника нет")
-                            .font(.app(.subheadline, weight: .semibold))
-                        Text("Он живёт только на этом телефоне. Выбери папку — копия будет обновляться сама.")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.app(.caption))
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.vertical, 2)
-                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .accessibilityIdentifier("backupMissing")
         default:
-            DayHintRow(hint: hint, onTap: hint.action.map { action in { perform(action) } })
+            return hint.action.map { action in { perform(action) } }
+        }
+    }
+
+    /// Имя подсказки для тестов: у поста, обзора и копии свои, у остальных общее.
+    private func hintIdentifier(_ hint: DayHint) -> String {
+        switch hint.source {
+        case .fasting: return "fastingCard"
+        case .weeklyReview: return "weeklyReviewDue"
+        case .backup: return "backupMissing"
+        default: return "dayHintMain"
         }
     }
 
@@ -1031,14 +1049,15 @@ private extension ContentView {
     @ViewBuilder
     var dayHints: some View {
         VStack(spacing: 16) {
-            // Одна подсказка — самая срочная из очереди. Смахивание влево
-            // убирает её до завтра, и на её место встаёт следующая.
+            // Одна подсказка — самая срочная из очереди. Крестик убирает её
+            // до завтра, и на её место встаёт следующая.
             if let hint = mainHint {
-                SwipeToDismiss(onDismiss: { dismiss(hint) }) {
-                    // Поверхность вешаем здесь, на любую из подсказок разом:
-                    // у поста, обзора и копии вид внутри свой, а плашка под
-                    // ним — одна и та же.
-                    hintView(hint).hintSurface()
+                // Плашка, нажатие и крестик — одни на любую подсказку: у
+                // поста, обзора и копии вид внутри свой, а ведут они себя
+                // одинаково.
+                HintCard(onTap: hintAction(hint), onClose: { dismiss(hint) },
+                         identifier: hintIdentifier(hint)) {
+                    hintView(hint)
                 }
                 .id(hint.id)
                 // Показ — в журнал, один раз на подсказку: журнал сам

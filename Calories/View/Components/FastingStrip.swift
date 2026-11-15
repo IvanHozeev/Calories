@@ -7,7 +7,6 @@ import SwiftUI
 /// показывает тот совет, который к месту сегодня, а вся памятка — по нажатию.
 struct FastingStrip: View {
     let hint: FastingHint
-    var onOpen: () -> Void
 
     private var title: String {
         // Пост идёт — говорим, сколько осталось: это единственное, что в этот
@@ -31,8 +30,7 @@ struct FastingStrip: View {
     }
 
     var body: some View {
-        Button(action: onOpen) {
-            HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 10) {
                 Image(systemName: hint.daysUntil == 0 ? "moon.stars.fill" : "moon.stars")
                     .font(.app(.subheadline))
                     .foregroundStyle(.indigo)
@@ -65,16 +63,6 @@ struct FastingStrip: View {
                     }
                 }
                 Spacer(minLength: 4)
-                Image(systemName: "chevron.right")
-                    .font(.app(.caption2, weight: .semibold))
-                    .foregroundStyle(.tertiary)
-                    .padding(.top, 4)
             }
-            // Поверхность — снаружи, общая для всех подсказок: своё стекло
-            // на ней давало бы второе поверх первого.
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("fastingCard")
     }
 }

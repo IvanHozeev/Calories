@@ -331,6 +331,11 @@ struct DismissedHints {
         return ids
     }
 
+    /// Номер подсказки на сегодня: закрытая уходит до завтра.
+    static func dated(_ base: String, now: Date = Date(), calendar: Calendar = .current) -> String {
+        base + todaySuffix(now, calendar: calendar)
+    }
+
     private static func todaySuffix(_ now: Date, calendar: Calendar) -> String {
         let parts = calendar.dateComponents([.year, .month, .day], from: now)
         return String(format: ":%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)

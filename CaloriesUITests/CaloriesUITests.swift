@@ -19,7 +19,8 @@ final class CaloriesUITests: XCTestCase {
     /// - Parameter seedMeasurements: посеять два сеанса замеров. История
     ///   замеров открывается только со второго — по одному её не бывает.
     private func launchApp(premium: Bool = false, resetMeasurements: Bool = false,
-                           health: Bool = false, seedMeasurements: Bool = false) -> XCUIApplication {
+                           health: Bool = false, seedMeasurements: Bool = false,
+                           extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "-AppleLanguages", "(en)",
@@ -49,7 +50,7 @@ final class CaloriesUITests: XCTestCase {
             "-ui_test_reset_appearance", "YES",
             "-health_pretend_authorized", health ? "YES" : "NO",
             "-ui_test_seed_measurements", seedMeasurements ? "YES" : "NO"
-        ]
+        ] + extraArguments
         app.launch()
         // Ждём, пока интерфейс действительно встанет, и только потом отдаём
         // приложение тесту.
@@ -541,6 +542,42 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
         let hints = app.descendants(matching: .any).matching(identifier: "dayHintMain")
         XCTAssertLessThanOrEqual(hints.count, 1, "На «Сегодня» больше одной главной подсказки")
+    }
+
+    /// Крестик закрывает подсказку и больше ничего не делает.
+    ///
+    /// Подсказки закрывались смахиванием; теперь — крестиком. Первая его
+    /// версия лежала поверх плашки, и касание проваливалось в строку списка:
+    /// подсказка оставалась, а открывался разбор дня. Проверяем оба конца:
+    /// подсказка ушла, а экран остался «Сегодня» без листов и переходов.
+    @MainActor
+    func testTheCrossClosesAHintAndOpensNothing() {
+        // Закрытые сегодня подсказки — с чистого листа: аргумент запуска
+        // ложится поверх хранилища, и прошлые прогоны не прячут подсказку.
+        let app = launchApp(extraArguments: ["-dismissed_day_hints", "()"])
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
+
+        let close = app.buttons.matching(identifier: "hintClose").firstMatch
+        guard close.waitForExistence(timeout: 5) else {
+            // Подсказок сегодня нет — и проверять нечего.
+            return
+        }
+        let hintIDs = ["dayHintMain", "fastingCard", "weeklyReviewDue", "backupMissing",
+                       "birthdayCard", "batchHint"]
+        let hint = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier IN %@", hintIDs)).firstMatch
+        XCTAssertTrue(hint.exists, "Крестик есть, а подсказки рядом нет")
+        let label = hint.label
+
+        close.tap()
+
+        let same = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "identifier IN %@ AND label == %@", hintIDs, label)).firstMatch
+        let gone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: same)
+        wait(for: [gone], timeout: 5)
+        XCTAssertTrue(app.navigationBars["Today"].isHittable,
+                      "После крестика открылось что-то поверх «Сегодня»")
+        XCTAssertFalse(app.navigationBars["Day breakdown"].exists, "Крестик открыл разбор дня")
     }
 
     /// Клавиатура из-под листа не трогает экран под ним.

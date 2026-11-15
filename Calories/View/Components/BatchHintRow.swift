@@ -8,7 +8,6 @@ struct BatchHintRow: View {
     let dish: Dish
     let state: DishBatch.State
     let advice: DishBatch.Advice
-    var onOpen: () -> Void
 
     /// Название и сколько осталось — больше в строке ничего.
     ///
@@ -46,26 +45,15 @@ struct BatchHintRow: View {
     }
 
     var body: some View {
-        Button {
-            onOpen()
-        } label: {
-            HStack(spacing: 10) {
-                Image(systemName: "takeoutbag.and.cup.and.straw")
-                    .foregroundStyle(color)
-                Text(verbatim: text)
-                    .font(.app(.subheadline))
-                    .multilineTextAlignment(.leading)
-                Spacer(minLength: 0)
-                Image(systemName: "chevron.right")
-                    .font(.app(.caption))
-                    .foregroundStyle(.tertiary)
-            }
-            // Цвет — у значка: состояние кастрюли он и говорит, а текст
-            // цветом читался хуже, чем чёрным по стеклу.
-            .hintSurface()
-            .contentShape(RoundedRectangle(cornerRadius: 18))
+        // Цвет — у значка: состояние кастрюли он и говорит, а текст
+        // цветом читался хуже, чем чёрным по стеклу.
+        HStack(spacing: 10) {
+            Image(systemName: "takeoutbag.and.cup.and.straw")
+                .foregroundStyle(color)
+            Text(verbatim: text)
+                .font(.app(.subheadline))
+                .multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
         }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier("batchHint")
     }
 }

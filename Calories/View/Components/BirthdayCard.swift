@@ -32,9 +32,7 @@ struct BirthdayCard: View {
             }
             Spacer(minLength: 0)
         }
-        .hintSurface()
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("birthdayCard")
         .onAppear { appeared = true }
     }
 }

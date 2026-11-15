@@ -8,10 +8,9 @@ import SwiftUI
 struct DayHintRow: View {
     let hint: DayHint
     /// nil — у подсказки нет действия, строка не нажимается.
-    var onTap: (() -> Void)?
 
     var body: some View {
-        let content = HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: 10) {
             Group {
                 // Подсказки календаря — звездой Давида: в SF Symbols её нет,
                 // поэтому знаком, тем же, что у переключателя в профиле.
@@ -35,26 +34,12 @@ struct DayHintRow: View {
                 }
             }
             Spacer(minLength: 0)
-            if onTap != nil {
-                Image(systemName: "chevron.right")
-                    .font(.app(.caption))
-                    .foregroundStyle(.tertiary)
-            }
         }
         .padding(.vertical, 2)
-
-        Group {
-            if let onTap {
-                Button(action: onTap) { content.contentShape(Rectangle()) }
-                    .buttonStyle(.plain)
-            } else {
-                content
-            }
-        }
         // Одним элементом: без этого имя наследовали значок, заголовок и
         // пояснение по отдельности, и VoiceOver читал подсказку тремя кусками.
+        // Тап, нажатие и имя для тестов — у карточки вокруг (`HintCard`).
         .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("dayHintMain")
     }
 
     private var symbol: String {

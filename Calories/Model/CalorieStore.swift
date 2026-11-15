@@ -137,6 +137,31 @@ final class CalorieStore {
 
 
 
+#if DEBUG
+    /// Посев для `ui_test_seed_plan`: сушка четыре недели, неделя брейка,
+    /// снова сушка и поддержание; сегодня — четвёртый день после брейка.
+    /// Вес уходит по полкило в неделю на сушке и стоит на брейке.
+    static func seededPlan(now: Date = Date()) -> (plan: Plan, weights: [WeightEntry]) {
+        let calendar = Calendar.current
+        let start = calendar.date(byAdding: .day, value: -38, to: calendar.startOfDay(for: now)) ?? now
+        let weights = stride(from: 0, through: 38, by: 2).map { day -> WeightEntry in
+            let cutDays = Double(min(day, 28) + max(0, day - 35))
+            let noise = [0.2, -0.1, 0.15, -0.2, 0.05][day / 2 % 5]
+            let kg = ((82.4 - cutDays / 7 * 0.5 + noise) * 10).rounded() / 10
+            let date = calendar.date(byAdding: .hour, value: 8, to:
+                calendar.date(byAdding: .day, value: day, to: start) ?? start) ?? start
+            return WeightEntry(weightKg: kg, date: date)
+        }
+        let plan = Plan(startDate: start, startWeightKg: 82.4, phases: [
+            PlanPhase(intent: .cut, durationWeeks: 4, weeklyRatePercent: 0.6),
+            PlanPhase(intent: .maintenance, durationWeeks: 1, isDietBreak: true),
+            PlanPhase(intent: .cut, durationWeeks: 6, weeklyRatePercent: 0.6),
+            PlanPhase(intent: .maintenance, durationWeeks: 4),
+        ])
+        return (plan, weights)
+    }
+#endif
+
     // Кэшированные производные — перестраиваются в rebuildCaches() после каждого изменения данных
     var todayEntries: [FoodEntry] = []
     var consumedToday: Int = 0
@@ -370,6 +395,7 @@ final class CalorieStore {
             UserDefaults.standard.removeObject(forKey: "app_font")
             UserDefaults.standard.removeObject(forKey: "app_text_size")
         }
+
 #endif
 
         let dishDescriptor = FetchDescriptor<Dish>(sortBy: [SortDescriptor(\.createdAt, order: .reverse)])
@@ -377,6 +403,21 @@ final class CalorieStore {
 
         let weightDescriptor = FetchDescriptor<WeightEntry>(sortBy: [SortDescriptor(\.date, order: .forward)])
         weightEntries = (try? context.fetch(weightDescriptor)) ?? []
+
+#if DEBUG
+        // План с брейком и пять недель взвешиваний — чтобы экран плана было
+        // на чём смотреть и проверять. Собрать такое через интерфейс — это
+        // редактор фаз, колёса дат и тридцать взвешиваний по одному.
+        //
+        // Только в памяти: ни план, ни взвешивания не пишутся на диск. Данные
+        // симулятора переживают прогоны, и сохранённый план сломал бы тесты,
+        // которые ждут экран без плана.
+        if UserDefaults.standard.bool(forKey: "ui_test_seed_plan") {
+            let seeded = Self.seededPlan()
+            plan = seeded.plan
+            weightEntries = seeded.weights
+        }
+#endif
 
         let goalDescriptor = FetchDescriptor<GoalRecord>(sortBy: [SortDescriptor(\.date, order: .forward)])
         goalRecords = (try? context.fetch(goalDescriptor)) ?? []

@@ -42,33 +42,45 @@ struct WeekReviewView {
         return "\(from) – \(end.formatted(.dateTime.day().month(.wide)))"
     }
 
-    /// Секции итога недели: числа с выводами одной секцией и предложение нормы.
+    /// Итог недели: три числа и выводы под ними одной карточкой.
     ///
-    /// Выводы — в той же секции, что числа, а не под своим заголовком «Что
-    /// это значит»: они и есть пояснение к этим трём числам, и отдельная
-    /// секция разводила число и его смысл на пол-экрана.
+    /// Выводы — в той же карточке, что числа, а не под своим заголовком «Что
+    /// это значит»: они и есть пояснение к этим трём числам. Между числами и
+    /// выводами одна черта, между самими выводами — ни одной: это один
+    /// абзац, а не список.
     @ViewBuilder
-    var sections: some View {
+    var weekSection: some View {
         Section {
                 numbers
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                ForEach(lines) { line in
-                    HStack(alignment: .top, spacing: 10) {
-                        // Значок — только у оценки: галочка или тревога.
-                        // Кружок «i» у справочной строки ничего не открывал и
-                        // ничего не добавлял, а читался как кнопка.
-                        if let symbol = icon(line.tone) {
-                            Image(systemName: symbol)
-                                .font(.app(.footnote))
-                                .foregroundStyle(color(line.tone))
+                // Выводы — одной строкой списка: по строке на вывод давали
+                // каждому высоту системной ячейки, и три фразы растягивались
+                // на пол-экрана.
+                if !lines.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(lines) { line in
+                            HStack(alignment: .top, spacing: 10) {
+                                // Значок — только у оценки: галочка или тревога.
+                                // Кружок «i» у справочной строки ничего не
+                                // открывал и читался как кнопка.
+                                // Без значка — пустое место под него: иначе
+                                // справочная строка вылезала левее остальных.
+                                Group {
+                                    if let symbol = icon(line.tone) {
+                                        Image(systemName: symbol)
+                                            .font(.app(.footnote))
+                                            .foregroundStyle(color(line.tone))
+                                    } else {
+                                        Color.clear
+                                    }
+                                }
                                 .frame(width: 18)
+                                Text(verbatim: line.text)
+                                    .font(.app(.footnote))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
-                        Text(verbatim: line.text)
-                            .font(.app(.footnote))
-                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    .padding(.vertical, 2)
+                    .padding(.vertical, 4)
                 }
             } header: {
                 // Какая неделя — в самом заголовке: итог считается за
@@ -80,6 +92,11 @@ struct WeekReviewView {
                 }
                 .tracksSectionHead(String(localized: "Неделя"))
             }
+    }
+
+    /// Предложение нормы на следующую неделю — своей карточкой.
+    @ViewBuilder
+    var proposalSection: some View {
 
             // Договор о норме — здесь, а не само собой.
             //
@@ -145,9 +162,8 @@ struct WeekReviewView {
             cell(title: "Вес", value: weightChange, unit: "кг")
             cell(title: "Дней с записями", value: "\(input.loggedDays)", unit: "из 7")
         }
-        .padding(12)
+        .padding(.vertical, 4)
         .frame(maxWidth: .infinity)
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
     }
 
     private var meanEaten: String {
@@ -164,7 +180,9 @@ struct WeekReviewView {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(verbatim: value)
                     .font(.app(.title3, weight: .bold))

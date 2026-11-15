@@ -31,9 +31,15 @@ struct PlanView: View {
     @ViewBuilder
     private var dashboard: some View {
         List {
+            // Порядок — как в макете: фаза и статус, вес, неделя, цена
+            // дефицита, норма на следующую неделю. Подробности прогноза и
+            // настройки брейка и цикла — ниже, для тех, кто пришёл за ними.
             if let plan = store.plan {
                 Section {
-                    hero(plan)
+                    PlanPhaseCard(plan: plan,
+                                  adherence: store.planOutcome == nil ? store.planAdherence() : nil)
+                    PlanWeightCard(plan: plan, entries: store.weightEntries,
+                                   trend: { store.weightTrend(on: $0) })
                 }
                 .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 .listRowBackground(Color.clear)
@@ -42,16 +48,25 @@ struct PlanView: View {
 
             if let outcome = store.planOutcome {
                 outcomeSection(outcome)
-            } else if let plan = store.plan, let adherence = store.planAdherence() {
-                adherenceSection(plan: plan, adherence: adherence)
             }
 
-            // Итог недели — сразу под вердиктом: вердикт говорит, идёт ли
-            // план, итог — из чего это сложилось за последние семь дней и
-            // какую норму план предлагает дальше. Это часть Premium, как и
-            // сам план, и сюда ведёт строка «Недельный обзор» с «Сегодня».
+            // Итог недели: что съедено, куда пошёл вес и что из этого следует.
+            // Это часть Premium, как и сам план, и сюда ведёт строка
+            // «Недельный обзор» с «Сегодня».
             if store.planOutcome == nil {
-                WeekReviewView(store: store).sections
+                WeekReviewView(store: store).weekSection
+            }
+
+            if store.planOutcome == nil, let plan = store.plan {
+                costSection(plan)
+            }
+
+            if store.planOutcome == nil {
+                WeekReviewView(store: store).proposalSection
+            }
+
+            if store.planOutcome == nil, let plan = store.plan, let adherence = store.planAdherence() {
+                adherenceSection(plan: plan, adherence: adherence)
             }
 
             if store.planOutcome == nil, let plan = store.plan, plan.phases.contains(where: { $0.intent == .cut }) {
@@ -76,6 +91,9 @@ struct PlanView: View {
         }
         .glassRow()
         .listStyle(.insetGrouped)
+        // Карточка фазы — сразу под заголовком, как в макете: системный
+        // отступ над первой секцией оставлял над ней пустую полосу.
+        .contentMargins(.top, 4, for: .scrollContent)
         .scrollIndicators(.hidden)
         .alert("Завершить план?", isPresented: $confirmingCancel) {
             Button("Отмена", role: .cancel) {}
@@ -88,7 +106,7 @@ struct PlanView: View {
             // теряет. Куда денется цель — следствие самого завершения.
             Text("Записи о еде и весе останутся")
         }
-        .screenTitle(String(localized: "План"), eyebrow: planWeek, trailingButtons: 1)
+        .screenTitle(String(localized: "План"), trailingButtons: 1)
         // Правка в тулбаре, а не строкой списка: настраивают план один раз,
         // а смотрят на него каждую неделю, и строка занимала место в самом
         // низу, куда ради неё приходилось долистывать весь разбор.
@@ -97,153 +115,11 @@ struct PlanView: View {
                 NavigationLink {
                     PlanEditorView(store: store)
                 } label: {
-                    Image(systemName: "slider.horizontal.3")
+                    Image(systemName: "pencil")
                 }
                 .accessibilityLabel("Изменить план")
                 .accessibilityIdentifier("editPlan")
             }
-        }
-    }
-
-    /// Шапка: где мы на дистанции и сколько есть сегодня. Два числа, ради которых
-    /// экран открывают, — остальное ниже и мельче.
-    private func hero(_ plan: Plan) -> some View {
-        let status = store.planAdherence()?.status
-        let finished = plan.isFinished
-
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Image(systemName: finished ? "flag.checkered" : "target")
-                    .foregroundStyle(finished ? Color.secondary : Color.accentColor)
-                // Название плана — заголовок карточки, а не строка в ряду:
-                // на ступень выше подписей под ним.
-                Text(plan.title)
-                    .font(.app(.title3, weight: .bold))
-                    .fixedSize(horizontal: false, vertical: true)
-                Spacer(minLength: 8)
-                if let status, !finished {
-                    if plan.isDietBreak(on: Date()) {
-                        // Во время брейка вес о плане не говорит: вода и гликоген.
-                        // Показываем брейк, а не треугольник отставания.
-                        HStack(spacing: 4) {
-                            Image(systemName: "cup.and.saucer.fill")
-                                .font(.app(.caption, weight: .semibold))
-                                .foregroundStyle(.green)
-                            Text("Брейк")
-                                .font(.app(.caption2, weight: .semibold))
-                                .foregroundStyle(.green)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .padding(6)
-                        .background(Color.green.opacity(0.12), in: Capsule())
-                        .accessibilityLabel(Text("Идёт диет-брейк"))
-                    } else {
-                        // Оранжевый треугольник без подписи не объясняет,
-                        // что означает «отстаёшь от графика».
-                        HStack(spacing: 4) {
-                            Image(systemName: status.icon)
-                                .font(.app(.caption, weight: .semibold))
-                                .foregroundStyle(status.color)
-                            Text(status.title)
-                                .font(.app(.caption2, weight: .semibold))
-                                .foregroundStyle(status.color)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                        .padding(6)
-                        .background(status.color.opacity(0.12), in: Capsule())
-                        .accessibilityLabel(Text(verbatim: status.title))
-                    }
-                }
-            }
-
-            if !finished {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(store.adaptedTodayGoal.formatted())
-                        .font(.app(size: 34, weight: .bold))
-                        .monospacedDigit()
-                    Text("ккал сегодня")
-                        .font(.app(.subheadline))
-                        .foregroundStyle(.secondary)
-                }
-
-                weightTrack(plan, tint: plan.isDietBreak(on: Date()) ? .green : (status?.color ?? .accentColor))
-
-                // Полоса фаз только когда их несколько: у плана из одной фазы
-                // она повторяла бы то, что уже сказано неделей и темпом.
-                if plan.timeline.count > 1 {
-                    PlanTimeline(plan: plan)
-                }
-
-                HStack(spacing: 6) {
-                    Text(String(format: String(localized: "Неделя %d из %d"),
-                                plan.currentWeek, plan.durationWeeks))
-                    if let phase = plan.currentPhase, plan.timeline.count > 1 {
-                        Text("·")
-                            .foregroundStyle(.tertiary)
-                        Text(phase.title)
-                    }
-                    Text("·")
-                        .foregroundStyle(.tertiary)
-                    Text(String(format: "%+.2f \(String(localized: "кг/нед"))", plan.weeklyRateKg))
-                }
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        // Тем же стеклом, что строка плана на «Сегодня»: план — премиум, и
-        // шапка его экрана — продолжение той строки, а не белая карточка.
-        .liquidGlass(in: RoundedRectangle(cornerRadius: 22))
-    }
-
-    /// Полоса пройденного пути — по весу, а не по времени.
-    ///
-    /// Раньше тут был прогресс по календарю: на третьей неделе из восьми он честно
-    /// показывал 37%, даже если вес не сдвинулся ни на грамм. Рядом с целевым весом
-    /// это читалось как «идём по плану», хотя план как раз проваливался.
-    /// Без взвешиваний считать нечего — тогда полоса остаётся по времени и подписана
-    /// соответственно.
-    private func weightTrack(_ plan: Plan, tint: Color) -> some View {
-        let current = store.latestWeight?.weightKg
-        let total = plan.targetWeightKg - plan.startWeightKg
-        let byWeight = current != nil && abs(total) > 0.05
-        let progress: Double = byWeight
-            ? min(max((current! - plan.startWeightKg) / total, 0), 1)
-            : plan.progress
-
-        return VStack(alignment: .leading, spacing: 6) {
-            // Тонкая полоска с подложкой того же цвета, как у макросов под
-            // кольцом, — вместо толстой канавки со свечением.
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(tint.opacity(0.18))
-                    Capsule()
-                        .fill(tint)
-                        .frame(width: max(4, geo.size.width * progress))
-                }
-            }
-            .frame(height: 4)
-
-            HStack {
-                Text(String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg))
-                Spacer()
-                if byWeight, let current {
-                    let left = abs(plan.targetWeightKg - current)
-                    Text(String(format: String(localized: "осталось %.1f кг"), left))
-                        .foregroundStyle(left <= 0.1 ? Color.green : Color.secondary)
-                } else {
-                    Text("нет взвешиваний")
-                }
-                Spacer()
-                Text(String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg))
-            }
-            .font(.app(.caption2))
-            .foregroundStyle(.secondary)
-            .monospacedDigit()
         }
     }
 
@@ -427,15 +303,6 @@ struct PlanView: View {
         let today = Date()
         let short = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
         Section {
-            // Запас диеты — сколько недель дефицита прошло и сколько осталось
-            // до рекомендованного перерыва. Только пока идёт дефицит: на
-            // брейке и на поддержании считать нечего.
-            if !plan.isDietBreak(on: today) {
-                let input = store.recoveryInput(now: today)
-                if input.isCutting {
-                    dietReserveRow(DietReserve(input))
-                }
-            }
             if plan.isDietBreak(on: today) {
                 let end = plan.firstNonBreakDay(from: today)
                 breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: .green,
@@ -490,12 +357,54 @@ struct PlanView: View {
         }
     }
 
+    /// Цена дефицита: что с силой и сколько ещё терпеть до перерыва.
+    ///
+    /// Запас диеты жил в секции брейка, под его кнопками, а сила — только в
+    /// разборе состава, который появляется к концу фазы. Это один вопрос —
+    /// во что обходится сушка, — и ответ на него теперь одной карточкой.
+    @ViewBuilder
+    private func costSection(_ plan: Plan) -> some View {
+        let today = Date()
+        let strength = plan.phaseIndex(on: today).flatMap {
+            store.strengthChange(from: plan.startDate(ofPhaseAt: $0), to: today)
+        }
+        let input = store.recoveryInput(now: today)
+        let reserve = (!plan.isDietBreak(on: today) && input.isCutting) ? DietReserve(input) : nil
+        if strength != nil || reserve != nil {
+            Section {
+                if let strength {
+                    HStack(spacing: 10) {
+                        Image(systemName: "dumbbell")
+                            .foregroundStyle(Color.accentColor)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: strength.outcome.title)
+                                .font(.app(.subheadline, weight: .semibold))
+                            Text("с начала фазы, по GymLogger")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text(verbatim: String(format: "%+.0f%%", strength.percent))
+                            .font(.app(.body, weight: .semibold))
+                            .monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("planStrength")
+                }
+                if let reserve {
+                    dietReserveRow(reserve)
+                }
+            }
+        }
+    }
+
     /// Полоска «Запас диеты»: чем ближе перерыв, тем она полнее и краснее.
     private func dietReserveRow(_ reserve: DietReserve) -> some View {
         let color: Color = reserve.isDue ? ProgressRing.overColors[0] : MacroKind.fat.color
         return VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Запас диеты")
+                    .font(.app(.subheadline, weight: .semibold))
                 Spacer()
                 if reserve.isDue {
                     Text("Пора на перерыв")
@@ -603,71 +512,10 @@ struct PlanView: View {
         }
     }
 
-    /// Какая это неделя плана — строкой над названием в шапке.
-    ///
-    /// Из всего, что знает карточка, именно неделя отвечает на «где я»:
-    /// название фазы человек помнит и так, а счёт недель — нет.
-    private var planWeek: String? {
-        guard let plan = store.plan else { return nil }
-        return String(format: String(localized: "Неделя %d из %d"), plan.currentWeek, plan.durationWeeks)
-    }
-
-    /// Откуда вышли, сколько прошли, куда идём — одной строкой.
-    ///
-    /// Эти три числа лежали порознь: стартовый вес в карточке плана, текущий в
-    /// строках соответствия, целевой в фазах. Вопрос же задают один, и ответом
-    /// на него служит их сопоставление, а не каждое по отдельности.
-    private func progressSummary(plan: Plan, adherence: PlanAdherence) -> some View {
-        HStack(alignment: .top, spacing: 0) {
-            summaryCell(title: String(localized: "Старт"),
-                        value: String(format: "%.1f \(String(localized: "кг"))", plan.startWeightKg),
-                        caption: Self.planDate(plan.startDate),
-                        tint: .secondary)
-            summaryCell(title: String(localized: "Изменение"),
-                        value: adherence.actualWeightToday.map {
-                            String(format: "%+.1f \(String(localized: "кг"))", $0 - plan.startWeightKg)
-                        } ?? "—",
-                        caption: nil,
-                        // Цвет по направлению фазы, а не по знаку: минус на
-                        // наборе — это не успех.
-                        tint: changeTint(plan: plan, adherence: adherence))
-            summaryCell(title: String(localized: "Цель"),
-                        value: String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg),
-                        caption: Self.planDate(plan.endDate),
-                        tint: .secondary)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private func summaryCell(title: String, value: String, caption: String?, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(verbatim: title)
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-            Text(verbatim: value)
-                .font(.app(.headline))
-                .monospacedDigit()
-                .foregroundStyle(tint)
-            if let caption {
-                Text(verbatim: caption)
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    private func changeTint(plan: Plan, adherence: PlanAdherence) -> Color {
-        guard let actual = adherence.actualWeightToday else { return .secondary }
-        let change = actual - plan.startWeightKg
-        guard abs(change) > 0.2, let intent = plan.currentPhase?.intent else { return .primary }
-        return (change < 0) == (intent == .cut) ? ProgressRing.kcalColors[0] : .primary
-    }
-
     private func adherenceSection(plan: Plan, adherence: PlanAdherence) -> some View {
         Section {
-            progressSummary(plan: plan, adherence: adherence)
-            PlanProgressChart(plan: plan, entries: store.weightEntries)
+            // Статус, темп и график — в карточках наверху. Здесь то, что из
+            // них следует: прогноз финиша и что с ним можно сделать.
 
             // Во время брейка вес о плане не говорит: калории подняли, вернулись
             // вода и гликоген. Сравнение с ожидаемым, отклонение, прогноз финиша
@@ -683,8 +531,6 @@ struct PlanView: View {
                     ResultRow(title: "Фактический вес (тренд)", value: String(format: "%.1f \(String(localized: "кг"))", actual))
                 }
             } else {
-            statusRow(adherence.status)
-
             // Резкий темп называем вслух и здесь, а не только в редакторе:
             // именно сюда человек смотрит каждую неделю.
             if let phase = plan.currentPhase, phase.isAggressive {
@@ -825,7 +671,7 @@ struct PlanView: View {
             }
             }
         } header: {
-            Text("Как идёт план").listSectionTitle()
+            Text("Прогноз").listSectionTitle()
         }
     }
 
@@ -957,10 +803,5 @@ struct PlanView: View {
         }
     }
 
-    private func statusRow(_ status: PlanStatus) -> some View {
-        Label(status.title, systemImage: status.icon)
-            .foregroundStyle(status.color)
-            .font(.app(.subheadline, weight: .semibold))
-    }
 
 }

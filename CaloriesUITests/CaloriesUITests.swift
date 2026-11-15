@@ -864,6 +864,33 @@ final class CaloriesUITests: XCTestCase {
                       "Кнопка тулбара не открыла редактор плана")
     }
 
+    /// Экран плана собран по макету: фаза со статусом, вес графиком, неделя,
+    /// цена дефицита.
+    ///
+    /// План и взвешивания засеваются в памяти (`ui_test_seed_plan`): четвёртый
+    /// день сушки после брейка, вес уходит вдоль плана.
+    @MainActor
+    func testPlanScreenShowsPhaseWeightAndWeek() {
+        let app = launchApp(premium: true, extraArguments: ["-ui_test_seed_plan", "YES"])
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+
+        let strip = app.buttons["planStrip"]
+        scrollIntoReach(strip, in: app)
+        strip.tap()
+
+        let phase = app.descendants(matching: .any).matching(identifier: "planPhaseCard").firstMatch
+        XCTAssertTrue(phase.waitForExistence(timeout: 5), "Нет карточки фазы")
+        XCTAssertTrue(phase.label.contains("Deficit"), "Карточка фазы не про идущую сушку: \(phase.label)")
+        XCTAssertTrue(phase.label.contains("Next:"), "Нет строки о следующих фазах: \(phase.label)")
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "planWeightCard").firstMatch.exists,
+                      "Нет карточки веса")
+        XCTAssertTrue(app.staticTexts["Week"].exists, "Нет итога недели")
+        // Первый день после брейка — запас диеты полный, но строка есть.
+        let reserve = app.descendants(matching: .any).matching(identifier: "dietReserve").firstMatch
+        scrollTo(reserve, in: app)
+        XCTAssertTrue(reserve.exists, "Нет запаса диеты")
+    }
+
     /// Смысл экрана: заполняешь постепенно, и недостающее подсказывается по пропорциям.
     @MainActor
     func testMeasurementsSuggestMissingSites() {

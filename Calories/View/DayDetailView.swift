@@ -11,28 +11,17 @@ struct DayDetailView: View {
 
     var body: some View {
         List {
+            // Итог дня одной карточкой: кольцо, число, вердикт словом и три
+            // макроса с нормой. Раньше — два числа и строка макросов без нормы.
             Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Итого")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                        Text("\(day.totalCalories) ккал")
-                            .font(.app(.title2, weight: .bold))
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("Цель")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                        Text("\(day.goal) ккал")
-                            .font(.app(.title2, weight: .bold))
-                    }
-                }
-                .padding(.vertical, 4)
-
-                MacrosRow(macros: day.totalMacros)
-                    .padding(.vertical, 8)
+                DaySummaryCard(calories: day.totalCalories, goal: day.goal,
+                               macros: day.totalMacros,
+                               hasEntries: !day.entries.isEmpty,
+                               proteinTarget: store.proteinTarget,
+                               fatTarget: store.fatTarget,
+                               carbsTarget: store.carbsTarget)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             }
 
             // Пустую секцию не показываем вовсе: заголовок «Приёмы пищи»
@@ -95,6 +84,20 @@ struct DayDetailView: View {
             }
         }
         .glassRow()
+        .safeAreaInset(edge: .bottom) {
+            // Добавить в этот день — кнопкой внизу, под большим пальцем, а не
+            // только плюсом в шапке: в историю заходят, чтобы дописать забытое.
+            Button {
+                showingAdd = true
+            } label: {
+                Text("Добавить в этот день")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.secondaryAction)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
+            .accessibilityIdentifier("addToThisDay")
+        }
         .screenTitle(day.date.formatted(.dateTime.day().month(.wide)),
                      eyebrow: day.date.formatted(.dateTime.weekday(.wide)),
                      trailingButtons: 1)

@@ -13,6 +13,7 @@ struct DayNutritionView: View {
 
     /// Выбранный ломоть кольца состава. Nil — выбран весь день.
     @State private var selectedPart: DayCategories.Part.ID?
+    @Environment(\.colorScheme) private var colorScheme
 
     private var macros: Macros {
         let day = Calendar.current.startOfDay(for: date)
@@ -54,32 +55,13 @@ struct DayNutritionView: View {
 
     var body: some View {
         List {
-            if !categories.isEmpty {
-                Section {
-                    compositionChart
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    compositionLegend
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                } header: {
-                    Text("Состав рациона")
-                } footer: {
-                    if categories.contains(where: { $0.category == nil }) {
-                        explain("Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает.").map { Text($0) }
-                    } else {
-                        explain("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.").map { Text($0) }
-                    }
-                }
-            }
-
             if !context.isEmpty {
                 Section {
                     ForEach(context) { item in
                         adviceRow(item)
                     }
                 } header: {
-                    Text("Как прошёл день")
+                    Text("Как прошёл день").listSectionTitle()
                 } footer: {
                     explain("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.").map { Text($0) }
                 }
@@ -91,7 +73,7 @@ struct DayNutritionView: View {
                         adviceRow(item)
                     }
                 } header: {
-                    Text("Разбор")
+                    Text("Разбор").listSectionTitle()
                 }
             }
 
@@ -109,7 +91,26 @@ struct DayNutritionView: View {
                     fiberRow(fiber, isPartial: micronutrients.fiberIsPartial)
                 }
             } header: {
-                Text("Белки, жиры, углеводы")
+                Text("Белки, жиры, углеводы").listSectionTitle()
+            }
+
+            if !categories.isEmpty {
+                Section {
+                    compositionChart
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                    compositionLegend
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                } header: {
+                    Text("Состав рациона").listSectionTitle()
+                } footer: {
+                    if categories.contains(where: { $0.category == nil }) {
+                        explain("Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает.").map { Text($0) }
+                    } else {
+                        explain("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.").map { Text($0) }
+                    }
+                }
             }
 
             micronutrientSection
@@ -372,7 +373,7 @@ struct DayNutritionView: View {
     private func color(for tone: DayAnalysis.Advice.Tone) -> Color {
         switch tone {
         case .good:    return ProgressRing.kcalColors[0]
-        case .warning: return .orange
+        case .warning: return ProgressRing.overColors[0]
         case .info:    return .secondary
         }
     }
@@ -382,18 +383,28 @@ struct DayNutritionView: View {
     private func macroRow(_ kind: MacroKind, value: Double, target: Double?, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
-                Text(LocalizedStringKey(kind.title))
+                HStack(spacing: 8) {
+                    Circle().fill(color).frame(width: 9, height: 9)
+                    Text(LocalizedStringKey(kind.title))
+                }
                 Spacer()
                 Text(String(format: "%.0f \(String(localized: "г"))", value))
                     .font(.app(.body, weight: .semibold))
-                    .foregroundStyle(color)
+                    // Чёрным в светлой теме, цветным в тёмной; цвет макроса
+                    // остаётся в точке и в полоске.
+                    .foregroundStyle(colorScheme == .dark ? color : Color.primary)
                     .monospacedDigit()
                 if let target {
                     Text(verbatim: "/ \(Int(target.rounded()))")
                         .font(.app(.caption))
-                        .foregroundStyle(.tertiary)
+                        .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
+            }
+
+            if let target, target > 0 {
+                ProgressView(value: min(value / target, 1))
+                    .progressViewStyle(.engraved(color, thickness: 6))
             }
 
             // Граммы на килограмм — то, в чём цели и задаются. Без пересчёта
@@ -407,7 +418,7 @@ struct DayNutritionView: View {
 
             Text(note(for: kind))
                 .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 2)
@@ -418,7 +429,10 @@ struct DayNutritionView: View {
         let target = Micronutrient.fiber.dailyValue
         return VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Клетчатка")
+                HStack(spacing: 8) {
+                    Circle().fill(MacroKind.carbs.color).frame(width: 9, height: 9)
+                    Text("Клетчатка")
+                }
                 Spacer()
                 // «Не меньше», когда состав известен не про весь день:
                 // клетчатка складывается, поэтому показанное — нижняя
@@ -426,13 +440,15 @@ struct DayNutritionView: View {
                 Text(String(format: isPartial ? "≥ %.0f \(String(localized: "г"))"
                                               : "%.0f \(String(localized: "г"))", amount))
                     .font(.app(.body, weight: .semibold))
-                    .foregroundStyle(MacroKind.carbs.color)
+                    .foregroundStyle(colorScheme == .dark ? MacroKind.carbs.color : Color.primary)
                     .monospacedDigit()
                 Text(verbatim: "/ \(Int(target.rounded()))")
                     .font(.app(.caption))
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
+            ProgressView(value: min(amount / target, 1))
+                .progressViewStyle(.engraved(MacroKind.carbs.color, thickness: 6))
             explain("Входит в углеводы, но калорий почти не даёт. Держит сытость и кишечник; на дефиците про неё забывают первой.").map { Text($0) }
                 .font(.app(.caption2))
                 .foregroundStyle(.tertiary)
@@ -474,7 +490,7 @@ struct DayNutritionView: View {
                     }
                 }
             } header: {
-                Text("Витамины и минералы")
+                Text("Витамины и минералы").listSectionTitle()
             } footer: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(String(format: String(localized: "Посчитано по %lld%% съеденного за день."),

@@ -196,10 +196,12 @@ struct StepsNavigationView: View {
             Text("Разреши доступ к данным о шагах из Здоровья, чтобы видеть активность.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
-            Button("Разрешить доступ") {
+            Button {
                 store.requestAuthorization()
+            } label: {
+                Text("Разрешить доступ")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.mainAction)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -463,7 +465,7 @@ private struct StepsContentView: View {
                         .font(.app(.subheadline, weight: .semibold))
                         .monospacedDigit()
                 }
-                .foregroundStyle(trend >= 0 ? ProgressRing.kcalColors[0] : .orange)
+                .foregroundStyle(trend >= 0 ? ProgressRing.kcalColors[0] : ProgressRing.overColors[0])
             } else {
                 Text("—")
                     .font(.app(.subheadline, weight: .semibold))

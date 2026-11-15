@@ -125,6 +125,12 @@ struct PantryView: View {
             // Недавнее показываем только на нетронутом экране: когда человек
             // уже ищет или отфильтровал категорию, он знает, что ему нужно, и
             // повторный список сверху только мешает.
+            // Сваренное — первым в «Рецептах»: что стоит в холодильнике и
+            // сколько ему осталось, важнее списка рецептов вообще.
+            if trimmedQuery.isEmpty, categoryFilter == nil, tab == .dishes {
+                fridgeSection
+            }
+
             if trimmedQuery.isEmpty, categoryFilter == nil {
                 recentSection
             }
@@ -303,6 +309,35 @@ struct PantryView: View {
     /// Продукт заводят ровно тогда, когда собираются им пользоваться, а в
     /// списке по категориям он лежит вперемешку с теми, что завели полгода
     /// назад, и его приходится искать глазами сразу после создания.
+    /// Блюда с остатком, старшие по суткам — выше: их доедать в первую очередь.
+    private var fridge: [(dish: Dish, state: DishBatch.State)] {
+        store.dishes
+            .compactMap { dish in
+                store.batchState(of: dish).flatMap { $0.isFinished ? nil : (dish: dish, state: $0) }
+            }
+            .sorted { $0.state.dayNumber() > $1.state.dayNumber() }
+    }
+
+    @ViewBuilder
+    private var fridgeSection: some View {
+        let batches = fridge
+        if !batches.isEmpty {
+            Section {
+                ForEach(batches, id: \.dish.id) { batch in
+                    NavigationLink {
+                        NewDishSheet(store: store, editingDish: batch.dish, isEmbedded: true)
+                    } label: {
+                        FridgeBatchRow(dish: batch.dish, state: batch.state) {
+                            serving = .dish(batch.dish)
+                        }
+                    }
+                }
+            } header: {
+                Text("В холодильнике").listSectionTitle()
+            }
+        }
+    }
+
     @ViewBuilder
     private var recentSection: some View {
         switch tab {
@@ -311,7 +346,7 @@ struct PantryView: View {
                 .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
                 .prefix(3)
             if recent.count > 1 {
-                Section("Недавнее") {
+                Section {
                     ForEach(recent) { dish in
                         NavigationLink {
                             NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
@@ -328,6 +363,8 @@ struct PantryView: View {
                             )
                         }
                     }
+                } header: {
+                    Text("Недавнее").listSectionTitle()
                 }
             }
         case .products:
@@ -336,7 +373,7 @@ struct PantryView: View {
                 .sorted { ($0.updatedAt ?? .distantPast) > ($1.updatedAt ?? .distantPast) }
                 .prefix(3)
             if recent.count > 1 {
-                Section("Недавнее") {
+                Section {
                     ForEach(recent) { food in
                         NavigationLink {
                             NewFoodSheet(store: store, editingFood: food, isEmbedded: true)
@@ -344,6 +381,8 @@ struct PantryView: View {
                             foodRow(food)
                         }
                     }
+                } header: {
+                    Text("Недавнее").listSectionTitle()
                 }
             }
         case .database:
@@ -527,7 +566,7 @@ struct PantryView: View {
                     }
                 }
             } header: {
-                Text("Открытая база продуктов")
+                Text("Открытая база продуктов").listSectionTitle()
             }
         }
     }

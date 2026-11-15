@@ -72,7 +72,7 @@ struct MealScheduleStrip: View {
         // в списке аргументов вешает проверку типов.
         let tap: () -> Void = isTimeToEat ? (onEat ?? onOpen) : onOpen
         return TodayTile(icon: isTimeToEat ? "clock.fill" : "fork.knife",
-                         tint: isTimeToEat ? .orange : Color.accentColor,
+                         tint: Color.accentColor,
                          label: tileLabel,
                          value: tileValue,
                          caption: tileCaption,
@@ -255,7 +255,7 @@ struct MealScheduleSheet: View {
                     Section {
                         MealAdherenceCard(days: adherence)
                     } header: {
-                        Text("Как получается")
+                        Text("Как получается").listSectionTitle()
                     } footer: {
                         explain("Пунктир — время по расписанию, точки — дни, как они прошли. Считается по дням с записями, начиная с пятого.").map { Text($0) }
                     }
@@ -373,7 +373,7 @@ struct MealScheduleSheet: View {
         switch state {
         case .done:     return ProgressRing.kcalColors[0]
         case .missed:   return .secondary
-        case .current:  return .orange
+        case .current:  return Color.accentColor
         case .upcoming: return .secondary
         }
     }

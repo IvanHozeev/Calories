@@ -111,3 +111,15 @@ enum DishBatch {
         return daysLeft <= cookAheadDays ? .cookAgain(runsOutOn: runsOut) : nil
     }
 }
+
+extension DishBatch.State {
+    /// Какие по счёту сутки партии: день готовки — первый, дальше до срока
+    /// годности (`shelfLifeDays`). За пределы срока не выходит: после
+    /// четвёртого дня партия уже «лучше не есть», и пятых суток на полоске нет.
+    func dayNumber(now: Date = Date(), calendar: Calendar = .current) -> Int {
+        let cooked = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -DishBatch.shelfLifeDays,
+                                                            to: goodUntil) ?? goodUntil)
+        let days = calendar.dateComponents([.day], from: cooked, to: calendar.startOfDay(for: now)).day ?? 0
+        return min(max(days + 1, 1), DishBatch.shelfLifeDays)
+    }
+}

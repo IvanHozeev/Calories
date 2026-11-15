@@ -68,23 +68,6 @@ struct ContentView: View {
     @State private var listHeight: CGFloat = 0
     @State private var listBottomInset: CGFloat = 0
 
-    /// Пробую настройки на экране Сегодня
-
-    /// Высота первого экрана: ровно видимая часть списка.
-    ///
-    /// Полоска и плитки берут своё, остаток достаётся кольцу — поэтому блок
-    /// кончается у таббара, а дневник начинается со следующего экрана.
-    /// Нижняя граница не для красоты: на маленьком экране с крупным шрифтом
-    /// без неё кольцо схлопнулось бы в точку.
-    private var summaryHeight: CGFloat {
-        // Подсказки дня живут под кольцом — все в одном месте, чтобы их не
-        // искать по экрану. Приходят они не каждый день, и платить за них
-        // должен экран, а не кольцо: без добавки каждая отъедала бы у знака
-        // свою высоту, потому что блок фиксирован.
-        let weighIn: CGFloat = (store.profile == nil || !store.hasWeighedToday) ? 52 : 0
-        let batch: CGFloat = store.batchHint() == nil ? 0 : 52
-        return max(listHeight - listBottomInset - 8, 420) + weighIn + batch
-    }
     private let quickActions = QuickActionRouter.shared
 
     /// Разбирает нажатие на иконке. Забираем действие сразу, чтобы повторный показ
@@ -578,18 +561,6 @@ private extension ContentView {
             WeekStrip(weeks: store.weekStripWeeks(),
                       onSelect: { selectedHistoryDay = $0 })
 
-            // Подсказки — отдельной строкой сразу под первым экраном:
-            // свою высоту они берут у дневника, а не у кольца.
-            if hasDayHints {
-                Section {
-                    dayHints
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
-                }
-                .listSectionSeparator(.hidden)
-            }
-            
             PullableRing(
                 consumed: store.consumedToday,
                 goal: store.adaptedTodayGoal,
@@ -643,9 +614,17 @@ private extension ContentView {
             // ещё ниже. Освободившееся достаётся самому знаку.
             .padding(.bottom, 30)
 
-            // Открытка в день рождения — сразу под кольцом, строкой той же
-            // высоты, что взвешивание: праздник не должен отнимать у знака
-            // дня место, которое у него на первом экране.
+            // Подсказки — сразу под кольцом, все в одном месте: главная из
+            // очереди (совет, пост, обзор, копия, взвешивание) и банк калорий.
+            // Раньше главная стояла над кольцом, а остальное под ним, и по
+            // подсказкам приходилось бегать глазами по всему экрану.
+            if hasDayHints {
+                dayHints
+            }
+
+            // Открытка в день рождения — под подсказкой, строкой той же
+            // поверхности: праздник не должен отнимать у знака дня место,
+            // которое у него на первом экране.
             if showsBirthday {
                 SwipeToDismiss(onDismiss: {
                     withAnimation(.snappy) { dismissedHints = DismissedHints().dismiss(birthdayID) }
@@ -664,59 +643,30 @@ private extension ContentView {
                 }
             }
 
-            // Взвешивание — сразу под кольцом.
+            // Без профиля нет ни нормы, ни веса, и подсказывать нечего, кроме
+            // этого. Той же поверхности, что остальные подсказки: пока строка
+            // была голубой полоской, она выглядела ошибкой, а это приглашение.
             //
-            // Это первое дело дня и то, из чего считается вся остальная
-            // картина: без утреннего веса ни тренд, ни расход не сдвинутся.
-            // В хвосте экрана, под плитками и напоминаниями, строка
-            // попадалась на глаза последней — когда до весов уже не дойти.
+            // Взвешивание отсюда ушло в общую очередь подсказок: утром оно
+            // первое дело дня, но не важнее копии, поста и перерыва в диете.
             if store.profile == nil {
                 NavigationLink {
                     SettingsView(store: store)
                 } label: {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 10) {
                         Image(systemName: "person.crop.circle.badge.questionmark")
-                            .font(.app(.footnote))
+                            .foregroundStyle(ProgressRing.kcalColors[0])
                         Text("Заполнить профиль")
-                            .font(.app(.caption))
-                        Spacer()
+                            .font(.app(.subheadline))
+                        Spacer(minLength: 0)
                         Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
+                            .font(.app(.caption))
+                            .foregroundStyle(.tertiary)
                     }
-                    .foregroundStyle(.blue)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.blue.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .hintSurface()
+                    .contentShape(RoundedRectangle(cornerRadius: 18))
                 }
                 .buttonStyle(.plain)
-            } else if !store.hasWeighedToday,
-                      // Только утром: вечерний вес выше на съеденное за день
-                      // и тренд только сбивает. Из «+» взвеситься можно всегда.
-                      WeighInWindow.isOpen(now: Date(), wakeHour: hourOfDay(mealSchedule.wake)) {
-                Button {
-                    todaySheet = .weight
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "scalemass")
-                            .font(.app(.footnote))
-                        Text("Взвешивание")
-                            .font(.app(.caption))
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption2))
-                    }
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.orange.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-                .buttonStyle(.plain)
-                // Имя строке нужно тесту: он следит, чтобы кольцо на неё не
-                // наезжало. Проверять это глазами выходит плохо — наезд уже
-                // приезжал дважды.
-                .accessibilityIdentifier("weighInRow")
             }
 
             // Экран читается как отъезд камеры: кольцо и макросы —
@@ -804,6 +754,12 @@ private extension ContentView {
             hints += DayHint.weeklyReview(proposal: proposal, now: now)
         }
         if needsBackupReminder { hints += DayHint.backup(now: now) }
+        // Только утром: вечерний вес выше на съеденное за день и тренд только
+        // сбивает. Из «+» взвеситься можно всегда.
+        if store.profile != nil, !store.hasWeighedToday,
+           WeighInWindow.isOpen(now: now, wakeHour: hourOfDay(mealSchedule.wake)) {
+            hints += DayHint.weighIn(now: now)
+        }
         if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
         if let weightForecast {
             hints += DayHint.forecast(weightForecast.forecast, trendKg: weightForecast.trendKg, now: now)
@@ -863,6 +819,7 @@ private extension ContentView {
         case .openPlan, .moveRefeedToday, .openWeeklyReview: showingPlan = true
         case .openFasting: showingFasting = true
         case .openAdd: entryAction = nil; showingAdd = true
+        case .openWeight: todaySheet = .weight
         case .backupNow: showingBackupSettings = true
         case .markFast, .moveRefeed: confirmingHint = mainHint
         }
@@ -1076,7 +1033,10 @@ private extension ContentView {
             // убирает её до завтра, и на её место встаёт следующая.
             if let hint = mainHint {
                 SwipeToDismiss(onDismiss: { dismiss(hint) }) {
-                    hintView(hint)
+                    // Поверхность вешаем здесь, на любую из подсказок разом:
+                    // у поста, обзора и копии вид внутри свой, а плашка под
+                    // ним — одна и та же.
+                    hintView(hint).hintSurface()
                 }
                 .id(hint.id)
                 // Показ — в журнал, один раз на подсказку: журнал сам

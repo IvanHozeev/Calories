@@ -498,29 +498,32 @@ final class CaloriesUITests: XCTestCase {
 
     // MARK: - Вёрстка
 
-    /// Кольцо не должно наезжать на полоску взвешивания.
+    /// Кольцо не должно наезжать на подсказку под ним.
     ///
     /// Наезжало дважды, и оба раза находил человек, а не набор: первый —
     /// когда блок первого экрана схлопывался клавиатурой из-под листа,
     /// второй — когда диаметр кольца стали считать от одной ширины, и оно
     /// перестало умещаться в отведённую высоту. Глазами такое ловится
     /// случайно, координатами — всегда.
+    ///
+    /// Раньше следили за строкой взвешивания; теперь взвешивание — одна из
+    /// подсказок общей очереди, и проверяем главную, какая бы она ни была.
     @MainActor
-    func testTheRingDoesNotOverlapTheWeighInRow() {
+    func testTheRingDoesNotOverlapTheHintUnderIt() {
         let app = launchApp()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10))
 
         let ring = app.descendants(matching: .any).matching(identifier: "addFromRing").firstMatch
         XCTAssertTrue(ring.waitForExistence(timeout: 10), "Кольца нет на экране")
-        let weighIn = app.descendants(matching: .any).matching(identifier: "weighInRow").firstMatch
-        guard weighIn.waitForExistence(timeout: 5) else {
-            // Взвесились сегодня — строки нет, и проверять нечего.
+        let hint = app.descendants(matching: .any).matching(identifier: "dayHintMain").firstMatch
+        guard hint.waitForExistence(timeout: 5) else {
+            // Подсказок сегодня нет — и проверять нечего.
             return
         }
 
         XCTAssertLessThanOrEqual(
-            ring.frame.maxY, weighIn.frame.minY,
-            "Кольцо (\(ring.frame)) наезжает на полоску взвешивания (\(weighIn.frame))")
+            ring.frame.maxY, hint.frame.minY,
+            "Кольцо (\(ring.frame)) наезжает на подсказку (\(hint.frame))")
     }
 
     /// Под кольцом не больше одной главной подсказки (ТЗ-1).

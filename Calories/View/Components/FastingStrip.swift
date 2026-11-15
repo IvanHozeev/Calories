@@ -70,10 +70,9 @@ struct FastingStrip: View {
                     .foregroundStyle(.tertiary)
                     .padding(.top, 4)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            // Поверхность — снаружи, общая для всех подсказок: своё стекло
+            // на ней давало бы второе поверх первого.
             .contentShape(Rectangle())
-            .liquidGlass(in: RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("fastingCard")

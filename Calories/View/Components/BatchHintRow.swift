@@ -49,21 +49,21 @@ struct BatchHintRow: View {
         Button {
             onOpen()
         } label: {
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Image(systemName: "takeoutbag.and.cup.and.straw")
-                    .font(.app(.footnote))
+                    .foregroundStyle(color)
                 Text(verbatim: text)
-                    .font(.app(.caption))
+                    .font(.app(.subheadline))
                     .multilineTextAlignment(.leading)
                 Spacer(minLength: 0)
                 Image(systemName: "chevron.right")
-                    .font(.app(.caption2))
+                    .font(.app(.caption))
+                    .foregroundStyle(.tertiary)
             }
-            .foregroundStyle(color)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(color.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            // Цвет — у значка: состояние кастрюли он и говорит, а текст
+            // цветом читался хуже, чем чёрным по стеклу.
+            .hintSurface()
+            .contentShape(RoundedRectangle(cornerRadius: 18))
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("batchHint")

@@ -16,11 +16,16 @@ struct DayHint: Equatable, Identifiable, Sendable {
     enum Source: String, Codable, Sendable {
         case dailyAdvice, recovery, fasting, weeklyReview, batch, backup
         case weightExplainer, calendar
+        /// Утреннее взвешивание. Раньше стояло отдельной оранжевой строкой
+        /// рядом с очередью и спорило с ней за место под кольцом.
+        case weighIn
     }
 
     enum Action: Equatable, Sendable {
         case openAdd, openFasting, openWeeklyReview, openPlan
         case moveRefeedToday, backupNow
+        /// Открыть лист взвешивания.
+        case openWeight
         /// Отметить пост из календаря — на этот день.
         case markFast(Date)
         /// Перенести рефид этой недели на праздник.
@@ -56,6 +61,10 @@ struct DayHint: Equatable, Identifiable, Sendable {
         static let refeed = 93
         static let noDinnerYet = 92
         static let underGoal = 91
+        /// Первое дело дня, но не важнее копии, поста и решений про диету:
+        /// владелец поставил их выше. Утром, пока ничего не съедено, это
+        /// обычно единственная подсказка.
+        static let weighIn = 85
         static let weightExplainer = 80
         /// Справка на завтра, а не совет на сегодня.
         static let weightForecast = 60
@@ -161,6 +170,18 @@ struct DayHint: Equatable, Identifiable, Sendable {
                  urgency: Urgency.weeklyReview,
                  expiresAt: endOfDay(now, calendar: calendar),
                  action: .openWeeklyReview)]
+    }
+
+    /// Взвешивание — подсказкой. Только утром и только пока человек не
+    /// взвесился: когда окно открыто, решает вызывающий (`WeighInWindow`).
+    static func weighIn(now: Date, calendar: Calendar = .current) -> [DayHint] {
+        [DayHint(id: "weighIn:today:\(dayKey(now, calendar: calendar))",
+                 source: .weighIn,
+                 title: String(localized: "Взвешивание"),
+                 detail: nil,
+                 urgency: Urgency.weighIn,
+                 expiresAt: endOfDay(now, calendar: calendar),
+                 action: .openWeight)]
     }
 
     /// Объяснение веса — подсказкой. Говорит «похоже на воду» и никогда не
@@ -326,7 +347,7 @@ enum DayHintPicker {
         -> (main: DayHint?, rest: [DayHint]) {
         let order = { (source: DayHint.Source) in
             [DayHint.Source.dailyAdvice, .recovery, .fasting, .weeklyReview, .batch, .backup,
-             .weightExplainer, .calendar].firstIndex(of: source) ?? .max
+             .weightExplainer, .calendar, .weighIn].firstIndex(of: source) ?? .max
         }
         let live = all
             .filter { $0.expiresAt > now && !dismissed.contains($0.id) }

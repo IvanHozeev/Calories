@@ -263,7 +263,13 @@ struct ProgressRing: View {
             // с градиентами. Вынесенные дуги получают те же самые доли и цвета,
             // SwiftUI видит, что аргументы не изменились, и не перерисовывает
             // их — поворачивается уже готовая картинка.
-            RingArcs(segments: segments(lineWidth: lineWidth, size: side), lineWidth: lineWidth)
+            RingArcs(segments: segments(lineWidth: lineWidth, size: side), lineWidth: lineWidth,
+                     // Пустое кольцо — первое, что видит человек утром и в
+                     // новом приложении, и на чёрном три дуги по тринадцать
+                     // процентов цвета почти не читались: непонятно, что их
+                     // три и что они делят день. Пока ничего не съедено,
+                     // дорожки ярче; с первой записью — обычные.
+                     trackOpacity: consumed == 0 ? 0.30 : 0.20)
                 // Одним слоем: каждая дуга крутилась отдельно,
                 // и на обороте цвета размазывались друг по другу. Склеенное кольцо
                 // поворачивается как цельная картинка.
@@ -386,6 +392,7 @@ private extension View {
 private struct RingArcs: View {
     let segments: [ProgressRing.Segment]
     let lineWidth: CGFloat
+    var trackOpacity: Double = 0.20
 
     var body: some View {
         ZStack {
@@ -394,10 +401,9 @@ private struct RingArcs: View {
                 // макросов под кольцом. Вместо серой канавки: пустое кольцо
                 // уже показывает, на что делится день.
                 RingArc(start: segment.start, end: segment.end)
-                    // Толще дуга — заметнее и дорожка, поэтому она бледнее
-                    // прежнего: на иконке дорожки нет вовсе, и здесь она
-                    // должна читаться как место под цвет, а не как второй знак.
-                    .stroke(segment.colors[0].opacity(0.13),
+                    // Дорожка — место под цвет, а не второй знак: на иконке
+                    // её нет вовсе, и здесь она не должна спорить с дугой.
+                    .stroke(segment.colors[0].opacity(trackOpacity),
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 // Своей дугой, а не общей: у этой есть анимируемые данные, и
                 // заливка растёт плавно, а не перескакивает.

@@ -181,6 +181,44 @@ extension View {
     func tileSurface(cornerRadius: CGFloat = 20) -> some View {
         modifier(TileSurface(cornerRadius: cornerRadius))
     }
+
+    /// Строка подсказки на «Сегодня»: одна стеклянная плашка во всю ширину.
+    ///
+    /// Подсказки приходят от разных расчётов — совет, пост, обзор, копия,
+    /// взвешивание, — и у каждой был свой вид: у одной фон цвета значка, у
+    /// другой голый текст, у третьей закруглённый прямоугольник другого
+    /// радиуса. Плитки под ними давно одной поверхности, и подсказка, стоящая
+    /// между кольцом и плитками, должна быть той же породы.
+    func hintSurface() -> some View {
+        padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .tileSurface(cornerRadius: 18)
+    }
+}
+
+/// Главная кнопка экрана: чёрная в светлой теме и белая в тёмной.
+///
+/// Акцент приложения — цвет значков, переключателей и выбранных строк, и он
+/// настраивается: от голубого до персикового. Голубой и персиковый на белом
+/// читаются хуже чёрного, а кнопка, которую нажимают чаще всего, должна быть
+/// самой читаемой вещью на экране. Поэтому она берёт не акцент, а `primary`
+/// и подпись цвета фона.
+struct MainActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.app(.subheadline, weight: .semibold))
+            .foregroundStyle(Color(.systemBackground))
+            .padding(.horizontal, 18)
+            .frame(minHeight: 44)
+            .background(Color.primary, in: Capsule())
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .contentShape(Capsule())
+    }
+}
+
+extension ButtonStyle where Self == MainActionButtonStyle {
+    static var mainAction: MainActionButtonStyle { MainActionButtonStyle() }
 }
 
 /// Цветная бусина под стеклом: кружок выбора цвета.

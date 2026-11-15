@@ -32,9 +32,7 @@ struct BirthdayCard: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 7)
-        .liquidGlass(in: RoundedRectangle(cornerRadius: 12))
+        .hintSurface()
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("birthdayCard")
         .onAppear { appeared = true }

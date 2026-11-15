@@ -66,32 +66,11 @@ struct WeekStrip: View {
 
     private let calendar = Calendar.current
 
-    /// Высота полоски.
+    /// Высота полоски: подпись дня и кольцо с числом.
     ///
-    /// Считается от кегля, а не задана числом: со строкой нормы в ячейке four
-    /// строки — день недели, число, норма и точка, — и при крупном системном
-    /// шрифте фиксированная высота срезала бы нижнюю, то есть точку. Она и
-    /// срезалась: при обычном кегле пятьдесят шесть точек на всё это уже
-    /// не хватало.
-    @ScaledMetric(relativeTo: .subheadline) private var tallRow: CGFloat = 70
-    @ScaledMetric(relativeTo: .subheadline) private var shortRow: CGFloat = 44
-
-    private var rowHeight: CGFloat { showsEaten ? tallRow : shortRow }
-
-    /// Показывать ли числа под днями.
-    ///
-    /// Под числом дня стоит съеденное, а не норма.
-    ///
-    /// Норма там была сведениями о плане, а не о прожитом дне: она одинакова
-    /// у всех дней без циклирования, а главное — не отвечает на вопрос, с
-    /// которым на полоску и смотрят. «Сколько я тогда съел» — отвечает, и
-    /// вместе с точкой-вердиктом над ним день читается целиком.
-    ///
-    /// Решается один раз на всю полоску, а не на каждую неделю: иначе её
-    /// высота прыгала бы при листании.
-    private var showsEaten: Bool {
-        weeks.contains { week in week.contains { $0.hasEntries } }
-    }
+    /// Считается от кегля, а не задана числом: при крупном системном шрифте
+    /// подпись растёт, и фиксированная высота срезала бы нижний край кольца.
+    @ScaledMetric(relativeTo: .caption2) private var rowHeight: CGFloat = 58
 
     var body: some View {
         // Листается целыми неделями: свободный скролл вставал бы посередине
@@ -125,78 +104,29 @@ struct WeekStrip: View {
         return first.uppercased() + text.dropFirst()
     }
 
-    /// Знак дня — только у промаха мимо нормы: «>» у перебора, «<» у недобора.
+    /// Один день: подпись и кольцо с числом внутри.
     ///
-    /// Точка у обоих была одна, и по ней нельзя было понять, в какую сторону
-    /// промах. Знак сравнения говорит это сам: съедено больше нормы или
-    /// меньше. Остальных знаков нет: зелёная точка повторяла цвет съеденного
-    /// под ней, а полая у сегодняшнего дня не говорила ничего — день идёт,
-    /// судить рано. Там, где знака нет, его нет и в вёрстке: пустое место
-    /// разводило число и калории на лишний зазор.
-    ///
-    /// Свой красный из палитры кольца, а не системный: системный тут кричал,
-    /// а этот — тот же цвет, которым перебор нарисован в самом кольце.
-    private func verdictMark(_ verdict: DayMark.Verdict) -> some View {
-        Text(verbatim: verdict == .over ? ">" : "<")
-            .font(.system(size: 10, weight: .bold, design: .rounded))
-            .foregroundStyle(ProgressRing.overColors[0])
-            .accessibilityHidden(true)
-    }
-
-    /// Тихо, как шапка недели в Календаре: цвет — только точка под числом.
-    /// Залитые кружки над кольцом давали ряд из семи цветных пятен тех же
-    /// зелёного и оранжевого, что в кольце, и спорили с ним за внимание.
+    /// Дуга кольца — сколько нормы съедено, и этого достаточно, чтобы день
+    /// читался целиком. Раньше под числом стояли калории, а под ними знак
+    /// «>» или «<»: три строки на день и ряд цифр, которые приходилось
+    /// сравнивать с нормой в уме. Дуга сравнивает сама: полная — норма
+    /// набрана, красная — мимо неё, короткая — недобор.
     private func dayCell(_ day: DayMark) -> some View {
         let isToday = calendar.isDateInToday(day.date)
+        let number = calendar.component(.day, from: day.date)
         return Button {
             onSelect(day.date)
         } label: {
-            VStack(spacing: 2) {
+            VStack(spacing: 4) {
                 // Две буквы, а не одна: «В» в русском — и вторник, и
                 // воскресенье, «С» — среда и суббота, «П» — понедельник и
                 // пятница. Узкая форма даёт ровно их, и половина полоски
                 // читается гаданием по порядку. Сокращённая различает все
                 // семь.
                 Text(verbatim: Self.weekdayLabel(day.date))
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-                Text(verbatim: "\(calendar.component(.day, from: day.date))")
-                    .font(.app(.subheadline, weight: isToday ? .bold : .regular))
-                    .monospacedDigit()
+                    .font(.app(.caption2, weight: isToday ? .bold : .regular))
                     .foregroundStyle(isToday ? .primary : .secondary)
-                if showsEaten {
-                    // Не мельче подписи дня недели и не бледнее её: десятым
-                    // кеглем в третьей ступени серого число не читалось вовсе,
-                    // а оно здесь — то, ради чего строку и добавили.
-                    //
-                    // У дня без записей места под число не отнимаем, но и
-                    // нуля не пишем: пустой день и день на нуле — разные вещи.
-                    Text(verbatim: day.hasEntries ? "\(day.consumed)" : " ")
-                        .font(.app(.caption, weight: .medium))
-                        .monospacedDigit()
-                        // Зелёным, цветом калорий: это съеденное, то же самое,
-                        // что крупно стоит в кольце на «Сегодня». Серым оно
-                        // читалось как подпись к числу дня, а не как число.
-                        //
-                        // День с перебором — красным, вместе с точкой под
-                        // числом: тогда перебор виден по самому числу, а не
-                        // по пятну под ним, которое ещё надо соотнести.
-                        //
-                        // Недобор — так же, как перебор. На дефиците тысяча
-                        // вместо двух с половиной — не «уложился», а дыра,
-                        // которую потом закрывают срывом, и зелёным она
-                        // читалась как успех. Какой из двух промахов —
-                        // видно по самому числу.
-                        .foregroundStyle(day.verdict == .over || day.verdict == .under
-                                         ? ProgressRing.overColors[0] : ProgressRing.kcalColors[0])
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                }
-                // Знак под съеденным, а не над ним: число читается первым, а
-                // знак его поясняет — больше нормы или меньше. Условием, а не
-                // прозрачной заглушкой: `if` без ветки не занимает в стопке
-                // ничего, даже отбивки, а заглушка разводила бы строки.
-                if day.verdict == .over || day.verdict == .under { verdictMark(day.verdict) }
+                DayRing(day: day, number: number, isToday: isToday)
             }
             .frame(maxWidth: .infinity, minHeight: rowHeight)
             .contentShape(Rectangle())
@@ -204,6 +134,110 @@ struct WeekStrip: View {
         .buttonStyle(.plain)
         // Сегодняшний день и так на экране.
         .disabled(isToday)
-        .accessibilityIdentifier("weekDay-\(calendar.component(.day, from: day.date))")
+        .accessibilityLabel(Text(verbatim: accessibilityText(day, number: number)))
+        .accessibilityIdentifier("weekDay-\(number)")
+    }
+
+    /// Дугу голосом не прочитать: число, съеденное и перебор — словами.
+    private func accessibilityText(_ day: DayMark, number: Int) -> String {
+        var text = "\(Self.weekdayLabel(day.date)) \(number)"
+        if day.hasEntries {
+            text += ", " + String(format: String(localized: "%lld ккал"), day.consumed)
+        }
+        if day.verdict == .over { text += ", " + String(localized: "Перебор") }
+        return text
+    }
+}
+
+/// Кольцо дня в полоске недели.
+///
+/// Та же форма, что у главного кольца: окружность с раскрытием сверху, цвет
+/// калорий, а мимо нормы — тот же красный, которым перебор нарисован в самом
+/// кольце. Дорожка — цвет дуги, приглушённый, как под макросами.
+private struct DayRing: View {
+    let day: DayMark
+    let number: Int
+    let isToday: Bool
+
+    /// Доля окружности под дугу: 360° минус раскрытие в 84°, как у главного кольца.
+    private static let arcShare = 0.766
+    private static let lineWidth: CGFloat = 4.5
+    private static let size: CGFloat = 36
+
+    private var share: Double {
+        guard day.goal > 0, day.hasEntries else { return 0 }
+        return min(Double(day.consumed) / Double(day.goal), 1)
+    }
+
+    /// Сколько сверх нормы, в долях нормы, не больше четверти.
+    private var excess: Double {
+        guard day.goal > 0, day.verdict == .over else { return 0 }
+        return min(max(Double(day.consumed - day.goal) / Double(day.goal), 0), 0.25)
+    }
+
+    /// Мимо нормы в любую сторону — красным: недобор на дефиците такая же
+    /// дыра, как перебор, и зелёным он читался как успех.
+    private var color: Color {
+        switch day.verdict {
+        case .over, .under: return ProgressRing.overColors[0]
+        default: return ProgressRing.kcalColors[0]
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            if isToday {
+                Circle()
+                    .fill(Color(.secondarySystemGroupedBackground))
+                    .shadow(color: .black.opacity(0.10), radius: 5, y: 2)
+            }
+            arc(Self.arcShare)
+                .stroke(color.opacity(0.18), style: stroke)
+            arc(Self.arcShare * share)
+                .stroke(color, style: stroke)
+                .opacity(share > 0 ? 1 : 0)
+            // Перебор — короткой тёмной дугой в начале красной: ровно
+            // насколько вышло за норму, а не просто «много».
+            arc(Self.arcShare * excess)
+                .stroke(ProgressRing.overColors[1], style: stroke)
+                .opacity(excess > 0 ? 1 : 0)
+            Text(verbatim: "\(number)")
+                .font(.app(.caption, weight: isToday ? .bold : .semibold))
+                .monospacedDigit()
+                .foregroundStyle(.primary)
+                .dynamicTypeSize(...DynamicTypeSize.xLarge)
+        }
+        .frame(width: Self.size, height: Self.size)
+        .animation(.spring(response: 0.65, dampingFraction: 0.85), value: share)
+    }
+
+    private var stroke: StrokeStyle {
+        StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round)
+    }
+
+    /// Дуга от раскрытия по часовой, внутри рамки кольца.
+    private func arc(_ end: Double) -> some Shape {
+        InsetArc(end: end, inset: Self.lineWidth / 2)
+    }
+}
+
+/// Часть окружности, начиная с трёх часов и повёрнутая на 8°, чтобы раскрытие
+/// пришлось на верх — как у главного кольца.
+private struct InsetArc: Shape {
+    var end: Double
+    var inset: CGFloat
+
+    var animatableData: Double {
+        get { end }
+        set { end = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        Circle()
+            .trim(from: 0, to: max(0, min(end, 1)))
+            .path(in: rect.insetBy(dx: inset, dy: inset))
+            .applying(CGAffineTransform(translationX: -rect.midX, y: -rect.midY)
+                .concatenating(CGAffineTransform(rotationAngle: 8 * .pi / 180))
+                .concatenating(CGAffineTransform(translationX: rect.midX, y: rect.midY)))
     }
 }

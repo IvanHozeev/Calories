@@ -44,6 +44,9 @@ struct MacrosCard: View {
     var focus: MacroKind? = nil
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorScheme) private var colorScheme
+    /// Выше плиток приёма и плана: в ней три строки, и число теперь крупнее.
+    private static let tileHeight: CGFloat = 74
 
     var body: some View {
         // Четыре отдельные плитки, а не одна карточка с четырьмя колонками.
@@ -135,30 +138,41 @@ struct MacrosCard: View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
         return Button(action: onOpen) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(verbatim: title)
-                    .font(.app(.caption2))
-                    // Подпись ведущего макроса — его цветом: приложение
-                    // подсказывает, куда смотреть, не добавляя ни строчки.
-                    .foregroundStyle(isLeading ? color : Color.secondary.opacity(0.6))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                HStack(spacing: 6) {
+                    // Цвет макроса — точкой у названия и полоской внизу: так
+                    // он узнаётся и при чёрном числе.
+                    Circle()
+                        .fill(color)
+                        .frame(width: 8, height: 8)
+                    Text(verbatim: title)
+                        .font(.app(.caption))
+                        // Подпись ведущего макроса — его цветом: приложение
+                        // подсказывает, куда смотреть, не добавляя ни строчки.
+                        .foregroundStyle(isLeading ? color : Color.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
 
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(verbatim: value.map { v in
                         let number = String(format: "%.0f", v)
                         return prefix.map { "\($0)\(number)" } ?? number
                     } ?? "—")
-                        .font(.app(.headline))
-                        .foregroundStyle(color)
+                        .font(.app(.title3, weight: .bold))
+                        // В светлой теме число чёрное: голубой и персиковый
+                        // на белом читаются заметно хуже, а число — то, ради
+                        // чего плитку и смотрят. В тёмной цвет читается и
+                        // остаётся числом макроса.
+                        .foregroundStyle(colorScheme == .dark ? color : Color.primary)
                         .contentTransition(.numericText())
                     if let target {
                         Text(verbatim: "/ \(Int(target.rounded()))")
-                            .font(.app(.caption2))
-                            .foregroundStyle(.tertiary)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
                     }
                     Text("г")
-                        .font(.app(.caption2))
-                        .foregroundStyle(.tertiary)
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
                     Spacer(minLength: 0)
                 }
                 .monospacedDigit()
@@ -172,12 +186,12 @@ struct MacrosCard: View {
                             .frame(width: geometry.size.width * progress)
                     }
                 }
-                .frame(height: 3)
+                .frame(height: 4)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .frame(height: TodayTile.height)
+            .frame(height: Self.tileHeight)
             .overlay(alignment: .topTrailing) {
                 HStack(spacing: 6) {
                     // Отставание — стрелкой цвета самого макроса: вниз —

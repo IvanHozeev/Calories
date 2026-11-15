@@ -179,6 +179,47 @@ struct DayHintPickerTests {
     }
 }
 
+/// Взвешивание — одна из подсказок общей очереди, а не отдельная строка.
+struct WeighInHintTests {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    @Test func itOpensTheWeightSheet() throws {
+        let hint = try #require(DayHint.weighIn(now: now).first)
+        #expect(hint.source == .weighIn)
+        #expect(hint.action == .openWeight)
+        #expect(hint.urgency == DayHint.Urgency.weighIn)
+    }
+
+    /// Копия, пост, перерыв в диете и плато — решения, которые нельзя
+    /// пропустить; взвешивание — привычное дело, оно ждёт.
+    @Test func theOwnersUrgentHintsComeFirst() {
+        let all = [DayHint.weighIn(now: now),
+                   DayHint.backup(now: now),
+                   DayHint.fasting(daysUntil: 0, kind: "water", now: now)].flatMap { $0 }
+        let picked = DayHintPicker.pick(all, now: now, dismissed: [])
+        #expect(picked.main?.source == .backup)
+        #expect(picked.rest.map(\.source) == [.fasting, .weighIn])
+    }
+
+    /// Взвешивание важнее объяснения и прогноза веса: сначала взвесься —
+    /// потом будет что объяснять.
+    @Test func itOutranksTheWeightExplanation() throws {
+        let explainer = DayHint(id: "e", source: .weightExplainer, title: "e", detail: nil,
+                                urgency: DayHint.Urgency.weightExplainer,
+                                expiresAt: now.addingTimeInterval(3600), action: nil)
+        let weighIn = try #require(DayHint.weighIn(now: now).first)
+        let picked = DayHintPicker.pick([explainer, weighIn], now: now, dismissed: [])
+        #expect(picked.main?.source == .weighIn)
+    }
+
+    /// Смахнутое утром, оно не возвращается до завтра, а завтра — снова.
+    @Test func itsIdCarriesTheDay() throws {
+        let today = try #require(DayHint.weighIn(now: now).first)
+        let tomorrow = try #require(DayHint.weighIn(now: now.addingTimeInterval(86_400)).first)
+        #expect(today.id != tomorrow.id)
+    }
+}
+
 /// Открытка в день рождения: когда он сегодня.
 struct BirthdayTests {
     private let calendar = Calendar(identifier: .gregorian)

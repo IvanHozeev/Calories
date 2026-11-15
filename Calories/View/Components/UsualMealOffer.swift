@@ -37,8 +37,7 @@ struct UsualMealOffer: View {
                 Text("Записать")
                     .font(.app(.subheadline, weight: .semibold))
             }
-            .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
+            .buttonStyle(.mainAction)
             .accessibilityIdentifier("logUsualMeal")
         }
         .padding(.vertical, 4)

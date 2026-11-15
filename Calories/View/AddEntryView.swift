@@ -1188,7 +1188,7 @@ struct AddEntryView: View {
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
             .toolbar { whenToolbar }
-            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 1)
+            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 2)
             // Лист закрывался смахиванием, и набранный приём пропадал молча:
             // жест не отличить от случайного. Пока в приёме есть набранное,
             // смахнуть лист нельзя — выйти можно «Сохранить» или «Отмена».
@@ -1262,14 +1262,35 @@ struct AddEntryView: View {
         // пунктов тулбара приходится назвать явно: иначе система показывает
         // либо поиск, либо пункты, и один из них пропадает.
         DefaultToolbarItem(kind: .search, placement: .bottomBar)
-        // Отдельной кнопкой, а не полем внутри той же капсулы: дата, вшитая
-        // в строку поиска, читалась как часть поиска.
+        // Сканер справа от строки поиска, а не часы: штрихкод — способ найти
+        // еду, как и поиск, и стоит рядом с ним. Отдельной кнопкой, а не
+        // полем внутри той же капсулы.
         ToolbarSpacer(.fixed, placement: .bottomBar)
         ToolbarItem(placement: .bottomBar) {
             Button {
+                showingScanner = true
+            } label: {
+                Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
+            }
+            .accessibilityIdentifier("scanBarcode")
+        }
+
+        // Время приёма — сверху, справа: его правят редко и по ошибке, а
+        // внизу, рядом с поиском, оно занимало место, нужное тому, чем
+        // пользуются каждый раз. Показано числом, чтобы сдвинутое время
+        // читалось сразу, без нажатия.
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
                 showingWhen = true
             } label: {
-                Label("Когда", systemImage: "clock")
+                // Не `Label`: в тулбаре система показывает у него одну иконку,
+                // а время должно читаться словами рядом с часами.
+                HStack(spacing: 5) {
+                    Image(systemName: "clock")
+                    Text(verbatim: timeLabel)
+                        .monospacedDigit()
+                }
+                .accessibilityElement(children: .combine)
             }
             .accessibilityIdentifier("mealTimePicker")
             .popover(isPresented: $showingWhen) {
@@ -1284,6 +1305,14 @@ struct AddEntryView: View {
                     .presentationCompactAdaptation(.popover)
             }
         }
+    }
+
+    /// «13:20», а для другого дня — с датой: «вчера 13:20» не угадать по
+    /// одним часам.
+    private var timeLabel: String {
+        let time = selectedDate.formatted(date: .omitted, time: .shortened)
+        guard !Calendar.current.isDateInToday(selectedDate) else { return time }
+        return selectedDate.formatted(.dateTime.day().month(.abbreviated)) + " " + time
     }
 
     /// Отмена и сохранение — полосой над строкой поиска.

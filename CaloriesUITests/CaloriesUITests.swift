@@ -168,9 +168,14 @@ final class CaloriesUITests: XCTestCase {
     /// Строка продукта в результатах поиска. Ищем по метке среди любых
     /// элементов, а не по `staticTexts["Beef"]`: этот запрос перестал находить
     /// строку (почему именно, не выяснялось), хотя на экране она есть.
+    ///
+    /// Кнопки «+» у строки тоже подписаны названием продукта («Add Spinach»),
+    /// и тап по ней кладёт продукт в приём, минуя экран порции, — поэтому они
+    /// исключены: ищем саму строку.
     func foodRow(_ name: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS[c] %@", name)).firstMatch
+            .matching(NSPredicate(format: "label CONTAINS[c] %@ AND NOT (identifier IN {'quickAdd', 'fridgeAdd'})",
+                                  name)).firstMatch
     }
 
     /// Строка поиска живёт под тулбаром и появляется, только когда список
@@ -725,8 +730,7 @@ final class CaloriesUITests: XCTestCase {
         // чистом симуляторе, а дальше падает на «multiple matching elements».
         // По метке, а не по типу: после «быстрого добавления» строка с
         // названием может быть не статическим текстом, а кнопкой.
-        let food = app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS[c] 'Spinach'")).firstMatch
+        let food = foodRow("Spinach", in: app)
         XCTAssertTrue(food.waitForExistence(timeout: 5), "Шпината нет во встроенной базе")
         food.tap()
 

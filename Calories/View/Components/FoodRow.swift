@@ -187,7 +187,16 @@ struct FoodRow: View {
                              // буквы под ним, и число калорий — четыре кода без подписей.
                              color: .primary,
                              traits: traits,
-                             weight: portion.isEmpty ? nil : portion)
+                             weight: nil)
+                    // Порция — второй строкой, а не хвостом названия: «Тунец
+                    // консервированный 🔥 108 г» переносился по словам, и вес
+                    // оказывался то в конце первой строки, то в начале второй.
+                    if !portion.isEmpty {
+                        Text(verbatim: portion)
+                            .font(.app(.footnote, weight: .medium))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
 
                 // Подпись слева — сколько ингредиентов у блюда. Всё остальное

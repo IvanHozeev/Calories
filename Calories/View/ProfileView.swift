@@ -147,6 +147,21 @@ struct ProfileView: View {
                 .accessibilityIdentifier("subscription")
             }
 
+            // Как идёт тело: вес, жир, сухая масса и тренд веса за полтора
+            // месяца. Только смотреть — править в параметрах ниже.
+            if let weight = store.weightKg {
+                Section {
+                    BodySnapshotCard(weightKg: weight,
+                                     fatPercent: store.measuredBodyFatPercent,
+                                     leanKg: draftProfile?.leanMassKg(from: measurement),
+                                     trend: store.weightTrendSeries(weeks: 6),
+                                     weeks: 6,
+                                     imperial: useImperial)
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                }
+            }
+
             // Расчёт сразу под ней: ради него профиль и открывают — сколько тратишь,
             // сколько есть и сколько белка. Параметры, из которых он собран,
             // правят редко, и им место ниже.

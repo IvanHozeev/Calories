@@ -564,18 +564,53 @@ enum PalettePreset: String, CaseIterable, Identifiable {
 
 /// Насыщенность палитры: три названия и ползунок под ними.
 private extension SettingsView {
+    /// Образец кольца: настоящее, с цветами выбранной насыщенности и тремя
+    /// полосками макросов рядом. Меняется на глазах, пока двигают ползунок и
+    /// выбирают цвет, — иначе настройка работала вслепую: сменил, вышел на
+    /// «Сегодня», увидел, не понравилось, вернулся.
+    var ringSampleRow: some View {
+        HStack(spacing: 16) {
+            ProgressRing(consumed: 1711, goal: 2749,
+                         macros: Macros(protein: 112, fat: 41, carbs: 262),
+                         proteinTarget: 136, fatTarget: 64, carbsTarget: 407,
+                         miniature: 76, onOpen: {})
+                .frame(width: 76, height: 76)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Так будет выглядеть день")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                sampleBar(ProgressRing.proteinColors[0], share: 0.82)
+                sampleBar(ProgressRing.fatColors[0], share: 0.64)
+                sampleBar(ProgressRing.carbColors[0], share: 0.64)
+            }
+        }
+        .padding(.vertical, 6)
+        // Пересобирается вместе с ползунком: цвета кольца читаются из
+        // настроек при сборке, а не следят за ними сами.
+        .id(paletteIntensity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Так будет выглядеть день"))
+        .accessibilityIdentifier("ringSample")
+    }
+
+    private func sampleBar(_ color: Color, share: Double) -> some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule().fill(color.opacity(0.22))
+                Capsule().fill(color).frame(width: geometry.size.width * share)
+            }
+        }
+        .frame(height: 4)
+    }
+
     var intensityRow: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 settingLabel("Насыщенность", systemImage: "drop.halffull")
                 Spacer()
-                // Образец рядом с ползунком: цифры процентов тут ничего не
-                // говорят, а три точки макросов меняются на глазах.
-                HStack(spacing: 6) {
-                    Circle().fill(ProgressRing.proteinColors[0]).frame(width: 14, height: 14)
-                    Circle().fill(ProgressRing.fatColors[0]).frame(width: 14, height: 14)
-                    Circle().fill(ProgressRing.carbColors[0]).frame(width: 14, height: 14)
-                }
+                // Образец — выше, во весь размер: три точки рядом с ползунком
+                // показывали цвета, но не то, как они лягут на кольцо.
             }
             Picker("Насыщенность", selection: Binding(
                 get: { PalettePreset.matching(paletteIntensity) },
@@ -736,6 +771,7 @@ private extension SettingsView {
     /// как приложение считает, — поэтому своей секцией.
     var appearanceSection: some View {
     Section {
+        ringSampleRow
         themeRow
         fontRow
         accentRow

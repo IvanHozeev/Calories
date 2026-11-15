@@ -496,6 +496,16 @@ extension CalorieStore {
         return window.reduce(0) { $0 + $1.weightKg } / Double(window.count)
     }
 
+    /// Тренд веса за последние недели для мини-графика в профиле: по точке
+    /// раз в шесть дней, от давней к свежей. Дни без данных пропускаются.
+    func weightTrendSeries(weeks: Int = 6, now: Date = Date()) -> [Double] {
+        guard !weightEntries.isEmpty else { return [] }
+        let calendar = Calendar.current
+        return stride(from: -weeks * 7, through: 0, by: 6).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: now).flatMap { weightTrend(on: $0) }
+        }
+    }
+
     /// Окна приёмов за день по дневнику: и сегодняшние, и прожитые.
     ///
     /// Норму берём ту, что была в силе: на сегодня — с поправкой на активность,

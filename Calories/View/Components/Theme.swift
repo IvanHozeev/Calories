@@ -222,8 +222,25 @@ struct MainActionButtonStyle: ButtonStyle {
             .font(.app(.subheadline, weight: .semibold))
             .foregroundStyle(Color(.systemBackground))
             .padding(.horizontal, 18)
-            .frame(minHeight: 44)
+            .frame(minHeight: 48)
             .background(Color.primary, in: Capsule())
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .contentShape(Capsule())
+    }
+}
+
+/// Вторая кнопка рядом с главной: серая заливка и обычный текст.
+///
+/// Нужна там, где действий два и одно из них — «записать сразу» вместо
+/// главного «в приём пищи»: оба должны читаться кнопками, но не спорить.
+struct SecondaryActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.app(.subheadline, weight: .semibold))
+            .foregroundStyle(Color.primary)
+            .padding(.horizontal, 18)
+            .frame(minHeight: 48)
+            .background(Color.secondary.opacity(0.16), in: Capsule())
             .opacity(configuration.isPressed ? 0.7 : 1)
             .contentShape(Capsule())
     }
@@ -231,6 +248,10 @@ struct MainActionButtonStyle: ButtonStyle {
 
 extension ButtonStyle where Self == MainActionButtonStyle {
     static var mainAction: MainActionButtonStyle { MainActionButtonStyle() }
+}
+
+extension ButtonStyle where Self == SecondaryActionButtonStyle {
+    static var secondaryAction: SecondaryActionButtonStyle { SecondaryActionButtonStyle() }
 }
 
 /// Цветная бусина под стеклом: кружок выбора цвета.

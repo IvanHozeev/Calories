@@ -24,19 +24,27 @@ struct FoodQuantityView: View {
     /// «в приём пищи» — он уже там, — а подтверждение нового веса.
     private let addTitle: LocalizedStringKey
 
-    /// Время приёма пищи, в который добавляют продукт. Кнопка с часами — здесь,
-    /// на экране продукта: время решают, когда уже выбрали, что съели.
+    /// День и набранный приём — чтобы показать, что порция сделает с днём.
+    /// nil — не показываем: правят запись за прошлый день или экран открыт
+    /// из «Рациона», где «после приёма» нечего сравнивать.
+    private let impactBase: MealImpact.Base?
+
+    /// С чего начинали: обычная порция, она же первая из быстрых.
+    private let startGrams: Double
 
     init(food: FoodItem, grams initialGrams: Double? = nil, addTitle: LocalizedStringKey = "В приём пищи",
          onSave: (() -> Void)? = nil, onAddAndSave: ((MealItem) -> Void)? = nil,
+         impactBase: MealImpact.Base? = nil,
          isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
+        self.impactBase = impactBase
         self.food = food
         self.addTitle = addTitle
         self.onSave = onSave
         self.onAddAndSave = onAddAndSave
         self.onAdd = onAdd
         let g = initialGrams ?? (food.defaultGrams > 0 ? food.defaultGrams : 100)
+        self.startGrams = g
         _grams = State(initialValue: g)
         _gramsText = State(initialValue: "\(Int(g))")
         _pieces = State(initialValue: food.isPerUnit ? max(0.5, (initialGrams ?? 100) / 100) : 1)
@@ -66,62 +74,31 @@ struct FoodQuantityView: View {
 
     var body: some View {
         Form {
-            // Карточка сжата по высоте намеренно: с поднятой клавиатурой
-            // экрану остаётся около половины, и раньше поле веса уезжало под
-            // неё — приходилось ждать автоподскролл, чтобы увидеть, что
-            // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
-            Section {
-                VStack(spacing: 8) {
-                    // Название ушло в заголовок экрана: оно и так стоит
-                    // над карточкой, а второй копией забирало строку у чисел.
-                    Text("\(calories) ккал")
-                        .font(.app(size: 28, weight: .bold))
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                        .foregroundStyle(.green)
-                    // Цена ста граммов — только когда она отличается от
-                    // съеденного: на ста граммах это было то же число дважды.
-                    if !isHundredGrams {
-                        Text(food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
-                                            : "\(food.caloriesPer100g) ккал / 100 г")
-                            .font(.app(.caption2))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    MacrosRow(macros: macros)
-                        .padding(.top, 2)
-
-                    MacroSplitBar(macros: macros)
-                        .padding(.top, 4)
-                        .padding(.horizontal, 4)
-
-                    // Свойство еды — последней строкой карточки, под БЖУ:
-                    // сначала числа, потом вывод из них.
-                    FoodTraitLines(traits: food.traits)
-                        .padding(.top, 8)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-            }
-
+            // Количество — первым, а не после карточки продукта.
+            //
+            // С поднятой цифровой клавиатурой экрану остаётся около трёхсот
+            // пятидесяти точек, а число, которое набирают, и быстрые порции под
+            // ним важнее всего остального: когда они стояли третьими, нижняя
+            // панель «В приём пищи» закрывала их. Результат — калории, БЖУ и
+            // «после приёма» — читается под числом, как в калькуляторе.
             if food.isPerUnit {
                 // Штуками, а не граммами: вес у такого продукта неизвестен.
                 // Половинками — выпил полшейка, съел полбатончика.
-                Section("Количество, шт") {
-                    Stepper(value: $pieces, in: 0.5...20, step: 0.5) {
-                        Text(verbatim: PortionLabel.text(grams: nil, pieces: pieces) ?? "")
-                            .font(.app(.body, weight: .medium))
-                            .monospacedDigit()
-                    }
-                    .accessibilityIdentifier("piecesStepper")
+                Section {
+                    AmountRow(label: PortionLabel.text(grams: nil, pieces: pieces) ?? "",
+                              onMinus: { pieces = max(0.5, pieces - 0.5) },
+                              onPlus: { pieces = min(20, pieces + 0.5) })
+                        .listRowSeparator(.hidden)
+                        .accessibilityIdentifier("piecesStepper")
+                } header: {
+                    Text("Количество, шт").listSectionTitle()
                 }
             } else {
-            Section("Количество, г") {
-                Stepper(value: $grams, in: 5...2000, step: 10) {
-                    TextField("Граммы", text: $gramsText)
-                        .keyboardType(.numberPad)
-                        .focused($gramsFocused)
-                        .font(.app(.body, weight: .medium))
+                Section {
+                    AmountRow(text: $gramsText, focus: $gramsFocused, unit: String(localized: "г"),
+                              onMinus: { grams = max(5, grams - 10) },
+                              onPlus: { grams = min(2000, grams + 10) })
+                        .listRowSeparator(.hidden)
                         .onChange(of: gramsText) { _, newValue in
                             if let value = Double(newValue), value > 0 {
                                 grams = min(value, 2000)
@@ -135,8 +112,68 @@ struct FoodQuantityView: View {
                                 gramsText = "\(Int(newValue))"
                             }
                         }
+                    QuickAmounts(options: Self.quickOptions(start: startGrams), current: grams) {
+                        grams = $0
+                    }
+                    .listRowSeparator(.hidden)
+                } header: {
+                    Text("Количество, г").listSectionTitle()
                 }
             }
+
+            // «После этого приёма» — прямо под количеством: граммы выбирают,
+            // глядя на это число.
+            if let impactBase {
+                Section {
+                    MealImpactCard(impact: MealImpact(base: impactBase,
+                                                      thisCalories: calories, thisMacros: macros))
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+
+            // Карточка сжата по высоте намеренно: с поднятой клавиатурой
+            // экрану остаётся около половины, и раньше поле веса уезжало под
+            // неё — приходилось ждать автоподскролл, чтобы увидеть, что
+            // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
+            Section {
+                VStack(spacing: 8) {
+                    // Название ушло в заголовок экрана: оно и так стоит
+                    // над карточкой, а второй копией забирало строку у чисел.
+                    Text("\(calories) ккал")
+                        .font(.app(size: 28, weight: .bold))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
+                        .foregroundStyle(.primary)
+                    // Цена ста граммов — только когда она отличается от
+                    // съеденного: на ста граммах это было то же число дважды.
+                    if !isHundredGrams {
+                        Text(food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
+                                            : "\(food.caloriesPer100g) ккал / 100 г")
+                            .font(.app(.caption2))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    MacrosRow(macros: macros)
+                        .padding(.top, 2)
+
+                    // Без подписей: названия макросов уже стоят над числами в
+                    // строке выше, и вторая копия забирала у экрана высоту, а
+                    // с поднятой клавиатурой её и так в обрез.
+                    MacroSplitBar(macros: macros, showsLabels: false)
+                        .padding(.top, 4)
+                        .padding(.horizontal, 4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+            }
+
+            // Свойство еды — последним: сначала числа и граммы, которые
+            // выбирают, потом вывод из них.
+            if !food.traits.isEmpty {
+                Section {
+                    FoodTraitLines(traits: food.traits)
+                }
             }
 
         }
@@ -209,12 +246,11 @@ struct FoodQuantityView: View {
                         onAddAndSave(mealItem)
                     } label: {
                         Text("Сохранить")
-                            .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(.green)
+                    // Вторая кнопка серая, главная чёрная: «записать сразу» —
+                    // запасное действие, а не то, ради чего пришли.
+                    .buttonStyle(.secondaryAction)
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
@@ -231,16 +267,111 @@ struct FoodQuantityView: View {
                     if !isPushed { dismiss() }
                 } label: {
                     Text(addTitle)
-                        .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.mainAction)
                 .accessibilityIdentifier("addToMeal")
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 10)
+        }
+    }
+
+    /// Быстрые порции: с чего начали (обычная), затем сто, сто пятьдесят и
+    /// двести пятьдесят — без повторов, не больше четырёх.
+    static func quickOptions(start: Double) -> [Double] {
+        var options: [Double] = [start.rounded()]
+        for candidate in [100.0, 150, 250, 200, 50] where !options.contains(candidate) {
+            options.append(candidate)
+            if options.count == 4 { break }
+        }
+        return options
+    }
+}
+
+/// Количество: крупное число между «−» и «+».
+///
+/// Раньше это был системный степпер с мелким полем в строке. Число, ради
+/// которого на экран и заходят, стоило набрано кеглем текста; теперь оно
+/// главное на экране, а «−» и «+» — под большим пальцем по краям. Поле, как
+/// и раньше, редактируется с клавиатуры.
+private struct AmountRow: View {
+    var text: Binding<String>? = nil
+    var focus: FocusState<Bool>.Binding? = nil
+    /// Готовая подпись вместо поля — для штук, где поля с клавиатурой нет.
+    var label: String? = nil
+    var unit: String = ""
+    var onMinus: () -> Void
+    var onPlus: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            stepButton("minus", label: String(localized: "Меньше"), action: onMinus)
+            Spacer(minLength: 0)
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                if let text, let focus {
+                    TextField("Граммы", text: text)
+                        .keyboardType(.numberPad)
+                        .focused(focus)
+                        .font(.app(size: 34, weight: .bold))
+                        .multilineTextAlignment(.trailing)
+                        .monospacedDigit()
+                        .fixedSize()
+                    Text(verbatim: unit)
+                        .font(.app(.body))
+                        .foregroundStyle(.secondary)
+                } else if let label {
+                    Text(verbatim: label)
+                        .font(.app(size: 34, weight: .bold))
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                }
+            }
+            Spacer(minLength: 0)
+            stepButton("plus", label: String(localized: "Больше"), action: onPlus)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func stepButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.app(size: 18, weight: .bold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 48, height: 48)
+                .background(Color.secondary.opacity(0.16), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: label))
+    }
+}
+
+/// Быстрые порции под числом: нажал — граммы подставились.
+private struct QuickAmounts: View {
+    let options: [Double]
+    let current: Double
+    let pick: (Double) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(options, id: \.self) { value in
+                let selected = abs(current - value) < 0.5
+                Button {
+                    pick(value)
+                } label: {
+                    Text(verbatim: "\(Int(value)) \(String(localized: "г"))")
+                        .font(.app(.subheadline, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(selected ? Color(.systemBackground) : Color.primary)
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 44)
+                        .background(selected ? Color.primary : Color.secondary.opacity(0.16),
+                                    in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
         }
     }
 }
@@ -270,11 +401,16 @@ struct DishQuantityView: View {
     /// поиска — сразу в дневник.
     private let addTitle: LocalizedStringKey
 
+    /// День и набранный приём — как у продукта.
+    private let impactBase: MealImpact.Base?
+
     init(dish: Dish, addTitle: LocalizedStringKey = "В приём пищи",
          onAddAndSave: ((MealItem) -> Void)? = nil,
          remainingGrams: Double? = nil,
+         impactBase: MealImpact.Base? = nil,
          isPushed: Bool = false, onAdd: @escaping (MealItem) -> Void) {
         self.isPushed = isPushed
+        self.impactBase = impactBase
         self.dish = dish
         self.addTitle = addTitle
         self.onAddAndSave = onAddAndSave
@@ -312,6 +448,41 @@ struct DishQuantityView: View {
 
     var body: some View {
         Form {
+            // Количество — первым: см. FoodQuantityView.
+            Section {
+                AmountRow(text: $gramsText, focus: $gramsFocused, unit: String(localized: "г"),
+                          onMinus: { grams = max(5, grams - 10) },
+                          onPlus: { grams = min(5000, grams + 10) })
+                    .listRowSeparator(.hidden)
+                    .onChange(of: gramsText) { _, newValue in
+                        if let value = Double(newValue), value > 0 {
+                            grams = min(value, 5000)
+                        }
+                    }
+                    .onChange(of: grams) { _, newValue in
+                        // Не по фокусу, а по расхождению: с поднятой клавиатурой
+                        // степпер тоже жмут, и строка оставалась со старым числом.
+                        // Своё же набранное не перетираем — оно уже совпадает.
+                        if Double(gramsText) != newValue {
+                            gramsText = "\(Int(newValue))"
+                        }
+                    }
+                QuickAmounts(options: FoodQuantityView.quickOptions(start: dish.servingGrams),
+                             current: grams) { grams = $0 }
+                    .listRowSeparator(.hidden)
+            } header: {
+                Text("Количество, г").listSectionTitle()
+            }
+
+            if let impactBase {
+                Section {
+                    MealImpactCard(impact: MealImpact(base: impactBase,
+                                                      thisCalories: calories, thisMacros: macros))
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+
             Section {
                 VStack(spacing: 8) {
                     // Название — в заголовке экрана, как и у продукта.
@@ -319,7 +490,7 @@ struct DishQuantityView: View {
                         .font(.app(size: 28, weight: .bold))
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(.primary)
                     if !isHundredGrams {
                         Text("\(dish.caloriesPer100g) ккал / 100 г")
                             .font(.app(.caption))
@@ -328,39 +499,17 @@ struct DishQuantityView: View {
 
                     MacrosRow(macros: macros)
                         .padding(.top, 4)
-
-                    // Как у продукта: свойство последней строкой.
-                    FoodTraitLines(traits: dish.traits)
-                        .padding(.top, 8)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 6)
             }
 
-            Section("Количество, г") {
-                Stepper(value: $grams, in: 5...5000, step: 10) {
-                    TextField("Граммы", text: $gramsText)
-                        .keyboardType(.numberPad)
-                        .focused($gramsFocused)
-                        .font(.app(.body, weight: .medium))
-                        .onChange(of: gramsText) { _, newValue in
-                            if let value = Double(newValue), value > 0 {
-                                grams = min(value, 5000)
-                            }
-                        }
-                        .onChange(of: grams) { _, newValue in
-                            // Не по фокусу, а по расхождению: с поднятой клавиатурой
-                            // степпер тоже жмут, и строка оставалась со старым числом.
-                            // Своё же набранное не перетираем — оно уже совпадает.
-                            if Double(gramsText) != newValue {
-                                gramsText = "\(Int(newValue))"
-                            }
-                        }
+            // Свойство — под количеством, как у продукта.
+            if !dish.traits.isEmpty {
+                Section {
+                    FoodTraitLines(traits: dish.traits)
                 }
             }
-
-            // Чем продукт хорош или опасен на сушке, словами: в списке это
-            // только значок, а здесь есть место объяснить.
 
 
             if !dish.ingredients.isEmpty {
@@ -417,12 +566,9 @@ struct DishQuantityView: View {
                         onAddAndSave(MealItem(name: dish.name, calories: calories, macros: macros, grams: grams))
                     } label: {
                         Text("Сохранить")
-                            .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .tint(.green)
+                    .buttonStyle(.secondaryAction)
                     .accessibilityIdentifier("addAndSave")
                     .accessibilityLabel("Добавить и сохранить")
                 }
@@ -433,11 +579,9 @@ struct DishQuantityView: View {
                     if !isPushed { dismiss() }
                 } label: {
                     Text(addTitle)
-                        .fontWeight(.semibold)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.mainAction)
                 .accessibilityIdentifier("addToMeal")
             }
             .padding(.horizontal, 16)

@@ -11,14 +11,22 @@ struct MacrosRow: View {
         }
     }
 
+    @Environment(\.colorScheme) private var colorScheme
+
     private func macroItem(title: LocalizedStringKey, value: Double, color: Color) -> some View {
         VStack(spacing: 2) {
+            // Число чёрное в светлой теме и цветное в тёмной: голубой и
+            // персиковый на белом читаются хуже, а цвет макроса остаётся
+            // точкой у названия — так же, как в плитках на «Сегодня».
             Text(formatted(value))
                 .font(.app(.subheadline, weight: .semibold))
-                .foregroundStyle(color)
-            Text(title)
-                .font(.app(.caption2))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(colorScheme == .dark ? color : Color.primary)
+            HStack(spacing: 5) {
+                Circle().fill(color).frame(width: 7, height: 7)
+                Text(title)
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

@@ -1663,6 +1663,7 @@ struct AddEntryView: View {
                 grams: grams,
                 onSave: saveAction(for: food, enabled: savable),
                 onAddAndSave: quickAction(enabled: quickSave),
+                impactBase: impactBase(),
                 isPushed: true,
             ) { item in
                 addToDraft(item)
@@ -1670,6 +1671,7 @@ struct AddEntryView: View {
         case .dish(let dish):
             DishQuantityView(dish: dish, onAddAndSave: addAndSave,
                              remainingGrams: store.batchState(of: dish)?.remainingGrams,
+                             impactBase: impactBase(),
                              isPushed: true) { item in
                 addToDraft(item)
             }
@@ -1677,7 +1679,9 @@ struct AddEntryView: View {
             if let item = draftItems.first(where: { $0.id == itemID }),
                let amount = item.pieces.map({ $0 * 100 }) ?? item.grams, amount > 0 {
                 FoodQuantityView(food: per100g(item, grams: amount, perUnit: item.pieces != nil), grams: amount,
-                                 addTitle: "Готово", isPushed: true) { edited in
+                                 addTitle: "Готово",
+                                 impactBase: impactBase(excluding: itemID),
+                                 isPushed: true) { edited in
                     // Правим поля на месте, а не подменяем элемент целиком: у
                     // нового `MealItem` новый идентификатор, экран порции
                     // открыт по старому — и после «Готово» он оставался
@@ -1704,6 +1708,38 @@ struct AddEntryView: View {
     ///
     /// Продукт «на штуку» возвращается «на одну штуку»: `grams` для него —
     /// штуки, переведённые в сотни.
+    /// День и набранный приём — для «после этого приёма» на экране порции.
+    ///
+    /// Только за сегодня: норма и съеденное известны на сегодня, а запись
+    /// задним числом сравнивать с сегодняшним остатком — вводить в
+    /// заблуждение. Дополняя приём, его запись уже в «съедено» и одновременно
+    /// в черновике, поэтому из дня она вычитается: иначе посчитали бы дважды.
+    ///
+    /// - Parameter excluding: правка уже набранного — сама эта строка не в
+    ///   чёрновике, её заменяет выбираемая порция.
+    private func impactBase(excluding itemID: UUID? = nil) -> MealImpact.Base? {
+        let calendar = Calendar.current
+        guard calendar.isDateInToday(selectedDate), store.adaptedTodayGoal > 0 else { return nil }
+        var consumed = store.consumedToday
+        var macros = store.macrosToday
+        if let entry = appendingTo, calendar.isDateInToday(entry.date) {
+            consumed -= entry.calories
+            macros = Macros(protein: macros.protein - entry.macros.protein,
+                            fat: macros.fat - entry.macros.fat,
+                            carbs: macros.carbs - entry.macros.carbs)
+        }
+        let draft = draftItems.filter { $0.id != itemID }
+        return MealImpact.Base(
+            day: MealImpact.Day(goal: store.adaptedTodayGoal,
+                                consumed: max(0, consumed),
+                                macros: macros,
+                                proteinTarget: store.proteinTarget,
+                                fatTarget: store.fatTarget,
+                                carbsTarget: store.carbsTarget),
+            draftCalories: draft.reduce(0) { $0 + $1.calories },
+            draftMacros: draft.reduce(Macros.zero) { $0 + $1.macros })
+    }
+
     private func per100g(_ item: MealItem, grams: Double, perUnit: Bool = false) -> FoodItem {
         let factor = 100 / grams
         let food = FoodItem(name: item.name,

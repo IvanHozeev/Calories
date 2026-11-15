@@ -124,6 +124,7 @@ struct FoodQuantityView: View {
                               onMinus: { pieces = max(0.5, pieces - 0.5) },
                               onPlus: { pieces = min(20, pieces + 0.5) })
                         .listRowSeparator(.hidden)
+                        .listRowInsets(Self.amountInsets)
                         .accessibilityIdentifier("piecesStepper")
                 }
             } else {
@@ -132,6 +133,7 @@ struct FoodQuantityView: View {
                               onMinus: { grams = max(5, grams - 10) },
                               onPlus: { grams = min(2000, grams + 10) })
                         .listRowSeparator(.hidden)
+                        .listRowInsets(Self.amountInsets)
                         .onChange(of: gramsText) { _, newValue in
                             if let value = Double(newValue), value > 0 {
                                 grams = min(value, 2000)
@@ -149,6 +151,7 @@ struct FoodQuantityView: View {
                         grams = $0
                     }
                     .listRowSeparator(.hidden)
+                    .listRowInsets(Self.chipsInsets)
                 }
             }
 
@@ -279,6 +282,12 @@ struct FoodQuantityView: View {
         }
     }
 
+    /// Отступы строк количества и быстрых порций: у системных по одиннадцать
+    /// точек сверху и снизу у каждой строки, и две строки подряд съедали
+    /// высоту, нужную, чтобы три карточки поместились над клавиатурой.
+    static let amountInsets = EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16)
+    static let chipsInsets = EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16)
+
     /// Быстрые порции: с чего начали (обычная), затем сто, сто пятьдесят и
     /// двести пятьдесят — без повторов, не больше четырёх.
     static func quickOptions(start: Double) -> [Double] {
@@ -323,7 +332,7 @@ private struct AmountRow: View {
                     TextField("Граммы", text: text)
                         .keyboardType(.numberPad)
                         .focused(focus)
-                        .font(.app(size: 34, weight: .bold))
+                        .font(.app(size: 30, weight: .bold))
                         .multilineTextAlignment(.center)
                         .monospacedDigit()
                         .fixedSize()
@@ -332,7 +341,7 @@ private struct AmountRow: View {
                         .foregroundStyle(.secondary)
                 } else if let label {
                     Text(verbatim: label)
-                        .font(.app(size: 34, weight: .bold))
+                        .font(.app(size: 30, weight: .bold))
                         .monospacedDigit()
                         .contentTransition(.numericText())
                 }
@@ -347,7 +356,7 @@ private struct AmountRow: View {
             Image(systemName: symbol)
                 .font(.app(size: 18, weight: .bold))
                 .foregroundStyle(Color.accentColor)
-                .frame(width: 44, height: 44)
+                .frame(width: 40, height: 40)
                 .background(Color.secondary.opacity(0.16), in: Circle())
         }
         .buttonStyle(.plain)
@@ -372,7 +381,7 @@ private struct QuickAmounts: View {
                         .font(.app(.subheadline, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(selected ? Color(.systemBackground) : Color.primary)
-                        .frame(maxWidth: .infinity, minHeight: 40)
+                        .frame(maxWidth: .infinity, minHeight: 36)
                         .background(selected ? Color.primary : Color.secondary.opacity(0.16),
                                     in: Capsule())
                 }
@@ -482,6 +491,7 @@ struct DishQuantityView: View {
                           onMinus: { grams = max(5, grams - 10) },
                           onPlus: { grams = min(5000, grams + 10) })
                     .listRowSeparator(.hidden)
+                    .listRowInsets(FoodQuantityView.amountInsets)
                     .onChange(of: gramsText) { _, newValue in
                         if let value = Double(newValue), value > 0 {
                             grams = min(value, 5000)
@@ -498,6 +508,7 @@ struct DishQuantityView: View {
                 QuickAmounts(options: FoodQuantityView.quickOptions(start: dish.servingGrams),
                              current: grams) { grams = $0 }
                     .listRowSeparator(.hidden)
+                    .listRowInsets(FoodQuantityView.chipsInsets)
             }
 
             if let impactBase {

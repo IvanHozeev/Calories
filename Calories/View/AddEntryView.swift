@@ -1318,6 +1318,10 @@ struct AddEntryView: View {
                     Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.semibold)
+                        // Цвет фона, а не системный: заливка кнопки — `primary`
+                        // (чёрная в светлой теме, белая в тёмной), и системный
+                        // белый текст в тёмной темне виден на белой плашке.
+                        .foregroundStyle(Color(.systemBackground))
                 }
                 .buttonStyle(.glassProminent)
                 // Чёрная в светлой теме и белая в тёмной, как главные кнопки

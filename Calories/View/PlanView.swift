@@ -114,9 +114,11 @@ struct PlanView: View {
         return VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Image(systemName: finished ? "flag.checkered" : "target")
-                    .foregroundStyle(finished ? Color.secondary : Color.yellow)
+                    .foregroundStyle(finished ? Color.secondary : Color.accentColor)
+                // Название плана — заголовок карточки, а не строка в ряду:
+                // на ступень выше подписей под ним.
                 Text(plan.title)
-                    .font(.app(.headline))
+                    .font(.app(.title3, weight: .bold))
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 if let status, !finished {
@@ -158,7 +160,7 @@ struct PlanView: View {
 
             if !finished {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(verbatim: "\(store.adaptedTodayGoal)")
+                    Text(store.adaptedTodayGoal.formatted())
                         .font(.app(size: 34, weight: .bold))
                         .monospacedDigit()
                     Text("ккал сегодня")
@@ -317,9 +319,9 @@ struct PlanView: View {
             // Заголовок по намерению: на наборе вес не уходит, и спрашивать
             // «из чего уходит» там нечего.
             switch intent {
-            case .bulk:        Text("Из чего набирается вес")
-            case .maintenance: Text("Из чего состоит вес")
-            default:           Text("Из чего уходит вес")
+            case .bulk:        Text("Из чего набирается вес").listSectionTitle()
+            case .maintenance: Text("Из чего состоит вес").listSectionTitle()
+            default:           Text("Из чего уходит вес").listSectionTitle()
             }
         } footer: {
             // Две вещи, и обе нужны: когда снято и где кончается точность.
@@ -405,11 +407,11 @@ struct PlanView: View {
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.mainAction)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             .listRowBackground(Color.clear)
         } header: {
-            Text("План завершён")
+            Text("План завершён").listSectionTitle()
         } footer: {
             explain("Пока план не закрыт, дневная норма продолжает держать его дефицит. Заверши — она вернётся к расчёту по профилю, или увеличь срок ниже, чтобы продолжить.").map { Text($0) }
         }
@@ -425,6 +427,15 @@ struct PlanView: View {
         let today = Date()
         let short = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
         Section {
+            // Запас диеты — сколько недель дефицита прошло и сколько осталось
+            // до рекомендованного перерыва. Только пока идёт дефицит: на
+            // брейке и на поддержании считать нечего.
+            if !plan.isDietBreak(on: today) {
+                let input = store.recoveryInput(now: today)
+                if input.isCutting {
+                    dietReserveRow(DietReserve(input))
+                }
+            }
             if plan.isDietBreak(on: today) {
                 let end = plan.firstNonBreakDay(from: today)
                 breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: .green,
@@ -473,10 +484,36 @@ struct PlanView: View {
                 }
             }
         } header: {
-            Text("Диет-брейк")
+            Text("Диет-брейк").listSectionTitle()
         } footer: {
             explain("Неделя-две на поддержании. Жир за сушку уходит так же, а голод и тяга сорваться — заметно меньше. Брейк действует с сегодняшнего дня, финиш сдвигается на его длину, целевой вес не меняется.").map { Text($0) }
         }
+    }
+
+    /// Полоска «Запас диеты»: чем ближе перерыв, тем она полнее и краснее.
+    private func dietReserveRow(_ reserve: DietReserve) -> some View {
+        let color: Color = reserve.isDue ? ProgressRing.overColors[0] : MacroKind.fat.color
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("Запас диеты")
+                Spacer()
+                if reserve.isDue {
+                    Text("Пора на перерыв")
+                        .font(.app(.caption, weight: .semibold))
+                        .foregroundStyle(color)
+                } else {
+                    Text("Перерыв через \(reserve.weeksLeft) нед.")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            ProgressView(value: reserve.progress)
+                .progressViewStyle(.engraved(color, thickness: 6))
+        }
+        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("dietReserve")
     }
 
     private func breakRow(_ title: LocalizedStringKey, icon: String, tint: Color,
@@ -556,7 +593,7 @@ struct PlanView: View {
                 .accessibilityIdentifier("moveRefeedToToday")
             }
         } header: {
-            Text("Эта неделя")
+            Text("Эта неделя").listSectionTitle()
         } footer: {
             // Объяснение — только когда есть что нажать: в сам рефид-день
             // «перенеси на сегодня» без кнопки звучит как издёвка.
@@ -788,7 +825,7 @@ struct PlanView: View {
             }
             }
         } header: {
-            Text("Как идёт план")
+            Text("Как идёт план").listSectionTitle()
         }
     }
 

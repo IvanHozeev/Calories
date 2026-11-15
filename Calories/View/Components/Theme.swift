@@ -229,6 +229,22 @@ struct MainActionButtonStyle: ButtonStyle {
     }
 }
 
+extension View {
+    /// Плашка главной или второй кнопки как часть подписи.
+    ///
+    /// Для двух кнопок в одной строке списка: у стиля `ButtonStyle` строка
+    /// отдаёт тап обеим, а `.borderless` держит их независимыми. Поэтому там
+    /// стиль кнопки системный, а вид — здесь, в подписи.
+    func actionPlate(prominent: Bool) -> some View {
+        font(.app(.subheadline, weight: .semibold))
+            .foregroundStyle(prominent ? Color(.systemBackground) : Color.primary)
+            .padding(.horizontal, 18)
+            .frame(minHeight: 48)
+            .background(prominent ? Color.primary : Color.secondary.opacity(0.16), in: Capsule())
+            .contentShape(Capsule())
+    }
+}
+
 /// Вторая кнопка рядом с главной: серая заливка и обычный текст.
 ///
 /// Нужна там, где действий два и одно из них — «записать сразу» вместо

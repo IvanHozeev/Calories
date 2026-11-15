@@ -74,7 +74,7 @@ struct WeekReviewView {
                 // Какая неделя — в самом заголовке: итог считается за
                 // последние семь дней, а не за календарную неделю.
                 HStack(spacing: 6) {
-                    Text("Неделя")
+                    Text("Неделя").listSectionTitle()
                     Text(verbatim: Self.weekRange())
                         .foregroundStyle(.tertiary)
                 }
@@ -108,16 +108,26 @@ struct WeekReviewView {
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                         HStack(spacing: 12) {
-                            Button("Оставить как есть") { store.keepCurrentGoal() }
-                                .buttonStyle(.bordered)
-                            Button("Принять") { store.acceptProposedGoal() }
-                                .buttonStyle(.borderedProminent)
-                                .accessibilityIdentifier("acceptGoalProposal")
+                            // Две кнопки в одной строке списка: системный стиль
+                            // держит их независимыми, вид — в подписи.
+                            Button { store.keepCurrentGoal() } label: {
+                                Text("Оставить как есть")
+                                    .frame(maxWidth: .infinity)
+                                    .actionPlate(prominent: false)
+                            }
+                            .buttonStyle(.borderless)
+                            Button { store.acceptProposedGoal() } label: {
+                                Text("Принять")
+                                    .frame(maxWidth: .infinity)
+                                    .actionPlate(prominent: true)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityIdentifier("acceptGoalProposal")
                         }
                     }
                     .padding(.vertical, 2)
                 } header: {
-                    Text("Норма на следующую неделю")
+                    Text("Норма на следующую неделю").listSectionTitle()
                 } footer: {
                     explain("До ответа норма остаётся прежней. Приложение считает расход по дневнику и весам, но менять число, с которым ты живёшь, без твоего ведома оно не должно.").map { Text($0) }
                 }

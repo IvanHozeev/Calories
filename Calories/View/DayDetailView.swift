@@ -100,18 +100,8 @@ struct DayDetailView: View {
         }
         .screenTitle(day.date.formatted(.dateTime.day().month(.wide)),
                      eyebrow: day.date.formatted(.dateTime.weekday(.wide)),
-                     trailingButtons: 1)
+                     trailingButtons: 0)
         // Дата с днём недели — в шапке, слева, двумя плотными строками. День
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingAdd = true
-                } label: {
-                    Image(systemName: "plus.circle.fill")
-                }
-                .accessibilityLabel("Добавить")
-            }
-        }
         .sheet(isPresented: $showingAdd) {
             AddEntryView(store: store, initialDate: date,
                          onFinish: { showingAdd = false })

@@ -1608,19 +1608,9 @@ struct AddEntryView: View {
             offSearchSection
         }
 
-        // Пока сегменты спрятаны поиском, до внешней базы иначе не добраться,
-        // а ради неё всё и затевалось: только там есть микронутриенты.
-        if isSearching, !wantsOnlineSearch {
-            Section {
-                Button {
-                    wantsOnlineSearch = true
-                } label: {
-                    Label("Искать в базе USDA", systemImage: "globe")
-                }
-            } footer: {
-                Text("Внешняя база больше и знает витамины с минералами. Запрос уходит только по этой кнопке.")
-            }
-        }
+        // Кнопки «Искать в базе USDA» здесь больше нет — её убрал владелец.
+        // Состояние `wantsOnlineSearch` и секция `offSearchSection` остались:
+        // если внешний поиск понадобится снова, достаточно вернуть вход.
 
         if isSearching {
             if filteredBuiltInFoods.isEmpty {

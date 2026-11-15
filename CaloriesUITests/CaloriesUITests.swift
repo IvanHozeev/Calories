@@ -958,8 +958,8 @@ final class CaloriesUITests: XCTestCase {
     ///
     /// Раньше источник выбирался кнопкой в тулбаре, и поиск шёл по одному
     /// выбранному. Кнопка ушла: при наборе запроса показываются все источники
-    /// разом, а внешняя база — по отдельной кнопке в результатах, потому что
-    /// она ходит в сеть.
+    /// разом. Кнопка внешней базы USDA в результатах тоже убрана — по просьбе
+    /// владельца, 15.11.
     @MainActor
     func testSearchCoversEverySourceAtOnce() {
         let app = launchApp()
@@ -977,8 +977,8 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(foodRow("Beef", in: app).waitForExistence(timeout: 5),
                       "Продукт из базы должен находиться без выбора источника")
         let usda = app.buttons["Search the USDA database"]
-        XCTAssertTrue(usda.exists || app.staticTexts["Search the USDA database"].exists,
-                      "Во внешнюю базу должна вести кнопка прямо из результатов")
+        XCTAssertFalse(usda.exists || app.staticTexts["Search the USDA database"].exists,
+                       "Кнопки внешней базы в результатах быть не должно")
     }
 
     /// Фраза с весом даёт быстрый выбор: количество из строки становится

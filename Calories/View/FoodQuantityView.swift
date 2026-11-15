@@ -74,70 +74,12 @@ struct FoodQuantityView: View {
 
     var body: some View {
         Form {
-            // Количество — первым, а не после карточки продукта.
-            //
-            // С поднятой цифровой клавиатурой экрану остаётся около трёхсот
-            // пятидесяти точек, а число, которое набирают, и быстрые порции под
-            // ним важнее всего остального: когда они стояли третьими, нижняя
-            // панель «В приём пищи» закрывала их. Результат — калории, БЖУ и
-            // «после приёма» — читается под числом, как в калькуляторе.
-            if food.isPerUnit {
-                // Штуками, а не граммами: вес у такого продукта неизвестен.
-                // Половинками — выпил полшейка, съел полбатончика.
-                Section {
-                    AmountRow(label: PortionLabel.text(grams: nil, pieces: pieces) ?? "",
-                              onMinus: { pieces = max(0.5, pieces - 0.5) },
-                              onPlus: { pieces = min(20, pieces + 0.5) })
-                        .listRowSeparator(.hidden)
-                        .accessibilityIdentifier("piecesStepper")
-                } header: {
-                    Text("Количество, шт").listSectionTitle()
-                }
-            } else {
-                Section {
-                    AmountRow(text: $gramsText, focus: $gramsFocused, unit: String(localized: "г"),
-                              onMinus: { grams = max(5, grams - 10) },
-                              onPlus: { grams = min(2000, grams + 10) })
-                        .listRowSeparator(.hidden)
-                        .onChange(of: gramsText) { _, newValue in
-                            if let value = Double(newValue), value > 0 {
-                                grams = min(value, 2000)
-                            }
-                        }
-                        .onChange(of: grams) { _, newValue in
-                            // Не по фокусу, а по расхождению: с поднятой клавиатурой
-                            // степпер тоже жмут, и строка оставалась со старым числом.
-                            // Своё же набранное не перетираем — оно уже совпадает.
-                            if Double(gramsText) != newValue {
-                                gramsText = "\(Int(newValue))"
-                            }
-                        }
-                    QuickAmounts(options: Self.quickOptions(start: startGrams), current: grams) {
-                        grams = $0
-                    }
-                    .listRowSeparator(.hidden)
-                } header: {
-                    Text("Количество, г").listSectionTitle()
-                }
-            }
-
-            // «После этого приёма» — прямо под количеством: граммы выбирают,
-            // глядя на это число.
-            if let impactBase {
-                Section {
-                    MealImpactCard(impact: MealImpact(base: impactBase,
-                                                      thisCalories: calories, thisMacros: macros))
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets())
-            }
-
             // Карточка сжата по высоте намеренно: с поднятой клавиатурой
             // экрану остаётся около половины, и раньше поле веса уезжало под
             // неё — приходилось ждать автоподскролл, чтобы увидеть, что
             // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
             Section {
-                VStack(spacing: 8) {
+                VStack(spacing: 5) {
                     // Название ушло в заголовок экрана: оно и так стоит
                     // над карточкой, а второй копией забирало строку у чисел.
                     Text("\(calories) ккал")
@@ -165,7 +107,60 @@ struct FoodQuantityView: View {
                         .padding(.horizontal, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
+                .padding(.vertical, 2)
+            }
+
+            // Порядок: карточка продукта, количество, «после приёма». Карточка
+            // первой — по ней понятно, что выбирают; количество и быстрые
+            // порции сразу под ней, а результат — под числом. С поднятой
+            // цифровой клавиатурой места в обрез, поэтому интервалы между
+            // блоками короткие (`listSectionSpacing`), а у количества нет
+            // заголовка: единица стоит рядом с числом.
+            if food.isPerUnit {
+                // Штуками, а не граммами: вес у такого продукта неизвестен.
+                // Половинками — выпил полшейка, съел полбатончика.
+                Section {
+                    AmountRow(label: PortionLabel.text(grams: nil, pieces: pieces) ?? "",
+                              onMinus: { pieces = max(0.5, pieces - 0.5) },
+                              onPlus: { pieces = min(20, pieces + 0.5) })
+                        .listRowSeparator(.hidden)
+                        .accessibilityIdentifier("piecesStepper")
+                }
+            } else {
+                Section {
+                    AmountRow(text: $gramsText, focus: $gramsFocused, unit: String(localized: "г"),
+                              onMinus: { grams = max(5, grams - 10) },
+                              onPlus: { grams = min(2000, grams + 10) })
+                        .listRowSeparator(.hidden)
+                        .onChange(of: gramsText) { _, newValue in
+                            if let value = Double(newValue), value > 0 {
+                                grams = min(value, 2000)
+                            }
+                        }
+                        .onChange(of: grams) { _, newValue in
+                            // Не по фокусу, а по расхождению: с поднятой клавиатурой
+                            // степпер тоже жмут, и строка оставалась со старым числом.
+                            // Своё же набранное не перетираем — оно уже совпадает.
+                            if Double(gramsText) != newValue {
+                                gramsText = "\(Int(newValue))"
+                            }
+                        }
+                    QuickAmounts(options: Self.quickOptions(start: startGrams), current: grams) {
+                        grams = $0
+                    }
+                    .listRowSeparator(.hidden)
+                }
+            }
+
+            // «После этого приёма» — прямо под количеством: граммы выбирают,
+            // глядя на это число.
+            if let impactBase {
+                Section {
+                    MealImpactCard(impact: MealImpact(base: impactBase,
+                                                      thisCalories: calories, thisMacros: macros))
+                }
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
             }
 
             // Свойство еды — последним: сначала числа и граммы, которые
@@ -178,6 +173,8 @@ struct FoodQuantityView: View {
 
         }
         .glassRow()
+        // Плотнее обычного: три карточки подряд, и с клавиатурой места мало.
+        .listSectionSpacing(8)
         // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
         // «Готово» у numberPad нет — убрать её можно только смахиванием.
         .scrollDismissesKeyboard(.interactively)
@@ -311,11 +308,19 @@ private struct AmountRow: View {
             Spacer(minLength: 0)
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 if let text, let focus {
+                    // Невидимая копия единицы слева: число стоит по центру
+                    // карточки, а единица висит справа от него. Без неё по
+                    // центру стояла пара «число и единица», и само число
+                    // косило влево, а на глаз — вправо от «−».
+                    Text(verbatim: unit)
+                        .font(.app(.body))
+                        .hidden()
+                        .accessibilityHidden(true)
                     TextField("Граммы", text: text)
                         .keyboardType(.numberPad)
                         .focused(focus)
                         .font(.app(size: 34, weight: .bold))
-                        .multilineTextAlignment(.trailing)
+                        .multilineTextAlignment(.center)
                         .monospacedDigit()
                         .fixedSize()
                     Text(verbatim: unit)
@@ -331,7 +336,6 @@ private struct AmountRow: View {
             Spacer(minLength: 0)
             stepButton("plus", label: String(localized: "Больше"), action: onPlus)
         }
-        .padding(.vertical, 4)
     }
 
     private func stepButton(_ symbol: String, label: String, action: @escaping () -> Void) -> some View {
@@ -339,7 +343,7 @@ private struct AmountRow: View {
             Image(systemName: symbol)
                 .font(.app(size: 18, weight: .bold))
                 .foregroundStyle(Color.accentColor)
-                .frame(width: 48, height: 48)
+                .frame(width: 44, height: 44)
                 .background(Color.secondary.opacity(0.16), in: Circle())
         }
         .buttonStyle(.plain)
@@ -364,8 +368,7 @@ private struct QuickAmounts: View {
                         .font(.app(.subheadline, weight: .semibold))
                         .monospacedDigit()
                         .foregroundStyle(selected ? Color(.systemBackground) : Color.primary)
-                        .padding(.horizontal, 14)
-                        .frame(minHeight: 44)
+                        .frame(maxWidth: .infinity, minHeight: 40)
                         .background(selected ? Color.primary : Color.secondary.opacity(0.16),
                                     in: Capsule())
                 }
@@ -448,7 +451,28 @@ struct DishQuantityView: View {
 
     var body: some View {
         Form {
-            // Количество — первым: см. FoodQuantityView.
+            Section {
+                VStack(spacing: 5) {
+                    // Название — в заголовке экрана, как и у продукта.
+                    Text("\(calories) ккал")
+                        .font(.app(size: 28, weight: .bold))
+                        .minimumScaleFactor(0.6)
+                        .lineLimit(1)
+                        .foregroundStyle(.primary)
+                    if !isHundredGrams {
+                        Text("\(dish.caloriesPer100g) ккал / 100 г")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    MacrosRow(macros: macros)
+                        .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 2)
+            }
+
+            // Порядок и интервалы — как у продукта.
             Section {
                 AmountRow(text: $gramsText, focus: $gramsFocused, unit: String(localized: "г"),
                           onMinus: { grams = max(5, grams - 10) },
@@ -470,8 +494,6 @@ struct DishQuantityView: View {
                 QuickAmounts(options: FoodQuantityView.quickOptions(start: dish.servingGrams),
                              current: grams) { grams = $0 }
                     .listRowSeparator(.hidden)
-            } header: {
-                Text("Количество, г").listSectionTitle()
             }
 
             if let impactBase {
@@ -481,27 +503,6 @@ struct DishQuantityView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
-            }
-
-            Section {
-                VStack(spacing: 8) {
-                    // Название — в заголовке экрана, как и у продукта.
-                    Text("\(calories) ккал")
-                        .font(.app(size: 28, weight: .bold))
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                        .foregroundStyle(.primary)
-                    if !isHundredGrams {
-                        Text("\(dish.caloriesPer100g) ккал / 100 г")
-                            .font(.app(.caption))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    MacrosRow(macros: macros)
-                        .padding(.top, 4)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
             }
 
             // Свойство — под количеством, как у продукта.
@@ -527,6 +528,7 @@ struct DishQuantityView: View {
             }
         }
         .glassRow()
+        .listSectionSpacing(8)
         // Клавиатура над цифровым полем закрывает половину экрана, а кнопки
         // «Готово» у numberPad нет — убрать её можно только смахиванием.
         .scrollDismissesKeyboard(.interactively)

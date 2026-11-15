@@ -59,59 +59,68 @@ struct FoodRow: View {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
     }
 
-    /// Строка названия: имя, значки свойств и вес, склеенные в один `Text`.
+    /// Название и значки его свойств. Значки не падают на строку одни.
     ///
-    /// Склейка, а не `HStack`, ради переноса: `HStack` переносить не умеет,
-    /// и вес стоял у первой строки, пока имя уезжало вниз. В одном `Text`
-    /// всё течёт по словам — вес встаёт в конец последней строки.
+    /// Раньше значок был частью одного `Text` с названием, и перенос шёл по
+    /// словам внутри него — неразрывные пробелы должны были держать значок
+    /// у последнего слова, но на длинном названии он всё равно уходил на
+    /// вторую строку один: «Протеин со вкусом печенья» в одну строку, а 🔥
+    /// под ней. Теперь два раскладочных варианта, и выбирает их `ViewThatFits`:
     ///
-    /// Части разделены неразрывным пробелом: точка между ними убрана,
-    /// строка читается как «Творог 5% 🌿 200 г».
-    private func nameLine(text: String, font: Font, color: Color,
-                          traits: [FoodTrait], weight: String?) -> Text {
+    /// - название и значки целиком в одну строку, если помещаются;
+    /// - иначе название переносится, а значки стоят после последнего слова
+    ///   на его строке — «Протеин со вкусом / печенья 🔥».
+    ///
+    /// Третьего, с одиноким значком, нет: он всегда рядом с последним словом.
+    @ViewBuilder
+    private func nameBlock(text: String, font: Font, color: Color,
+                           traits: [FoodTrait]) -> some View {
         // Название оборачиваем в изолятор направления (FSI…PDI): если имя на
         // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
-        // его с иконками и весом — вес окажется в начале строки,
-        // а имя в конце. Для латиницы и кириллицы изолятор не меняет ничего.
-        //
-        // Последнее слово имени идёт отдельным куском вместе с хвостом (значки
-        // и вес): между ними только неразрывные пробелы и соединитель слов, так
-        // что хвост никогда не окажется на строке один. Перенос случается раньше,
-        // перед последним словом: «Протеин со вкусом / печенья 🌿 40 г», а не
-        // «Протеин со вкусом печенья / 🌿 40 г».
+        // его со значками. Для латиницы и кириллицы изолятор не меняет ничего.
         let words = text.split(separator: " ", omittingEmptySubsequences: false)
         let head = words.dropLast().joined(separator: " ")
         let last = words.last.map(String.init) ?? text
-        var line = Text("")
-        if !head.isEmpty {
-            line = Text("\u{2068}\(head)\u{2069} ").font(font).foregroundStyle(color)
+        if traits.isEmpty {
+            Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color).lineLimit(1)
+                    traitGlyphs(traits)
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    if !head.isEmpty {
+                        Text("\u{2068}\(head)\u{2069}").font(font).foregroundStyle(color)
+                    }
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("\u{2068}\(last)\u{2069}").font(font).foregroundStyle(color)
+                        traitGlyphs(traits)
+                    }
+                }
+            }
         }
-        line = line + Text("\u{2068}\(last)\u{2069}").font(font).foregroundStyle(color)
-        let glue = "\u{2060}\u{00A0}\u{00A0}\u{2060}"
-        if !traits.isEmpty {
-            line = line + Text(glue)
-            for (index, trait) in traits.enumerated() {
-                if index > 0 { line = line + Text(glue) }
-                line = line + Text(Image(systemName: trait.symbol))
+    }
+
+    private func traitGlyphs(_ traits: [FoodTrait]) -> some View {
+        HStack(spacing: 4) {
+            ForEach(traits) { trait in
+                Image(systemName: trait.symbol)
                     .font(.app(.caption2, weight: .medium))
                     .foregroundStyle(trait.color)
             }
         }
-        if let weight {
-            // Пробел внутри «40 г» тоже неразрывный: иначе «г» уезжает отдельно.
-            line = line + Text(glue)
-            line = line + Text(weight.replacingOccurrences(of: " ", with: "\u{00A0}"))
-                .font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
-        }
-        return line
     }
 
-    /// Метка «здесь есть что взять».
-    ///
-    /// Мягкая и без цифр: это приглашение зайти, а не ошибка и не недостача.
-    /// Искры, потому что значок должен читаться как находка, а не как
-    /// предупреждение — предупреждающий цвет в этом приложении уже занят
-    /// натрием и перебором калорий.
+    /// Количество — отдельной строкой под названием, везде одинаково: и у
+    /// одиночного продукта, и у каждой части составного приёма.
+    private func portionLine(_ text: String) -> some View {
+        Text(verbatim: text)
+            .font(.app(.footnote, weight: .medium))
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+    }
+
     private var vitaminOffer: some View {
         HStack(spacing: 3) {
             Image(systemName: "sparkles")
@@ -163,39 +172,36 @@ struct FoodRow: View {
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
                 if !parts.isEmpty {
-                    // Каждая часть приёма — своей строкой в цвет своего
-                    // доминирующего макроса: имя, значок свойства и вес.
-                    // Это один `Text`, а не `HStack`: перенос идёт по словам,
-                    // и вес встаёт в конец последней строки, а не висит
-                    // у первой.
+                    // Каждая часть приёма — названием со значками и весом
+                    // второй строкой, как у одиночного продукта.
                     ForEach(parts) { part in
-                        nameLine(text: part.name,
-                                 font: .app(.callout, weight: .semibold),
-                                 color: .primary,
-                                 traits: part.traits,
-                                 weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
+                        VStack(alignment: .leading, spacing: 1) {
+                            nameBlock(text: part.name,
+                                      font: .app(.callout, weight: .semibold),
+                                      color: .primary,
+                                      traits: part.traits)
+                            if let weight = PortionLabel.text(grams: part.grams, pieces: part.pieces) {
+                                portionLine(weight)
+                            }
+                        }
                     }
                 } else {
                     // Имя, значки свойств и вес — одной строкой. Длинное имя
                     // переносится, а не выталкивает калории за край.
-                    nameLine(text: name,
-                             // Название — полужирным, как и в любой строке списка:
-                             // в строке оно главное, а всё под ним — приметы.
-                             font: .app(.callout, weight: .semibold),
-                             // Название чёрное: цвет макросов теперь в полоске справа
-                             // (`MacroShareBar`). Раньше им красилось и название, и
-                             // буквы под ним, и число калорий — четыре кода без подписей.
-                             color: .primary,
-                             traits: traits,
-                             weight: nil)
+                    nameBlock(text: name,
+                              // Название — полужирным, как и в любой строке списка:
+                              // в строке оно главное, а всё под ним — приметы.
+                              font: .app(.callout, weight: .semibold),
+                              // Название чёрное: цвет макросов теперь в полоске справа
+                              // (`MacroShareBar`). Раньше им красилось и название, и
+                              // буквы под ним, и число калорий — четыре кода без подписей.
+                              color: .primary,
+                              traits: traits)
                     // Порция — второй строкой, а не хвостом названия: «Тунец
                     // консервированный 🔥 108 г» переносился по словам, и вес
                     // оказывался то в конце первой строки, то в начале второй.
                     if !portion.isEmpty {
-                        Text(verbatim: portion)
-                            .font(.app(.footnote, weight: .medium))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        portionLine(portion)
                     }
                 }
 

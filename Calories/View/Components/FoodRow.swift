@@ -199,12 +199,30 @@ struct FoodRow: View {
                     // Каждая часть приёма — названием, значками и весом в одной
                     // строке: частей бывает пять, и вес отдельной строкой
                     // удваивал бы высоту приёма.
-                    ForEach(parts) { part in
-                        nameBlock(text: part.name,
+                    //
+                    // Исключение — приём из одной части. Это одиночный
+                    // продукт, просто записанный через состав, и вес у него
+                    // — отдельной строкой под названием, как у продукта в
+                    // «Рационе»: строка названия и вес рядом читались как
+                    // одно длинное название («Shweppes Fruit Water 485 г»).
+                    if parts.count == 1, let only = parts.first {
+                        nameBlock(text: only.name,
                                   font: .app(.callout, weight: .semibold),
                                   color: .primary,
-                                  traits: part.traits,
-                                  weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
+                                  traits: only.traits)
+                        if let weight = PortionLabel.text(grams: only.grams, pieces: only.pieces) {
+                            portionLine(weight)
+                        } else if !portion.isEmpty {
+                            portionLine(portion)
+                        }
+                    } else {
+                        ForEach(parts) { part in
+                            nameBlock(text: part.name,
+                                      font: .app(.callout, weight: .semibold),
+                                      color: .primary,
+                                      traits: part.traits,
+                                      weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
+                        }
                     }
                 } else {
                     // Имя, значки свойств и вес — одной строкой. Длинное имя

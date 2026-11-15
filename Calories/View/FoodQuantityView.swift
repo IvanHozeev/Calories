@@ -83,11 +83,9 @@ struct FoodQuantityView: View {
                     // Название ушло в заголовок экрана: оно и так стоит
                     // над карточкой, а второй копией забирало строку у чисел.
                     //
-                    // Калории и цена ста граммов — одной строкой, а не двумя:
-                    // карточка занимала почти треть экрана над клавиатурой.
                     // Цена ста граммов — только когда она отличается от
                     // съеденного: на ста граммах это было то же число дважды.
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    VStack(spacing: 2) {
                         Text("\(calories) ккал")
                             .font(.app(size: 26, weight: .bold))
                             .minimumScaleFactor(0.6)
@@ -113,7 +111,7 @@ struct FoodQuantityView: View {
                         .padding(.horizontal, 4)
                 }
                 .frame(maxWidth: .infinity)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
             // Порядок: карточка продукта, количество, «после приёма». Карточка
@@ -182,8 +180,9 @@ struct FoodQuantityView: View {
 
         }
         .glassRow()
-        // Плотнее обычного: три карточки подряд, и с клавиатурой места мало.
-        .listSectionSpacing(8)
+        // Чуть плотнее обычного: три карточки подряд, и с клавиатурой места
+        // мало, но слипшимися они выглядели тесно.
+        .listSectionSpacing(14)
         // Карточка прижата к заголовку: сгруппированный список по умолчанию
         // отступает от навигации на три десятка точек, а здесь над карточкой
         // ничего нет — это был пустой промежуток под названием продукта.
@@ -291,8 +290,8 @@ struct FoodQuantityView: View {
     /// Отступы строк количества и быстрых порций: у системных по одиннадцать
     /// точек сверху и снизу у каждой строки, и две строки подряд съедали
     /// высоту, нужную, чтобы три карточки поместились над клавиатурой.
-    static let amountInsets = EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16)
-    static let chipsInsets = EdgeInsets(top: 4, leading: 16, bottom: 10, trailing: 16)
+    static let amountInsets = EdgeInsets(top: 12, leading: 16, bottom: 4, trailing: 16)
+    static let chipsInsets = EdgeInsets(top: 6, leading: 16, bottom: 14, trailing: 16)
 
     /// Быстрые порции: с чего начали (обычная), затем сто, сто пятьдесят и
     /// двести пятьдесят — без повторов, не больше четырёх.
@@ -482,7 +481,7 @@ struct DishQuantityView: View {
             Section {
                 VStack(spacing: 5) {
                     // Название — в заголовке экрана, как и у продукта.
-                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    VStack(spacing: 2) {
                         Text("\(calories) ккал")
                             .font(.app(size: 26, weight: .bold))
                             .minimumScaleFactor(0.6)
@@ -500,7 +499,7 @@ struct DishQuantityView: View {
                     MacrosRow(macros: macros)
                 }
                 .frame(maxWidth: .infinity)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
             // Порядок и интервалы — как у продукта.
@@ -561,7 +560,7 @@ struct DishQuantityView: View {
             }
         }
         .glassRow()
-        .listSectionSpacing(8)
+        .listSectionSpacing(14)
         // Карточка прижата к заголовку: сгруппированный список по умолчанию
         // отступает от навигации на три десятка точек, а здесь над карточкой
         // ничего нет — это был пустой промежуток под названием продукта.

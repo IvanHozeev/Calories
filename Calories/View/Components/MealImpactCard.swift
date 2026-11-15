@@ -62,7 +62,7 @@ struct MealImpactCard: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .tileSurface(cornerRadius: 18)
         .animation(.easeInOut(duration: 0.2), value: impact)

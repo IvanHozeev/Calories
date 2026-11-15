@@ -16,7 +16,7 @@ extension CalorieStore {
     }
 
     /// Недельный расход без оглядки на активность этого дня.
-    private func baseExpenditure(on date: Date) -> Double? {
+    func baseExpenditure(on date: Date) -> Double? {
         // Без Premium история измеренного расхода не используется: прошлые дни
         // считаются от формулы, как и сегодняшний.
         guard usesMeasuredExpenditure else { return nil }

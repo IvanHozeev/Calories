@@ -580,14 +580,20 @@ extension CalorieStore {
 
         input.weightStart = days.first.flatMap { weightTrend(on: $0) }
         input.weightEnd = days.last.flatMap { weightTrend(on: $0) }
-        if let plan, let index = plan.phaseIndex(on: today), index < plan.timeline.count {
-            let phase = plan.timeline[index]
-            if phase.intent != .maintenance, !phase.isDietBreak {
-                input.plannedWeeklyKg = plan.weight(atStartOfPhaseAt: index) * phase.weeklyRatePercent / 100
-            }
+        // План этих семи дней, а не сегодняшней фазы: неделю брейка судили
+        // по темпу сушки, которая началась только сегодня, и писали
+        // «медленнее плана» про неделю, где плана сбрасывать не было вовсе.
+        // По прогнозу плана брейк и поддержание стоят на месте, и неделя,
+        // захватившая их частью, получает ровно свою долю темпа.
+        if let plan, let first = days.first {
+            let planned = plan.projectedWeight(on: first) - plan.projectedWeight(on: today)
+            if planned > 0.01 { input.plannedWeeklyKg = planned }
         }
 
-        input.expenditureStart = days.first.flatMap { expenditure(on: $0) }
+        // Расход недели без поправки на шаги отдельного дня: конец недели —
+        // сглаженный расход, и начало должно быть таким же, иначе разница
+        // меряет не неделю, а то, сколько человек прошёл в её первый день.
+        input.expenditureStart = days.first.flatMap { baseExpenditure(on: $0) }
         input.expenditureEnd = smoothedTDEE
 
         let nights = days.compactMap { sleep(on: $0)?.hours }
@@ -633,16 +639,27 @@ extension CalorieStore {
             input.weeksSinceBreak = max(0, (calendar.dateComponents([.day], from: ended, to: now).day ?? 0) / 7)
         }
 
+        // Откуда идёт нынешний дефицит: после брейка, поддержания или с
+        // начала плана. Все окна ниже меряются только внутри него.
+        //
+        // До этого окна захватывали неделю брейка, а на поддержании вес и
+        // должен стоять, а расход — плясать вместе с гликогеном. В первый же
+        // день после брейка выходило «вес стоит три недели, расход упал на
+        // 22 %, сдвинь рефид» — человеку, который неделю ел на поддержании.
+        let deficitStart = calendar.startOfDay(for: plan.startDate(ofPhaseAt: cursor + 1))
+
         // Движется ли вес: тренд сегодня против тренда неделю назад. Тренд, а
         // не два взвешивания: одно утро ничего не значит.
         if let today = weightTrend(on: now),
-           let weekAgo = calendar.date(byAdding: .day, value: -7, to: now).flatMap({ weightTrend(on: $0) }) {
+           let weekAgoDate = calendar.date(byAdding: .day, value: -7, to: now),
+           calendar.startOfDay(for: weekAgoDate) >= deficitStart,
+           let weekAgo = weightTrend(on: weekAgoDate) {
             input.weeklyChangeKg = today - weekAgo
         }
         input.plannedWeeklyKg = plan.weight(atStartOfPhaseAt: index) * phase.weeklyRatePercent / 100
         input.weeklyRatePercent = phase.weeklyRatePercent
-        input.stallWeeks = stallWeeks(now: now, plannedWeeklyKg: input.plannedWeeklyKg)
-        input.tdeeDropPercent = tdeeDropPercent(now: now)
+        input.stallWeeks = stallWeeks(now: now, plannedWeeklyKg: input.plannedWeeklyKg, since: deficitStart)
+        input.tdeeDropPercent = tdeeDropPercent(now: now, since: deficitStart)
 
         input.pulseRise = restingPulse(now: now)?.rise
         // Недосып берём средний за неделю: одна короткая ночь бывает у всех.
@@ -666,13 +683,17 @@ extension CalorieStore {
     ///
     /// Шесть недель — потолок: дальше считать незачем, отдыхать и так давно
     /// пора, а каждая неделя стоит прохода по дневнику.
-    func stallWeeks(now: Date, plannedWeeklyKg: Double?) -> Int {
+    ///
+    /// `since` — начало нынешнего дефицита: неделя, захватившая брейк или
+    /// поддержание, о застое не говорит — там вес стоять и должен.
+    func stallWeeks(now: Date, plannedWeeklyKg: Double?, since start: Date? = nil) -> Int {
         guard let planned = plannedWeeklyKg, planned > 0 else { return 0 }
         let calendar = Calendar.current
         var weeks = 0
         for step in 0..<6 {
             guard let later = calendar.date(byAdding: .day, value: -step * 7, to: now),
                   let earlier = calendar.date(byAdding: .day, value: -(step + 1) * 7, to: now),
+                  start.map({ calendar.startOfDay(for: earlier) >= $0 }) ?? true,
                   let a = weightTrend(on: later), let b = weightTrend(on: earlier) else { break }
             guard -(a - b) < planned * RecoverySignal.stallShare else { break }
             weeks += 1
@@ -688,11 +709,20 @@ extension CalorieStore {
     ///
     /// nil, пока истории нет: расход здесь измеренный, и до того, как факт
     /// накопился, говорить не о чем.
-    func tdeeDropPercent(now: Date, days: Int = 21) -> Double? {
+    ///
+    /// Сравнивается недельный расход без поправки на шаги этого дня: иначе
+    /// активный день три недели назад против ночи, в которую сделано
+    /// девятнадцать шагов, выглядел как обвал расхода.
+    ///
+    /// `since` — начало нынешнего дефицита. Окно, задевшее брейк, сравнивает
+    /// дефицит с поддержанием, а там расход по весам гуляет вместе с
+    /// гликогеном: еды больше, вода прибывает, и расход «падает» на бумаге.
+    func tdeeDropPercent(now: Date, days: Int = 21, since start: Date? = nil) -> Double? {
         let calendar = Calendar.current
         guard let then = calendar.date(byAdding: .day, value: -days, to: now),
-              let before = expenditure(on: then), before > 0,
-              let current = expenditure(on: now) else { return nil }
+              start.map({ calendar.startOfDay(for: then) >= $0 }) ?? true,
+              let before = baseExpenditure(on: then), before > 0,
+              let current = baseExpenditure(on: now) else { return nil }
         return max(0, (before - current) / before * 100)
     }
 

@@ -34,7 +34,7 @@ struct HintCard<Content: View>: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 14)
                 .padding(.trailing, onClose == nil ? 14 : 4)
-                .padding(.vertical, 10)
+                .padding(.vertical, 8)
                 .frame(maxHeight: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 // Нажатие ловит системный распознаватель, а не жест SwiftUI.
@@ -58,17 +58,16 @@ struct HintCard<Content: View>: View {
                     Image(systemName: "xmark")
                         .font(.app(.caption, weight: .semibold))
                         .foregroundStyle(.tertiary)
-                        .frame(width: 44, height: 44)
-                        .frame(maxHeight: .infinity, alignment: .top)
+                        .frame(width: 40, height: 36)
+                        .frame(maxHeight: .infinity, alignment: .center)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 2)
                 .accessibilityLabel(Text("Скрыть до завтра"))
                 .accessibilityIdentifier("hintClose")
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .tileSurface(cornerRadius: 18)
         .scaleEffect(pressed ? Self.pressedScale : 1)

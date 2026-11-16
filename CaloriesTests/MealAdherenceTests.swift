@@ -87,6 +87,32 @@ import Foundation
         #expect(breakfast.skippedDays == 0)
     }
 
+    /// Завтрак всегда на час позже восьми, пятьсот килокалорий: обычное время —
+    /// девять, обычная порция — пятьсот, и никаких «позже» и «меньше».
+    @Test func aHabitNamesTheUsualTimeAndPortion() {
+        let habits = MealAdherence.habits(lateBreakfastWeek(shiftMinutes: 60))
+        let breakfast = try! #require(habits.first { $0.period == .breakfast })
+        #expect(breakfast.usualFromMinutes == 9 * 60)
+        #expect(breakfast.usualToMinutes == 9 * 60)
+        #expect(breakfast.typicalCalories == 500)
+    }
+
+    /// Время от дня ко дню гуляет: промежуток — середина, без крайних дней.
+    @Test func theUsualRangeIsTheMiddleOfTheDays() {
+        let shifts = [-30, -20, -10, 0, 10, 20, 30, 120]
+        let days = shifts.enumerated().map { index, shift -> MealAdherence.Day in
+            let d = day(index + 1)
+            let planned = at(d, 8)
+            return MealAdherence.day(d,
+                slots: [slot(d, .breakfast, planHour: 8, window: 6...12, planned: 500)],
+                entries: [(planned.addingTimeInterval(Double(shift) * 60), 500)])
+        }
+        let breakfast = try! #require(MealAdherence.habits(days).first { $0.period == .breakfast })
+        #expect(breakfast.usualFromMinutes < breakfast.usualToMinutes)
+        #expect(breakfast.usualFromMinutes >= 7 * 60 + 30)
+        #expect(breakfast.usualToMinutes <= 8 * 60 + 30, "Редкий завтрак в десять не растягивает «обычно»")
+    }
+
     @Test func oneStrangeDayDoesNotMoveTheMedian() {
         var days = lateBreakfastWeek(shiftMinutes: 10)
         // Один раз человек позавтракал в четыре часа дня.

@@ -62,6 +62,12 @@ enum MealAdherence {
         let caloriesRatio: Double
         /// В скольких днях окно осталось пустым.
         let skippedDays: Int
+        /// Когда приём обычно случается: от и до, минуты от полуночи. Середина
+        /// дней — между четвертью и тремя четвертями, без крайних случаев.
+        var usualFromMinutes: Int = 0
+        var usualToMinutes: Int = 0
+        /// Сколько калорий в приёме обычно: медиана съеденного.
+        var typicalCalories: Int = 0
 
         var id: String { period.rawValue }
     }
@@ -115,6 +121,8 @@ enum MealAdherence {
     /// единственному странному дню.
     static func habits(_ days: [Day], minimumDays: Int = minimumDays) -> [Habit] {
         var shifts: [MealPeriod: [Int]] = [:]
+        var clock: [MealPeriod: [Double]] = [:]
+        var eaten: [MealPeriod: [Double]] = [:]
         var ratios: [MealPeriod: [Double]] = [:]
         var seen: [MealPeriod: Int] = [:]
         var skipped: [MealPeriod: Int] = [:]
@@ -129,6 +137,11 @@ enum MealAdherence {
                 if let shift = meal.shiftMinutes {
                     shifts[meal.period, default: []].append(shift)
                 }
+                if let actual = meal.actualTime {
+                    let parts = Calendar.current.dateComponents([.hour, .minute], from: actual)
+                    clock[meal.period, default: []].append(Double((parts.hour ?? 0) * 60 + (parts.minute ?? 0)))
+                    eaten[meal.period, default: []].append(Double(meal.eatenCalories))
+                }
                 if let ratio = meal.caloriesRatio {
                     ratios[meal.period, default: []].append(ratio)
                 }
@@ -142,11 +155,15 @@ enum MealAdherence {
             guard shiftSamples.count >= minimumDays else { return nil }
             guard let shift = median(shiftSamples.map(Double.init)),
                   let ratio = median(ratios[period] ?? []) else { return nil }
+            let times = (clock[period] ?? []).sorted()
             return Habit(period: period,
                          days: seen[period] ?? shiftSamples.count,
                          shiftMinutes: Int(shift.rounded()),
                          caloriesRatio: ratio,
-                         skippedDays: skipped[period] ?? 0)
+                         skippedDays: skipped[period] ?? 0,
+                         usualFromMinutes: Int(quantile(times, 0.25).rounded()),
+                         usualToMinutes: Int(quantile(times, 0.75).rounded()),
+                         typicalCalories: Int((median(eaten[period] ?? []) ?? 0).rounded()))
         }
     }
 
@@ -209,6 +226,15 @@ enum MealAdherence {
             }
         }
         return result
+    }
+
+    /// Квантиль отсортированной выборки с линейной подстановкой между соседями.
+    static func quantile(_ sorted: [Double], _ q: Double) -> Double {
+        guard !sorted.isEmpty else { return 0 }
+        let position = q * Double(sorted.count - 1)
+        let low = Int(position.rounded(.down))
+        let high = min(low + 1, sorted.count - 1)
+        return sorted[low] + (sorted[high] - sorted[low]) * (position - Double(low))
     }
 
     private static func median(_ values: [Double]) -> Double? {

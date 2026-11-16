@@ -122,46 +122,38 @@ struct MealAdherenceCard: View {
         return max(0, low)...min(24, max(high, low + 3))
     }
 
+    /// Привычка одним предложением: «Завтрак обычно между 8:10 и 9:20, в
+    /// среднем 650 ккал».
+    ///
+    /// Раньше строка говорила «на 42 мин позже» и «на 47 % меньше» — позже и
+    /// меньше чего, не сказано: это была разница с планом, которого на экране
+    /// рядом нет. Теперь называется само время и сама порция, а сравнить их
+    /// с расписанием можно по засечкам на графике выше.
     @ViewBuilder
     private func line(for habit: MealAdherence.Habit) -> some View {
-        let shift = abs(habit.shiftMinutes)
-        let percent = Int((abs(habit.caloriesRatio - 1) * 100).rounded())
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Text(verbatim: habit.period.rawValue)
-                .font(.app(.caption, weight: .medium))
-            Text(verbatim: summary(shift: shift, late: habit.shiftMinutes > 0,
-                                   percent: percent, more: habit.caloriesRatio > 1))
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 0)
-        }
+        Text(verbatim: habit.period.rawValue).font(.app(.subheadline, weight: .semibold))
+            + Text(verbatim: " " + summary(habit))
+                .font(.app(.subheadline))
+                .foregroundColor(.secondary)
     }
 
-    /// Одна фраза на приём. Когда сходится и время, и порция — так и
-    /// говорим: человеку важно знать, что расписание работает, а не только
-    /// где оно врёт.
-    private func summary(shift: Int, late: Bool, percent: Int, more: Bool) -> String {
-        let timeOK = shift < MealAdherence.noticeableShiftMinutes
-        let sizeOK = percent < Int(MealAdherence.noticeableRatio * 100)
-        switch (timeOK, sizeOK) {
-        case (true, true):
-            return String(localized: "идёт по плану")
-        case (false, true):
-            return late
-                ? String(format: String(localized: "обычно на %lld мин позже"), shift)
-                : String(format: String(localized: "обычно на %lld мин раньше"), shift)
-        case (true, false):
-            return more
-                ? String(format: String(localized: "обычно на %lld%% больше плана"), percent)
-                : String(format: String(localized: "обычно на %lld%% меньше плана"), percent)
-        case (false, false):
-            let when = late
-                ? String(format: String(localized: "на %lld мин позже"), shift)
-                : String(format: String(localized: "на %lld мин раньше"), shift)
-            let how = more
-                ? String(format: String(localized: "на %lld%% больше"), percent)
-                : String(format: String(localized: "на %lld%% меньше"), percent)
-            return String(format: String(localized: "обычно %1$@ и %2$@"), when, how)
+    private func summary(_ habit: MealAdherence.Habit) -> String {
+        let from = clock(habit.usualFromMinutes)
+        let to = clock(habit.usualToMinutes)
+        // Четверть и три четверти почти совпали — промежутка нет, и «между
+        // 8:10 и 8:12» звучало бы как точность, которой у привычки нет.
+        if abs(habit.usualToMinutes - habit.usualFromMinutes) < 10 {
+            return String(format: String(localized: "обычно около %1$@, в среднем %2$lld ккал"),
+                          clock((habit.usualFromMinutes + habit.usualToMinutes) / 2), habit.typicalCalories)
         }
+        return String(format: String(localized: "обычно между %1$@ и %2$@, в среднем %3$lld ккал"),
+                      from, to, habit.typicalCalories)
+    }
+
+    /// Время суток по минутам от полуночи — в формате часов, выбранном на телефоне.
+    private func clock(_ minutes: Int) -> String {
+        let day = Calendar.current.startOfDay(for: Date())
+        let date = Calendar.current.date(byAdding: .minute, value: minutes, to: day) ?? day
+        return date.formatted(date: .omitted, time: .shortened)
     }
 }

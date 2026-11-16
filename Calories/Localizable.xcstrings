@@ -65478,6 +65478,100 @@
           }
         }
       }
+    },
+    "обычно между %1$@ и %2$@, в среднем %3$lld ккал": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عادةً بين %1$@ و%2$@، بمتوسط %3$lld سعرة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meist zwischen %1$@ und %2$@, im Schnitt %3$lld kcal"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "usually between %1$@ and %2$@, about %3$lld kcal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "suele ser entre %1$@ y %2$@, unas %3$lld kcal"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "généralement entre %1$@ et %2$@, environ %3$lld kcal"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בדרך כלל בין %1$@ ל־%2$@, בממוצע %3$lld קק״ל"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "costuma ser entre %1$@ e %2$@, cerca de %3$lld kcal"
+          }
+        }
+      }
+    },
+    "обычно около %1$@, в среднем %2$lld ккал": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عادةً نحو %1$@، بمتوسط %2$lld سعرة"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meist gegen %1$@, im Schnitt %2$lld kcal"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "usually around %1$@, about %2$lld kcal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "suele ser sobre las %1$@, unas %2$lld kcal"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "généralement vers %1$@, environ %2$lld kcal"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בדרך כלל בסביבות %1$@, בממוצע %2$lld קק״ל"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "costuma ser por volta das %1$@, cerca de %2$lld kcal"
+          }
+        }
+      }
     }
   },
   "version": "1.1"

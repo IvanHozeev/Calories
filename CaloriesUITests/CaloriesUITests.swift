@@ -1090,6 +1090,26 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(picker.waitForExistence(timeout: 5), "Нет выбора времени приёма")
     }
 
+    /// Время и крестик видны сразу, а не спрятаны в меню «…», и крестик закрывает
+    /// пустой приём без вопросов.
+    @MainActor
+    func testTimeAndCloseAreBothVisibleInTheMealSheet() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let picker = app.descendants(matching: .any).matching(identifier: "mealTimePicker").firstMatch
+        let close = app.descendants(matching: .any).matching(identifier: "closeMealSheet").firstMatch
+        XCTAssertTrue(picker.waitForExistence(timeout: 5), "Нет выбора времени приёма")
+        XCTAssertTrue(close.exists, "Нет крестика — скорее всего, свёрнут в меню «…»")
+        XCTAssertLessThan(picker.frame.maxX, close.frame.minX + 1, "Крестик должен стоять справа от времени")
+        XCTAssertEqual(picker.frame.midY, close.frame.midY, accuracy: 6, "Время и крестик на одной линии")
+
+        close.tap()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5), "Крестик не закрыл лист")
+        XCTAssertFalse(close.waitForExistence(timeout: 1))
+    }
+
     /// Выбор шрифта должен доезжать до интерфейса, а не только сохраняться.
     @MainActor
     func testFontChoiceIsOfferedAndPersists() {

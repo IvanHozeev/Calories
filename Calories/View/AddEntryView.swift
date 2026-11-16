@@ -1190,7 +1190,9 @@ struct AddEntryView: View {
             // Строка поиска внизу, у большого пальца: собирая приём, к ней
             // возвращаются после каждого добавленного продукта.
             .toolbar { whenToolbar }
-            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 2)
+            // Справа — время и крестик одной капсулой, она шире двух кнопок:
+            // при резерве на две система сворачивала её в меню «…».
+            .topBarTitle(String(localized: "Приём пищи"), trailingButtons: 3)
             // Лист закрывался смахиванием, и набранный приём пропадал молча:
             // жест не отличить от случайного. Пока в приёме есть набранное,
             // смахнуть лист нельзя — выйти можно «Сохранить» или «Отмена».
@@ -1291,50 +1293,69 @@ struct AddEntryView: View {
         // внизу, рядом с поиском, оно занимало место, нужное тому, чем
         // пользуются каждый раз. Показано числом, чтобы сдвинутое время
         // читалось сразу, без нажатия.
+        // Время и крестик — одним пунктом, а не двумя.
+        //
+        // Два пункта подряд система сворачивала в меню «…», и ни время, ни
+        // крестик с первого взгляда видно не было: приходилось сперва
+        // нажать на три точки. Один пункт с двумя кнопками внутри не
+        // сворачивается и стоит капсулой, как и задумано.
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                showingWhen = true
-            } label: {
-                // Не `Label`: в тулбаре система показывает у него одну иконку,
-                // а время должно читаться словами рядом с часами.
-                //
-                // Шрифт приложения, а не системный: в тулбаре текст берёт
-                // системный кегль и выглядел чужим рядом с остальным листом.
-                // Время — полужирным пятнадцатым, часы — акцентом и чуть
-                // мельче: читается число, а не значок.
-                HStack(spacing: 6) {
-                    Image(systemName: "clock")
-                        .font(.app(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
-                    Text(verbatim: timeLabel)
-                        .font(.app(size: 15, weight: .semibold))
-                        .foregroundStyle(.primary)
-                        .monospacedDigit()
+            HStack(spacing: 14) {
+                Button {
+                    showingWhen = true
+                } label: {
+                    // Не `Label`: в тулбаре система показывает у него одну
+                    // иконку, а время должно читаться словами рядом с часами.
+                    //
+                    // Шрифт приложения, а не системный: в тулбаре текст берёт
+                    // системный кегль и выглядел чужим рядом с остальным
+                    // листом. Время — полужирным пятнадцатым, часы — акцентом
+                    // и чуть мельче: читается число, а не значок.
+                    HStack(spacing: 6) {
+                        Image(systemName: "clock")
+                            .font(.app(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                        Text(verbatim: timeLabel)
+                            .font(.app(size: 15, weight: .semibold))
+                            .foregroundStyle(.primary)
+                            .monospacedDigit()
+                            // Без этого система ужимала пункт до ширины
+                            // значков, и «8:20» переносилось на две строки.
+                            .lineLimit(1)
+                            .fixedSize()
+                    }
+                    .accessibilityElement(children: .combine)
                 }
-                .accessibilityElement(children: .combine)
-            }
-            .accessibilityIdentifier("mealTimePicker")
-            .popover(isPresented: $showingWhen) {
-                DatePicker("Когда", selection: $selectedDate, in: ...Date(),
-                           displayedComponents: [.date, .hourAndMinute])
-                    .datePickerStyle(.graphical)
-                    .labelsHidden()
-                    .frame(width: 320)
-                    .padding(.vertical, 8)
-                    // Поповером, а не листом: лист поверх листа — это второй
-                    // этаж модальности, и выход из него человек ищет заново.
-                    .presentationCompactAdaptation(.popover)
-            }
-        }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("mealTimePicker")
+                .popover(isPresented: $showingWhen) {
+                    DatePicker("Когда", selection: $selectedDate, in: ...Date(),
+                               displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .frame(width: 320)
+                        .padding(.vertical, 8)
+                        // Поповером, а не листом: лист поверх листа — это второй
+                        // этаж модальности, и выход из него человек ищет заново.
+                        .presentationCompactAdaptation(.popover)
+                }
 
-        ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                closeSheet()
-            } label: {
-                Image(systemName: "xmark")
+                Button {
+                    closeSheet()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.app(size: 15, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Закрыть")
+                .accessibilityIdentifier("closeMealSheet")
             }
-            .accessibilityLabel("Закрыть")
-            .accessibilityIdentifier("closeMealSheet")
+            .padding(.horizontal, 4)
+            // Каждая кнопка — своим элементом: без этого система склеивала
+            // пункт тулбара в один, и ни время, ни крестик не находились
+            // по имени.
+            .accessibilityElement(children: .contain)
         }
     }
 

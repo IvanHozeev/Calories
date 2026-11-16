@@ -16,6 +16,12 @@ struct BodySnapshotCard: View {
     let weeks: Int
     /// Фунты вместо килограммов — как в настройках единиц.
     var imperial: Bool = false
+    /// Когда сняты замеры, из которых считаются жир и сухая масса.
+    var measuredOn: Date? = nil
+    /// Вес — на экран взвешиваний, жир и сухая масса — на замеры. Плитки
+    /// нажимаются: смотреть на число и не мочь его поправить было бы странно.
+    var onOpenWeight: () -> Void = {}
+    var onOpenBody: () -> Void = {}
 
     private static let poundsPerKilogram = 2.20462
 
@@ -29,50 +35,73 @@ struct BodySnapshotCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 8) {
-                metric("Вес", mass(weightKg), unit: massUnit)
-                metric("Жир", fatPercent.map { String(format: "%.1f", $0) } ?? "—", unit: "%")
-                metric("Сухая масса", mass(leanKg), unit: massUnit)
+                metric("Вес", mass(weightKg), unit: massUnit, action: onOpenWeight)
+                    .accessibilityIdentifier("openWeight")
+                metric("Жир", fatPercent.map { String(format: "%.1f", $0) } ?? "—", unit: "%",
+                       action: onOpenBody)
+                    .accessibilityIdentifier("openBodyFat")
+                metric("Сухая масса", mass(leanKg), unit: massUnit, action: onOpenBody)
+                    .accessibilityIdentifier("openLeanMass")
             }
 
             if TrendSparkline.heights(trend).count >= TrendSparkline.minimumPoints {
                 sparkline
-                if let change = TrendSparkline.change(trend) {
+            }
+
+            // Подпись под графиком: слева — изменение, справа — когда сняты
+            // замеры. Без графика подпись всё равно нужна: по ней видно,
+            // свежие ли числа жира и сухой массы.
+            HStack {
+                if TrendSparkline.heights(trend).count >= TrendSparkline.minimumPoints,
+                   let change = TrendSparkline.change(trend) {
                     // «−3,1 кг» одной подстановкой: единица языко-зависима, и
                     // вставлять её отдельным словом в переводимую фразу нельзя.
                     let changeText = "\(String(format: "%+.1f", imperial ? change * Self.poundsPerKilogram : change)) \(massUnit)"
                     Text("\(changeText) за \(weeks) нед.")
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
+                }
+                Spacer(minLength: 8)
+                if let measuredOn {
+                    Text(String(format: String(localized: "замеры %@"),
+                                measuredOn.formatted(.dateTime.day().month(.wide))))
                 }
             }
+            .font(.app(.caption))
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .tileSurface(cornerRadius: 20)
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("bodySnapshot")
     }
 
-    private func metric(_ title: LocalizedStringKey, _ value: String, unit: String) -> some View {
+    private func metric(_ title: LocalizedStringKey, _ value: String, unit: String,
+                        action: @escaping () -> Void) -> some View {
+        Button(action: action) {
         VStack(alignment: .leading, spacing: 2) {
             Text(title)
                 .font(.app(.caption))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
             HStack(alignment: .firstTextBaseline, spacing: 3) {
                 Text(verbatim: value)
                     .font(.app(.title2, weight: .bold))
+                    .foregroundStyle(Color.primary)
                     .monospacedDigit()
                 Text(verbatim: unit)
                     .font(.app(.caption))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.secondary)
             }
             .lineLimit(1)
             .minimumScaleFactor(0.7)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: 44, alignment: .topLeading)
+        .contentShape(Rectangle())
+        }
+        // Системный стиль без обводки, а не `.plain`: три кнопки в одной
+        // строке списка с `.plain` отдают тап строке целиком, и нажималась
+        // сразу вся тройка. Подписи красим явно — этот стиль красит акцентом.
+        .buttonStyle(.borderless)
     }
 
     /// Линия тренда цветом калорий, последняя точка — кружком.

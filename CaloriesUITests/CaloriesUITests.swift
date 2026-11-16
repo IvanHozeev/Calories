@@ -661,17 +661,18 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(tab.waitForExistence(timeout: 10), "Нет вкладки рациона")
         tab.tap()
 
-        // Раздел выбирается меню в тулбаре: своих продуктов, блюд и базы.
-        let menu = app.descendants(matching: .any).matching(identifier: "sectionFilter").firstMatch
-        XCTAssertTrue(menu.waitForExistence(timeout: 10), "На вкладке рациона нет выбора раздела")
-        menu.tap()
+        // Раздел выбирается полосой сегментов под поиском: рецепты, свои
+        // продукты и база.
+        let control = app.descendants(matching: .any).matching(identifier: "sectionFilter").firstMatch
+        XCTAssertTrue(control.waitForExistence(timeout: 10), "На вкладке рациона нет выбора раздела")
         // «Foods», а не «My Foods»: слово «Мои» из названий разделов убрали,
         // а тест остался с прежним — и падал с тех пор молча, потому что в
         // обычный прогон UI-тесты не входят.
-        XCTAssertTrue(app.buttons["Foods"].firstMatch.waitForExistence(timeout: 5),
-                      "В меню нет своих продуктов")
-        XCTAssertTrue(app.buttons["Database"].firstMatch.exists, "И базы продуктов тоже")
-        app.buttons["Database"].firstMatch.tap()
+        XCTAssertTrue(control.buttons["Foods"].waitForExistence(timeout: 5),
+                      "В полосе нет своих продуктов")
+        XCTAssertTrue(control.buttons["Recipes"].exists, "И рецептов тоже")
+        XCTAssertTrue(control.buttons["Database"].exists, "И базы продуктов тоже")
+        control.buttons["Database"].tap()
     }
 
     /// Вход в замеры должен быть виден на пустом экране, иначе фичу просто не найдут.

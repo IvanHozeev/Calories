@@ -59,42 +59,11 @@ struct ProfileView: View {
     private var leanMassKg: Double? { draftProfile?.leanMassKg(from: measurement) }
 
 
-    @ViewBuilder
-    private func macroBudgetSection(_ profile: UserProfile) -> some View {
-        let protein = profile.proteinTargetGrams(from: measurement)
-        let fat = profile.fatTargetGrams
-        let goal = Double(store.adaptedTodayGoal > 0 ? store.adaptedTodayGoal : store.dailyGoal)
-        let locked = protein * MacroTargets.kcalPerProteinGram + fat * MacroTargets.kcalPerFatGram
-        let carbs = (goal - locked) / MacroTargets.kcalPerCarbGram
-
-        // Белок и жир здесь не повторяем: их «итого» стоит двумя секциями выше,
-        // в самих нормах, где их и задают. Новое число тут одно — углеводы,
-        // которых никто не задаёт: они остаток нормы калорий.
-        Section {
-            if carbs > 0 {
-                MacroBudgetRow("Углеводы", grams: carbs, color: MacroKind.carbs.color)
-            } else {
-                Label(
-                    String(
-                        format: String(localized: "Белок и жир не помещаются в норму: не хватает %d ккал. Подними калораж или опусти норму белка."),
-                        Int((locked - goal).rounded())
-                    ),
-                    systemImage: "exclamationmark.triangle.fill"
-                )
-                .font(.app(.footnote))
-                .foregroundStyle(.orange)
-            }
-        } header: {
-            Text("Норма углеводов")
-        } footer: {
-            explain("Белок и жир заданы телом, углеводы — остаток нормы калорий. В день с повышенной нормой вырастут именно они.").map { Text($0) }
-        }
-    }
-    
-    
     /// Экран оплаты со строки «Premium» внизу профиля.
     @State private var showingPaywall = false
     @State private var showingSettings = false
+    @State private var showingWeight = false
+    @State private var showingMeasurements = false
 
     /// Профиль, который получится из черновика. Опционален ради тех мест,
     /// где он читается как «есть ли что считать».
@@ -116,9 +85,7 @@ struct ProfileView: View {
         if store.plan == nil, !store.isPremium { order.append(String(localized: "Цель")) }
         order.append(String(localized: "Параметры тела"))
         order.append(String(localized: "Питание"))
-        if !usesFact { order.append(String(localized: "Уровень активности")) }
-        order.append(String(localized: "Норма белка"))
-        order.append(String(localized: "Норма жира"))
+        if !usesFact { order.append(String(localized: "Активность")) }
         return order
     }
 
@@ -129,18 +96,31 @@ struct ProfileView: View {
             // подписи не говорил, что за ним оплата.
             Section {
                 Button { showingPaywall = true } label: {
-                    HStack {
-                        Label("Premium", systemImage: "sparkles")
-                            .foregroundStyle(.primary)
-                        Spacer()
+                    HStack(spacing: 12) {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(.tint)
+                            .frame(width: 22)
+                        // Название и одной строкой, что внутри: «Premium» без
+                        // подписи не говорил, за что платят.
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Premium")
+                                .font(.app(.body, weight: .semibold))
+                                .foregroundStyle(.primary)
+                            Text("План, расход по факту, недельный обзор")
+                                .font(.app(.caption))
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 8)
                         if store.isPremium {
                             Text("Активен")
+                                .font(.app(.subheadline))
                                 .foregroundStyle(.secondary)
                         }
                         Image(systemName: "chevron.right")
                             .font(.app(.caption, weight: .semibold))
                             .foregroundStyle(.tertiary)
                     }
+                    .padding(.vertical, 4)
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
@@ -156,9 +136,15 @@ struct ProfileView: View {
                                      leanKg: draftProfile?.leanMassKg(from: measurement),
                                      trend: store.weightTrendSeries(weeks: 6),
                                      weeks: 6,
-                                     imperial: useImperial)
+                                     imperial: useImperial,
+                                     measuredOn: store.latestMeasurement?.date,
+                                     onOpenWeight: { showingWeight = true },
+                                     onOpenBody: { showingMeasurements = true })
+                        // Без своих отступов: карточка во всю ширину секции,
+                        // как строки соседних карточек. С шестнадцатью точками
+                        // по бокам она выходила уже остальных.
                         .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowInsets(EdgeInsets())
                 }
             }
 
@@ -181,20 +167,33 @@ struct ProfileView: View {
             // Приёмы пищи при этом в профиле, а не в настройках приложения: это
             // про режим человека, как подъём и отбой, а не про то, как
             // приложение выглядит и куда кладёт копии.
-            NutritionSection(store: store)
-            
+            NutritionSection(store: store, draft: $draft, openPicker: $openPicker,
+                             measurement: measurement)
+
             // Пока норма идёт от факта, множитель активности ни на что не
             // влияет: расход измерен, а не угадан. Тогда выбор уезжает в лист
             // «Как считаем» — вместе с переключателем, который его включает.
-            ActivityLevelSection(draft: $draft, usesFact: usesFact)
-            
-            ProteinTargetSection(draft: $draft, openPicker: $openPicker,
-                                 measurement: measurement)
-
-            FatTargetSection(draft: $draft, openPicker: $openPicker)
-
-            if let draftProfile, store.dailyGoal > 0 {
-                macroBudgetSection(draftProfile)
+            // Иначе — одной строкой с выбранным уровнем, а пять вариантов на
+            // своём экране.
+            if !usesFact {
+                Section {
+                    NavigationLink {
+                        ActivityLevelScreen(draft: $draft, usesFact: usesFact)
+                    } label: {
+                        settingLabel(systemImage: "figure.run") {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(verbatim: draft.activityLevel.title)
+                                Text(verbatim: draft.activityLevel.subtitle)
+                                    .font(.app(.caption))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    .accessibilityIdentifier("openActivityLevel")
+                } header: {
+                    Text("Активность")
+                        .tracksSectionHead(String(localized: "Активность"))
+                }
             }
         }
         .sheet(isPresented: $showingBasis) {
@@ -249,6 +248,12 @@ struct ProfileView: View {
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
         }
+        .navigationDestination(isPresented: $showingWeight) {
+            WeightDetailView(store: store)
+        }
+        .navigationDestination(isPresented: $showingMeasurements) {
+            MeasurementsView(store: store)
+        }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
         }
@@ -282,18 +287,6 @@ struct ProfileView: View {
         draft = ProfileDraft(profile: profile, latestWeightKg: store.latestWeight?.weightKg)
     }
 
-    /// Динамика за месяц: искра и изменение прямо в строке веса — тренд виден,
-    /// не заходя внутрь.
-    private var weightTrend: (points: [Double], caption: String)? {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        let recent = store.weightEntries.filter { $0.date >= cutoff }.sorted { $0.date < $1.date }
-        guard recent.count >= 2, let first = recent.first, let last = recent.last else { return nil }
-        let delta = last.weightKg - first.weightKg
-        let unit = String(localized: "кг")
-        return (recent.map(\.weightKg),
-                String(format: "%+.1f %@", delta, unit))
-    }
-    
     /// Считаем ли норму от измеренного расхода.
     private var usesFact: Bool { store.usesMeasuredExpenditure && store.adaptiveTDEE != nil }
 
@@ -358,35 +351,6 @@ struct ProfileView: View {
         return parts.joined(separator: " · ")
     }
 
-}
-
-/// Искра веса: тридцать дней одной линией. Осей нет намеренно — здесь важна
-/// форма кривой, а числа лежат на экране динамики.
-private struct WeightSparkline: View {
-    let points: [Double]
-    
-    var body: some View {
-        GeometryReader { geo in
-            if points.count >= 2, let low = points.min(), let high = points.max() {
-                // Плоская линия при одинаковом весе не должна делить на ноль
-                let span = max(high - low, 0.1)
-                Path { path in
-                    for (index, value) in points.enumerated() {
-                        let x = geo.size.width * CGFloat(index) / CGFloat(points.count - 1)
-                        let y = geo.size.height * (1 - CGFloat((value - low) / span))
-                        if index == 0 {
-                            path.move(to: CGPoint(x: x, y: y))
-                        } else {
-                            path.addLine(to: CGPoint(x: x, y: y))
-                        }
-                    }
-                }
-                .stroke(Color.accentColor,
-                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
-            }
-        }
-        .accessibilityHidden(true)
-    }
 }
 
 /// Как считается расход: по факту или по формуле, и с каким множителем активности.
@@ -503,7 +467,7 @@ private extension ProfileView {
         Section {
             let expenditure = usesFact ? (store.smoothedTDEE ?? draftProfile.tdee) : draftProfile.tdee
             valueRow("Расход", systemImage: "flame",
-                     value: "\(Int(expenditure.rounded()))", unit: "ккал",
+                     value: Int(expenditure.rounded()).formatted(), unit: "ккал",
                      detail: usesFact ? "по факту" : "по формуле",
                      color: .primary,
                      onInfo: { showingBasis = true })
@@ -513,7 +477,7 @@ private extension ProfileView {
             // это то же число строкой выше.
             if abs(Double(store.dailyGoal) - expenditure) >= 5 {
                 valueRow("Норма", systemImage: "fork.knife",
-                         value: "\(store.dailyGoal)", unit: "ккал",
+                         value: store.dailyGoal.formatted(), unit: "ккал",
                          color: ProgressRing.kcalColors[0], onInfo: nil)
                     // Своё число — только без плана: с планом норму ведёт он.
                     .tappableRow {
@@ -546,32 +510,6 @@ private extension ProfileView {
             settingLabel("Пол", glyph: draft.sex.symbol)
         }
         .id(appAccent)
-        // Вес ведёт на свой экран, а не открывает колесо: он меняется
-        // взвешиваниями с датой, и колесо тут же расходилось бы с историей.
-        // Динамика переехала туда же — отдельной строке рядом делать нечего.
-        NavigationLink {
-            WeightDetailView(store: store)
-        } label: {
-            settingLabel(systemImage: "scalemass") {
-            HStack {
-                Text(LocalizedStringKey(useImperial ? "Вес, фунт" : "Вес, кг"))
-                Spacer()
-                if let trend = weightTrend {
-                    Text(trend.caption)
-                        .font(.app(.caption))
-                        .foregroundStyle(.secondary)
-                    WeightSparkline(points: trend.points)
-                        .frame(width: 44, height: 18)
-                }
-                Text(weightDisplayText(draft.weightTenths))
-                    .foregroundStyle(.secondary)
-            }
-            }
-        }
-        .accessibilityIdentifier("openWeight")
-        
-        
-        
         settingLabel(systemImage: "figure.stand") {
             HStack {
                 Text(LocalizedStringKey(useImperial ? "Рост, фт+дюйм" : "Рост, см"))
@@ -601,7 +539,7 @@ private extension ProfileView {
                 // Пока даты нет, показываем годы: подставить вместо них
                 // выдуманную дату значило бы соврать о дне рождения.
                 if let birthDate = draft.birthDate {
-                    Text(birthDate.formatted(date: .abbreviated, time: .omitted))
+                    Text(birthDate.formatted(date: .long, time: .omitted))
                         .foregroundStyle(.secondary)
                 } else {
                     Text("\(draft.ageInt) лет")
@@ -642,26 +580,21 @@ private extension ProfileView {
             HStack {
                 Text("Замеры")
                 Spacer()
+                // Талия — то, что люди смотрят в замерах первым; дата снятия
+                // уже стоит в карточке сверху.
                 if let last = store.latestMeasurement {
-                    Text(last.date.formatted(date: .abbreviated, time: .omitted))
-                        .font(.app(.caption))
+                    Text(last.waistCm > 0
+                         ? String(format: String(localized: "талия %@ см"), String(format: "%.0f", last.waistCm))
+                         : last.date.formatted(date: .abbreviated, time: .omitted))
+                        .font(.app(.subheadline))
                         .foregroundStyle(.secondary)
+                        .monospacedDigit()
                 }
             }
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
 
-        // Жир — среди параметров тела, рядом с замерами, из которых он и
-        // считается, а не в карточке расчёта, где стоял особняком.
-        if let draftProfile {
-            valueRow("Жир", systemImage: "drop",
-                     value: String(format: "%.1f", draftProfile.bodyFatPercentage(from: measurement)),
-                     unit: "%",
-                     color: BodyFatStyle.color(for: draftProfile.bodyFatCategory(from: measurement)),
-                     onInfo: { showingBasis = true })
-                .accessibilityIdentifier("bodyFatRow")
-        }
     } header: {
         // Заголовок отдельным блоком, а не строкой в `Section("…")`: так к
         // нему можно привесить слежение, по которому имя секции переезжает

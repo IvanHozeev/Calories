@@ -97,7 +97,13 @@ struct StepsNavigationView: View {
             } else if !store.isAuthorized {
                 authView
             } else {
-                StepsContentView(viewModel: viewModel, store: store)
+                StepsContentView(viewModel: viewModel, store: store, onEditGoal: {
+                    // Цель и источники — строками на самом экране, а не меню
+                    // «…» в углу: настройки, которые трогают раз в полгода,
+                    // но искать их под значком без подписи было негде.
+                    selectedGoal = max(1000, min(30_000, (store.stepGoal / 500) * 500))
+                    showingGoalEditor = true
+                })
                     .safeAreaInset(edge: .bottom) { noDataHint }
             }
         }
@@ -110,54 +116,13 @@ struct StepsNavigationView: View {
         // сегодня, а какое это сегодня, не сказано нигде.
         .screenTitle(String(localized: "Шаги"),
                      eyebrow: Date().formatted(.dateTime.weekday(.wide).day().month(.wide)),
-                     trailingButtons: 1)
+                     trailingButtons: 0)
         .scrollIndicators(.hidden)
-        .toolbar {
-            // Одной кнопкой, а не двумя: мишень и значок источника стояли
-            // рядом без подписей, и обе — настройки, которые трогают раз
-            // в полгода. Вдвоём они съедали место у заголовка, а порознь
-            // ничего не объясняли.
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        let snapped = max(1000, min(30_000, (store.stepGoal / 500) * 500))
-                        selectedGoal = snapped
-                        showingGoalEditor = true
-                    } label: {
-                        Label("Цель", systemImage: "target")
-                    }
-                    .accessibilityIdentifier("stepGoal")
-
-                    // Выбор источника появляется только когда выбирать есть
-                    // из чего: у большинства шаги пишет один телефон, и пункт
-                    // с единственным вариантом был бы вопросом без смысла.
-                    if store.sources.count > 1 {
-                        Picker("Источники", selection: sourceBinding) {
-                            Text("Все источники").tag(String?.none)
-                            ForEach(store.sources) { source in
-                                Text(source.name).tag(String?.some(source.id))
-                            }
-                        }
-                        .pickerStyle(.menu)
-                        .accessibilityIdentifier("stepSource")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                }
-                .accessibilityLabel("Настройки шагов")
-            }
-        }
         .sheet(isPresented: $showingGoalEditor, onDismiss: {
             store.stepGoal = selectedGoal
         }) {
             GoalPickerSheet(goal: $selectedGoal)
         }
-    }
-
-    /// Выбранный источник живёт в хранилище, а не в экране: по нему идут
-    /// запросы, и менять его надо там, где их задают.
-    private var sourceBinding: Binding<String?> {
-        Binding(get: { store.preferredSourceID }, set: { store.preferredSourceID = $0 })
     }
 
     /// HealthKit намеренно не сообщает, дали ли доступ на чтение: запрос возвращает success
@@ -262,8 +227,14 @@ private struct StepsContentView: View {
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     @Bindable var viewModel: StepsViewModel
     var store: StepStore
-    @State private var ringPull: CGFloat = 0
+    var onEditGoal: () -> Void = {}
     @AppStorage("use_imperial") private var useImperial = false
+
+    /// Выбранный источник живёт в хранилище, а не в экране: по нему идут
+    /// запросы, и менять его надо там, где их задают.
+    private var sourceBinding: Binding<String?> {
+        Binding(get: { store.preferredSourceID }, set: { store.preferredSourceID = $0 })
+    }
 
     private var distanceText: String {
         guard viewModel.distanceKm > 0 else { return "—" }
@@ -273,27 +244,73 @@ private struct StepsContentView: View {
     }
 
     var body: some View {
+        // Порядок — как в макете: сегодня, история, настройки. Раньше было
+        // кольцо, график, обзор из четырёх ячеек и ещё одна плашка из трёх,
+        // и главное — сколько осталось до цели — делило экран с рекордами.
         List {
-            VStack(spacing: 16) {
+            Section {
                 todayCard
-                chartCard
-                trendsCard
-                statsCard
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
             }
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+
+            Section {
+                chartCard
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+            } header: {
+                Text("История").listSectionTitle()
+            }
+
+            Section {
+                Button(action: onEditGoal) {
+                    HStack {
+                        Label {
+                            Text("Цель").foregroundStyle(Color.primary)
+                        } icon: {
+                            Image(systemName: "target").foregroundStyle(.tint)
+                        }
+                        Spacer()
+                        Text(store.stepGoal.formatted())
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("stepGoal")
+
+                // Выбор источника появляется только когда выбирать есть
+                // из чего: у большинства шаги пишет один телефон, и пункт
+                // с единственным вариантом был бы вопросом без смысла.
+                if store.sources.count > 1 {
+                    Picker(selection: sourceBinding) {
+                        Text("Все источники").tag(String?.none)
+                        ForEach(store.sources) { source in
+                            Text(source.name).tag(String?.some(source.id))
+                        }
+                    } label: {
+                        Label {
+                            Text("Источники").foregroundStyle(Color.primary)
+                        } icon: {
+                            Image(systemName: "iphone.gen3").foregroundStyle(.tint)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .accessibilityIdentifier("stepSource")
+                }
+            } footer: {
+                Text("Приложение только читает шаги из «Здоровья» и ничего туда не пишет.")
+            }
         }
         .glassRow()
         .listStyle(.insetGrouped)
-        // Перетяг — у списка, а не по положению кольца: см. тот же приём на
-        // «Сегодня». Запомненный покой устаревает, стоит содержимому над
-        // кольцом изменить высоту, и кольцо начинает поворачиваться само.
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            max(0, -(geometry.contentOffset.y + geometry.contentInsets.top))
-        } action: { _, pull in
-            ringPull = pull
-        }
+        .contentMargins(.top, 4, for: .scrollContent)
         .refreshable {
             await viewModel.refresh()
         }
@@ -322,70 +339,79 @@ private struct StepsContentView: View {
         return [color, color]
     }
 
-    private var ringColors: [Color] {
-        viewModel.stepGoalAchieved ? ProgressRing.kcalColors : stepsColors
+    /// Цвет полоски: цель взята — зелёный кольца калорий, как «в норме»
+    /// везде в приложении; иначе акцент.
+    private var barColor: Color {
+        viewModel.stepGoalAchieved ? ProgressRing.kcalColors[0] : stepsColors[0]
     }
 
-    private var ringLabel: some View {
-        let remaining = store.stepGoal - store.stepsToday
-        return VStack(spacing: 2) {
-            Text(store.stepsToday.formatted())
-                .font(.app(size: 42, weight: .bold))
-                .monospacedDigit()
-                .contentTransition(.numericText())
-            Text("из \(store.stepGoal.formatted()) шагов")
+    /// Сегодня: число шагов, полоска до цели и три числа под ней.
+    ///
+    /// Кольцо ушло: оно занимало треть экрана ради одного числа, а ответ на
+    /// «сколько осталось» — это полоска и цифра «Осталось».
+    private var todayCard: some View {
+        let remaining = max(store.stepGoal - store.stepsToday, 0)
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(store.stepsToday.formatted())
+                    .font(.app(size: 34, weight: .bold))
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                Text("из \(store.stepGoal.formatted()) шагов")
+                    .font(.app(.subheadline))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(barColor.opacity(0.18))
+                    Capsule().fill(barColor)
+                        .frame(width: max(6, geometry.size.width * viewModel.ringProgress))
+                }
+            }
+            .frame(height: 6)
+            .accessibilityHidden(true)
+
+            HStack(alignment: .top, spacing: 8) {
+                column(viewModel.stepGoalAchieved ? String(localized: "Цель") : String(localized: "Осталось"),
+                       viewModel.stepGoalAchieved ? String(localized: "взята") : remaining.formatted())
+                column(String(localized: "Расстояние"), distanceText)
+                column(String(localized: "Активные"),
+                       store.activeCaloriesToday > 0 ? "\(store.activeCaloriesToday) \(String(localized: "ккал"))" : "—")
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("stepsToday")
+    }
+
+    private func column(_ title: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: title)
                 .font(.app(.caption))
                 .foregroundStyle(.secondary)
-            if remaining > 0 {
-                Text("\(remaining.formatted()) осталось")
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-                    .contentTransition(.numericText())
-            } else {
-                Text("цель достигнута")
-                    .font(.app(.caption2, weight: .semibold))
-                    .foregroundStyle(ProgressRing.kcalColors[0])
-                    .contentTransition(.numericText())
-            }
+            Text(verbatim: value)
+                .font(.app(.headline, weight: .bold))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
-    }
-
-    /// Кольцо прямо на фоне, как на «Сегодня», а показатели под ним — стеклянной
-    /// плашкой в стиле макросов. Кольцо в карточке было единственным таким
-    /// во всём приложении.
-    private var todayCard: some View {
-        VStack(spacing: 24) {
-            RingView(progress: viewModel.ringProgress, colors: ringColors, labelID: store.stepsToday,
-                     spinTicket: viewModel.refreshTicket, pullAngle: Double(ringPull) * 1.4) {
-                ringLabel
-            }
-
-            HStack(spacing: 0) {
-                statCell(title: String(localized: "Дистанция"), value: distanceText, subtitle: "")
-                statCell(title: String(localized: "от цели"), value: viewModel.goalPercentText, subtitle: "")
-                statCell(title: String(localized: "Цель"), value: store.stepGoal.formatted(), subtitle: "")
-            }
-            .padding(.vertical, 12)
-            .glassCard()
-        }
-        .padding(.top, 8)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var chartCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("История")
-                    .font(.app(.subheadline, weight: .semibold))
-                Spacer()
-                Picker("Период", selection: $viewModel.period) {
-                    ForEach(StepPeriod.allCases, id: \.self) { p in
-                        Text(verbatim: p.localizedTitle).tag(p)
-                    }
+            // Период — полосой во всю ширину карточки, а не узким сегментом
+            // справа от заголовка: заголовок теперь над карточкой.
+            Picker("Период", selection: $viewModel.period) {
+                ForEach(StepPeriod.allCases, id: \.self) { p in
+                    Text(verbatim: p.localizedTitle).tag(p)
                 }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
             }
+            .pickerStyle(.segmented)
 
             if viewModel.history.isEmpty {
                 Text("Нет данных")
@@ -422,107 +448,22 @@ private struct StepsContentView: View {
                 .drawingGroup()
                 .animation(.easeInOut, value: viewModel.period)
             }
-        }
-        .padding()
-        .glassCard()
-    }
 
-    private var trendsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Обзор")
-                .font(.app(.subheadline, weight: .semibold))
-
-            HStack(spacing: 0) {
-                trendCell
-                statCell(
-                    title: String(localized: "Стрик"),
-                    value: "\(store.goalStreak)",
-                    subtitle: viewModel.goalStreakSubtitle
-                )
-                statCell(
-                    title: String(localized: "Неделя"),
-                    value: store.weeklyTotal > 0 ? store.weeklyTotal.formatted() : "—",
-                    subtitle: String(localized: "шагов")
-                )
-                statCell(
-                    title: String(localized: "Калории"),
-                    value: store.activeCaloriesToday > 0 ? "\(store.activeCaloriesToday)" : "—",
-                    subtitle: String(localized: "ккал актив.")
-                )
+            // Итог периода двумя числами под графиком: среднее и сколько дней
+            // цель была взята.
+            HStack {
+                Text(String(format: String(localized: "В среднем %@ в день"),
+                            viewModel.average > 0 ? viewModel.average.formatted() : "—"))
+                Spacer(minLength: 8)
+                Text(String(format: String(localized: "Цель взята %1$lld из %2$lld"),
+                            viewModel.daysOnGoal, viewModel.history.count))
             }
+            .font(.app(.caption))
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
         }
-        .padding()
-        .glassCard()
-    }
-
-    private var trendCell: some View {
-        VStack(spacing: 4) {
-            if let trend = viewModel.trendPercent {
-                HStack(spacing: 2) {
-                    Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
-                        .font(.app(.caption, weight: .bold))
-                    Text(String(format: "%.0f%%", abs(trend)))
-                        .font(.app(.subheadline, weight: .semibold))
-                        .monospacedDigit()
-                }
-                .foregroundStyle(trend >= 0 ? ProgressRing.kcalColors[0] : ProgressRing.overColors[0])
-            } else {
-                Text("—")
-                    .font(.app(.subheadline, weight: .semibold))
-                    .foregroundStyle(.secondary)
-            }
-            Text(verbatim: String(localized: "vs пред. неделя"))
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var statsCard: some View {
-        HStack(spacing: 0) {
-            statCell(
-                title: String(localized: "Среднее"),
-                value: viewModel.average > 0 ? viewModel.average.formatted() : "—",
-                subtitle: String(localized: "шагов/день")
-            )
-            statCell(
-                title: String(localized: "Рекорд"),
-                value: viewModel.best.map { $0.steps.formatted() } ?? "—",
-                subtitle: viewModel.best.map { $0.date.formatted(.dateTime.day().month(.abbreviated)) } ?? ""
-            )
-            statCell(
-                title: String(localized: "Дней с целью"),
-                value: "\(viewModel.daysOnGoal)",
-                subtitle: String(format: String(localized: "из %lld"), viewModel.history.count)
-            )
-        }
-        .padding(.vertical, 16)
-        .frame(maxWidth: .infinity)
-        .glassCard()
-    }
-
-    private func statCell(title: String, value: String, subtitle: String) -> some View {
-        // Как колонки плашки макросов: подпись мелко, число — без крика,
-        // без разделителей между ячейками.
-        VStack(spacing: 3) {
-            Text(value)
-                .font(.app(.subheadline, weight: .semibold))
-                .monospacedDigit()
-            Text(title)
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                // Ячеек в ряду до четырёх, и длинные подписи вроде «vs пред. неделя»
-                // обрезались многоточием вместо переноса.
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.85)
-            if !subtitle.isEmpty {
-                Text(subtitle)
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-            }
-        }
-        .frame(maxWidth: .infinity)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
     }
 }

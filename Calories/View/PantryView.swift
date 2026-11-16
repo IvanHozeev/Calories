@@ -122,6 +122,25 @@ struct PantryView: View {
         // локале-зависимым сравнением на каждом нажатии подвешивал ввод.
         // Пересчёт идёт по отложенному запросу — ниже, в onChange.
         List {
+            // Раздел — полосой сегментов под поиском, как в макете. Раньше он
+            // прятался в меню тулбара «потому что переключают редко», но
+            // меню не говорило, в каком разделе человек, пока его не
+            // откроешь. Полоса показывает это сразу. При поиске её нет: он
+            // идёт по всем разделам разом.
+            if trimmedQuery.isEmpty {
+                Section {
+                    Picker("Раздел", selection: $tab) {
+                        Text("Рецепты").tag(Tab.dishes)
+                        Text("Продукты").tag(Tab.products)
+                        Text("База").tag(Tab.database)
+                    }
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("sectionFilter")
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                }
+            }
+
             // Недавнее показываем только на нетронутом экране: когда человек
             // уже ищет или отфильтровал категорию, он знает, что ему нужно, и
             // повторный список сверху только мешает.
@@ -198,32 +217,11 @@ struct PantryView: View {
             remoteResults = (try? await FoodSearch.search(query: text)) ?? []
         }
         .toolbar {
-            // Порядок: добавить, отфильтровать, сменить раздел. Добавляют
-            // сюда каждый день, фильтруют реже, а раздел переключают совсем
-            // редко — и редкое не должно стоять первым.
+            // Порядок — как в макете: сканер, плюс. Штрихкод вынут из меню:
+            // он избавляет от ручного ввода и нужен чаще, чем «новый
+            // продукт», так что прятать его под плюсом не за что.
+            // Фильтр по категории — слева от них: им пользуются реже.
             //
-            // Все способы пополнить справочник — под одной кнопкой, как и на
-            // экране приёма пищи. Сверху штрихкод: он избавляет от ручного
-            // ввода, ниже — то, что придётся заполнять самому.
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button { showingScanner = true } label: {
-                        Label("Сканировать штрихкод", systemImage: "barcode.viewfinder")
-                    }
-                    Divider()
-                    Button { showingNewFood = true } label: {
-                        Label("Новый продукт", systemImage: "plus")
-                    }
-                    Button { showingNewDish = true } label: {
-                        Label("Новый рецепт", systemImage: "fork.knife")
-                    }
-                } label: {
-                    Image(systemName: "plus")
-                }
-                .accessibilityLabel("Добавить")
-                .accessibilityIdentifier("addMenu")
-            }
-
             // Фильтр — меню, а не полоса чипов: категорий девять, полосой
             // они не помещаются и превращаются в горизонтальную прокрутку,
             // где выбранная категория уезжает из виду.
@@ -244,24 +242,28 @@ struct PantryView: View {
                 .accessibilityLabel("Категория")
             }
 
-            // Раздел — своим меню, а не полосой сегментов над списком:
-            // сегменты занимали строку экрана и обрезались на длинных
-            // подписях, а выбирают раздел редко. Значок показывает текущий,
-            // поэтому по нему видно, где ты, не открывая меню.
             ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Picker("Раздел", selection: $tab) {
-                        Label("Рецепты", systemImage: Tab.dishes.icon).tag(Tab.dishes)
-                        Label("Продукты", systemImage: Tab.products.icon).tag(Tab.products)
-                        Label("База", systemImage: Tab.database.icon).tag(Tab.database)
-                    }
-                } label: {
-                    Image(systemName: tab.icon)
+                Button { showingScanner = true } label: {
+                    Image(systemName: "barcode.viewfinder")
                 }
-                .accessibilityIdentifier("sectionFilter")
-                .accessibilityLabel("Раздел")
+                .accessibilityLabel("Сканировать штрихкод")
+                .accessibilityIdentifier("scanBarcodeButton")
             }
 
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button { showingNewFood = true } label: {
+                        Label("Новый продукт", systemImage: "plus")
+                    }
+                    Button { showingNewDish = true } label: {
+                        Label("Новый рецепт", systemImage: "fork.knife")
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .accessibilityLabel("Добавить")
+                .accessibilityIdentifier("addMenu")
+            }
         }
         .sheet(isPresented: $showingNewFood) {
             NewFoodSheet(store: store)
@@ -342,31 +344,10 @@ struct PantryView: View {
     private var recentSection: some View {
         switch tab {
         case .dishes:
-            let recent = store.dishes
-                .sorted { ($0.updatedAt ?? $0.createdAt) > ($1.updatedAt ?? $1.createdAt) }
-                .prefix(3)
-            if recent.count > 1 {
-                Section {
-                    ForEach(recent) { dish in
-                        NavigationLink {
-                            NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
-                        } label: {
-                            FoodRow(
-                                name: dish.name,
-                                calories: dish.servingCalories,
-                                caloriesPer100g: dish.caloriesPer100g,
-                                portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
-                                macros: dish.servingMacros,
-                                detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                                leadingMacros: dish.macrosPer100g,
-                                traits: dish.traits
-                            )
-                        }
-                    }
-                } header: {
-                    Text("Недавнее").listSectionTitle()
-                }
-            }
+            // В «Рецептах» недавнего нет: «Все рецепты» — короткий список, и
+            // повторять его первые три строки сверху значило показывать одно
+            // и то же дважды.
+            EmptyView()
         case .products:
             let recent = store.customFoods
                 .filter { $0.updatedAt != nil }
@@ -416,20 +397,7 @@ struct PantryView: View {
                     NavigationLink {
                         NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
                     } label: {
-                        FoodRow(
-                            name: dish.name,
-                            calories: dish.servingCalories,
-                            caloriesPer100g: dish.caloriesPer100g,
-                            portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
-                            macros: dish.servingMacros,
-                            // У сваренного вместо числа ингредиентов —
-                            // остаток: про рецепт человек и так знает, а
-                            // сколько ещё есть в холодильнике — нет.
-                            detail: batchDetail(dish)
-                                ?? "\(dish.ingredients.count) \(String(localized: "ингр."))",
-                            leadingMacros: dish.macrosPer100g,
-                            traits: dish.traits
-                        )
+                        DishRow(dish: dish)
                     }
                     .swipeActions(edge: .leading) {
                         recordButton { serving = .dish(dish) }
@@ -443,6 +411,10 @@ struct PantryView: View {
                         .accessibilityLabel("Удалить")
                     }
                 }
+            } header: {
+                // Без поиска — «Все рецепты», как в макете; при поиске блюда
+                // идут среди продуктов и базы, и заголовок у них свой.
+                Text(trimmedQuery.isEmpty ? "Все рецепты" : "Рецепты").listSectionTitle()
             }
         }
     }

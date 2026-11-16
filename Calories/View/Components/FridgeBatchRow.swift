@@ -37,7 +37,8 @@ struct FridgeBatchRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(verbatim: dish.name)
                     .font(.app(.callout, weight: .semibold))
-                Text(verbatim: "\(dish.servingCalories) \(String(localized: "ккал")) · \(Int(dish.servingGrams)) \(String(localized: "г"))")
+                Text(verbatim: String(format: String(localized: "%lld ккал на порцию · %lld г"),
+                                      dish.servingCalories, Int(dish.servingGrams.rounded())))
                     .font(.app(.footnote, weight: .medium))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()

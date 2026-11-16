@@ -79,38 +79,15 @@ struct FoodQuantityView: View {
             // неё — приходилось ждать автоподскролл, чтобы увидеть, что
             // набираешь. Теперь и поле, и кнопки стоят сразу над клавиатурой.
             Section {
-                VStack(spacing: 4) {
-                    // Название ушло в заголовок экрана: оно и так стоит
-                    // над карточкой, а второй копией забирало строку у чисел.
-                    //
-                    // Цена ста граммов — только когда она отличается от
-                    // съеденного: на ста граммах это было то же число дважды.
-                    VStack(spacing: 2) {
-                        Text("\(calories) ккал")
-                            .font(.app(size: 26, weight: .bold))
-                            .minimumScaleFactor(0.6)
-                            .lineLimit(1)
-                            .foregroundStyle(.primary)
-                        if !isHundredGrams {
-                            Text(food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
-                                                : "\(food.caloriesPer100g) ккал / 100 г")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                        }
-                    }
-
-                    MacrosRow(macros: macros)
-
-                    // Без подписей: названия макросов уже стоят над числами в
-                    // строке выше, и вторая копия забирала у экрана высоту, а
-                    // с поднятой клавиатурой её и так в обрез.
-                    MacroSplitBar(macros: macros, showsLabels: false)
-                        .padding(.top, 2)
-                        .padding(.horizontal, 4)
-                }
-                .frame(maxWidth: .infinity)
+                // Название ушло в заголовок экрана: оно и так стоит над
+                // карточкой. Цена ста граммов — только когда она отличается
+                // от съеденного: на ста граммах это было то же число дважды.
+                FoodSummaryCard(
+                    calories: calories,
+                    densityLine: isHundredGrams ? nil
+                        : (food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
+                                          : "\(food.caloriesPer100g) ккал / 100 г"),
+                    macros: macros)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
@@ -481,26 +458,11 @@ struct DishQuantityView: View {
     var body: some View {
         Form {
             Section {
-                VStack(spacing: 5) {
-                    // Название — в заголовке экрана, как и у продукта.
-                    VStack(spacing: 2) {
-                        Text("\(calories) ккал")
-                            .font(.app(size: 26, weight: .bold))
-                            .minimumScaleFactor(0.6)
-                            .lineLimit(1)
-                            .foregroundStyle(.primary)
-                        if !isHundredGrams {
-                            Text("\(dish.caloriesPer100g) ккал / 100 г")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.7)
-                        }
-                    }
-
-                    MacrosRow(macros: macros)
-                }
-                .frame(maxWidth: .infinity)
+                // Название — в заголовке экрана, как и у продукта.
+                FoodSummaryCard(
+                    calories: calories,
+                    densityLine: isHundredGrams ? nil : "\(dish.caloriesPer100g) ккал / 100 г",
+                    macros: macros)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 

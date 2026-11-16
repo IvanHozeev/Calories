@@ -435,23 +435,11 @@ struct NewFoodSheet: View {
     private var detailCard: some View {
         Section {
             VStack(spacing: 8) {
-                Text("\(enteredCalories) ккал")
-                    .font(.app(size: 28, weight: .bold))
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(1)
-                    .foregroundStyle(.green)
-                if servingToSave != 100, enteredCalories > 0 {
-                    Text("\(portionCalories) ккал / \(Int(servingToSave)) г")
-                        .font(.app(.caption2))
-                        .foregroundStyle(.secondary)
-                }
-                if hasMacros {
-                    MacrosRow(macros: draftMacros)
-                        .padding(.top, 2)
-                    MacroSplitBar(macros: draftMacros)
-                        .padding(.top, 4)
-                        .padding(.horizontal, 4)
-                }
+                FoodSummaryCard(
+                    calories: enteredCalories,
+                    densityLine: servingToSave != 100 && enteredCalories > 0
+                        ? "\(portionCalories) ккал / \(Int(servingToSave)) г" : nil,
+                    macros: hasMacros ? draftMacros : .zero)
                 let traits = editingFood?.traits ?? []
                 if !traits.isEmpty {
                     FoodTraitLines(traits: traits)

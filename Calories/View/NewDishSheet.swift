@@ -403,27 +403,11 @@ struct NewDishSheet: View {
     /// экране порции: калории, БЖУ, полоска соотношения.
     private var detailCard: some View {
         Section {
-            VStack(spacing: 8) {
-                Text("\(portionCalories) ккал")
-                    .font(.app(size: 28, weight: .bold))
-                    .minimumScaleFactor(0.6)
-                    .lineLimit(1)
-                    .foregroundStyle(.green)
-                if totalGrams > 0 {
-                    let per100g = Int((Double(totalCalories) / totalGrams * 100).rounded())
-                    Text("\(per100g) ккал / 100 г")
-                        .font(.app(.caption2))
-                        .foregroundStyle(.secondary)
-                }
-                if totalGrams > 0 {
-                    MacrosRow(macros: portionMacros)
-                        .padding(.top, 2)
-                    MacroSplitBar(macros: portionMacros)
-                        .padding(.top, 4)
-                        .padding(.horizontal, 4)
-                }
-            }
-            .frame(maxWidth: .infinity)
+            FoodSummaryCard(
+                calories: portionCalories,
+                densityLine: totalGrams > 0
+                    ? "\(Int((Double(totalCalories) / totalGrams * 100).rounded())) ккал / 100 г" : nil,
+                macros: totalGrams > 0 ? portionMacros : .zero)
             .padding(.vertical, 6)
         }
     }

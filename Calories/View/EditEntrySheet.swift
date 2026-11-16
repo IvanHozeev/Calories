@@ -114,22 +114,9 @@ struct EditEntrySheet: View {
     private var formContent: some View {
         Form {
             Section {
-                VStack(spacing: 10) {
-                    Text(verbatim: "\(partsCalories) \(String(localized: "ккал"))")
-                        .font(.app(size: 34, weight: .bold))
-                        .foregroundStyle(.green)
-                        .minimumScaleFactor(0.6)
-                        .lineLimit(1)
-                        .contentTransition(.numericText())
-                    MacroTags(macros: partsMacros)
-                    if partsMacros.protein > 0 || partsMacros.fat > 0 || partsMacros.carbs > 0 {
-                        MacroSplitBar(macros: partsMacros)
-                            .padding(.top, 2)
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .animation(.easeInOut(duration: 0.2), value: partsCalories)
+                FoodSummaryCard(calories: partsCalories, macros: partsMacros)
+                    .padding(.vertical, 8)
+                    .animation(.easeInOut(duration: 0.2), value: partsCalories)
             }
             .listRowBackground(Color.clear)
 

@@ -120,12 +120,7 @@ struct ContentView: View {
                         // экран, карточки идут за ним сразу, без пустоты между ними.
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
-                        // Без боковых отступов строки: карточки под кольцом
-                        // стоят во всю ширину секции, как строки дневника
-                        // ниже. С шестнадцатью точками по бокам они выходили
-                        // на шестнадцать уже. Полоска дней и кольцо
-                        // отступают сами — им нужен воздух по краям.
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
                 }
                 .listSectionSeparator(.hidden)
 
@@ -565,7 +560,6 @@ private extension ContentView {
             // чатов. Прокрутка её толкает, а не обходит.
             WeekStrip(weeks: store.weekStripWeeks(),
                       onSelect: { selectedHistoryDay = $0 })
-                .padding(.horizontal, 16)
 
             PullableRing(
                 consumed: store.consumedToday,
@@ -612,7 +606,6 @@ private extension ContentView {
             // Кольцо минимум 200 точек высоты, чтобы хорошо читалось, но не
             // растягивается на весь экран — карточки под ним не должны уезжать.
             .frame(minHeight: 220)
-            .padding(.horizontal, 16)
             // Воздух снизу, но не сверху: знак берёт не весь остаток, а
             // остаток минус поле. Снизу эти четырнадцать точек держат кольцо
             // от полоски взвешивания и плиток. Сверху же над ним полоска

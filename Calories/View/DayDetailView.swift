@@ -74,7 +74,11 @@ struct DayDetailView: View {
                             .font(.app(.subheadline, weight: .semibold))
                             .foregroundStyle(.primary)
                         Spacer()
-                        Text(verbatim: MealPeriod.time(of: group.entries))
+                        // «Время · калории»: в истории суммой приёма
+                        // сверяют день, и считать её в уме по строкам незачем.
+                        Text(verbatim: "\(MealPeriod.time(of: group.entries)) · "
+                             + String(format: String(localized: "%lld ккал"),
+                                      group.entries.reduce(0) { $0 + $1.calories }))
                             .font(.app(.caption))
                             .foregroundStyle(.secondary)
                             .monospacedDigit()

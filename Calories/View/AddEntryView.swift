@@ -1351,7 +1351,10 @@ struct AddEntryView: View {
                 .accessibilityLabel("Закрыть")
                 .accessibilityIdentifier("closeMealSheet")
             }
-            .padding(.horizontal, 4)
+            // Крестику справа отступ побольше: у самой кромки капсулы он
+            // читался прижатым.
+            .padding(.leading, 4)
+            .padding(.trailing, 10)
             // Каждая кнопка — своим элементом: без этого система склеивала
             // пункт тулбара в один, и ни время, ни крестик не находились
             // по имени.

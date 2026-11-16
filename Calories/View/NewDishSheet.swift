@@ -370,10 +370,7 @@ struct NewDishSheet: View {
         }
         .sheet(isPresented: $showingIngredientPicker) {
             IngredientPickerSheet(store: store) { ingredient in
-                // Сухое превращаем в готовое сразу: в блюдо идёт то, что
-                // окажется в тарелке. Калории при этом те же — вода их не
-                // несёт, — меняется только вес.
-                ingredients.append(store.cooked(ingredient))
+                ingredients.append(ingredient)
             }
         }
         .navigationDestination(item: $editingIngredient) { ingredient in

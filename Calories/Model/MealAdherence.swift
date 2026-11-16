@@ -153,8 +153,10 @@ enum MealAdherence {
             // нельзя сказать ни во сколько он ест, ни сколько кладёт.
             let shiftSamples = shifts[period] ?? []
             guard shiftSamples.count >= minimumDays else { return nil }
-            guard let shift = median(shiftSamples.map(Double.init)),
-                  let ratio = median(ratios[period] ?? []) else { return nil }
+            guard let shift = median(shiftSamples.map(Double.init)) else { return nil }
+            // Без плана по калориям (день без нормы) отношения нет, и это не
+            // повод молчать про время: калории привычки считаются по съеденному.
+            let ratio = median(ratios[period] ?? []) ?? 1
             let times = (clock[period] ?? []).sorted()
             return Habit(period: period,
                          days: seen[period] ?? shiftSamples.count,

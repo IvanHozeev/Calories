@@ -166,6 +166,9 @@ struct MealScheduleSheet: View {
     /// стек и кнопка закрытия не нужны — они уже есть снаружи.
     var isEmbedded = false
     @Environment(\.dismiss) private var dismiss
+    /// Растёт, когда окно сдвинули кнопкой: смещения лежат в UserDefaults, и
+    /// экран сам об этом не узнает.
+    @State private var slotsTick = 0
 
     /// Есть ли в расписании второй ужин — единственный приём, время которого
     /// зависит от отбоя.
@@ -174,13 +177,15 @@ struct MealScheduleSheet: View {
     }
 
     private var slots: [MealSchedule.Slot] {
-        MealSchedule.slots(settings: settings, entries: entries, dailyGoal: dailyGoal)
+        _ = slotsTick
+        return MealSchedule.slots(settings: settings, entries: entries, dailyGoal: dailyGoal)
     }
 
     /// Прожитые дни для сверки плана с фактом. Без дневника сверять нечего —
     /// экран открывают и из настроек, где стора нет.
     private var adherence: [MealAdherence.Day] {
         guard settings.isEnabled, let store else { return [] }
+        _ = slotsTick
         return store.adherenceDays(schedule: settings)
     }
 
@@ -216,11 +221,12 @@ struct MealScheduleSheet: View {
                     // днями, потом правят.
                     if !adherence.isEmpty {
                         Section {
-                            MealAdherenceCard(days: adherence)
+                            MealWindowCard(days: adherence, slots: slots, settings: settings,
+                                           onMoved: { slotsTick += 1 })
                         } header: {
                             Text("Как получается").listSectionTitle()
                         } footer: {
-                            explain("Пунктир — время по расписанию, точки — дни, как они прошли. Считается по дням с записями, начиная с пятого.").map { Text($0) }
+                            explain("Серая дорожка — часть дня, синяя — окно приёма по расписанию, точка — когда приём в среднем начинался. Считается по дням с записями, начиная с пятого.").map { Text($0) }
                         }
                     }
                 }

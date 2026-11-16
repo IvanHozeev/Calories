@@ -47,6 +47,9 @@ struct MacrosCard: View {
     @Environment(\.colorScheme) private var colorScheme
     /// Выше плиток приёма и плана: в ней три строки, и число теперь крупнее.
     private static let tileHeight: CGFloat = 74
+    /// Плитка на четверть ряда: название, число, норма и полоска — четыре
+    /// строки вместо трёх.
+    private static let narrowTileHeight: CGFloat = 92
 
     var body: some View {
         // Четыре отдельные плитки, а не одна карточка с четырьмя колонками.
@@ -56,23 +59,16 @@ struct MacrosCard: View {
         // стоят вровень с «приёмом» и «планом» ниже: четыре ответа на четыре
         // вопроса, каждый сам по себе.
         //
-        // Два ряда, а не один: в строке из четырёх каждой достаётся восемьдесят
-        // семь точек, и «319 / 434 г» туда уже не помещается.
+        // Один ряд: в нём каждой достаётся около восьмидесяти точек, и
+        // «319 / 434 г» в одну строку не помещается — поэтому в узкой плитке
+        // норма стоит строкой под числом («из 434 г»). На крупном шрифте
+        // плитки идут столбиком, как и раньше.
         let isBig = dynamicTypeSize.isAccessibilitySize
         return Group {
             if isBig {
                 VStack(spacing: 10) { tiles }
             } else {
-                Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-                    GridRow {
-                        macroTile(.protein, value: macros.protein)
-                        macroTile(.fat, value: macros.fat)
-                    }
-                    GridRow {
-                        macroTile(.carbs, value: macros.carbs)
-                        fiberTile
-                    }
-                }
+                HStack(spacing: 8) { tiles }
             }
         }
         // Полоски ходят вместе с дугами кольца, той же пружиной.
@@ -136,8 +132,9 @@ struct MacrosCard: View {
                       gymDay: String? = nil,
                       prefix: String? = nil, identifier: String? = nil) -> some View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
+        let narrow = !dynamicTypeSize.isAccessibilitySize
         return Button(action: onOpen) {
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: narrow ? 3 : 5) {
                 HStack(spacing: 6) {
                     // Цвет макроса — точкой у названия и полоской внизу: так
                     // он узнаётся и при чёрном числе.
@@ -153,6 +150,30 @@ struct MacrosCard: View {
                         .minimumScaleFactor(0.8)
                 }
 
+                if narrow {
+                    // Число и под ним норма: в плитке на четверть ряда рядом
+                    // они не помещаются.
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(verbatim: value.map { v in
+                            let number = String(format: "%.0f", v)
+                            return prefix.map { "\($0)\(number)" } ?? number
+                        } ?? "—")
+                            .font(.app(.title3, weight: .bold))
+                            .foregroundStyle(colorScheme == .dark ? color : Color.primary)
+                            .contentTransition(.numericText())
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        if let target {
+                            Text(verbatim: String(format: String(localized: "из %lld г"), Int(target.rounded())))
+                                .font(.app(.caption2))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                    }
+                } else {
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(verbatim: value.map { v in
                         let number = String(format: "%.0f", v)
@@ -178,6 +199,7 @@ struct MacrosCard: View {
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.75)
+                }
 
                 GeometryReader { geometry in
                     ZStack(alignment: .leading) {
@@ -189,9 +211,9 @@ struct MacrosCard: View {
                 .frame(height: 4)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, narrow ? 10 : 14)
             .padding(.vertical, 10)
-            .frame(height: Self.tileHeight)
+            .frame(height: narrow ? Self.narrowTileHeight : Self.tileHeight)
             .overlay(alignment: .topTrailing) {
                 HStack(spacing: 6) {
                     // Отставание — стрелкой цвета самого макроса: вниз —

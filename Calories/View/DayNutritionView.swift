@@ -55,25 +55,23 @@ struct DayNutritionView: View {
 
     var body: some View {
         List {
-            if !context.isEmpty {
+            // Один блок вместо двух, как в макете: оценка дня и то, что за ней
+            // стоит, читаются подряд. Сначала что с едой (белок, клетчатка,
+            // «день ещё идёт»), потом обстоятельства — сон, нагрузка, вес.
+            if !analysis.isEmpty || !context.isEmpty {
                 Section {
+                    ForEach(analysis) { item in
+                        adviceRow(item)
+                    }
                     ForEach(context) { item in
                         adviceRow(item)
                     }
                 } header: {
                     Text("Как прошёл день").listSectionTitle()
                 } footer: {
-                    explain("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.").map { Text($0) }
-                }
-            }
-
-            if !analysis.isEmpty {
-                Section {
-                    ForEach(analysis) { item in
-                        adviceRow(item)
+                    if !context.isEmpty {
+                        explain("Сон, нагрузка, пульс и вес норму не оценивают — они объясняют, почему день получился таким.").map { Text($0) }
                     }
-                } header: {
-                    Text("Разбор").listSectionTitle()
                 }
             }
 
@@ -82,33 +80,23 @@ struct DayNutritionView: View {
                 macroRow(.fat, value: macros.fat, target: store.fatTarget, color: MacroKind.fat.color)
                 macroRow(.carbs, value: macros.carbs,
                          target: store.carbsTarget ?? MacroTargets.carbsMinimum, color: MacroKind.carbs.color)
-                // Клетчатка живёт здесь, а не среди витаминов: она часть
-                // углеводов, её считают в граммах, как макрос, и знают о ней
-                // не только продукты встроенной базы — Open Food Facts отдаёт
-                // её тоже. Среди витаминов она пропадала вместе с ними, стоило
-                // дню собраться из магазинной еды.
-                if let fiber = micronutrients.fiber {
-                    fiberRow(fiber, isPartial: micronutrients.fiberIsPartial)
-                }
             } header: {
                 Text("Белки, жиры, углеводы").listSectionTitle()
             }
 
             if !categories.isEmpty {
                 Section {
-                    compositionChart
+                    compositionCard
                         .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    compositionLegend
-                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
                 } header: {
                     Text("Состав рациона").listSectionTitle()
                 } footer: {
                     if categories.contains(where: { $0.category == nil }) {
-                        explain("Доли считаются в калориях. «Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает.").map { Text($0) }
+                        explain("«Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает. Справа — калории.").map { Text($0) }
                     } else {
-                        explain("Доли считаются в калориях: так видно, на что действительно уходит день, а не сколько позиций в дневнике.").map { Text($0) }
+                        explain("Справа — калории: так видно, на что действительно уходит день, а не сколько позиций в дневнике.").map { Text($0) }
                     }
                 }
             }
@@ -156,185 +144,58 @@ struct DayNutritionView: View {
 
     // MARK: - Состав и разбор
 
-    /// Кольцо состава: по категориям продуктов, в середине — калории дня.
+    /// Состав рациона: полоса по долям калорий и под ней — категории с числами.
     ///
-    /// Раньше здесь делились белки, жиры и углеводы — то же самое, что тремя
-    /// строками ниже, только кружком. Категории отвечают на другой вопрос:
-    /// чего в рационе не было вовсе.
-    private var compositionChart: some View {
+    /// Раньше это было кольцо с выбором ломтя: красиво, но число калорий
+    /// категории надо было вылавливать пальцем, а подписи дублировали проценты.
+    /// Полоса показывает доли, список — сами калории; нажатие по строке по-прежнему
+    /// выделяет категорию.
+    private var compositionCard: some View {
         let parts = categories
-        let shown = parts.first { $0.id == selectedPart }
-        return Chart(parts) { part in
-            // Выбранный сегмент выходит из кольца наружу и тянет на себя
-            // внимание, остальные приглушаются. Двигаем внешний радиус, а не
-            // толщину: кольцо остаётся кольцом, просто один ломоть выдвинут.
-            //
-            // Ломти толще и с круглыми концами — форма соседнего приложения,
-            // где кольцо собрано из отдельных кусков, а не разрезано на доли.
-            // Разница в том, что читается: дольки пирога глаз сравнивает по
-            // площади, а куски кольца — по длине, и длину он сравнивает лучше.
-            SectorMark(angle: .value("Калории", part.calories),
-                       innerRadius: .ratio(Self.innerRatio),
-                       outerRadius: .ratio(part.id == selectedPart ? 1.0 : 0.94),
-                       angularInset: 2.5)
-                // Конечное скругление, а не бесконечное: пока едет внешний
-                // радиус выбранного ломтя, бесконечное вырождает сектор, и на
-                // кадрах перехода кольцо рассыпается в шипы.
-                .cornerRadius(12)
-                .foregroundStyle(color(for: part))
-                .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.35)
-        }
-        .chartLegend(.hidden)
-        .frame(height: 190)
-        // Значки и попадания — из одной геометрии.
-        //
-        // Аннотация центрует значок по рамке сектора, а не по его дуге: у
-        // ломтя на четверть круга рамка почти квадратная, и середина её лежит
-        // в стороне от самой дуги. А `chartAngleSelection` знает только угол,
-        // поэтому нажатие в дырку посередине или мимо кольца всё равно
-        // попадало «в ломоть» — отсюда и кривые попадания. Считаем сами, зато
-        // один раз: и значок, и палец меряются одним кругом.
-        .chartOverlay { proxy in
+        let columns = [GridItem(.flexible(), spacing: 16, alignment: .leading),
+                       GridItem(.flexible(), spacing: 16, alignment: .leading)]
+        return VStack(alignment: .leading, spacing: 14) {
             GeometryReader { geometry in
-                let frame = proxy.plotFrame.map { geometry[$0] } ?? .zero
-                let radius = min(frame.width, frame.height) / 2
-                ZStack {
-                    ForEach(iconPlacements(in: parts)) { placement in
-                        Image(systemName: placement.icon)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
-                            .opacity(selectedPart == nil || placement.id == selectedPart ? 1 : 0.35)
-                            .position(point(at: placement.turn,
-                                            radius: radius * (Self.innerRatio + 0.94) / 2,
-                                            in: frame))
+                let total = max(parts.reduce(0.0) { $0 + Double($1.calories) }, 1)
+                let gaps = CGFloat(max(parts.count - 1, 0)) * 3
+                HStack(spacing: 3) {
+                    ForEach(parts) { part in
+                        Capsule()
+                            .fill(color(for: part))
+                            .frame(width: max(6, (geometry.size.width - gaps) * CGFloat(Double(part.calories) / total)))
+                            .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.3)
                     }
                 }
-                .allowsHitTesting(false)
+            }
+            .frame(height: 10)
+            .accessibilityHidden(true)
 
-                // Нажатием, а не протяжкой: протяжка над кольцом забирала бы
-                // прокрутку списка, а выбор ломтя она всё равно не улучшает.
-                Color.clear
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 8) {
+                ForEach(parts) { part in
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(color(for: part))
+                            .frame(width: 10, height: 10)
+                        Text(title(for: part))
+                            .lineLimit(1)
+                        Spacer(minLength: 4)
+                        Text(verbatim: part.calories.formatted())
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    .font(.app(.subheadline))
                     .contentShape(Rectangle())
-                    .onTapGesture { location in
-                        select(at: location, center: CGPoint(x: frame.midX, y: frame.midY),
-                               radius: radius, in: parts)
+                    .onTapGesture {
+                        selectedPart = selectedPart == part.id ? nil : part.id
                     }
-            }
-        }
-        .overlay {
-            // В середине — либо день целиком, либо выбранная категория.
-            // Ради этого числа по сегменту и жмут: доля в процентах есть в
-            // подписи, а калорий этой категории не было нигде.
-            VStack(spacing: 2) {
-                Text(verbatim: "\(shown?.calories ?? parts.reduce(0) { $0 + $1.calories })")
-                    .font(.app(size: 26, weight: .bold))
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                Text(verbatim: shown.map { title(for: $0) } ?? String(localized: "ккал"))
-                    .font(.app(.caption2))
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .padding(.horizontal, 24)
-            }
-        }
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
-        .padding(.bottom, 4)
-    }
-
-    /// Точка на круге: доля оборота от двенадцати часов по часовой стрелке.
-    private func point(at turn: Double, radius: CGFloat, in frame: CGRect) -> CGPoint {
-        let angle = turn * 2 * .pi - .pi / 2
-        return CGPoint(x: frame.midX + radius * cos(angle),
-                       y: frame.midY + radius * sin(angle))
-    }
-
-    /// Выбирает ломоть под пальцем — если палец вообще на кольце.
-    private func select(at location: CGPoint, center: CGPoint,
-                        radius: CGFloat, in parts: [DayCategories.Part]) {
-        let dx = location.x - center.x
-        let dy = location.y - center.y
-        let distance = sqrt(dx * dx + dy * dy)
-        // Дырка посередине и поле вокруг кольца — это «мимо», и нажатие туда
-        // снимает выбор, а не выбирает ближайшее по углу.
-        guard distance >= radius * Self.innerRatio * 0.85, distance <= radius * 1.08 else {
-            selectedPart = nil
-            return
-        }
-        let turn = (atan2(dy, dx) + .pi / 2 + 2 * .pi).truncatingRemainder(dividingBy: 2 * .pi) / (2 * .pi)
-        let pick = part(atTurn: turn, in: parts)
-        selectedPart = pick == selectedPart ? nil : pick
-    }
-
-    /// Какой ломоть занимает эту долю оборота.
-    private func part(atTurn turn: Double, in parts: [DayCategories.Part]) -> DayCategories.Part.ID? {
-        let total = parts.reduce(0.0) { $0 + Double($1.calories) }
-        guard total > 0 else { return nil }
-        var cursor = 0.0
-        for part in parts {
-            cursor += Double(part.calories) / total
-            if turn <= cursor { return part.id }
-        }
-        return parts.last?.id
-    }
-
-    /// Толщина кольца долей от радиуса. Чем куски толще, тем больше они
-    /// читаются кусками, а не дольками разрезанного круга.
-    private static let innerRatio: Double = 0.58
-    /// Уже этой доли круга значок не ставим: на двух процентах он сядет
-    /// поверх соседнего ломтя и оба станут нечитаемыми.
-    private static let minimumShareForIcon: Double = 0.07
-
-    /// Где на кольце стоит значок категории.
-    private struct IconPlacement: Identifiable {
-        let id: DayCategories.Part.ID
-        let icon: String
-        /// Середина ломтя в долях оборота, от двенадцати часов по часовой.
-        let turn: Double
-    }
-
-    private func iconPlacements(in parts: [DayCategories.Part]) -> [IconPlacement] {
-        let total = parts.reduce(0.0) { $0 + Double($1.calories) }
-        guard total > 0 else { return [] }
-        var cursor = 0.0
-        return parts.compactMap { part in
-            let share = Double(part.calories) / total
-            let middle = cursor + share / 2
-            cursor += share
-            guard share >= Self.minimumShareForIcon, let icon = part.category?.icon else { return nil }
-            return IconPlacement(id: part.id, icon: icon, turn: middle)
-        }
-    }
-
-    /// Подписи под кольцом: сеткой, а не строкой — категорий бывает под
-    /// десяток, и в одну строку они не помещаются.
-    private var compositionLegend: some View {
-        let columns = [GridItem(.adaptive(minimum: 130), spacing: 8, alignment: .leading)]
-        return LazyVGrid(columns: columns, alignment: .leading, spacing: 6) {
-            ForEach(categories) { part in
-                HStack(spacing: 5) {
-                    Circle()
-                        .fill(color(for: part))
-                        .frame(width: 7, height: 7)
-                    Text(title(for: part))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                    Text(verbatim: "\(Int((part.share * 100).rounded()))%")
-                        .foregroundStyle(.tertiary)
-                        .monospacedDigit()
+                    .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.45)
                 }
-                // Подпись — такая же дверь к числу, как и сам ломоть: попасть
-                // пальцем в узкий сегмент на два процента нельзя, а в строку
-                // под кольцом можно.
-                .tappableRow {
-                    selectedPart = selectedPart == part.id ? nil : part.id
-                }
-                .opacity(selectedPart == nil || part.id == selectedPart ? 1 : 0.45)
             }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
         }
-        .font(.app(.caption2))
-        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedPart)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
     }
 
     private func color(for part: DayCategories.Part) -> Color {
@@ -350,12 +211,21 @@ struct DayNutritionView: View {
 
     private func adviceRow(_ item: DayAnalysis.Advice) -> some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: icon(for: item.tone))
-                .font(.app(.footnote))
-                .foregroundStyle(color(for: item.tone))
-                .frame(width: 18)
+            // Справочная строка без значка, но с пустым местом под него: её
+            // текст стоит в одну линию с оценками, а не вылезает левее.
+            Group {
+                if item.tone == .info {
+                    Color.clear
+                } else {
+                    Image(systemName: icon(for: item.tone))
+                        .font(.app(.footnote))
+                        .foregroundStyle(color(for: item.tone))
+                }
+            }
+            .frame(width: 18)
             Text(verbatim: item.text)
-                .font(.app(.footnote))
+                .font(.app(.subheadline))
+                .foregroundStyle(item.tone == .info ? Color.secondary : Color.primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 2)
@@ -381,24 +251,29 @@ struct DayNutritionView: View {
     // MARK: - Макросы
 
     private func macroRow(_ kind: MacroKind, value: Double, target: Double?, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 HStack(spacing: 8) {
-                    Circle().fill(color).frame(width: 9, height: 9)
+                    Circle().fill(color).frame(width: 10, height: 10)
                     Text(LocalizedStringKey(kind.title))
                 }
                 Spacer()
-                Text(String(format: "%.0f \(String(localized: "г"))", value))
+                // «112 из 136 г»: число крупно, норма и единица — подписью.
+                // Чёрным в светлой теме, цветным в тёмной; цвет макроса
+                // остаётся в точке и в полоске.
+                Text(verbatim: String(format: "%.0f", value))
                     .font(.app(.body, weight: .semibold))
-                    // Чёрным в светлой теме, цветным в тёмной; цвет макроса
-                    // остаётся в точке и в полоске.
                     .foregroundStyle(colorScheme == .dark ? color : Color.primary)
                     .monospacedDigit()
                 if let target {
-                    Text(verbatim: "/ \(Int(target.rounded()))")
+                    Text(verbatim: String(format: String(localized: "из %lld г"), Int(target.rounded())))
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
+                } else {
+                    Text("г")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -407,66 +282,45 @@ struct DayNutritionView: View {
                     .progressViewStyle(.engraved(color, thickness: 6))
             }
 
-            // Граммы на килограмм — то, в чём цели и задаются. Без пересчёта
-            // «120 г белка» ничего не говорит: много это или мало, зависит от веса.
-            if kind != .carbs, let weightKg = store.weightKg, weightKg > 0 {
-                Text(String(format: String(localized: "%.2f г/кг при весе %.1f кг"), value / weightKg, weightKg))
-                    .font(.app(.caption2))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-            }
-
-            Text(note(for: kind))
-                .font(.app(.caption2))
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            caption(for: kind, value: value)
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 4)
     }
 
-    /// Клетчатка той же строкой, что макросы: граммы, цель и зачем она.
-    private func fiberRow(_ amount: Double, isPartial: Bool) -> some View {
-        let target = Micronutrient.fiber.dailyValue
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                HStack(spacing: 8) {
-                    Circle().fill(MacroKind.carbs.color).frame(width: 9, height: 9)
-                    Text("Клетчатка")
-                }
-                Spacer()
-                // «Не меньше», когда состав известен не про весь день:
-                // клетчатка складывается, поэтому показанное — нижняя
-                // граница, а не оценка.
-                Text(String(format: isPartial ? "≥ %.0f \(String(localized: "г"))"
-                                              : "%.0f \(String(localized: "г"))", amount))
-                    .font(.app(.body, weight: .semibold))
-                    .foregroundStyle(colorScheme == .dark ? MacroKind.carbs.color : Color.primary)
-                    .monospacedDigit()
-                Text(verbatim: "/ \(Int(target.rounded()))")
-                    .font(.app(.caption))
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-            }
-            ProgressView(value: min(amount / target, 1))
-                .progressViewStyle(.engraved(MacroKind.carbs.color, thickness: 6))
-            explain("Входит в углеводы, но калорий почти не даёт. Держит сытость и кишечник; на дефиците про неё забывают первой.").map { Text($0) }
-                .font(.app(.caption2))
-                .foregroundStyle(.tertiary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.vertical, 2)
-    }
-
-    private func note(for kind: MacroKind) -> String {
+    /// Одна строка под полоской. Граммы на килограмм — то, в чём цели и
+    /// задаются: «120 г белка» ничего не говорит, пока неизвестен вес. У жира
+    /// рядом рабочий минимум, у углеводов — откуда взята норма и клетчатка,
+    /// которая раньше стояла отдельной строкой ниже.
+    @ViewBuilder
+    private func caption(for kind: MacroKind, value: Double) -> some View {
+        let weight = store.weightKg.flatMap { $0 > 0 ? $0 : nil }
         switch kind {
         case .protein:
-            return String(localized: "Норма белка из профиля — от веса или от сухой массы, смотря что выбрано.")
+            if let weight {
+                Text(String(format: String(localized: "%.2f г/кг при весе %.1f кг"), value / weight, weight))
+                    .captionStyle()
+            }
         case .fat:
-            return String(localized: "Норма жира из профиля. Ниже 0.5 г/кг рискуешь гормонами — жир нужен телу постоянно.")
+            if let weight {
+                Text(String(format: String(localized: "%1$.2f г/кг — рабочий минимум %2$.1f"),
+                            value / weight, MacroTargets.fatFloorPerKg))
+                    .captionStyle()
+            }
         case .carbs:
-            return store.carbsTarget == nil
-                ? String(localized: "130 г/день — RDA, минимум глюкозы для работы мозга, не зависит от веса.")
-                : String(localized: "Остаток дневной нормы после белка и жира — то, чем управляешь ты.")
+            HStack(alignment: .firstTextBaseline) {
+                Text(store.carbsTarget == nil
+                     ? String(localized: "Минимум на день: на него работает мозг")
+                     : String(localized: "Остаток нормы после белка и жира"))
+                Spacer(minLength: 8)
+                if let fiber = micronutrients.fiber {
+                    // «≥19», когда состав известен не про весь день: клетчатка
+                    // складывается, и показанное — нижняя граница.
+                    Text(String(format: String(localized: "клетчатка %1$@ из %2$lld г"),
+                                (micronutrients.fiberIsPartial ? "≥" : "") + "\(Int(fiber.rounded()))",
+                                Int(Micronutrient.fiber.dailyValue.rounded())))
+                }
+            }
+            .captionStyle()
         }
     }
 
@@ -483,12 +337,14 @@ struct DayNutritionView: View {
         let day = micronutrients
         if day.totalCalories > 0, day.isTrustworthy {
             Section {
-                // Клетчатка показана выше, вместе с макросами.
-                ForEach(Micronutrient.allCases.filter { $0 != .fiber }) { nutrient in
-                    if let amount = day.totals[nutrient] {
-                        nutrientRow(nutrient, amount: amount, isEstimate: day.hasEstimates)
-                    }
+                // Клетчатка показана выше, под углеводами.
+                let items = Micronutrient.allCases.filter { $0 != .fiber }.compactMap { nutrient in
+                    day.totals[nutrient].map { (nutrient, $0) }
                 }
+                micronutrientGrid(items, isEstimate: day.hasEstimates)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
             } header: {
                 Text("Витамины и минералы").listSectionTitle()
             } footer: {
@@ -505,30 +361,45 @@ struct DayNutritionView: View {
         }
     }
 
-    private func nutrientRow(_ nutrient: Micronutrient, amount: Double,
-                             isEstimate: Bool = false) -> some View {
+    /// Витамины и минералы: две колонки, у каждого — название, процент нормы
+    /// и тонкая полоска. Граммы и миллиграммы ушли: процент отвечает на
+    /// вопрос «хватает ли», а число в микрограммах — нет.
+    private func micronutrientGrid(_ items: [(Micronutrient, Double)], isEstimate: Bool) -> some View {
+        let columns = [GridItem(.flexible(), spacing: 20, alignment: .top),
+                       GridItem(.flexible(), spacing: 20, alignment: .top)]
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+            ForEach(items, id: \.0) { nutrient, amount in
+                nutrientCell(nutrient, amount: amount, isEstimate: isEstimate)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
+    }
+
+    private func nutrientCell(_ nutrient: Micronutrient, amount: Double, isEstimate: Bool) -> some View {
         let share = amount / nutrient.dailyValue
         // У натрия шкала означает обратное: заполнилась — плохо. Поэтому он
-        // оранжевый с самого начала, а не зелёный до какого-то порога.
+        // оранжевый с самого начала, а не зелёный до какого-то порога. У
+        // остальных меньше половины нормы — цветом жира, как «пока мало».
         let color: Color = nutrient.isCeiling
-            ? (share > 1 ? .red : .orange)
-            : (share >= 1 ? .green : .blue)
-        return VStack(alignment: .leading, spacing: 4) {
+            ? (share > 1 ? ProgressRing.overColors[0] : MacroKind.fat.color)
+            : (share >= 0.5 ? ProgressRing.kcalColors[0] : MacroKind.fat.color)
+        return VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
                 Text(nutrient.title)
-                Spacer()
-                Text(verbatim: (isEstimate ? "≈ " : "") + formatted(amount, nutrient))
-                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 4)
+                Text(verbatim: (isEstimate ? "≈" : "") + "\(Int((share * 100).rounded()))%")
                     .foregroundStyle(.secondary)
-                Text(verbatim: "\(Int((share * 100).rounded()))%")
-                    .font(.app(.caption, weight: .semibold))
-                    .foregroundStyle(color)
                     .monospacedDigit()
             }
+            .font(.app(.subheadline))
             ProgressView(value: min(share, 1))
-                .progressViewStyle(.engraved(color))
+                .progressViewStyle(.engraved(color, thickness: 4))
         }
-        .padding(.vertical, 2)
+        .accessibilityElement(children: .combine)
     }
 
     /// Один формат на все нутриенты давал бы либо «0 мкг» у B12, либо «558.0 мг»
@@ -536,5 +407,15 @@ struct DayNutritionView: View {
     private func formatted(_ amount: Double, _ nutrient: Micronutrient) -> String {
         let digits = amount < 10 ? 1 : 0
         return String(format: "%.\(digits)f \(nutrient.unit)", amount)
+    }
+}
+
+private extension View {
+    /// Подпись под строкой: мелко, вторым цветом, с цифрами одной ширины.
+    func captionStyle() -> some View {
+        font(.app(.caption))
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

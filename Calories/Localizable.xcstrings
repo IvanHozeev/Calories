@@ -66160,6 +66160,1002 @@
           }
         }
       }
+    },
+    "из %lld г": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "من %lld غ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "von %lld g"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "of %lld g"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de %lld g"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sur %lld g"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מתוך %lld ג׳"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de %lld g"
+          }
+        }
+      }
+    },
+    "%1$.2f г/кг — рабочий минимум %2$.1f": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f غ/كغ — الحد الأدنى العملي %2$.1f"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f g/kg — Arbeitsminimum %2$.1f"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f g/kg — working minimum %2$.1f"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f g/kg — mínimo útil %2$.1f"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f g/kg — minimum utile %2$.1f"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f ג׳/ק״ג — מינימום עבודה %2$.1f"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$.2f g/kg — mínimo útil %2$.1f"
+          }
+        }
+      }
+    },
+    "Минимум на день: на него работает мозг": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الحد الأدنى اليومي: يعمل به الدماغ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tagesminimum: das Gehirn läuft darauf"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A daily minimum: the brain runs on it"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mínimo diario: con él trabaja el cerebro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minimum quotidien : le cerveau en a besoin"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מינימום יומי: המוח עובד עליו"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mínimo diário: o cérebro funciona com ele"
+          }
+        }
+      }
+    },
+    "Остаток нормы после белка и жира": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما تبقى من الحصة بعد البروتين والدهون"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rest der Norm nach Eiweiß und Fett"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is left of the norm after protein and fat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo que queda de la norma tras proteína y grasa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reste de la norme après protéines et lipides"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מה שנשאר מהנורמה אחרי חלבון ושומן"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que sobra da meta após proteína e gordura"
+          }
+        }
+      }
+    },
+    "«Неизвестно» — еда, записанная одной строкой: из чего она собрана, приложение не знает. Справа — калории.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«غير معروف» طعام سُجّل في سطر واحد: لا يعرف التطبيق مما يتكوّن. السعرات على اليمين."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "„Unbekannt“ ist Essen, das in einer Zeile erfasst wurde: Woraus es besteht, weiß die App nicht. Rechts stehen die Kalorien."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Unknown” is food logged as one line: the app does not know what it is made of. Calories are on the right."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Desconocido» es comida anotada en una línea: la app no sabe de qué se compone. A la derecha, las calorías."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "« Inconnu » : aliment saisi sur une ligne, l’app ne sait pas de quoi il est fait. À droite, les calories."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«לא ידוע» הוא אוכל שנרשם בשורה אחת: האפליקציה לא יודעת ממה הוא מורכב. בצד — הקלוריות."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«Desconhecido» é comida anotada numa linha: o app não sabe de que é feita. À direita, as calorias."
+          }
+        }
+      }
+    },
+    "Справа — калории: так видно, на что действительно уходит день, а не сколько позиций в дневнике.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "السعرات على اليمين: يظهر فيمَ يذهب اليوم فعلًا، لا عدد العناصر في اليوميات."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechts stehen die Kalorien: So sieht man, wofür der Tag wirklich draufgeht, nicht wie viele Einträge im Tagebuch stehen."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calories are on the right: it shows what the day actually goes on, not how many items are in the diary."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A la derecha, las calorías: se ve en qué se va el día, no cuántas entradas hay en el diario."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À droite, les calories : on voit à quoi sert vraiment la journée, pas le nombre de lignes du journal."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בצד — הקלוריות: רואים על מה היום באמת הולך, ולא כמה פריטים ביומן."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "À direita, as calorias: mostra no que o dia realmente vai, não quantos itens há no diário."
+          }
+        }
+      }
+    },
+    "клетчатка %1$@ из %2$lld г": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fibre %1$@ of %2$lld g"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fibra %1$@ de %2$lld g"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fibra %1$@ de %2$lld g"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fibres %1$@ sur %2$lld g"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ballaststoffe %1$@ von %2$lld g"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الألياف %1$@ من %2$lld غ"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "סיבים %1$@ מתוך %2$lld ג׳"
+          }
+        }
+      }
+    },
+    "раньше окна": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "before the window"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "antes de la ventana"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "antes da janela"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "avant la fenêtre"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vor dem Fenster"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قبل النافذة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לפני החלון"
+          }
+        }
+      }
+    },
+    "позже окна": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "after the window"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "después de la ventana"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "depois da janela"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "après la fenêtre"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nach dem Fenster"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بعد النافذة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אחרי החלון"
+          }
+        }
+      }
+    },
+    "в окне, но ближе к его началу": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inside the window, nearer its start"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro de la ventana, más cerca del inicio"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro da janela, mais perto do início"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dans la fenêtre, plutôt au début"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "im Fenster, eher am Anfang"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داخل النافذة وأقرب إلى بدايتها"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בתוך החלון, קרוב לתחילתו"
+          }
+        }
+      }
+    },
+    "в окне, но ближе к его концу": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inside the window, nearer its end"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro de la ventana, más cerca del final"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro da janela, mais perto do fim"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dans la fenêtre, plutôt à la fin"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "im Fenster, eher am Ende"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داخل النافذة وأقرب إلى نهايتها"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בתוך החלון, קרוב לסופו"
+          }
+        }
+      }
+    },
+    "в окне, ближе к середине": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inside the window, near the middle"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro de la ventana, hacia el centro"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dentro da janela, perto do meio"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "dans la fenêtre, plutôt au milieu"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "im Fenster, eher in der Mitte"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داخل النافذة وقرب منتصفها"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בתוך החלון, קרוב לאמצע"
+          }
+        }
+      }
+    },
+    "%1$@ за %2$lld дн. в среднем начинался в %3$@ — %4$@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Over %2$lld days %1$@ started at %3$@ on average — %4$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En %2$lld días, %1$@ empezó de media a las %3$@: %4$@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em %2$lld dias, %1$@ começou em média às %3$@ — %4$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur %2$lld jours, %1$@ a commencé en moyenne à %3$@ — %4$@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In %2$lld Tagen begann %1$@ im Schnitt um %3$@ — %4$@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "خلال %2$lld أيام بدأ %1$@ في المتوسط عند %3$@ — %4$@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ב־%2$lld ימים %1$@ התחיל בממוצע ב־%3$@ — %4$@"
+          }
+        }
+      }
+    },
+    "окно %1$@–%2$@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "window %1$@–%2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ventana %1$@–%2$@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "janela %1$@–%2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fenêtre %1$@–%2$@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster %1$@–%2$@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النافذة %1$@–%2$@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חלון %1$@–%2$@"
+          }
+        }
+      }
+    },
+    "Сдвинуть окно на %1$@–%2$@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move the window to %1$@–%2$@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover la ventana a %1$@–%2$@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mover a janela para %1$@–%2$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Décaler la fenêtre à %1$@–%2$@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenster auf %1$@–%2$@ verschieben"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نقل النافذة إلى %1$@–%2$@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "להזיז את החלון ל־%1$@–%2$@"
+          }
+        }
+      }
+    },
+    "%lld приёмов за неделю": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld приём за неделю"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld приёма за неделю"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld приёмов за неделю"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld приёма за неделю"
+                }
+              }
+            }
+          }
+        },
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld meal this week"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld meals this week"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld comida esta semana"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld comidas esta semana"
+                }
+              }
+            }
+          }
+        },
+        "pt": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld refeição na semana"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld refeições na semana"
+                }
+              }
+            }
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld repas cette semaine"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld repas cette semaine"
+                }
+              }
+            }
+          }
+        },
+        "de": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Mahlzeit diese Woche"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld Mahlzeiten diese Woche"
+                }
+              }
+            }
+          }
+        },
+        "ar": {
+          "variations": {
+            "plural": {
+              "zero": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld وجبة هذا الأسبوع"
+                }
+              },
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "وجبة واحدة هذا الأسبوع"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "وجبتان هذا الأسبوع"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld وجبات هذا الأسبوع"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld وجبة هذا الأسبوع"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld وجبة هذا الأسبوع"
+                }
+              }
+            }
+          }
+        },
+        "he": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "ארוחה אחת השבוע"
+                }
+              },
+              "two": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "שתי ארוחות השבוע"
+                }
+              },
+              "many": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ארוחות השבוע"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld ארוחות השבוע"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Пока мало данных: по каждому приёму нужно пять дней с записями. Записано дней: %lld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enough data yet: each meal needs five days with entries. Days logged: %lld."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún hay pocos datos: cada comida necesita cinco días con registros. Días anotados: %lld."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda poucos dados: cada refeição precisa de cinco dias com registros. Dias anotados: %lld."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas encore assez de données : chaque repas demande cinq jours saisis. Jours saisis : %lld."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch zu wenig Daten: Jede Mahlzeit braucht fünf Tage mit Einträgen. Erfasste Tage: %lld."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "البيانات قليلة بعد: كل وجبة تحتاج خمسة أيام مسجّلة. الأيام المسجّلة: %lld."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עדיין מעט נתונים: כל ארוחה דורשת חמישה ימים עם רישום. ימים שנרשמו: %lld."
+          }
+        }
+      }
+    },
+    "Серая дорожка — часть дня, синяя — окно приёма по расписанию, точка — когда приём в среднем начинался. Считается по дням с записями, начиная с пятого.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The grey track is part of the day, the blue band is the meal’s window in the schedule, the dot is when the meal started on average. Counted over days with entries, from the fifth."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La pista gris es parte del día, la azul es la ventana de la comida según el horario, el punto es cuándo empezó de media. Se cuenta por días con registros, desde el quinto."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A pista cinza é parte do dia, a azul é a janela da refeição no horário, o ponto é quando começou em média. Conta dias com registros, a partir do quinto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La piste grise est une partie de la journée, la bleue la fenêtre du repas prévue, le point le moment moyen du début. Calculé sur les jours saisis, à partir du cinquième."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die graue Bahn ist ein Teil des Tages, die blaue das Fenster der Mahlzeit laut Zeitplan, der Punkt der durchschnittliche Beginn. Gezählt über Tage mit Einträgen, ab dem fünften."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المسار الرمادي جزء من اليوم، والأزرق نافذة الوجبة حسب الجدول، والنقطة وقت بدء الوجبة في المتوسط. يُحسب من الأيام المسجّلة بدءًا من اليوم الخامس."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המסלול האפור הוא חלק מהיום, הכחול הוא חלון הארוחה לפי לוח הזמנים, והנקודה היא מתי הארוחה התחילה בממוצע. מחושב לפי ימים עם רישום, מהחמישי."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

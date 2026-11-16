@@ -520,7 +520,11 @@ extension CalorieStore {
         return MealSchedule.slots(
             settings: schedule,
             entries: (entriesByDay[day] ?? []).map { (date: $0.date, calories: $0.calories) },
-            dailyGoal: calendar.isDateInToday(day) ? adaptedTodayGoal : goal(for: day),
+            // День без сохранённой нормы берёт сегодняшнюю: окна строятся
+            // только при положительной норме, и без неё прожитый день выпадал
+            // из сверки расписания целиком.
+            dailyGoal: calendar.isDateInToday(day) ? adaptedTodayGoal
+                : (goal(for: day) > 0 ? goal(for: day) : adaptedTodayGoal),
             now: moment)
     }
 

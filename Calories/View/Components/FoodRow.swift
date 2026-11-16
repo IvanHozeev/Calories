@@ -140,7 +140,7 @@ struct FoodRow: View {
     /// Количество — отдельной строкой под названием у одиночного продукта.
     private func portionLine(_ text: String) -> some View {
         Text(verbatim: text)
-            .font(.app(.footnote, weight: .medium))
+            .font(.app(.caption, weight: .medium))
             .foregroundStyle(.secondary)
             .lineLimit(1)
     }
@@ -175,7 +175,7 @@ struct FoodRow: View {
                     .foregroundStyle(isAdded ? Color(.systemBackground) : Color.accentColor)
             }
             .frame(width: 28, height: 28)
-            .frame(width: 44, height: 44)
+            .frame(width: 44, height: 40)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -191,7 +191,7 @@ struct FoodRow: View {
             // макросы) с воздухом по шесть точек растягивали ячейку так, что
             // в поиске помещалось пять продуктов. Ярусы остаются — макросы
             // не стоит склеивать с подписью, — а воздух между ними убран.
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 1) {
                 // Составной приём — каждая часть своей строкой в цвет своего
                 // доминирующего макроса: «Молоко» — цветом молока, «Протеин»
                 // — цветом белка, а не вся строка одним серым.
@@ -294,7 +294,11 @@ struct FoodRow: View {
                 quickAddButton(quickAdd)
             }
         }
-        .padding(.vertical, 2)
+        // Чуть компактнее: строки прижаты ярусами по единице, а вертикальный
+        // отступ ячейки уменьшен вдвое — в поиске и в «Рационе» помещается
+        // больше продуктов.
+        .padding(.vertical, 0)
+        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
         // Разделитель начинается от края содержимого — там же, где полоска,
         // а не от названия, отодвинутого под неё.
         .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }

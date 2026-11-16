@@ -1378,7 +1378,12 @@ struct AddEntryView: View {
         if !draftItems.isEmpty {
             HStack(spacing: 12) {
                 Button("Отмена") {
-                    draftItems.removeAll()
+                    // С анимацией: список набранного и полоса кнопок уходят
+                    // плавно, как при снятии одного продукта. Без вопроса
+                    // перед стиранием это единственное, что смягчает резкое
+                    // исчезновение всего приёма.
+                    withAnimation(.snappy) { draftItems.removeAll() }
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
                 .buttonStyle(.glass)
                 .accessibilityIdentifier("cancelMeal")

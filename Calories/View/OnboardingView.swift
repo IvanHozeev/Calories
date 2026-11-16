@@ -332,68 +332,102 @@ struct OnboardingView: View {
         }
     }
 
+    /// Три карточки вместо сегментов, а под ними — темп.
+    ///
+    /// Сегменты «Сушка / Поддержание / Набор» назвали цели и больше ничего:
+    /// что за этим стоит, человек узнавал уже на плане. У карточки есть
+    /// строка про то, чем цель обернётся. Темп — тремя вариантами с тем, что
+    /// они значат в килограммах и в итоге, а не шагом степпера в сотых долях
+    /// процента: никто не знает, чем 0.65% отличается от 0.7%.
     private var goalStep: some View {
-        stepShell(title: "Цель") {
-            VStack(spacing: 16) {
-                Picker("Цель", selection: $intent) {
-                    ForEach(PlanIntent.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: intent) { _, newIntent in
-                    ratePercent = newIntent.defaultWeeklyRatePercent
-                    durationWeeks = newIntent == .bulk ? 16 : 12
-                }
+        stepShell(title: "Цель", subtitle: "От неё зависят норма калорий и план") {
+            VStack(spacing: 10) {
+                selectableRow(title: String(localized: "Похудеть"),
+                              subtitle: String(localized: "Дефицит, темп и срок до цели"),
+                              selected: intent == .cut) { chooseIntent(.cut) }
+                selectableRow(title: String(localized: "Поддерживать"),
+                              subtitle: String(localized: "Норма равна расходу, план не нужен"),
+                              selected: intent == .maintenance) { chooseIntent(.maintenance) }
+                selectableRow(title: String(localized: "Набрать"),
+                              subtitle: String(localized: "Небольшой профицит, медленно"),
+                              selected: intent == .bulk) { chooseIntent(.bulk) }
 
                 if intent != .maintenance {
-                    VStack(spacing: 0) {
-                        Stepper(value: $ratePercent, in: 0.1...1.5, step: 0.05) {
-                            HStack {
-                                Text("Темп")
-                                Spacer()
-                                Text(verbatim: String(format: "%.2f%% · %+.2f \(String(localized: "кг/нед"))",
-                                                      ratePercent,
-                                                      intent.direction * ratePercent / 100 * weightKg))
-                                    .foregroundStyle(.secondary)
-                                    .monospacedDigit()
-                            }
-                        }
-                        .padding(.vertical, 10)
-                        Divider()
-                        Stepper(value: $durationWeeks, in: 4...52) {
-                            HStack {
-                                Text("Срок")
-                                Spacer()
-                                Text(String(format: String(localized: "%lld нед."), durationWeeks))
-                                    .foregroundStyle(.secondary)
-                                    .monospacedDigit()
-                            }
-                        }
-                        .padding(.vertical, 10)
-                    }
-                    .padding(.horizontal, 16)
-                    .tileSurface(cornerRadius: 20)
-
-                    if ratePercent > intent.aggressiveRatePercent {
-                        Label(intent == .cut
-                              ? "Быстрее процента веса в неделю — на сушке это уже за счёт мышц."
-                              : "Быстрее половины процента в неделю — на наборе большая часть прибавки будет жиром.",
-                              systemImage: "exclamationmark.triangle.fill")
-                            .font(.app(.caption))
-                            .foregroundStyle(ProgressRing.overColors[0])
-                    }
-
-                    Text(String(format: String(localized: "План бесплатно %lld дней — за это время появится первый вердикт, как он идёт."),
-                                CalorieStore.trialDays))
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                } else {
-                    Text("На поддержании план не нужен: норма — твой расход, без темпа и финиша.")
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+                    paceSection
+                        .padding(.top, 6)
+                        .transition(.opacity)
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: intent)
+        }
+    }
+
+    private func chooseIntent(_ newIntent: PlanIntent) {
+        intent = newIntent
+        ratePercent = newIntent.defaultWeeklyRatePercent
+        durationWeeks = newIntent == .bulk ? 16 : 12
+    }
+
+    /// Три темпа на цель: бережный, рабочий и верхняя граница. Верхняя —
+    /// ровно та, за которой приложение предупреждает (`aggressiveRatePercent`).
+    private var paceOptions: [(percent: Double, note: String)] {
+        switch intent {
+        case .cut:
+            return [(0.5, String(localized: "Бережно: медленнее, зато легче держать и меньше риск для мышц.")),
+                    (0.7, String(localized: "Рабочая середина: заметный результат без лишнего риска.")),
+                    (1.0, String(localized: "Верхняя граница: держать тяжело, мышцы под риском."))]
+        case .bulk:
+            return [(0.2, String(localized: "Осторожно: почти весь набор — мышцы, но медленно.")),
+                    (0.3, String(localized: "Рабочая середина для набора: мышцы растут, жира немного.")),
+                    (0.5, String(localized: "Верхняя граница набора: большая часть прибавки будет жиром."))]
+        case .maintenance:
+            return []
+        }
+    }
+
+    private var paceSection: some View {
+        let options = paceOptions
+        let weekly = intent.direction * ratePercent / 100 * weightKg
+        let finish = weightKg + weekly * Double(durationWeeks)
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("Темп")
+                .font(.app(.subheadline, weight: .semibold))
+                .padding(.horizontal, 14)
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("Темп", selection: $ratePercent) {
+                    ForEach(options, id: \.percent) { option in
+                        Text(verbatim: option.percent.formatted(.number.precision(.fractionLength(0...2))) + "%")
+                            .tag(option.percent)
+                    }
+                }
+                .pickerStyle(.segmented)
+
+                HStack(alignment: .firstTextBaseline) {
+                    (Text(verbatim: weekly.formatted(.number.precision(.fractionLength(2)).sign(strategy: .always())) + " ")
+                        .font(.app(.title3, weight: .bold))
+                     + Text("кг в неделю")
+                        .font(.app(.caption))
+                        .foregroundColor(.secondary))
+                    Spacer(minLength: 8)
+                    Text(verbatim: String(format: String(localized: "за %1$lld нед. — до %2$@ кг"),
+                                          durationWeeks,
+                                          finish.formatted(.number.precision(.fractionLength(0)))))
+                        .font(.app(.subheadline))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .monospacedDigit()
+
+                Text(verbatim: options.first { $0.percent == ratePercent }?.note ?? "")
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .tileSurface(cornerRadius: 20)
         }
     }
 

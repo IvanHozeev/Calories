@@ -18,6 +18,8 @@ struct AddEntryView: View {
     /// Спрашиваем, отбросить ли набранный приём: «Отмена» в полосе черновика
     /// стирает его целиком, и случайный тап не должен стоить собранного.
     @State private var confirmingDiscard = false
+    /// То же, но с закрытием листа: крестик отбрасывает набранное и уходит.
+    @State private var confirmingDiscardAndClose = false
 
     /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
     /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
@@ -1194,6 +1196,16 @@ struct AddEntryView: View {
             // смахнуть лист нельзя — выйти можно «Сохранить» или «Отмена».
             .interactiveDismissDisabled(MealDraftGuard.hasUnsavedWork(count: draftItems.count,
                                                                        appending: appendingTo != nil))
+            .confirmationDialog("Отбросить приём?", isPresented: $confirmingDiscardAndClose,
+                                titleVisibility: .visible) {
+                Button("Отбросить", role: .destructive) {
+                    draftItems.removeAll()
+                    finish()
+                }
+                Button("Продолжить", role: .cancel) { }
+            } message: {
+                Text("Набранное не сохранится.")
+            }
             .confirmationDialog("Отбросить приём?", isPresented: $confirmingDiscard,
                                 titleVisibility: .visible) {
                 Button("Отбросить", role: .destructive) { draftItems.removeAll() }
@@ -1285,9 +1297,18 @@ struct AddEntryView: View {
             } label: {
                 // Не `Label`: в тулбаре система показывает у него одну иконку,
                 // а время должно читаться словами рядом с часами.
-                HStack(spacing: 5) {
+                //
+                // Шрифт приложения, а не системный: в тулбаре текст берёт
+                // системный кегль и выглядел чужим рядом с остальным листом.
+                // Время — полужирным пятнадцатым, часы — акцентом и чуть
+                // мельче: читается число, а не значок.
+                HStack(spacing: 6) {
                     Image(systemName: "clock")
+                        .font(.app(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.accentColor)
                     Text(verbatim: timeLabel)
+                        .font(.app(size: 15, weight: .semibold))
+                        .foregroundStyle(.primary)
                         .monospacedDigit()
                 }
                 .accessibilityElement(children: .combine)
@@ -1304,6 +1325,30 @@ struct AddEntryView: View {
                     // этаж модальности, и выход из него человек ищет заново.
                     .presentationCompactAdaptation(.popover)
             }
+        }
+
+        ToolbarItem(placement: .topBarTrailing) {
+            Button {
+                closeSheet()
+            } label: {
+                Image(systemName: "xmark")
+            }
+            .accessibilityLabel("Закрыть")
+            .accessibilityIdentifier("closeMealSheet")
+        }
+    }
+
+    /// Закрыть лист: крестик справа от времени.
+    ///
+    /// Лист закрывался только смахиванием, а смахнуть его нельзя, пока в приёме
+    /// есть набранное, — и выйти можно было лишь через «Отмену» внизу. Крестик
+    /// стоит там, где его ищут, и ведёт себя как смахивание: пустой приём
+    /// закрывает сразу, набранный спрашивает, отбросить ли его.
+    private func closeSheet() {
+        if MealDraftGuard.hasUnsavedWork(count: draftItems.count, appending: appendingTo != nil) {
+            confirmingDiscardAndClose = true
+        } else {
+            finish()
         }
     }
 

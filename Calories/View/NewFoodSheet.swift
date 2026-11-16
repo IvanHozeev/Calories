@@ -452,9 +452,11 @@ private extension NewFoodSheet {
             TextField("Производитель", text: $producer)
                 .focused($focusedField, equals: .producer)
         }
+        // Без значков в вариантах: выбранное «Рыба и морепродукты» со значком
+        // не помещалось рядом с подписью, и подпись уезжала на строку выше.
         Picker(selection: $category) {
             ForEach(FoodCategory.allCases) { item in
-                Label(item.title, systemImage: item.icon).tag(item)
+                Text(verbatim: item.title).tag(item)
             }
         } label: {
             settingLabel("Категория", systemImage: "square.grid.2x2")

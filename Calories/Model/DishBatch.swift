@@ -123,3 +123,41 @@ extension DishBatch.State {
         return min(max(days + 1, 1), DishBatch.shelfLifeDays)
     }
 }
+
+/// Сколько порций — словами, с правильной формой.
+///
+/// Раньше число шло подстановкой в готовую фразу: «осталось 5.0 порции» и
+/// «на 2.0 порции». Целое число теперь идёт через склонение («1 порция,
+/// 2 порции, 5 порций»), а дробное — половинками и без лишнего нуля:
+/// «2,5 порции». Четвертинки не показываем: «3,47» — это отчёт, а не ответ.
+nonisolated enum PortionCount {
+    /// Ближайшая половинка.
+    static func rounded(_ servings: Double) -> Double { (servings * 2).rounded() / 2 }
+
+    private static func decimal(_ value: Double) -> String {
+        value.formatted(.number.precision(.fractionLength(1)))
+    }
+
+    private static func isWhole(_ value: Double) -> Bool { value == value.rounded() }
+
+    /// «2 порции», «5 порций», «2,5 порции».
+    static func plain(_ servings: Double) -> String {
+        let half = rounded(servings)
+        if isWhole(half) { let count = Int(half); return String(localized: "\(count) порции") }
+        return String(format: String(localized: "%@ порции"), decimal(half))
+    }
+
+    /// «осталось 5 порций», «осталась 1 порция», «осталось 2,5 порции».
+    static func left(_ servings: Double) -> String {
+        let half = rounded(servings)
+        if isWhole(half) { let count = Int(half); return String(localized: "осталось \(count) порций") }
+        return String(format: String(localized: "осталось %@ порции"), decimal(half))
+    }
+
+    /// «хватит на 4 порции», «хватит на 5 порций», «хватит на 3,5 порции».
+    static func makes(_ servings: Double) -> String {
+        let half = rounded(servings)
+        if isWhole(half) { let count = Int(half); return String(localized: "хватит на \(count) порций") }
+        return String(format: String(localized: "на %@ порции"), decimal(half))
+    }
+}

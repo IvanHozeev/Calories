@@ -26,8 +26,7 @@ struct FridgeBatchRow: View {
 
     private var remainingText: String {
         if let servings = state.remainingServings, servings >= 0.5 {
-            return String(format: String(localized: "осталось %@ порции"),
-                          String(format: "%.1f", servings))
+            return PortionCount.left(servings)
         }
         return String(format: String(localized: "осталось %.0f г"), state.remainingGrams)
     }

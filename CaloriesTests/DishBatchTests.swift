@@ -301,3 +301,24 @@ struct RecipeHintTests {
         #expect(missing.map(\.foodName) == ["Картофель", "Соль", "Масло оливковое"])
     }
 }
+
+/// Число порций — округляется до половинки и не тащит за собой нуль.
+struct PortionCountTests {
+    @Test func roundsToTheNearestHalf() {
+        #expect(PortionCount.rounded(4.97) == 5)
+        #expect(PortionCount.rounded(3.47) == 3.5)
+        #expect(PortionCount.rounded(2.2) == 2)
+    }
+
+    @Test func aWholeCountHasNoDecimalZero() {
+        for servings in [1.0, 2.0, 4.96, 5.0] {
+            #expect(!PortionCount.left(servings).contains(".0"), "«\(PortionCount.left(servings))»")
+            #expect(!PortionCount.plain(servings).contains(",0"))
+        }
+    }
+
+    @Test func aHalfKeepsItsDecimal() {
+        let text = PortionCount.plain(2.5)
+        #expect(text.contains("2.5") || text.contains("2,5"), "«\(text)»")
+    }
+}

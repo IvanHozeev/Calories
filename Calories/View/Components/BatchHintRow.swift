@@ -32,8 +32,7 @@ struct BatchHintRow: View {
             return String(format: String(localized: "%1$@ — осталось %2$@"), name, grams)
         }
         return String(format: String(localized: "%1$@ — осталось %2$@"),
-                      name, String.localizedStringWithFormat(
-                          String(localized: "%lld порции"), Int(servings)))
+                      name, PortionCount.plain(servings))
     }
 
     private var color: Color {

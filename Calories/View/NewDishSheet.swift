@@ -37,13 +37,9 @@ struct NewDishSheet: View {
         guard servingGramsValue > 0, totalGrams > 0 else { return nil }
         let count = totalGrams / servingGramsValue
         guard count >= 1.1 else { return nil }
-        // Половинки показываем, четвертинки нет: «на 3.5 порции» — это
-        // по-человечески, «на 3.47» — отчёт.
-        let rounded = (count * 2).rounded() / 2
-        let text = rounded == rounded.rounded()
-            ? String(format: "%.0f", rounded)
-            : String(format: "%.1f", rounded)
-        return String(format: String(localized: "на %@ порции"), text)
+        // Половинки показываем, четвертинки нет: «на 3,5 порции» — это
+        // по-человечески, «на 3,47» — отчёт.
+        return PortionCount.makes(count)
     }
 
     private var servingGramsValue: Double {
@@ -192,16 +188,14 @@ struct NewDishSheet: View {
     private func portionsText(_ grams: Double, of dish: Dish) -> String {
         let text = String(format: "%.0f \(String(localized: "г"))", grams)
         guard dish.defaultServingGrams > 0, grams / dish.defaultServingGrams >= 0.5 else { return text }
-        return String(format: String(localized: "%1$@ · %2$@ порции"),
-                      text, String(format: "%.1f", grams / dish.defaultServingGrams))
+        return "\(text) · \(PortionCount.plain(grams / dish.defaultServingGrams))"
     }
 
     /// Остаток словами: граммы и, если известна порция, сколько это раз.
     private func remainingText(_ state: DishBatch.State) -> String {
         let grams = String(format: "%.0f \(String(localized: "г"))", state.remainingGrams)
         guard let servings = state.remainingServings, servings >= 0.5 else { return grams }
-        return String(format: String(localized: "%1$@ · %2$@ порции"),
-                      grams, String(format: "%.1f", servings))
+        return "\(grams) · \(PortionCount.plain(servings))"
     }
 
     private var listContent: some View {

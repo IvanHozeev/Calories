@@ -375,8 +375,7 @@ struct PantryView: View {
     private func batchDetail(_ dish: Dish) -> String? {
         guard let state = store.batchState(of: dish), !state.isFinished else { return nil }
         if let servings = state.remainingServings, servings >= 0.5 {
-            return String(format: String(localized: "осталось %@ порции"),
-                          String(format: "%.1f", servings))
+            return PortionCount.left(servings)
         }
         return String(format: String(localized: "осталось %.0f г"), state.remainingGrams)
     }

@@ -41,7 +41,10 @@ struct PlanView: View {
                     PlanWeightCard(plan: plan, entries: store.weightEntries,
                                    trend: { store.weightTrend(on: $0) })
                 }
-                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                // Без своих боковых отступов: карточки во всю ширину секции,
+                // как все остальные ниже. С шестнадцатью точками по бокам
+                // они выходили уже недельного итога и строк настроек.
+                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }
@@ -393,6 +396,12 @@ struct PlanView: View {
                 }
                 if let reserve {
                     dietReserveRow(reserve)
+                }
+            } footer: {
+                // Что это за полоска: без пояснения «запас» читался как запас
+                // калорий или еды.
+                if reserve != nil {
+                    Text("Запас диеты — сколько недель дефицита ты уже прошёл до рекомендованного перерыва. Чем полнее полоска, тем ближе диет-брейк: после долгого дефицита расход падает и голод растёт. На крутом темпе она заполняется быстрее.")
                 }
             }
         }

@@ -65384,6 +65384,100 @@
           }
         }
       }
+    },
+    "Сушка": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تنشيف"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diät"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Definición"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sèche"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חיטוב"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Definição"
+          }
+        }
+      }
+    },
+    "Запас диеты — сколько недель дефицита ты уже прошёл до рекомендованного перерыва. Чем полнее полоска, тем ближе диет-брейк: после долгого дефицита расход падает и голод растёт. На крутом темпе она заполняется быстрее.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "احتياطي الحمية هو عدد أسابيع العجز التي قطعتها حتى الاستراحة الموصى بها. كلما امتلأ الشريط اقتربت الاستراحة: بعد عجز طويل ينخفض الصرف ويزداد الجوع. وبوتيرة حادة يمتلئ أسرع."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Diätreserve zeigt, wie viele Wochen Defizit du bis zur empfohlenen Pause schon hinter dir hast. Je voller der Balken, desto näher die Diätpause: Nach langem Defizit sinkt der Verbrauch und der Hunger steigt. Bei hohem Tempo füllt er sich schneller."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diet reserve is how many weeks of deficit you have done on the way to the recommended break. The fuller the bar, the closer the diet break: after a long deficit expenditure drops and hunger grows. At a steep pace it fills faster."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La reserva de dieta es cuántas semanas de déficit llevas hasta el descanso recomendado. Cuanto más llena la barra, más cerca el descanso: tras un déficit largo baja el gasto y sube el hambre. Con un ritmo duro se llena antes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La réserve de régime, c’est le nombre de semaines de déficit déjà faites avant la pause recommandée. Plus la barre est pleine, plus la pause approche : après un long déficit la dépense baisse et la faim augmente. À rythme soutenu, elle se remplit plus vite."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "רזרבת הדיאטה היא כמה שבועות גירעון עברת עד ההפסקה המומלצת. ככל שהפס מלא יותר, ההפסקה קרובה: אחרי גירעון ארוך ההוצאה יורדת והרעב עולה. בקצב תלול הוא מתמלא מהר יותר."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A reserva de dieta é quantas semanas de déficit você já fez até a pausa recomendada. Quanto mais cheia a barra, mais perto a pausa: após um déficit longo o gasto cai e a fome sobe. Em ritmo forte ela enche mais rápido."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

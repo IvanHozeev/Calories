@@ -881,7 +881,7 @@ final class CaloriesUITests: XCTestCase {
 
         let phase = app.descendants(matching: .any).matching(identifier: "planPhaseCard").firstMatch
         XCTAssertTrue(phase.waitForExistence(timeout: 5), "Нет карточки фазы")
-        XCTAssertTrue(phase.label.contains("Deficit"), "Карточка фазы не про идущую сушку: \(phase.label)")
+        XCTAssertTrue(phase.label.contains("Cut"), "Карточка фазы не про идущую сушку: \(phase.label)")
         XCTAssertTrue(phase.label.contains("Next:"), "Нет строки о следующих фазах: \(phase.label)")
         XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "planWeightCard").firstMatch.exists,
                       "Нет карточки веса")

@@ -53,9 +53,13 @@ struct PlanPhaseCard: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Divider()
-
-            statusRow
+            // Статус — только когда есть чем его назвать: без профиля или
+            // взвешиваний вердикта нет, и черта над пустым местом висела бы
+            // зря.
+            if plan.isDietBreak(on: today) || adherence != nil {
+                Divider()
+                statusRow
+            }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -201,6 +205,19 @@ struct PlanWeightCard: View {
 
     private var current: Double? { trend(today) }
 
+    /// Какая доля срока плана уже прошла.
+    private var todayShare: CGFloat {
+        let total = plan.endDate.timeIntervalSince(plan.startDate)
+        guard total > 0 else { return 0 }
+        return CGFloat(min(max(today.timeIntervalSince(plan.startDate) / total, 0), 1))
+    }
+
+    /// «Сегодня» молчит, когда отметка так близко к краю, что слово налезло бы
+    /// на «старт» или «цель»: тогда эти две подписи сами говорят, где человек.
+    private func todayLabelFits(x: CGFloat, total: CGFloat) -> Bool {
+        x > 90 && x < total - 90
+    }
+
     private var bounds: ClosedRange<Double> {
         let values = weighIns.map(\.weightKg) + planned.map(\.kg) + trendPoints.map(\.kg)
         let low = (values.min() ?? plan.startWeightKg) - 0.5
@@ -226,13 +243,24 @@ struct PlanWeightCard: View {
                 .frame(height: 110)
                 .accessibilityHidden(true)
 
-            HStack {
-                Text(String(format: String(localized: "старт %@"), String(format: "%.1f", plan.startWeightKg)))
-                Spacer()
-                Text("сегодня")
-                Spacer()
-                Text(String(format: String(localized: "цель %@"), String(format: "%.1f", plan.targetWeightKg)))
+            // «Сегодня» — под отметкой, а не посередине: середина подписи
+            // совпадала с серединой карточки, и при отметке на трети пути
+            // слово стояло под пустым местом. Положение — доля пройденного
+            // срока, та же, что у линии на графике.
+            GeometryReader { geometry in
+                let x = geometry.size.width * todayShare
+                ZStack(alignment: .topLeading) {
+                    Text(String(format: String(localized: "старт %@"), String(format: "%.1f", plan.startWeightKg)))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text(String(format: String(localized: "цель %@"), String(format: "%.1f", plan.targetWeightKg)))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                    Text("сегодня")
+                        .fixedSize()
+                        .position(x: x, y: 7)
+                        .opacity(todayLabelFits(x: x, total: geometry.size.width) ? 1 : 0)
+                }
             }
+            .frame(height: 16)
             .font(.app(.caption2))
             .foregroundStyle(.secondary)
             .monospacedDigit()

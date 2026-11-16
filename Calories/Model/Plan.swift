@@ -63,7 +63,7 @@ enum PlanIntent: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .cut:         return String(localized: "Дефицит")
+        case .cut:         return String(localized: "Сушка")
         case .maintenance: return String(localized: "Поддержание")
         case .bulk:        return String(localized: "Набор")
         }

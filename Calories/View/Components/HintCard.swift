@@ -6,11 +6,9 @@ import SwiftUI
 /// надо было знать заранее, и его путали с прокруткой. Теперь справа крестик,
 /// как у баннеров в системных приложениях и мессенджерах, а смахивания нет.
 ///
-/// Пока палец держит плашку, она пружиной подрастает и коротко отзывается
-/// вибрацией, а отпущенная возвращается и выполняет своё действие. Так видно,
-/// что плашка живая, ещё до того, как что-то открылось. Подсказка без
-/// действия («норма набрана») тоже подрастает: её можно закрыть, и отклик
-/// говорит, что палец до неё дотянулся.
+/// Пока палец держит плашку, она коротко отзывается вибрацией, а отпущенная
+/// выполняет своё действие. Увеличения нет: плашка стоит во всю ширину строки,
+/// и подросшая она выходила за рамки соседних карточек.
 struct HintCard<Content: View>: View {
     var onTap: (() -> Void)?
     var onClose: (() -> Void)?
@@ -19,13 +17,6 @@ struct HintCard<Content: View>: View {
     @ViewBuilder var content: Content
 
     @State private var pressed = false
-
-    /// Насколько плашка подрастает под пальцем — только в высоту.
-    ///
-    /// В ширину она уже стоит во всю строку списка, и всё, что шире, выходило
-    /// за рамки соседних карточек и срезалось краем строки. Вверх и вниз места
-    /// хватает: между подсказками шестнадцать точек.
-    static var pressedScale: CGFloat { 1.12 }
 
     var body: some View {
         // Крестик — соседом плашки по строке, а не слоем поверх неё.
@@ -73,8 +64,6 @@ struct HintCard<Content: View>: View {
         .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .tileSurface(cornerRadius: 18)
-        .scaleEffect(x: 1, y: pressed ? Self.pressedScale : 1)
-        .animation(.spring(response: 0.32, dampingFraction: 0.58), value: pressed)
         .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.6), trigger: pressed) { _, isPressed in
             isPressed
         }

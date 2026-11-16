@@ -124,11 +124,7 @@ struct ContentView: View {
                         // дневник (`contentMargins` ниже), а не у строки: тогда
                         // карточки и строки дневника стоят в одну ширину, и обе
                         // с отступом от края экрана.
-                        //
-                        // Строка шире содержимого на `pressRoom` с каждой
-                        // стороны: плашка подсказки под пальцем подрастает, и
-                        // ячейка списка срезала её по краям строки.
-                        .listRowInsets(EdgeInsets(top: 0, leading: -Self.pressRoom, bottom: 16, trailing: -Self.pressRoom))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
 
@@ -738,14 +734,7 @@ private extension ContentView {
             )
             }
         }
-        // Вровень с остальным списком: строка выше на `pressRoom` с каждой
-        // стороны, и этот зазор возвращается полем внутрь.
-        .padding(.horizontal, Self.pressRoom)
     }
-
-    /// Запас по бокам строки под плашку, подросшую под пальцем: четыре
-    /// процента от ширины плашки — около пяти точек с каждой стороны.
-    static let pressRoom: CGFloat = 8
 
     /// Есть ли сегодня хоть одна подсказка.
     ///

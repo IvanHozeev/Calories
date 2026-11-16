@@ -124,9 +124,17 @@ struct ContentView: View {
                         // дневник (`contentMargins` ниже), а не у строки: тогда
                         // карточки и строки дневника стоят в одну ширину, и обе
                         // с отступом от края экрана.
+                        //
+                        // Сама ячейка шире плиток на `glassRoom` с каждой
+                        // стороны: у системного стекла есть тень и кромка за
+                        // рамкой плитки, а ячейка срезает всё, что за её
+                        // краем, — тень у крайних плиток обрывалась ровной
+                        // линией. Отрицательный отступ строки тут не помогает:
+                        // ячейка остаётся прежней, сдвигается только вид.
                         .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
+                .listSectionMargins(.horizontal, 32 - Self.glassRoom)
 
                 // Стекло — только строкам дневника.
                 //
@@ -137,8 +145,10 @@ struct ContentView: View {
                     .glassRow()
             }
             .listStyle(.insetGrouped)
-            .contentMargins(.horizontal, 32, for: .scrollContent)
-            // Полоску дней — ближе к шапке.
+            // Поле списка уже на `glassRoom`, чтобы ячейка с плитками вышла
+            // шире их самих; секции дневника возвращают этот зазор полем
+            // секции, а секция с плитками — нет.
+                        // Полоску дней — ближе к шапке.
             //
             // Сгруппированный список отбивает первую секцию от навигации на
             // три десятка точек: они нужны заголовку секции, которого здесь
@@ -734,7 +744,18 @@ private extension ContentView {
             )
             }
         }
+        // Зазор, который строка отдаёт стеклу, возвращается полем внутрь:
+        // видимая ширина плиток и дневника остаётся одной.
+        .padding(.horizontal, Self.glassRoom)
     }
+
+    /// Запас по бокам строки под кромку стекла, в точках.
+    static let glassRoom: CGFloat = 12
+    /// Боковое поле секций дневника и заголовков приёмов: от края экрана.
+    ///
+    /// Задаётся секции, а не списку: на уровне списка поле не доходит до
+    /// секций дневника, и они стоят с системным отступом.
+    static let diaryMargin: CGFloat = 32
 
     /// Есть ли сегодня хоть одна подсказка.
     ///
@@ -1120,6 +1141,7 @@ private extension ContentView {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
                 }
             }
+            .listSectionMargins(.horizontal, Self.diaryMargin)
         } else if store.todayEntries.isEmpty {
         Section {
             // Пустой лоток и есть сообщение: подпись «пока ничего не
@@ -1133,6 +1155,7 @@ private extension ContentView {
             .listRowBackground(Color.clear)
         }
         .listSectionSeparator(.hidden)
+        .listSectionMargins(.horizontal, Self.diaryMargin)
         } else {
         ForEach(store.groupedTodayEntries, id: \.period) { group in
             Section {
@@ -1225,6 +1248,7 @@ private extension ContentView {
                 }
                 .textCase(nil)
             }
+            .listSectionMargins(.horizontal, Self.diaryMargin)
         }
         }
     }

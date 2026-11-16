@@ -4,6 +4,7 @@ struct EditEntrySheet: View {
     var store: CalorieStore
     let entry: FoodEntry
     var isEmbedded: Bool = false
+    @State private var showingWhen = false
     @Environment(\.dismiss) private var dismiss
 
     @State private var date: Date
@@ -120,38 +121,6 @@ struct EditEntrySheet: View {
             }
             .listRowBackground(Color.clear)
 
-            // Дата и время — сразу под итогом и своей секцией.
-            //
-            // Это не часть приёма, а его место в дне: раньше строка стояла
-            // в хвосте, за составом и полями, и правили её чаще, чем всё
-            // остальное вместе взятое — записал задним числом, поправил час.
-            //
-            // Подпись ушла в заголовок секции, а строка осталась двум
-            // колёсикам: день слева, час справа. Подпись и два колёсика в
-            // одной строке делили её на три неравные части, и строка читалась
-            // теснее, чем в ней было смысла.
-            Section {
-                // Одно колёсико на обе половины, а не два по краям строки.
-                //
-                // Колёсико даты держит ширину под самую длинную форму — под
-                // «1 нояб. 2026 г.» — и прижимает к её правому краю то, что
-                // показывает сейчас. Поэтому «28.10.2026» отъезжало от левого
-                // края строки, а «1 нояб. 2026 г.» нет: обе капсулы кончались
-                // в одной точке, а начинались в разных. Ни выключкой, ни
-                // `fixedSize` это не лечится — ширину выбирает сам контрол.
-                //
-                // С одним колёсиком система ставит капсулы вплотную друг к
-                // другу и сама отвечает за промежуток между ними.
-                HStack {
-                    DatePicker("Дата и время", selection: $date, in: ...Date(),
-                               displayedComponents: [.date, .hourAndMinute])
-                        .labelsHidden()
-                    Spacer(minLength: 0)
-                }
-            } header: {
-                Text("Дата и время")
-            }
-
             // Приём правится по частям — одна в нём или шесть.
             Section {
                 ForEach(parts.indices, id: \.self) { index in
@@ -215,8 +184,30 @@ struct EditEntrySheet: View {
                      eyebrow: entry.name.isEmpty ? nil : String(localized: "Редактировать"),
                      lines: 2,
                      cancelTitle: isEmbedded ? nil : String(localized: "Отмена"),
-                     trailingButtons: 1)
+                     trailingButtons: 2)
         .toolbar {
+            // Дата и время — часами в тулбаре, а не секцией под итогом: это
+            // место записи в дне, правят его редко, и целая секция с двумя
+            // капсулами забирала экран у состава. Графическое колесо — в
+            // поповере, как в листе добавления.
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showingWhen = true
+                } label: {
+                    Image(systemName: "clock")
+                }
+                .accessibilityLabel("Дата и время")
+                .accessibilityIdentifier("entryTimePicker")
+                .popover(isPresented: $showingWhen) {
+                    DatePicker("Дата и время", selection: $date, in: ...Date(),
+                               displayedComponents: [.date, .hourAndMinute])
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .frame(width: 320)
+                        .padding(.vertical, 8)
+                        .presentationCompactAdaptation(.popover)
+                }
+            }
             if !isEmbedded {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Отмена") { dismiss() }

@@ -20,8 +20,9 @@ struct DayHintRow: View {
                     Image(systemName: symbol)
                 }
             }
+            .font(.app(.subheadline))
             .foregroundStyle(tint)
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 0) {
                 Text(verbatim: hint.title)
                     .font(.app(.subheadline, weight: hint.detail == nil ? .regular : .semibold))
                     .foregroundStyle(hint.detail == nil ? .secondary : .primary)
@@ -35,7 +36,6 @@ struct DayHintRow: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, 2)
         // Одним элементом: без этого имя наследовали значок, заголовок и
         // пояснение по отдельности, и VoiceOver читал подсказку тремя кусками.
         // Тап, нажатие и имя для тестов — у карточки вокруг (`HintCard`).

@@ -877,7 +877,6 @@ private extension ContentView {
                 }
                 Spacer(minLength: 0)
             }
-            .padding(.vertical, 2)
         case .backup:
             // Копий нет, а дневнику уже есть что терять. Синхронизации у
             // приложения нет, контейнер удаляется вместе с ним, и выбранная
@@ -897,7 +896,6 @@ private extension ContentView {
                 }
                 Spacer(minLength: 0)
             }
-            .padding(.vertical, 2)
         default:
             DayHintRow(hint: hint)
         }

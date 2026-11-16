@@ -135,19 +135,21 @@ struct MacrosCard: View {
         let narrow = !dynamicTypeSize.isAccessibilitySize
         return Button(action: onOpen) {
             VStack(alignment: .leading, spacing: narrow ? 3 : 5) {
-                HStack(spacing: 6) {
+                HStack(spacing: narrow ? 4 : 6) {
                     // Цвет макроса — точкой у названия и полоской внизу: так
-                    // он узнаётся и при чёрном числе.
+                    // он узнаётся и при чёрном числе. В плитке на четверть
+                    // ряда точка мельче, чтобы «Углеводы» и «Клетчатка»
+                    // не обрезались многоточием.
                     Circle()
                         .fill(color)
-                        .frame(width: 8, height: 8)
+                        .frame(width: narrow ? 6 : 8, height: narrow ? 6 : 8)
                     Text(verbatim: title)
                         .font(.app(.caption))
                         // Подпись ведущего макроса — его цветом: приложение
                         // подсказывает, куда смотреть, не добавляя ни строчки.
                         .foregroundStyle(isLeading ? color : Color.secondary)
                         .lineLimit(1)
-                        .minimumScaleFactor(0.8)
+                        .minimumScaleFactor(narrow ? 0.6 : 0.8)
                 }
 
                 if narrow {
@@ -211,7 +213,7 @@ struct MacrosCard: View {
                 .frame(height: 4)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, narrow ? 10 : 14)
+            .padding(.horizontal, narrow ? 8 : 14)
             .padding(.vertical, 10)
             .frame(height: narrow ? Self.narrowTileHeight : Self.tileHeight)
             .overlay(alignment: .topTrailing) {

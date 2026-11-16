@@ -5,11 +5,13 @@ import HealthKit
 enum StepPeriod: String, CaseIterable {
     case week = "7 дней"
     case month = "30 дней"
+    case quarter = "90 дней"
 
     var localizedTitle: String {
         switch self {
         case .week: return String(localized: "7 дней")
         case .month: return String(localized: "30 дней")
+        case .quarter: return String(localized: "90 дней")
         }
     }
 }
@@ -26,7 +28,11 @@ final class StepsViewModel {
     }
 
     var history: [ActivityDay] {
-        period == .week ? store.weekHistory : store.monthHistory
+        switch period {
+        case .week: return store.weekHistory
+        case .month: return store.monthHistory
+        case .quarter: return store.quarterHistory
+        }
     }
 
     var average: Int {
@@ -424,14 +430,20 @@ private struct StepsContentView: View {
                         y: .value("Шаги", day.steps)
                     )
                     .foregroundStyle(day.steps >= store.stepGoal ? ProgressRing.kcalColors[0] : stepsColors[0])
-                    .cornerRadius(4)
+                    .cornerRadius(viewModel.period == .quarter ? 1.5 : 4)
 
                     RuleMark(y: .value("Цель", store.stepGoal))
                         .lineStyle(StrokeStyle(lineWidth: 1, dash: [4]))
                         .foregroundStyle(Color.secondary.opacity(0.6))
                 }
                 .chartXAxis {
-                    let stride = viewModel.period == .week ? 1 : 5
+                    // Подпись раз в день, раз в пять дней или раз в две
+                    // недели: на девяноста столбцах числа слиплись бы.
+                    let stride = switch viewModel.period {
+                    case .week: 1
+                    case .month: 5
+                    case .quarter: 14
+                    }
                     AxisMarks(values: .stride(by: .day, count: stride)) { _ in
                         AxisGridLine()
                         AxisValueLabel(format: .dateTime.day(), centered: true)

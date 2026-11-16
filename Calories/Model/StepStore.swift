@@ -27,6 +27,8 @@ final class StepStore {
     private(set) var activeCaloriesToday: Int = 0
     private(set) var weekHistory: [ActivityDay] = []
     private(set) var monthHistory: [ActivityDay] = []
+    /// Девяносто дней: так же глубоко запрашивается история из «Здоровья».
+    private(set) var quarterHistory: [ActivityDay] = []
     private(set) var isAuthorized: Bool = false
     private(set) var goalStreak: Int = 0
     private(set) var weeklyTotal: Int = 0
@@ -95,6 +97,7 @@ final class StepStore {
         // перекроют, а пустой экран в ожидании запроса никому не нужен.
         let stored = history.days
         if !stored.isEmpty {
+            quarterHistory = Array(stored.suffix(90))
             monthHistory = Array(stored.suffix(30))
             weekHistory = Array(stored.suffix(7))
             stepsToday = stored.last.flatMap {
@@ -630,6 +633,7 @@ final class StepStore {
             }
             let finalDays = days
             Task { @MainActor [weak self] in
+                self?.quarterHistory = Array(finalDays.suffix(90))
                 self?.monthHistory = Array(finalDays.suffix(30))
                 self?.weekHistory = Array(finalDays.suffix(7))
                 self?.updateDerivedStats()

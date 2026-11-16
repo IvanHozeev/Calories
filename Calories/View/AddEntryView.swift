@@ -17,9 +17,7 @@ struct AddEntryView: View {
     @State private var draftItems: [MealItem] = []
     /// Спрашиваем, отбросить ли набранный приём: «Отмена» в полосе черновика
     /// стирает его целиком, и случайный тап не должен стоить собранного.
-    @State private var confirmingDiscard = false
     /// То же, но с закрытием листа: крестик отбрасывает набранное и уходит.
-    @State private var confirmingDiscardAndClose = false
 
     /// Трогали ли время руками. Пока нет — на экране о нём ни строки: еда почти
     /// всегда записывается тогда же, когда съедена. Как только время сдвинули,
@@ -1198,23 +1196,6 @@ struct AddEntryView: View {
             // смахнуть лист нельзя — выйти можно «Сохранить» или «Отмена».
             .interactiveDismissDisabled(MealDraftGuard.hasUnsavedWork(count: draftItems.count,
                                                                        appending: appendingTo != nil))
-            .confirmationDialog("Отбросить приём?", isPresented: $confirmingDiscardAndClose,
-                                titleVisibility: .visible) {
-                Button("Отбросить", role: .destructive) {
-                    draftItems.removeAll()
-                    finish()
-                }
-                Button("Продолжить", role: .cancel) { }
-            } message: {
-                Text("Набранное не сохранится.")
-            }
-            .confirmationDialog("Отбросить приём?", isPresented: $confirmingDiscard,
-                                titleVisibility: .visible) {
-                Button("Отбросить", role: .destructive) { draftItems.removeAll() }
-                Button("Продолжить", role: .cancel) { }
-            } message: {
-                Text("Набранное не сохранится.")
-            }
             .safeAreaBar(edge: .bottom) { draftBar }
             .navigationDestination(item: $serving) { target in
                 servingScreen(target)
@@ -1366,14 +1347,11 @@ struct AddEntryView: View {
     ///
     /// Лист закрывался только смахиванием, а смахнуть его нельзя, пока в приёме
     /// есть набранное, — и выйти можно было лишь через «Отмену» внизу. Крестик
-    /// стоит там, где его ищут, и ведёт себя как смахивание: пустой приём
-    /// закрывает сразу, набранный спрашивает, отбросить ли его.
+    /// стоит там, где его ищут, и закрывает лист сразу, без вопроса: нажатие
+    /// на него — осознанное, в отличие от случайного смахивания, которое
+    /// по-прежнему заблокировано, пока в приёме есть набранное.
     private func closeSheet() {
-        if MealDraftGuard.hasUnsavedWork(count: draftItems.count, appending: appendingTo != nil) {
-            confirmingDiscardAndClose = true
-        } else {
-            finish()
-        }
+        finish()
     }
 
     /// «13:20», а для другого дня — с датой: «вчера 13:20» не угадать по
@@ -1400,12 +1378,7 @@ struct AddEntryView: View {
         if !draftItems.isEmpty {
             HStack(spacing: 12) {
                 Button("Отмена") {
-                    if MealDraftGuard.needsConfirmationToDiscard(count: draftItems.count,
-                                                                 appending: appendingTo != nil) {
-                        confirmingDiscard = true
-                    } else {
-                        draftItems.removeAll()
-                    }
+                    draftItems.removeAll()
                 }
                 .buttonStyle(.glass)
                 .accessibilityIdentifier("cancelMeal")
@@ -2052,22 +2025,17 @@ struct AddEntryView: View {
     }
 }
 
-/// Когда набранный приём нельзя терять молча.
+/// Когда набранный приём нельзя терять от случайного смахивания.
 ///
 /// Вынесено из экрана, чтобы правило проверялось тестом: на самом листе
-/// смахивание не нажать из юнит-теста.
+/// смахивание не нажать из юнит-теста. Кнопки «Отмена» и крестик спрашивать
+/// не должны — их нажимают нарочно.
 nonisolated enum MealDraftGuard {
     /// Есть ли набранное, чего нет в дневнике. При дополнении записи первой
     /// строкой черновика идёт она сама, и это не набранное: открыл, ничего
     /// не добавил — закрыть можно как обычно.
     static func hasUnsavedWork(count: Int, appending: Bool) -> Bool {
         count > (appending ? 1 : 0)
-    }
-
-    /// Спрашивать ли, прежде чем стереть: собранный приём из двух и более
-    /// продуктов — это труд, а один продукт набирается заново за секунды.
-    static func needsConfirmationToDiscard(count: Int, appending: Bool) -> Bool {
-        count - (appending ? 1 : 0) >= 2
     }
 }
 

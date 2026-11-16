@@ -241,3 +241,39 @@ struct BirthdayTests {
         #expect(UserProfile.isBirthday(bornOn: leap, now: date(2028, 2, 29), calendar: calendar))
     }
 }
+
+/// Замеры — раз в неделю, в тот же день недели.
+struct MeasurementReminderTests {
+    private let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    private func date(_ day: Int, hour: Int = 9) -> Date {
+        calendar.date(from: DateComponents(year: 2026, month: 11, day: day, hour: hour))!
+    }
+
+    @Test func aWeekLaterOnTheSameWeekdayItIsDue() {
+        // 11 ноября — среда, 18 — тоже.
+        #expect(MeasurementReminder.isDue(lastMeasurement: date(11), now: date(18), calendar: calendar))
+    }
+
+    @Test func itDoesNotNagEveryMorning() {
+        #expect(!MeasurementReminder.isDue(lastMeasurement: date(11), now: date(19), calendar: calendar))
+        #expect(!MeasurementReminder.isDue(lastMeasurement: date(11), now: date(17), calendar: calendar))
+    }
+
+    @Test func notBeforeAWeekHasPassed() {
+        #expect(!MeasurementReminder.isDue(lastMeasurement: date(11), now: date(11, hour: 20), calendar: calendar))
+    }
+
+    @Test func anOverdueOneComesBackOnTheNextSameWeekday() {
+        #expect(MeasurementReminder.isDue(lastMeasurement: date(4), now: date(25), calendar: calendar))
+    }
+
+    @Test func withoutAnyMeasurementItIsSunday() {
+        #expect(MeasurementReminder.isDue(lastMeasurement: nil, now: date(15), calendar: calendar))
+        #expect(!MeasurementReminder.isDue(lastMeasurement: nil, now: date(16), calendar: calendar))
+    }
+}

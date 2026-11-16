@@ -68049,6 +68049,100 @@
           }
         }
       }
+    },
+    "Пора снять замеры": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time to take measurements"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora de tomar medidas"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hora de tirar medidas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "C'est l'heure des mensurations"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeit für Körpermaße"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حان وقت أخذ القياسات"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הגיע הזמן למדוד"
+          }
+        }
+      }
+    },
+    "Прошла неделя: талия, грудь, бёдра — по ним видно то, чего не видно на весах.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A week has passed: waist, chest, hips show what the scale does not."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ha pasado una semana: cintura, pecho y caderas muestran lo que la báscula no."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passou uma semana: cintura, peito e quadril mostram o que a balança não mostra."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une semaine a passé : taille, poitrine, hanches montrent ce que la balance ne montre pas."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Woche ist vergangen: Taille, Brust, Hüfte zeigen, was die Waage nicht zeigt."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مرّ أسبوع: الخصر والصدر والوركان تُظهر ما لا يُظهره الميزان."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עבר שבוע: מותניים, חזה וירכיים מראים מה שהמשקל לא מראה."
+          }
+        }
+      }
     }
   },
   "version": "1.1"

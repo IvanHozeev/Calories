@@ -16,6 +16,8 @@ struct DayHint: Equatable, Identifiable, Sendable {
     enum Source: String, Codable, Sendable {
         case dailyAdvice, recovery, fasting, weeklyReview, batch, backup
         case weightExplainer, calendar
+        /// Раз в неделю: пора снять замеры.
+        case measurements
         /// Утреннее взвешивание. Раньше стояло отдельной оранжевой строкой
         /// рядом с очередью и спорило с ней за место под кольцом.
         case weighIn
@@ -26,6 +28,8 @@ struct DayHint: Equatable, Identifiable, Sendable {
         case moveRefeedToday, backupNow
         /// Открыть лист взвешивания.
         case openWeight
+        /// Открыть ввод замеров.
+        case openMeasurements
         /// Отметить пост из календаря — на этот день.
         case markFast(Date)
         /// Перенести рефид этой недели на праздник.
@@ -66,6 +70,8 @@ struct DayHint: Equatable, Identifiable, Sendable {
         /// обычно единственная подсказка.
         static let weighIn = 85
         static let weightExplainer = 80
+        /// Раз в неделю и не срочно: ниже недельного обзора, выше кастрюли.
+        static let measurements = 55
         /// Справка на завтра, а не совет на сегодня.
         static let weightForecast = 60
         static let weeklyReview = 70
@@ -182,6 +188,17 @@ struct DayHint: Equatable, Identifiable, Sendable {
                  urgency: Urgency.weighIn,
                  expiresAt: endOfDay(now, calendar: calendar),
                  action: .openWeight)]
+    }
+
+    /// Замеры — подсказкой, раз в неделю (`MeasurementReminder`).
+    static func measurements(now: Date, calendar: Calendar = .current) -> [DayHint] {
+        [DayHint(id: "measurements:week:\(dayKey(now, calendar: calendar))",
+                 source: .measurements,
+                 title: String(localized: "Пора снять замеры"),
+                 detail: String(localized: "Прошла неделя: талия, грудь, бёдра — по ним видно то, чего не видно на весах."),
+                 urgency: Urgency.measurements,
+                 expiresAt: endOfDay(now, calendar: calendar),
+                 action: .openMeasurements)]
     }
 
     /// Объяснение веса — подсказкой. Говорит «похоже на воду» и никогда не
@@ -352,7 +369,7 @@ enum DayHintPicker {
         -> (main: DayHint?, rest: [DayHint]) {
         let order = { (source: DayHint.Source) in
             [DayHint.Source.dailyAdvice, .recovery, .fasting, .weeklyReview, .batch, .backup,
-             .weightExplainer, .calendar, .weighIn].firstIndex(of: source) ?? .max
+             .weightExplainer, .calendar, .measurements, .weighIn].firstIndex(of: source) ?? .max
         }
         let live = all
             .filter { $0.expiresAt > now && !dismissed.contains($0.id) }
@@ -363,5 +380,26 @@ enum DayHintPicker {
                 return a.id < b.id
             }
         return (live.first, Array(live.dropFirst()))
+    }
+}
+
+
+/// Когда напоминать про замеры: раз в неделю, в тот же день недели, что и
+/// прошлый раз.
+///
+/// Без состояния и без «показано на прошлой неделе»: срок и день недели
+/// считаются из даты последнего замера. Прошла неделя и сегодня тот же день
+/// недели — напоминаем; не снял — в следующий такой же день снова, то есть
+/// ещё через неделю, а не каждое утро. Замеров ещё не было — по воскресеньям.
+enum MeasurementReminder {
+    static let firstTimeWeekday = 1 // воскресенье
+
+    static func isDue(lastMeasurement: Date?, now: Date, calendar: Calendar = .current) -> Bool {
+        guard let last = lastMeasurement else {
+            return calendar.component(.weekday, from: now) == firstTimeWeekday
+        }
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: last),
+                                           to: calendar.startOfDay(for: now)).day ?? 0
+        return days >= 7 && calendar.component(.weekday, from: last) == calendar.component(.weekday, from: now)
     }
 }

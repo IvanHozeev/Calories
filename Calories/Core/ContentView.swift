@@ -799,6 +799,11 @@ private extension ContentView {
            WeighInWindow.isOpen(now: now, wakeHour: hourOfDay(mealSchedule.wake)) {
             hints += DayHint.weighIn(now: now)
         }
+        // Раз в неделю, в день недели прошлых замеров.
+        if store.profile != nil,
+           MeasurementReminder.isDue(lastMeasurement: store.latestMeasurement?.date, now: now) {
+            hints += DayHint.measurements(now: now)
+        }
         if let weightExplanation { hints += DayHint.weight(weightExplanation, now: now) }
         if let weightForecast {
             hints += DayHint.forecast(weightForecast.forecast, trendKg: weightForecast.trendKg, now: now)
@@ -859,6 +864,7 @@ private extension ContentView {
         case .openFasting: showingFasting = true
         case .openAdd: entryAction = nil; showingAdd = true
         case .openWeight: todaySheet = .weight
+        case .openMeasurements: showingMeasurements = true
         case .backupNow: showingBackupSettings = true
         case .markFast, .moveRefeed: confirmingHint = mainHint
         }

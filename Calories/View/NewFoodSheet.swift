@@ -51,14 +51,11 @@ struct NewFoodSheet: View {
     /// видит обогащения, а на упаковке написано то, что в банке.
     @State private var entered: [Micronutrient: String] = [:]
     private enum Field: Hashable {
-        case search, name, producer, calories, protein, fat, carbs, fiber, donor
+        case name, producer, calories, protein, fat, carbs, fiber, donor
         case nutrient(Micronutrient)
     }
     @FocusState private var focusedField: Field?
 
-    @State private var searchQuery = ""
-    @State private var offResults: [FoodItem] = []
-    @State private var isSearchingOFF = false
 
     private var isEditing: Bool { editingFood != nil }
 
@@ -316,7 +313,6 @@ struct NewFoodSheet: View {
     private var formContent: some View {
         Form {
             detailCard
-            searchSection
             nameSection
             dataSection
             packageSection
@@ -326,14 +322,6 @@ struct NewFoodSheet: View {
             dishesSection
         }
             .glassRow()
-            .task(id: searchQuery) {
-                guard !searchQuery.isEmpty else { offResults = []; isSearchingOFF = false; return }
-                try? await Task.sleep(for: .milliseconds(300))
-                guard !Task.isCancelled else { return }
-                isSearchingOFF = true
-                offResults = (try? await FoodSearch.search(query: searchQuery)) ?? []
-                isSearchingOFF = false
-            }
             // Форма внутри листа по умолчанию не прячет клавиатуру при прокрутке,
             // и свайп вниз упирается в неё вместо того, чтобы её убрать.
             .scrollDismissesKeyboard(.interactively)
@@ -414,7 +402,7 @@ struct NewFoodSheet: View {
                     }
                     if !isEmbedded { focusedField = .name }
                 } else {
-                    focusedField = .search
+                    focusedField = .name
                 }
             }
     }
@@ -446,18 +434,6 @@ struct NewFoodSheet: View {
         let trimmed = producer.trimmingCharacters(in: .whitespaces)
         return trimmed.isEmpty ? nil : trimmed
     }
-
-    private func fillFrom(_ food: FoodItem) {
-        name = food.name
-        producer = food.producer ?? ""
-        caloriesPer100g = "\(food.caloriesPer100g)"
-        protein = food.protein > 0 ? String(format: "%g", food.protein) : ""
-        fat = food.fat > 0 ? String(format: "%g", food.fat) : ""
-        carbs = food.carbs > 0 ? String(format: "%g", food.carbs) : ""
-        searchQuery = ""
-        offResults = []
-        focusedField = .name
-    }
 }
 
 // MARK: - Разделы экрана «Свой продукт»
@@ -466,60 +442,6 @@ struct NewFoodSheet: View {
 // по отступам. Каждый — свойство с явным типом: и читается, и проверяется
 // типами по частям.
 private extension NewFoodSheet {
-    /// Поиск по Open Food Facts — только при создании: у существующего
-    /// продукта искать нечего, его уже завели.
-    @ViewBuilder
-    var searchSection: some View {
-    if !isEditing {
-        Section {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("Найти в базе данных...", text: $searchQuery)
-                    .autocorrectionDisabled()
-                    .focused($focusedField, equals: .search)
-                if isSearchingOFF {
-                    ProgressView()
-                } else if !searchQuery.isEmpty {
-                    Button {
-                        searchQuery = ""
-                        offResults = []
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("Очистить")
-                }
-            }
-
-            if !offResults.isEmpty {
-                ForEach(offResults.prefix(12), id: \.id) { food in
-                    Button {
-                        fillFrom(food)
-                    } label: {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(food.name)
-                                    .foregroundStyle(.primary)
-                                Text("Б\(Int(food.protein)) Ж\(Int(food.fat)) У\(Int(food.carbs))")
-                                    .font(.app(.caption2))
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Text("\(food.caloriesPer100g) ккал/100г")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
-        } header: {
-            Text("Поиск")
-        }
-    }
-    }
-
     /// Как называется и к какой категории относится.
     var nameSection: some View {
     Section("Название") {

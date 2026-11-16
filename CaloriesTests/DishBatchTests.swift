@@ -279,11 +279,18 @@ struct RecipeHintTests {
     }
 
     @Test func theCloserMatchComesFirst() {
-        let salad = dish("Салат", [("Капуста", 200), ("Свёкла", 100)])
+        let salad = dish("Салат", [("Капуста", 200), ("Свёкла", 100), ("Огурец", 20)])
         let matches = RecipeHint.matches(draft: ["Свёкла", "Капуста"], dishes: [borsch, salad])
         #expect(matches.first?.dish.name == "Салат",
-                "Салат из этих двух состоит целиком, борщ — наполовину")
+                "Салат из этих двух состоит почти целиком, борщ — наполовину")
         #expect(matches.count == RecipeHint.limit)
+    }
+
+    /// Всё из рецепта уже в приёме — дописывать нечего, и подсказка молчит:
+    /// раньше она показывалась, а нажатие ничего не делало.
+    @Test func aRecipeWhoseEveryPartIsAlreadyThereIsNotSuggested() {
+        let shake = dish("Протеин с молоком", [("Молоко", 337), ("Протеин", 40)])
+        #expect(RecipeHint.matches(draft: ["Молоко", "Протеин"], dishes: [shake]).isEmpty)
     }
 
     @Test func anEmptyMealSuggestsNothing() {

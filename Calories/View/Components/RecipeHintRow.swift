@@ -8,7 +8,16 @@ import SwiftUI
 /// больше картофеля, и его вес важнее рецептного.
 struct RecipeHintRow: View {
     let match: RecipeHint.Match
+    /// Что нажатие допишет: названия недостающих продуктов.
+    var missing: [String] = []
     var onAdd: () -> Void
+
+    /// «Вода, соль» или «Вода, соль и ещё 2»: что именно добавится.
+    private var missingLine: String {
+        let shown = missing.prefix(2).joined(separator: ", ")
+        guard missing.count > 2 else { return shown }
+        return shown + " " + String(format: String(localized: "и ещё %lld"), missing.count - 2)
+    }
 
     var body: some View {
         Button(action: onAdd) {
@@ -21,6 +30,12 @@ struct RecipeHintRow: View {
                         .foregroundStyle(.secondary)
                     Text(verbatim: match.dish.name)
                         .font(.app(.subheadline, weight: .semibold))
+                    if !missing.isEmpty {
+                        Text(verbatim: String(format: String(localized: "добавить: %@"), missingLine))
+                            .font(.app(.caption2))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
                 }
                 Spacer(minLength: 0)
                 // Что сделает нажатие, сказано словом, а не стрелкой:

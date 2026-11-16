@@ -1469,7 +1469,8 @@ struct AddEntryView: View {
                 // человек собирает прямо сейчас, и увидеть её он должен,
                 // пока собирает, а не дособрав.
                 if let hint = recipeHint {
-                    RecipeHintRow(match: hint) {
+                    RecipeHintRow(match: hint,
+                                  missing: RecipeHint.missing(from: hint.dish, draft: draftItems.map(\.name)).map(\.foodName)) {
                         for part in RecipeHint.missing(from: hint.dish, draft: draftItems.map(\.name)) {
                             draftItems.append(MealItem(name: part.foodName,
                                                        calories: part.calories,

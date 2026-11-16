@@ -67,6 +67,9 @@ enum RecipeHint {
 
                 let found = parts.filter { names.contains($0.foodName.folded) }
                 guard found.count >= minimumCovered else { return nil }
+                // Всё уже в приёме — предлагать нечего: нажатие ничего бы не
+                // дописало, и подсказка читалась как нерабочая.
+                guard found.count < parts.count else { return nil }
 
                 let share = found.reduce(0.0) { $0 + $1.grams } / total
                 guard share >= minimumShare else { return nil }

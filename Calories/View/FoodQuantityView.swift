@@ -336,14 +336,16 @@ private struct AmountRow: View {
                         .accessibilityHidden(true)
                     // Ширину числу задаёт невидимая копия его цифр, а не само
                     // поле: у `TextField` с `fixedSize` она равна ширине
-                    // подсказки «Граммы», и единица висела в тридцати точках
-                    // от последней цифры.
-                    Text(verbatim: text.wrappedValue.isEmpty ? "0" : text.wrappedValue)
+                    // подсказки, и единица висела в тридцати точках от
+                    // последней цифры. Пока поле пусто, ширину задаёт сама
+                    // подсказка «Вес»: с шириной нуля она обрезалась до одной
+                    // буквы.
+                    Text(verbatim: text.wrappedValue.isEmpty ? String(localized: "Вес") : text.wrappedValue)
                         .font(.app(size: 30, weight: .bold))
                         .monospacedDigit()
                         .hidden()
                         .overlay {
-                            TextField("Граммы", text: text)
+                            TextField("Вес", text: text)
                                 .keyboardType(.numberPad)
                                 .focused(focus)
                                 .font(.app(size: 30, weight: .bold))

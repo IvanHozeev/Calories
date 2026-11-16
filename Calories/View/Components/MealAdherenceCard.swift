@@ -36,6 +36,12 @@ struct MealAdherenceCard: View {
         }
     }
 
+    /// Приёмы, у которых есть точки, — в порядке дня.
+    private var rows: [MealPeriod] {
+        let present = Set(points.map(\.period))
+        return MealPeriod.allCases.filter { present.contains($0) }
+    }
+
     /// Засечки плана — по одной на приём.
     private var plan: [Point] {
         var seen: Set<MealPeriod> = []
@@ -104,10 +110,25 @@ struct MealAdherenceCard: View {
                 }
             }
         }
+        // Строки — в порядке дня, а не в порядке появления данных: ось
+        // сама раскладывает категории по тому, какая встретилась первой, и
+        // если у первого дня не было завтрака, он оказывался внизу, а
+        // «Второй завтрак» наверху. Область задана явно, сверху вниз — от
+        // завтрака к ужину.
+        .chartYScale(domain: rows.map(\.rawValue))
         .chartYAxis {
-            AxisMarks(preset: .aligned, position: .leading)
+            // Подпись по центру своей строки и без линий между строками:
+            // выровненные по краю подписи стояли на линиях сетки, а точки —
+            // между ними, и строки читались со сдвигом.
+            AxisMarks(position: .leading) { value in
+                AxisValueLabel {
+                    if let name = value.as(String.self) {
+                        Text(LocalizedStringKey(name))
+                    }
+                }
+            }
         }
-        .frame(height: CGFloat(max(plan.count, 1)) * 34 + 30)
+        .frame(height: CGFloat(max(rows.count, 1)) * 34 + 30)
         .font(.app(.caption2))
     }
 

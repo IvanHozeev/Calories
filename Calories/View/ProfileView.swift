@@ -81,7 +81,8 @@ struct ProfileView: View {
     /// заголовок давно уехал за кромку; по составу — не считается текущей
     /// та, которой на экране нет.
     private var sectionOrder: [String] {
-        var order = [String(localized: "Расчёт")]
+        var order: [String] = []
+        if showsGoalRow { order.append(String(localized: "Расчёт")) }
         if store.plan == nil, !store.isPremium { order.append(String(localized: "Цель")) }
         order.append(String(localized: "Параметры тела"))
         order.append(String(localized: "Питание"))
@@ -148,9 +149,8 @@ struct ProfileView: View {
                 }
             }
 
-            // Расчёт сразу под ней: ради него профиль и открывают — сколько тратишь,
-            // сколько есть и сколько белка. Параметры, из которых он собран,
-            // правят редко, и им место ниже.
+            // Норма — под ней, когда она отличается от расхода. Сам расход стоит
+            // в параметрах тела, из которых он считается.
             calculationSection
 
             // Выбор цели — только без премиума. С премиумом режим задаётся
@@ -452,30 +452,26 @@ private struct CalculationBasisSheet: View {
 // искать глазами по отступам. Каждый раздел стал свойством с явным типом: и
 // читается, и проверяется типами по частям.
 private extension ProfileView {
-    /// Расчёт: сколько тратишь, сколько есть и сколько белка. Ради него
-    /// профиль и открывают, поэтому он первый.
+    /// Расход, взятый из параметров тела: тратят то, что есть у тела, и число
+    /// стоит там же, где вес, рост и возраст, из которых оно считается.
+    var expenditure: Double? {
+        guard let draftProfile else { return nil }
+        return usesFact ? (store.smoothedTDEE ?? draftProfile.tdee) : draftProfile.tdee
+    }
+
+    /// Норма показывается отдельно, только когда она отличается от расхода:
+    /// на поддержании это то же число, и второй раз его писать незачем.
+    var showsGoalRow: Bool {
+        guard let expenditure else { return false }
+        return abs(Double(store.dailyGoal) - expenditure) >= 5
+    }
+
+    /// Расчёт: сколько есть. Расход ушёл в параметры тела, и секция остаётся,
+    /// только когда норма от него отличается.
     @ViewBuilder
     var calculationSection: some View {
-    if let draftProfile {
-        // Две строки вместо карточки.
-        //
-        // Карточка несла расход, норму, жир, сон, пульс, шаги и совет — и
-        // половина этого жила где-то ещё: шаги и совет на «Сегодня», жир
-        // среди параметров тела. Сон и пульс норму не двигают, а смотреть на
-        // них здесь было незачем. Остался сам расчёт: сколько тратишь и, если
-        // норма от этого отличается, сколько есть. Как это посчитано — в «i».
-        Section {
-            let expenditure = usesFact ? (store.smoothedTDEE ?? draftProfile.tdee) : draftProfile.tdee
-            valueRow("Расход", systemImage: "flame",
-                     value: Int(expenditure.rounded()).formatted(), unit: "ккал",
-                     detail: usesFact ? "по факту" : "по формуле",
-                     color: .primary,
-                     onInfo: { showingBasis = true })
-                .accessibilityIdentifier("adaptiveTDEE")
-
-            // Норма, совпавшая с расходом, не показывается: на поддержании
-            // это то же число строкой выше.
-            if abs(Double(store.dailyGoal) - expenditure) >= 5 {
+        if showsGoalRow {
+            Section {
                 valueRow("Норма", systemImage: "fork.knife",
                          value: store.dailyGoal.formatted(), unit: "ккал",
                          color: ProgressRing.kcalColors[0], onInfo: nil)
@@ -486,12 +482,11 @@ private extension ProfileView {
                         showingGoalEditor = true
                     }
                     .accessibilityIdentifier("calorieTargetRow")
+            } header: {
+                Text("Расчёт")
+                    .tracksSectionHead(String(localized: "Расчёт"))
             }
-        } header: {
-            Text("Расчёт")
-                .tracksSectionHead(String(localized: "Расчёт"))
         }
-    }
     }
 
     @ViewBuilder
@@ -594,6 +589,17 @@ private extension ProfileView {
             }
         }
         .accessibilityIdentifier("openMeasurementsRow")
+
+        // Расход — последней строкой параметров: он считается из них, и «i»
+        // объясняет как.
+        if let expenditure {
+            valueRow("Расход", systemImage: "flame",
+                     value: Int(expenditure.rounded()).formatted(), unit: "ккал",
+                     detail: usesFact ? "по факту" : "по формуле",
+                     color: .primary,
+                     onInfo: { showingBasis = true })
+                .accessibilityIdentifier("adaptiveTDEE")
+        }
 
     } header: {
         // Заголовок отдельным блоком, а не строкой в `Section("…")`: так к

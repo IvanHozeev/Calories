@@ -55,6 +55,16 @@ struct FoodRow: View {
 
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// Цвет названия — доминирующего макроса: белковое голубое, жирное
+    /// персиковое, углеводное сиреневое. В светлой теме пастель на белом
+    /// читается плохо, поэтому там цвет темнее на треть.
+    private func nameColor(_ kind: MacroKind?) -> Color {
+        guard let kind else { return .primary }
+        return colorScheme == .dark ? kind.color : kind.color.mix(with: .black, by: 0.35)
+    }
+
     private var hasMacros: Bool {
         macros.protein > 0 || macros.fat > 0 || macros.carbs > 0
     }
@@ -220,7 +230,7 @@ struct FoodRow: View {
                     if parts.count == 1, let only = parts.first {
                         nameBlock(text: only.name,
                                   font: .app(.callout, weight: .semibold),
-                                  color: .primary,
+                                  color: nameColor(only.macros.leadingKind),
                                   traits: only.traits)
                         if let weight = PortionLabel.text(grams: only.grams, pieces: only.pieces) {
                             portionLine(weight)
@@ -231,7 +241,7 @@ struct FoodRow: View {
                         ForEach(parts) { part in
                             nameBlock(text: part.name,
                                       font: .app(.callout, weight: .semibold),
-                                      color: .primary,
+                                      color: nameColor(part.macros.leadingKind),
                                       traits: part.traits,
                                       weight: PortionLabel.text(grams: part.grams, pieces: part.pieces))
                         }
@@ -243,10 +253,10 @@ struct FoodRow: View {
                               // Название — полужирным, как и в любой строке списка:
                               // в строке оно главное, а всё под ним — приметы.
                               font: .app(.callout, weight: .semibold),
-                              // Название чёрное: цвет макросов теперь в полоске справа
-                              // (`MacroShareBar`). Раньше им красилось и название, и
-                              // буквы под ним, и число калорий — четыре кода без подписей.
-                              color: .primary,
+                              // Название — цветом доминирующего макроса, как и было;
+                              // подписи и числа под ним остаются нейтральными, чтобы
+                              // цвет значил одно.
+                              color: nameColor(leadingKind),
                               traits: traits)
                     // Порция — второй строкой, а не хвостом названия: «Тунец
                     // консервированный 🔥 108 г» переносился по словам, и вес

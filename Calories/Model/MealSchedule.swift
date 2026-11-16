@@ -374,13 +374,16 @@ extension MealSchedule {
     static func slots(settings: MealScheduleSettings,
                       entries: [(date: Date, calories: Int)],
                       dailyGoal: Int,
-                      now: Date = Date()) -> [Slot] {
+                      now: Date = Date(),
+                      appliesOffsets: Bool = true) -> [Slot] {
         slots(.init(wake: settings.today(settings.wake, now: now),
                     sleep: settings.today(settings.sleep, now: now),
                     mealCount: settings.count,
                     dailyGoal: dailyGoal,
                     entries: entries,
                     now: now,
-                    settings: settings))
+                    // Без личных сдвигов приёмов — для сверки расписания с
+                    // жизнью: см. `CalorieStore.adherenceDays`.
+                    settings: appliesOffsets ? settings : nil))
     }
 }

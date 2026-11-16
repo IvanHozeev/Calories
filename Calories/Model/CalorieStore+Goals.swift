@@ -512,7 +512,7 @@ extension CalorieStore {
     /// на прошедший день — сохранённую, иначе разбор дня считал бы вчерашний
     /// перебор по сегодняшней цифре.
     func slots(on date: Date = Date(), schedule: MealScheduleSettings,
-               now: Date = Date()) -> [MealSchedule.Slot] {
+               now: Date = Date(), appliesOffsets: Bool = true) -> [MealSchedule.Slot] {
         let calendar = Calendar.current
         let day = calendar.startOfDay(for: date)
         // Прожитый день разбираем целиком: «сейчас» для него — последняя минута.
@@ -525,7 +525,8 @@ extension CalorieStore {
             // из сверки расписания целиком.
             dailyGoal: calendar.isDateInToday(day) ? adaptedTodayGoal
                 : (goal(for: day) > 0 ? goal(for: day) : adaptedTodayGoal),
-            now: moment)
+            now: moment,
+            appliesOffsets: appliesOffsets)
     }
 
     /// План против факта за прошедшие дни.
@@ -543,8 +544,18 @@ extension CalorieStore {
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
             let entries = (entriesByDay[date] ?? []).map { (date: $0.date, calories: $0.calories) }
             guard !entries.isEmpty else { return nil }
+            // Окна — без личных сдвигов приёмов.
+            //
+            // Со сдвигами каждое нажатие «Сдвинуть окно» двигало границы
+            // соседних окон, и поздний завтрак перетекал в обеденное окно:
+            // у обеда «первая запись» вдруг оказывалась в десять утра,
+            // обеду предлагали уехать на два часа назад, а завтраку — снова
+            // вперёд, и так по кругу. Без сдвигов запись всегда принадлежит
+            // одному и тому же приёму, а сдвиг привычки — это сколько
+            // нужно поставить, а не сколько ещё осталось.
             return MealAdherence.day(date,
-                                     slots: slots(on: date, schedule: schedule, now: now),
+                                     slots: slots(on: date, schedule: schedule, now: now,
+                                                  appliesOffsets: false),
                                      entries: entries)
         }
     }

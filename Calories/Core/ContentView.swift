@@ -120,7 +120,11 @@ struct ContentView: View {
                         // экран, карточки идут за ним сразу, без пустоты между ними.
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 16, trailing: 16))
+                        // Боковые поля — у самого списка, одни на карточки и на
+                        // дневник (`contentMargins` ниже), а не у строки: тогда
+                        // карточки и строки дневника стоят в одну ширину, и обе
+                        // с отступом от края экрана.
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
 
@@ -133,6 +137,7 @@ struct ContentView: View {
                     .glassRow()
             }
             .listStyle(.insetGrouped)
+            .contentMargins(.horizontal, 32, for: .scrollContent)
             // Полоску дней — ближе к шапке.
             //
             // Сгруппированный список отбивает первую секцию от навигации на

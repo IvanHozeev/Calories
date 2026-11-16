@@ -38,7 +38,13 @@ struct MealWindowCard: View {
     /// Показываем выбранный приём, а по умолчанию — тот, что уехал дальше всех.
     private var focus: (habit: MealAdherence.Habit, slot: MealSchedule.Slot)? {
         if let chosen, let pick = candidates.first(where: { $0.habit.period == chosen }) { return pick }
-        return candidates.max { abs($0.habit.shiftMinutes) < abs($1.habit.shiftMinutes) }
+        // Тот, что сейчас дальше всех от жизни: после сдвига приём перестаёт
+        // быть первым, а не остаётся на месте, цепляя кнопку снова.
+        return candidates.max { missBy($0.habit) < missBy($1.habit) }
+    }
+
+    private func missBy(_ habit: MealAdherence.Habit) -> Int {
+        abs(habit.shiftMinutes - settings.mealOffset(habit.period))
     }
 
     /// Съеденное мимо расписания за последнюю неделю: сколько раз.
@@ -96,7 +102,7 @@ struct MealWindowCard: View {
     // MARK: - Дорожка
 
     private func track(_ habit: MealAdherence.Habit, _ slot: MealSchedule.Slot) -> some View {
-        let usual = slot.time.addingTimeInterval(Double(habit.shiftMinutes) * 60)
+        let usual = usualTime(habit, slot)
         let lower = min(slot.start.addingTimeInterval(-90 * 60), usual.addingTimeInterval(-30 * 60))
         let upper = max(slot.end.addingTimeInterval(150 * 60), usual.addingTimeInterval(30 * 60))
         let span = max(upper.timeIntervalSince(lower), 1)
@@ -141,7 +147,7 @@ struct MealWindowCard: View {
 
     /// «Обед за 9 дн. в среднем начинался в 13:25 — в окне, но ближе к его концу».
     private func sentence(_ habit: MealAdherence.Habit, _ slot: MealSchedule.Slot) -> String {
-        let usual = slot.time.addingTimeInterval(Double(habit.shiftMinutes) * 60)
+        let usual = usualTime(habit, slot)
         let where_: String
         if usual < slot.start {
             where_ = String(localized: "раньше окна")
@@ -178,19 +184,37 @@ struct MealWindowCard: View {
 
     // MARK: - Кнопки
 
-    /// Полчаса — шаг сдвига: «на 55 минут» расписанием не назвать.
-    private func shiftStep(_ habit: MealAdherence.Habit) -> Int {
+    /// Когда приём в среднем начинался. Сдвиг привычки считается от времени
+    /// приёма без личного сдвига, поэтому и откладывается от него.
+    private func usualTime(_ habit: MealAdherence.Habit, _ slot: MealSchedule.Slot) -> Date {
+        slot.time
+            .addingTimeInterval(-Double(settings.mealOffset(habit.period)) * 60)
+            .addingTimeInterval(Double(habit.shiftMinutes) * 60)
+    }
+
+    /// Какой сдвиг приёма нужен, чтобы он совпал с жизнью: полчаса — шаг, «на
+    /// 55 минут» расписанием не назвать.
+    private func neededOffset(_ habit: MealAdherence.Habit) -> Int {
         Int((Double(habit.shiftMinutes) / 30).rounded()) * 30
+    }
+
+    /// Насколько ещё сдвигать от нынешнего. Ноль — приём уже стоит где надо, и
+    /// кнопка пропадает: она задаёт сдвиг, а не прибавляет к нему.
+    private func step(_ habit: MealAdherence.Habit) -> Int {
+        neededOffset(habit) - settings.mealOffset(habit.period)
     }
 
     @ViewBuilder
     private func moveButton(_ habit: MealAdherence.Habit, _ slot: MealSchedule.Slot) -> some View {
-        let step = shiftStep(habit)
-        if abs(habit.shiftMinutes) >= MealAdherence.noticeableShiftMinutes, step != 0 {
+        let step = step(habit)
+        let missBy = abs(habit.shiftMinutes - settings.mealOffset(habit.period))
+        if missBy >= MealAdherence.noticeableShiftMinutes, step != 0 {
             let start = slot.start.addingTimeInterval(Double(step) * 60)
             let end = slot.end.addingTimeInterval(Double(step) * 60)
             Button {
-                settings.setMealOffset(settings.mealOffset(habit.period) + step, for: habit.period)
+                // Задаём сдвиг целиком, а не прибавляем: второе нажатие после
+                // первого не должно двигать окно снова.
+                settings.setMealOffset(neededOffset(habit), for: habit.period)
                 onMoved()
             } label: {
                 Text(String(format: String(localized: "Сдвинуть окно на %1$@–%2$@"), clock(start), clock(end)))

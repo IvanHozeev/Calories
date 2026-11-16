@@ -3,11 +3,22 @@ import SwiftUI
 struct MacrosRow: View {
     let macros: Macros
 
+    /// Макрос, который округляется до нуля, не показываем: «0 г» у воды и
+    /// газировки — это строки о том, чего нет. Остаются те, что есть; а когда
+    /// нет ни одного, ряд не занимает места вовсе.
+    private func shown(_ value: Double) -> Bool { value.rounded() > 0 }
+
     var body: some View {
         HStack(spacing: 20) {
-            macroItem(title: "Белки", value: macros.protein, color: MacroKind.protein.color)
-            macroItem(title: "Жиры", value: macros.fat, color: MacroKind.fat.color)
-            macroItem(title: "Углеводы", value: macros.carbs, color: MacroKind.carbs.color)
+            if shown(macros.protein) {
+                macroItem(title: "Белки", value: macros.protein, color: MacroKind.protein.color)
+            }
+            if shown(macros.fat) {
+                macroItem(title: "Жиры", value: macros.fat, color: MacroKind.fat.color)
+            }
+            if shown(macros.carbs) {
+                macroItem(title: "Углеводы", value: macros.carbs, color: MacroKind.carbs.color)
+            }
         }
     }
 

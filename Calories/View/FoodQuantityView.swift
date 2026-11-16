@@ -87,7 +87,8 @@ struct FoodQuantityView: View {
                     densityLine: isHundredGrams ? nil
                         : (food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
                                           : "\(food.caloriesPer100g) ккал / 100 г"),
-                    macros: macros)
+                    macros: macros,
+                    traits: food.traits)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
@@ -145,14 +146,6 @@ struct FoodQuantityView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
-            }
-
-            // Свойство еды — последним: сначала числа и граммы, которые
-            // выбирают, потом вывод из них.
-            if !food.traits.isEmpty {
-                Section {
-                    FoodTraitLines(traits: food.traits)
-                }
             }
 
         }
@@ -462,7 +455,8 @@ struct DishQuantityView: View {
                 FoodSummaryCard(
                     calories: calories,
                     densityLine: isHundredGrams ? nil : "\(dish.caloriesPer100g) ккал / 100 г",
-                    macros: macros)
+                    macros: macros,
+                    traits: dish.traits)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
             }
 
@@ -499,13 +493,6 @@ struct DishQuantityView: View {
                 }
                 .listRowBackground(Color.clear)
                 .listRowInsets(EdgeInsets())
-            }
-
-            // Свойство — под количеством, как у продукта.
-            if !dish.traits.isEmpty {
-                Section {
-                    FoodTraitLines(traits: dish.traits)
-                }
             }
 
 

@@ -131,10 +131,10 @@ struct ContentView: View {
                         // краем, — тень у крайних плиток обрывалась ровной
                         // линией. Отрицательный отступ строки тут не помогает:
                         // ячейка остаётся прежней, сдвигается только вид.
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 16, trailing: 0))
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 8, trailing: 0))
                 }
                 .listSectionSeparator(.hidden)
-                .listSectionMargins(.horizontal, 32 - Self.glassRoom)
+                .listSectionMargins(.horizontal, Self.diaryMargin - Self.glassRoom)
 
                 // Стекло — только строкам дневника.
                 //
@@ -565,7 +565,7 @@ private extension ContentView {
         // Расписание спрашиваем один раз: строится оно примерно за миллисекунду,
         // а в теле оно нужно дважды — проверить, есть ли приёмы, и показать их.
         let slots = store.todaySlots
-        return VStack(spacing: 16) {
+        return VStack(spacing: 8) {
             // Полоска дней первой строкой содержимого, а не прибитой панелью.
             //
             // Прибитая, она занимала место всегда, даже когда человек читает
@@ -752,10 +752,12 @@ private extension ContentView {
     /// Запас по бокам строки под кромку стекла, в точках.
     static let glassRoom: CGFloat = 12
     /// Боковое поле секций дневника и заголовков приёмов: от края экрана.
+    /// Шестнадцать точек, как у системных списков; промежутки между карточками
+    /// на «Сегодня» вдвое меньше прежних — восемь вместо шестнадцати.
     ///
     /// Задаётся секции, а не списку: на уровне списка поле не доходит до
     /// секций дневника, и они стоят с системным отступом.
-    static let diaryMargin: CGFloat = 32
+    static let diaryMargin: CGFloat = 16
 
     /// Есть ли сегодня хоть одна подсказка.
     ///
@@ -1072,7 +1074,7 @@ private extension ContentView {
 
     @ViewBuilder
     var dayHints: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 8) {
             // Одна подсказка — самая срочная из очереди. Крестик убирает её
             // до завтра, и на её место встаёт следующая.
             if let hint = mainHint {

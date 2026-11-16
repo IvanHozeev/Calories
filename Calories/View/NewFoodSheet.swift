@@ -416,12 +416,8 @@ struct NewFoodSheet: View {
                     calories: enteredCalories,
                     densityLine: servingToSave != 100 && enteredCalories > 0
                         ? "\(portionCalories) ккал / \(Int(servingToSave)) г" : nil,
-                    macros: hasMacros ? draftMacros : .zero)
-                let traits = editingFood?.traits ?? []
-                if !traits.isEmpty {
-                    FoodTraitLines(traits: traits)
-                        .padding(.top, 8)
-                }
+                    macros: hasMacros ? draftMacros : .zero,
+                    traits: editingFood?.traits ?? [])
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 6)

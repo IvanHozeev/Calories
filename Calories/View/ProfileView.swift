@@ -92,9 +92,30 @@ struct ProfileView: View {
 
     var body: some View {
         List {
-            // Подписка — самой верхней строкой, как учётная запись в
-            // Настройках, и со словом, а не звёздочками в углу: значок без
-            // подписи не говорил, что за ним оплата.
+            // Как идёт тело: вес, жир, сухая масса и тренд веса за полтора
+            // месяца. Только смотреть — править в параметрах ниже.
+            if let weight = store.weightKg {
+                Section {
+                    BodySnapshotCard(weightKg: weight,
+                                     fatPercent: store.measuredBodyFatPercent,
+                                     leanKg: draftProfile?.leanMassKg(from: measurement),
+                                     trend: store.weightTrendSeries(weeks: 6),
+                                     weeks: 6,
+                                     imperial: useImperial,
+                                     measuredOn: store.latestMeasurement?.date,
+                                     onOpenWeight: { showingWeight = true },
+                                     onOpenBody: { showingMeasurements = true })
+                        // Без своих отступов: карточка во всю ширину секции,
+                        // как строки соседних карточек. С шестнадцатью точками
+                        // по бокам она выходила уже остальных.
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(EdgeInsets())
+                }
+            }
+
+            // Подписка — второй карточкой, под тем, как идёт тело: профиль
+            // открывают ради тела, а оплата — со словом, а не звёздочками в
+            // углу: значок без подписи не говорил, что за ним оплата.
             Section {
                 Button { showingPaywall = true } label: {
                     HStack(spacing: 12) {
@@ -126,27 +147,6 @@ struct ProfileView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("subscription")
-            }
-
-            // Как идёт тело: вес, жир, сухая масса и тренд веса за полтора
-            // месяца. Только смотреть — править в параметрах ниже.
-            if let weight = store.weightKg {
-                Section {
-                    BodySnapshotCard(weightKg: weight,
-                                     fatPercent: store.measuredBodyFatPercent,
-                                     leanKg: draftProfile?.leanMassKg(from: measurement),
-                                     trend: store.weightTrendSeries(weeks: 6),
-                                     weeks: 6,
-                                     imperial: useImperial,
-                                     measuredOn: store.latestMeasurement?.date,
-                                     onOpenWeight: { showingWeight = true },
-                                     onOpenBody: { showingMeasurements = true })
-                        // Без своих отступов: карточка во всю ширину секции,
-                        // как строки соседних карточек. С шестнадцатью точками
-                        // по бокам она выходила уже остальных.
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets())
-                }
             }
 
             // Норма — под ней, когда она отличается от расхода. Сам расход стоит

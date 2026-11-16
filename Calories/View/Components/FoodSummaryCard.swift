@@ -13,9 +13,30 @@ struct FoodSummaryCard: View {
     /// Строка под числом — «388 ккал / 100 г». nil — не показывать.
     var densityLine: String? = nil
     let macros: Macros
+    /// Свойства еды — «Можно много», «Термический эффект»: одной строкой
+    /// шапки над числом, без пояснений. Пояснение стоит в разборе дня, а здесь
+    /// нужен только знак и слово, чтобы не отнимать у экрана целую карточку.
+    var traits: [FoodTrait] = []
 
     var body: some View {
         VStack(spacing: 4) {
+            if !traits.isEmpty {
+                HStack(spacing: 12) {
+                    ForEach(traits) { trait in
+                        HStack(spacing: 4) {
+                            Image(systemName: trait.symbol)
+                                .font(.app(.caption2, weight: .semibold))
+                                .foregroundStyle(trait.color)
+                            Text(verbatim: trait.title)
+                                .font(.app(.caption, weight: .medium))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+                .minimumScaleFactor(0.8)
+                .padding(.bottom, 4)
+            }
             VStack(spacing: 2) {
                 Text(verbatim: "\(calories) \(String(localized: "ккал"))")
                     .font(.app(size: 26, weight: .bold))

@@ -53,9 +53,9 @@ enum FoodTrait: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .almostNoCalories:  return "leaf.fill"
-        case .eatALot:           return "leaf"
-        case .highThermicEffect: return "flame"
-        case .easyToOvereat:     return "exclamationmark.triangle"
+        case .eatALot:           return "leaf.fill"
+        case .highThermicEffect: return "flame.fill"
+        case .easyToOvereat:     return "exclamationmark.triangle.fill"
         }
     }
 

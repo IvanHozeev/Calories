@@ -12,6 +12,9 @@ struct PantryView: View {
     @State private var query = ""
     /// nil — показывать все категории.
     @State private var categoryFilter: FoodCategory?
+    /// nil — любые. Чем богата еда: отбор по доминирующему макросу или, для
+    /// клетчатки, по содержанию.
+    @State private var richFilter: Rich?
     @State private var debouncedQuery = ""
     @State private var remoteResults: [FoodItem] = []
     @State private var isSearchingRemote = false
@@ -35,6 +38,36 @@ struct PantryView: View {
     @State private var dishes: [Dish] = []
     @State private var products: [FoodItem] = []
     @State private var database: [FoodItem] = []
+
+    /// Фильтр «богато»: белки, жиры, углеводы, клетчатка.
+    ///
+    /// Макрос — тот, на который приходится больше всего калорий продукта
+    /// (по нему же красится название в строке); клетчатка — от трёх граммов
+    /// на сто: меньше уже не «богато».
+    enum Rich: String, CaseIterable, Identifiable {
+        case protein, fat, carbs, fiber
+        var id: String { rawValue }
+
+        static let fiberGramsPer100 = 3.0
+
+        var title: String {
+            switch self {
+            case .protein: return String(localized: "Белки")
+            case .fat:     return String(localized: "Жиры")
+            case .carbs:   return String(localized: "Углеводы")
+            case .fiber:   return String(localized: "Клетчатка")
+            }
+        }
+
+        func matches(_ food: FoodItem) -> Bool {
+            switch self {
+            case .protein: return food.macrosPer100g.leadingKind == .protein
+            case .fat:     return food.macrosPer100g.leadingKind == .fat
+            case .carbs:   return food.macrosPer100g.leadingKind == .carbs
+            case .fiber:   return (food.micronutrients[.fiber] ?? 0) >= Self.fiberGramsPer100
+            }
+        }
+    }
 
     enum Tab: String, CaseIterable, Identifiable {
         case dishes, products, database
@@ -89,6 +122,9 @@ struct PantryView: View {
         if let categoryFilter {
             items = items.filter { $0.foodCategory == categoryFilter }
         }
+        if let richFilter {
+            items = items.filter(richFilter.matches)
+        }
         guard !trimmedQuery.isEmpty else { return items }
         return items.filter { $0.matches(trimmedQuery) }
     }
@@ -104,6 +140,9 @@ struct PantryView: View {
             : FoodDatabase.search(trimmedQuery, limit: 200)
         if let categoryFilter {
             items = items.filter { $0.foodCategory == categoryFilter }
+        }
+        if let richFilter {
+            items = items.filter(richFilter.matches)
         }
         return items
     }
@@ -146,11 +185,11 @@ struct PantryView: View {
             // повторный список сверху только мешает.
             // Сваренное — первым в «Рецептах»: что стоит в холодильнике и
             // сколько ему осталось, важнее списка рецептов вообще.
-            if trimmedQuery.isEmpty, categoryFilter == nil, tab == .dishes {
+            if trimmedQuery.isEmpty, categoryFilter == nil, richFilter == nil, tab == .dishes {
                 fridgeSection
             }
 
-            if trimmedQuery.isEmpty, categoryFilter == nil {
+            if trimmedQuery.isEmpty, categoryFilter == nil, richFilter == nil {
                 recentSection
             }
 
@@ -201,6 +240,7 @@ struct PantryView: View {
         .onAppear(perform: recomputeLists)
         .onChange(of: debouncedQuery) { _, _ in recomputeLists() }
         .onChange(of: categoryFilter) { _, _ in recomputeLists() }
+        .onChange(of: richFilter) { _, _ in recomputeLists() }
         .onChange(of: tab) { _, _ in recomputeLists() }
         .onChange(of: store.customFoods.count) { _, _ in recomputeLists() }
         .onChange(of: store.dishes.count) { _, _ in recomputeLists() }
@@ -227,14 +267,22 @@ struct PantryView: View {
             // где выбранная категория уезжает из виду.
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
+                    // Без значков: список категорий со значками читался
+                    // лесенкой картинок, а названия и так говорят всё.
                     Picker("Категория", selection: $categoryFilter) {
                         Text("Все категории").tag(FoodCategory?.none)
                         ForEach(usedCategories) { item in
-                            Label(item.title, systemImage: item.icon).tag(FoodCategory?.some(item))
+                            Text(verbatim: item.title).tag(FoodCategory?.some(item))
+                        }
+                    }
+                    Picker("Богато", selection: $richFilter) {
+                        Text("Любые").tag(Rich?.none)
+                        ForEach(Rich.allCases) { item in
+                            Text(verbatim: item.title).tag(Rich?.some(item))
                         }
                     }
                 } label: {
-                    Image(systemName: categoryFilter == nil
+                    Image(systemName: categoryFilter == nil && richFilter == nil
                           ? "line.3.horizontal.decrease.circle"
                           : "line.3.horizontal.decrease.circle.fill")
                 }
@@ -450,7 +498,7 @@ struct PantryView: View {
                         }
                     }
                 } header: {
-                    Label(category.title, systemImage: category.icon)
+                    Text(verbatim: category.title)
                         // Гаснет, уезжая в шапку: имя не должно стоять в двух
                         // местах разом.
                         .tracksSectionHead(category.title)
@@ -498,7 +546,7 @@ struct PantryView: View {
                         }
                     }
                 } header: {
-                    Label(category.title, systemImage: category.icon)
+                    Text(verbatim: category.title)
                         // Гаснет, уезжая в шапку: имя не должно стоять в двух
                         // местах разом.
                         .tracksSectionHead(category.title)

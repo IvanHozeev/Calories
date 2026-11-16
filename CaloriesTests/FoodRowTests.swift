@@ -97,3 +97,26 @@ struct FoodNameSplitTests {
         #expect(split.last == "Пармезан")
     }
 }
+
+/// Фильтр «богато» в «Рационе»: макрос — по доминирующему, клетчатка — по
+/// содержанию.
+struct RichFilterTests {
+    private func food(_ name: String, kcal: Int, p: Double, f: Double, c: Double) -> FoodItem {
+        FoodItem(name: name, caloriesPer100g: kcal, protein: p, fat: f, carbs: c)
+    }
+
+    @Test func aMacroIsMatchedByTheLeadingOne() {
+        let chicken = food("Курица", kcal: 110, p: 23, f: 1.2, c: 0)
+        let oil = food("Масло", kcal: 880, p: 0, f: 99, c: 0)
+        let rice = food("Рис", kcal: 340, p: 7, f: 1, c: 75)
+        #expect(PantryView.Rich.protein.matches(chicken))
+        #expect(!PantryView.Rich.protein.matches(rice))
+        #expect(PantryView.Rich.fat.matches(oil))
+        #expect(PantryView.Rich.carbs.matches(rice))
+        #expect(!PantryView.Rich.carbs.matches(oil))
+    }
+
+    @Test func aFoodWithoutFibreIsNotHighInFibre() {
+        #expect(!PantryView.Rich.fiber.matches(food("Масло", kcal: 880, p: 0, f: 99, c: 0)))
+    }
+}

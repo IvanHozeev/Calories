@@ -468,7 +468,7 @@ private extension NewFoodSheet {
             Picker(selection: Binding(get: { kosherChoice ?? KosherStatus.byCategory(category) },
                                       set: { kosherChoice = $0 })) {
                 ForEach(KosherStatus.allCases) { status in
-                    Label(status.title, systemImage: status.symbol).tag(status)
+                    Text(verbatim: status.title).tag(status)
                 }
             } label: {
                 settingLabel("Кашрут", systemImage: "circle.lefthalf.filled")

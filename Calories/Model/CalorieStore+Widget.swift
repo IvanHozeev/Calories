@@ -28,6 +28,10 @@ extension CalorieStore {
         groupDefaults?.set(proteinTarget ?? 0, forKey: "widget_protein_target")
         groupDefaults?.set(fatTarget ?? 0, forKey: "widget_fat_target")
         groupDefaults?.set(carbsTarget ?? MacroTargets.carbsMinimum, forKey: "widget_carbs_target")
+        // Клетчатка — строкой под тремя макросами среднего виджета. Ноль, когда
+        // про день известно слишком мало: виджет тогда прочерк, а не «0 г».
+        groupDefaults?.set(micronutrients(on: Date()).fiber ?? 0, forKey: "widget_fiber")
+        groupDefaults?.set(Micronutrient.fiber.dailyValue, forKey: "widget_fiber_target")
         publishShared()
         publishMealsToWidget()
         publishLastMeal()

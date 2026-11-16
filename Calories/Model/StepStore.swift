@@ -100,6 +100,7 @@ final class StepStore {
             quarterHistory = Array(stored.suffix(90))
             monthHistory = Array(stored.suffix(30))
             weekHistory = Array(stored.suffix(7))
+            publishWeekToWidget()
             stepsToday = stored.last.flatMap {
                 Calendar.current.isDateInToday($0.date) ? $0.steps : nil
             } ?? 0
@@ -417,6 +418,24 @@ final class StepStore {
         healthStore.execute(query)
     }
 
+    /// Неделя столбиками — среднему виджету шагов.
+    ///
+    /// Семь дней, последний — сегодня: виджет сам подписывает их днями недели
+    /// от сегодняшней даты. Дни, которых в истории нет, — нули: пустой столбик
+    /// честнее выдуманного.
+    private func publishWeekToWidget() {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let byDay = Dictionary(weekHistory.map { (calendar.startOfDay(for: $0.date), $0.steps) },
+                               uniquingKeysWith: { _, last in last })
+        let week = (0..<7).reversed().map { offset -> Int in
+            let day = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
+            return byDay[day] ?? 0
+        }
+        groupDefaults?.set(week, forKey: "widget_steps_week")
+        groupDefaults?.set(today, forKey: "widget_steps_week_day")
+    }
+
     private func fetchDistanceToday() {
         let type = HKQuantityType(.distanceWalkingRunning)
         let start = Calendar.current.startOfDay(for: Date())
@@ -636,6 +655,7 @@ final class StepStore {
                 self?.quarterHistory = Array(finalDays.suffix(90))
                 self?.monthHistory = Array(finalDays.suffix(30))
                 self?.weekHistory = Array(finalDays.suffix(7))
+                self?.publishWeekToWidget()
                 self?.updateDerivedStats()
                 self?.updateGoalStreak()
                 self?.history.rememberSteps(finalDays, source: self?.preferredSourceID)

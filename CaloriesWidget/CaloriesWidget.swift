@@ -152,7 +152,8 @@ struct CaloriesWidgetEntryView: View {
 
     // MARK: - Домашний экран
 
-    private func ringWithRemaining(lineWidth: CGFloat, number: CGFloat) -> some View {
+    private func ringWithRemaining(lineWidth: CGFloat, number: CGFloat,
+                                   label: LocalizedStringKey = "Остаток") -> some View {
         ZStack {
             WidgetRing(segments: entry.segments, lineWidth: lineWidth)
             VStack(spacing: 0) {
@@ -162,74 +163,118 @@ struct CaloriesWidgetEntryView: View {
                     .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
                     .lineLimit(1)
-                Text("Остаток")
-                    .font(.system(size: number * 0.38))
+                Text(label)
+                    .font(.system(size: number * 0.4))
                     .foregroundStyle(.secondary)
             }
             .padding(lineWidth * 1.6)
         }
     }
 
+    /// Малый: кольцо с остатком и под ним строка «съедено из». Остаток отвечает
+    /// на «сколько ещё можно», а строка — откуда он взялся.
     private var smallView: some View {
-        ringWithRemaining(lineWidth: 11, number: 26)
-            .padding(-2)
-            .containerBackground(for: .widget) { WidgetPalette.surface }
+        VStack(spacing: 4) {
+            ringWithRemaining(lineWidth: 11, number: 24, label: "осталось")
+            Text(verbatim: String(format: String(localized: "съедено %1$lld из %2$lld"),
+                                  entry.consumed, entry.goal))
+                .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .containerBackground(for: .widget) { WidgetPalette.surface }
+    }
+
+    /// Ближайший приём из расписания — строкой под макросами. nil, когда
+    /// расписание выключено или приложение ещё не рассказало о нём.
+    private var nextMeal: MealSlotSnapshot? {
+        MealFeed.shown(at: entry.date, in: MealFeed.slots())
     }
 
     private var mediumView: some View {
-        // Кольцо на половину виджета: раньше оно занимало треть и читалось
-        // мелкой картинкой рядом с текстом, хотя ради него виджет и ставят.
-        // Размер берём от самого виджета, а не числом в точках: средний
-        // виджет на разных айфонах разной ширины.
+        // Кольцо на сорок процентов ширины и не выше самого виджета: размер
+        // берём от него, а не числом в точках — средний виджет на разных
+        // айфонах разной ширины.
         GeometryReader { geometry in
-            // Кольцо квадратное и по центру своей половины: считать его сторону
-            // только от ширины нельзя — на узких экранах квадрат выше виджета,
-            // и кольцо прижималось к верху, оставляя пустую полосу снизу.
-            let side = min(geometry.size.height, geometry.size.width * 0.46)
+            let side = min(geometry.size.height, geometry.size.width * 0.42)
             HStack(spacing: 16) {
-                ringWithRemaining(lineWidth: side * 0.085, number: side * 0.2)
+                ringWithRemaining(lineWidth: side * 0.11, number: side * 0.2, label: "осталось")
                     .frame(width: side, height: side)
 
-                // Как плашка макросов под знаком в приложении: число с целью и
-                // тонкая полоска цветом дуги. Дуга показывает долю, строка —
-                // сами граммы, и на экране они стоят той же парой.
-                VStack(alignment: .leading, spacing: 14) {
-                    statRow(letter: "Б", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
-                    statRow(letter: "Ж", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)
-                    statRow(letter: "У", color: WidgetPalette.carbs[0], value: entry.carbs, target: entry.carbsTarget)
+                VStack(alignment: .leading, spacing: 9) {
+                    Text(verbatim: String(format: String(localized: "съедено %1$lld из %2$lld ккал"),
+                                          entry.consumed, entry.goal))
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    VStack(spacing: 6) {
+                        macroLine("Белки", color: WidgetPalette.protein[0], value: entry.protein, target: entry.proteinTarget)
+                        macroLine("Жиры", color: WidgetPalette.fat[0], value: entry.fat, target: entry.fatTarget)
+                        macroLine("Углеводы", color: WidgetPalette.carbs[0], value: entry.carbs, target: entry.carbsTarget)
+                    }
+
+                    if let meal = nextMeal {
+                        mealLine(meal)
+                    }
                 }
-                Spacer(minLength: 0)
             }
-            // По центру в обе стороны: с прижатым влево содержимым кольцо
-            // вставало вплотную к краю, а справа оставался воздух.
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .containerBackground(for: .widget) { WidgetPalette.surface }
     }
 
-    /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
-    /// со строкой ничего не локализует, и подпись показывалась по-русски
-    /// на любом языке системы.
-    private func statRow(letter: LocalizedStringKey, color: Color, value: Double, target: Double) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            // Крупнее прежнего: на виджете это второе по важности число после
-            // остатка, а одиннадцатым кеглем его приходилось разглядывать.
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(letter)
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(color)
-                Text(verbatim: "\(Int(value.rounded()))")
-                    .font(.system(size: 17, weight: .semibold))
-                    .monospacedDigit()
-                    .foregroundStyle(.primary)
-                if target > 0 {
-                    Text(verbatim: "/ \(Int(target.rounded()))")
-                        .font(.system(size: 13))
-                        .monospacedDigit()
-                        .foregroundStyle(.tertiary)
-                }
+    /// Строка макроса: точка цвета, название, число цветом и норма.
+    ///
+    /// Название — словом, а не буквой: в среднем виджете места хватает, и
+    /// «Белки» читается без расшифровки.
+    private func macroLine(_ name: LocalizedStringKey, color: Color, value: Double, target: Double) -> some View {
+        HStack(spacing: 6) {
+            Circle().fill(color).frame(width: 7, height: 7)
+            Text(name)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            Text(verbatim: "\(Int(value.rounded()))")
+                .fontWeight(.bold)
+                .foregroundStyle(color)
+            if target > 0 {
+                Text(verbatim: "/ \(Int(target.rounded()))")
+                    .foregroundStyle(.secondary)
             }
-            WidgetBar(share: target > 0 ? min(value / target, 1) : 0, color: color)
+        }
+        .font(.system(size: 13))
+        .monospacedDigit()
+    }
+
+    /// «Ужин до 20:30 · 640 ккал» под чертой: что дальше по расписанию.
+    private func mealLine(_ meal: MealSlotSnapshot) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Rectangle()
+                .fill(.secondary.opacity(0.25))
+                .frame(height: 1)
+            HStack(spacing: 6) {
+                Image(systemName: "fork.knife")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Text(verbatim: String(localized: String.LocalizationValue(meal.period)))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.primary)
+                Text(verbatim: meal.calories > 0
+                     ? String(format: String(localized: "до %@ · %lld ккал"),
+                              (meal.isCurrent ? meal.end : meal.time).formatted(date: .omitted, time: .shortened),
+                              meal.calories)
+                     : (meal.isCurrent ? meal.end : meal.time).formatted(date: .omitted, time: .shortened))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .font(.system(size: 12))
+            .monospacedDigit()
         }
     }
 }
@@ -255,16 +300,35 @@ struct StepsEntry: TimelineEntry {
     let steps: Int
     let goal: Int
     let distanceKm: Double
+    /// Семь дней, последний — сегодня. Пусто, пока приложение не отдало неделю.
+    var week: [Int] = []
 
     var progress: Double {
         guard goal > 0 else { return 0 }
         return min(Double(steps) / Double(goal), 1.0)
     }
+
+    /// Неделя, сдвинутая к дате записи: после полуночи приложение могли не
+    /// открывать, и «последний» столбик в ней — ещё вчерашний. Сдвигаем влево
+    /// на пройденные дни, дописываем нули, а сегодняшний — текущими шагами.
+    static func alignedWeek(_ stored: [Int], storedDay: Date?, now: Date, todaySteps: Int) -> [Int] {
+        guard stored.count == 7, let storedDay else { return [] }
+        let calendar = Calendar.current
+        let gap = calendar.dateComponents([.day], from: calendar.startOfDay(for: storedDay),
+                                          to: calendar.startOfDay(for: now)).day ?? 0
+        var week = stored
+        if gap > 0 {
+            week = Array(stored.dropFirst(min(gap, 7))) + Array(repeating: 0, count: min(gap, 7))
+        }
+        week[6] = todaySteps
+        return week
+    }
 }
 
 struct StepsProvider: TimelineProvider {
     func placeholder(in context: Context) -> StepsEntry {
-        StepsEntry(date: Date(), steps: 6500, goal: 10_000, distanceKm: 4.8)
+        StepsEntry(date: Date(), steps: 6500, goal: 10_000, distanceKm: 4.8,
+                          week: [8200, 10_400, 5200, 7800, 9100, 4900, 6500])
     }
 
     func getSnapshot(in context: Context, completion: @escaping (StepsEntry) -> Void) {
@@ -280,10 +344,14 @@ struct StepsProvider: TimelineProvider {
         let current = !fresh && isToday("widget_steps_day", in: defaults)
         let rawGoal = defaults?.integer(forKey: "widget_step_goal") ?? 0
         let goal = rawGoal > 0 ? rawGoal : 10_000
+        let steps = current ? defaults?.integer(forKey: "widget_steps_today") ?? 0 : 0
         return StepsEntry(date: date,
-                          steps: current ? defaults?.integer(forKey: "widget_steps_today") ?? 0 : 0,
+                          steps: steps,
                           goal: goal,
-                          distanceKm: current ? defaults?.double(forKey: "widget_distance_km") ?? 0 : 0)
+                          distanceKm: current ? defaults?.double(forKey: "widget_distance_km") ?? 0 : 0,
+                          week: StepsEntry.alignedWeek(defaults?.array(forKey: "widget_steps_week") as? [Int] ?? [],
+                                                       storedDay: defaults?.object(forKey: "widget_steps_week_day") as? Date,
+                                                       now: date, todaySteps: steps))
     }
 }
 
@@ -352,65 +420,106 @@ struct StepsWidgetEntryView: View {
         .containerBackground(.clear, for: .widget)
     }
 
-    private var smallView: some View {
-        ZStack {
-            WidgetRing(segments: stepsSegment, lineWidth: 11)
+    /// «из 8 000 · 4,6 км» — цель и, когда дистанция известна, она же.
+    private var goalLine: String {
+        let goal = entry.goal.formatted()
+        guard entry.distanceKm > 0 else {
+            return String(format: String(localized: "из %@"), goal)
+        }
+        return String(format: String(localized: "из %1$@ · %2$@ км"), goal,
+                      entry.distanceKm.formatted(.number.precision(.fractionLength(1))))
+    }
 
-            VStack(spacing: 2) {
+    /// Левая колонка: подпись, число, цель и полоска. Малый виджет — это она
+    /// одна, средний — она плюс неделя столбиками.
+    private var stepsColumn: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: "figure.walk")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(ringColors[0])
+                Text("Шаги")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            VStack(alignment: .leading, spacing: 2) {
                 Text(entry.steps.formatted())
-                    .font(.system(size: 26, weight: .bold))
+                    .font(.system(size: 34, weight: .bold))
                     .monospacedDigit()
                     .foregroundStyle(.primary)
                     .minimumScaleFactor(0.5)
-                Text("шагов")
-                    .font(.system(size: 11))
+                    .lineLimit(1)
+                Text(verbatim: goalLine)
+                    .font(.system(size: 12))
                     .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
+            Spacer(minLength: 0)
+            WidgetBar(share: entry.progress, color: ringColors[0], height: 6)
+        }
+    }
+
+    private var smallView: some View {
+        stepsColumn
+            .containerBackground(for: .widget) { bg }
+    }
+
+    private var mediumView: some View {
+        HStack(alignment: .top, spacing: 16) {
+            stepsColumn
+                .frame(width: 140)
+            weekChart
         }
         .containerBackground(for: .widget) { bg }
     }
 
-    private var mediumView: some View {
-        HStack(spacing: 18) {
-            ZStack {
-                WidgetRing(segments: stepsSegment, lineWidth: 9)
+    /// Неделя столбиками: день, в который цель взята, — цветом калорий, остальные
+    /// — приглушённым акцентом, сегодня — акцентом целиком. Пунктир — цель.
+    private var weekChart: some View {
+        let week = entry.week.isEmpty ? Array(repeating: 0, count: 7) : entry.week
+        let top = Double(max(week.max() ?? 0, Int(Double(entry.goal) * 1.2), 1))
+        let calendar = Calendar.current
+        return GeometryReader { geometry in
+            let labelHeight: CGFloat = 16
+            let chart = geometry.size.height - labelHeight
+            let gap: CGFloat = 8
+            let barWidth = (geometry.size.width - gap * 6) / 7
+            ZStack(alignment: .topLeading) {
+                // Цель — пунктиром на своей высоте.
+                Path { path in
+                    let y = chart * (1 - Double(entry.goal) / top)
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: geometry.size.width, y: y))
+                }
+                .stroke(Color.secondary.opacity(0.6),
+                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round, dash: [4, 5]))
 
-                VStack(spacing: 2) {
-                    Text(entry.steps.formatted())
-                        .font(.system(size: 20, weight: .bold))
-                        .monospacedDigit()
-                        .foregroundStyle(.primary)
-                        .minimumScaleFactor(0.5)
-                    Text("шагов")
-                        .font(.system(size: 9))
-                        .foregroundStyle(.secondary)
+                ForEach(0..<7, id: \.self) { index in
+                    let steps = week[index]
+                    let isToday = index == 6
+                    let reached = steps >= entry.goal
+                    let height = max(chart * Double(steps) / top, 4)
+                    VStack(spacing: 0) {
+                        Spacer(minLength: 0)
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(reached ? WidgetPalette.kcal[0] : ringColors[0].opacity(isToday ? 1 : 0.45))
+                            .frame(width: barWidth, height: height)
+                        let day = calendar.date(byAdding: .day, value: index - 6, to: entry.date) ?? entry.date
+                        Text(day.formatted(.dateTime.weekday(.abbreviated)))
+                            .font(.system(size: 10, weight: isToday ? .bold : .regular))
+                            .foregroundStyle(isToday ? Color.primary : Color.secondary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                            .frame(width: barWidth + gap, height: labelHeight)
+                    }
+                    .frame(width: barWidth + gap, height: geometry.size.height)
+                    .offset(x: CGFloat(index) * (barWidth + gap) - gap / 2)
                 }
             }
-            .frame(width: 88, height: 88)
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Шаги")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.primary)
-                    .padding(.bottom, 8)
-
-                statRow(label: "Пройдено", value: entry.steps.formatted())
-                Spacer().frame(height: 5)
-                statRow(label: "Цель", value: entry.goal.formatted())
-                if entry.distanceKm > 0 {
-                    Spacer().frame(height: 5)
-                    statRow(label: "Дистанция", value: String(format: "%.1f \(String(localized: "км"))", entry.distanceKm))
-                }
-
-                WidgetBar(share: entry.progress, color: ringColors[0])
-                    .padding(.top, 10)
-            }
-
-            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .containerBackground(for: .widget) { bg }
     }
 
     /// Подпись — `LocalizedStringKey`, а не `String`: у `Text` инициализатор
@@ -461,12 +570,17 @@ struct MacrosEntry: TimelineEntry {
     let proteinTarget: Double
     let fatTarget: Double
     let carbsTarget: Double
+    /// Клетчатка за день и её норма — строка под тремя макросами среднего
+    /// виджета. Ноль у съеденного — «неизвестно», а не «не ел».
+    var fiber: Double = 0
+    var fiberTarget: Double = 0
 }
 
 struct MacrosProvider: TimelineProvider {
     func placeholder(in context: Context) -> MacrosEntry {
         MacrosEntry(date: Date(), protein: 120, fat: 40, carbs: 250,
-                    proteinTarget: 160, fatTarget: 60, carbsTarget: 300)
+                    proteinTarget: 160, fatTarget: 60, carbsTarget: 300,
+                    fiber: 19, fiberTarget: 28)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (MacrosEntry) -> Void) {
@@ -487,7 +601,9 @@ struct MacrosProvider: TimelineProvider {
             carbs: current ? defaults?.double(forKey: "widget_carbs") ?? 0 : 0,
             proteinTarget: defaults?.double(forKey: "widget_protein_target") ?? 0,
             fatTarget: defaults?.double(forKey: "widget_fat_target") ?? 0,
-            carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0
+            carbsTarget: defaults?.double(forKey: "widget_carbs_target") ?? 0,
+            fiber: current ? defaults?.double(forKey: "widget_fiber") ?? 0 : 0,
+            fiberTarget: defaults?.double(forKey: "widget_fiber_target") ?? 0
         )
     }
 }
@@ -527,7 +643,7 @@ struct MacrosWidgetEntryView: View {
 
     var body: some View {
         switch family {
-        case .systemSmall: markView
+        case .systemSmall: smallView
         case .accessoryCircular: circularView
         case .accessoryRectangular: rectangularView
         case .accessoryInline: inlineView
@@ -535,71 +651,117 @@ struct MacrosWidgetEntryView: View {
         }
     }
 
-    // MARK: Знак
-
-    /// Маленький — знак приложения «С», только живой: каждая дуга залита по
-    /// своему макросу. В середине белок — у того, кто держит макросы, это
-    /// обязательство, а остальное — остаток.
-    private var markView: some View {
-        ZStack {
-            WidgetRing(segments: WidgetRingLayout.mark(
-                protein: entry.protein, fat: entry.fat, carbs: entry.carbs,
-                proteinTarget: entry.proteinTarget, fatTarget: entry.fatTarget, carbsTarget: entry.carbsTarget),
-                       lineWidth: 11)
-            VStack(spacing: 0) {
-                Text(verbatim: "\(Int(entry.protein.rounded()))")
-                    .font(.system(size: 26, weight: .bold))
-                    .monospacedDigit()
-                    .foregroundStyle(.primary)
-                    .minimumScaleFactor(0.5)
-                if entry.proteinTarget > 0 {
-                    Text(verbatim: "/ \(Int(entry.proteinTarget.rounded()))")
-                        .font(.system(size: 11))
-                        .monospacedDigit()
-                        .foregroundStyle(.tertiary)
-                }
-                Text("Б")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(WidgetPalette.protein[0])
-            }
-            .padding(18)
-        }
-        .padding(-2)
-        .containerBackground(for: .widget) { bg }
-    }
-
     // MARK: Домашний экран
 
-    private var homeView: some View {
-        VStack(alignment: .leading, spacing: 10) {
+    /// Подпись макроса — словом: на малом и среднем виджете места хватает, а
+    /// буква «Б» без расшифровки читается только теми, кто её уже знает.
+    private func title(_ macro: Macro) -> LocalizedStringKey {
+        switch macro.id {
+        case "Б": return "Белки"
+        case "Ж": return "Жиры"
+        default: return "Углеводы"
+        }
+    }
+
+    /// Малый: три строки — точка и название, число цветом с нормой, полоска.
+    private var smallView: some View {
+        VStack(alignment: .leading, spacing: 13) {
             ForEach(macros, id: \.id) { macro in
-                row(macro)
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack(alignment: .firstTextBaseline) {
+                        HStack(spacing: 6) {
+                            Circle().fill(macro.color).frame(width: 7, height: 7)
+                            Text(title(macro))
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
+                        Spacer(minLength: 4)
+                        HStack(spacing: 3) {
+                            Text(verbatim: "\(Int(macro.value.rounded()))")
+                                .fontWeight(.bold)
+                                .foregroundStyle(macro.color)
+                            if macro.hasTarget {
+                                Text(verbatim: "/ \(Int(macro.target.rounded()))")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .font(.system(size: 13))
+                        .monospacedDigit()
+                    }
+                    if macro.hasTarget {
+                        WidgetBar(share: macro.share, color: macro.color, height: 5)
+                    }
+                }
             }
         }
-        .padding(.vertical, 2)
         .containerBackground(for: .widget) { bg }
     }
 
-    private func row(_ macro: Macro) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(macro.letter)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(macro.color)
-                Text(verbatim: "\(Int(macro.value.rounded()))")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .monospacedDigit()
-                if macro.hasTarget {
-                    Text(verbatim: "/ \(Int(macro.target.rounded()))")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .monospacedDigit()
+    /// Средний: три колонки — название, крупное число цветом, «из N г» и полоска;
+    /// под чертой клетчатка с полоской.
+    private var homeView: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 14) {
+                ForEach(macros, id: \.id) { macro in
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 6) {
+                            Circle().fill(macro.color).frame(width: 7, height: 7)
+                            Text(title(macro))
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                        Text(verbatim: "\(Int(macro.value.rounded()))")
+                            .font(.system(size: 28, weight: .bold))
+                            .monospacedDigit()
+                            .foregroundStyle(macro.color)
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
+                        if macro.hasTarget {
+                            Text(verbatim: String(format: String(localized: "из %lld г"),
+                                                  Int(macro.target.rounded())))
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                            WidgetBar(share: macro.share, color: macro.color, height: 5)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                Spacer(minLength: 0)
             }
-            if macro.hasTarget {
-                WidgetBar(share: macro.share, color: macro.color)
+            Spacer(minLength: 6)
+            fiberLine
+        }
+        .containerBackground(for: .widget) { bg }
+    }
+
+    /// Клетчатка под чертой. Без нормы или пока про день неизвестно — прочерк,
+    /// а не «0 г»: ноль значил бы «не ел», а мы просто не знаем.
+    @ViewBuilder
+    private var fiberLine: some View {
+        if entry.fiberTarget > 0 {
+            VStack(spacing: 8) {
+                Rectangle()
+                    .fill(.secondary.opacity(0.25))
+                    .frame(height: 1)
+                HStack(spacing: 10) {
+                    Text("Клетчатка")
+                        .foregroundStyle(.secondary)
+                    WidgetBar(share: min(entry.fiber / entry.fiberTarget, 1),
+                              color: WidgetPalette.carbs[0], height: 5)
+                    HStack(spacing: 3) {
+                        Text(verbatim: entry.fiber > 0 ? "\(Int(entry.fiber.rounded()))" : "—")
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.primary)
+                        Text(verbatim: String(format: String(localized: "/ %lld г"),
+                                              Int(entry.fiberTarget.rounded())))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .font(.system(size: 12))
+                .monospacedDigit()
             }
         }
     }
@@ -667,6 +829,7 @@ struct MacrosWidget: Widget {
 struct WidgetBar: View {
     let share: Double
     let color: Color
+    var height: CGFloat = 3
     @Environment(\.widgetRenderingMode) private var renderingMode
 
     var body: some View {
@@ -680,6 +843,6 @@ struct WidgetBar: View {
                     .widgetAccentable()
             }
         }
-        .frame(height: 3)
+        .frame(height: height)
     }
 }

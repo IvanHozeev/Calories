@@ -39,6 +39,25 @@ struct BatchEatingTests {
         return dish
     }
 
+    /// «Приготовил» можно отметить задним числом: съеденное после выбранного
+    /// момента — из этой кастрюли, раньше — из прошлой.
+    @Test func eatenIsCountedFromTheChosenMoment() throws {
+        let dish = pot()
+        let now = Date()
+        let earlier = now.addingTimeInterval(-6 * 3600)
+        let before = now.addingTimeInterval(-9 * 3600)
+        store.add(name: dish.name, calories: 400, macros: .zero, grams: 400, date: before)
+        store.add(name: dish.name, calories: 400, macros: .zero, grams: 400, date: now.addingTimeInterval(-3 * 3600))
+
+        #expect(store.eatenGrams(of: dish, since: earlier) == 400, "Съеденное до готовки в счёт не идёт")
+        #expect(store.eatenGrams(of: dish, since: before.addingTimeInterval(-60)) == 800)
+
+        // Партия, начатая задним числом, видит только свои порции.
+        store.startBatch(of: dish, grams: 3200, cookedAt: earlier)
+        let state = try #require(store.batchState(of: dish))
+        #expect(state.remainingGrams == 2800)
+    }
+
     @Test func aPlainEntryTakesFromThePot() throws {
         let dish = pot()
         store.add(name: dish.name, calories: 400, macros: .zero, grams: 400)

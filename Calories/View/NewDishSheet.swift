@@ -7,6 +7,8 @@ struct NewDishSheet: View {
     var isEmbedded: Bool = false
 
     @State private var name = ""
+    /// Когда приготовлена партия — по умолчанию сейчас.
+    @State private var cookedAt = Date()
     /// Что это за рецепт: салат, суп, горячее, десерт, напиток.
     @State private var kind: DishKind = .other
     /// Пусто — значит «вся кастрюля»: подставится полный вес блюда.
@@ -148,10 +150,33 @@ struct NewDishSheet: View {
                     store.endBatch(of: dish)
                 }
             } else {
+                // Когда приготовил — по умолчанию сейчас, но можно назад:
+                // сварил утром, а отметил вечером, или вообще вчера. Всё,
+                // что съедено после этого момента, — из этой кастрюли, и
+                // остаток ниже считается с учётом уже съеденного.
+                DatePicker("Приготовил", selection: $cookedAt, in: ...Date(),
+                           displayedComponents: [.date, .hourAndMinute])
+                    .accessibilityIdentifier("batchCookedAt")
+
+                let eaten = store.eatenGrams(of: dish, since: cookedAt)
+                if eaten > 0 {
+                    let left = max(0, totalGrams - eaten)
+                    LabeledContent("Уже съедено") {
+                        Text(verbatim: portionsText(eaten, of: dish))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                    LabeledContent("Останется") {
+                        Text(verbatim: portionsText(left, of: dish))
+                            .font(.app(.body, weight: .medium))
+                            .monospacedDigit()
+                    }
+                }
+
                 Button("Приготовил") {
                     // Сколько сварено — вес состава: человек только что его и
                     // собрал из того, что положил в кастрюлю.
-                    store.startBatch(of: dish, grams: totalGrams)
+                    store.startBatch(of: dish, grams: totalGrams, cookedAt: cookedAt)
                 }
                 .disabled(totalGrams <= 0)
             }
@@ -161,6 +186,14 @@ struct NewDishSheet: View {
             // что в ней лежит.
             explain("Отметь, что приготовил, — и приложение будет считать остаток само: сколько порций ещё есть, на сколько дней хватит и до какого числа это стоит есть.").map { Text($0) }
         }
+    }
+
+    /// Граммы и, если известна порция, сколько это раз.
+    private func portionsText(_ grams: Double, of dish: Dish) -> String {
+        let text = String(format: "%.0f \(String(localized: "г"))", grams)
+        guard dish.defaultServingGrams > 0, grams / dish.defaultServingGrams >= 0.5 else { return text }
+        return String(format: String(localized: "%1$@ · %2$@ порции"),
+                      text, String(format: "%.1f", grams / dish.defaultServingGrams))
     }
 
     /// Остаток словами: граммы и, если известна порция, сколько это раз.

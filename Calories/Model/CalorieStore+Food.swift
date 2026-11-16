@@ -85,24 +85,32 @@ extension CalorieStore {
     /// раньше, было из прошлой кастрюли.
     func batchState(of dish: Dish, now: Date = Date()) -> DishBatch.State? {
         guard let cookedAt = dish.cookedAt, dish.batchGrams > 0 else { return nil }
+        return DishBatch.state(cookedAt: cookedAt,
+                               totalGrams: dish.batchGrams,
+                               eatenGrams: eatenGrams(of: dish, since: cookedAt),
+                               servingGrams: dish.defaultServingGrams > 0 ? dish.defaultServingGrams : nil,
+                               now: now)
+    }
+
+    /// Сколько граммов блюда съедено по дневнику начиная с момента.
+    ///
+    /// Нужно и состоянию партии, и экрану, где человек ещё только выбирает,
+    /// когда приготовил: съеденное после этого момента — из этой кастрюли,
+    /// и остаток должен быть настоящим, а не «сварил восемь порций».
+    func eatenGrams(of dish: Dish, since moment: Date) -> Double {
         // По составу записи, а не по её имени.
         //
         // Та же ловушка, что была с клетчаткой: приёмы здесь почти всегда
         // составные, и запись называется склейкой — «Паста с тунцом, Хлеб».
         // Имени блюда среди имён записей нет, и остаток не двигался вовсе:
         // человек съел пять порций из восьми, а кастрюля всё ещё полная.
-        let eaten = entries
-            .filter { $0.date >= cookedAt }
+        return entries
+            .filter { $0.date >= moment }
             .reduce(0.0) { total, entry in
                 total + entry.composition
                     .filter { $0.name == dish.name }
                     .reduce(0.0) { $0 + ($1.grams ?? 0) }
             }
-        return DishBatch.state(cookedAt: cookedAt,
-                               totalGrams: dish.batchGrams,
-                               eatenGrams: eaten,
-                               servingGrams: dish.defaultServingGrams > 0 ? dish.defaultServingGrams : nil,
-                               now: now)
     }
 
     /// Начать партию: сварили столько-то и сегодня.

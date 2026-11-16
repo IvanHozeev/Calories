@@ -73,3 +73,27 @@ struct QuickAddItemTests {
         #expect(item.calories == 320)
     }
 }
+
+/// Значок встаёт рядом с последним словом названия — а значит, последнее слово
+/// должно быть настоящим, даже если в имени лишние пробелы.
+struct FoodNameSplitTests {
+    @Test func splitsOffTheLastWord() {
+        let split = FoodRow.splitName("Протеин со вкусом печенья")
+        #expect(split.head == "Протеин со вкусом")
+        #expect(split.last == "печенья")
+    }
+
+    /// Пробел на конце раньше давал пустое последнее слово, и значок
+    /// оставался один на отдельной строке.
+    @Test func trailingAndDoubledSpacesDoNotMakeEmptyWords() {
+        let split = FoodRow.splitName("Корнишоны  маринованные ")
+        #expect(split.head == "Корнишоны")
+        #expect(split.last == "маринованные")
+    }
+
+    @Test func aSingleWordHasNoHead() {
+        let split = FoodRow.splitName("Пармезан")
+        #expect(split.head.isEmpty)
+        #expect(split.last == "Пармезан")
+    }
+}

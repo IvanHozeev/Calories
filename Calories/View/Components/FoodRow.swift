@@ -77,15 +77,27 @@ struct FoodRow: View {
     /// что название, после значков («Молоко 3% 🌿 300 г»), а не отдельной
     /// строкой, как у одиночного продукта: иначе приём из пяти частей
     /// занимал бы десять строк.
+    /// Название без последнего слова и само последнее слово.
+    ///
+    /// Значки встают рядом с последним словом, поэтому оно обязано быть
+    /// настоящим: пробелы на концах и двойные пробелы внутри пустых слов не
+    /// порождают.
+    static func splitName(_ text: String) -> (head: String, last: String) {
+        let words = text.split(whereSeparator: \.isWhitespace)
+        return (words.dropLast().joined(separator: " "), words.last.map(String.init) ?? text)
+    }
+
     @ViewBuilder
     private func nameBlock(text: String, font: Font, color: Color,
                            traits: [FoodTrait], weight: String? = nil) -> some View {
         // Название оборачиваем в изолятор направления (FSI…PDI): если имя на
         // иврите или арабском, общий двунаправленный алгоритм иначе перемешает
         // его со значками. Для латиницы и кириллицы изолятор не меняет ничего.
-        let words = text.split(separator: " ", omittingEmptySubsequences: false)
-        let head = words.dropLast().joined(separator: " ")
-        let last = words.last.map(String.init) ?? text
+        //
+        // Слова — без пустых: имя с пробелом на конце («Протеин со вкусом
+        // печенья ») давало пустое последнее слово, и значок оставался один
+        // на третьей строке. Теперь «последнее слово» — последнее настоящее.
+        let (head, last) = Self.splitName(text)
         if traits.isEmpty {
             // Без значков — один `Text`: перенос идёт по словам, а вес
             // встаёт в конец последней строки. Пробел перед весом и внутри

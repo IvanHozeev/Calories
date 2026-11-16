@@ -20,9 +20,12 @@ struct HintCard<Content: View>: View {
 
     @State private var pressed = false
 
-    /// Насколько подрастает плашка под пальцем. Четыре процента заметны, но
-    /// не наезжают на соседей: между подсказками шестнадцать точек.
-    static var pressedScale: CGFloat { 1.04 }
+    /// Насколько плашка подрастает под пальцем — только в высоту.
+    ///
+    /// В ширину она уже стоит во всю строку списка, и всё, что шире, выходило
+    /// за рамки соседних карточек и срезалось краем строки. Вверх и вниз места
+    /// хватает: между подсказками шестнадцать точек.
+    static var pressedScale: CGFloat { 1.12 }
 
     var body: some View {
         // Крестик — соседом плашки по строке, а не слоем поверх неё.
@@ -70,7 +73,7 @@ struct HintCard<Content: View>: View {
         .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
         .tileSurface(cornerRadius: 18)
-        .scaleEffect(pressed ? Self.pressedScale : 1)
+        .scaleEffect(x: 1, y: pressed ? Self.pressedScale : 1)
         .animation(.spring(response: 0.32, dampingFraction: 0.58), value: pressed)
         .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.6), trigger: pressed) { _, isPressed in
             isPressed

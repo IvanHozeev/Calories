@@ -2043,7 +2043,6 @@ struct AddEntryView: View {
             caloriesPer100g: dish.caloriesPer100g,
             portion: String(format: "%.0f \(String(localized: "г"))", dish.servingGrams),
             macros: dish.servingMacros,
-            detail: "\(dish.ingredients.count) \(String(localized: "ингр."))",
             micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.servingGrams),
             traits: dish.traits
         )

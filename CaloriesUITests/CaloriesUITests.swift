@@ -866,6 +866,45 @@ final class CaloriesUITests: XCTestCase {
                       "Кнопка тулбара не открыла редактор плана")
     }
 
+    /// Новый план: фаза по совету стоит сразу, добавление кладёт ровно одну
+    /// фазу в конец, а подставленную можно убрать.
+    @MainActor
+    func testAddingAPhaseAddsExactlyOne() {
+        let app = launchApp(premium: true)
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        let strip = app.buttons["planStrip"]
+        scrollIntoReach(strip, in: app)
+        if strip.exists { strip.tap() }
+        guard app.staticTexts["Phases of the new plan"].waitForExistence(timeout: 5) else {
+            // План уже идёт — заготовки нет, проверять нечего.
+            return
+        }
+        let rows = app.buttons.matching(identifier: "planPhaseRow")
+        XCTAssertEqual(rows.count, 1, "Новый план начинается с одной фазы по совету")
+
+        let add = app.buttons["addPhase-bulk"]
+        scrollIntoReach(add, in: app)
+        add.tap()
+        XCTAssertTrue(rows.element(boundBy: 1).waitForExistence(timeout: 3))
+        XCTAssertEqual(rows.count, 2, "Добавление положило не одну фазу")
+
+        // Подставленную по совету можно убрать — останется только своя.
+        let first = rows.element(boundBy: 0)
+        first.swipeLeft()
+        let delete = app.buttons["Delete"].firstMatch
+        if delete.waitForExistence(timeout: 3) { delete.tap() }
+        XCTAssertTrue(waitForCount(rows, 1), "Фаза по совету не удаляется")
+    }
+
+    private func waitForCount(_ query: XCUIElementQuery, _ count: Int, timeout: TimeInterval = 4) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if query.count == count { return true }
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        return query.count == count
+    }
+
     /// Экран плана собран по макету: фаза со статусом, вес графиком, неделя,
     /// цена дефицита.
     ///

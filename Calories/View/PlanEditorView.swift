@@ -10,11 +10,9 @@ struct PlanEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var phases: [PlanPhase]
-    /// Фаза, подставленная новому плану по умолчанию, пока её не трогали.
-    ///
-    /// Первая добавленная фаза её заменяет, а не встаёт после неё: иначе
-    /// «Добавить поддержание» давало сушку из заготовки и поддержание за ней.
-    @State private var untouchedDefault: PlanPhase?
+    /// Фаза, которую новый план получил по совету «Что дальше». Помечена в
+    /// списке, чтобы было видно: её поставило приложение, и её можно убрать.
+    @State private var suggestedID: UUID?
     @State private var cyclingEnabled: Bool
     @State private var weekendStyle: WeekendStyle
 
@@ -25,11 +23,11 @@ struct PlanEditorView: View {
         // недель, как раньше подставлялось всем подряд.
         if let plan = store.plan {
             _phases = State(initialValue: plan.phases)
-            _untouchedDefault = State(initialValue: nil)
+            _suggestedID = State(initialValue: nil)
         } else {
             let first = Self.suggestedPhase(store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent))
             _phases = State(initialValue: [first])
-            _untouchedDefault = State(initialValue: first)
+            _suggestedID = State(initialValue: first.id)
         }
         _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
         _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
@@ -130,18 +128,32 @@ struct PlanEditorView: View {
                     } else {
                         phaseRows
                     }
+                    if phases.isEmpty {
+                        Text("Добавь первую фазу кнопками ниже.")
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
 
-                    Menu {
+                    // Три кнопки, а не меню: что добавить, видно сразу, и одно
+                    // нажатие вместо двух.
+                    HStack(spacing: 8) {
                         ForEach(PlanIntent.allCases) { intent in
                             Button {
                                 addPhase(intent)
                             } label: {
-                                Label(intent.title, systemImage: intent.symbol)
+                                Label(intent.title, systemImage: "plus")
+                                    .font(.app(.subheadline, weight: .semibold))
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.8)
+                                    .frame(maxWidth: .infinity)
                             }
+                            .buttonStyle(.bordered)
+                            .buttonBorderShape(.capsule)
+                            .accessibilityIdentifier("addPhase-\(intent.rawValue)")
                         }
-                    } label: {
-                        Label("Добавить фазу", systemImage: "plus")
                     }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
                 } header: {
                     // У нового плана это не сохранённое, а предложенное: фаза
                     // по умолчанию на восемь недель принималась за запись о
@@ -246,15 +258,11 @@ struct PlanEditorView: View {
                          weeklyRatePercent: intent == .maintenance ? nil : advice.weeklyRatePercent)
     }
 
-    /// Добавить фазу. Нетронутую заготовку нового плана она заменяет.
+    /// Добавить фазу — в конец, ничего не подменяя.
     private func addPhase(_ intent: PlanIntent) {
-        let phase = PlanPhase(intent: intent, durationWeeks: 8)
-        if let untouchedDefault, phases == [untouchedDefault] {
-            phases = [phase]
-        } else {
-            phases.append(phase)
+        withAnimation(.snappy) {
+            phases.append(PlanPhase(intent: intent, durationWeeks: intent == .maintenance ? 4 : 8))
         }
-        untouchedDefault = nil
     }
 
     /// Фазы, где расписание брейков не лезет в прошлое.
@@ -302,13 +310,14 @@ struct PlanEditorView: View {
             } label: {
                 phaseRow(phase)
             }
+            .accessibilityIdentifier("planPhaseRow")
         }
         .onDelete { offsets in
-            // Последнюю не отдаём: план без единой фазы — это не план.
-            // Активный план нельзя лишить всех фаз: иначе draftPlan станет nil,
-            // кнопка «Готово» заблокируется, а план в сторе останется старым
-            // — несоответствие между тем, что человек увидел, и тем, что есть.
-            guard phases.count > offsets.count else { return }
+            // У идущего плана последнюю фазу не отдаём: план без фаз — не
+            // план, а «Готово» заблокировалось бы при старом плане в сторе. У
+            // нового убрать можно и единственную — подставленную по совету,
+            // чтобы собрать свой план с нуля; сохранить пустой нельзя.
+            guard store.plan == nil || phases.count > offsets.count else { return }
             phases.remove(atOffsets: offsets)
         }
         .onMove { phases.move(fromOffsets: $0, toOffset: $1) }
@@ -363,6 +372,10 @@ struct PlanEditorView: View {
                     if phase.intent == .cut, let every = phase.dietBreakEvery {
                         Text(verbatim: "·")
                         Text(String(format: String(localized: "брейк %lld : 1"), every))
+                    }
+                    if phase.id == suggestedID {
+                        Text(verbatim: "·")
+                        Text("по совету")
                     }
                 }
                 .font(.app(.caption))

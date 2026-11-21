@@ -375,7 +375,7 @@ struct PlanEditorView: View {
                     }
                     if phase.id == suggestedID {
                         Text(verbatim: "·")
-                        Text("по совету")
+                        Text("рекомендация")
                     }
                 }
                 .font(.app(.caption))

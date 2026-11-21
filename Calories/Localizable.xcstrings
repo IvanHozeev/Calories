@@ -69130,53 +69130,6 @@
         }
       }
     },
-    "по совету": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "advised"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "recomendada"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "recomendada"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "conseillée"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "empfohlen"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "موصى بها"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מומלץ"
-          }
-        }
-      }
-    },
     "Добавь первую фазу кнопками ниже.": {
       "extractionState": "manual",
       "localizations": {
@@ -69220,6 +69173,53 @@
           "stringUnit": {
             "state": "translated",
             "value": "הוסף את השלב הראשון בכפתורים למטה."
+          }
+        }
+      }
+    },
+    "рекомендация": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "recommended"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "recomendación"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "recomendação"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "recommandation"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empfehlung"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "توصية"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המלצה"
           }
         }
       }

@@ -10,15 +10,27 @@ struct PlanEditorView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var phases: [PlanPhase]
+    /// Фаза, подставленная новому плану по умолчанию, пока её не трогали.
+    ///
+    /// Первая добавленная фаза её заменяет, а не встаёт после неё: иначе
+    /// «Добавить поддержание» давало сушку из заготовки и поддержание за ней.
+    @State private var untouchedDefault: PlanPhase?
     @State private var cyclingEnabled: Bool
     @State private var weekendStyle: WeekendStyle
 
     init(store: CalorieStore) {
         self.store = store
-        // Новый план начинается с одной фазы дефицита: это то, зачем сюда
-        // заходят чаще всего, и пустой список нечем показать.
-        _phases = State(initialValue: store.plan?.phases
-                        ?? [PlanPhase(intent: .cut, durationWeeks: 8)])
+        // Новый план начинается с той фазы, которую советует «Что дальше»:
+        // после сушки — поддержание на нужный срок, а не снова сушка на восемь
+        // недель, как раньше подставлялось всем подряд.
+        if let plan = store.plan {
+            _phases = State(initialValue: plan.phases)
+            _untouchedDefault = State(initialValue: nil)
+        } else {
+            let first = Self.suggestedPhase(store.phaseAdvice(bodyFatPercent: store.measuredBodyFatPercent))
+            _phases = State(initialValue: [first])
+            _untouchedDefault = State(initialValue: first)
+        }
         _cyclingEnabled = State(initialValue: store.plan?.cyclingEnabled ?? false)
         _weekendStyle = State(initialValue: store.plan?.weekendStyle ?? .satSun)
     }
@@ -122,7 +134,7 @@ struct PlanEditorView: View {
                     Menu {
                         ForEach(PlanIntent.allCases) { intent in
                             Button {
-                                phases.append(PlanPhase(intent: intent, durationWeeks: 8))
+                                addPhase(intent)
                             } label: {
                                 Label(intent.title, systemImage: intent.symbol)
                             }
@@ -220,6 +232,29 @@ struct PlanEditorView: View {
                 .fontWeight(.semibold)
             }
         }
+    }
+
+    /// Фаза по совету: что, сколько недель и с каким темпом.
+    static func suggestedPhase(_ advice: PhaseAdvice.Recommendation) -> PlanPhase {
+        let intent: PlanIntent
+        switch advice.kind {
+        case .cut: intent = .cut
+        case .bulk: intent = .bulk
+        case .maintain: intent = .maintenance
+        }
+        return PlanPhase(intent: intent, durationWeeks: advice.weeks ?? 8,
+                         weeklyRatePercent: intent == .maintenance ? nil : advice.weeklyRatePercent)
+    }
+
+    /// Добавить фазу. Нетронутую заготовку нового плана она заменяет.
+    private func addPhase(_ intent: PlanIntent) {
+        let phase = PlanPhase(intent: intent, durationWeeks: 8)
+        if let untouchedDefault, phases == [untouchedDefault] {
+            phases = [phase]
+        } else {
+            phases.append(phase)
+        }
+        untouchedDefault = nil
     }
 
     /// Фазы, где расписание брейков не лезет в прошлое.

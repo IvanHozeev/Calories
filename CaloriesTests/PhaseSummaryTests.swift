@@ -72,3 +72,23 @@ struct PhaseSummaryTests {
         #expect(summary.protein == 120)
     }
 }
+
+/// Новый план начинается с той фазы, которую советует «Что дальше».
+struct SuggestedPhaseTests {
+    @Test func afterACutTheNewPlanStartsWithMaintenance() {
+        let advice = PhaseAdvice.Recommendation(kind: .maintain, headline: "", detail: "",
+                                                weeks: 7, weeklyRatePercent: nil)
+        let phase = PlanEditorView.suggestedPhase(advice)
+        #expect(phase.intent == .maintenance)
+        #expect(phase.durationWeeks == 7)
+    }
+
+    @Test func aCutTakesTheAdvisedPace() {
+        let advice = PhaseAdvice.Recommendation(kind: .cut, headline: "", detail: "",
+                                                weeks: 10, weeklyRatePercent: 0.5)
+        let phase = PlanEditorView.suggestedPhase(advice)
+        #expect(phase.intent == .cut)
+        #expect(phase.durationWeeks == 10)
+        #expect(phase.weeklyRatePercent == 0.5)
+    }
+}

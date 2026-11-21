@@ -158,7 +158,10 @@ struct MacrosCard: View {
                     // плитки: наверху им места не хватало, и они налезали на
                     // название.
                     VStack(alignment: .leading, spacing: 0) {
-                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        // Значок — вплотную к числу и по его середине: у правой
+                        // кромки на базовой линии он отрывался от числа и
+                        // проседал вниз.
+                        HStack(alignment: .center, spacing: 5) {
                             Text(verbatim: value.map { v in
                                 let number = String(format: "%.0f", v)
                                 return prefix.map { "\($0)\(number)" } ?? number
@@ -169,8 +172,8 @@ struct MacrosCard: View {
                                 .monospacedDigit()
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
-                            Spacer(minLength: 0)
                             marks(hint: hint, gymDay: gymDay, color: color)
+                            Spacer(minLength: 0)
                         }
                         if let target {
                             Text(verbatim: String(format: String(localized: "из %lld г"), Int(target.rounded())))

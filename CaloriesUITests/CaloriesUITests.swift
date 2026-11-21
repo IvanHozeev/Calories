@@ -855,8 +855,9 @@ final class CaloriesUITests: XCTestCase {
 
         // Без плана экран плана и есть редактор — показывать нечего. Тест
         // проверяет путь к правке, а он в этом случае короче на одно нажатие.
+        // У нового плана заголовок «Phases of the new plan», у идущего — «Phases».
+        if app.staticTexts["Phases of the new plan"].waitForExistence(timeout: 3) { return }
         let phases = app.staticTexts["Phases"]
-        if phases.waitForExistence(timeout: 3) { return }
 
         let edit = app.buttons["editPlan"]
         XCTAssertTrue(edit.waitForExistence(timeout: 5), "В тулбаре плана нет кнопки правки")

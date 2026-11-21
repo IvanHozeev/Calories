@@ -68,6 +68,22 @@ struct PlanEditorView: View {
                     }
                 }
 
+                // Пройденные фазы — итогом, а не настройкой: план закончен, и
+                // то, что было прожито, смотрят, а не правят.
+                if store.plan == nil, !store.phaseHistory.isEmpty {
+                    Section {
+                        ForEach(store.phaseHistory.sorted { $0.endDate > $1.endDate }) { record in
+                            NavigationLink {
+                                PhaseSummaryView(store: store, record: record)
+                            } label: {
+                                finishedPhaseRow(record)
+                            }
+                        }
+                    } header: {
+                        Text("Пройденные фазы")
+                    }
+                }
+
                 Section {
                     HStack {
                         Text("Текущий вес")
@@ -115,7 +131,10 @@ struct PlanEditorView: View {
                         Label("Добавить фазу", systemImage: "plus")
                     }
                 } header: {
-                    Text("Фазы")
+                    // У нового плана это не сохранённое, а предложенное: фаза
+                    // по умолчанию на восемь недель принималась за запись о
+                    // только что завершённой.
+                    Text(store.plan == nil ? "Фазы нового плана" : "Фазы")
                 } footer: {
                     explain("Сушка, выход в поддержание, набор — это один план, а не три. Порядок фаз меняется перетаскиванием, темп каждой считается от веса, с которым она начинается.").map { Text($0) }
                 }
@@ -258,6 +277,29 @@ struct PlanEditorView: View {
             phases.remove(atOffsets: offsets)
         }
         .onMove { phases.move(fromOffsets: $0, toOffset: $1) }
+    }
+
+    /// Пройденная фаза: сколько недель было на деле и каким стал вес — не
+    /// задуманное, а то, чем она закончилась.
+    private func finishedPhaseRow(_ record: PhaseRecord) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: record.intent.symbol)
+                .foregroundStyle(.secondary)
+                .frame(width: 20)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(record.intent.title)
+                Text(String(format: String(localized: "%lld нед."), record.weeks))
+                    .font(.app(.caption))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+            Spacer()
+            if let end = record.endWeightKg {
+                Text(String(format: "%.1f \(String(localized: "кг"))", end))
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+            }
+        }
     }
 
     private func phaseRow(_ phase: PlanPhase) -> some View {

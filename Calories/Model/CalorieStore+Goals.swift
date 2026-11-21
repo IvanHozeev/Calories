@@ -425,6 +425,31 @@ extension CalorieStore {
         return DaySummary(date: day, entries: entriesByDay[day] ?? [], goal: goal(for: day))
     }
 
+    /// Что съедено за период: в среднем за день с записями, и сколько таких дней.
+    ///
+    /// Пустые дни не считаем: забытый дневник не значит, что человек не ел, и
+    /// среднее по ним было бы занижено.
+    func intakeSummary(from start: Date, to end: Date) -> (days: Int, calories: Double, protein: Double)? {
+        let calendar = Calendar.current
+        var day = calendar.startOfDay(for: start)
+        let last = calendar.startOfDay(for: end)
+        var days = 0
+        var calories = 0.0
+        var protein = 0.0
+        while day <= last {
+            let summary = summary(for: day)
+            if !summary.entries.isEmpty {
+                days += 1
+                calories += Double(summary.totalCalories)
+                protein += summary.totalMacros.protein
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        guard days > 0 else { return nil }
+        return (days, calories / Double(days), protein / Double(days))
+    }
+
     /// Последние N дней (включая сегодня), от старого к новому — для графиков.
     func lastDays(_ count: Int) -> [DaySummary] {
         let calendar = Calendar.current

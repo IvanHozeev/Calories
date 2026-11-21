@@ -716,7 +716,13 @@ final class CalorieStore {
                                  startDate: finished.startDate,
                                  endDate: end,
                                  startWeightKg: finished.startWeightKg,
-                                 endWeightKg: weightTrend(on: end))
+                                 endWeightKg: weightTrend(on: end),
+                                 // Задуманное — рядом с прожитым: завершили раньше
+                                 // срока, и в сводке видно, сколько недель
+                                 // было в плане и до какого веса.
+                                 plannedWeeks: finished.timeline.reduce(0) { $0 + $1.durationWeeks },
+                                 plannedEndWeightKg: finished.targetWeightKg,
+                                 endedEarly: now < finished.endDate)
         phaseHistory.append(record)
         if let data = try? JSONEncoder().encode(phaseHistory) {
             defaults.set(data, forKey: Keys.phaseHistory)

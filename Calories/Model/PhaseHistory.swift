@@ -12,6 +12,20 @@ struct PhaseRecord: Codable, Identifiable, Equatable {
     var endDate: Date
     var startWeightKg: Double?
     var endWeightKg: Double?
+    /// Что было задумано: сколько недель и до какого веса. Нужны сводке, чтобы
+    /// сравнить задуманное с прожитым. nil у записей, сделанных раньше.
+    var plannedWeeks: Int? = nil
+    var plannedEndWeightKg: Double? = nil
+    /// Фаза закончена раньше срока — человек завершил план сам.
+    var endedEarly: Bool? = nil
+
+    /// Сколько килограммов в неделю ушло или пришло на деле.
+    var weeklyChangeKg: Double? {
+        guard let changeKg else { return nil }
+        let weeks = endDate.timeIntervalSince(startDate) / (7 * 86_400)
+        guard weeks >= 0.5 else { return nil }
+        return changeKg / weeks
+    }
 
     var weeks: Int {
         max(1, Int((endDate.timeIntervalSince(startDate) / (7 * 86_400)).rounded()))

@@ -220,8 +220,8 @@ final class CaloriesUITests: XCTestCase {
         start.tap()
 
         // Шагов с настройкой несколько; доходим «Далее» до шага с доступом к шагам.
-        // На шаге цели выбираем поддержание: план с дефицитом запустил бы
-        // пробный период, и следующие тесты получили бы премиум, которого не ждут.
+        // На шаге цели выбираем поддержание: на нём плана нет вовсе, и
+        // отложенный маршрут не достанется следующим тестам.
         let health = app.buttons["onboardingHealthAccess"]
         let maintenance = app.buttons["onboardingGoal-maintenance"]
         var taps = 0
@@ -240,14 +240,22 @@ final class CaloriesUITests: XCTestCase {
 
         app.buttons["Next"].tap()
         XCTAssertTrue(app.staticTexts["onboardingOffer"].waitForExistence(timeout: 5), "Нет итогового шага")
-        app.buttons["Get Started"].tap()
+        // Финиш предлагает пробный месяц; без него в приложение ведёт «Не
+        // сейчас». Тарифы не загрузились — остаётся обычное «Начать».
+        let skip = app.buttons["onboardingSkipTrial"]
+        if skip.waitForExistence(timeout: 10) {
+            XCTAssertTrue(app.buttons["onboardingTrial"].exists, "Нет кнопки пробного месяца")
+            skip.tap()
+        } else {
+            app.buttons["Get Started"].tap()
+        }
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
                       "После онбординга должно открываться «Сегодня»")
-        // Без плана пробный период не начат — строка плана зовёт в пэйвол.
+        // Без подписки плана нет — строка плана зовёт в пэйвол.
         // Строка ниже кольца, а список ленивый: сначала доводим до неё.
         scrollIntoReach(app.buttons["planStrip"], in: app)
         XCTAssertTrue(app.staticTexts["Personal plan"].waitForExistence(timeout: 5),
-                      "Поддержание не должно создавать план и пробный период")
+                      "Без подписки план не должен запускаться")
     }
 
     // MARK: - Навигация

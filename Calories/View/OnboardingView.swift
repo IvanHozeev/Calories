@@ -9,12 +9,16 @@ import UniformTypeIdentifiers
 /// с разумными значениями по умолчанию: пропустить можно любой шаг кнопкой
 /// «Далее», ничего не трогая.
 ///
-/// План сразу запускает двухнедельный пробный период — за две недели появится
-/// первый вердикт «как идёт план», и будет видно, за что платить.
+/// Кончается предложением и пробным месяцем App Store: человек только что
+/// увидел свой маршрут, и это единственный момент, когда «попробовать» значит
+/// «начать вот это», а не «купить приложение».
 struct OnboardingView: View {
     var store: CalorieStore
     var stepStore: StepStore
     @AppStorage("onboarding_completed") private var onboardingCompleted = false
+    @Environment(PurchaseService.self) private var purchases
+    @State private var isPurchasing = false
+    @State private var showingPlans = false
 
     @State private var step: Step = .welcome
 
@@ -147,6 +151,34 @@ struct OnboardingView: View {
                 insertion: .move(edge: .trailing).combined(with: .opacity),
                 removal: .move(edge: .leading).combined(with: .opacity)
             ))
+        }
+        .task { if purchases.products.isEmpty { await purchases.load() } }
+        // Подписку могли оформить и на листе со всеми тарифами — онбординг
+        // кончается так же, как после кнопки на финише.
+        .onChange(of: purchases.isPremium) { _, premium in
+            if premium, step == .result { finish(subscribed: true) }
+        }
+        .sheet(isPresented: $showingPlans) {
+            NavigationStack {
+                // То же предложение, что на финише: ответы и план ещё не
+                // сохранены, и пэйвол сам собрал бы его по старым данным.
+                PaywallView(store: store, presetOffer: offer)
+                    .toolbar {
+                        // Справа: слева у пэйвола свой крупный заголовок, и
+                        // «Закрыть» наезжал на него.
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Закрыть", systemImage: "xmark") { showingPlans = false }
+                        }
+                    }
+            }
+        }
+        .alert("Не удалось оформить подписку", isPresented: Binding(
+            get: { purchases.purchaseError != nil && !showingPlans },
+            set: { if !$0 { purchases.purchaseError = nil } }
+        )) {
+            Button("Понятно", role: .cancel) { purchases.purchaseError = nil }
+        } message: {
+            Text(purchases.purchaseError ?? "")
         }
     }
 
@@ -780,13 +812,66 @@ struct OnboardingView: View {
             }
             .scrollIndicators(.hidden)
 
-            if draftPlan != nil {
-                Text(String(format: String(localized: "План бесплатно %lld дней"), CalorieStore.trialDays))
-                    .font(.app(.footnote))
+            trialBar
+        }
+    }
+
+    /// Пробный месяц — кнопкой на финише, с ценой под ней.
+    ///
+    /// Один раз и с картой: App Store сам следит, чтобы пробный месяц был
+    /// один на Apple ID, и сам спишет годовую цену, если человек не отменит.
+    /// Поэтому под кнопкой — сколько и когда, а рядом — выход без подписки:
+    /// «Не сейчас» ведёт в приложение, а маршрут ждёт до подписки.
+    ///
+    /// Тарифы не загрузились (нет сети) — остаётся обычное «Начать»: закрыть
+    /// человеку вход в приложение из-за App Store нельзя.
+    @ViewBuilder
+    private var trialBar: some View {
+        if let product = purchases.featured {
+            VStack(spacing: 8) {
+                Button {
+                    isPurchasing = true
+                    Task {
+                        let bought = await purchases.purchase(product)
+                        isPurchasing = false
+                        if bought { finish(subscribed: true) }
+                    }
+                } label: {
+                    Group {
+                        if isPurchasing {
+                            ProgressView().tint(Color(.systemBackground))
+                        } else {
+                            Text(verbatim: product.purchaseTitle(introEligible: purchases.introEligible))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.mainAction)
+                .disabled(isPurchasing)
+                .accessibilityIdentifier("onboardingTrial")
+
+                Text(verbatim: product.termsText(introEligible: purchases.introEligible))
+                    .font(.app(.caption2))
                     .foregroundStyle(.secondary)
-                    .padding(.bottom, 8)
+                    .multilineTextAlignment(.center)
+
+                HStack(spacing: 24) {
+                    Button("Все тарифы") { showingPlans = true }
+                    Button("Не сейчас") { finish(subscribed: false) }
+                        .accessibilityIdentifier("onboardingSkipTrial")
+                }
+                .font(.app(.subheadline, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
             }
-            primaryButton(title: "Начать") { finish() }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 28)
+        } else if purchases.isLoading {
+            ProgressView()
+                .frame(height: 50)
+                .padding(.bottom, 44)
+        } else {
+            primaryButton(title: "Начать") { finish(subscribed: false) }
         }
     }
 
@@ -826,9 +911,10 @@ struct OnboardingView: View {
         .tileSurface(cornerRadius: 22)
     }
 
-    /// Профиль, план и пробный период — в таком порядке: `startPlan` закрыт
-    /// премиумом, и без пробного периода план молча не сохранился бы.
-    private func finish() {
+    /// Профиль и план. `startPlan` закрыт премиумом: с подпиской план
+    /// запускается сразу, без неё — откладывается до подписки.
+    private func finish(subscribed: Bool) {
+        guard !onboardingCompleted else { return }
         if !healthAsked { stepStore.deferAuthorization() }
         store.updateProfile(draftProfile)
         answers.save()
@@ -837,8 +923,14 @@ struct OnboardingView: View {
             KosherSettings.shared.observesCalendar = true
         }
         if let plan = draftPlan {
-            store.startTrialIfNeeded()
-            store.startPlan(plan)
+            // Право от StoreKit доходит до стора через приложение, чуть позже
+            // кнопки, — ставим его здесь, чтобы план не потерялся по дороге.
+            if subscribed { store.isPremium = true }
+            if store.isPremium {
+                store.startPlan(plan)
+            } else {
+                store.keepPendingPlan(plan)
+            }
         }
         onboardingCompleted = true
     }

@@ -58,74 +58,55 @@ struct CalorieStoreTests {
         #expect(!store.isWithinGoal(total: 3344, goal: 3230))
     }
 
-    @Test func trialGivesPremiumForTwoWeeks() {
+    // MARK: - План до подписки
+
+    private func cutPlan(startingDaysAgo days: Int) -> Plan {
+        let start = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
+        return Plan(startDate: start, startWeightKg: 80,
+                    phases: [PlanPhase(intent: .cut, durationWeeks: 12, weeklyRatePercent: 0.7)])
+    }
+
+    /// Своего пробного периода у приложения нет: без подписки — без плана.
+    @Test func withoutASubscriptionThereIsNoFreePlan() {
         #expect(!store.isPremium)
-        store.startTrialIfNeeded()
-        #expect(store.isPremium)
-        #expect(store.trialDaysLeft == CalorieStore.trialDays)
-        #expect(!store.hasPurchasedPremium)
+        store.startPlan(cutPlan(startingDaysAgo: 0))
+        #expect(store.plan == nil)
     }
 
-    @Test func expiredTrialTakesPremiumAway() {
-        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
-        #expect(!store.isPremium)
-        #expect(store.trialDaysLeft == nil)
-    }
+    /// «Не сейчас» на финише онбординга не выбрасывает маршрут: он ждёт
+    /// подписки и запускается, как только она появилась.
+    @Test func thePendingPlanWaitsForTheSubscription() {
+        store.keepPendingPlan(cutPlan(startingDaysAgo: 0))
+        store.adoptPendingPlanIfNeeded()
+        #expect(store.plan == nil)
+        #expect(store.pendingPlan != nil)
 
-    @Test func trialStartsOnlyOnce() {
-        let old = Date().addingTimeInterval(-20 * 86_400)
-        store.startTrialIfNeeded(now: old)
-        store.startTrialIfNeeded()
-        #expect(!store.isTrialActive)
-    }
-
-    @Test func trialEnded_onlyAfterTrialAndWithoutPurchase() {
-        #expect(!store.trialEnded)
-        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
-        #expect(store.trialEnded)
         store.isPremium = true
-        #expect(!store.trialEnded)
+        store.adoptPendingPlanIfNeeded()
+        #expect(store.plan?.phases.first?.intent == .cut)
+        #expect(store.pendingPlan == nil)
     }
 
-    /// От полудня и по календарным суткам: иначе поздно вечером запись «через
-    /// час» уезжала на следующие сутки, а в день перевода часов сами сутки
-    /// длятся не 86 400 секунд, и «пятнадцать суток назад» промахивалось на
-    /// день — тест насчитывал три дня вместо двух.
-    @Test func trialSummary_countsLoggedDaysWithinTheTrial() {
-        let calendar = Calendar.current
-        let start = noon(daysAgo: 15)
-        store.startTrialIfNeeded(now: start)
-        store.add(name: "A", calories: 500, date: calendar.date(byAdding: .day, value: 1, to: start)!)
-        store.add(name: "B", calories: 500, date: calendar.date(byAdding: .day, value: 2, to: start)!)
-        store.add(name: "C", calories: 500, date: calendar.date(byAdding: .hour, value: 49, to: start)!)
-        // Запись после конца пробного периода в итог не входит.
-        store.add(name: "D", calories: 500, date: Date())
-        #expect(store.trialSummary?.loggedDays == 2)
+    /// Подписку оформили через десять дней — маршрут начинается сегодня, а не
+    /// в день онбординга: иначе с первого дня он показывал бы отставание.
+    @Test func aLatePendingPlanStartsToday() {
+        store.keepPendingPlan(cutPlan(startingDaysAgo: 10))
+        store.isPremium = true
+        store.adoptPendingPlanIfNeeded()
+        #expect(store.plan?.startDate == Calendar.current.startOfDay(for: Date()))
     }
 
-    /// День, в который пробный период кончился, в итог не идёт.
-    ///
-    /// Он начался до того часа, в который период кончился, и пока границы
-    /// сравнивались в разных единицах — день с мгновением, — в итог попадал
-    /// весь день целиком, вместе с едой, записанной уже после конца.
-    @Test func theDayTheTrialRanOutIsNotCounted() {
-        let calendar = Calendar.current
-        // Четырнадцать суток назад — значит период кончается сегодня в полдень.
-        let start = noon(daysAgo: CalorieStore.trialDays)
-        store.startTrialIfNeeded(now: start)
-        store.add(name: "A", calories: 500, date: calendar.date(byAdding: .day, value: 1, to: start)!)
-        store.add(name: "B", calories: 500, date: Date())
-
-        #expect(store.trialSummary?.loggedDays == 1)
+    /// План, начатый вручную, отложенный не перезаписывает.
+    @Test func thePendingPlanDoesNotReplaceARunningOne() {
+        store.isPremium = true
+        let running = Plan(startDate: Date(), startWeightKg: 80,
+                           phases: [PlanPhase(intent: .bulk, durationWeeks: 8, weeklyRatePercent: 0.25)])
+        store.startPlan(running)
+        store.keepPendingPlan(cutPlan(startingDaysAgo: 0))
+        store.adoptPendingPlanIfNeeded()
+        #expect(store.plan?.phases.first?.intent == .bulk)
+        #expect(store.pendingPlan == nil)
     }
-
-    /// Полдень столько-то суток назад — по календарю, а не по секундам.
-    private func noon(daysAgo: Int) -> Date {
-        let calendar = Calendar.current
-        let day = calendar.date(byAdding: .day, value: -daysAgo, to: calendar.startOfDay(for: Date()))!
-        return calendar.date(byAdding: .hour, value: 12, to: day)!
-    }
-
 
     @Test func weekStrip_goesBackToTheFirstEntryAndEndsToday() {
         #expect(store.weekStripWeeks().count == 1)
@@ -142,13 +123,6 @@ struct CalorieStoreTests {
     @Test func weekStrip_isCappedAtTwelveWeeks() {
         store.add(name: "A", calories: 500, date: Date().addingTimeInterval(-200 * 86_400))
         #expect(store.weekStripWeeks().count == 12)
-    }
-
-    @Test func purchaseOutlivesTheTrial() {
-        store.startTrialIfNeeded(now: Date().addingTimeInterval(-15 * 86_400))
-        store.isPremium = true
-        #expect(store.isPremium)
-        #expect(store.hasPurchasedPremium)
     }
 
     @Test func dishServingDefaultsToTheWholeBatch() {

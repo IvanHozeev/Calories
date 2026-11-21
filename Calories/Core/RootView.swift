@@ -71,6 +71,9 @@ struct RootView: View {
             set: { _ in }
         )) {
             OnboardingView(store: store, stepStore: stepStore)
+                // Финиш онбординга продаёт пробный месяц, и покупкам нужно
+                // быть под рукой и у этого кавера.
+                .environment(purchases)
         }
         .overlay {
             if showingSplash {

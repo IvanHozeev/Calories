@@ -34,6 +34,10 @@ struct CalorieCounterApp: App {
     private func applyEntitlements(store: CalorieStore) {
         if purchases.isPremium {
             store.isPremium = true
+            // Подписку могли оформить через неделю после онбординга — из
+            // профиля или с «Сегодня»: тогда маршрут, отложенный на финише,
+            // запускается сейчас.
+            store.adoptPendingPlanIfNeeded()
         }
     }
 

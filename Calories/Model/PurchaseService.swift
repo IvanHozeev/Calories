@@ -35,8 +35,18 @@ final class PurchaseService {
     private(set) var isLoading = false
     private(set) var loadFailed = false
     var purchaseError: String?
+    /// Положен ли ещё бесплатный месяц. App Store даёт его один раз на группу
+    /// подписок и Apple ID — после переустановки или отмены в пробном периоде
+    /// второго не будет, и обещать его на кнопке нельзя. Пока StoreKit не
+    /// ответил — считаем положенным: новых людей больше, чем вернувшихся.
+    private(set) var introEligible = true
 
     var isPremium: Bool { !purchasedIDs.isEmpty }
+
+    /// Тариф, который предлагаем по умолчанию: годовой, с пробным месяцем.
+    var featured: Product? {
+        subscriptions.first { $0.id == ProductID.yearly } ?? subscriptions.last
+    }
 
     /// Куплена пара приложений, а не один Calories.
     var hasBundle: Bool { !purchasedIDs.isDisjoint(with: ProductID.bundles) }
@@ -97,6 +107,9 @@ final class PurchaseService {
         }
         purchasedIDs = active
         publishBundle()
+        if let subscription = featured?.subscription {
+            introEligible = await subscription.isEligibleForIntroOffer
+        }
     }
 
     /// Сказать соседу, что пара куплена здесь.

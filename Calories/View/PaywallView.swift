@@ -9,16 +9,16 @@ import StoreKit
 enum PaywallFocus {
     case general
     case plan
-    /// Пробные две недели кончились: разговор не про «купи», а про «вот что было
-    /// за две недели, и вот что закрылось».
+    /// Пробный месяц уже был, а подписки нет: отменили в пробном периоде или
+    /// она истекла. Разговор не про «попробуй», а про то, что закрылось.
     case trialEnded
 
     /// Заголовок и подзаголовок — от предложения, собранного по ответам
-    /// онбординга; у конца пробного периода — свои.
+    /// онбординга; у конца доступа — свои.
     func headline(_ offer: Offer) -> String {
         switch self {
         case .general, .plan: return offer.headline
-        case .trialEnded: return String(localized: "Пробные две недели закончились")
+        case .trialEnded: return String(localized: "Доступ к программе закончился")
         }
     }
 
@@ -33,6 +33,9 @@ enum PaywallFocus {
 struct PaywallView: View {
     var store: CalorieStore
     var focus: PaywallFocus = .general
+    /// Предложение, собранное снаружи, — с финиша онбординга, где ответы ещё
+    /// не сохранены.
+    var presetOffer: Offer? = nil
 
     @Environment(PurchaseService.self) private var purchases
     @Environment(\.dismiss) private var dismiss
@@ -40,11 +43,11 @@ struct PaywallView: View {
     @State private var selectedID: String?
     @State private var isPurchasing = false
 
-    /// Кончился пробный период — говорим об этом, откуда бы ни открыли пэйвол.
-    /// Открытому бандлом про конец пробного периода говорить нечего: доступ
-    /// у него есть, и «пробные две недели закончились» звучит как потеря.
+    /// Пробный месяц уже взят, а подписки нет — говорим об этом, откуда бы ни
+    /// открыли пэйвол. Открытому бандлом про конец доступа говорить нечего:
+    /// доступ у него есть, и такой заголовок звучал бы как потеря.
     private var shownFocus: PaywallFocus {
-        store.trialEnded && !unlockedByBundle ? .trialEnded : focus
+        !purchases.introEligible && !purchases.isPremium && !unlockedByBundle ? .trialEnded : focus
     }
 
     /// Открыто бандлом: своей покупки нет, но пара приложений куплена в
@@ -57,6 +60,7 @@ struct PaywallView: View {
     /// а не удержание, на котором человек может стоять сейчас), без плана — по
     /// профилю.
     private var offer: Offer {
+        if let presetOffer { return presetOffer }
         let intent: PlanIntent?
         if let moving = store.plan?.phases.first(where: { $0.intent != .maintenance }) {
             intent = moving.intent
@@ -74,14 +78,13 @@ struct PaywallView: View {
 
     private var selectedProduct: Product? {
         purchases.products.first { $0.id == selectedID }
-            ?? purchases.subscriptions.first
+            ?? purchases.featured
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
                 header
-                if shownFocus == .trialEnded { trialSummary }
                 features
 
                 if purchases.isPremium {
@@ -112,7 +115,7 @@ struct PaywallView: View {
         }
         .task {
             if purchases.products.isEmpty { await purchases.load() }
-            selectedID = purchases.subscriptions.last?.id
+            selectedID = purchases.featured?.id
         }
         .alert("Не удалось оформить подписку", isPresented: Binding(
             get: { purchases.purchaseError != nil },
@@ -187,39 +190,6 @@ struct PaywallView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .tileSurface(cornerRadius: 20)
         .padding(.horizontal, 20)
-    }
-
-    /// Итоги пробного периода: то, что уже работает на человека.
-    @ViewBuilder
-    private var trialSummary: some View {
-        if let summary = store.trialSummary {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("За две недели")
-                    .font(.app(.headline))
-                summaryRow("calendar", String(format: String(localized: "Дней с записями: %lld из %lld"),
-                                              summary.loggedDays, CalorieStore.trialDays))
-                if let change = summary.weightChangeKg {
-                    summaryRow("figure.stand", String(format: String(localized: "Вес по тренду: %+.1f кг"), change))
-                }
-                if let status = store.planAdherence()?.status {
-                    summaryRow(status.icon, status.title)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .glassCard()
-            .padding(.horizontal, 20)
-        }
-    }
-
-    private func summaryRow(_ icon: String, _ text: String) -> some View {
-        Label {
-            Text(verbatim: text)
-        } icon: {
-            Image(systemName: icon)
-                .foregroundStyle(.green)
-        }
-        .font(.app(.subheadline))
     }
 
     /// То же место, где обычно тарифы, но вместо них — откуда взялся доступ.
@@ -326,7 +296,8 @@ struct PaywallView: View {
                     if isPurchasing {
                         ProgressView().tint(Color(.systemBackground))
                     } else {
-                        Text("Начать программу")
+                        Text(verbatim: selectedProduct?.purchaseTitle(introEligible: purchases.introEligible)
+                             ?? String(localized: "Начать программу"))
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -334,7 +305,8 @@ struct PaywallView: View {
             .buttonStyle(.mainAction)
             .disabled(selectedProduct == nil || isPurchasing)
 
-            Text(verbatim: termsText(for: selectedProduct))
+            Text(verbatim: selectedProduct?.termsText(introEligible: purchases.introEligible)
+                 ?? String(localized: "Отменить можно в любой момент."))
                 .font(.app(.caption2))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -404,49 +376,6 @@ struct PaywallView: View {
         .font(.app(.caption, weight: .semibold))
         .foregroundStyle(.secondary)
         .accessibilityIdentifier("restorePurchases")
-    }
-
-    /// Что и когда спишут — под кнопкой, с ценой.
-    ///
-    /// «Потом по тарифу» не называло сумму, а App Review требует, чтобы рядом
-    /// с кнопкой было видно, сколько и за какой срок человек заплатит после
-    /// пробного периода. Цена и срок — от выбранного тарифа.
-    private func termsText(for product: Product?) -> String {
-        guard let product else { return String(localized: "Отменить можно в любой момент.") }
-        guard let subscription = product.subscription else {
-            return String(format: String(localized: "%@ один раз, без подписки."), product.displayPrice)
-        }
-        let price = pricePerPeriod(product.displayPrice, subscription.subscriptionPeriod)
-        if let offer = subscription.introductoryOffer, offer.paymentMode == .freeTrial {
-            return String(format: String(localized: "Пробный период — %1$@, потом %2$@. Отменить можно в любой момент."),
-                          duration(offer.period), price)
-        }
-        return String(format: String(localized: "%@. Отменить можно в любой момент."), price)
-    }
-
-    private func pricePerPeriod(_ price: String, _ period: Product.SubscriptionPeriod) -> String {
-        switch period.unit {
-        case .year: return String(format: String(localized: "%@ в год"), price)
-        case .month: return String(format: String(localized: "%@ в месяц"), price)
-        case .week: return String(format: String(localized: "%@ в неделю"), price)
-        default: return price
-        }
-    }
-
-    /// «1 неделя», «3 дня» — словами системы, на языке интерфейса.
-    private func duration(_ period: Product.SubscriptionPeriod) -> String {
-        var parts = DateComponents()
-        switch period.unit {
-        case .day: parts.day = period.value
-        case .week: parts.weekOfMonth = period.value
-        case .month: parts.month = period.value
-        case .year: parts.year = period.value
-        @unknown default: parts.day = period.value
-        }
-        let formatter = DateComponentsFormatter()
-        formatter.unitsStyle = .full
-        formatter.allowedUnits = [.day, .weekOfMonth, .month, .year]
-        return formatter.string(from: parts) ?? ""
     }
 
     private func featureRow(_ icon: String, _ title: String, _ detail: String) -> some View {

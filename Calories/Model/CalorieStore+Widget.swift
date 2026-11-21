@@ -52,7 +52,7 @@ extension CalorieStore {
         // Своё, а не подаренное: иначе открытое по бандлу соседа уходило бы
         // к нему же обратно как «премиум Calories», и никто бы уже не сказал,
         // за что именно человек заплатил.
-        groupDefaults?.set(hasPurchasedPremium || isTrialActive, forKey: "shared_is_premium")
+        groupDefaults?.set(hasPurchasedPremium, forKey: "shared_is_premium")
     }
 
     /// Когда человек ел в последний раз и насколько плотно.

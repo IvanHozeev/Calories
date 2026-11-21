@@ -61,7 +61,7 @@
             "displayPrice": "0",
             "internalID": "6740480334",
             "paymentMode": "free",
-            "subscriptionPeriod": "P1W"
+            "subscriptionPeriod": "P1M"
           },
           "localizations": [
             {
@@ -92,7 +92,7 @@
             "displayPrice": "0",
             "internalID": "6740480335",
             "paymentMode": "free",
-            "subscriptionPeriod": "P1W"
+            "subscriptionPeriod": "P1M"
           },
           "localizations": [
             {

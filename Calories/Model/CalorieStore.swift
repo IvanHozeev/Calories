@@ -76,20 +76,17 @@ final class CalorieStore {
     }
     var profile: UserProfile?
     var plan: Plan?
-    /// Премиум куплен. Сам по себе не значит доступа: его даёт ещё и пробный период.
+    /// Премиум куплен — или идёт пробный месяц App Store: для StoreKit это
+    /// та же подписка, просто первый месяц стоит ноль.
     var hasPurchasedPremium: Bool {
         didSet {
             defaults.set(hasPurchasedPremium, forKey: Keys.premium)
             // И в общую группу — сразу, а не до следующего пересчёта дня:
             // покупку совершают в одном приложении, а открыться она должна
             // в обоих, пока человек ещё помнит, за что платил.
-            groupDefaults?.set(hasPurchasedPremium || isTrialActive, forKey: "shared_is_premium")
+            groupDefaults?.set(hasPurchasedPremium, forKey: "shared_is_premium")
         }
     }
-
-    /// Когда начался пробный период плана. Начинается один раз — при первом плане
-    /// из онбординга — и заново не выдаётся, даже если план завершить и начать снова.
-    var trialStartedAt: Date?
 
     /// Куплена пара приложений — здесь или в GymLogger.
     ///
@@ -291,7 +288,7 @@ final class CalorieStore {
         static let profile = "user_profile"
         static let plan = "active_plan"
         static let premium = "is_premium"
-        static let trialStarted = "plan_trial_started"
+        static let pendingPlan = "plan_pending"
     }
 
     init(
@@ -319,7 +316,6 @@ final class CalorieStore {
             self.dailyGoalPhaseID = loadedPlan?.phase(on: Date())?.id
         }
         self.hasPurchasedPremium = defaults.bool(forKey: Keys.premium)
-        self.trialStartedAt = defaults.object(forKey: Keys.trialStarted) as? Date
         refresh()
         lockPastGoals()
     }

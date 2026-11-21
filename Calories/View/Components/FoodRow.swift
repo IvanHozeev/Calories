@@ -56,6 +56,18 @@ struct FoodRow: View {
         var color: Color { macros.leadingKind?.color ?? .primary.opacity(0.85) }
     }
 
+    /// Порция для нижней строки: у приёма из одной части — вес этой части,
+    /// у продукта — переданная порция. У составного приёма вес стоит в строке
+    /// каждой части, и отдельной порции нет.
+    private var portionText: String? {
+        if !parts.isEmpty {
+            guard parts.count == 1, let only = parts.first else { return nil }
+            if let weight = PortionLabel.text(grams: only.grams, pieces: only.pieces) { return weight }
+            return portion.isEmpty ? nil : portion
+        }
+        return portion.isEmpty ? nil : portion
+    }
+
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
 
     @Environment(\.colorScheme) private var colorScheme
@@ -252,11 +264,7 @@ struct FoodRow: View {
                                   font: .app(.callout, weight: .semibold),
                                   color: nameColor(only.macros.leadingKind),
                                   traits: only.traits)
-                        if let weight = PortionLabel.text(grams: only.grams, pieces: only.pieces) {
-                            portionLine(weight)
-                        } else if !portion.isEmpty {
-                            portionLine(portion)
-                        }
+
                     } else {
                         ForEach(parts) { part in
                             nameBlock(text: part.name,
@@ -278,12 +286,6 @@ struct FoodRow: View {
                               // цвет значил одно.
                               color: nameColor(leadingKind),
                               traits: traits)
-                    // Порция — второй строкой, а не хвостом названия: «Тунец
-                    // консервированный 🔥 108 г» переносился по словам, и вес
-                    // оказывался то в конце первой строки, то в начале второй.
-                    if !portion.isEmpty {
-                        portionLine(portion)
-                    }
                 }
 
                 // Подпись слева — сколько ингредиентов у блюда. Всё остальное
@@ -312,6 +314,14 @@ struct FoodRow: View {
                 if hasMacros {
                     MacroShareBar(macros: macros, width: 56)
                         .padding(.top, 2)
+                }
+
+                // Граммы — самой нижней строкой, под полоской макросов: порция
+                // отдельной строкой, а не хвостом названия («Тунец
+                // консервированный 🔥 108 г» переносился по словам, и вес
+                // оказывался то в конце первой строки, то в начале второй).
+                if let text = portionText {
+                    portionLine(text)
                 }
             }
             // Колонке отдаём ровно остаток ширины ряда: имя переносится по

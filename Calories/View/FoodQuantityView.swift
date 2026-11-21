@@ -530,20 +530,6 @@ struct DishQuantityView: View {
                 .listRowInsets(EdgeInsets())
             }
 
-
-            if !dish.ingredients.isEmpty {
-                Section("Состав") {
-                    ForEach(dish.ingredients) { ingredient in
-                        HStack {
-                            Text(ingredient.foodName)
-                                .font(.app(.body, weight: .semibold))
-                            Spacer()
-                            Text("\(Int(ingredient.grams)) г")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-            }
         }
         .glassRow()
         .listSectionSpacing(8)

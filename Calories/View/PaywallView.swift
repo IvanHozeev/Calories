@@ -3,6 +3,9 @@ import StoreKit
 
 /// С какой фичи пользователь пришёл в пейволл. Абстрактная «Подписка» продаёт хуже,
 /// чем конкретный ответ на вопрос, который человек задавал секунду назад.
+///
+/// Продаём не функции, а результат: сбросить вес и не вернуть его. Функции —
+/// это «как»; человек платит за «зачем», и за то, что видит путь к нему.
 enum PaywallFocus {
     case general
     case plan
@@ -12,17 +15,15 @@ enum PaywallFocus {
 
     var headline: String {
         switch self {
-        case .general: return String(localized: "Норма, которая считает по тебе")
-        case .plan: return String(localized: "Персональный план")
+        case .general, .plan: return String(localized: "Сбросить вес и удержать его")
         case .trialEnded: return String(localized: "Пробные две недели закончились")
         }
     }
 
     var subtitle: String? {
         switch self {
-        case .general: return String(localized: "Не число из формулы, а расход, измеренный по твоему дневнику и весам.")
-        case .plan: return String(localized: "Персональный план калорийности под твои цели")
-        case .trialEnded: return String(localized: "Норма теперь считается по формуле, а не по твоему расходу. Расход по факту, экран плана, вердикт, банк калорий и настройка — в Premium.")
+        case .general, .plan: return String(localized: "Программа, а не счётчик: сушка с финишем, выход из неё и удержание. Каждую неделю видно, идёшь ли ты по плану.")
+        case .trialEnded: return String(localized: "Норма снова считается по формуле. Довести маршрут до финиша и удержать результат — с Premium.")
         }
     }
 }
@@ -135,30 +136,51 @@ struct PaywallView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 28)
             }
+
+            if let route {
+                Text(verbatim: route)
+                    .font(.app(.subheadline, weight: .semibold))
+                    .foregroundStyle(ProgressRing.kcalColors[0])
+                    .monospacedDigit()
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(ProgressRing.kcalColors[0].opacity(0.14), in: Capsule())
+                    .padding(.horizontal, 24)
+                    .accessibilityIdentifier("paywallRoute")
+            }
         }
     }
 
-    /// Что входит — не списком галочек, а с одной строкой объяснения на
-    /// каждую.
+    /// Свой маршрут одной строкой, если план уже есть: «80.2 → 75.7 кг к
+    /// 13 марта». Предложение с твоими цифрами читается как обещание, а не
+    /// как реклама. Когда вес по плану не меняется, двигаться некуда — строки нет.
+    private var route: String? {
+        guard let plan = store.plan,
+              abs(plan.targetWeightKg - plan.startWeightKg) >= 0.5 else { return nil }
+        return String(format: String(localized: "Твой маршрут: %1$@ → %2$@ кг к %3$@"),
+                      String(format: "%.1f", plan.startWeightKg),
+                      String(format: "%.1f", plan.targetWeightKg),
+                      PlanView.planDate(plan.endDate))
+    }
+
+    /// Что получаешь — результатами, а не функциями, с одной строкой о том,
+    /// за счёт чего.
     ///
-    /// Галочка без объяснения продаёт только то, что человек и так знает по
-    /// названию. А продаёт здесь ровно то, чего нет у счётчиков калорий:
-    /// норма, которая идёт за измеренным расходом, и которая не меняется
-    /// у человека за спиной.
+    /// Каждая строка отвечает на свою боль: когда приду к цели, не вернётся ли
+    /// вес, работает ли это вообще, почему встал вес, как не сорваться.
     private var features: some View {
         VStack(spacing: 18) {
-            featureRow("chart.line.uptrend.xyaxis", "Норма идёт за расходом",
-                       "Расход считается по твоему дневнику и весам, а не по формуле: она не знает ни твоей работы, ни адаптации к дефициту.")
-            featureRow("hand.raised", "Норма не меняется молча",
-                       "Раз в неделю — итог: сколько ел, куда пошёл вес и какую норму предлагает план. До твоего ответа держится прежняя.")
-            featureRow("calendar", "План из фаз",
-                       "Сушка, поддержание, набор — у каждой свой темп и срок, и видно, на какой ты неделе.")
-            featureRow("fork.knife", "Рефиды и диет-брейки",
-                       "По расписанию или вручную. Рефид можно перенести на праздник, не ломая неделю.")
-            featureRow("checkmark.seal", "Вердикт, который не врёт",
-                       "Если данных мало, так и будет сказано: по трём дням вес не судят.")
-            featureRow("banknote", "Банк калорий",
-                       "Недобор одного дня не пропадает: он добавляется к остальным дням недели, а перебор вычитается.")
+            featureRow("flag.checkered", "Финиш с датой",
+                       "Темп, при котором уходит жир, а не мышцы, и день, к которому ты придёшь к цели.")
+            featureRow("shield.lefthalf.filled", "Чтобы вес не вернулся",
+                       "После сушки план сам ставит удержание нужной длины и плавно выводит из дефицита. Большинство диет кончается откатом именно здесь.")
+            featureRow("checkmark.seal", "Видно, что работает",
+                       "Раз в неделю — вердикт по тренду, а не по утренним весам. По трём дням вес не судят, и приложение так и скажет.")
+            featureRow("chart.line.uptrend.xyaxis", "Норма по твоему расходу",
+                       "Расход измеряется по дневнику и весам, а не по формуле. Тело привыкает к дефициту — норма это учитывает, но меняется только с твоего согласия.")
+            featureRow("fork.knife", "Сушка без срывов",
+                       "Рефиды и диет-брейки по расписанию, а недобор одного дня переходит на остальные дни недели.")
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -300,7 +322,7 @@ struct PaywallView: View {
                     if isPurchasing {
                         ProgressView().tint(Color(.systemBackground))
                     } else {
-                        Text("Оформить Premium")
+                        Text("Начать программу")
                     }
                 }
                 .frame(maxWidth: .infinity)

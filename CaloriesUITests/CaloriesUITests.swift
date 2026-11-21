@@ -1353,7 +1353,7 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Restore"].exists,
                       "Восстановление покупок обязательно для App Review")
-        XCTAssertTrue(app.staticTexts["Refeeds and diet breaks"].exists,
+        XCTAssertTrue(app.staticTexts["So the weight stays off"].exists,
                       "Перечень фич должен быть переведён, а не падать на русский исходник")
     }
 

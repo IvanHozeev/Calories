@@ -151,10 +151,17 @@ struct PlanEditorView: View {
                             Button {
                                 addPhase(intent)
                             } label: {
-                                Label(intent.title, systemImage: "plus")
-                                    .font(.app(.subheadline, weight: .semibold))
-                                    .lineLimit(1)
-                                    .fixedSize()
+                                // Значок и слово руками, не `Label`: в строке
+                                // списка он показывал одну иконку, и кнопки
+                                // стояли тремя одинаковыми плюсами.
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus")
+                                        .font(.app(.caption, weight: .bold))
+                                    Text(verbatim: intent.title)
+                                        .font(.app(.subheadline, weight: .semibold))
+                                        .lineLimit(1)
+                                }
+                                .fixedSize()
                             }
                             .buttonStyle(.bordered)
                             .buttonBorderShape(.capsule)

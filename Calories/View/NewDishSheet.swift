@@ -225,7 +225,9 @@ struct NewDishSheet: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(ingredient.foodName)
                                 .font(.app(.body, weight: .semibold))
-                            Text("\(Int(ingredient.grams)) г")
+                            Text(ingredient.cooked == true
+                                 ? "\(Int(ingredient.grams)) \(String(localized: "г")) · \(String(localized: "Готовый").lowercased())"
+                                 : "\(Int(ingredient.grams)) \(String(localized: "г"))")
                                 .font(.app(.caption))
                                 .foregroundStyle(.secondary)
                         }
@@ -461,6 +463,9 @@ struct IngredientPickerSheet: View {
     @State private var selectedFood: FoodItem? = nil
     @State private var grams: Double = 100
     @State private var gramsText = "100"
+    /// Вес готового, а не сухого — только у продуктов, где измерено, сколько
+    /// из сухого выходит готового.
+    @State private var isCooked = false
     @FocusState private var gramsFocused: Bool
 
     private var filteredCustomFoods: [FoodItem] {
@@ -488,6 +493,7 @@ struct IngredientPickerSheet: View {
         selectedFood = food
         grams = 100
         gramsText = "100"
+        isCooked = false
     }
 
     private var foodPickerView: some View {
@@ -521,9 +527,24 @@ struct IngredientPickerSheet: View {
     }
 
     private func gramsEntryView(for food: FoodItem) -> some View {
-        let cal = Int((Double(food.caloriesPer100g) * grams / 100).rounded())
-        let m = food.macrosPer100g.portion(grams: grams)
+        // Числа на сто грамм — сухого или готового, как выбрано.
+        let basis = isCooked ? food.cookedPer100g : nil
+        let per100Calories = basis?.calories ?? food.caloriesPer100g
+        let per100Macros = basis?.macros ?? food.macrosPer100g
+        let cal = Int((Double(per100Calories) * grams / 100).rounded())
+        let m = per100Macros.portion(grams: grams)
         return List {
+            if food.cookedPer100g != nil {
+                Section {
+                    Picker("Вид", selection: $isCooked) {
+                        Text("Сухой").tag(false)
+                        Text("Готовый").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                }
+            }
             // Поле и стрелки — одной строкой, как на экране порции. Две
             // строки про один и тот же вес («Количество, г 100» и «100 г»
             // со степпером) читались как два разных числа.
@@ -563,9 +584,10 @@ struct IngredientPickerSheet: View {
                 Button("Добавить") {
                     let ingredient = DishIngredient(
                         foodName: food.name,
-                        caloriesPer100g: food.caloriesPer100g,
-                        macrosPer100g: food.macrosPer100g,
-                        grams: grams
+                        caloriesPer100g: per100Calories,
+                        macrosPer100g: per100Macros,
+                        grams: grams,
+                        cooked: isCooked && basis != nil ? true : nil
                     )
                     onAdd(ingredient)
                     dismiss()

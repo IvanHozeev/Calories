@@ -32,6 +32,10 @@ struct NewFoodSheet: View {
     /// Пищевая ценность на одну штуку, а не на 100 г: шейк, батончик, у
     /// которых на упаковке КБЖУ всей бутылки, а вес не указан.
     @State private var perUnit = false
+    /// Два веса для готового продукта: сколько было сухого и сколько из него
+    /// вышло готового.
+    @State private var dryWeight = ""
+    @State private var cookedWeight = ""
     /// Витамины, взятые из каталога, и строка, из которой они взяты.
     @State private var linkedMicronutrients = Micronutrients()
     @State private var linkedCatalogID: Int?
@@ -317,6 +321,7 @@ struct NewFoodSheet: View {
             dataSection
             packageSection
             servingSection
+            cookedSection
             donorSection
             vitaminsSection
             dishesSection
@@ -351,6 +356,9 @@ struct NewFoodSheet: View {
                                                micronutrientsAreEstimated: linkedIsEstimate, producer: trimmedProducer,
                                                isPerUnit: perUnit)
                         }
+                        // Измеренное «из сухого вышло готового» — тоже после
+                        // сохранения: у нового продукта до этого нет объекта.
+                        store.setCookingYield(perUnit ? nil : cookedYield, forFoodNamed: name)
                         // Статус — после сохранения, как и коэффициент: у
                         // нового продукта до этого момента ещё нет объекта,
                         // которому его поставить.
@@ -395,6 +403,10 @@ struct NewFoodSheet: View {
                             guard let amount = food.micronutrients[nutrient], amount > 0 else { continue }
                             entered[nutrient] = String(format: "%g", amount)
                         }
+                    }
+                    if let factor = food.cookingYield {
+                        dryWeight = "100"
+                        cookedWeight = String(format: "%g", (factor * 100).rounded())
                     }
                     if let id = food.catalogID,
                        let source = FoodCatalog.all.first(where: { $0.id == id }) {
@@ -645,6 +657,60 @@ private extension NewFoodSheet {
         explain("Это значение будет подставляться при добавлении продукта в приём пищи.").map { Text($0) }
     }
     }
+    }
+
+    /// Готовый продукт: данные выше — на сто грамм сухого, а здесь два веса.
+    ///
+    /// Спрашиваем не коэффициент, а два веса — их человек знает, потому что
+    /// взвешивает. Коэффициент приложение считает само и показывает, что
+    /// получилось на сто грамм готового.
+    @ViewBuilder
+    var cookedSection: some View {
+        if !perUnit {
+            Section {
+                HStack {
+                    Text("Сухого")
+                    Spacer()
+                    TextField("100", text: $dryWeight)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                    Text("г").foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("Вышло готового")
+                    Spacer()
+                    TextField("250", text: $cookedWeight)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 80)
+                    Text("г").foregroundStyle(.secondary)
+                }
+                if let factor = cookedYield, enteredCalories > 0 || hasMacros {
+                    let cooked = CookingYield.cookedPer100g(calories: enteredCalories,
+                                                            macros: draftMacros, factor: factor)
+                    LabeledContent("На 100 г готового") {
+                        Text(verbatim: "\(cooked.calories) \(String(localized: "ккал"))")
+                            .font(.app(.body, weight: .medium))
+                            .monospacedDigit()
+                    }
+                    MacroTags(macros: cooked.macros)
+                } else if !dryWeight.isEmpty || !cookedWeight.isEmpty {
+                    Text("Проверь веса: готового не может быть в разы больше или меньше сухого.")
+                        .font(.app(.caption))
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("Готовый продукт")
+            } footer: {
+                explain("Данные выше — на 100 г сухого. Взвесил, сколько из него вышло готового, — и при добавлении можно выбрать «сухой» или «готовый»: калории пересчитаются сами.").map { Text($0) }
+            }
+        }
+    }
+
+    /// Коэффициент по двум весам — nil, если поля пусты или числа не складываются.
+    private var cookedYield: Double? {
+        CookingYield.factor(dry: dryWeight.decimalValueOrZero, cooked: cookedWeight.decimalValueOrZero)
     }
 
     /// Витамины из базы: подобранные по названию и цифрам плюс поиск руками.

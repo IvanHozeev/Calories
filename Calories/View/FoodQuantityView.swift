@@ -14,6 +14,9 @@ struct FoodQuantityView: View {
     /// Штуки — у продукта «на штуку», чей вес неизвестен. Числа продукта
     /// введены на одну штуку, и в арифметике она — сто условных единиц.
     @State private var pieces: Double
+    /// Вес — готового продукта, а не сухого: переключатель есть только там, где
+    /// измерено, сколько из сухого выходит готового.
+    @State private var isCooked = false
     @FocusState private var gramsFocused: Bool
 
     /// Открыт переходом внутри стека, а не листом. Тогда «Отмена» не нужна:
@@ -54,8 +57,14 @@ struct FoodQuantityView: View {
     /// штуки, переведённые в сотни.
     private var amount: Double { food.isPerUnit ? pieces * 100 : grams }
 
+    /// Числа на сто грамм: сухого или готового — как выбрано.
+    private var basis: (calories: Int, macros: Macros) {
+        if isCooked, let cooked = food.cookedPer100g { return cooked }
+        return (food.caloriesPer100g, food.macrosPer100g)
+    }
+
     private var calories: Int {
-        Int((Double(food.caloriesPer100g) * amount / 100).rounded())
+        Int((Double(basis.calories) * amount / 100).rounded())
     }
 
     /// Что положить в приём: у продукта «на штуку» — штуки без граммов.
@@ -69,7 +78,7 @@ struct FoodQuantityView: View {
     private var isHundredGrams: Bool { abs(amount - 100) < 0.5 }
 
     private var macros: Macros {
-        food.macrosPer100g.portion(grams: amount)
+        basis.macros.portion(grams: amount)
     }
 
     var body: some View {
@@ -86,10 +95,26 @@ struct FoodQuantityView: View {
                     calories: calories,
                     densityLine: isHundredGrams ? nil
                         : (food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
-                                          : "\(food.caloriesPer100g) ккал / 100 г"),
+                                          : "\(basis.calories) ккал / 100 г"),
                     macros: macros,
                     traits: food.traits)
                 .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            }
+
+            // Сухой или готовый: вес в граммах — того, что лежит на весах. Только у
+            // продукта, для которого человек сам измерил, сколько из сухого
+            // выходит готового.
+            if !food.isPerUnit, food.cookedPer100g != nil {
+                Section {
+                    Picker("Вид", selection: $isCooked) {
+                        Text("Сухой").tag(false)
+                        Text("Готовый").tag(true)
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                    .accessibilityIdentifier("cookedState")
+                }
             }
 
             // Порядок: карточка продукта, количество, «после приёма». Карточка

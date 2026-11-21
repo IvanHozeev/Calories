@@ -190,6 +190,9 @@ struct DishIngredient: Codable, Identifiable, Hashable {
     var caloriesPer100g: Int
     var macrosPer100g: Macros
     var grams: Double
+    /// Вес — готового продукта, а не сухого. Числа на сто грамм у такого
+    /// ингредиента уже пересчитаны на готовое. nil у всех записанных раньше.
+    var cooked: Bool? = nil
 
     var calories: Int { Int((Double(caloriesPer100g) * grams / 100).rounded()) }
     var macros: Macros { macrosPer100g.portion(grams: grams) }

@@ -168,6 +168,18 @@ extension CalorieStore {
         }
     }
 
+    /// Запомнить, во сколько раз продукт тяжелеет, — или забыть (`nil`).
+    ///
+    /// Только своё измерение: справочных коэффициентов нет.
+    func setCookingYield(_ factor: Double?, forFoodNamed name: String) {
+        guard let food = customFoods.first(where: { $0.name == name }) else { return }
+        let value = factor.flatMap { CookingYield.allowed.contains($0) ? $0 : nil }
+        guard food.cookingYield != value else { return }
+        food.cookingYield = value
+        food.updatedAt = Date()
+        persistCustomFoods()
+    }
+
     /// Что человек обычно собирает в это окно — приём целиком.
     ///
     /// Полгода, как и у пар: привычный завтрак не меняется за месяц, а у

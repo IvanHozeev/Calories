@@ -444,7 +444,7 @@ struct PantryView: View {
                     NavigationLink {
                         NewDishSheet(store: store, editingDish: dish, isEmbedded: true)
                     } label: {
-                        DishRow(dish: dish)
+                        dishRow(dish)
                     }
                     .swipeActions(edge: .leading) {
                         recordButton { serving = .dish(dish) }
@@ -591,6 +591,25 @@ struct PantryView: View {
     }
 
     // MARK: - Общее
+
+    /// Рецепт — той же строкой, что продукт: название в цвет ведущего макроса,
+    /// калории порции справа, снизу число ингредиентов и вес порции.
+    ///
+    /// Раньше у рецепта была своя строка — калории мелко в подписи и полоска
+    /// долей справа, — и в одном списке жили две системы: непонятно, почему
+    /// рецепт нарисован не так, как продукт рядом.
+    private func dishRow(_ dish: Dish) -> some View {
+        FoodRow(
+            name: dish.name,
+            calories: dish.servingCalories,
+            caloriesPer100g: dish.totalGrams > 0 ? dish.caloriesPer100g : nil,
+            portion: "\(Int(dish.servingGrams.rounded())) \(String(localized: "г"))",
+            macros: dish.servingMacros,
+            detail: String(localized: "\(dish.ingredients.count) ингредиентов"),
+            micros: store.notableMicronutrients(forFoodNamed: dish.name, grams: dish.servingGrams),
+            leadingMacros: dish.macrosPer100g
+        )
+    }
 
     private func foodRow(_ food: FoodItem) -> some View {
         let grams = food.defaultGrams > 0 ? food.defaultGrams : 100

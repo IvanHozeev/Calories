@@ -285,9 +285,17 @@ enum MealSchedule {
         // Ему отводится его же недоеденный кусок: съел 380 из 558 — осталось
         // 178. Раньше он попадал в общий делёж и получал свежую полную долю
         // от остатка дня, то есть приложение звало съесть всю порцию ещё раз.
+        //
+        // Но не больше, чем осталось на день: переели днём — и ужину
+        // по его доле полагалось «ещё 583», хотя на весь день оставалось
+        // 355. Остаток раздаётся начатым приёмам по порядку, первым — тому,
+        // что раньше.
         var leftovers: [Int: Int] = [:]
+        var budget = remaining
         for index in upcoming where consumed[index] > 0 {
-            leftovers[index] = max(0, planned[index] - consumed[index])
+            let leftover = min(max(0, planned[index] - consumed[index]), budget)
+            leftovers[index] = leftover
+            budget -= leftover
         }
         // Остальное делится не поровну, а по весу приёма: на обед отводится
         // больше, чем на полдник.

@@ -43,6 +43,20 @@ struct MealScheduleTests {
         #expect(try #require(slots.first { $0.period == .dinner }).time == at(19))
     }
 
+    /// Начатый приём не обещает больше, чем осталось на весь день.
+    ///
+    /// Доля ужина считалась от его плана: план минус съеденное в его окне. А
+    /// днём переели, и на день оставалось 355, тогда как плитка звала
+    /// «ещё 583 ккал» — съешь их, и норма перебита.
+    @Test func aStartedMealNeverOffersMoreThanTheDayHasLeft() throws {
+        let slots = MealSchedule.slots(input(count: 3, goal: 2800,
+                                             entries: [(at(8), 1400), (at(13), 1000), (at(17), 300)],
+                                             now: at(18)))
+        let dinner = try #require(slots.first { $0.period == .dinner })
+        #expect(dinner.consumed == 300)
+        #expect(dinner.calories == 100, "На день осталось 100 ккал — больше ужину не дать")
+    }
+
     /// Промежуточные — ровно посередине между соседями.
     @Test func theInBetweenMealsSitInTheMiddle() throws {
         let slots = MealSchedule.slots(input(count: 6, now: at(7)))

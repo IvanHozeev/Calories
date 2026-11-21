@@ -101,7 +101,7 @@ struct PlanStrip: View {
         if store.planOutcome != nil { return .secondary }
         guard let plan = store.plan else { return .secondary }
         // Во время брейка вес о плане не говорит — зелёный, а не цвет статуса.
-        if plan.isDietBreak(on: Date()) { return .green }
+        if plan.isDietBreak(on: Date()) { return Palette.good }
         return planAdherenceColor
     }
 

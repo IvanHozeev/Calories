@@ -65,7 +65,7 @@ struct MicroChip: View {
     /// серое пятно: ровно это и случилось со значками в меню. Там, где
     /// значок уезжает в картинку, подложка должна быть краской.
     var painted: Bool = false
-    private var color: Color { nutrient.isCeiling ? .orange : .green }
+    private var color: Color { nutrient.isCeiling ? Palette.warn : Palette.good }
 
     var body: some View {
         // Значку нужна его ширина целиком.

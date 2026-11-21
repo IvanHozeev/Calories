@@ -23,9 +23,9 @@ extension PlanStatus {
     var color: Color {
         switch self {
         case .insufficientData: return .secondary
-        case .onTrack: return .green
-        case .ahead: return .blue
-        case .behind: return .orange
+        case .onTrack: return Palette.good
+        case .ahead: return Palette.good
+        case .behind: return Palette.warn
         }
     }
 }

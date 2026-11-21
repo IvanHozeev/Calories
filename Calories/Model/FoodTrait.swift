@@ -61,9 +61,9 @@ enum FoodTrait: String, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
-        case .almostNoCalories, .eatALot: return .green
+        case .almostNoCalories, .eatALot: return Palette.good
         case .highThermicEffect:          return .orange
-        case .easyToOvereat:              return .red
+        case .easyToOvereat:              return Palette.warn
         }
     }
 

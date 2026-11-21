@@ -205,7 +205,7 @@ struct MeasurementsView: View {
                         if let delta, abs(delta) >= 0.05 {
                             Text(verbatim: String(format: "%+.1f", delta))
                                 .font(.app(.caption, weight: .semibold))
-                                .foregroundStyle(delta > 0 ? .green : .orange)
+                                .foregroundStyle(delta > 0 ? Palette.good : Palette.warn)
                                 .monospacedDigit()
                         }
                         Text(verbatim: String(format: "%g \(String(localized: "см"))", now))

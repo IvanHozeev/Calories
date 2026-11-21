@@ -46,8 +46,8 @@ struct WeeklyChartView: View {
                     )
                     .foregroundStyle(
                         day.totalCalories > day.goal
-                            ? Color.red.gradient
-                            : Color.green.gradient
+                            ? Palette.warn.gradient
+                            : Palette.good.gradient
                     )
                     .cornerRadius(4)
                 }

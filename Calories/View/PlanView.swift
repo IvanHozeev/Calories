@@ -217,11 +217,11 @@ struct PlanView: View {
 
     private func phaseVerdictColor(_ verdict: PhaseCompositionVerdict) -> Color {
         switch verdict {
-        case .worked:        return .green
+        case .worked:        return Palette.good
         case .costly:        return .orange
         case .stalled:       return .secondary
         case .tooSoon:       return .secondary
-        case .recomposition: return .green
+        case .recomposition: return Palette.good
         }
     }
 
@@ -236,8 +236,8 @@ struct PlanView: View {
     private func verdictColor(_ verdict: CompositionVerdict) -> Color {
         switch verdict {
         case .leanLoss:    return .orange
-        case .leanGain:    return .green
-        case .withinNoise: return .green
+        case .leanGain:    return Palette.good
+        case .withinNoise: return Palette.good
         }
     }
 
@@ -263,7 +263,7 @@ struct PlanView: View {
                 if outcome.reachedTarget {
                     Label("Цель взята", systemImage: "checkmark.circle.fill")
                         .font(.app(.subheadline, weight: .semibold))
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Palette.good)
                 } else {
                     Label(
                         String(format: String(localized: "Не хватило %.1f кг"), shortfall),
@@ -308,7 +308,7 @@ struct PlanView: View {
         Section {
             if plan.isDietBreak(on: today) {
                 let end = plan.firstNonBreakDay(from: today)
-                breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: .green,
+                breakRow("Идёт брейк", icon: "cup.and.saucer.fill", tint: Palette.good,
                          detail: "Дефицит вернётся", date: end.formatted(short))
                 // Передумать можно, пока идёт первая неделя брейка: он встаёт
                 // с текущей недели, то есть сразу, и кнопки «убрать» иначе не
@@ -321,7 +321,7 @@ struct PlanView: View {
                 }
             } else if plan.pendingManualDietBreak(on: today) != nil,
                       let start = plan.nextDietBreakStart(after: today) {
-                breakRow("Брейк запланирован", icon: "cup.and.saucer", tint: .green,
+                breakRow("Брейк запланирован", icon: "cup.and.saucer", tint: Palette.good,
                          detail: "Начнётся", date: start.formatted(short))
                 Button("Убрать брейк", role: .destructive) {
                     store.cancelPendingDietBreak()
@@ -534,7 +534,7 @@ struct PlanView: View {
                 Label("Идёт диет-брейк. Плюс на весах сейчас — вода и гликоген, а не жир; план по весу оценим, когда вернётся дефицит.",
                       systemImage: "cup.and.saucer.fill")
                     .font(.app(.caption))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Palette.good)
                     .fixedSize(horizontal: false, vertical: true)
                 if let actual = adherence.actualWeightToday {
                     ResultRow(title: "Фактический вес (тренд)", value: String(format: "%.1f \(String(localized: "кг"))", actual))

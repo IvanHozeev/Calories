@@ -118,7 +118,7 @@ struct PlanPhaseCard: View {
     private var statusRow: some View {
         if plan.isDietBreak(on: today) {
             // Во время брейка вес о плане не говорит: вода и гликоген.
-            row(icon: "cup.and.saucer.fill", tint: .green,
+            row(icon: "cup.and.saucer.fill", tint: Palette.good,
                 title: String(localized: "Идёт брейк"),
                 caption: String(format: String(localized: "Дефицит вернётся %@"),
                                 plan.firstNonBreakDay(from: today)

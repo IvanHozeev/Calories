@@ -32,10 +32,8 @@ enum WidgetPalette {
         case "protein": return protein
         case "fat":     return fat
         case "carbs":   return carbs
-        // Системный цвет — тот же, что рисует приложение: обычный синий iOS.
-        // Своя пара «небесный → морской» здесь осталась от прежней палитры и
-        // с кольцом шагов на экране больше не совпадала.
-        default:        return [.blue, .blue]
+        // Цвет по умолчанию — тот же, что рисует приложение: фирменное индиго.
+        default:        return [Palette.tint, Palette.tint]
         }
     }
 

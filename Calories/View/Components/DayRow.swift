@@ -21,7 +21,7 @@ struct DayRow: View {
                     .font(.app(.subheadline, weight: .semibold))
                 Text(overGoal ? "+\(day.difference)" : "\(day.difference)")
                     .font(.app(.caption))
-                    .foregroundStyle(overGoal ? .red : .green)
+                    .foregroundStyle(overGoal ? Palette.warn : Palette.good)
             }
         }
         .padding(.vertical, 4)

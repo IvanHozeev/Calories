@@ -1414,16 +1414,13 @@ struct AddEntryView: View {
                     Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.semibold)
-                        // Цвет фона, а не системный: заливка кнопки — `primary`
-                        // (чёрная в светлой теме, белая в тёмной), и системный
-                        // белый текст в тёмной темне виден на белой плашке.
-                        .foregroundStyle(Color(.systemBackground))
+                        .foregroundStyle(Color.white)
                 }
                 .buttonStyle(.glassProminent)
-                // Чёрная в светлой теме и белая в тёмной, как главные кнопки
-                // остальных экранов: акцент приложения настраивается, а эта
-                // кнопка должна читаться при любом.
-                .tint(.primary)
+                // Фирменное индиго, как главные кнопки остальных экранов:
+                // акцент приложения настраивается, а эта кнопка должна
+                // читаться при любом.
+                .tint(Palette.brand)
                 .accessibilityIdentifier("saveMeal")
             }
             // Стекло и крупный размер — те же, что у кнопок в тулбаре: полоса

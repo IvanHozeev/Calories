@@ -662,7 +662,7 @@ struct OnboardingView: View {
                 Image(systemName: backups.isConfigured
                       ? "externaldrive.badge.checkmark" : "externaldrive.badge.icloud")
                     .font(.app(size: 72))
-                    .foregroundStyle(backups.isConfigured ? .green : Color.accentColor)
+                    .foregroundStyle(backups.isConfigured ? Palette.good : Color.accentColor)
 
                 if let folder = backups.folderName {
                     Text(verbatim: folder)

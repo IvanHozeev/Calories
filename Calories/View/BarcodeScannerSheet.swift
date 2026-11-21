@@ -163,7 +163,7 @@ struct BarcodeScannerSheet: View {
             if saved {
                 Label("Уже в моих продуктах", systemImage: "checkmark.circle.fill")
                     .font(.app(.subheadline))
-                    .foregroundStyle(.green)
+                    .foregroundStyle(Palette.good)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
             } else {

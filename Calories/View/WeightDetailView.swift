@@ -68,7 +68,7 @@ struct WeightDetailView: View {
                                 .foregroundStyle(.secondary)
                             Text(String(format: "%+.1f \(String(localized: "кг"))", weightChange))
                                 .font(.app(.title3, weight: .semibold))
-                                .foregroundStyle(weightChange <= 0 ? .green : .red)
+                                .foregroundStyle(weightChange <= 0 ? Palette.good : Palette.warn)
                         }
                     }
                 }

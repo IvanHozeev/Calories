@@ -31,10 +31,10 @@ struct MacroWeekSection: View {
                 } else {
                     row("Попадания по белку",
                         value: "\(counted.filter(\.hitProtein).count) / \(counted.count)",
-                        color: counted.allSatisfy(\.hitProtein) ? .green : .orange)
+                        color: counted.allSatisfy(\.hitProtein) ? Palette.good : Palette.warn)
                     row("Белки",
                         value: grams(average { $0.macros.protein }, of: average(\.proteinTarget)),
-                        color: average { $0.macros.protein } >= average(\.proteinTarget) ? .green : .orange)
+                        color: average { $0.macros.protein } >= average(\.proteinTarget) ? Palette.good : Palette.warn)
                     row("Жиры",
                         value: grams(average { $0.macros.fat }, of: average(\.fatTarget)),
                         color: .secondary)
@@ -90,6 +90,6 @@ struct MacroWeekSection: View {
 
     private func color(for day: MacroDay) -> Color {
         guard day.hasEntries else { return .gray.opacity(0.25) }
-        return day.hitProtein ? .green : .orange
+        return day.hitProtein ? Palette.good : Palette.warn
     }
 }

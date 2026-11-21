@@ -1103,7 +1103,7 @@ private extension ContentView {
                 Button { showingBankInfo = true } label: {
                     HStack(spacing: 4) {
                         Image(systemName: store.calorieBankBonus > 0 ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
-                            .foregroundStyle(store.calorieBankBonus > 0 ? .green : .orange)
+                            .foregroundStyle(store.calorieBankBonus > 0 ? Palette.good : Palette.warn)
                         Text(store.calorieBankBonus > 0
                              ? "+\(store.calorieBankBonus) ккал из недели"
                              : "\(store.calorieBankBonus) ккал из недели")
@@ -1379,10 +1379,10 @@ private struct CalorieBankPopover: View {
                 }
                 HStack {
                     Text("Из банка недели")
-                        .foregroundStyle(bonus > 0 ? .green : .orange)
+                        .foregroundStyle(bonus > 0 ? Palette.good : Palette.warn)
                     Spacer()
                     Text(bonus > 0 ? "+\(bonus)" : "\(bonus)")
-                        .foregroundStyle(bonus > 0 ? .green : .orange)
+                        .foregroundStyle(bonus > 0 ? Palette.good : Palette.warn)
                         .fontWeight(.medium)
                 }
                 Divider()

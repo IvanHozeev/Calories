@@ -79,7 +79,7 @@ struct StallReportView: View {
                 .monospacedDigit()
                 // Цвет по направлению, а не по «хорошо и плохо»: вверх — туда,
                 // куда вес тянуло, вниз — откуда.
-                .foregroundStyle(value > 0 ? Color.orange : Color.green)
+                .foregroundStyle(value > 0 ? Palette.warn : Palette.good)
         }
         .padding(.vertical, 2)
     }

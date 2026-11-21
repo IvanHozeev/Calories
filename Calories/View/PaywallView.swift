@@ -197,7 +197,7 @@ struct PaywallView: View {
         VStack(spacing: 10) {
             Label("Открыто бандлом", systemImage: "checkmark.seal.fill")
                 .font(.app(.headline))
-                .foregroundStyle(.green)
+                .foregroundStyle(Palette.good)
             Text("Calories и GymLogger куплены вместе — платить второй раз не нужно.")
                 .font(.app(.subheadline))
                 .foregroundStyle(.secondary)
@@ -222,7 +222,7 @@ struct PaywallView: View {
         VStack(spacing: 10) {
             Label("Premium активен", systemImage: "checkmark.seal.fill")
                 .font(.app(.headline))
-                .foregroundStyle(.green)
+                .foregroundStyle(Palette.good)
             Button("Готово") { dismiss() }
                 .buttonStyle(.mainAction)
         }

@@ -27,7 +27,7 @@ struct ResultRow: View {
             VStack(alignment: .trailing, spacing: 1) {
                 Text(value)
                     .font(highlighted ? .body.weight(.semibold) : .body)
-                    .foregroundStyle(highlighted ? .green : .primary)
+                    .foregroundStyle(highlighted ? Palette.good : .primary)
                 if let caption {
                     Text(verbatim: caption)
                         .font(.app(.caption2))

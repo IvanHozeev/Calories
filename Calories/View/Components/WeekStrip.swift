@@ -110,7 +110,7 @@ struct WeekStrip: View {
     /// читался целиком. Раньше под числом стояли калории, а под ними знак
     /// «>» или «<»: три строки на день и ряд цифр, которые приходилось
     /// сравнивать с нормой в уме. Дуга сравнивает сама: полная — норма
-    /// набрана, красная — мимо неё, короткая — недобор.
+    /// набрана, малиновая — мимо неё, короткая — недобор.
     private func dayCell(_ day: DayMark) -> some View {
         let isToday = calendar.isDateInToday(day.date)
         let number = calendar.component(.day, from: day.date)
@@ -138,13 +138,20 @@ struct WeekStrip: View {
         .accessibilityIdentifier("weekDay-\(number)")
     }
 
-    /// Дугу голосом не прочитать: число, съеденное и перебор — словами.
+    /// Дугу голосом не прочитать: число, съеденное и промах — словами.
     private func accessibilityText(_ day: DayMark, number: Int) -> String {
         var text = "\(Self.weekdayLabel(day.date)) \(number)"
         if day.hasEntries {
             text += ", " + String(format: String(localized: "%lld ккал"), day.consumed)
         }
-        if day.verdict == .over { text += ", " + String(localized: "Перебор") }
+        switch day.verdict {
+        case .over:
+            text += ", " + String(format: String(localized: "Перебор на %lld ккал"), day.consumed - day.goal)
+        case .under:
+            text += ", " + String(format: String(localized: "Недобор на %lld ккал"), day.goal - day.consumed)
+        default:
+            break
+        }
         return text
     }
 }
@@ -175,8 +182,9 @@ private struct DayRing: View {
         return min(max(Double(day.consumed - day.goal) / Double(day.goal), 0), 0.25)
     }
 
-    /// Мимо нормы в любую сторону — красным: недобор на дефиците такая же
-    /// дыра, как перебор, и зелёным он читался как успех.
+    /// Мимо нормы в любую сторону — малиновым: недобор на дефиците такая же
+    /// дыра, как перебор, и цветом нормы он читался бы как успех. Сторону
+    /// видно по дуге: недобор короткий, у перебора тёмный конец.
     private var color: Color {
         switch day.verdict {
         case .over, .under: return ProgressRing.overColors[0]

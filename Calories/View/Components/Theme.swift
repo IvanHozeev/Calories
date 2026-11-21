@@ -209,21 +209,21 @@ extension View {
     }
 }
 
-/// Главная кнопка экрана: чёрная в светлой теме и белая в тёмной.
+/// Главная кнопка экрана: фирменное индиго с белой подписью.
 ///
 /// Акцент приложения — цвет значков, переключателей и выбранных строк, и он
-/// настраивается: от голубого до персикового. Голубой и персиковый на белом
-/// читаются хуже чёрного, а кнопка, которую нажимают чаще всего, должна быть
-/// самой читаемой вещью на экране. Поэтому она берёт не акцент, а `primary`
-/// и подпись цвета фона.
+/// настраивается: от индиго до янтаря. Янтарь и бирюза под белым текстом не
+/// читаются, а кнопка, которую нажимают чаще всего, должна быть самой
+/// читаемой вещью на экране. Поэтому она берёт не акцент, а `Palette.brand`:
+/// он подобран под белый текст в обеих темах.
 struct MainActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.app(.subheadline, weight: .semibold))
-            .foregroundStyle(Color(.systemBackground))
+            .foregroundStyle(Color.white)
             .padding(.horizontal, 18)
             .frame(minHeight: 48)
-            .background(Color.primary, in: Capsule())
+            .background(Palette.brand, in: Capsule())
             .opacity(configuration.isPressed ? 0.7 : 1)
             .contentShape(Capsule())
     }
@@ -237,10 +237,10 @@ extension View {
     /// стиль кнопки системный, а вид — здесь, в подписи.
     func actionPlate(prominent: Bool) -> some View {
         font(.app(.subheadline, weight: .semibold))
-            .foregroundStyle(prominent ? Color(.systemBackground) : Color.primary)
+            .foregroundStyle(prominent ? Color.white : Color.primary)
             .padding(.horizontal, 18)
             .frame(minHeight: 48)
-            .background(prominent ? Color.primary : Color.secondary.opacity(0.16), in: Capsule())
+            .background(prominent ? Palette.brand : Color.secondary.opacity(0.16), in: Capsule())
             .contentShape(Capsule())
     }
 }
@@ -486,7 +486,7 @@ enum AppAccent: String, CaseIterable, Identifiable {
         // Без контекста ведущий макрос неизвестен — показываем цвет калорий.
         // Контекст есть у `color(focus:)`, и все экраны зовут именно его.
         case .focus:   return ProgressRing.kcalColors[0]
-        case .system:  return .blue
+        case .system:  return Palette.tint
         case .kcal:    return ProgressRing.kcalColors[0]
         case .protein: return MacroKind.protein.color
         case .fat:     return MacroKind.fat.color
@@ -512,7 +512,7 @@ enum AppAccent: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .focus:   return String(localized: "По макросу")
-        case .system:  return String(localized: "Системный")
+        case .system:  return String(localized: "Фирменный")
         case .kcal:    return String(localized: "Калории")
         case .protein: return String(localized: "Белки")
         case .fat:     return String(localized: "Жиры")

@@ -134,8 +134,18 @@ struct PlanEditorView: View {
                             .foregroundStyle(.secondary)
                     }
 
-                    // Три кнопки, а не меню: что добавить, видно сразу, и одно
-                    // нажатие вместо двух.
+                } header: {
+                    // У нового плана это не сохранённое, а предложенное: фаза
+                    // по умолчанию на восемь недель принималась за запись о
+                    // только что завершённой.
+                    Text(store.plan == nil ? "Фазы нового плана" : "Фазы")
+                }
+
+                // Кнопки добавления — своей строкой под карточкой фаз, а не
+                // последней строкой в ней: с прозрачным фоном они срезали
+                // карточке низ. Ширина у каждой своя: на трёх равных
+                // «Поддержание» не помещалось.
+                Section {
                     HStack(spacing: 8) {
                         ForEach(PlanIntent.allCases) { intent in
                             Button {
@@ -144,24 +154,20 @@ struct PlanEditorView: View {
                                 Label(intent.title, systemImage: "plus")
                                     .font(.app(.subheadline, weight: .semibold))
                                     .lineLimit(1)
-                                    .minimumScaleFactor(0.8)
-                                    .frame(maxWidth: .infinity)
+                                    .fixedSize()
                             }
                             .buttonStyle(.bordered)
                             .buttonBorderShape(.capsule)
                             .accessibilityIdentifier("addPhase-\(intent.rawValue)")
                         }
                     }
+                    .frame(maxWidth: .infinity)
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 4, trailing: 0))
-                } header: {
-                    // У нового плана это не сохранённое, а предложенное: фаза
-                    // по умолчанию на восемь недель принималась за запись о
-                    // только что завершённой.
-                    Text(store.plan == nil ? "Фазы нового плана" : "Фазы")
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
                 } footer: {
                     explain("Сушка, выход в поддержание, набор — это один план, а не три. Порядок фаз меняется перетаскиванием, темп каждой считается от веса, с которым она начинается.").map { Text($0) }
                 }
+                .listSectionSpacing(8)
 
                 Section {
                     Toggle("Недельный цикл калорий", isOn: $cyclingEnabled)

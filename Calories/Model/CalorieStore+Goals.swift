@@ -450,6 +450,25 @@ extension CalorieStore {
         return (days, calories / Double(days), protein / Double(days))
     }
 
+    /// На сколько в среднем день с записями расходился с нормой того дня:
+    /// плюс — ели больше, минус — меньше. nil — дней с записями и нормой нет.
+    func averageGoalGap(from start: Date, to end: Date) -> Int? {
+        let calendar = Calendar.current
+        var day = calendar.startOfDay(for: start)
+        let last = calendar.startOfDay(for: end)
+        var gaps: [Int] = []
+        while day <= last {
+            let summary = summary(for: day)
+            if !summary.entries.isEmpty, summary.goal > 0 {
+                gaps.append(summary.totalCalories - summary.goal)
+            }
+            guard let next = calendar.date(byAdding: .day, value: 1, to: day) else { break }
+            day = next
+        }
+        guard !gaps.isEmpty else { return nil }
+        return Int((Double(gaps.reduce(0, +)) / Double(gaps.count)).rounded())
+    }
+
     /// Последние N дней (включая сегодня), от старого к новому — для графиков.
     func lastDays(_ count: Int) -> [DaySummary] {
         let calendar = Calendar.current

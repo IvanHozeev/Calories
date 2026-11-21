@@ -62,11 +62,31 @@ enum PhaseAdvice {
         let weeklyRatePercent: Double?
     }
 
-    /// Сколько поддержания нужно после сушки: половина её длины, но не меньше
-    /// четырёх недель.
-    static func restWeeks(afterCutOf weeks: Int) -> Int {
-        max(4, Int((Double(weeks) / 2).rounded()))
+    /// Сколько поддержания нужно после сушки.
+    ///
+    /// Не «половина сушки всегда». Половина — для глубокой: долгой (от
+    /// двенадцати недель) или закончившейся сухой (жир до двенадцати
+    /// процентов), где расход, гормоны и аппетит просели сильнее всего. После
+    /// короткой мягкой хватает трети. Не меньше двух недель — столько
+    /// возвращаются гликоген и вода, и до этого вес ничего не скажет, — и не
+    /// больше восьми.
+    ///
+    /// `creditWeeks` — недели, уже съеденные на поддержании в конце сушки: если
+    /// последние дни человек сам ел около расхода, восстановление началось.
+    static func restWeeks(afterCutOf weeks: Int, bodyFatPercent: Double? = nil,
+                          creditWeeks: Int = 0) -> Int {
+        let deep = weeks >= 12 || (bodyFatPercent.map { $0 <= leanBodyFat } ?? false)
+        let base = Int((Double(weeks) * (deep ? 0.5 : 1.0 / 3)).rounded())
+        return max(minimumRestWeeks, min(8, base) - max(0, creditWeeks))
     }
+
+    /// Меньше этого на поддержании не судим: столько возвращаются гликоген и
+    /// вода, и вес до этого прыгает сам по себе.
+    static let minimumRestWeeks = 2
+    /// Ниже этого процента сушка считается глубокой.
+    static let leanBodyFat = 12.0
+    /// Вес «стоит», если за неделю тренд сдвинулся меньше чем на столько.
+    static let stableWeeklyChangeKg = 0.2
 
     /// Процент жира, выше которого набирать невыгодно: лишнее уйдёт в жир,
     /// и следующая сушка будет длиннее самого набора.
@@ -78,11 +98,18 @@ enum PhaseAdvice {
 
     /// - Parameter brief: человек выбрал короткие объяснения — совет тот же,
     ///   но без разъяснения, зачем телу отдых.
+    /// - Parameter weeklyWeightChangeKg: как сдвинулся тренд веса за последнюю
+    ///   неделю. Стоит вес после двух недель поддержания — восстановление
+    ///   идёт, и ждать формальный срок необязательно.
+    /// - Parameter creditWeeks: недели, которые человек уже ел около расхода в
+    ///   конце сушки.
     static func recommend(history: [PhaseRecord],
                           maintenanceSince: Date?,
                           bodyFatPercent: Double?,
                           today: Date = Date(),
-                          brief: Bool = false) -> Recommendation {
+                          brief: Bool = false,
+                          weeklyWeightChangeKg: Double? = nil,
+                          creditWeeks: Int = 0) -> Recommendation {
         func pick(_ detailed: String, _ short: String) -> String { brief ? short : detailed }
         let maintenanceWeeks = maintenanceSince.map {
             max(0, Int(today.timeIntervalSince($0) / (7 * 86_400)))
@@ -91,19 +118,31 @@ enum PhaseAdvice {
 
         // Сначала отдых: после сушки телу нужно поддержание, и это не «можно
         // пропустить, если очень хочется».
+        var readyEarly = false
         if let lastCut {
-            let needed = restWeeks(afterCutOf: lastCut.weeks)
-            if maintenanceWeeks < needed {
+            let needed = restWeeks(afterCutOf: lastCut.weeks, bodyFatPercent: bodyFatPercent,
+                                   creditWeeks: creditWeeks)
+            // Срок — ориентир, а не закон. Две недели прошло и вес стоит —
+            // гликоген вернулся, тело держит новую массу, и дальше решают
+            // самочувствие и цель, а не календарь.
+            let stable = weeklyWeightChangeKg.map { abs($0) < stableWeeklyChangeKg } ?? false
+            readyEarly = maintenanceWeeks >= minimumRestWeeks && stable && maintenanceWeeks < needed
+            if maintenanceWeeks < needed, !readyEarly {
                 let left = needed - maintenanceWeeks
                 return Recommendation(
                     kind: .maintain,
                     headline: String(format: String(localized: "Поддержание ещё %lld нед."), left),
-                    detail: String(format: pick(String(localized: "Прошлая сушка длилась %1$lld нед., на поддержании ты %2$lld. Дай телу вернуть расход и гормоны — обычно это половина длины сушки, но не меньше месяца. Тогда следующий дефицит снова будет работать."),
-                                                String(localized: "Сушка длилась %1$lld нед., поддержания пока %2$lld. Нужно не меньше половины от сушки.")), lastCut.weeks, maintenanceWeeks),
+                    detail: String(format: pick(String(localized: "Сушка длилась %1$lld нед., на поддержании ты %2$lld. Срок — по длине и глубине сушки, а не половина всегда. Через две-три недели смотри на себя: вес стоит, голод ровный, силы на тренировках вернулись — можно двигаться дальше и раньше."),
+                                                String(localized: "Сушка длилась %1$lld нед., поддержания %2$lld. Вес встанет и голод уйдёт — можно раньше.")), lastCut.weeks, maintenanceWeeks),
                     weeks: left,
                     weeklyRatePercent: nil)
             }
         }
+
+        let early = readyEarly
+            ? pick(String(localized: "Вес стоит уже неделю — восстановление идёт, формальный срок можно не ждать. Если голод ровный и силы вернулись: "),
+                   String(localized: "Вес стоит — можно не ждать срока. "))
+            : ""
 
         guard let fat = bodyFatPercent else {
             return Recommendation(
@@ -119,7 +158,7 @@ enum PhaseAdvice {
             return Recommendation(
                 kind: .cut,
                 headline: String(localized: "Можно сушиться"),
-                detail: String(format: pick(String(localized: "Жир около %.0f%%. На таком проценте набор уходит в жир, а не в мышцы: сушка сейчас выгоднее. Темп 0.5%% массы в неделю — быстрее значит терять мышцы."),
+                detail: early + String(format: pick(String(localized: "Жир около %.0f%%. На таком проценте набор уходит в жир, а не в мышцы: сушка сейчас выгоднее. Темп 0.5%% массы в неделю — быстрее значит терять мышцы."),
                                             String(localized: "Жир около %.0f%% — выгоднее сушка, темп 0.5%% массы в неделю.")), fat),
                 weeks: 12,
                 weeklyRatePercent: 0.5)
@@ -128,7 +167,7 @@ enum PhaseAdvice {
             return Recommendation(
                 kind: .bulk,
                 headline: String(localized: "Можно набирать"),
-                detail: String(format: pick(String(localized: "Жир около %.0f%%. Есть куда набирать: на этом проценте прибавка идёт в мышцы охотнее всего. Темп 0.25%% массы в неделю — быстрее набирается жир, а не сила."),
+                detail: early + String(format: pick(String(localized: "Жир около %.0f%%. Есть куда набирать: на этом проценте прибавка идёт в мышцы охотнее всего. Темп 0.25%% массы в неделю — быстрее набирается жир, а не сила."),
                                             String(localized: "Жир около %.0f%% — можно набирать, темп 0.25%% массы в неделю.")), fat),
                 weeks: 16,
                 weeklyRatePercent: 0.25)
@@ -136,7 +175,7 @@ enum PhaseAdvice {
         return Recommendation(
             kind: .maintain,
             headline: String(localized: "Можно и то, и другое"),
-            detail: String(format: pick(String(localized: "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор."),
+            detail: early + String(format: pick(String(localized: "Жир около %.0f%% — это середина, откуда работает и сушка, и набор. Решает цель: хочешь рельеф к лету — сушка, хочешь массу — набор."),
                                         String(localized: "Жир около %.0f%% — работает и сушка, и набор. Решает цель.")), fat),
             weeks: nil,
             weeklyRatePercent: nil)

@@ -314,7 +314,53 @@ struct PhaseAdviceTests {
     /// Отдых считается от длины сушки: половина, но не меньше месяца.
     @Test func restIsHalfTheCutButAtLeastAMonth() {
         #expect(PhaseAdvice.restWeeks(afterCutOf: 12) == 6)
-        #expect(PhaseAdvice.restWeeks(afterCutOf: 4) == 4)
+        // Короткая мягкая сушка — треть, но не меньше двух недель.
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 4) == 2)
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 9, bodyFatPercent: 16) == 3)
+    }
+
+    /// Глубокая сушка — до сухого процента — требует половины даже короткой.
+    @Test func aLeanFinishMakesEvenAShortCutDeep() {
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 8, bodyFatPercent: 9.5) == 4)
+    }
+
+    /// Дольше восьми недель поддержание не тянем.
+    @Test func restIsCappedAtEightWeeks() {
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 24) == 8)
+    }
+
+    /// Неделю, съеденную около расхода в конце сушки, засчитываем.
+    @Test func eatingAtMaintenanceAtTheEndCounts() {
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 14, bodyFatPercent: 9.5, creditWeeks: 1) == 6)
+        #expect(PhaseAdvice.restWeeks(afterCutOf: 4, creditWeeks: 3) == PhaseAdvice.minimumRestWeeks)
+    }
+
+    /// Две недели на поддержании и вес стоит — можно не ждать формального срока.
+    @Test func aStableWeightAfterTwoWeeksLetsYouMoveOn() {
+        let advice = PhaseAdvice.recommend(history: [record(.cut, weeks: 14, endedWeeksAgo: 2)],
+                                           maintenanceSince: Date().addingTimeInterval(-15 * 86_400),
+                                           bodyFatPercent: 9.5,
+                                           weeklyWeightChangeKg: 0.05)
+        #expect(advice.kind == .bulk)
+    }
+
+    /// Вес ещё прыгает — ждём, сколько бы недель ни прошло из нужных.
+    @Test func aMovingWeightKeepsYouOnMaintenance() {
+        let advice = PhaseAdvice.recommend(history: [record(.cut, weeks: 14, endedWeeksAgo: 2)],
+                                           maintenanceSince: Date().addingTimeInterval(-15 * 86_400),
+                                           bodyFatPercent: 9.5,
+                                           weeklyWeightChangeKg: 0.6)
+        #expect(advice.kind == .maintain)
+        #expect(advice.weeks == 5)
+    }
+
+    /// Раньше двух недель не судим, даже если вес стоит: это ещё гликоген.
+    @Test func notBeforeTwoWeeks() {
+        let advice = PhaseAdvice.recommend(history: [record(.cut, weeks: 14, endedWeeksAgo: 1)],
+                                           maintenanceSince: Date().addingTimeInterval(-8 * 86_400),
+                                           bodyFatPercent: 9.5,
+                                           weeklyWeightChangeKg: 0.0)
+        #expect(advice.kind == .maintain)
     }
 
     /// Отдохнул и жира много — пора сушиться, и темп назван.

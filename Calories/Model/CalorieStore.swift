@@ -700,7 +700,36 @@ final class CalorieStore {
                               maintenanceSince: maintenanceSince,
                               bodyFatPercent: bodyFatPercent,
                               today: now,
-                              brief: ExplanationSettings.shared.level == .expert)
+                              brief: ExplanationSettings.shared.level == .expert,
+                              weeklyWeightChangeKg: weeklyTrendChange(now: now),
+                              creditWeeks: maintenanceEatenAtCutEnd())
+    }
+
+    /// Как сдвинулся тренд веса за последнюю неделю. nil — взвешиваний мало.
+    func weeklyTrendChange(now: Date = Date()) -> Double? {
+        guard let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now),
+              let current = weightTrend(on: now), let before = weightTrend(on: weekAgo) else { return nil }
+        return current - before
+    }
+
+    /// Сколько недель человек уже ел около расхода в конце прошлой сушки.
+    ///
+    /// Если последние две недели дефицита он сам подтягивал еду к расходу,
+    /// восстановление началось до того, как план закрыли, — и считать
+    /// поддержание с нуля было бы нечестно. День «около расхода» — от
+    /// девяноста процентов нынешнего расхода.
+    func maintenanceEatenAtCutEnd() -> Int {
+        guard let cut = phaseHistory.filter({ $0.intent == .cut }).max(by: { $0.endDate < $1.endDate }) else { return 0 }
+        let calendar = Calendar.current
+        let threshold = workingTDEE * 0.9
+        guard threshold > 0 else { return 0 }
+        let days = (1...14).filter { offset in
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: calendar.startOfDay(for: cut.endDate)),
+                  day >= cut.startDate else { return false }
+            let summary = summary(for: day)
+            return !summary.entries.isEmpty && Double(summary.totalCalories) >= threshold
+        }.count
+        return Int((Double(days) / 7).rounded())
     }
 
     /// Записать закончившийся план в историю. Вызывается при завершении плана,

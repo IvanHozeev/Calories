@@ -68941,6 +68941,194 @@
           }
         }
       }
+    },
+    "Сушка длилась %1$lld нед., на поддержании ты %2$lld. Срок — по длине и глубине сушки, а не половина всегда. Через две-три недели смотри на себя: вес стоит, голод ровный, силы на тренировках вернулись — можно двигаться дальше и раньше.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cut lasted %1$lld wk, you have been at maintenance for %2$lld. The length follows how long and how deep the cut was, not always half of it. After two or three weeks check yourself: weight steady, hunger calm, strength back in training — you can move on earlier."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El déficit duró %1$lld sem., llevas %2$lld en mantenimiento. El plazo depende de lo largo y profundo que fue, no siempre de la mitad. Tras dos o tres semanas fíjate: peso estable, hambre tranquila, fuerza de vuelta en el gimnasio: puedes avanzar antes."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O cutting durou %1$lld sem., você está em manutenção há %2$lld. O prazo segue a duração e a profundidade do cutting, não sempre a metade. Depois de duas ou três semanas observe: peso estável, fome calma, força de volta nos treinos — dá para seguir antes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La sèche a duré %1$lld sem., tu es en maintien depuis %2$lld. La durée dépend de la longueur et de la profondeur de la sèche, pas toujours de la moitié. Après deux ou trois semaines, observe-toi : poids stable, faim calme, force revenue à l'entraînement — tu peux passer à la suite plus tôt."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Diät dauerte %1$lld Wo., du bist seit %2$lld auf Erhaltung. Die Dauer richtet sich nach Länge und Tiefe der Diät, nicht immer nach der Hälfte. Nach zwei, drei Wochen schau auf dich: Gewicht stabil, Hunger ruhig, Kraft im Training zurück — dann geht es auch früher weiter."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "استمر التنشيف %1$lld أسبوعًا، وأنت على الثبات منذ %2$lld. المدة حسب طول التنشيف وعمقه، لا نصفه دائمًا. بعد أسبوعين أو ثلاثة راقب نفسك: وزن ثابت وجوع هادئ وقوة عادت في التمرين — يمكنك المتابعة أبكر."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "החיטוב נמשך %1$lld שבועות, אתה בשמירה כבר %2$lld. המשך נקבע לפי אורך ועומק החיטוב, לא תמיד חצי. אחרי שבועיים־שלושה בדוק: משקל יציב, רעב רגוע, כוח חזר באימונים — אפשר להתקדם מוקדם יותר."
+          }
+        }
+      }
+    },
+    "Сушка длилась %1$lld нед., поддержания %2$lld. Вес встанет и голод уйдёт — можно раньше.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cut %1$lld wk, maintenance %2$lld. Once weight settles and hunger fades, you can move on earlier."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déficit %1$lld sem., mantenimiento %2$lld. Cuando el peso se asiente y el hambre pase, puedes avanzar antes."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cutting %1$lld sem., manutenção %2$lld. Quando o peso firmar e a fome passar, dá para seguir antes."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sèche %1$lld sem., maintien %2$lld. Quand le poids se pose et que la faim passe, tu peux avancer plus tôt."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diät %1$lld Wo., Erhaltung %2$lld. Steht das Gewicht und ist der Hunger weg, geht es früher weiter."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تنشيف %1$lld أسابيع، ثبات %2$lld. عندما يستقر الوزن ويهدأ الجوع يمكنك المتابعة أبكر."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חיטוב %1$lld שבועות, שמירה %2$lld. כשהמשקל יתייצב והרעב ירד — אפשר מוקדם יותר."
+          }
+        }
+      }
+    },
+    "Вес стоит уже неделю — восстановление идёт, формальный срок можно не ждать. Если голод ровный и силы вернулись: ": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your weight has held for a week — recovery is on track, no need to wait out the formal length. If hunger is calm and strength is back: "
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso lleva una semana estable: la recuperación va bien, no hace falta esperar el plazo formal. Si el hambre está tranquila y la fuerza volvió: "
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso está estável há uma semana: a recuperação vai bem, não precisa esperar o prazo formal. Se a fome está calma e a força voltou: "
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le poids tient depuis une semaine : la récupération avance, inutile d'attendre la durée prévue. Si la faim est calme et la force revenue : "
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Gewicht hält seit einer Woche — die Erholung läuft, die formale Dauer muss nicht abgewartet werden. Ist der Hunger ruhig und die Kraft zurück: "
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوزن ثابت منذ أسبوع — التعافي يسير، ولا داعي لانتظار المدة الرسمية. إذا كان الجوع هادئًا وعادت القوة: "
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל יציב כבר שבוע — ההתאוששות בדרך, אין צורך לחכות לתום התקופה. אם הרעב רגוע והכוח חזר: "
+          }
+        }
+      }
+    },
+    "Вес стоит — можно не ждать срока. ": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight is steady — no need to wait. "
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso está estable: no hace falta esperar. "
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso está estável — não precisa esperar. "
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le poids est stable — inutile d'attendre. "
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewicht stabil — kein Warten nötig. "
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الوزن ثابت — لا داعي للانتظار. "
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל יציב — אין צורך לחכות. "
+          }
+        }
+      }
     }
   },
   "version": "1.1"

@@ -37,8 +37,9 @@ enum Palette {
     // Приложение продаёт программу — «сбросить и удержать», — а синий в
     // восприятии брендов читается как компетентность и надёжность, и
     // сине-фиолетовый будоражит меньше всех тонов: спокойный фон для тех, кто
-    // срывается. Цвета макросов остались прежними: бирюза, персик и сирень
-    // с индиго не спорят.
+    // срывается. Тона макросов прежние — бирюза, персик, сирень, — но сирень
+    // сдвинута к орхидее: рядом с индиго калорий прежняя с ним сливалась, а
+    // бирюза взята чуть зеленее, чтобы не тянуться к синему.
     static let kcal = Ramp(name: "kcal",
                            faint: [Color(hex: 0xC3CCFB), Color(hex: 0xA6B4F9)],
                            pale: [Color(hex: 0x8C9DF7), Color(hex: 0x5B74F0)])
@@ -47,16 +48,16 @@ enum Palette {
     /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
     /// у соседей, и цвет остаётся бирюзовым, а не синеет.
     static let protein = Ramp(name: "protein",
-                              faint: [Color(hex: 0xA0F4FD), Color(hex: 0x80E3FC)],
-                              pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)])
+                              faint: [Color(hex: 0xA6F5F1), Color(hex: 0x84EDEA)],
+                              pale: [Color(hex: 0x5EE0DC), Color(hex: 0x22C2CF)])
     static let fat = Ramp(name: "fat",
-                          faint: [Color(hex: 0xFED5BE), Color(hex: 0xFEBEAA)],
-                          pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)])
+                          faint: [Color(hex: 0xFED5C2), Color(hex: 0xFEBEAA)],
+                          pale: [Color(hex: 0xF7B598), Color(hex: 0xF58A6E)])
     /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
     /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
     static let carbs = Ramp(name: "carbs",
-                            faint: [Color(hex: 0xE3CDFE), Color(hex: 0xCCB1FE)],
-                            pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)])
+                            faint: [Color(hex: 0xF0D4FE), Color(hex: 0xE3BDFC)],
+                            pale: [Color(hex: 0xDDAAF5), Color(hex: 0xC27BF0)])
     /// Мимо нормы — перебор и недобор — малиновым.
     ///
     /// Цвета состояний не должны совпадать с цветами макросов: оранжевый

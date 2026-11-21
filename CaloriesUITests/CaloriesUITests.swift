@@ -1356,7 +1356,7 @@ final class CaloriesUITests: XCTestCase {
         app.staticTexts["Personal plan"].tap()
         XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5))
 
-        XCTAssertTrue(app.buttons["Restore"].exists,
+        XCTAssertTrue(app.buttons["restorePurchases"].exists,
                       "Восстановление покупок обязательно для App Review")
         // Строки предложения зависят от ответов онбординга; «Видно, что
         // работает» есть в каждом варианте.

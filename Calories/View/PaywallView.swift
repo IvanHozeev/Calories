@@ -99,17 +99,7 @@ struct PaywallView: View {
             .padding(.bottom, 16)
         }
         .scrollIndicators(.hidden)
-        // Справа не значок, а слово «Восстановить»: места оно занимает втрое
-        // больше, и заголовок, посчитанный по одной кнопке, залезал под шеврон.
-        .screenTitle(String(localized: "Подписка"), trailingButtons: 3)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Восстановить") {
-                    Task { await purchases.restore() }
-                }
-                .font(.app(.footnote))
-            }
-        }
+        .screenTitle(String(localized: "Подписка"))
         // Кнопка покупки — у нижней кромки, а не в конце прокрутки.
         //
         // Она лежала последней в списке, и на экране с четырьмя фичами и тремя
@@ -278,6 +268,9 @@ struct PaywallView: View {
                 Task { await purchases.load() }
             }
             .buttonStyle(.bordered)
+            // Восстановлению тарифы не нужны: оно спрашивает App Store, что
+            // уже куплено, — и должно работать, даже когда цены не пришли.
+            restoreLink
         }
         .padding(.vertical, 24)
     }
@@ -341,10 +334,11 @@ struct PaywallView: View {
             .buttonStyle(.mainAction)
             .disabled(selectedProduct == nil || isPurchasing)
 
-            Text(introText(for: selectedProduct) ?? String(localized: "Отменить можно в любой момент."))
+            Text(verbatim: termsText(for: selectedProduct))
                 .font(.app(.caption2))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            restoreLink
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 10)
@@ -397,10 +391,62 @@ struct PaywallView: View {
         }
     }
 
-    private func introText(for product: Product?) -> String? {
-        guard let offer = product?.subscription?.introductoryOffer,
-              offer.paymentMode == .freeTrial else { return nil }
-        return String(localized: "Первая неделя бесплатно, потом по тарифу. Отменить можно в любой момент.")
+    /// Восстановить покупку — ссылкой под условиями, а не кнопкой в тулбаре.
+    ///
+    /// App Review требует, чтобы она была. Но это действие для того, кто уже
+    /// заплатил (новый телефон, переустановка), а в тулбаре напротив «Начать
+    /// программу» оно читалось как вторая главная кнопка. Под ценой и
+    /// условиями её ищут те, кому она нужна, — там она во всех приложениях.
+    private var restoreLink: some View {
+        Button("Восстановить покупки") {
+            Task { await purchases.restore() }
+        }
+        .font(.app(.caption, weight: .semibold))
+        .foregroundStyle(.secondary)
+        .accessibilityIdentifier("restorePurchases")
+    }
+
+    /// Что и когда спишут — под кнопкой, с ценой.
+    ///
+    /// «Потом по тарифу» не называло сумму, а App Review требует, чтобы рядом
+    /// с кнопкой было видно, сколько и за какой срок человек заплатит после
+    /// пробного периода. Цена и срок — от выбранного тарифа.
+    private func termsText(for product: Product?) -> String {
+        guard let product else { return String(localized: "Отменить можно в любой момент.") }
+        guard let subscription = product.subscription else {
+            return String(format: String(localized: "%@ один раз, без подписки."), product.displayPrice)
+        }
+        let price = pricePerPeriod(product.displayPrice, subscription.subscriptionPeriod)
+        if let offer = subscription.introductoryOffer, offer.paymentMode == .freeTrial {
+            return String(format: String(localized: "Пробный период — %1$@, потом %2$@. Отменить можно в любой момент."),
+                          duration(offer.period), price)
+        }
+        return String(format: String(localized: "%@. Отменить можно в любой момент."), price)
+    }
+
+    private func pricePerPeriod(_ price: String, _ period: Product.SubscriptionPeriod) -> String {
+        switch period.unit {
+        case .year: return String(format: String(localized: "%@ в год"), price)
+        case .month: return String(format: String(localized: "%@ в месяц"), price)
+        case .week: return String(format: String(localized: "%@ в неделю"), price)
+        default: return price
+        }
+    }
+
+    /// «1 неделя», «3 дня» — словами системы, на языке интерфейса.
+    private func duration(_ period: Product.SubscriptionPeriod) -> String {
+        var parts = DateComponents()
+        switch period.unit {
+        case .day: parts.day = period.value
+        case .week: parts.weekOfMonth = period.value
+        case .month: parts.month = period.value
+        case .year: parts.year = period.value
+        @unknown default: parts.day = period.value
+        }
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .full
+        formatter.allowedUnits = [.day, .weekOfMonth, .month, .year]
+        return formatter.string(from: parts) ?? ""
     }
 
     private func featureRow(_ icon: String, _ title: String, _ detail: String) -> some View {

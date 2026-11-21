@@ -72,9 +72,7 @@ struct MealScheduleStrip: View {
         // в списке аргументов вешает проверку типов.
         let tap: () -> Void = isTimeToEat ? (onEat ?? onOpen) : onOpen
         return TodayTile(icon: isTimeToEat ? "clock.fill" : "fork.knife",
-                         // Коралл только тут: тёплый цвет зовёт к еде, и
-                         // больше нигде в приложении его нет.
-                         tint: isTimeToEat ? Palette.mealTime : Color.accentColor,
+                         tint: Color.accentColor,
                          label: tileLabel,
                          value: tileValue,
                          caption: tileCaption,

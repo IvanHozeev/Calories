@@ -37,27 +37,30 @@ enum Palette {
     // Приложение продаёт программу — «сбросить и удержать», — а синий в
     // восприятии брендов читается как компетентность и надёжность, и
     // сине-фиолетовый будоражит меньше всех тонов: спокойный фон для тех, кто
-    // срывается. Тона макросов прежние — бирюза, персик, сирень, — но сирень
-    // сдвинута к орхидее: рядом с индиго калорий прежняя с ним сливалась, а
-    // бирюза взята чуть зеленее, чтобы не тянуться к синему.
+    // срывается.
+    //
+    // Индиго подстроено под прежнюю пастель, а не наоборот: макросы — бирюза,
+    // персик, сирень — остались какими были. Сам тон сдвинут к синему (около
+    // 222°): чистое индиго стояло в тридцати градусах от сирени углеводов, и
+    // на кольце они сливались. Пара светлый → насыщенный, как у остальных дуг.
     static let kcal = Ramp(name: "kcal",
-                           faint: [Color(hex: 0xC3CCFB), Color(hex: 0xA6B4F9)],
-                           pale: [Color(hex: 0x8C9DF7), Color(hex: 0x5B74F0)])
+                           faint: [Color(hex: 0xC6D6FD), Color(hex: 0xAEC4FC)],
+                           pale: [Color(hex: 0x8FB0FA), Color(hex: 0x5B86F2)])
     /// Дальний конец дуги раньше уходил в стальной синий: светимость падала
     /// вдвое (0.58 → 0.29), вчетверо круче, чем у жиров, и белок читался
     /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
     /// у соседей, и цвет остаётся бирюзовым, а не синеет.
     static let protein = Ramp(name: "protein",
-                              faint: [Color(hex: 0xA6F5F1), Color(hex: 0x84EDEA)],
-                              pale: [Color(hex: 0x5EE0DC), Color(hex: 0x22C2CF)])
+                              faint: [Color(hex: 0xA0F4FD), Color(hex: 0x80E3FC)],
+                              pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)])
     static let fat = Ramp(name: "fat",
-                          faint: [Color(hex: 0xFED5C2), Color(hex: 0xFEBEAA)],
-                          pale: [Color(hex: 0xF7B598), Color(hex: 0xF58A6E)])
+                          faint: [Color(hex: 0xFED5BE), Color(hex: 0xFEBEAA)],
+                          pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)])
     /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
     /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
     static let carbs = Ramp(name: "carbs",
-                            faint: [Color(hex: 0xF0D4FE), Color(hex: 0xE3BDFC)],
-                            pale: [Color(hex: 0xDDAAF5), Color(hex: 0xC27BF0)])
+                            faint: [Color(hex: 0xE3CDFE), Color(hex: 0xCCB1FE)],
+                            pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)])
     /// Мимо нормы — перебор и недобор — малиновым.
     ///
     /// Цвета состояний не должны совпадать с цветами макросов: оранжевый
@@ -67,24 +70,21 @@ enum Palette {
     /// индиго. Направление видно по кольцу, а не по цвету: недобор — короткая
     /// дуга, перебор — полное кольцо с тёмным концом.
     static let over = Ramp(name: "over",
-                           faint: [Color(hex: 0xF6B3CA), Color(hex: 0xEF94B3)],
-                           pale: [Color(hex: 0xE8628F), Color(hex: 0xC2255C)])
+                           faint: [Color(hex: 0xF9BFCD), Color(hex: 0xF5A3B8)],
+                           pale: [Color(hex: 0xF2849F), Color(hex: 0xD1456F)])
 
     /// Заливка главной кнопки. На ней белый текст, контраст не ниже 4,9 : 1
     /// в обеих темах; светлое индиго тёмной темы под белым текстом не читалось бы.
-    static let brand = Color(light: 0x2F45C8, dark: 0x4C63E6)
+    static let brand = Color(light: 0x3360D8, dark: 0x3F68E0)
     /// Акцент значков, ссылок и переключателей. В тёмной теме светлее: тёмное
     /// индиго на почти чёрном фоне тонет.
-    static let tint = Color(light: 0x2F45C8, dark: 0x8C9DF7)
+    static let tint = Color(light: 0x3360D8, dark: 0x8FB0FA)
     /// «Получилось»: в норме, по плану, белок закрыт. Тот же индиго, что и
     /// бренд — успех здесь не зелёный, а цвет самого приложения.
     static let good = tint
     /// «Мимо»: перебор, отставание, вес вверх на сушке — текстом и значками.
     /// Тот же малиновый, что дуга перебора, на белом не ниже 4,5 : 1.
-    static let warn = Color(light: 0xC2255C, dark: 0xF0749C)
-    /// Коралл — только «Пора есть». Один цвет — одно значение: тёплый там, где
-    /// приложение зовёт к еде, и больше нигде.
-    static let mealTime = Color(light: 0xE5603D, dark: 0xFF8A6B)
+    static let warn = Color(light: 0xC23A63, dark: 0xF2849F)
 
     /// Ниже этой светимости дуга тонет в тёмной теме.
     ///

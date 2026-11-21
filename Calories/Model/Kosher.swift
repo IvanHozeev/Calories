@@ -13,7 +13,7 @@ import Foundation
 /// парве, и таймер, построенный на категории, запретил бы мясо после яйца.
 /// Поэтому статус живёт своим свойством, а категория даёт ему только
 /// значение по умолчанию — и то не везде.
-enum KosherStatus: String, Codable, CaseIterable, Identifiable, Sendable {
+nonisolated enum KosherStatus: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Бсари: мясо и птица, и всё, что на мясном бульоне.
     case meat
     /// Халави: молоко и всё молочное.
@@ -41,7 +41,7 @@ enum KosherStatus: String, Codable, CaseIterable, Identifiable, Sendable {
 
 // MARK: - Значение по умолчанию
 
-extension KosherStatus {
+nonisolated extension KosherStatus {
     /// Статус по категории — грубая основа, которую уточняют поимённо.
     ///
     /// Шесть категорий честно ложатся на кашрут: мясо мясное, рыба, яйца и
@@ -144,14 +144,14 @@ extension KosherStatus {
 /// морское без чешуи и плавников запрещены видом. Это не зависит ни от
 /// производителя, ни от надзора, ни от страны, и ошибиться тут нельзя.
 /// Поэтому ответов два: «запрещено видом» и «не знаю».
-enum KosherVerdict: String, Codable, Sendable {
+nonisolated enum KosherVerdict: String, Codable, Sendable {
     /// Запрещено видом — что бы ни было написано на упаковке.
     case forbidden
     /// Зависит от производства, а о нём приложение ничего не знает.
     case unknown
 }
 
-extension KosherVerdict {
+nonisolated extension KosherVerdict {
     /// Позиции каталога, запрещённые видом. Ключ английский — он у каталога
     /// стабилен.
     ///
@@ -172,7 +172,7 @@ extension KosherVerdict {
 
 // MARK: - Приём пищи целиком
 
-extension KosherStatus {
+nonisolated extension KosherStatus {
     /// Статус приёма из нескольких продуктов.
     ///
     /// Мясное перевешивает: если в тарелке было и то и другое, ждать надо по
@@ -219,7 +219,7 @@ struct KosherCustom: Equatable, Codable, Sendable {
 }
 
 /// Ожидание после еды: чего ждём и до какого времени.
-struct KosherWait: Equatable, Sendable {
+nonisolated struct KosherWait: Equatable, Sendable {
     /// Что съели — от этого зависит, чего именно нельзя.
     let eaten: KosherStatus
     /// Чего ждём.

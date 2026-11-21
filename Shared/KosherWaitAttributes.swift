@@ -11,7 +11,7 @@ import Foundation
 /// Лежит в `Shared`, потому что нужна обоим: приложение её заводит, виджет
 /// рисует. Поэтому здесь нет ни `KosherStatus`, ни чего-либо ещё из модели —
 /// только то, что переживёт границу таргета.
-struct KosherWaitAttributes: ActivityAttributes {
+nonisolated struct KosherWaitAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         /// Когда ожидание кончится. Островок сам считает до него.
         var until: Date

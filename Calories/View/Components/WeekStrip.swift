@@ -47,7 +47,7 @@ struct DayMark: Identifiable {
     /// Десятая часть нормы: промахнуться на двести килокалорий из двух с
     /// половиной тысяч — обычная жизнь, а тысяча вместо двух с половиной —
     /// не «уложился», сколько бы знак «меньше» ни был формально верен.
-    static let undershootShare = 0.1
+    nonisolated static let undershootShare = 0.1
 
     var verdict: Verdict {
         guard hasEntries else { return .empty }

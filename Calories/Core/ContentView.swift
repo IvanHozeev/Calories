@@ -1009,7 +1009,6 @@ private extension ContentView {
 
     /// Совет дня: одно контекстное сообщение на основе данных пользователя.
     private var dailyAdvice: DailyAdvice? {
-        let calendar = Calendar.current
         let lastLoggedDay = store.entriesByDay.keys.sorted().last
         let weighIns = store.weightEntries.map { AdviceWeighIn(date: $0.date, kg: $0.weightKg) }
         return DailyAdviceEngine.advice(

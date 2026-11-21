@@ -129,8 +129,7 @@ struct FoodRow: View {
             // него неразрывный, чтобы «300 г» не разрывалось.
             let name = Text("\u{2068}\(text)\u{2069}").font(font).foregroundStyle(color)
             if let weight {
-                name + Text("\u{00A0}\u{00A0}" + weight.replacingOccurrences(of: " ", with: "\u{00A0}"))
-                    .font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary)
+                Text("\(name)\(Text(verbatim: "\u{00A0}\u{00A0}" + weight.replacingOccurrences(of: " ", with: "\u{00A0}")).font(.app(.caption2, weight: .medium)).foregroundStyle(.secondary))")
             } else {
                 name
             }

@@ -70,7 +70,13 @@ struct AddEntryView: View {
     @State private var wantsOnlineSearch = false
 
     /// Кэш разбора запроса, чтобы не парсить строку при каждом нажатии клавиши.
-    @State private var parsedQueryCache: (search: String, items: [FoodQuery.Item]) = ("", [])
+    ///
+    /// Коробка-класс, а не кортеж в `@State`: кэш пишется прямо из `body`, а
+    /// запись в состояние во время отрисовки SwiftUI считает неопределённым
+    /// поведением (фиолетовое «Modifying state during view update»). Поля
+    /// класса состоянием не являются — запись в них экран не перерисовывает,
+    /// да и не должна: это только кэш.
+    @State private var parsedQueryCache = ParsedQueryCache()
     /// Результат быстрого добавления, вычисляемый в фоне.
     @State private var quickAddsResult: [QuickAdd] = []
     /// Задача пересчёта быстрых добавлений с debounce — отменяется при каждом
@@ -194,7 +200,8 @@ struct AddEntryView: View {
             return parsedQueryCache.items
         }
         let items = FoodQuery.parse(debouncedSearch)
-        parsedQueryCache = (debouncedSearch, items)
+        parsedQueryCache.search = debouncedSearch
+        parsedQueryCache.items = items
         return items
     }
 
@@ -1151,7 +1158,10 @@ struct AddEntryView: View {
                     }
                     var seen = Set<String>()
                     var candidates: [(TopMatch, Int)] = []
-                    func consider(_ match: TopMatch) {
+                    // Вложенная функция изоляцию задачи не наследует: без
+                    // явного @MainActor она считалась неизолированной, и обращение
+                    // к имени и ранжированию шло мимо главного потока.
+                    @MainActor func consider(_ match: TopMatch) {
                         guard let rank = Self.matchRank(match.name, query), rank <= 1 else { return }
                         guard seen.insert(match.name.lowercased()).inserted else { return }
                         candidates.append((match, rank))
@@ -2089,4 +2099,10 @@ private struct SearchActivityReader: View {
                 withTransaction(transaction) { isActive = newValue }
             }
     }
+}
+
+/// Разобранный запрос последней строки поиска. См. `AddEntryView.parsedQueryCache`.
+private final class ParsedQueryCache {
+    var search = ""
+    var items: [FoodQuery.Item] = []
 }

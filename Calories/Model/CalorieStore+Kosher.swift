@@ -64,7 +64,12 @@ extension CalorieStore {
     ///
     /// Смотрим не весь дневник, а последние сутки: самое долгое ожидание —
     /// шесть часов, и перебирать ради него годы записей незачем.
-    func kosherWaits(now: Date = Date(), custom: KosherCustom = KosherCustom()) -> [KosherWait] {
+    ///
+    /// Обычай по умолчанию подставляется внутри, а не в объявлении: значение
+    /// по умолчанию считается вне изоляции стора, а `KosherCustom()` живёт
+    /// на главном потоке.
+    func kosherWaits(now: Date = Date(), custom: KosherCustom? = nil) -> [KosherWait] {
+        let custom = custom ?? KosherCustom()
         let since = now.addingTimeInterval(-24 * 3600)
         let meals = entries
             .filter { $0.date > since && $0.date <= now }

@@ -98,11 +98,6 @@ struct RemindersView: View {
 
     @ViewBuilder
     private func habitRow(_ habit: MealAdherence.Habit) -> some View {
-        let habitSuggestions = habitSuggestions.filter { $0.id == habit.id }
-        let moveSuggestion = habitSuggestions.first(where: {
-            if case .moveMeal = $0 { return true }; return false
-        })
-
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "clock.arrow.circlepath")
                 .foregroundStyle(.orange)

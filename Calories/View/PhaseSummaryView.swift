@@ -112,11 +112,7 @@ struct PhaseSummaryView: View {
 
             if let change = record.changeKg, let start = record.startWeightKg, let end = record.endWeightKg {
                 HStack(alignment: .lastTextBaseline) {
-                    (Text(verbatim: String(format: "%+.1f", change))
-                        .font(.app(size: 52, weight: .bold))
-                     + Text(verbatim: " \(String(localized: "кг"))")
-                        .font(.app(size: 22, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.6)))
+                    Text("\(Text(verbatim: String(format: "%+.1f", change)).font(.app(size: 52, weight: .bold)))\(Text(verbatim: " \(String(localized: "кг"))").font(.app(size: 22, weight: .semibold)).foregroundColor(.white.opacity(0.6)))")
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
                     Spacer(minLength: 8)

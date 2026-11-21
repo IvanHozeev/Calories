@@ -14,7 +14,7 @@ import Foundation
 ///
 /// Чистая логика без стора: пороги здесь важнее всего, и проверять их надо
 /// тестами.
-enum RecoverySignal {
+nonisolated enum RecoverySignal {
     struct Input {
         /// Идёт ли дефицит прямо сейчас. Вне его советовать нечего.
         var isCutting: Bool = false

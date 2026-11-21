@@ -383,7 +383,7 @@ struct MealScheduleSheet: View {
                 window + " · " + String(format: String(localized: "съеден в %@"),
                                         $0.formatted(date: .omitted, time: .shortened))
             } ?? window
-            trailing = Text(verbatim: "\(slot.consumed.formatted()) ") + Text("ккал").font(.app(.caption)).foregroundColor(.secondary)
+            trailing = Text("\(Text(verbatim: "\(slot.consumed.formatted()) "))\(Text("ккал").font(.app(.caption)).foregroundColor(.secondary))")
         case .current:
             title = Text(String(format: String(localized: "%@ — пора есть"),
                                 String(localized: String.LocalizationValue(slot.period.rawValue))))

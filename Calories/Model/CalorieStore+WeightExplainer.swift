@@ -15,9 +15,14 @@ extension CalorieStore {
     /// взвешивались) и сегодняшний день как причина завтрашнего утра — для
     /// прогноза: его отклонение ещё неизвестно и стоит нулём, а тренд, от
     /// которого оно будет отсчитано, — `trendTomorrow`.
-    func weightExplainerInput(now: Date = Date(), sleep: Date = MealScheduleSettings.shared.sleep)
+    ///
+    /// Время отбоя по умолчанию берётся внутри, а не в объявлении: значение
+    /// по умолчанию считается вне изоляции стора, а настройки расписания
+    /// живут на главном потоке.
+    func weightExplainerInput(now: Date = Date(), sleep: Date? = nil)
         -> (history: [WeightExplainer.Day], today: WeightExplainer.Day?,
             tonight: WeightExplainer.Day?, trendTomorrow: Double?) {
+        let sleep = sleep ?? MealScheduleSettings.shared.sleep
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: now)
 
@@ -108,8 +113,9 @@ extension CalorieStore {
     ///
     /// Только вечером, за три часа до отбоя и позже: днём еда ещё не съедена,
     /// и прогноз гадал бы по половине дня.
-    func weightForecast(now: Date = Date(), sleep: Date = MealScheduleSettings.shared.sleep)
+    func weightForecast(now: Date = Date(), sleep: Date? = nil)
         -> (forecast: WeightExplainer.Forecast, trendKg: Double)? {
+        let sleep = sleep ?? MealScheduleSettings.shared.sleep
         let calendar = Calendar.current
         let sleepParts = calendar.dateComponents([.hour, .minute], from: sleep)
         var sleepHour = Double(sleepParts.hour ?? 23) + Double(sleepParts.minute ?? 0) / 60

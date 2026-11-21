@@ -498,11 +498,7 @@ struct OnboardingView: View {
                 .pickerStyle(.segmented)
 
                 HStack(alignment: .firstTextBaseline) {
-                    (Text(verbatim: weekly.formatted(.number.precision(.fractionLength(2)).sign(strategy: .always())) + " ")
-                        .font(.app(.title3, weight: .bold))
-                     + Text("кг в неделю")
-                        .font(.app(.caption))
-                        .foregroundColor(.secondary))
+                    Text("\(Text(verbatim: weekly.formatted(.number.precision(.fractionLength(2)).sign(strategy: .always())) + " ").font(.app(.title3, weight: .bold)))\(Text("кг в неделю").font(.app(.caption)).foregroundColor(.secondary))")
                     Spacer(minLength: 8)
                     Text(verbatim: String(format: String(localized: "за %1$lld нед. — до %2$@ кг"),
                                           durationWeeks,

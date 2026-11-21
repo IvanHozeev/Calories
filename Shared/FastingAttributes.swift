@@ -7,7 +7,7 @@ import Foundation
 /// отсчёт и полоску рисует система по своим часам — приложение закрыто, а число
 /// остаётся верным. Лежит в `Shared`, потому что нужна обоим таргетам, и потому
 /// здесь нет ничего из модели: вид поста — строкой.
-struct FastingAttributes: ActivityAttributes {
+nonisolated struct FastingAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         /// Когда пост кончится.
         var until: Date

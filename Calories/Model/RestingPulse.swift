@@ -28,7 +28,7 @@ enum RestingPulse {
     static let minimumHours = 2
     /// На сколько ударов пульс должен уйти вверх, чтобы об этом стоило
     /// говорить. Один-два удара — это погрешность оптического датчика.
-    static let notableRise = 3
+    nonisolated static let notableRise = 3
 
     /// Пульс в покое по дням: минимальный час ночи.
     ///

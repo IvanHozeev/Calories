@@ -178,8 +178,7 @@ struct MealWindowCard: View {
             : String(format: String(localized: "обычно между %1$@ и %2$@, в среднем %3$lld ккал"),
                      clock(minutes: habit.usualFromMinutes), clock(minutes: habit.usualToMinutes),
                      habit.typicalCalories)
-        return Text(verbatim: mealName(habit.period)).font(.app(.footnote, weight: .semibold))
-            + Text(verbatim: " " + text).font(.app(.footnote)).foregroundColor(.secondary)
+        return Text("\(Text(verbatim: mealName(habit.period)).font(.app(.footnote, weight: .semibold)))\(Text(verbatim: " " + text).font(.app(.footnote)).foregroundColor(.secondary))")
     }
 
     // MARK: - Кнопки

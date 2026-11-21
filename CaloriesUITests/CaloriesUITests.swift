@@ -1226,6 +1226,15 @@ final class CaloriesUITests: XCTestCase {
         app.tabBars.buttons["Profile"].tap()
         XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout: 5))
 
+        // Пять уровней живут на своём экране, в профиле — одна строка с
+        // выбранным.
+        let open = app.buttons["openActivityLevel"]
+        scrollTo(open, in: app)
+        open.tap()
+        XCTAssertTrue(app.navigationBars["Activity"].waitForExistence(timeout: 5)
+                      || app.staticTexts["Activity"].waitForExistence(timeout: 2),
+                      "Экран активности не открылся")
+
         // Уровень переживает прогоны, а тап по уже выбранному ничего не делает —
         // поэтому сначала уводим его в заведомо другое положение.
         let baseline = app.staticTexts["Sedentary"]

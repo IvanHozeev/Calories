@@ -13,16 +13,18 @@ enum PaywallFocus {
     /// за две недели, и вот что закрылось».
     case trialEnded
 
-    var headline: String {
+    /// Заголовок и подзаголовок — от предложения, собранного по ответам
+    /// онбординга; у конца пробного периода — свои.
+    func headline(_ offer: Offer) -> String {
         switch self {
-        case .general, .plan: return String(localized: "Сбросить вес и удержать его")
+        case .general, .plan: return offer.headline
         case .trialEnded: return String(localized: "Пробные две недели закончились")
         }
     }
 
-    var subtitle: String? {
+    func subtitle(_ offer: Offer) -> String {
         switch self {
-        case .general, .plan: return String(localized: "Программа, а не счётчик: сушка с финишем, выход из неё и удержание. Каждую неделю видно, идёшь ли ты по плану.")
+        case .general, .plan: return offer.subtitle
         case .trialEnded: return String(localized: "Норма снова считается по формуле. Довести маршрут до финиша и удержать результат — с Premium.")
         }
     }
@@ -49,6 +51,26 @@ struct PaywallView: View {
     /// GymLogger. Показывать цены здесь нельзя — человек уже заплатил, и
     /// тарифы читаются как требование заплатить снова.
     private var unlockedByBundle: Bool { store.bundleUnlocked && !purchases.isPremium }
+
+    /// То же предложение, что на финише онбординга: о той боли, о которой
+    /// человек сказал в начале. Цель — по плану (первая фаза, что двигает вес,
+    /// а не удержание, на котором человек может стоять сейчас), без плана — по
+    /// профилю.
+    private var offer: Offer {
+        let intent: PlanIntent?
+        if let moving = store.plan?.phases.first(where: { $0.intent != .maintenance }) {
+            intent = moving.intent
+        } else {
+            switch store.profile?.goal {
+            case .fatLoss: intent = .cut
+            case .muscleGain: intent = .bulk
+            case .maintenance: intent = store.plan == nil ? .maintenance : .cut
+            case nil: intent = nil
+            }
+        }
+        return Offer.make(intent: intent, answers: OfferAnswers.load(),
+                          observesTradition: KosherSettings.shared.isEnabled)
+    }
 
     private var selectedProduct: Product? {
         purchases.products.first { $0.id == selectedID }
@@ -124,18 +146,16 @@ struct PaywallView: View {
                 .padding(.top, 8)
                 .accessibilityHidden(true)
 
-            Text(shownFocus.headline)
+            Text(shownFocus.headline(offer))
                 .font(.app(.title, weight: .bold))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)
 
-            if let subtitle = shownFocus.subtitle {
-                Text(subtitle)
-                    .font(.app(.subheadline))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 28)
-            }
+            Text(shownFocus.subtitle(offer))
+                .font(.app(.subheadline))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 28)
 
             if let route {
                 Text(verbatim: route)
@@ -161,26 +181,17 @@ struct PaywallView: View {
         return String(format: String(localized: "Твой маршрут: %1$@ → %2$@ кг к %3$@"),
                       String(format: "%.1f", plan.startWeightKg),
                       String(format: "%.1f", plan.targetWeightKg),
-                      PlanView.planDate(plan.endDate))
+                      PlanView.planDate(plan.targetReachedDate))
     }
 
     /// Что получаешь — результатами, а не функциями, с одной строкой о том,
-    /// за счёт чего.
-    ///
-    /// Каждая строка отвечает на свою боль: когда приду к цели, не вернётся ли
-    /// вес, работает ли это вообще, почему встал вес, как не сорваться.
+    /// за счёт чего. Порядок — от боли человека: первой та, ради которой он
+    /// пришёл.
     private var features: some View {
         VStack(spacing: 18) {
-            featureRow("flag.checkered", "Финиш с датой",
-                       "Темп, при котором уходит жир, а не мышцы, и день, к которому ты придёшь к цели.")
-            featureRow("shield.lefthalf.filled", "Чтобы вес не вернулся",
-                       "После сушки план сам ставит удержание нужной длины и плавно выводит из дефицита. Большинство диет кончается откатом именно здесь.")
-            featureRow("checkmark.seal", "Видно, что работает",
-                       "Раз в неделю — вердикт по тренду, а не по утренним весам. По трём дням вес не судят, и приложение так и скажет.")
-            featureRow("chart.line.uptrend.xyaxis", "Норма по твоему расходу",
-                       "Расход измеряется по дневнику и весам, а не по формуле. Тело привыкает к дефициту — норма это учитывает, но меняется только с твоего согласия.")
-            featureRow("fork.knife", "Сушка без срывов",
-                       "Рефиды и диет-брейки по расписанию, а недобор одного дня переходит на остальные дни недели.")
+            ForEach(offer.benefits, id: \.kind) { benefit in
+                featureRow(benefit.icon, benefit.title, benefit.detail)
+            }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -392,18 +403,16 @@ struct PaywallView: View {
         return String(localized: "Первая неделя бесплатно, потом по тарифу. Отменить можно в любой момент.")
     }
 
-    private func featureRow(_ icon: String,
-                            _ title: LocalizedStringKey,
-                            _ detail: LocalizedStringKey) -> some View {
+    private func featureRow(_ icon: String, _ title: String, _ detail: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.app(.headline))
                 .foregroundStyle(ProgressRing.kcalColors[0])
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
+                Text(verbatim: title)
                     .font(.app(.headline))
-                Text(detail)
+                Text(verbatim: detail)
                     .font(.app(.footnote))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

@@ -45,14 +45,22 @@ struct OnboardingView: View {
     @State private var fatTenths = Int(MacroTargets.fatPerKg * 10)
     /// Кашрут и посты — одним вопросом: тема одна, и включает её тот же человек.
     @State private var observesTradition = false
+    /// Два вопроса для предложения на финише: от них зависят и слова, и план.
+    @State private var training: TrainingHabit = .sometimes
+    @State private var obstacle: PastObstacle = .firstTime
 
     enum Step: Int, CaseIterable {
-        case welcome, explanations, sex, birthday, height, weight, activity, goal, cutOptions, macros, tradition, gear, backup, health, result
+        case welcome, explanations, sex, birthday, height, weight, activity, training, goal, obstacle, cutOptions, macros, tradition, gear, backup, health, result
     }
 
-    /// Шаги, которые реально показываются: брейки и цикл — только у дефицита.
+    /// Шаги, которые реально показываются: прошлые попытки, брейки и цикл —
+    /// только у дефицита.
     private var steps: [Step] {
-        Step.allCases.filter { $0 != .cutOptions || intent == .cut }
+        Step.allCases.filter { ($0 != .cutOptions && $0 != .obstacle) || intent == .cut }
+    }
+
+    private var answers: OfferAnswers {
+        OfferAnswers(training: training, obstacle: intent == .cut ? obstacle : nil)
     }
 
     private var weightKg: Double { Double(weightTenths) / 10 }
@@ -85,8 +93,12 @@ struct OnboardingView: View {
         return Plan(
             startDate: Date(),
             startWeightKg: weightKg,
-            phases: [PlanPhase(intent: intent, durationWeeks: durationWeeks, weeklyRatePercent: ratePercent,
-                               dietBreakEvery: intent == .cut ? dietBreakEvery : nil)],
+            // Сушка — сразу с удержанием после неё: предложение обещает «сбросить
+            // и удержать», и в плане должно быть ровно это.
+            phases: intent == .cut
+                ? answers.cutPhases(durationWeeks: durationWeeks, ratePercent: ratePercent,
+                                    dietBreakEvery: dietBreakEvery)
+                : [PlanPhase(intent: intent, durationWeeks: durationWeeks, weeklyRatePercent: ratePercent)],
             cyclingEnabled: intent == .cut && cyclingEnabled,
             weekendStyle: weekendStyle
         )
@@ -118,7 +130,9 @@ struct OnboardingView: View {
                 case .height:     heightStep
                 case .weight:     weightStep
                 case .activity:   activityStep
+                case .training:   trainingStep
                 case .goal:       goalStep
+                case .obstacle:   obstacleStep
                 case .cutOptions: cutOptionsStep
                 case .macros:     macrosStep
                 case .tradition:  traditionStep
@@ -332,6 +346,52 @@ struct OnboardingView: View {
         }
     }
 
+    /// Зал — до цели: от ответа зависит темп сушки по умолчанию и белок, и
+    /// человек видит их уже выставленными, а не переписанными после.
+    private var trainingStep: some View {
+        stepShell(title: "Ходишь в зал?", subtitle: "Силовые решают, сколько белка и какой темп") {
+            VStack(spacing: 8) {
+                ForEach(TrainingHabit.allCases) { habit in
+                    selectableRow(title: habit.title, subtitle: habit.subtitle, selected: training == habit) {
+                        chooseTraining(habit)
+                    }
+                    .accessibilityIdentifier("onboardingTraining-\(habit.rawValue)")
+                }
+            }
+        }
+    }
+
+    private func chooseTraining(_ habit: TrainingHabit) {
+        training = habit
+        proteinTenths = Int((answers.proteinPerKg * 10).rounded())
+        if intent == .cut { ratePercent = answers.cutRatePercent }
+    }
+
+    /// Что мешало раньше — та боль, которую человек пришёл решить. По ней
+    /// собирается предложение на финише, и она же меняет план: тому, кто
+    /// срывался, — цикл калорий, кто терял силу — бережный темп и больше белка.
+    private var obstacleStep: some View {
+        stepShell(title: "Что мешало раньше?", subtitle: "Под это соберём план") {
+            VStack(spacing: 8) {
+                ForEach(PastObstacle.allCases) { item in
+                    selectableRow(title: item.title, subtitle: item.subtitle, selected: obstacle == item) {
+                        chooseObstacle(item)
+                    }
+                    .accessibilityIdentifier("onboardingObstacle-\(item.rawValue)")
+                }
+            }
+        }
+    }
+
+    private func chooseObstacle(_ item: PastObstacle) {
+        obstacle = item
+        cyclingEnabled = answers.wantsCycling
+        proteinTenths = Int((answers.proteinPerKg * 10).rounded())
+        // Темп выбран шагом раньше; трогаем его, только если он резче, чем
+        // стоит тому, кто терял силу.
+        if item == .lostStrength { ratePercent = min(ratePercent, answers.cutRatePercent) }
+    }
+
     /// Три карточки вместо сегментов, а под ними — темп.
     ///
     /// Сегменты «Сушка / Поддержание / Набор» назвали цели и больше ничего:
@@ -345,12 +405,15 @@ struct OnboardingView: View {
                 selectableRow(title: String(localized: "Похудеть"),
                               subtitle: String(localized: "Дефицит, темп и срок до цели"),
                               selected: intent == .cut) { chooseIntent(.cut) }
+                    .accessibilityIdentifier("onboardingGoal-cut")
                 selectableRow(title: String(localized: "Поддерживать"),
                               subtitle: String(localized: "Норма равна расходу, план не нужен"),
                               selected: intent == .maintenance) { chooseIntent(.maintenance) }
+                    .accessibilityIdentifier("onboardingGoal-maintenance")
                 selectableRow(title: String(localized: "Набрать"),
                               subtitle: String(localized: "Небольшой профицит, медленно"),
                               selected: intent == .bulk) { chooseIntent(.bulk) }
+                    .accessibilityIdentifier("onboardingGoal-bulk")
 
                 if intent != .maintenance {
                     paceSection
@@ -364,7 +427,7 @@ struct OnboardingView: View {
 
     private func chooseIntent(_ newIntent: PlanIntent) {
         intent = newIntent
-        ratePercent = newIntent.defaultWeeklyRatePercent
+        ratePercent = newIntent == .cut ? answers.cutRatePercent : newIntent.defaultWeeklyRatePercent
         durationWeeks = newIntent == .bulk ? 16 : 12
     }
 
@@ -665,59 +728,102 @@ struct OnboardingView: View {
         }
     }
 
+    /// Финиш — не «Готов?», а предложение: что человек получит, собранное
+    /// из его ответов, и его же цифры — откуда, куда и к какому дню.
+    private var offer: Offer {
+        Offer.make(intent: intent, answers: answers, observesTradition: observesTradition)
+    }
+
     private var resultStep: some View {
-        VStack(spacing: 0) {
-            Spacer()
-            VStack(spacing: 24) {
-                Text("Готов?")
-                    .font(.app(size: 30, weight: .bold))
+        let offer = offer
+        return VStack(spacing: 0) {
+            ScrollView {
+                VStack(spacing: 20) {
+                    VStack(spacing: 8) {
+                        Text(verbatim: offer.headline)
+                            .font(.app(size: 28, weight: .bold))
+                            .multilineTextAlignment(.center)
+                            .accessibilityIdentifier("onboardingOffer")
+                        Text(verbatim: offer.subtitle)
+                            .font(.app(.subheadline))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.horizontal, 24)
 
-                // Кольцо с «Сегодня», заполненное нормой: сразу видно, на что
-                // делится день — половина калорий и дуги макросов по их граммам.
-                ProgressRing(consumed: 0, goal: dailyCalories, macros: .zero,
-                             proteinTarget: proteinGrams, fatTarget: fatGrams, carbsTarget: carbGrams,
-                             showsTargets: true, onOpen: {})
-                    .allowsHitTesting(false)
+                    routeCard
+                        .padding(.horizontal, 20)
 
-                HStack(spacing: 0) {
-                    resultNumber(Int(proteinGrams.rounded()), unit: "г", title: "Белки", color: MacroKind.protein.color)
-                    resultNumber(Int(fatGrams.rounded()), unit: "г", title: "Жиры", color: MacroKind.fat.color)
-                    resultNumber(Int(carbGrams.rounded()), unit: "г", title: "Углеводы", color: MacroKind.carbs.color)
+                    VStack(alignment: .leading, spacing: 14) {
+                        ForEach(offer.benefits.prefix(3), id: \.kind) { benefit in
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: benefit.icon)
+                                    .font(.app(.headline))
+                                    .foregroundStyle(ProgressRing.kcalColors[0])
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(verbatim: benefit.title)
+                                        .font(.app(.headline))
+                                    Text(verbatim: benefit.detail)
+                                        .font(.app(.footnote))
+                                        .foregroundStyle(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
                 }
-                .padding(.horizontal, 24)
-
-                if let plan = draftPlan {
-                    Text(String(format: String(localized: "%@ к %@ · план бесплатно %lld дней"),
-                                String(format: "%.1f \(String(localized: "кг"))", plan.targetWeightKg),
-                                plan.endDate.formatted(.dateTime.day().month(.wide)),
-                                CalorieStore.trialDays))
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                }
+                .padding(.top, 24)
+                .padding(.bottom, 12)
             }
-            Spacer()
+            .scrollIndicators(.hidden)
+
+            if draftPlan != nil {
+                Text(String(format: String(localized: "План бесплатно %lld дней"), CalorieStore.trialDays))
+                    .font(.app(.footnote))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 8)
+            }
             primaryButton(title: "Начать") { finish() }
         }
     }
 
-    private func resultNumber(_ value: Int, unit: LocalizedStringKey, title: LocalizedStringKey, color: Color) -> some View {
-        VStack(spacing: 2) {
-            HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(verbatim: "\(value)")
-                    .font(.app(.title2, weight: .bold))
-                    .monospacedDigit()
-                    .foregroundStyle(color)
-                Text(unit)
+    /// Маршрут и норма одной карточкой: кольцо дня, откуда и куда вес, к
+    /// какому дню, и сколько удержания после.
+    private var routeCard: some View {
+        HStack(spacing: 16) {
+            ProgressRing(consumed: 0, goal: dailyCalories, macros: .zero,
+                         proteinTarget: proteinGrams, fatTarget: fatGrams, carbsTarget: carbGrams,
+                         showsTargets: true, miniature: 76, onOpen: {})
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                if let plan = draftPlan {
+                    Text(verbatim: String(format: "%.1f → %.1f %@", plan.startWeightKg, plan.targetWeightKg,
+                                          String(localized: "кг")))
+                        .font(.app(.title3, weight: .bold))
+                    Text(verbatim: String(format: String(localized: "к %@"),
+                                          plan.targetReachedDate.formatted(.dateTime.day().month(.wide))))
+                        .font(.app(.subheadline, weight: .semibold))
+                        .foregroundStyle(ProgressRing.kcalColors[0])
+                    if plan.holdWeeksAfterTarget > 0 {
+                        Text(String(format: String(localized: "потом %lld нед. удержания"), plan.holdWeeksAfterTarget))
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Text(verbatim: String(format: String(localized: "%1$lld ккал · белок %2$lld г"),
+                                      dailyCalories, Int(proteinGrams.rounded())))
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
             }
-            Text(title)
-                .font(.app(.caption))
-                .foregroundStyle(.secondary)
+            .monospacedDigit()
+            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity)
+        .padding(16)
+        .tileSurface(cornerRadius: 22)
     }
 
     /// Профиль, план и пробный период — в таком порядке: `startPlan` закрыт
@@ -725,6 +831,7 @@ struct OnboardingView: View {
     private func finish() {
         if !healthAsked { stepStore.deferAuthorization() }
         store.updateProfile(draftProfile)
+        answers.save()
         if observesTradition {
             KosherSettings.shared.isEnabled = true
             KosherSettings.shared.observesCalendar = true
@@ -806,6 +913,8 @@ struct OnboardingView: View {
         }
         // Без плоского стиля кнопка красит текст карточки в синий.
         .buttonStyle(.plain)
+        // Выбранная карточка — выбранная и для VoiceOver: галочку он не читает.
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func tileCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {

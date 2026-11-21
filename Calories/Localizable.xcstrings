@@ -430,58 +430,6 @@
         }
       }
     },
-    "%@ к %@ · план бесплатно %lld дней": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ إلى %@ · الخطة مجانًا %lld يومًا"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ auf %@ · Plan %lld Tage gratis"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ to %@ · plan free for %lld days"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ a %@ · plan gratis %lld días"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ vers %@ · plan gratuit %lld jours"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ ל-%@ · התוכנית חינם %lld ימים"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ para %@ · plano grátis por %lld dias"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "new",
-            "value": "%1$@ к %2$@ · план бесплатно %3$lld дней"
-          }
-        }
-      }
-    },
     "%@ кг": {
       "extractionState": "manual",
       "localizations": {
@@ -14857,52 +14805,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Prato principal"
-          }
-        }
-      }
-    },
-    "Готов?": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جاهز؟"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bereit?"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ready?"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿Listo?"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Prêt ?"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מוכן?"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pronto?"
           }
         }
       }
@@ -70480,6 +70382,2030 @@
           "stringUnit": {
             "state": "translated",
             "value": "להתחיל את התוכנית"
+          }
+        }
+      }
+    },
+    "Регулярно": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regularly"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Con regularidad"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regularmente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Régulièrement"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regelmäßig"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بانتظام"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "באופן קבוע"
+          }
+        }
+      }
+    },
+    "Иногда": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sometimes"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A veces"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Às vezes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parfois"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manchmal"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أحيانًا"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לפעמים"
+          }
+        }
+      }
+    },
+    "Не хожу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I don't"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No voy"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não vou"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je n’y vais pas"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gehe nicht"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا أذهب"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא הולך"
+          }
+        }
+      }
+    },
+    "Силовые два раза в неделю и чаще": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength training twice a week or more"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuerza dos veces por semana o más"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musculação duas vezes por semana ou mais"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Musculation deux fois par semaine ou plus"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krafttraining zweimal pro Woche oder öfter"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمارين القوة مرتين أسبوعيًا أو أكثر"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אימוני כוח פעמיים בשבוע ויותר"
+          }
+        }
+      }
+    },
+    "Бывает, но без системы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Now and then, without a routine"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De vez en cuando, sin rutina"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De vez em quando, sem rotina"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De temps en temps, sans régularité"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ab und zu, ohne System"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أحيانًا، بلا انتظام"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קורה, אבל בלי שיטה"
+          }
+        }
+      }
+    },
+    "Без зала: работа, шаги, дом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No gym: work, walking, home"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin gimnasio: trabajo, pasos, casa"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem academia: trabalho, passos, casa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de salle : travail, marche, maison"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Studio: Arbeit, Schritte, Zuhause"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بلا نادٍ: عمل ومشي وبيت"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בלי חדר כושר: עבודה, הליכה, בית"
+          }
+        }
+      }
+    },
+    "Вес возвращался": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The weight came back"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso volvía"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso voltava"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le poids revenait"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Gewicht kam zurück"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كان الوزن يعود"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל חזר"
+          }
+        }
+      }
+    },
+    "Срывы от голода": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Binges from hunger"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atracones por hambre"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compulsões pela fome"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Craquages à cause de la faim"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fressattacken vor Hunger"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "انتكاسات بسبب الجوع"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "התקפי אכילה מרעב"
+          }
+        }
+      }
+    },
+    "Не было видно результата": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No visible result"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se veía el resultado"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O resultado não aparecia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun résultat visible"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein sichtbares Ergebnis"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم تظهر نتيجة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא ראו תוצאה"
+          }
+        }
+      }
+    },
+    "Уходили сила и мышцы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength and muscle went too"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se iban la fuerza y el músculo"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Força e músculo iam embora"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La force et le muscle partaient"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kraft und Muskeln gingen mit"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كانت القوة والعضلات تذهب"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הלכו גם כוח ושריר"
+          }
+        }
+      }
+    },
+    "Худею впервые": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First time losing weight"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primera vez que bajo de peso"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Primeira vez emagrecendo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Première fois que je perds du poids"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ich nehme zum ersten Mal ab"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أول مرة أخسر الوزن"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "פעם ראשונה בירידה במשקל"
+          }
+        }
+      }
+    },
+    "Вес уходил, а через пару месяцев возвращался": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It came off, then came back within a couple of months"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se iba y a los dos meses volvía"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saía e em dois meses voltava"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il partait, puis revenait en quelques mois"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Es ging runter und kam nach ein paar Monaten zurück"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كان ينزل ثم يعود بعد شهرين"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הוא ירד, ואחרי חודשיים חזר"
+          }
+        }
+      }
+    },
+    "Неделю-две держишься, потом срыв": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You hold on for a week or two, then binge"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aguantas una o dos semanas y luego te descontrolas"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você aguenta uma ou duas semanas e depois descamba"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu tiens une ou deux semaines, puis tu craques"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein, zwei Wochen hältst du durch, dann kommt die Attacke"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تصمد أسبوعًا أو اثنين ثم تنتكس"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחזיקים שבוע-שבועיים, ואז נשברים"
+          }
+        }
+      }
+    },
+    "Весы стояли или прыгали, и опускались руки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The scale stalled or jumped around, and you gave up"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La báscula no se movía o saltaba, y te rendías"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A balança travava ou oscilava, e você desistia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La balance stagnait ou faisait le yo-yo, et tu abandonnais"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Waage stand oder sprang, und du hast aufgegeben"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كان الميزان ثابتًا أو يقفز، فتستسلم"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל עמד או קפץ, והידיים נפלו"
+          }
+        }
+      }
+    },
+    "Вес уходил вместе с рабочими весами в зале": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weight came off along with your lifts"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso bajaba junto con tus cargas en el gimnasio"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso caía junto com as cargas na academia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le poids partait avec tes charges à la salle"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Gewicht ging zusammen mit deinen Arbeitsgewichten"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كان الوزن ينزل مع أوزان التمرين"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל ירד יחד עם משקלי העבודה בחדר הכושר"
+          }
+        }
+      }
+    },
+    "Раньше попыток не было": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No attempts before"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin intentos antes"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem tentativas antes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune tentative avant"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisher keine Versuche"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا محاولات سابقة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא היו ניסיונות קודמים"
+          }
+        }
+      }
+    },
+    "Уходит жир, а не сила": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fat goes, strength stays"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se va la grasa, no la fuerza"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vai a gordura, não a força"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La graisse part, pas la force"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fett geht, Kraft bleibt"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تذهب الدهون لا القوة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הולך שומן, לא כוח"
+          }
+        }
+      }
+    },
+    "Кашрут и посты в плане": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut and fasts in the plan"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut y ayunos en el plan"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kashrut e jejuns no plano"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cacherout et jeûnes dans le plan"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaschrut und Fasttage im Plan"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الكشروت والصيام في الخطة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כשרות וצומות בתוכנית"
+          }
+        }
+      }
+    },
+    "Мышцы, а не жир": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muscle, not fat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Músculo, no grasa"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Músculo, não gordura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du muscle, pas de la graisse"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muskeln statt Fett"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عضلات لا دهون"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "שריר, לא שומן"
+          }
+        }
+      }
+    },
+    "Вес не уползёт незаметно": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your weight won't drift unnoticed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El peso no se desviará sin que lo notes"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O peso não vai escapar sem você notar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ton poids ne dérivera pas en douce"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Gewicht verschiebt sich nicht unbemerkt"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لن ينحرف وزنك دون أن تلاحظ"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "המשקל לא יזחל בלי שתשים לב"
+          }
+        }
+      }
+    },
+    "Темп не быстрее процента массы в неделю и белок по твоему весу: рабочие веса в зале остаются.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A pace no faster than one percent of body weight a week and protein for your weight: your lifts stay."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un ritmo no más rápido del uno por ciento del peso por semana y proteína según tu peso: tus cargas se mantienen."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um ritmo de no máximo um por cento do peso por semana e proteína pelo seu peso: suas cargas ficam."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rythme pas plus rapide qu’un pour cent du poids par semaine et des protéines selon ton poids : tes charges restent."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Tempo von höchstens einem Prozent des Körpergewichts pro Woche und Eiweiß nach deinem Gewicht: deine Arbeitsgewichte bleiben."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وتيرة لا تتجاوز واحدًا بالمئة من الوزن أسبوعيًا وبروتين حسب وزنك: تبقى أوزان تمرينك."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קצב שלא מהיר מאחוז ממשקל הגוף בשבוע וחלבון לפי המשקל שלך: משקלי העבודה נשארים."
+          }
+        }
+      }
+    },
+    "Ожидание между мясным и молочным и посты из календаря — в том же плане, без отдельных приложений.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The wait between meat and dairy and fasts from the calendar, in the same plan, without separate apps."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La espera entre carne y lácteos y los ayunos del calendario, en el mismo plan, sin apps aparte."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A espera entre carne e laticínios e os jejuns do calendário, no mesmo plano, sem apps separados."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L’attente entre viande et laitage et les jeûnes du calendrier, dans le même plan, sans applis à part."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die Wartezeit zwischen Fleischigem und Milchigem und die Fasttage aus dem Kalender, im selben Plan, ohne extra Apps."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الانتظار بين اللحوم والألبان والصيام من التقويم في الخطة نفسها، بلا تطبيقات منفصلة."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ההמתנה בין בשרי לחלבי והצומות מהלוח — באותה תוכנית, בלי אפליקציות נפרדות."
+          }
+        }
+      }
+    },
+    "Профицит такой, чтобы росли мышцы. Если темп уйдёт за половину процента в неделю, приложение предупредит.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A surplus sized for muscle growth. If the pace goes past half a percent a week, the app will warn you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un superávit justo para que crezca el músculo. Si el ritmo supera medio por ciento por semana, la app te avisará."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um superávit na medida para o músculo crescer. Se o ritmo passar de meio por cento por semana, o app avisa."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un surplus calibré pour faire du muscle. Si le rythme dépasse un demi pour cent par semaine, l’app te prévient."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Überschuss, der Muskeln wachsen lässt. Geht das Tempo über ein halbes Prozent pro Woche, warnt die App."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فائض يكفي لنمو العضلات. إذا تجاوزت الوتيرة نصف بالمئة أسبوعيًا، سينبهك التطبيق."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עודף בדיוק כדי שהשריר יגדל. אם הקצב יעבור חצי אחוז בשבוע, האפליקציה תתריע."
+          }
+        }
+      }
+    },
+    "Норма по твоему настоящему расходу и вердикт раз в неделю: сдвиг видно раньше, чем его покажет зеркало.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A target based on what you really burn and a weekly verdict: you see a shift before the mirror shows it."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un objetivo según tu gasto real y un veredicto semanal: ves el cambio antes que el espejo."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma meta pelo seu gasto real e um veredicto semanal: você vê a mudança antes do espelho."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un objectif selon ta vraie dépense et un verdict hebdomadaire : tu vois le changement avant le miroir."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Ziel nach deinem echten Verbrauch und ein wöchentliches Urteil: du siehst die Verschiebung vor dem Spiegel."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هدف حسب إنفاقك الحقيقي وحكم أسبوعي: ترى التغير قبل أن تُظهره المرآة."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "יעד לפי ההוצאה האמיתית שלך ומסקנה שבועית: רואים את השינוי לפני שהמראה מראה אותו."
+          }
+        }
+      }
+    },
+    "Набрать мышцы, а не жир": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Build muscle, not fat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gana músculo, no grasa"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ganhe músculo, não gordura"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prendre du muscle, pas de la graisse"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muskeln aufbauen, nicht Fett"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ابنِ العضلات لا الدهون"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לבנות שריר, לא שומן"
+          }
+        }
+      }
+    },
+    "Небольшой профицит и темп, при котором растут мышцы, а не живот. Каждую неделю видно, идёшь ли ты по плану.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A small surplus and a pace that grows muscle, not your waistline. Every week you see whether you're on track."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un pequeño superávit y un ritmo que hace crecer el músculo, no la barriga. Cada semana ves si vas según el plan."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um pequeno superávit e um ritmo que faz crescer o músculo, não a barriga. Toda semana você vê se está no plano."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un petit surplus et un rythme qui fait grossir les muscles, pas le ventre. Chaque semaine, tu vois si tu es dans les temps."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein kleiner Überschuss und ein Tempo, bei dem Muskeln wachsen, nicht der Bauch. Jede Woche siehst du, ob du im Plan bist."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فائض صغير ووتيرة تنمو بها العضلات لا البطن. كل أسبوع ترى إن كنت تسير وفق الخطة."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עודף קטן וקצב שבו גדל השריר ולא הבטן. בכל שבוע רואים אם אתה עומד בתוכנית."
+          }
+        }
+      }
+    },
+    "Держать вес без угадывания": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold your weight without guessing"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantén tu peso sin adivinar"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantenha o peso sem adivinhar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder ton poids sans deviner"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gewicht halten ohne Raten"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حافظ على وزنك بلا تخمين"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לשמור על המשקל בלי לנחש"
+          }
+        }
+      }
+    },
+    "Норма по твоему расходу, а не по формуле, и сигнал, если вес поползёт.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A target based on your expenditure, not a formula, and a signal if your weight starts to drift."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un objetivo según tu gasto, no una fórmula, y un aviso si el peso empieza a desviarse."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma meta pelo seu gasto, não por fórmula, e um aviso se o peso começar a mudar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un objectif selon ta dépense, pas une formule, et un signal si ton poids commence à dériver."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Ziel nach deinem Verbrauch statt nach Formel und ein Signal, wenn das Gewicht wegdriftet."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هدف حسب إنفاقك لا بالمعادلة، وتنبيه إذا بدأ وزنك ينحرف."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "יעד לפי ההוצאה שלך, לא לפי נוסחה, ואות אם המשקל מתחיל לזחול."
+          }
+        }
+      }
+    },
+    "Сбросить вес и в этот раз удержать": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lose the weight and keep it off this time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baja de peso y esta vez no lo recuperes"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca peso e desta vez não recupere"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perdre du poids et, cette fois, le garder"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abnehmen und es diesmal halten"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اخسر الوزن وحافظ عليه هذه المرة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לרדת במשקל ולשמור עליו הפעם"
+          }
+        }
+      }
+    },
+    "Сушка с финишем, а после неё — удержание: план не бросает тебя в день, когда цель достигнута.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cut with a finish line, then a maintenance phase: the plan doesn't drop you the day you hit your goal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una definición con meta y después mantenimiento: el plan no te abandona el día que alcanzas tu objetivo."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma definição com linha de chegada e depois manutenção: o plano não te larga no dia em que você atinge a meta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Une sèche avec une ligne d’arrivée, puis un maintien : le plan ne te lâche pas le jour où tu atteins ton objectif."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eine Diät mit Ziellinie, danach eine Erhaltungsphase: Der Plan lässt dich nicht an dem Tag allein, an dem du dein Ziel erreichst."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تنشيف بخط نهاية ثم فترة محافظة: الخطة لا تتركك يوم تصل إلى هدفك."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "חיטוב עם קו סיום, ואחריו שלב שמירה: התוכנית לא עוזבת אותך ביום שהגעת ליעד."
+          }
+        }
+      }
+    },
+    "Сбросить вес без срывов": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lose weight without binges"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baja de peso sin atracones"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca peso sem compulsões"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perdre du poids sans craquer"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abnehmen ohne Fressattacken"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اخسر الوزن بلا انتكاسات"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לרדת במשקל בלי התקפי אכילה"
+          }
+        }
+      }
+    },
+    "Дефицит с передышками: рефиды и диет-брейки по расписанию, чтобы голод не копился неделями.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A deficit with breathers: refeeds and diet breaks on a schedule, so hunger doesn't build up for weeks."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un déficit con respiros: recargas y pausas de dieta programadas, para que el hambre no se acumule durante semanas."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um déficit com respiros: refeeds e pausas na dieta programados, para a fome não se acumular por semanas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un déficit avec des pauses : refeeds et pauses de régime planifiés, pour que la faim ne s’accumule pas pendant des semaines."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Defizit mit Verschnaufpausen: Refeeds und Diätpausen nach Plan, damit sich der Hunger nicht wochenlang aufstaut."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عجز مع فترات راحة: أيام تحميل وفترات توقف مجدولة كي لا يتراكم الجوع لأسابيع."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "גירעון עם הפוגות: ריפידים והפסקות דיאטה לפי לוח זמנים, כדי שהרעב לא יצטבר שבועות."
+          }
+        }
+      }
+    },
+    "Сбросить вес и видеть, что это работает": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lose weight and see that it's working"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baja de peso y comprueba que funciona"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca peso e veja que está funcionando"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perdre du poids et voir que ça marche"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abnehmen und sehen, dass es wirkt"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اخسر الوزن وشاهد أنه يعمل"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לרדת במשקל ולראות שזה עובד"
+          }
+        }
+      }
+    },
+    "Не утренние весы, а тренд и вердикт раз в неделю: скачок на килограмм объяснён, а не пугает.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not the morning scale but the trend and a weekly verdict: a one-kilo jump is explained, not scary."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No la báscula de la mañana, sino la tendencia y un veredicto semanal: un salto de un kilo se explica en vez de asustar."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não a balança da manhã, mas a tendência e um veredicto semanal: um salto de um quilo é explicado, não assusta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas la balance du matin, mais la tendance et un verdict hebdomadaire : un saut d’un kilo est expliqué au lieu de faire peur."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht die Morgenwaage, sondern Trend und wöchentliches Urteil: Ein Kilo Sprung wird erklärt statt zu erschrecken."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا ميزان الصباح، بل الاتجاه وحكم أسبوعي: قفزة كيلو تُفسَّر بدل أن تُخيف."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לא המשקל של הבוקר, אלא המגמה ומסקנה שבועית: קפיצה של קילו מוסברת ולא מפחידה."
+          }
+        }
+      }
+    },
+    "Сбросить жир, а не силу": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lose fat, not strength"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pierde grasa, no fuerza"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perca gordura, não força"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perdre de la graisse, pas de la force"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fett verlieren, nicht Kraft"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اخسر الدهون لا القوة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "לאבד שומן, לא כוח"
+          }
+        }
+      }
+    },
+    "Бережный темп и белок по весу: уходит жир, а рабочие веса в зале остаются.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A gentle pace and protein for your weight: fat comes off while your lifts stay."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un ritmo suave y proteína según tu peso: se va la grasa y tus cargas se mantienen."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um ritmo suave e proteína pelo seu peso: sai a gordura e as cargas ficam."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un rythme doux et des protéines selon ton poids : la graisse part, tes charges restent."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein sanftes Tempo und Eiweiß nach deinem Gewicht: Fett geht, deine Arbeitsgewichte bleiben."
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وتيرة لطيفة وبروتين حسب وزنك: تذهب الدهون وتبقى أوزان تمرينك."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קצב עדין וחלבון לפי המשקל: הולך שומן, ומשקלי העבודה נשארים."
+          }
+        }
+      }
+    },
+    "План бесплатно %lld дней": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The plan is free for %lld days"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El plan es gratis %lld días"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O plano é grátis por %lld dias"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le plan est gratuit pendant %lld jours"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Plan ist %lld Tage kostenlos"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخطة مجانية لمدة %lld يومًا"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "התוכנית בחינם ל־%lld ימים"
+          }
+        }
+      }
+    },
+    "к %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "by %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "para el %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "até %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "d’ici le %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bis %@"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بحلول %@"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עד %@"
+          }
+        }
+      }
+    },
+    "потом %lld нед. удержания": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "then %lld wk of maintenance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "luego %lld sem. de mantenimiento"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "depois %lld sem. de manutenção"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "puis %lld sem. de maintien"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "danach %lld Wo. Halten"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ثم %lld أسبوع محافظة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ואז %lld שב׳ שמירה"
+          }
+        }
+      }
+    },
+    "%1$lld ккал · белок %2$lld г": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kcal · protein %2$lld g"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kcal · proteína %2$lld g"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kcal · proteína %2$lld g"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kcal · protéines %2$lld g"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld kcal · Eiweiß %2$lld g"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld سعرة · بروتين %2$lld جم"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld קק\"ל · חלבון %2$lld ג'"
+          }
+        }
+      }
+    },
+    "Ходишь в зал?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you go to the gym?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Vas al gimnasio?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você vai à academia?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu vas à la salle ?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gehst du ins Studio?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هل تذهب إلى النادي؟"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "הולך לחדר כושר?"
+          }
+        }
+      }
+    },
+    "Что мешало раньше?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What got in the way before?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué te frenó antes?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O que atrapalhou antes?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qu’est-ce qui a coincé avant ?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Was hat bisher im Weg gestanden?"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ما الذي أعاقك سابقًا؟"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מה הפריע קודם?"
+          }
+        }
+      }
+    },
+    "Силовые решают, сколько белка и какой темп": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Strength training decides how much protein and what pace"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La fuerza decide cuánta proteína y qué ritmo"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A musculação decide quanta proteína e qual ritmo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La musculation décide des protéines et du rythme"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Krafttraining entscheidet über Eiweiß und Tempo"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تمارين القوة تحدد كمية البروتين والوتيرة"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אימוני כוח קובעים כמה חלבון ובאיזה קצב"
+          }
+        }
+      }
+    },
+    "Под это соберём план": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll build the plan around it"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armaremos el plan en torno a eso"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vamos montar o plano em torno disso"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On construira le plan autour"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Danach richten wir den Plan aus"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سنبني الخطة على ذلك"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "נבנה את התוכנית סביב זה"
           }
         }
       }

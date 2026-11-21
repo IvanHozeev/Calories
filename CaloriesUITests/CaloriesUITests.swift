@@ -209,6 +209,9 @@ final class CaloriesUITests: XCTestCase {
             "-AppleLocale", "en_US",
             "-onboarding_completed", "NO",
             "-show_launch_splash", "NO",
+            // Без этого тест брал покупку, оставшуюся на симуляторе, и строка
+            // плана показывала совет фаз вместо приглашения в Premium.
+            "-is_premium", "NO",
         ]
         app.launch()
 
@@ -220,7 +223,7 @@ final class CaloriesUITests: XCTestCase {
         // На шаге цели выбираем поддержание: план с дефицитом запустил бы
         // пробный период, и следующие тесты получили бы премиум, которого не ждут.
         let health = app.buttons["onboardingHealthAccess"]
-        let maintenance = app.buttons["Maintenance"]
+        let maintenance = app.buttons["onboardingGoal-maintenance"]
         var taps = 0
         while !health.exists && taps < 14 {
             if maintenance.exists, !maintenance.isSelected {
@@ -236,11 +239,13 @@ final class CaloriesUITests: XCTestCase {
         XCTAssertTrue(health.waitForExistence(timeout: 5), "Нет шага с доступом к шагам")
 
         app.buttons["Next"].tap()
-        XCTAssertTrue(app.staticTexts["Ready?"].waitForExistence(timeout: 5), "Нет итогового шага")
+        XCTAssertTrue(app.staticTexts["onboardingOffer"].waitForExistence(timeout: 5), "Нет итогового шага")
         app.buttons["Get Started"].tap()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
                       "После онбординга должно открываться «Сегодня»")
         // Без плана пробный период не начат — строка плана зовёт в пэйвол.
+        // Строка ниже кольца, а список ленивый: сначала доводим до неё.
+        scrollIntoReach(app.buttons["planStrip"], in: app)
         XCTAssertTrue(app.staticTexts["Personal plan"].waitForExistence(timeout: 5),
                       "Поддержание не должно создавать план и пробный период")
     }
@@ -1353,7 +1358,9 @@ final class CaloriesUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Restore"].exists,
                       "Восстановление покупок обязательно для App Review")
-        XCTAssertTrue(app.staticTexts["So the weight stays off"].exists,
+        // Строки предложения зависят от ответов онбординга; «Видно, что
+        // работает» есть в каждом варианте.
+        XCTAssertTrue(app.staticTexts["You can see it working"].exists,
                       "Перечень фич должен быть переведён, а не падать на русский исходник")
     }
 

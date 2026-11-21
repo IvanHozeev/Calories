@@ -98,7 +98,7 @@ struct FoodQuantityView: View {
                                           : "\(basis.calories) ккал / 100 г"),
                     macros: macros,
                     traits: food.traits)
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
             }
 
             // Сухой или готовый: вес в граммах — того, что лежит на весах. Только у
@@ -111,6 +111,10 @@ struct FoodQuantityView: View {
                         Text("Готовый").tag(true)
                     }
                     .pickerStyle(.segmented)
+                    // Мельче и без полей: с поднятой клавиатурой экрану места
+                    // в обрез, и переключатель во весь рост выталкивал
+                    // «после приёма» под кнопки.
+                    .controlSize(.small)
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
                     .accessibilityIdentifier("cookedState")
@@ -142,6 +146,10 @@ struct FoodQuantityView: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(Self.amountInsets)
                         .onChange(of: gramsText) { _, newValue in
+                            // Нули в начале не вводятся: «000» и «05» читаются как
+                            // ошибка ввода, а ноль граммов — не порция.
+                            let cleaned = AmountText.clean(newValue)
+                            if cleaned != newValue { gramsText = cleaned; return }
                             if let value = Double(newValue), value > 0 {
                                 grams = min(value, 2000)
                             }
@@ -177,7 +185,7 @@ struct FoodQuantityView: View {
         .glassRow()
         // Чуть плотнее обычного: три карточки подряд, и с клавиатурой места
         // мало, но слипшимися они выглядели тесно.
-        .listSectionSpacing(14)
+        .listSectionSpacing(8)
         // Карточка прижата к заголовку: сгруппированный список по умолчанию
         // отступает от навигации на три десятка точек, а здесь над карточкой
         // ничего нет — это был пустой промежуток под названием продукта.
@@ -482,7 +490,7 @@ struct DishQuantityView: View {
                     densityLine: isHundredGrams ? nil : "\(dish.caloriesPer100g) ккал / 100 г",
                     macros: macros,
                     traits: dish.traits)
-                .listRowInsets(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
             }
 
             // Порядок и интервалы — как у продукта.
@@ -493,6 +501,8 @@ struct DishQuantityView: View {
                     .listRowSeparator(.hidden)
                     .listRowInsets(FoodQuantityView.amountInsets)
                     .onChange(of: gramsText) { _, newValue in
+                        let cleaned = AmountText.clean(newValue)
+                        if cleaned != newValue { gramsText = cleaned; return }
                         if let value = Double(newValue), value > 0 {
                             grams = min(value, 5000)
                         }
@@ -536,7 +546,7 @@ struct DishQuantityView: View {
             }
         }
         .glassRow()
-        .listSectionSpacing(14)
+        .listSectionSpacing(8)
         // Карточка прижата к заголовку: сгруппированный список по умолчанию
         // отступает от навигации на три десятка точек, а здесь над карточкой
         // ничего нет — это был пустой промежуток под названием продукта.
@@ -613,5 +623,17 @@ struct DishQuantityView: View {
     ])
     NavigationStack {
         DishQuantityView(dish: dish) { _ in }
+    }
+}
+
+
+/// Набранное количество граммов: только цифры и без нулей в начале.
+///
+/// «000» не должно набираться вовсе: ноль граммов — не порция, а нули
+/// спереди — ошибка ввода. Пустая строка остаётся пустой.
+enum AmountText {
+    static func clean(_ text: String) -> String {
+        let digits = text.filter { $0.isASCII && $0.isNumber }
+        return String(digits.drop(while: { $0 == "0" }))
     }
 }

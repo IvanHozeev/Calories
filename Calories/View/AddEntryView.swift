@@ -294,9 +294,19 @@ struct AddEntryView: View {
     }
     private var shownRecentFoods: [FoodItem] { notOnTop(recentFoodItems) { $0.name } }
     private var shownRecentDishes: [Dish] { notOnTop(recentDishItems) { $0.name } }
-    private var shownDishes: [Dish] { notOnTop(filteredDishes) { $0.name } }
-    private var shownCustomFoods: [FoodItem] { notOnTop(filteredCustomFoods) { $0.name } }
-    private var shownBuiltInFoods: [FoodItem] { notOnTop(filteredBuiltInFoods) { $0.name } }
+    private var shownDishes: [Dish] { notInRecent(notOnTop(filteredDishes) { $0.name }) { $0.name } }
+    private var shownCustomFoods: [FoodItem] { notInRecent(notOnTop(filteredCustomFoods) { $0.name }) { $0.name } }
+    private var shownBuiltInFoods: [FoodItem] { notInRecent(notOnTop(filteredBuiltInFoods) { $0.name }) { $0.name } }
+
+    /// Что уже стоит в «Недавнем»: ниже, в категориях, второй раз не повторяем.
+    /// «Принив хамуциет» в «Недавнем» и тут же в «Напитках» читался как два
+    /// разных продукта.
+    private func notInRecent<T>(_ items: [T], _ name: (T) -> String) -> [T] {
+        guard isSearching else { return items }
+        let recent = Set((shownRecentFoods.map(\.name) + shownRecentDishes.map(\.name)).map { $0.lowercased() })
+        guard !recent.isEmpty else { return items }
+        return items.filter { !recent.contains(name($0).lowercased()) }
+    }
 
     /// Имена, уже показанные сверху, — ниже в секциях источников их не повторяем.
     private var topMatchNames: Set<String> {
@@ -1984,8 +1994,25 @@ struct AddEntryView: View {
             offersVitamins: store.foodsOfferedVitamins.contains(food.id),
             traits: food.traits,
             quickAdd: { toggleQuick(food) },
+            quickSave: { saveNow(food) },
             isAdded: draftItems.contains { $0.name == food.name }
         )
+    }
+
+    /// Галочка в строке: записать продукт в дневник сразу, с той порцией, что
+    /// стоит в строке, — без экрана порции и без черновика приёма. Уже
+    /// набранное в приёме не трогаем: записывается только этот продукт.
+    private func saveNow(_ food: FoodItem) {
+        let item = Self.quickItem(for: food, usualGrams: usualGrams(food))
+        logChoice(food.name, source: "food", grams: item.grams)
+        let component = EntryComponent(name: item.name, calories: item.calories, macros: item.macros,
+                                       grams: item.grams, pieces: item.pieces)
+        store.add(name: item.name, calories: item.calories, macros: item.macros,
+                  grams: item.grams, date: entryDate, components: [component])
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        // Лист закрываем, только когда приём не собирают: иначе человек,
+        // нажавший галочку на одном продукте из многих, терял бы черновик.
+        if draftItems.isEmpty { finish() }
     }
 
     /// Продукт в приём одним касанием — с той порцией, что стоит в строке.

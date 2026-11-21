@@ -120,3 +120,22 @@ struct RichFilterTests {
         #expect(!PantryView.Rich.fiber.matches(food("Масло", kcal: 880, p: 0, f: 99, c: 0)))
     }
 }
+
+/// Граммы набираются без нулей в начале.
+struct AmountTextTests {
+    @Test func leadingZerosAreDropped() {
+        #expect(AmountText.clean("000") == "")
+        #expect(AmountText.clean("05") == "5")
+        #expect(AmountText.clean("0") == "")
+    }
+
+    @Test func zerosInsideStay() {
+        #expect(AmountText.clean("100") == "100")
+        #expect(AmountText.clean("1005") == "1005")
+    }
+
+    @Test func nonDigitsAreDropped() {
+        #expect(AmountText.clean("1a2") == "12")
+        #expect(AmountText.clean("") == "")
+    }
+}

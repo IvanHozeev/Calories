@@ -555,6 +555,8 @@ struct IngredientPickerSheet: View {
                         .focused($gramsFocused)
                         .font(.app(.body, weight: .medium))
                         .onChange(of: gramsText) { _, v in
+                            let cleaned = AmountText.clean(v)
+                            if cleaned != v { gramsText = cleaned; return }
                             if let value = Double(v), value > 0 { grams = min(value, 5000) }
                         }
                 }

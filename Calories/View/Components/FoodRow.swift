@@ -33,7 +33,10 @@ struct FoodRow: View {
     /// Положить в приём одним касанием, с обычной порцией. nil — кнопки нет:
     /// в дневнике и в «Рационе» строку нажимают, чтобы открыть, а не добавить.
     var quickAdd: (() -> Void)? = nil
-    /// Уже в приёме: кнопка рисуется галочкой, повторное нажатие убирает.
+    /// Сохранить в дневник сразу, с обычной порцией, не заходя на экран порции:
+    /// «+» кладёт в собираемый приём, галочка записывает. nil — кнопки нет.
+    var quickSave: (() -> Void)? = nil
+    /// Уже в приёме: «+» рисуется чёрной «−», повторное нажатие убирает.
     var isAdded: Bool = false
 
     /// Одна часть составного приёма: имя, цвет своего доминирующего макроса
@@ -192,7 +195,7 @@ struct FoodRow: View {
             ZStack {
                 Circle()
                     .fill(isAdded ? Color.primary : Color.secondary.opacity(0.16))
-                Image(systemName: isAdded ? "checkmark" : "plus")
+                Image(systemName: isAdded ? "minus" : "plus")
                     .font(.app(size: 13, weight: .bold))
                     .foregroundStyle(isAdded ? Color(.systemBackground) : Color.accentColor)
             }
@@ -204,7 +207,24 @@ struct FoodRow: View {
         .accessibilityLabel(Text(verbatim: "\(String(localized: "Добавить")) \(name)"))
         .accessibilityAddTraits(isAdded ? .isSelected : [])
         .accessibilityIdentifier("quickAdd")
-        .padding(.trailing, -6)
+    }
+
+    /// Галочка: записать в дневник сразу, без экрана порции.
+    private func quickSaveButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                Circle().fill(Color.secondary.opacity(0.16))
+                Image(systemName: "checkmark")
+                    .font(.app(size: 13, weight: .bold))
+                    .foregroundStyle(Color.accentColor)
+            }
+            .frame(width: 28, height: 28)
+            .frame(width: 36, height: 40)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(verbatim: "\(String(localized: "Записать")) \(name)"))
+        .accessibilityIdentifier("quickSave")
     }
 
     var body: some View {
@@ -285,15 +305,19 @@ struct FoodRow: View {
                         }
                     }
                 }
+
+                // Полоска долей макросов — внизу столбца, под названием и
+                // значками: справа она стояла между текстом и числом калорий и
+                // отнимала ширину у названия.
+                if hasMacros {
+                    MacroShareBar(macros: macros, width: 56)
+                        .padding(.top, 2)
+                }
             }
             // Колонке отдаём ровно остаток ширины ряда: имя переносится по
             // словам и не может вытолкнуть число калорий за правый край.
             // Без этой рамки текст берёт натуральную ширину и уезжает.
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            if hasMacros {
-                MacroShareBar(macros: macros)
-            }
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text(verbatim: "\(calories)")
@@ -314,6 +338,11 @@ struct FoodRow: View {
 
             if let quickAdd {
                 quickAddButton(quickAdd)
+                    .padding(.trailing, quickSave == nil ? -6 : 0)
+            }
+            if let quickSave {
+                quickSaveButton(quickSave)
+                    .padding(.trailing, -6)
             }
         }
         // Воздуха побольше: ярусы через три точки, вертикальный отступ

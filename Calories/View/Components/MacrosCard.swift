@@ -71,11 +71,10 @@ struct MacrosCard: View {
                 HStack(spacing: 8) { tiles }
             }
         }
-        // Полоски ходят вместе с дугами кольца, той же пружиной.
-        .animation(.spring(response: 0.65, dampingFraction: 0.85), value: macros)
-        // Смена ведущего макроса — отдельное, более медленное движение: это
-        // смена смысла, а не изменение числа.
-        .animation(.easeInOut(duration: 0.5), value: focus)
+        // Анимации здесь не на всём ряду, а на полосках и цвете подписи (ниже).
+        // На ряду целиком пружина ловила и перестройку самой строки списка —
+        // когда рядом исчезала подсказка и всё уезжало вверх, три плитки из
+        // четырёх застревали на полпути и наезжали на карточки выше.
     }
 
     /// Те же четыре плитки подряд — для крупного шрифта.
@@ -148,24 +147,31 @@ struct MacrosCard: View {
                         // Подпись ведущего макроса — его цветом: приложение
                         // подсказывает, куда смотреть, не добавляя ни строчки.
                         .foregroundStyle(isLeading ? color : Color.secondary)
+                        .animation(.easeInOut(duration: 0.5), value: isLeading)
                         .lineLimit(1)
                         .minimumScaleFactor(narrow ? 0.6 : 0.8)
                 }
 
                 if narrow {
                     // Число и под ним норма: в плитке на четверть ряда рядом
-                    // они не помещаются.
+                    // они не помещаются. Значки — справа от числа, а не в углу
+                    // плитки: наверху им места не хватало, и они налезали на
+                    // название.
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(verbatim: value.map { v in
-                            let number = String(format: "%.0f", v)
-                            return prefix.map { "\($0)\(number)" } ?? number
-                        } ?? "—")
-                            .font(.app(.title3, weight: .bold))
-                            .foregroundStyle(colorScheme == .dark ? color : Color.primary)
-                            .contentTransition(.numericText())
-                            .monospacedDigit()
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(verbatim: value.map { v in
+                                let number = String(format: "%.0f", v)
+                                return prefix.map { "\($0)\(number)" } ?? number
+                            } ?? "—")
+                                .font(.app(.title3, weight: .bold))
+                                .foregroundStyle(colorScheme == .dark ? color : Color.primary)
+                                .contentTransition(.numericText())
+                                .monospacedDigit()
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                            Spacer(minLength: 0)
+                            marks(hint: hint, gymDay: gymDay, color: color)
+                        }
                         if let target {
                             Text(verbatim: String(format: String(localized: "из %lld г"), Int(target.rounded())))
                                 .font(.app(.caption2))
@@ -197,6 +203,7 @@ struct MacrosCard: View {
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                     Spacer(minLength: 0)
+                    marks(hint: hint, gymDay: gymDay, color: color)
                 }
                 .monospacedDigit()
                 .lineLimit(1)
@@ -208,6 +215,7 @@ struct MacrosCard: View {
                         Capsule().fill(color.opacity(0.18))
                         Capsule().fill(color)
                             .frame(width: geometry.size.width * progress)
+                            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
                     }
                 }
                 .frame(height: 4)
@@ -216,25 +224,6 @@ struct MacrosCard: View {
             .padding(.horizontal, narrow ? 8 : 14)
             .padding(.vertical, 10)
             .frame(height: narrow ? Self.narrowTileHeight : Self.tileHeight)
-            .overlay(alignment: .topTrailing) {
-                HStack(spacing: 6) {
-                    // Отставание — стрелкой цвета самого макроса: вниз —
-                    // недобор белка или жира, вверх — углеводы сверх нормы.
-                    if let hint {
-                        Image(systemName: hint.symbol)
-                            .font(.app(.caption2, weight: .bold))
-                            .foregroundStyle(color)
-                            .accessibilityLabel(Text(verbatim: hint.label))
-                            .accessibilityIdentifier("macroBehind")
-                    }
-                    if let gymDay {
-                        GymAccent(color: color)
-                            .accessibilityLabel(Text(verbatim: gymDay))
-                    }
-                }
-                .padding(.top, 9)
-                .padding(.trailing, 11)
-            }
             .contentShape(RoundedRectangle(cornerRadius: 18))
             // Стекло, собранное руками: заливка, кант и тень. Почему не
             // системное — в `TileSurface`.
@@ -242,6 +231,26 @@ struct MacrosCard: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(identifier ?? "")
+    }
+
+    /// Значки плитки: отставание стрелкой цвета макроса, тяжёлый день —
+    /// гантелью. Стоят справа от числа.
+    @ViewBuilder
+    private func marks(hint: (symbol: String, label: String)?, gymDay: String?, color: Color) -> some View {
+        HStack(spacing: 4) {
+            if let hint {
+                Image(systemName: hint.symbol)
+                    .font(.app(.caption2, weight: .bold))
+                    .foregroundStyle(color)
+                    .accessibilityLabel(Text(verbatim: hint.label))
+                    .accessibilityIdentifier("macroBehind")
+            }
+            if let gymDay {
+                GymAccent(color: color)
+                    .accessibilityLabel(Text(verbatim: gymDay))
+            }
+        }
+        .fixedSize()
     }
 
     private func target(for kind: MacroKind) -> Double? {

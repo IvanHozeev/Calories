@@ -175,7 +175,7 @@ final class CaloriesUITests: XCTestCase {
     /// исключены: ищем саму строку.
     func foodRow(_ name: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS[c] %@ AND NOT (identifier IN {'quickAdd', 'fridgeAdd'})",
+            .matching(NSPredicate(format: "label CONTAINS[c] %@ AND NOT (identifier IN {'quickAdd', 'quickSave', 'fridgeAdd'})",
                                   name)).firstMatch
     }
 
@@ -1077,6 +1077,29 @@ final class CaloriesUITests: XCTestCase {
         // полоса с кнопкой появляется только над непустым черновиком.
         XCTAssertTrue(app.buttons["saveMeal"].waitForExistence(timeout: 10),
                       "Быстрый выбор должен класть продукт в приём пищи")
+    }
+
+    /// Галочка у строки записывает продукт в дневник сразу и закрывает лист, а
+    /// «+» только кладёт его в собираемый приём.
+    @MainActor
+    func testTheCheckmarkSavesAFoodStraightAway() {
+        let app = launchApp()
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
+        openAddEntry(in: app)
+
+        let search = revealSearchField(in: app)
+        XCTAssertTrue(search.waitForExistence(timeout: 5), "Не показалась строка поиска")
+        search.tap()
+        search.typeText("Spinach")
+
+        let save = app.buttons.matching(identifier: "quickSave").firstMatch
+        XCTAssertTrue(save.waitForExistence(timeout: 8), "У строки нет галочки «записать»")
+        save.tap()
+
+        // Лист закрылся, а не повис с черновиком.
+        XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 8))
+        XCTAssertFalse(app.buttons["saveMeal"].waitForExistence(timeout: 2),
+                       "Галочка не должна оставлять черновик приёма")
     }
 
     /// Дата и время приёма стоят в тулбаре, на месте прежнего выбора источника.

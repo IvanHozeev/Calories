@@ -9,6 +9,7 @@ struct CaloriesWidgetBundle: WidgetBundle {
         StepsWidget()
         MealWidget()
         KosherWaitLiveActivity()
+        FastingLiveActivity()
         // Контролы появились в iOS 18, а минимальная версия приложения — 26,
         // поэтому проверка доступности здесь не нужна.
         QuickAddControl()

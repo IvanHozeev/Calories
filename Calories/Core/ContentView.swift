@@ -1070,6 +1070,8 @@ private extension ContentView {
     /// ровно такой момент.
     private func syncKosherActivity() {
         KosherActivity.sync(waits: kosherWaits, enabled: KosherSettings.shared.isEnabled)
+        // Идущий пост — тем же движением: оба «ждём» живут в одном островке.
+        FastingActivity.sync(running: store.runningFast())
     }
 
     /// Пора ли сказать, что копий дневника нет.

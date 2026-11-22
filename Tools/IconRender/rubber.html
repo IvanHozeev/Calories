@@ -1,0 +1,173 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+html, body { margin: 0; padding: 0; width: 1024px; height: 1024px; overflow: hidden; background: transparent; }
+#icon { position: relative; width: 1024px; height: 1024px; overflow: hidden; }
+svg { position: absolute; left: 0; top: 0; }
+</style>
+</head>
+<body>
+<div id="icon"><svg id="svg" width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"></svg></div>
+<script>
+// "Резина" for Calories: the ring's three arcs drawn like the GymLogger dumbbell - each piece
+// a solid lit from the top left, thickness from 16 darker copies shifted down-right, a soft
+// shadow underneath. The hash is "<concept>-<mode>": concept 1, 2 or 3; mode light or dark.
+const [concept, mode] = (location.hash || '#1-light').slice(1).split('-');
+const svg = document.getElementById('svg');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (name, attrs, parent) => {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(e);
+  return e;
+};
+
+const hex = (c) => [1, 3, 5].map((k) => parseInt(c.slice(k, k + 2), 16));
+const mix = (c, t, k) => { const a = hex(c), b = hex(t); return 'rgb(' + a.map((v, j) => Math.round(v + (b[j] - v) * k)).join(',') + ')'; };
+
+// The arcs of the app icon (Ring.svg), scaled a little about the centre so the sign fills
+// about four fifths of the icon, as the GymLogger mark does.
+const S = 1.08;
+const T = (x, y) => [512 + (x - 512) * S, 512 + (y - 512) * S];
+const arc = (a, b) => {
+  const [x1, y1] = T(...a), [x2, y2] = T(...b);
+  return 'M ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' A ' + (312 * S) + ' ' + (312 * S) + ' 0 0 1 ' + x2.toFixed(2) + ' ' + y2.toFixed(2);
+};
+const WIDTH = 122 * S;
+const arcs = [
+  { id: 'carbs', d: arc([241.80, 668.00], [618.71, 218.82]) },
+  { id: 'protein', d: arc([813.37, 431.25], [555.42, 820.96]) },
+  { id: 'fat', d: arc([512.00, 824.00], [266.14, 704.09]) },
+];
+
+const palettes = {
+  // 1: the icon's own colours, as the app icon has always been.
+  '1': { carbs: '#B26DFF', protein: '#06BCDC', fat: '#FF7F42' },
+  // 2: the pastels of the ring in the app: lilac, aqua, peach.
+  '2': { carbs: '#A77DF5', protein: '#2DBBDF', fat: '#F59172' },
+  // 3: the same pastels with a steel ball in the gap of the ring.
+  '3': { carbs: '#A77DF5', protein: '#2DBBDF', fat: '#F59172' },
+};
+const colors = Object.assign({}, palettes[concept] || palettes['1']);
+
+let ground, shadow;
+if (mode === 'dark') {
+  ground = 'dark';
+  shadow = 'rgba(0,0,0,0.7)';
+} else if (mode === 'tinted') {
+  // Grayscale on black: the system lays its own tint over the light parts.
+  ground = 'black';
+  shadow = 'rgba(0,0,0,0)';
+  const gray = (c, k) => { const [r, g, b] = hex(c); const l = 0.299 * r + 0.587 * g + 0.114 * b;
+    const v = Math.round(l + (255 - l) * k).toString(16).padStart(2, '0'); return '#' + v + v + v; };
+  for (const k in colors) colors[k] = gray(colors[k], 0.55);
+} else if (mode === 'markdark') {
+  // The sign alone for the dark appearance: a deeper shadow, or it is not seen at all.
+  ground = null;
+  shadow = 'rgba(0,0,0,0.65)';
+} else if (mode === 'mark') {
+  ground = null;
+  shadow = 'rgba(30,24,18,0.38)';
+} else {
+  ground = 'light';
+  shadow = 'rgba(70,55,40,0.42)';
+}
+
+const defs = el('defs', {});
+if (ground === 'light') {
+  const g = el('linearGradient', { id: 'ground', gradientTransform: 'rotate(70 .5 .5)' }, defs);
+  el('stop', { offset: 0, 'stop-color': '#F5F2ED' }, g);
+  el('stop', { offset: 1, 'stop-color': '#E2DCD3' }, g);
+  el('rect', { width: 1024, height: 1024, fill: 'url(#ground)' });
+} else if (ground === 'black') {
+  el('rect', { width: 1024, height: 1024, fill: '#000000' });
+} else if (ground === 'dark') {
+  const g = el('radialGradient', { id: 'ground', cx: 0.5, cy: 0, r: 1.15, fx: 0.5, fy: 0 }, defs);
+  el('stop', { offset: 0, 'stop-color': '#2A2D36' }, g);
+  el('stop', { offset: 0.55, 'stop-color': '#14161B' }, g);
+  el('stop', { offset: 1, 'stop-color': '#0A0B0E' }, g);
+  el('rect', { width: 1024, height: 1024, fill: 'url(#ground)' });
+}
+
+// Inner light on top and inner shade at the bottom, the way the rubber pieces get theirs.
+const f = el('filter', { id: 'rubber', filterUnits: 'userSpaceOnUse', x: -64, y: -64, width: 1152, height: 1152 }, defs);
+const inner = (name, dy, blur, color, opacity) => {
+  el('feComponentTransfer', { in: 'SourceAlpha', result: name + 'inv' }, f);
+  f.lastChild.appendChild(Object.assign(document.createElementNS(NS, 'feFuncA'), { }));
+  f.lastChild.firstChild.setAttribute('type', 'table'); f.lastChild.firstChild.setAttribute('tableValues', '1 0');
+  el('feOffset', { in: name + 'inv', dy, result: name + 'off' }, f);
+  el('feGaussianBlur', { in: name + 'off', stdDeviation: blur, result: name + 'blur' }, f);
+  el('feComposite', { in: name + 'blur', in2: 'SourceAlpha', operator: 'in', result: name + 'a' }, f);
+  el('feFlood', { 'flood-color': color, 'flood-opacity': opacity, result: name + 'f' }, f);
+  el('feComposite', { in: name + 'f', in2: name + 'a', operator: 'in', result: name }, f);
+};
+inner('hl', 7, 6, '#FFFFFF', 0.42);
+inner('sh', -11, 9, '#000000', 0.2);
+const merge = el('feMerge', {}, f);
+['SourceGraphic', 'hl', 'sh'].forEach((n) => el('feMergeNode', { in: n }, merge));
+
+const blurF = el('filter', { id: 'soft', filterUnits: 'userSpaceOnUse', x: -128, y: -128, width: 1280, height: 1280 }, defs);
+el('feGaussianBlur', { stdDeviation: 26 }, blurF);
+
+const stroke = (d, color, extra) => el('path', Object.assign({ d, fill: 'none', stroke: color,
+  'stroke-width': WIDTH, 'stroke-linecap': 'round' }, extra || {}));
+
+// Shadow under the sign.
+const shadowGroup = el('g', { filter: 'url(#soft)', transform: 'translate(26 44)' });
+arcs.forEach((a) => stroke(a.d, shadow, {}).setAttribute('stroke', shadow));
+shadowGroup.append(...Array.from(svg.querySelectorAll('path')).slice(-arcs.length));
+
+// Ball position: the middle of the gap between the end of the carbs arc and the start of the
+// protein arc, on the ring itself.
+const ball = (() => {
+  if (concept !== '3') return null;
+  const a1 = Math.atan2(218.82 - 512, 618.71 - 512), a2 = Math.atan2(431.25 - 512, 813.37 - 512);
+  const mid = (a1 + a2) / 2;
+  const [x, y] = T(512 + 312 * Math.cos(mid), 512 + 312 * Math.sin(mid));
+  return { x, y, r: 60 * S };
+})();
+
+// Thickness: sixteen copies, each a step further down-right and darker.
+for (let k = 16; k >= 1; k--) {
+  const g = el('g', { transform: 'translate(' + (k * 1.6) + ' ' + (k * 2.4) + ')' });
+  arcs.forEach((a) => {
+    const p = stroke(a.d, mix(colors[a.id], '#000000', 0.42));
+    g.appendChild(p);
+  });
+  if (ball) {
+    g.appendChild(el('circle', { cx: ball.x, cy: ball.y, r: ball.r, fill: mix('#AEB3BC', '#000000', 0.42) }));
+  }
+}
+
+// The faces: each arc a radial gradient with its highlight toward the top left.
+arcs.forEach((a) => {
+  const c = colors[a.id];
+  const path = stroke(a.d, c);
+  const b = path.getBBox();
+  const x0 = b.x - WIDTH / 2, y0 = b.y - WIDTH / 2, w = b.width + WIDTH, h = b.height + WIDTH;
+  const g = el('radialGradient', { id: 'g-' + a.id, gradientUnits: 'userSpaceOnUse',
+    cx: x0 + w * 0.28, cy: y0 + h * 0.12, r: Math.max(w, h) * 1.05 }, defs);
+  el('stop', { offset: 0, 'stop-color': mix(c, '#FFFFFF', 0.34) }, g);
+  el('stop', { offset: 0.48, 'stop-color': c }, g);
+  el('stop', { offset: 1, 'stop-color': mix(c, '#000000', 0.16) }, g);
+  path.setAttribute('stroke', 'url(#g-' + a.id + ')');
+  path.setAttribute('filter', 'url(#rubber)');
+});
+
+// The steel: polished, silver, not coloured.
+if (ball) {
+  const g = el('radialGradient', { id: 'steel', gradientUnits: 'userSpaceOnUse',
+    cx: ball.x - ball.r * 0.34, cy: ball.y - ball.r * 0.4, r: ball.r * 1.7 }, defs);
+  [[0, '#FFFFFF'], [0.22, '#F4F6F9'], [0.5, '#C9CED6'], [0.78, '#9AA0AA'], [1, '#767B85']]
+    .forEach(([o, c]) => el('stop', { offset: o, 'stop-color': c }, g));
+  el('circle', { cx: ball.x, cy: ball.y, r: ball.r, fill: 'url(#steel)', filter: 'url(#rubber)' });
+  // A small bright reflection, as on a polished ball.
+  el('ellipse', { cx: ball.x - ball.r * 0.36, cy: ball.y - ball.r * 0.42, rx: ball.r * 0.26, ry: ball.r * 0.16,
+    fill: '#FFFFFF', 'fill-opacity': 0.8, transform: 'rotate(-35 ' + (ball.x - ball.r * 0.36) + ' ' + (ball.y - ball.r * 0.42) + ')' });
+}
+document.title = 'ready';
+</script>
+</body>
+</html>

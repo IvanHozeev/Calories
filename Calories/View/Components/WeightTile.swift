@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Плитка плана на «Сегодня», которая показывает вес: шапкой — фаза плана и
-/// её неделя, крупно — вес, справа — линия за шесть недель и цель плана.
+/// её неделя, под ней вес со сдвигом, справа — линия за шесть недель и цель.
 ///
 /// Во всю ширину под макросами: места хватает и на неделю плана, и на
 /// линию покрупнее, и на цель.
@@ -56,14 +56,20 @@ struct WeightTile: View {
     var body: some View {
         // Плитка — не кнопка, а жест: внутри неё своя кнопка «Взвеситься», а
         // вложенная в кнопку кнопка тап не получает — его забирает внешняя.
-        VStack(alignment: .leading, spacing: 4) {
-            header
-            HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
+        //
+        // В две колонки, а не в три ряда: слева шапка и вес со сдвигом в
+        // одну строку, справа линия и цель. Высота — по более высокой из
+        // колонок, а не сумма рядов: в рядах плитка выходила почти вдвое
+        // выше макросов над ней.
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                header
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     weightLine
                     if offersWeighIn {
                         Button(action: onWeighIn) { weighInLabel }
                             .buttonStyle(.plain)
+                            .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 4 }
                             .accessibilityIdentifier("weightTileWeighIn")
                     } else if let changeText {
                         Text(verbatim: changeText)
@@ -71,36 +77,36 @@ struct WeightTile: View {
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
                 }
-                Spacer(minLength: 0)
-                if series.count > 1 || goal != nil {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        if series.count > 1 {
-                            sparkline
-                                .frame(width: 132, height: 32)
-                        }
-                        if let goal {
-                            Text(verbatim: goal)
-                                .font(.app(.caption2))
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
+            }
+            Spacer(minLength: 0)
+            if series.count > 1 || goal != nil {
+                VStack(alignment: .trailing, spacing: 2) {
+                    if series.count > 1 {
+                        sparkline
+                            .frame(width: 112, height: 28)
+                    }
+                    if let goal {
+                        Text(verbatim: goal)
+                            .font(.app(.caption2))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
                     }
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
         .contentShape(RoundedRectangle(cornerRadius: 18))
         .tileSurface()
         .onTapGesture(perform: onOpen)
-        // Для VoiceOver — одна кнопка: что за фаза, вес, сдвиг и цель.
-        // «Взвеситься» остаётся отдельной кнопкой.
         .accessibilityElement(children: .contain)
     }
 
+    /// Шапка: значок и название фазы, за ними неделя плана.
     private var header: some View {
         HStack(spacing: 4) {
             if let symbol {
@@ -111,16 +117,15 @@ struct WeightTile: View {
             Text(verbatim: title)
                 .font(.app(.caption, weight: .semibold))
                 .foregroundStyle(.secondary)
-                .lineLimit(1)
-            Spacer(minLength: 8)
             if let week {
-                Text(verbatim: week)
+                Text(verbatim: "· \(week)")
                     .font(.app(.caption))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
-                    .lineLimit(1)
             }
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(.default, onOpen)

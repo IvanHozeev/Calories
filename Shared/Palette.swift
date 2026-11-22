@@ -108,7 +108,7 @@ enum Palette {
         // раньше стоял «стандарт», больше нет.
         let span = PaletteIntensity.range.upperBound - PaletteIntensity.range.lowerBound
         let amount = span > 0 ? (factor - PaletteIntensity.range.lowerBound) / span : 1
-        let colors = zip(ramp.faint, ramp.pale).map { $0.blended(with: $1, amount: amount).liftedOnDark() }
+        let colors = zip(ramp.faint, ramp.pale).map { $0.blended(with: $1, amount: amount).themed() }
         cacheLock.lock()
         cache[key] = colors
         cacheLock.unlock()
@@ -166,6 +166,32 @@ extension Color {
         return Color(hue: (from.hue + delta * t + 1).truncatingRemainder(dividingBy: 1),
                      saturation: from.saturation + (to.saturation - from.saturation) * t,
                      brightness: from.brightness + (to.brightness - from.brightness) * t)
+    }
+
+    /// Насколько гуще цвет в светлой теме: насыщенность — во столько раз,
+    /// яркость — до этой доли.
+    ///
+    /// Пастель, подобранная под чёрный фон, на белом выцветала: бирюза почти
+    /// терялась, сирень читалась серой. Тон не меняется, меняется плотность.
+    static let lightSaturationBoost = 1.35
+    static let lightBrightness = 0.95
+
+    /// Цвет дуги для обеих тем: в светлой — гуще (`lightSaturationBoost`),
+    /// в тёмной — не темнее порога (`liftedOnDark`).
+    func themed() -> Color {
+        let dark = UIColor(lifted(toLuminance: Palette.darkLuminanceFloor))
+        let light = UIColor(saturatedForLight())
+        return Color(uiColor: UIColor { traits in
+            traits.userInterfaceStyle == .dark ? dark : light
+        })
+    }
+
+    /// Тот же тон, гуще: для белого фона.
+    func saturatedForLight() -> Color {
+        guard let parts = hsb else { return self }
+        return Color(hue: parts.hue,
+                     saturation: min(parts.saturation * Self.lightSaturationBoost, 1),
+                     brightness: parts.brightness * Self.lightBrightness)
     }
 
     /// Тот же цвет, но в тёмной теме не темнее порога.

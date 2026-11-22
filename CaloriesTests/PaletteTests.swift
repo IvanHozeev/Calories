@@ -77,6 +77,21 @@ struct PaletteTests {
         #expect(resolved(floored, dark: true).luminance > plain.luminance)
     }
 
+    /// В светлой теме дуги гуще, чем в тёмной: тот же тон, больше
+    /// насыщенности. Пастель на белом выцветала.
+    @Test func arcsAreDenserOnTheLightTheme() throws {
+        for (name, ramp) in ramps {
+            for color in Palette.colors(ramp, intensity: PaletteIntensity.standard) {
+                let light = try #require(resolved(color, dark: false).hsb)
+                let base = try #require(resolved(color, dark: true).hsb)
+                #expect(light.saturation > base.saturation || base.saturation >= 0.99,
+                        "\(name): насыщенность \(light.saturation) против \(base.saturation)")
+                let delta = abs(light.hue - base.hue) * 360
+                #expect(min(delta, 360 - delta) < 3, "\(name): тон уехал на \(delta)°")
+            }
+        }
+    }
+
     /// Светлым цветам порог не нужен — их не поднимают.
     @Test func brightColoursAreLeftAlone() {
         let mint = Color(hex: 0x00C892)

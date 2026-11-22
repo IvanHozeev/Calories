@@ -251,11 +251,9 @@ final class CaloriesUITests: XCTestCase {
         }
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 10),
                       "После онбординга должно открываться «Сегодня»")
-        // Без подписки плана нет — строка плана зовёт в пэйвол.
-        // Строка ниже кольца, а список ленивый: сначала доводим до неё.
-        scrollIntoReach(app.buttons["planStrip"], in: app)
-        XCTAssertTrue(app.staticTexts["Personal plan"].waitForExistence(timeout: 5),
-                      "Без подписки план не должен запускаться")
+        // Под кольцом — плитка веса. Список ленивый: сначала доводим до неё.
+        scrollIntoReach(app.buttons["weightTile"], in: app)
+        XCTAssertTrue(app.buttons["weightTile"].exists, "Под кольцом должна быть плитка веса")
     }
 
     // MARK: - Навигация
@@ -412,7 +410,7 @@ final class CaloriesUITests: XCTestCase {
         // «Новый план», а не «План»: пока плана нет, экран плана и есть его
         // настройка — показывать на нём нечего. Готовый план за той же
         // полоской проверяет `testPlanEditorOpensFromTheToolbar`.
-        visit("planStrip", expecting: "New plan", in: app)
+        visit("weightTile", expecting: "New plan", in: app)
     }
 
     /// Всё, что открывается из «Настроек», включая отладочные экраны:
@@ -862,7 +860,7 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp(premium: true)
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        let strip = app.buttons["planStrip"]
+        let strip = app.buttons["weightTile"]
         scrollIntoReach(strip, in: app)
         if strip.exists { strip.tap() }
 
@@ -885,7 +883,7 @@ final class CaloriesUITests: XCTestCase {
     func testAddingAPhaseAddsExactlyOne() {
         let app = launchApp(premium: true)
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
-        let strip = app.buttons["planStrip"]
+        let strip = app.buttons["weightTile"]
         scrollIntoReach(strip, in: app)
         if strip.exists { strip.tap() }
         guard app.staticTexts["Phases of the new plan"].waitForExistence(timeout: 5) else {
@@ -928,7 +926,7 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp(premium: true, extraArguments: ["-ui_test_seed_plan", "YES"])
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        let strip = app.buttons["planStrip"]
+        let strip = app.buttons["weightTile"]
         scrollIntoReach(strip, in: app)
         strip.tap()
 
@@ -1370,7 +1368,14 @@ final class CaloriesUITests: XCTestCase {
         let app = launchApp(premium: false)
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        app.staticTexts["Personal plan"].tap()
+        // Пэйвол — из строки «Подписка» в профиле: на «Сегодня» на месте
+        // плитки плана теперь вес, и в оплату она не ведёт.
+        let profileTab = app.tabBars.buttons["Profile"]
+        XCTAssertTrue(profileTab.waitForExistence(timeout: 10))
+        profileTab.tap()
+        let subscription = app.buttons["subscription"]
+        XCTAssertTrue(subscription.waitForExistence(timeout: 10), "В профиле нет строки подписки")
+        subscription.tap()
         XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5))
 
         XCTAssertTrue(app.buttons["restorePurchases"].exists,
@@ -1384,19 +1389,18 @@ final class CaloriesUITests: XCTestCase {
     // MARK: - Премиум-гейт
 
     @MainActor
-    func testPlanStripShowsPaywallWithoutPremium() {
+    func testWeightTileOpensWeightWithoutPremium() {
         let app = launchApp(premium: false)
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 5))
 
-        // Строка под кольцом — видимая дверь в план. Нажатие на само кольцо
-        // ведёт туда же, но о нём ничто не сообщает: платную функцию нельзя
-        // прятать за жест, которого не видно.
-        let strip = app.buttons["planStrip"]
-        scrollIntoReach(strip, in: app)
-        XCTAssertTrue(strip.exists, "Под кольцом должна быть строка плана")
-        strip.tap()
-        XCTAssertTrue(app.navigationBars["Subscription"].waitForExistence(timeout: 5),
-                      "Без премиума строка плана должна открывать пейволл")
+        // Без подписки плана нет — плитка веса ведёт на экран веса, а не в
+        // пэйвол: вес — не платная функция, и прятать за ним оплату нельзя.
+        let tile = app.buttons["weightTile"]
+        scrollIntoReach(tile, in: app)
+        XCTAssertTrue(tile.exists, "Под кольцом должна быть плитка веса")
+        tile.tap()
+        XCTAssertTrue(app.navigationBars["Weight and trend"].waitForExistence(timeout: 5),
+                      "Без премиума плитка веса должна открывать экран веса")
     }
 
     /// Кольцо ведёт в добавление еды — самое частое действие на экране.

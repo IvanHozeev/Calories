@@ -22,6 +22,22 @@ enum PhaseLook {
     static func color(_ phase: PlanPhase) -> Color {
         phase.isDietBreak ? MacroKind.fat.color : color(phase.intent)
     }
+
+    /// Значок фазы: куда она ведёт вес. Брейк — чашка, как на экране плана.
+    static func symbol(_ phase: PlanPhase) -> String {
+        if phase.isDietBreak { return "cup.and.saucer.fill" }
+        switch phase.intent {
+        case .cut: return "arrow.down.right"
+        case .maintenance: return "equal"
+        case .bulk: return "arrow.up.right"
+        }
+    }
+
+    /// Цвет значка фазы на светлой плитке. Серый поддержания для значка
+    /// слишком бледный — берём вторичный цвет текста.
+    static func symbolTint(_ phase: PlanPhase) -> Color {
+        !phase.isDietBreak && phase.intent == .maintenance ? .secondary : color(phase)
+    }
 }
 
 /// Маршрут плана одной карточкой: финиш, сколько недель, вес от и до, линия

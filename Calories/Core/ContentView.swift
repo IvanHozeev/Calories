@@ -42,6 +42,8 @@ struct ContentView: View {
     /// Подсказка календаря, ждущая подтверждения.
     @State private var confirmingHint: DayHint?
     @State private var showingPlan = false
+    @State private var showingWeightHistory = false
+    @AppStorage("use_imperial") private var useImperial = false
     /// С чего открыть добавление, если пришли по меню на иконке.
     @State private var entryAction: QuickAction?
     /// Запись, к которой добавляют ещё еды.
@@ -483,6 +485,9 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
+            .navigationDestination(isPresented: $showingWeightHistory) {
+                WeightDetailView(store: store)
+            }
             .navigationDestination(isPresented: $showingBackupSettings) {
                 SettingsView(store: store)
             }
@@ -718,12 +723,10 @@ private extension ContentView {
                     .tile
                 }
 
-                PlanStrip(
-                    store: store,
-                    onOpenPlan: { showingPlan = true },
-                    onShowPaywall: { showingPaywall = true }
-                )
-                .tile
+                // Вес на месте плитки плана: о темпе веса план и говорил,
+                // а сам вес лежал в профиле. С подпиской плитка ведёт в план —
+                // там и график веса, и фазы; без неё — на экран веса.
+                weightTile
             }
 
             // Макросы под ними: приём и план — про то, что делать сейчас и
@@ -788,12 +791,8 @@ private extension ContentView {
             hints += DayHint.weeklyReview(proposal: proposal, now: now)
         }
         if needsBackupReminder { hints += DayHint.backup(now: now) }
-        // Только утром: вечерний вес выше на съеденное за день и тренд только
-        // сбивает. Из «+» взвеситься можно всегда.
-        if store.profile != nil, !store.hasWeighedToday,
-           WeighInWindow.isOpen(now: now, wakeHour: hourOfDay(mealSchedule.wake)) {
-            hints += DayHint.weighIn(now: now)
-        }
+        // Взвешивания здесь нет: «Взвеситься» стоит в плитке веса, там же,
+        // где сам вес, — отдельная строка под кольцом повторяла бы её.
         // Раз в неделю, в день недели прошлых замеров.
         if store.profile != nil,
            MeasurementReminder.isDue(lastMeasurement: store.latestMeasurement?.date, now: now) {
@@ -1024,6 +1023,43 @@ private extension ContentView {
     ///
     /// Нужен совету дня, чтобы сравнивать съеденное с темпом дня, а не
     /// с итоговой нормой.
+    /// Плитка веса: тренд, линия за шесть недель и сдвиг за неделю.
+    var weightTile: some View {
+        let now = Date()
+        let trend = store.weightTrend(on: now)
+        // Сдвиг — только когда есть неделя истории: иначе тренд неделю назад
+        // подставил бы ближайшее взвешивание, и сдвиг вышел бы нулём.
+        let weekAgo = now.addingTimeInterval(-7 * 86_400)
+        let hasWeek = store.weightEntries.contains { $0.date <= weekAgo.addingTimeInterval(86_400) }
+        let change: Double? = hasWeek ? trend.flatMap { now in
+            store.weightTrend(on: weekAgo).flatMap { then in
+                then > 0 ? (now - then) / then * 100 : nil
+            }
+        } : nil
+        // Только утром, как и прежняя подсказка: вечерний вес выше на
+        // съеденное за день. Без единого взвешивания — всегда.
+        let offers = trend == nil || (!store.hasWeighedToday
+            && WeighInWindow.isOpen(now: now, wakeHour: hourOfDay(mealSchedule.wake)))
+        // Шапка — фаза плана со своим значком: плитка по-прежнему про то,
+        // куда идёшь, только ответ теперь — вес. Неделю плана не пишем: в
+        // половине экрана она теснила название фазы, а смотрят её в плане.
+        let plan = store.isPremium && store.planOutcome == nil ? store.plan : nil
+        let title = plan?.currentPhase?.title ?? String(localized: "Вес")
+        let phase = plan?.currentPhase
+        return WeightTile(title: title,
+                          symbol: phase.map { PhaseLook.symbol($0) },
+                          symbolTint: phase.map { PhaseLook.symbolTint($0) } ?? .secondary,
+                          trendKg: trend,
+                          weeklyChangePercent: change,
+                          series: store.weightTrendSeries(weeks: 6, now: now),
+                          offersWeighIn: offers,
+                          imperial: useImperial,
+                          onOpen: {
+                              if store.isPremium { showingPlan = true } else { showingWeightHistory = true }
+                          },
+                          onWeighIn: { todaySheet = .weight })
+    }
+
     private func hourOfDay(_ date: Date) -> Double {
         let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
         return Double(parts.hour ?? 0) + Double(parts.minute ?? 0) / 60

@@ -48,8 +48,8 @@ struct MacrosCard: View {
     /// Выше плиток приёма и плана: в ней три строки, и число теперь крупнее.
     private static let tileHeight: CGFloat = 74
     /// Плитка на четверть ряда: название, число, норма и полоска — четыре
-    /// строки вместо трёх.
-    private static let narrowTileHeight: CGFloat = 92
+    /// строки вместо трёх. Вровень с плитками приёма и плана над ней.
+    private static let narrowTileHeight: CGFloat = TodayTile.height
 
     var body: some View {
         // Четыре отдельные плитки, а не одна карточка с четырьмя колонками.

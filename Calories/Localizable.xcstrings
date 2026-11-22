@@ -36867,52 +36867,6 @@
         }
       }
     },
-    "Неделя %d из %d" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الأسبوع %d من %d"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Woche %d von %d"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Week %d of %d"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana %d de %d"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semaine %d sur %d"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "שבוע %d מתוך %d"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Semana %d de %d"
-          }
-        }
-      }
-    },
     "неделя %lld из %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -46556,53 +46510,6 @@
         }
       }
     },
-    "План завершён — посмотри итог" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "انتهت الخطة — اطّلع على النتيجة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Plan ist beendet — sieh dir das Ergebnis an"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The plan has finished — see how it went"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El plan terminó: mira el resultado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le plan est terminé — voyez le bilan"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "התוכנית הסתיימה — ראה את התוצאה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O plano terminou — veja o resultado"
-          }
-        }
-      }
-    },
     "План и факт" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -50264,53 +50171,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Última cópia"
-          }
-        }
-      }
-    },
-    "посмотри итог" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اطّلع على النتيجة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ergebnis ansehen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "see the outcome"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mira el resultado"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "vois le bilan"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ראה את התוצאה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "veja o resultado"
           }
         }
       }
@@ -62301,53 +62161,6 @@
         }
       }
     },
-    "Спланировать сушку или набор" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "خطّط للتنشيف أو الزيادة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cut oder Aufbau planen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan a cut or a bulk"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planear definición o volumen"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planifier une sèche ou une prise"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תכנן חיטוב או עלייה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planejar definição ou ganho"
-          }
-        }
-      }
-    },
     "Справа — калории: так видно, на что действительно уходит день, а не сколько позиций в дневнике." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -62857,52 +62670,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Duração"
-          }
-        }
-      }
-    },
-    "Срок до цели и норма по дням" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الوقت حتى الهدف والحصة اليومية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zeit bis zum Ziel und Tagesziele"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Time to goal and daily targets"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plazo hasta la meta y objetivo diario"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Délai jusqu’à l’objectif et cible du jour"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "זמן עד היעד ויעד יומי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prazo até a meta e meta diária"
           }
         }
       }

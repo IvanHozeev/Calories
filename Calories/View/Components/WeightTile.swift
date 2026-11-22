@@ -56,10 +56,10 @@ struct WeightTile: View {
     var body: some View {
         // Плитка — не кнопка, а жест: внутри неё своя кнопка «Взвеситься», а
         // вложенная в кнопку кнопка тап не получает — его забирает внешняя.
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             header
             HStack(alignment: .bottom, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     weightLine
                     if offersWeighIn {
                         Button(action: onWeighIn) { weighInLabel }
@@ -78,7 +78,7 @@ struct WeightTile: View {
                     VStack(alignment: .trailing, spacing: 2) {
                         if series.count > 1 {
                             sparkline
-                                .frame(width: 132, height: 40)
+                                .frame(width: 132, height: 32)
                         }
                         if let goal {
                             Text(verbatim: goal)
@@ -92,7 +92,7 @@ struct WeightTile: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .contentShape(RoundedRectangle(cornerRadius: 18))
         .tileSurface()
         .onTapGesture(perform: onOpen)

@@ -1,7 +1,10 @@
 import SwiftUI
 
-/// Плитка плана на «Сегодня», которая показывает вес: шапкой — фаза плана,
-/// крупно — вес.
+/// Плитка плана на «Сегодня», которая показывает вес: шапкой — фаза плана и
+/// её неделя, крупно — вес, справа — линия за шесть недель и цель плана.
+///
+/// Во всю ширину под макросами: места хватает и на неделю плана, и на
+/// линию покрупнее, и на цель.
 ///
 /// Плитка плана говорила о темпе веса словами, а сам вес лежал в профиле.
 /// Теперь вес перед глазами: по тренду, линией за шесть недель и сдвигом за
@@ -17,6 +20,10 @@ struct WeightTile: View {
     /// ничего не добавлял к слову «Вес».
     var symbol: String? = nil
     var symbolTint: Color = .secondary
+    /// Справа в шапке: «неделя 6 из 12». Без плана — ничего.
+    var week: String? = nil
+    /// Под линией: куда ведёт план, «цель 77.9». Без плана — ничего.
+    var goal: String? = nil
     /// Вес по тренду. nil — взвешиваний ещё нет.
     let trendKg: Double?
     /// Сдвиг тренда за неделю, в процентах от веса. nil — истории меньше недели.
@@ -49,76 +56,88 @@ struct WeightTile: View {
     var body: some View {
         // Плитка — не кнопка, а жест: внутри неё своя кнопка «Взвеситься», а
         // вложенная в кнопку кнопка тап не получает — его забирает внешняя.
-        // Раньше «Взвеситься» поэтому лежала поверх плитки, прижатой к низу,
-        // и не вставала по центру вместе с остальным.
-        VStack(alignment: .leading, spacing: 2) {
-            info
-            if offersWeighIn {
-                Button(action: onWeighIn) { weighInLabel }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("weightTileWeighIn")
+        VStack(alignment: .leading, spacing: 8) {
+            header
+            HStack(alignment: .bottom, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    weightLine
+                    if offersWeighIn {
+                        Button(action: onWeighIn) { weighInLabel }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("weightTileWeighIn")
+                    } else if let changeText {
+                        Text(verbatim: changeText)
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+                if series.count > 1 || goal != nil {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if series.count > 1 {
+                            sparkline
+                                .frame(width: 132, height: 40)
+                        }
+                        if let goal {
+                            Text(verbatim: goal)
+                                .font(.app(.caption2))
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
+                }
             }
         }
-        // По центру, как плитка приёма рядом.
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
-        // Поуже, чем у плитки приёма: с кнопкой «Взвеситься» здесь три
-        // строки и линия, и в 70 точек с прежними полями они не влезали.
-        .padding(.vertical, 6)
-        .frame(height: TodayTile.height)
+        .padding(.vertical, 12)
         .contentShape(RoundedRectangle(cornerRadius: 18))
         .tileSurface()
         .onTapGesture(perform: onOpen)
+        // Для VoiceOver — одна кнопка: что за фаза, вес, сдвиг и цель.
+        // «Взвеситься» остаётся отдельной кнопкой.
+        .accessibilityElement(children: .contain)
     }
 
-    /// Шапка, вес с линией и сдвиг — одним элементом для VoiceOver, кнопкой,
-    /// которая открывает план или экран веса.
-    private var info: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(spacing: 4) {
-                if let symbol {
-                    Image(systemName: symbol)
-                        .font(.app(.caption2, weight: .bold))
-                        .foregroundStyle(symbolTint)
-                }
-                Text(verbatim: title)
-                    .font(.app(.caption2, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+    private var header: some View {
+        HStack(spacing: 4) {
+            if let symbol {
+                Image(systemName: symbol)
+                    .font(.app(.caption, weight: .bold))
+                    .foregroundStyle(symbolTint)
             }
-
-            HStack(alignment: .center, spacing: 8) {
-                if let trendKg {
-                    Text(verbatim: "\(mass(trendKg)) \(unit)")
-                        .font(.app(.subheadline, weight: .semibold))
-                        .monospacedDigit()
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                } else {
-                    Text(verbatim: "—")
-                        .font(.app(.subheadline, weight: .semibold))
-                }
-                Spacer(minLength: 0)
-                if series.count > 1 {
-                    sparkline
-                        .frame(width: 56, height: 22)
-                }
-            }
-
-            if !offersWeighIn, let changeText {
-                Text(verbatim: changeText)
-                    .font(.app(.caption2))
+            Text(verbatim: title)
+                .font(.app(.caption, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            if let week {
+                Text(verbatim: week)
+                    .font(.app(.caption))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .minimumScaleFactor(0.8)
             }
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction(.default, onOpen)
         .accessibilityIdentifier("weightTile")
+    }
+
+    private var weightLine: some View {
+        Group {
+            if let trendKg {
+                Text(verbatim: "\(mass(trendKg)) \(unit)")
+            } else {
+                Text(verbatim: "—")
+            }
+        }
+        .font(.app(.title3, weight: .bold))
+        .monospacedDigit()
+        .lineLimit(1)
     }
 
     private var weighInLabel: some View {
@@ -138,7 +157,7 @@ struct WeightTile: View {
         let heights = TrendSparkline.heights(series)
         let color = ProgressRing.kcalColors[0]
         return GeometryReader { geometry in
-            let inset: CGFloat = 3
+            let inset: CGFloat = 5
             let width = geometry.size.width - inset * 2
             let height = geometry.size.height - inset * 2
             let points = heights.enumerated().map { index, level in
@@ -151,13 +170,13 @@ struct WeightTile: View {
                     path.move(to: first)
                     points.dropFirst().forEach { path.addLine(to: $0) }
                 }
-                .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
                 if let last = points.last {
                     Circle()
                         .fill(Color(.systemBackground))
                         .overlay(Circle().stroke(offersWeighIn ? Color.secondary : color,
                                                  style: StrokeStyle(lineWidth: 2, dash: offersWeighIn ? [2, 2] : [])))
-                        .frame(width: 7, height: 7)
+                        .frame(width: 9, height: 9)
                         .position(last)
                 }
             }

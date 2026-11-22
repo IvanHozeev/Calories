@@ -53,29 +53,57 @@ struct MacrosCard: View {
     static let narrowTileHeight: CGFloat = 84
 
     var body: some View {
-        // Четыре отдельные плитки, а не одна карточка с четырьмя колонками.
+        // Одна карточка с четырьмя колонками, а не четыре плитки.
         //
-        // Карточка читалась одним предметом — «макросы», — и чтобы узнать про
-        // белок, глаз сперва находил карточку, потом колонку в ней. Плитки
-        // стоят вровень с «приёмом» и «планом» ниже: четыре ответа на четыре
-        // вопроса, каждый сам по себе.
+        // Плитки делили одно на четыре: все про съеденное за день, и нажатие
+        // по любой вело в один и тот же разбор дня. Четыре стекла подряд
+        // читались как четыре разных входа, которых нет. Колонки разделены
+        // тонкой чертой — каждая по-прежнему читается сама по себе.
         //
-        // Один ряд: в нём каждой достаётся около восьмидесяти точек, и
-        // «319 / 434 г» в одну строку не помещается — поэтому в узкой плитке
-        // норма стоит строкой под числом («из 434 г»). На крупном шрифте
-        // плитки идут столбиком, как и раньше.
+        // В колонке около восьмидесяти точек, и «319 / 434 г» в одну строку не
+        // помещается — поэтому норма стоит строкой под числом («из 434 г»).
+        // На крупном шрифте колонки не помещаются вовсе, и там плитки идут
+        // столбиком, как раньше.
         let isBig = dynamicTypeSize.isAccessibilitySize
         return Group {
             if isBig {
                 VStack(spacing: 10) { tiles }
             } else {
-                HStack(spacing: 8) { tiles }
+                card
             }
         }
         // Анимации здесь не на всём ряду, а на полосках и цвете подписи (ниже).
         // На ряду целиком пружина ловила и перестройку самой строки списка —
         // когда рядом исчезала подсказка и всё уезжало вверх, три плитки из
         // четырёх застревали на полпути и наезжали на карточки выше.
+    }
+
+    /// Карточка: четыре колонки под одним стеклом, одна кнопка на всё.
+    private var card: some View {
+        Button(action: onOpen) {
+            HStack(spacing: 0) {
+                macroColumn(.protein, value: macros.protein)
+                columnDivider
+                macroColumn(.fat, value: macros.fat)
+                columnDivider
+                macroColumn(.carbs, value: macros.carbs)
+                columnDivider
+                fiberColumn
+            }
+            .padding(.horizontal, 4)
+            .frame(height: Self.narrowTileHeight)
+            .contentShape(RoundedRectangle(cornerRadius: 20))
+            .tileSurface()
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("openDayNutrition")
+    }
+
+    private var columnDivider: some View {
+        Rectangle()
+            .fill(Color.secondary.opacity(0.18))
+            .frame(width: 1)
+            .padding(.vertical, 14)
     }
 
     /// Те же четыре плитки подряд — для крупного шрифта.
@@ -109,6 +137,28 @@ struct MacrosCard: View {
                     identifier: kind == .protein ? "openDayNutrition" : nil)
     }
 
+    /// Колонка макроса в карточке — то же, что плитка, без своего стекла.
+    private func macroColumn(_ kind: MacroKind, value: Double) -> some View {
+        let isBehind = behindMacros.contains(kind)
+        return column(title: kind.title, value: value, target: target(for: kind),
+                      color: kind.color, isLeading: focus == kind,
+                      hint: isBehind ? (symbol: kind == .carbs ? "arrow.up" : "arrow.down",
+                                        label: kind.shortageTitle) : nil,
+                      gymDay: kind == .carbs ? gymDayName : nil,
+                      prefix: nil, narrow: true)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 10)
+    }
+
+    private var fiberColumn: some View {
+        column(title: String(localized: "Клетчатка"), value: fiber,
+               target: Micronutrient.fiber.dailyValue, color: MacroKind.carbs.color,
+               isLeading: false, hint: nil, gymDay: nil,
+               prefix: fiberIsPartial ? "≥" : nil, narrow: true)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 10)
+    }
+
     /// Клетчатка — цветом углеводов: она их часть, и своего цвета у неё нет.
     private var fiberTile: some View {
         tile(title: String(localized: "Клетчатка"),
@@ -131,10 +181,30 @@ struct MacrosCard: View {
                       hint: (symbol: String, label: String)? = nil,
                       gymDay: String? = nil,
                       prefix: String? = nil, identifier: String? = nil) -> some View {
-        let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
         let narrow = !dynamicTypeSize.isAccessibilitySize
         return Button(action: onOpen) {
-            VStack(alignment: .leading, spacing: narrow ? 3 : 5) {
+            column(title: title, value: value, target: target, color: color, isLeading: isLeading,
+                   hint: hint, gymDay: gymDay, prefix: prefix, narrow: narrow)
+            .padding(.horizontal, narrow ? 8 : 14)
+            .padding(.vertical, 10)
+            .frame(height: narrow ? Self.narrowTileHeight : Self.tileHeight)
+            .contentShape(RoundedRectangle(cornerRadius: 18))
+            // Стекло, собранное руками: заливка, кант и тень. Почему не
+            // системное — в `TileSurface`.
+            .tileSurface()
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier ?? "")
+    }
+
+    /// Содержимое плитки — подпись, число, норма и полоска. В карточке это
+    /// колонка, на крупном шрифте — отдельная плитка.
+    private func column(title: String, value: Double?, target: Double?,
+                        color: Color, isLeading: Bool,
+                        hint: (symbol: String, label: String)?,
+                        gymDay: String?, prefix: String?, narrow: Bool) -> some View {
+        let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
+        return VStack(alignment: .leading, spacing: narrow ? 3 : 5) {
                 HStack(spacing: narrow ? 4 : 6) {
                     // Цвет макроса — точкой у названия и полоской внизу: так
                     // он узнаётся и при чёрном числе. В плитке на четверть
@@ -225,16 +295,6 @@ struct MacrosCard: View {
                 .frame(height: 4)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, narrow ? 8 : 14)
-            .padding(.vertical, 10)
-            .frame(height: narrow ? Self.narrowTileHeight : Self.tileHeight)
-            .contentShape(RoundedRectangle(cornerRadius: 18))
-            // Стекло, собранное руками: заливка, кант и тень. Почему не
-            // системное — в `TileSurface`.
-            .tileSurface()
-        }
-        .buttonStyle(.plain)
-        .accessibilityIdentifier(identifier ?? "")
     }
 
     /// Значки плитки: отставание стрелкой цвета макроса, тяжёлый день —

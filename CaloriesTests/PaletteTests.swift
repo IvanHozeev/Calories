@@ -77,6 +77,20 @@ struct PaletteTests {
         #expect(resolved(floored, dark: true).luminance > plain.luminance)
     }
 
+    /// Название продукта в светлой теме — тот же тон, что дуга его макроса,
+    /// и читается на белом. Смесь с чёрным уводила персик в коричневый.
+    @Test func macroInkKeepsTheArcHueAndReadsOnWhite() throws {
+        let pairs: [(MacroKind, Palette.Ramp)] = [(.protein, Palette.protein), (.fat, Palette.fat), (.carbs, Palette.carbs)]
+        for (kind, ramp) in pairs {
+            let arc = try #require(ramp.pale[1].hsb).hue * 360
+            let ink = try #require(kind.ink.hsb)
+            #expect(abs(ink.hue * 360 - arc) < 4, "\(kind): тон \(Int(ink.hue * 360))° против \(Int(arc))°")
+            #expect(ink.saturation > (ramp.pale[1].hsb?.saturation ?? 1), "\(kind): насыщеннее дуги")
+            let contrast = 1.05 / (kind.ink.luminance + 0.05)
+            #expect(contrast >= 3, "\(kind): контраст на белом \(contrast)")
+        }
+    }
+
     /// Светлым цветам порог не нужен — их не поднимают.
     @Test func brightColoursAreLeftAlone() {
         let mint = Color(hex: 0x00C892)

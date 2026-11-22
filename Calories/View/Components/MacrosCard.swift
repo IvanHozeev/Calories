@@ -83,11 +83,8 @@ struct MacrosCard: View {
         Button(action: onOpen) {
             HStack(spacing: 0) {
                 macroColumn(.protein, value: macros.protein)
-                columnDivider
-                macroColumn(.fat, value: macros.fat)
-                columnDivider
-                macroColumn(.carbs, value: macros.carbs)
-                columnDivider
+                macroColumn(.fat, value: macros.fat, leadingDivider: true)
+                macroColumn(.carbs, value: macros.carbs, leadingDivider: true)
                 fiberColumn
             }
             .padding(.horizontal, 4)
@@ -99,13 +96,22 @@ struct MacrosCard: View {
         .accessibilityIdentifier("openDayNutrition")
     }
 
-    private var columnDivider: some View {
-        Rectangle()
-            .fill(Color.secondary.opacity(0.18))
-            .frame(width: 1)
-            .padding(.vertical, 22)
+    /// Черта слева от колонки — по высоте самих цифр: от верха числа до низа
+    /// «из 74 г». Рисуется на блоке числа, а не отдельным элементом ряда: с
+    /// отступами на глаз её концы уезжали при другом размере шрифта.
+    private func columnDivider(_ shown: Bool) -> some View {
+        Group {
+            if shown {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.18))
+                    .frame(width: 1)
+                    // Строка числа выше самих цифр на внутренний интерлиньяж.
+                    .padding(.top, 4)
+                    // Колонка отступает от соседей на 8 — черта стоит на их границе.
+                    .offset(x: -8.5)
+            }
+        }
     }
-
     /// Те же четыре плитки подряд — для крупного шрифта.
     @ViewBuilder
     private var tiles: some View {
@@ -138,14 +144,14 @@ struct MacrosCard: View {
     }
 
     /// Колонка макроса в карточке — то же, что плитка, без своего стекла.
-    private func macroColumn(_ kind: MacroKind, value: Double) -> some View {
+    private func macroColumn(_ kind: MacroKind, value: Double, leadingDivider: Bool = false) -> some View {
         let isBehind = behindMacros.contains(kind)
         return column(title: kind.title, value: value, target: target(for: kind),
                       color: kind.color, isLeading: focus == kind,
                       hint: isBehind ? (symbol: kind == .carbs ? "arrow.up" : "arrow.down",
                                         label: kind.shortageTitle) : nil,
                       gymDay: kind == .carbs ? gymDayName : nil,
-                      prefix: nil, narrow: true)
+                      prefix: nil, narrow: true, leadingDivider: leadingDivider)
             .padding(.horizontal, 8)
             .padding(.vertical, 10)
     }
@@ -154,7 +160,7 @@ struct MacrosCard: View {
         column(title: String(localized: "Клетчатка"), value: fiber,
                target: Micronutrient.fiber.dailyValue, color: MacroKind.carbs.color,
                isLeading: false, hint: nil, gymDay: nil,
-               prefix: fiberIsPartial ? "≥" : nil, narrow: true)
+               prefix: fiberIsPartial ? "≥" : nil, narrow: true, leadingDivider: true)
             .padding(.horizontal, 8)
             .padding(.vertical, 10)
     }
@@ -202,7 +208,8 @@ struct MacrosCard: View {
     private func column(title: String, value: Double?, target: Double?,
                         color: Color, isLeading: Bool,
                         hint: (symbol: String, label: String)?,
-                        gymDay: String?, prefix: String?, narrow: Bool) -> some View {
+                        gymDay: String?, prefix: String?, narrow: Bool,
+                        leadingDivider: Bool = false) -> some View {
         let progress = (value.flatMap { v in target.map { $0 > 0 ? min(v / $0, 1) : 0 } }) ?? 0
         return VStack(alignment: .leading, spacing: narrow ? 3 : 5) {
                 HStack(spacing: narrow ? 4 : 6) {
@@ -255,6 +262,7 @@ struct MacrosCard: View {
                                 .minimumScaleFactor(0.7)
                         }
                     }
+                    .overlay(alignment: .leading) { columnDivider(leadingDivider) }
                 } else {
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     Text(verbatim: value.map { v in

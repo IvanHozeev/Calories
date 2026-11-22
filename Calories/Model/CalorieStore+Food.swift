@@ -187,7 +187,12 @@ extension CalorieStore {
     /// набраться и трёх совпадений одного набора.
     func usualMeals(period: MealPeriod?, days: Int = 180) -> [UsualMeal.Suggestion] {
         let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
-        let history = entries.filter { $0.date >= cutoff }
+        // Приёмы с удалённым рецептом не берём: перед удалением блюдо
+        // впечатывается в записи своими ингредиентами, и съеденная три раза
+        // «Гречка с тунцом в томатном соусе» выглядела как приём «гречка,
+        // тунец, кукуруза», который человек будто бы собирает руками. Такой
+        // набор он не ел никогда, а сам рецепт предложить уже нельзя — его нет.
+        let history = entries.filter { $0.date >= cutoff && !$0.holdsDeletedDish }
             .map { (date: $0.date, parts: $0.composition) }
         return UsualMeal.suggestions(history: history, period: period)
     }
@@ -321,6 +326,24 @@ extension CalorieStore {
     ///
     /// Длинное имя обрезается многоточием, поэтому последний кусок может не
     /// совпасть ни с чем — он просто не найдётся и будет пропущен.
+    /// В записи было блюдо, которое потом удалили, и вместо него теперь
+    /// лежат его ингредиенты.
+    ///
+    /// Имя записи — склеенные имена частей, а при удалении блюда меняются
+    /// только части: имя блюда остаётся в имени записи, но среди частей его
+    /// уже нет. Последний кусок обрезанного многоточием имени не сверяем — он
+    /// неполный и не совпал бы ни с чем.
+    nonisolated static func nameHasPartMissing(_ name: String, from parts: [String]) -> Bool {
+        // Та же нормализация, что у `UsualMeal`: регистр и пробелы по краям.
+        func normalized(_ text: String) -> String {
+            text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        }
+        let present = Set(parts.map(normalized))
+        var pieces = name.components(separatedBy: ", ").map(normalized)
+        if let last = pieces.last, last.hasSuffix("…") { pieces.removeLast() }
+        return pieces.contains { !$0.isEmpty && !present.contains($0) }
+    }
+
     static func joinedNameParts(_ name: String) -> [String] {
         name.components(separatedBy: ", ")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -369,5 +392,13 @@ extension CalorieStore {
         dish.ingredients
             .filter { $0.foodName.localizedCaseInsensitiveCompare(foodName) == .orderedSame }
             .reduce(0) { $0 + $1.grams }
+    }
+}
+
+extension FoodEntry {
+    /// Запись хранит ингредиенты удалённого блюда вместо самого блюда.
+    var holdsDeletedDish: Bool {
+        !components.isEmpty
+            && CalorieStore.nameHasPartMissing(name, from: components.map(\.name))
     }
 }

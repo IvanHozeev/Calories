@@ -97,8 +97,6 @@ struct AddEntryView: View {
     /// Что ели вчера около этого часа — первой строкой листа.
     @State private var yesterdayEntry: FoodEntry?
     @State private var dishMatchesCache: [DishMatch] = []
-    @State private var mealMatchesCache: [FoodEntry] = []
-    @State private var entryMatchesCache: [FoodEntry] = []
 
     /// Что показываем на экране порции.
     ///
@@ -653,42 +651,6 @@ struct AddEntryView: View {
         .map { DishMatch(dish: $0, requestedGrams: requestedGrams) }
     }
 
-    /// Вычислить совпадения приёмов из дневника под текущий запрос.
-    private func computeMealMatches() -> [FoodEntry] {
-        guard isSearching else { return [] }
-        let terms = parsedQuery.map {
-            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
-        }.filter { !$0.isEmpty }
-        guard !terms.isEmpty else { return [] }
-        return store.recentMeals(limit: 10, days: 30).filter { entry in
-            let name = entry.name.lowercased()
-            return terms.contains { term in name.contains(term) }
-        }
-        .prefix(3)
-        .map { $0 }
-    }
-
-    /// Вычислить совпадения записей дневника с одним продуктом под запрос.
-    private func computeEntryMatches() -> [FoodEntry] {
-        guard isSearching else { return [] }
-        let terms = parsedQuery.map {
-            $0.name.trimmingCharacters(in: .whitespaces).lowercased()
-        }.filter { !$0.isEmpty }
-        guard !terms.isEmpty else { return [] }
-        let cutoff = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? .distantPast
-        var seen = Set<String>()
-        return store.entries
-            .filter { $0.date >= cutoff && $0.components.isEmpty }
-            .filter { entry in
-                guard !seen.contains(entry.name.lowercased()) else { return false }
-                seen.insert(entry.name.lowercased())
-                let name = entry.name.lowercased()
-                return terms.contains { term in name.contains(term) }
-            }
-            .prefix(3)
-            .map { $0 }
-    }
-
     /// Части приёма с наложенными запрошенными граммами.
     private func scaledParts(for match: UsualMatch) -> [MealItem] {
         match.usual.parts.map { part in
@@ -710,19 +672,14 @@ struct AddEntryView: View {
         let adds = quickAdds
         let usuals = usualMatchesCache
         let dishes = dishMatchesCache
-        let meals = mealMatchesCache
-        let entries = entryMatchesCache
-        let hasResults = !usuals.isEmpty || !dishes.isEmpty || !meals.isEmpty || !entries.isEmpty || !adds.isEmpty
+        // Только то, что секция и правда рисует. Сюда входили ещё совпадения
+        // приёмов и записей, которых в секции давно нет, — и при них
+        // заголовок «Быстрое добавление» стоял над пустотой.
+        let hasResults = !usuals.isEmpty || !dishes.isEmpty || !adds.isEmpty
 
         if isSearching && hasResults {
             Section("Быстрое добавление") {
-                quickAddSectionBody(
-                    usuals: usuals,
-                    dishes: dishes,
-                    meals: meals,
-                    entries: entries,
-                    adds: adds
-                )
+                quickAddSectionBody(usuals: usuals, dishes: dishes, adds: adds)
             }
         }
     }
@@ -733,8 +690,6 @@ struct AddEntryView: View {
     private func quickAddSectionBody(
         usuals: [UsualMatch],
         dishes: [DishMatch],
-        meals: [FoodEntry],
-        entries: [FoodEntry],
         adds: [QuickAdd]
     ) -> some View {
         if !usuals.isEmpty {
@@ -769,28 +724,6 @@ struct AddEntryView: View {
                 .accessibilityIdentifier("quickDishRow\(index)")
         }
         .animation(.default, value: dishes.map { $0.id })
-    }
-
-    /// Приёмы из недавнего в быстром добавлении.
-    private func quickMealSection(meals: [FoodEntry]) -> some View {
-        ForEach(Array(meals.enumerated()), id: \.element.id) { index, entry in
-            quickMealRow(entry)
-                .contentShape(Rectangle())
-                .onTapGesture { addQuickMeal(entry) }
-                .accessibilityIdentifier("quickMealRow\(index)")
-        }
-        .animation(.default, value: meals.map { $0.id })
-    }
-
-    /// Записи дневника с одним продуктом в быстром добавлении.
-    private func quickEntrySection(entries: [FoodEntry]) -> some View {
-        ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-            quickMealRow(entry)
-                .contentShape(Rectangle())
-                .onTapGesture { addQuickMeal(entry) }
-                .accessibilityIdentifier("quickEntryRow\(index)")
-        }
-        .animation(.default, value: entries.map { $0.id })
     }
 
     /// Строка недавнего блюда в быстром добавлении.
@@ -1112,6 +1045,11 @@ struct AddEntryView: View {
             .searchable(text: $searchText,
                         isPresented: $searchPresented,
                         prompt: "Поиск еды")
+            // Шапку при поиске не прятать. По умолчанию система убирает её на
+            // время поиска — вместе с названием «Приём пищи», временем и
+            // крестиком, — и над составом оставалась пустая полоса, а экран
+            // переставал говорить, что это за экран.
+            .searchPresentationToolbarBehavior(.avoidHidingContent)
             // Сетевой поиск ходит в сеть только на своей вкладке. Раньше он уходил
             // на каждое нажатие клавиши, даже когда искали в своих продуктах.
             .onChange(of: searchText) { oldValue, newValue in
@@ -1141,8 +1079,6 @@ struct AddEntryView: View {
                     await MainActor.run {
                         usualMatchesCache = computeUsualMatches()
                         dishMatchesCache = computeDishMatches()
-                        mealMatchesCache = computeMealMatches()
-                        entryMatchesCache = computeEntryMatches()
                     }
                 }
                 // Топ-сопоставления считаем с таким же дебаунсом — не на каждую
@@ -1537,20 +1473,22 @@ struct AddEntryView: View {
                 // остаётся только согласиться, а сейчас набранное ещё можно
                 // разложить по двум приёмам. Не запрет и не блокировка
                 // сохранения: приложение говорит, что видит, а решает человек.
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Итого")
-                            .font(.app(.subheadline, weight: .semibold))
-                        Spacer()
-                        Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
-                            .font(.app(.title3, weight: .bold))
-                            .monospacedDigit()
-                            .foregroundStyle(.primary)
-                            .contentTransition(.numericText())
-                    }
-                    MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros })
+                // Одной строкой: слово, БЖУ и калории. Двумя строками с
+                // крупным числом итог занимал высоту целого продукта, а это
+                // подпись под составом, а не ещё одна его строка.
+                HStack(spacing: 10) {
+                    Text("Итого")
+                        .font(.app(.subheadline, weight: .semibold))
+                    MacroTags(macros: draftItems.reduce(Macros.zero) { $0 + $1.macros }, compact: true)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Spacer(minLength: 8)
+                    Text(verbatim: "\(draftTotalCalories) \(String(localized: "ккал"))")
+                        .font(.app(.headline, weight: .bold))
+                        .monospacedDigit()
+                        .foregroundStyle(.primary)
+                        .contentTransition(.numericText())
                 }
-                .padding(.vertical, 4)
                 .animation(.easeInOut(duration: 0.2), value: draftTotalCalories)
             }
             .id(Self.draftAnchor)

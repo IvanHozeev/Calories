@@ -1135,6 +1135,39 @@ struct DishDeletionTests {
         #expect(entry.calories == 129 + 500)
     }
 
+    /// Удалённый рецепт не становится «Как обычно».
+    ///
+    /// После удаления блюдо лежит в записях своими ингредиентами, и три
+    /// съеденных борща выглядели как приём «свёкла, говядина», который
+    /// человек будто бы собирает сам. Обычный составной приём при этом
+    /// предлагается, как и раньше.
+    @Test func aDeletedRecipeIsNotOfferedAsAUsualMeal() throws {
+        let dish = try borsch()
+        let morning = Calendar.current.date(bySettingHour: 13, minute: 0, second: 0, of: Date()) ?? Date()
+        for day in 1...3 {
+            let date = Calendar.current.date(byAdding: .day, value: -day, to: morning) ?? morning
+            store.add(name: dish.name, calories: 629, macros: dish.macrosPer100g.portion(grams: 500),
+                      grams: 500, date: date)
+            store.add(name: "Хлеб, Сыр", calories: 240, macros: Macros(protein: 12, fat: 9, carbs: 28),
+                      date: date.addingTimeInterval(3600), components: [
+                EntryComponent(name: "Хлеб", calories: 140, macros: Macros(protein: 4, fat: 1, carbs: 28), grams: 50),
+                EntryComponent(name: "Сыр", calories: 100, macros: Macros(protein: 8, fat: 8, carbs: 0), grams: 30),
+            ])
+        }
+        store.deleteDish(dish)
+
+        let usual = store.usualMeals(period: nil)
+        #expect(usual.map { Set($0.parts.map(\.name)) } == [["Хлеб", "Сыр"]])
+    }
+
+    /// Обрезанное многоточием имя не выдаёт запись за удалённое блюдо:
+    /// последний кусок неполный и ни с чем не совпадёт.
+    @Test func aTruncatedMealNameIsNotADeletedDish() {
+        #expect(!CalorieStore.nameHasPartMissing("Хлеб, Сыр, Огур…", from: ["Хлеб", "Сыр", "Огурец"]))
+        #expect(CalorieStore.nameHasPartMissing("Борщ", from: ["Свёкла", "Говядина"]))
+        #expect(!CalorieStore.nameHasPartMissing("Хлеб, Сыр", from: ["Хлеб", "Сыр"]))
+    }
+
     /// Блюдо внутри приёма из нескольких частей разворачивается на своём месте,
     /// а соседи остаются как были.
     @Test func aDishInsideAMealIsExpandedInPlace() throws {

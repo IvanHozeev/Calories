@@ -103,7 +103,7 @@ struct MacrosCard: View {
         Rectangle()
             .fill(Color.secondary.opacity(0.18))
             .frame(width: 1)
-            .padding(.vertical, 14)
+            .padding(.vertical, 22)
     }
 
     /// Те же четыре плитки подряд — для крупного шрифта.

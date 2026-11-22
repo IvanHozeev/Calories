@@ -1010,15 +1010,10 @@ private extension ContentView {
         let week = plan.map {
             String(format: String(localized: "неделя %d из %d"), $0.currentWeek, $0.durationWeeks)
         }
-        let goal = plan.map { plan in
-            String(format: String(localized: "цель %@"),
-                   String(format: "%.1f", useImperial ? plan.targetWeightKg * 2.20462 : plan.targetWeightKg))
-        }
         return WeightTile(title: title,
                           symbol: phase.map { PhaseLook.symbol($0) },
                           symbolTint: phase.map { PhaseLook.symbolTint($0) } ?? .secondary,
                           week: week,
-                          goal: goal,
                           trendKg: trend,
                           weeklyChangePercent: change,
                           series: store.weightTrendSeries(weeks: 6, now: now),

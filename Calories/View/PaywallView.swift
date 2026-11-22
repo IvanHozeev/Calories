@@ -133,10 +133,15 @@ struct PaywallView: View {
         VStack(spacing: 14) {
             // Знак приложения, а не универсальные искры: искрами помечают
             // платное в любом приложении магазина, и шапка не говорила, чьё
-            // это Premium. Кольцо в режиме нормы — полные дуги — то же, что
-            // человек видит на «Сегодня» каждый день.
-            ProgressRing(consumed: 0, goal: 1, showsTargets: true, miniature: 96, onOpen: {})
-                .padding(.top, 8)
+            // это Premium. Тот же резиновый знак, что на иконке, готовой
+            // картинкой (`Tools/IconRender`): объём строится заранее, а не
+            // слоями на экране. Здесь он — предмет, а не прибор: кольцо
+            // с цифрами остаётся на «Сегодня».
+            Image("RubberMark")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 150, height: 150)
+                .padding(.top, 4)
                 .accessibilityHidden(true)
 
             Text(shownFocus.headline(offer))

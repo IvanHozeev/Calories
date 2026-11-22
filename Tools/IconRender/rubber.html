@@ -29,7 +29,7 @@ const mix = (c, t, k) => { const a = hex(c), b = hex(t); return 'rgb(' + a.map((
 
 // The arcs of the app icon (Ring.svg), scaled a little about the centre so the sign fills
 // about four fifths of the icon, as the GymLogger mark does.
-const S = 1.08;
+const S = 0.96;
 const T = (x, y) => [512 + (x - 512) * S, 512 + (y - 512) * S];
 const arc = (a, b) => {
   const [x1, y1] = T(...a), [x2, y2] = T(...b);

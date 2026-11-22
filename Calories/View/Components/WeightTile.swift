@@ -59,11 +59,12 @@ struct WeightTile: View {
                     .accessibilityIdentifier("weightTileWeighIn")
             }
         }
-        // По центру, как плитка приёма рядом: высота у них общая с макросами,
-        // а строк здесь три, и прижатые к верху они оставляли пустоту снизу.
+        // По центру, как плитка приёма рядом.
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 14)
-        .padding(.vertical, 8)
+        // Поуже, чем у плитки приёма: с кнопкой «Взвеситься» здесь три
+        // строки и линия, и в 70 точек с прежними полями они не влезали.
+        .padding(.vertical, 6)
         .frame(height: TodayTile.height)
         .contentShape(RoundedRectangle(cornerRadius: 18))
         .tileSurface()
@@ -126,7 +127,7 @@ struct WeightTile: View {
             .labelStyle(.titleAndIcon)
             .foregroundStyle(.tint)
             .padding(.horizontal, 9)
-            .frame(height: 22)
+            .frame(height: 18)
             .background(Color.accentColor.opacity(0.12), in: Capsule())
             .contentShape(Capsule())
     }

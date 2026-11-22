@@ -1414,7 +1414,7 @@ struct AddEntryView: View {
                     Text(verbatim: "\(String(localized: "Сохранить")) · \(draftTotalCalories) \(String(localized: "ккал"))")
                         .frame(maxWidth: .infinity)
                         .fontWeight(.semibold)
-                        .foregroundStyle(Color.white)
+                        .foregroundStyle(Palette.onBrand)
                 }
                 .buttonStyle(.glassProminent)
                 // Фирменное индиго, как главные кнопки остальных экранов:

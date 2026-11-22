@@ -1219,6 +1219,30 @@ final class CaloriesUITests: XCTestCase {
                       "Выбранное начертание должно быть видно в настройках")
     }
 
+    /// Схема палитры выбирается в настройках кольцами без подписей, и выбор
+    /// не выбрасывает с экрана настроек.
+    func testPaletteSchemeIsPickedInSettings() {
+        let app = launchApp()
+        openSettings(in: app)
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
+
+        let warm = app.buttons["paletteScheme-warm"]
+        scrollTo(warm, in: app)
+        XCTAssertTrue(warm.exists, "В настройках должен быть выбор палитры")
+        for scheme in ["fresh", "trust", "graphite"] {
+            XCTAssertTrue(app.buttons["paletteScheme-\(scheme)"].exists, "Нет схемы «\(scheme)»")
+        }
+        warm.tap()
+        XCTAssertTrue(warm.isSelected, "Выбранная схема должна быть отмечена")
+        XCTAssertTrue(app.navigationBars["Settings"].exists, "Смена схемы не должна выбрасывать из настроек")
+
+        // Вернуть схему по умолчанию: настройки переживают прогоны.
+        let trust = app.buttons["paletteScheme-trust"]
+        trust.tap()
+        XCTAssertTrue(trust.isSelected)
+        XCTAssertFalse(warm.isSelected)
+    }
+
     /// Случайный тап по уровню активности не должен молча менять норму калорий.
     @MainActor
     func testActivityLevelChangeAsksFirst() {

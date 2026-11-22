@@ -209,18 +209,18 @@ extension View {
     }
 }
 
-/// Главная кнопка экрана: фирменное индиго с белой подписью.
+/// Главная кнопка экрана: цвет схемы с подписью, подобранной под него.
 ///
 /// Акцент приложения — цвет значков, переключателей и выбранных строк, и он
-/// настраивается: от индиго до янтаря. Янтарь и бирюза под белым текстом не
-/// читаются, а кнопка, которую нажимают чаще всего, должна быть самой
-/// читаемой вещью на экране. Поэтому она берёт не акцент, а `Palette.brand`:
-/// он подобран под белый текст в обеих темах.
+/// настраивается: в том числе бирюзой и персиком, которые под белым текстом
+/// не читаются. Кнопка, которую нажимают чаще всего, должна быть самой
+/// читаемой вещью на экране. Поэтому она берёт не акцент, а `Palette.brand`
+/// и `Palette.onBrand`: эта пара подобрана в каждой схеме и в обеих темах.
 struct MainActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.app(.subheadline, weight: .semibold))
-            .foregroundStyle(Color.white)
+            .foregroundStyle(Palette.onBrand)
             .padding(.horizontal, 18)
             .frame(minHeight: 48)
             .background(Palette.brand, in: Capsule())
@@ -237,7 +237,7 @@ extension View {
     /// стиль кнопки системный, а вид — здесь, в подписи.
     func actionPlate(prominent: Bool) -> some View {
         font(.app(.subheadline, weight: .semibold))
-            .foregroundStyle(prominent ? Color.white : Color.primary)
+            .foregroundStyle(prominent ? Palette.onBrand : Color.primary)
             .padding(.horizontal, 18)
             .frame(minHeight: 48)
             .background(prominent ? Palette.brand : Color.secondary.opacity(0.16), in: Capsule())

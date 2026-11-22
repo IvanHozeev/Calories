@@ -12,6 +12,11 @@ struct RootView: View {
     @AppStorage("app_font") private var appFont = AppFont.system.rawValue
     @AppStorage("app_text_size") private var appTextSize = AppTextSize.normal.rawValue
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
+    /// Схема палитры. Читается здесь, чтобы `.tint` пересчитался сразу.
+    @AppStorage(PaletteScheme.key, store: PaletteScheme.store) private var paletteScheme = PaletteScheme.standard.rawValue
+    /// Схема, в которой собраны экраны. Отстаёт от выбранной, пока человек в
+    /// настройках: пересборка вкладок под ним сбросила бы навигацию.
+    @State private var appliedScheme = PaletteScheme.current.rawValue
     @Environment(\.scenePhase) private var scenePhase
     /// Лаунч-скрин статичен — анимировать его iOS не даёт. Поэтому поверх первого
     /// кадра лежит его точная копия, которая продолжает знак движением и тает.
@@ -89,6 +94,15 @@ struct RootView: View {
 
     var body: some View {
         tabs
+        // Новая схема — пересборка всех вкладок, но только когда человек
+        // вернулся из настроек к корню вкладки. Значки, переключатели и
+        // кнопки в шапках рисует UIKit, и цвет он берёт один раз, при
+        // создании: `.tint` сверху на готовые уже не действует, и без
+        // пересборки новая схема доходила до них лишь после перезапуска.
+        .id(appliedScheme)
+        .onReceive(NotificationCenter.default.publisher(for: PaletteScheme.applyNotification)) { _ in
+            if appliedScheme != paletteScheme { appliedScheme = paletteScheme }
+        }
         .environment(purchases)
         // Меню на иконке пересобираем на каждом подъёме: камера в нём появляется
         // только вместе с ключом, а его вводят прямо во время работы приложения.
@@ -161,6 +175,10 @@ struct RootView: View {
         }
         // Цвет акцента виджету шагов: он в своём процессе и настроек
         // приложения не видит, поэтому выбор кладётся в общие настройки группы.
+        // Виджеты рисуют ту же схему и перерисовываются только по просьбе.
+        .onChange(of: paletteScheme) { _, _ in
+            WidgetCenter.shared.reloadAllTimelines()
+        }
         .onChange(of: appAccent, initial: true) { _, accent in
             UserDefaults(suiteName: CalorieStore.appGroup)?.set(accent, forKey: "widget_accent")
             WidgetCenter.shared.reloadTimelines(ofKind: "StepsWidget")

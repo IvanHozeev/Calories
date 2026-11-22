@@ -1149,14 +1149,22 @@ private extension ContentView {
             .listSectionMargins(.horizontal, Self.diaryMargin)
         } else if store.todayEntries.isEmpty {
         Section {
-            // Пустой лоток и есть сообщение: подпись «пока ничего не
-            // добавлено» повторяла его словами, а читать её было незачем.
-            Image(systemName: "tray")
-                .font(.app(.largeTitle))
-                .foregroundStyle(.secondary)
-                .accessibilityLabel("Пока ничего не добавлено")
+            // Пустой день: словами, а не одним лотком. Лоток молчал, и
+            // человек не понимал, что тут можно сделать, — на «Сегодня» под
+            // кольцом оставалась пустота. Значок убран: он не говорил ничего,
+            // что не сказал бы текст.
+            VStack(spacing: 6) {
+                Text("Пока ничего не съедено")
+                    .font(.app(.headline))
+                    .foregroundStyle(.secondary)
+                Text("Нажми «+» вверху, чтобы записать первый приём пищи.")
+                    .font(.app(.subheadline))
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+            }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 40)
+            .accessibilityElement(children: .combine)
             .listRowBackground(Color.clear)
         }
         .listSectionSeparator(.hidden)

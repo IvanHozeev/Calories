@@ -67,6 +67,11 @@ struct WeightTile: View {
                     if offersWeighIn {
                         Button(action: onWeighIn) { weighInLabel }
                             .buttonStyle(.plain)
+                            // Подпись кнопки не ужимается и не обрезается
+                            // («Log we…»): места не хватало, потому что линия
+                            // справа держала свои 112 точек. Теперь уступает
+                            // линия, а не кнопка.
+                            .fixedSize()
                             .alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 4 }
                             .accessibilityIdentifier("weightTileWeighIn")
                     } else if let changeText {
@@ -82,7 +87,10 @@ struct WeightTile: View {
             Spacer(minLength: 0)
             if series.count > 1 {
                 sparkline
-                    .frame(width: 112, height: 32)
+                    // Ширина гибкая: на длинной подписи «Gewicht eintragen» с
+                    // кнопкой линия становится короче, а не кнопка обрезается.
+                    .frame(minWidth: 40, maxWidth: 112)
+                    .frame(height: 32)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

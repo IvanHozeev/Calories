@@ -54,7 +54,6 @@ struct ContentView: View {
     /// до перезапуска. Держим в `@State`, чтобы вкладка перерисовывалась,
     /// когда тумблер переключили на соседней.
     @State private var mealSchedule = MealScheduleSettings.shared
-    @State private var showingMealSchedule = false
     /// Что предложить при тапе на «Пора есть» — обычное блюдо для этого приёма.
     @State private var initialUsualMeal: UsualMeal.Suggestion? = nil
     /// Крупное кольцо уехало под шапку — в шапке его подменяет миниатюра.
@@ -472,16 +471,6 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingSteps) {
                 StepsNavigationView(store: stepStore)
             }
-            // Переходом, а не листом: расписание — экран настройки, с которого
-            // уходят назад, а не задача, которую закрывают галочкой. Листом он
-            // к тому же перекрывал «Сегодня», ради которого его и открывали.
-            .navigationDestination(isPresented: $showingMealSchedule) {
-                MealScheduleSheet(entries: store.todayEntries.map { (date: $0.date, calories: $0.calories) },
-                                  dailyGoal: store.adaptedTodayGoal,
-                                  settings: mealSchedule,
-                                  store: store,
-                                  isEmbedded: true)
-            }
             .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
@@ -564,13 +553,9 @@ private extension ContentView {
     /// Сегодняшний день сверху экрана: кольцо, макросы и полоски.
     ///
     /// Порядок читается как отъезд камеры: кольцо и макросы — это прямо
-    /// сейчас, дальше ближайший приём (часы), голодание (дни), план (недели)
-    /// и неделя позади.
+    /// сейчас, дальше вес с планом (недели) и неделя позади.
     var summaryCards: some View {
-        // Расписание спрашиваем один раз: строится оно примерно за миллисекунду,
-        // а в теле оно нужно дважды — проверить, есть ли приёмы, и показать их.
-        let slots = store.todaySlots
-        return VStack(spacing: 8) {
+        VStack(spacing: 8) {
             // Полоска дней первой строкой содержимого, а не прибитой панелью.
             //
             // Прибитая, она занимала место всегда, даже когда человек читает
@@ -729,30 +714,10 @@ private extension ContentView {
                 focus: store.focusMacro
             )
 
-            HStack(spacing: 12) {
-                if mealSchedule.isEnabled, !slots.isEmpty {
-                    // Раз в минуту: «через 20 мин» считается от «сейчас», а
-                    // экран сам по себе не перерисовывается. Без этого плитка
-                    // застывала на времени, когда её нарисовали, и в минуту
-                    // до обеда показывала «через 0 мин», пока что-нибудь
-                    // не тронешь. Расписание берём заново тоже: «пора есть»
-                    // зависит от того, какой приём сейчас идёт.
-                    TimelineView(.everyMinute) { context in
-                        MealScheduleStrip(slots: store.todaySlots,
-                                          remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                          dailyGoal: store.adaptedTodayGoal,
-                                          now: context.date,
-                                          onOpen: { showingMealSchedule = true },
-                                          onEat: { addFromMealTile() })
-                        .tile
-                    }
-                }
-
-                // Вес на месте плитки плана: о темпе веса план и говорил,
-                // а сам вес лежал в профиле. С подпиской плитка ведёт в план —
-                // там и график веса, и фазы; без неё — на экран веса.
-                weightTile
-            }
+            // Вес — под макросами, во всю ширину. Плитки приёма пищи рядом
+            // больше нет: на ближайший приём и его время человек не смотрел,
+            // она была украшением. Само расписание живёт в профиле.
+            weightTile
             }
         }
         // Зазор, который строка отдаёт стеклу, возвращается полем внутрь:
@@ -964,19 +929,6 @@ private extension ContentView {
         case .backup: return "backupMissing"
         default: return "dayHintMain"
         }
-    }
-
-    /// Тап по плитке приёма, когда пора есть: сразу добавление еды с «Как
-    /// обычно» для этого приёма.
-    ///
-    /// Раньше для этого была отдельная строка-подсказка под плитками. Она
-    /// повторяла плитку — тот же приём, то же время — и стоила строки и
-    /// второго тапа по тому же вопросу. Теперь состояние живёт в самой
-    /// плитке: её вид и её тап отвечают на «пора?» одинаково.
-    private func addFromMealTile() {
-        guard let slot = MealSchedule.nextSlot(store.todaySlots, now: Date()) else { return }
-        initialUsualMeal = store.usualMeals(period: slot.period, days: 180).first
-        showingAdd = true
     }
 
     /// Макросы, которые требуют внимания: белок и жиры — отстают от темпа,

@@ -294,13 +294,10 @@ final class CaloriesUITests: XCTestCase {
                        "Шестерёнка уехала в «Профиль» — на «Сегодня» её быть не должно")
     }
 
-    /// Включённое деление дня должно быть видно на «Сегодня».
-    ///
-    /// Фича была сделана целиком, но тумблер лежал в «Напоминаниях», а
-    /// «Сегодня» читало свой экземпляр настроек, прочитанный на запуске, —
-    /// то есть включить её было негде и незаметно.
+    /// С включённым делением дня на «Сегодня» нет плитки приёма: вес стоит
+    /// под макросами во всю ширину.
     @MainActor
-    func testMealScheduleStripShowsUpWhenTheDayIsSplit() {
+    func testTodayHasNoMealTileEvenWithASchedule() {
         let app = XCUIApplication()
         app.launchArguments = [
             "-AppleLanguages", "(en)",
@@ -313,9 +310,12 @@ final class CaloriesUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.navigationBars["Today"].waitForExistence(timeout: 30))
 
+        // Плитку ближайшего приёма с «Сегодня» убрали: на неё не смотрели.
+        // Даже с включённым расписанием её здесь быть не должно — само
+        // расписание живёт в профиле (`testProfileHasTheWayIntoMealSchedule`).
+        XCTAssertTrue(app.buttons["weightTile"].waitForExistence(timeout: 10))
         let strip = app.descendants(matching: .any).matching(identifier: "mealScheduleStrip").firstMatch
-        XCTAssertTrue(strip.waitForExistence(timeout: 10),
-                      "День делится на приёмы, а строки ближайшего приёма на «Сегодня» нет")
+        XCTAssertFalse(strip.exists, "Плитки ближайшего приёма на «Сегодня» быть не должно")
     }
 
     /// Вход в приёмы пищи живёт в профиле: это про режим человека — подъём,

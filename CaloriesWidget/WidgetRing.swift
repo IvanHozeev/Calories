@@ -111,16 +111,10 @@ struct WidgetRing: View {
     var rotation: Double = 0
     @Environment(\.widgetRenderingMode) private var renderingMode
 
-    /// Градиент вдоль дуги. У почти замкнутого кольца начало и конец дуги в
-    /// одной точке, и такой градиент вырождается в резкий шов — там он идёт
-    /// по диагонали.
-    private func gradient(for segment: WidgetRingSegment) -> LinearGradient {
-        if segment.end - segment.start > 300 {
-            return LinearGradient(colors: segment.colors, startPoint: .topLeading, endPoint: .bottomTrailing)
-        }
-        return LinearGradient(colors: segment.colors,
-                              startPoint: CircleArc.point(at: segment.start),
-                              endPoint: CircleArc.point(at: segment.end))
+    /// Цвет дуги — ровный, без перехода, как кольцо в приложении: у макроса
+    /// один цвет везде.
+    private func arcColor(for segment: WidgetRingSegment) -> Color {
+        segment.colors.first ?? .secondary
     }
 
     var body: some View {
@@ -137,7 +131,7 @@ struct WidgetRing: View {
                     let span = (segment.end - segment.start) * segment.progress
                     let arc = CircleArc(start: segment.start, end: segment.start + span)
                     if renderingMode == .fullColor {
-                        arc.stroke(gradient(for: segment),
+                        arc.stroke(arcColor(for: segment),
                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     } else {
                         arc.stroke(Color.white, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))

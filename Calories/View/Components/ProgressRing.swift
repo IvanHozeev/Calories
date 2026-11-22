@@ -22,13 +22,14 @@ struct RingView<Label: View>: View {
             .stroke((colors.first ?? .secondary).opacity(0.18), style: StrokeStyle(lineWidth: lineWidth))
     }
 
-    /// Заливка вровень с дорожкой, без свечения.
+    /// Заливка вровень с дорожкой, без свечения. Ровным цветом, без
+    /// перехода — тем же, что полоски и названия этого цвета.
     private var filling: some View {
         Circle()
             .inset(by: lineWidth / 2)
             .trim(from: 0, to: progress)
             .stroke(
-                LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing),
+                colors.first ?? .secondary,
                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
             )
             .rotationEffect(.degrees(-90))
@@ -405,11 +406,11 @@ private struct RingArcs: View {
                 // заливка растёт плавно, а не перескакивает.
                 RingArc(start: segment.start,
                         end: segment.start + (segment.end - segment.start) * segment.progress)
-                    // Градиент вдоль самой дуги, а не по всему кольцу: иначе дуга
-                    // в углу получала бы только один край градиента.
-                    .stroke(LinearGradient(colors: segment.colors,
-                                           startPoint: CircleArc.point(at: segment.start),
-                                           endPoint: CircleArc.point(at: segment.end)),
+                    // Ровным цветом, без перехода от светлого к глубокому: с
+                    // переходом дуга была одного цвета у начала и другого у
+                    // конца, а полоски макросов и названия в строках продуктов —
+                    // третьего. Теперь у макроса один цвет везде.
+                    .stroke(segment.colors[0],
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     // Скруглённые концы у нулевой длины дают точку — её и гасим.
                     .opacity(segment.progress > 0 ? 1 : 0)

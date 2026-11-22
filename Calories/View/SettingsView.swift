@@ -526,11 +526,11 @@ struct HealthInventoryView: View {
 }
 #endif
 
-/// Три названные плотности пастели — концы ползунка и его середина.
+/// Три названные плотности пастели — от дымки до плотной.
 ///
 /// Безымянный ползунок заставлял угадывать: человек тянет ручку и смотрит, что
-/// выйдет. Названия говорят, что получится, до того как трогаешь, а ползунок
-/// остаётся под ними для тех, кому между названиями.
+/// выйдет. Названия говорят, что получится, до того как трогаешь. Ползунок
+/// под ними был, но дублировал те же точки, и его убрали.
 ///
 /// «Стандарта» и «Контраста» тут больше нет: насыщенные цвета убраны из
 /// палитры совсем, и выбирать осталось только внутри пастели.
@@ -555,18 +555,18 @@ enum PalettePreset: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Пресет, на котором стоит ползунок, или `nil` — значит, его сдвинули
-    /// между ними, и подсвечивать нечего.
-    static func matching(_ intensity: Double) -> PalettePreset? {
-        allCases.first { abs($0.value - intensity) < 0.01 }
+    /// Ближайший пресет. Ползунка больше нет, но у тех, кто им пользовался,
+    /// могло остаться значение между точками — пикер показывает ближайшую.
+    static func nearest(_ intensity: Double) -> PalettePreset {
+        allCases.min { abs($0.value - intensity) < abs($1.value - intensity) } ?? .dense
     }
 }
 
-/// Насыщенность палитры: три названия и ползунок под ними.
+/// Насыщенность палитры: три названия.
 private extension SettingsView {
     /// Образец кольца: настоящее, с цветами выбранной насыщенности и тремя
-    /// полосками макросов рядом. Меняется на глазах, пока двигают ползунок и
-    /// выбирают цвет, — иначе настройка работала вслепую: сменил, вышел на
+    /// полосками макросов рядом. Меняется на глазах, пока выбирают плотность
+    /// и цвет, — иначе настройка работала вслепую: сменил, вышел на
     /// «Сегодня», увидел, не понравилось, вернулся.
     var ringSampleRow: some View {
         HStack(spacing: 16) {
@@ -586,7 +586,7 @@ private extension SettingsView {
             }
         }
         .padding(.vertical, 6)
-        // Пересобирается вместе с ползунком: цвета кольца читаются из
+        // Пересобирается вместе с плотностью: цвета кольца читаются из
         // настроек при сборке, а не следят за ними сами.
         .id(paletteIntensity)
         .accessibilityElement(children: .combine)
@@ -609,24 +609,22 @@ private extension SettingsView {
             HStack {
                 settingLabel("Насыщенность", systemImage: "drop.halffull")
                 Spacer()
-                // Образец — выше, во весь размер: три точки рядом с ползунком
+                // Образец — выше, во весь размер: три точки рядом с выбором
                 // показывали цвета, но не то, как они лягут на кольцо.
             }
+            // Три положения, без ползунка: ползунок под пикером дублировал
+            // те же три точки, и две настройки одного и того же спорили.
             Picker("Насыщенность", selection: Binding(
-                get: { PalettePreset.matching(paletteIntensity) },
-                set: { if let preset = $0 { paletteIntensity = preset.value } }
+                get: { PalettePreset.nearest(paletteIntensity) },
+                set: { paletteIntensity = $0.value }
             )) {
                 ForEach(PalettePreset.allCases) { preset in
-                    Text(preset.title).tag(Optional(preset))
+                    Text(preset.title).tag(preset)
                 }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
             .accessibilityIdentifier("palettePreset")
-            Slider(value: $paletteIntensity,
-                   in: PaletteIntensity.range.lowerBound...PaletteIntensity.range.upperBound)
-                .accessibilityIdentifier("paletteIntensity")
-                .accessibilityLabel("Насыщенность")
         }
         .onChange(of: paletteIntensity) { _, value in
             // Виджет читает общий контейнер группы: он в своём процессе и до

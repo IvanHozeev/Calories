@@ -81,7 +81,7 @@ struct ProfileView: View {
     /// заголовок давно уехал за кромку; по составу — не считается текущей
     /// та, которой на экране нет.
     private var sectionOrder: [String] {
-        var order: [String] = []
+        var order: [String] = [String(localized: "Подписка")]
         if showsGoalRow { order.append(String(localized: "Расчёт")) }
         if store.plan == nil, !store.isPremium { order.append(String(localized: "Цель")) }
         order.append(String(localized: "Параметры тела"))
@@ -92,8 +92,44 @@ struct ProfileView: View {
 
     var body: some View {
         List {
+            // Подписка — своей секцией, обычной строкой, как в системных
+            // настройках учётной записи. Крупная карточка с подписью спорила
+            // с телом и нормой, ради которых профиль открывают.
+            Section {
+                Button { showingPaywall = true } label: {
+                    HStack {
+                        settingLabel("Premium", systemImage: "sparkles")
+                        Spacer(minLength: 8)
+                        if store.isPremium {
+                            Text("Активен")
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.app(.caption, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("subscription")
+            } header: {
+                Text("Подписка")
+                    .tracksSectionHead(String(localized: "Подписка"))
+            }
+
+            // Норма — под ней, когда она отличается от расхода. Сам расход стоит
+            // в параметрах тела, из которых он считается.
+            calculationSection
+
+            // Выбор цели — только без премиума. С премиумом режим задаётся
+            // планом: вне плана идёт поддержание, и множитель из профиля
+            // означал бы вечный дефицит по настройке, о которой забыли.
+            GoalSection(store: store, goal: $draft.goal)
+            
+            bodyParametersSection
+
             // Как идёт тело: вес, жир, сухая масса и тренд веса за полтора
-            // месяца. Только смотреть — править в параметрах ниже.
+            // месяца — сразу под параметрами тела, из которых он и читается.
             if let weight = store.weightKg {
                 Section {
                     BodySnapshotCard(weightKg: weight,
@@ -113,52 +149,6 @@ struct ProfileView: View {
                 }
             }
 
-            // Подписка — второй карточкой, под тем, как идёт тело: профиль
-            // открывают ради тела, а оплата — со словом, а не звёздочками в
-            // углу: значок без подписи не говорил, что за ним оплата.
-            Section {
-                Button { showingPaywall = true } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "sparkles")
-                            .foregroundStyle(.tint)
-                            .frame(width: 22)
-                        // Название и одной строкой, что внутри: «Premium» без
-                        // подписи не говорил, за что платят.
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("Premium")
-                                .font(.app(.body, weight: .semibold))
-                                .foregroundStyle(.primary)
-                            Text("План, расход по факту, недельный обзор")
-                                .font(.app(.caption))
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer(minLength: 8)
-                        if store.isPremium {
-                            Text("Активен")
-                                .font(.app(.subheadline))
-                                .foregroundStyle(.secondary)
-                        }
-                        Image(systemName: "chevron.right")
-                            .font(.app(.caption, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 4)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("subscription")
-            }
-
-            // Норма — под ней, когда она отличается от расхода. Сам расход стоит
-            // в параметрах тела, из которых он считается.
-            calculationSection
-
-            // Выбор цели — только без премиума. С премиумом режим задаётся
-            // планом: вне плана идёт поддержание, и множитель из профиля
-            // означал бы вечный дефицит по настройке, о которой забыли.
-            GoalSection(store: store, goal: $draft.goal)
-            
-            bodyParametersSection
 
             // Питание сразу перед нормами белка и жира: расписание приёмов и
             // эти нормы — про одно и то же, про еду. Параметры тела идут

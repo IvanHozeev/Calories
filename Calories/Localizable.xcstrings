@@ -46697,53 +46697,6 @@
         }
       }
     },
-    "План, расход по факту, недельный обзор" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الخطة، الصرف المقاس، المراجعة الأسبوعية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan, gemessener Verbrauch, Wochenrückblick"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan, measured expenditure, weekly review"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan, gasto medido, resumen semanal"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plan, dépense mesurée, bilan hebdo"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "תוכנית, הוצאה נמדדת, סיכום שבועי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plano, gasto medido, resumo semanal"
-          }
-        }
-      }
-    },
     "Планировалось" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -70,14 +70,17 @@ struct FoodRow: View {
 
     private var leadingKind: MacroKind? { (leadingMacros ?? macros).leadingKind }
 
-    @Environment(\.colorScheme) private var colorScheme
-
-    /// Цвет названия — доминирующего макроса: белковое голубое, жирное
-    /// персиковое, углеводное сиреневое. В светлой теме пастель на белом
-    /// читается плохо, поэтому там цвет темнее на треть.
+    /// Цвет названия — доминирующего макроса, ровно тот же, что у полоски:
+    /// белковое бирюзовое, жирное персиковое, углеводное сиреневое.
+    ///
+    /// В светлой теме цвет раньше смешивался с чёрным на треть ради
+    /// читаемости, и примесь чёрного гасила тон: персик становился коричневым,
+    /// бирюза — тусклой синей, сирень — блёклой. Название переставало быть
+    /// цветом своего макроса. Пока — ровно цвет полоски, ценой контраста на
+    /// белом.
     private func nameColor(_ kind: MacroKind?) -> Color {
         guard let kind else { return .primary }
-        return colorScheme == .dark ? kind.color : kind.color.mix(with: .black, by: 0.35)
+        return kind.color
     }
 
     private var hasMacros: Bool {

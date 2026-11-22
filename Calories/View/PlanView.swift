@@ -36,15 +36,25 @@ struct PlanView: View {
             // настройки брейка и цикла — ниже, для тех, кто пришёл за ними.
             if let plan = store.plan {
                 Section {
-                    PlanPhaseCard(plan: plan,
-                                  adherence: store.planOutcome == nil ? store.planAdherence() : nil)
-                    PlanWeightCard(plan: plan, entries: store.weightEntries,
-                                   trend: { store.weightTrend(on: $0) })
+                    // Обе карточки — одной ячейкой, и ячейка шире их на
+                    // `glassRoom` с каждой стороны и снизу, как плитки на
+                    // «Сегодня». У системного стекла есть тень за рамкой, а
+                    // ячейка срезает всё, что за её краем: в двух ячейках
+                    // вровень с карточками тень обрывалась ровной серой
+                    // полосой — между карточками и под второй.
+                    VStack(spacing: 12) {
+                        PlanPhaseCard(plan: plan,
+                                      adherence: store.planOutcome == nil ? store.planAdherence() : nil)
+                        PlanWeightCard(plan: plan, entries: store.weightEntries,
+                                       trend: { store.weightTrend(on: $0) })
+                    }
+                    .padding(.horizontal, GlassListLayout.room)
+                    .padding(.bottom, GlassListLayout.room)
                 }
-                // Без своих боковых отступов: карточки во всю ширину секции,
-                // как все остальные ниже. С шестнадцатью точками по бокам
-                // они выходили уже недельного итога и строк настроек.
-                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
+                // Видимая ширина карточек — как у секций ниже: поле секции
+                // уже на тот запас, что ячейка отдала стеклу.
+                .listSectionMargins(.horizontal, GlassListLayout.sectionMargin - GlassListLayout.room)
+                .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 0, trailing: 0))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
             }

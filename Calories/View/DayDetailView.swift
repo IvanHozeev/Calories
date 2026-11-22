@@ -20,9 +20,15 @@ struct DayDetailView: View {
                                proteinTarget: store.proteinTarget,
                                fatTarget: store.fatTarget,
                                carbsTarget: store.carbsTarget)
+                    // Ячейка шире карточки на запас под тень стекла: вровень
+                    // с карточкой ячейка срезала тень по бокам ровными
+                    // серыми полосами. Тот же приём, что на «Сегодня».
+                    .padding(.horizontal, GlassListLayout.room)
+                    .padding(.bottom, GlassListLayout.room)
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowInsets(EdgeInsets())
             }
+            .listSectionMargins(.horizontal, GlassListLayout.sectionMargin - GlassListLayout.room)
 
             // Пустую секцию не показываем вовсе: заголовок «Приёмы пищи»
             // с подписью «пока ничего не добавлено» под ним — два

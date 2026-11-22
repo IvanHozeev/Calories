@@ -106,7 +106,9 @@ struct MealScheduleStrip: View {
 
     /// «2 ч 40 мин» или «25 мин» — сколько ждать.
     static func countdown(to date: Date, from now: Date) -> String {
-        let minutes = max(0, Int(date.timeIntervalSince(now) / 60))
+        // Вверх, а не вниз: за сорок секунд до обеда это «через 1 мин», а
+        // не «через 0 мин». Ноль минут — это уже «пора есть».
+        let minutes = max(0, Int((date.timeIntervalSince(now) / 60).rounded(.up)))
         let hours = minutes / 60
         guard hours > 0 else { return String(format: String(localized: "%lld мин"), minutes) }
         guard minutes % 60 > 0 else { return String(format: String(localized: "%lld ч"), hours) }

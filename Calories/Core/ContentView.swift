@@ -713,25 +713,8 @@ private extension ContentView {
             // высоту вдвоём, сколько раньше одна полоса, и читаются как два
             // ответа на два разных вопроса: когда есть и куда иду.
             VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                if mealSchedule.isEnabled, !slots.isEmpty {
-                    MealScheduleStrip(slots: slots,
-                                      remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
-                                      dailyGoal: store.adaptedTodayGoal,
-                                      onOpen: { showingMealSchedule = true },
-                                      onEat: { addFromMealTile() })
-                    .tile
-                }
-
-                // Вес на месте плитки плана: о темпе веса план и говорил,
-                // а сам вес лежал в профиле. С подпиской плитка ведёт в план —
-                // там и график веса, и фазы; без неё — на экран веса.
-                weightTile
-            }
-
-            // Макросы под ними: приём и план — про то, что делать сейчас и
-            // куда идёшь, а макросы — отчёт о том, что уже съедено. Решение
-            // выше отчёта.
+            // Макросы — сразу под кольцом: кольцо и есть макросы, и их цифры
+            // читаются продолжением дуг. Приём и план — под ними.
             MacrosCard(
                 macros: store.macrosToday,
                 proteinTarget: store.proteinTarget,
@@ -745,6 +728,31 @@ private extension ContentView {
                 gymDayName: store.gymHeavyDayName,
                 focus: store.focusMacro
             )
+
+            HStack(spacing: 12) {
+                if mealSchedule.isEnabled, !slots.isEmpty {
+                    // Раз в минуту: «через 20 мин» считается от «сейчас», а
+                    // экран сам по себе не перерисовывается. Без этого плитка
+                    // застывала на времени, когда её нарисовали, и в минуту
+                    // до обеда показывала «через 0 мин», пока что-нибудь
+                    // не тронешь. Расписание берём заново тоже: «пора есть»
+                    // зависит от того, какой приём сейчас идёт.
+                    TimelineView(.everyMinute) { context in
+                        MealScheduleStrip(slots: store.todaySlots,
+                                          remainingToday: max(0, store.adaptedTodayGoal - store.consumedToday),
+                                          dailyGoal: store.adaptedTodayGoal,
+                                          now: context.date,
+                                          onOpen: { showingMealSchedule = true },
+                                          onEat: { addFromMealTile() })
+                        .tile
+                    }
+                }
+
+                // Вес на месте плитки плана: о темпе веса план и говорил,
+                // а сам вес лежал в профиле. С подпиской плитка ведёт в план —
+                // там и график веса, и фазы; без неё — на экран веса.
+                weightTile
+            }
             }
         }
         // Зазор, который строка отдаёт стеклу, возвращается полем внутрь:

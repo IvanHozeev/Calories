@@ -695,8 +695,8 @@ private extension SettingsView {
 /// типов — всё, что можно, вынесено из её тела отдельными свойствами.
 private extension SettingsView {
     /// Схема — кольцами без подписей, как выбор иконки в системе: названия
-    /// у схем есть только для VoiceOver. Кольцо — дуга калорий схемы, точка
-    /// внутри — цвет её главной кнопки.
+    /// у схем есть только для VoiceOver. Кольцо — макросы схемы, как на
+    /// «Сегодня», точка внутри — цвет её главной кнопки.
     var schemeRow: some View {
         HStack {
             settingLabel("Палитра", systemImage: "swatchpalette")
@@ -717,11 +717,10 @@ private extension SettingsView {
             paletteScheme = scheme.rawValue
         } label: {
             ZStack {
-                Circle()
-                    .trim(from: 0, to: 0.766)
-                    .rotation(.degrees(8))
-                    .stroke(LinearGradient(colors: scheme.kcal.pale, startPoint: .top, endPoint: .bottom),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                // Дуги макросов в тех же местах, что на кольце «Сегодня».
+                schemeArc(scheme.protein, from: 8.05, share: 0.150)
+                schemeArc(scheme.fat, from: 79.65, share: 0.070)
+                schemeArc(scheme.carbs, from: 122.7, share: 0.448)
                 Circle()
                     .fill(scheme.brand)
                     .frame(width: 8, height: 8)
@@ -739,6 +738,14 @@ private extension SettingsView {
         .accessibilityLabel(Text(verbatim: scheme.title))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("paletteScheme-\(scheme.rawValue)")
+    }
+
+    func schemeArc(_ ramp: Palette.Ramp, from degrees: Double, share: Double) -> some View {
+        Circle()
+            .trim(from: 0, to: share)
+            .rotation(.degrees(degrees))
+            .stroke(LinearGradient(colors: ramp.pale, startPoint: .top, endPoint: .bottom),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round))
     }
 
     var accentRow: some View {

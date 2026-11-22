@@ -30,11 +30,47 @@ struct PaletteSchemeTests {
     /// ближе (около 16°): так приложение выглядело всегда, и эту схему
     /// выбирают именно ради прежнего вида. Новые схемы правило держат.
     @Test func theCaloriesArcStaysClearOfEveryMacro() throws {
-        let macros = [("белок", Palette.protein), ("жиры", Palette.fat), ("углеводы", Palette.carbs)]
         for scheme in PaletteScheme.allCases where scheme != .fresh {
-            for (name, ramp) in macros {
+            for (name, ramp) in [("белок", scheme.protein), ("жиры", scheme.fat), ("углеводы", scheme.carbs)] {
                 let distance = try hueDistance(scheme.kcal.pale[1], ramp.pale[1])
                 #expect(distance >= 25, "\(scheme): до цвета «\(name)» \(Int(distance))°")
+            }
+        }
+    }
+
+    /// Перебор и недобор не совпадают по тону ни с одним макросом схемы:
+    /// состояниям — свои цвета, макросам — свои.
+    @Test func missesStayClearOfEveryMacro() throws {
+        for scheme in PaletteScheme.allCases {
+            for (name, ramp) in [("белок", scheme.protein), ("жиры", scheme.fat), ("углеводы", scheme.carbs)] {
+                let distance = try hueDistance(Palette.over.pale[1], ramp.pale[1])
+                #expect(distance >= 25, "\(scheme): перебор до цвета «\(name)» \(Int(distance))°")
+            }
+        }
+    }
+
+    /// Ни одна дуга макросов не тонет в тёмной теме ни в одной схеме.
+    @Test func noMacroArcSinksIntoTheDarkTheme() {
+        for scheme in PaletteScheme.allCases {
+            for ramp in [scheme.protein, scheme.fat, scheme.carbs] {
+                for intensity in [PaletteIntensity.range.lowerBound, PaletteIntensity.range.upperBound] {
+                    for color in Palette.colors(ramp, intensity: intensity) {
+                        let luminance = resolved(color, dark: true).luminance
+                        #expect(luminance >= Palette.darkLuminanceFloor - 0.01, "\(scheme), \(ramp.name): \(luminance)")
+                    }
+                }
+            }
+        }
+    }
+
+    /// Сирень остаётся сиренью в каждой схеме, на обоих концах ползунка.
+    @Test func lilacStaysLilacInEveryScheme() throws {
+        for scheme in PaletteScheme.allCases {
+            for intensity in [PaletteIntensity.range.lowerBound, PaletteIntensity.range.upperBound] {
+                for color in Palette.colors(scheme.carbs, intensity: intensity) {
+                    let hue = try #require(resolved(color, dark: false).hsb).hue * 360
+                    #expect(hue >= 255 && hue <= 300, "\(scheme): тон \(Int(hue))°")
+                }
             }
         }
     }
@@ -66,6 +102,14 @@ struct PaletteSchemeTests {
     @Test func everySchemeCachesItsArcUnderItsOwnName() {
         let names = Set(PaletteScheme.allCases.map(\.kcal.name))
         #expect(names.count == PaletteScheme.allCases.count)
+        // Макросы: у «Свежести» и «Уверенности» одни и те же — и имя одно.
+        for kind in [\PaletteScheme.protein, \PaletteScheme.fat, \PaletteScheme.carbs] {
+            let byName = Dictionary(grouping: PaletteScheme.allCases) { $0[keyPath: kind].name }
+            for (_, schemes) in byName {
+                let looks = Set(schemes.map { $0[keyPath: kind].pale.map { "\($0.hsb?.hue ?? -1)" }.joined() })
+                #expect(looks.count == 1, "Под одним именем разные цвета: \(schemes)")
+            }
+        }
     }
 
     /// Ничего не выбрано или выбрано несуществующее — индиго.

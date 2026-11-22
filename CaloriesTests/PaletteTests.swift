@@ -80,14 +80,18 @@ struct PaletteTests {
     /// Название продукта в светлой теме — тот же тон, что дуга его макроса,
     /// и читается на белом. Смесь с чёрным уводила персик в коричневый.
     @Test func macroInkKeepsTheArcHueAndReadsOnWhite() throws {
-        let pairs: [(MacroKind, Palette.Ramp)] = [(.protein, Palette.protein), (.fat, Palette.fat), (.carbs, Palette.carbs)]
-        for (kind, ramp) in pairs {
-            let arc = try #require(ramp.pale[1].hsb).hue * 360
-            let ink = try #require(kind.ink.hsb)
-            #expect(abs(ink.hue * 360 - arc) < 4, "\(kind): тон \(Int(ink.hue * 360))° против \(Int(arc))°")
-            #expect(ink.saturation > (ramp.pale[1].hsb?.saturation ?? 1), "\(kind): насыщеннее дуги")
-            let contrast = 1.05 / (kind.ink.luminance + 0.05)
-            #expect(contrast >= 3, "\(kind): контраст на белом \(contrast)")
+        for scheme in PaletteScheme.allCases {
+            let pairs: [(String, Color, Palette.Ramp)] = [("белок", scheme.inks.protein, scheme.protein),
+                                                          ("жиры", scheme.inks.fat, scheme.fat),
+                                                          ("углеводы", scheme.inks.carbs, scheme.carbs)]
+            for (name, inkColor, ramp) in pairs {
+                let arc = try #require(ramp.pale[1].hsb).hue * 360
+                let ink = try #require(inkColor.hsb)
+                #expect(abs(ink.hue * 360 - arc) < 4, "\(scheme), \(name): тон \(Int(ink.hue * 360))° против \(Int(arc))°")
+                #expect(ink.saturation > (ramp.pale[1].hsb?.saturation ?? 1), "\(scheme), \(name): насыщеннее дуги")
+                let contrast = 1.05 / (inkColor.luminance + 0.05)
+                #expect(contrast >= 3, "\(scheme), \(name): контраст на белом \(contrast)")
+            }
         }
     }
 

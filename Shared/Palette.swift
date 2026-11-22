@@ -34,21 +34,12 @@ enum Palette {
 
     /// Дуга калорий — своя у каждой схемы (`PaletteScheme`).
     static var kcal: Ramp { PaletteScheme.current.kcal }
-    /// Дальний конец дуги раньше уходил в стальной синий: светимость падала
-    /// вдвое (0.58 → 0.29), вчетверо круче, чем у жиров, и белок читался
-    /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
-    /// у соседей, и цвет остаётся бирюзовым, а не синеет.
-    static let protein = Ramp(name: "protein",
-                              faint: [Color(hex: 0xA0F4FD), Color(hex: 0x80E3FC)],
-                              pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)])
-    static let fat = Ramp(name: "fat",
-                          faint: [Color(hex: 0xFED5BE), Color(hex: 0xFEBEAA)],
-                          pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)])
-    /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
-    /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
-    static let carbs = Ramp(name: "carbs",
-                            faint: [Color(hex: 0xE3CDFE), Color(hex: 0xCCB1FE)],
-                            pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)])
+    /// Дуги макросов — тоже по схеме: у каждой своя тройка бирюзы, персика и
+    /// сирени, в тон её кольцу и кнопкам.
+    static var protein: Ramp { PaletteScheme.current.protein }
+    static var fat: Ramp { PaletteScheme.current.fat }
+    static var carbs: Ramp { PaletteScheme.current.carbs }
+
     /// Мимо нормы — перебор и недобор — малиновым.
     ///
     /// Цвета состояний не должны совпадать с цветами макросов: оранжевый
@@ -120,10 +111,9 @@ enum Palette {
 
 /// Цветовая схема: дуга калорий, главные кнопки, акцент и цвет успеха.
 ///
-/// Макросы — бирюза, персик, сирень — одни во всех схемах: их человек учит
-/// в первые дни, и перекрашивать белок вместе с кнопками значило бы учить
-/// заново. Перебор и недобор тоже общие — малиновые. Схема отвечает за то,
-/// что вокруг: какого цвета приложение.
+/// Макросы во всех схемах — бирюза, персик и сирень, но каждая берёт их в
+/// своём ключе: прежние, земляные или дымчатые. Тоны остаются, и выученное в
+/// первые дни не теряется. Перебор и недобор общие — малиновые.
 ///
 /// Новые схемы держат правило палитры: их дуга калорий не ближе 25° по тону
 /// к любому макросу, иначе кольцо сливается (так было с чистым индиго и
@@ -204,8 +194,86 @@ enum PaletteScheme: String, CaseIterable, Identifiable {
         }
     }
 
+    var protein: Palette.Ramp {
+        switch self {
+        case .fresh, .trust: return Self.classicProtein
+        case .warm: return Self.warmProtein
+        case .graphite: return Self.graphiteProtein
+        }
+    }
+
+    var fat: Palette.Ramp {
+        switch self {
+        case .fresh, .trust: return Self.classicFat
+        case .warm: return Self.warmFat
+        case .graphite: return Self.graphiteFat
+        }
+    }
+
+    var carbs: Palette.Ramp {
+        switch self {
+        case .fresh, .trust: return Self.classicCarbs
+        case .warm: return Self.warmCarbs
+        case .graphite: return Self.graphiteCarbs
+        }
+    }
+
+    /// Цвет текста макроса на белом: тот же тон, что у дуги, насыщеннее и чуть
+    /// глубже — без примеси чёрного, которая гасит пастель в грязь. Порядок —
+    /// белок, жиры, углеводы.
+    var inks: (protein: Color, fat: Color, carbs: Color) {
+        switch self {
+        case .fresh, .trust: return (Color(hex: 0x0E9FCB), Color(hex: 0xEC5F37), Color(hex: 0x8F5CF0))
+        case .warm: return (Color(hex: 0x2F7C9A), Color(hex: 0xCB7D22), Color(hex: 0x8452AE))
+        case .graphite: return (Color(hex: 0x3E8BD4), Color(hex: 0xD4703A), Color(hex: 0x8D6BD1))
+        }
+    }
+
     // Готовые цвета — постоянными: кольцо спрашивает дугу на каждом кадре, и
     // собирать её заново из чисел каждый раз незачем.
+
+    // Макросы «Свежести» и «Уверенности» — прежние, с ними приложение жило
+    // с самого начала; индиго подстроено под них, а не наоборот.
+
+    /// Дальний конец дуги раньше уходил в стальной синий: светимость падала
+    /// вдвое (0.58 → 0.29), вчетверо круче, чем у жиров, и белок читался
+    /// тяжёлым даже на минимальной насыщенности. Теперь падение такое же, как
+    /// у соседей, и цвет остаётся бирюзовым, а не синеет.
+    fileprivate static let classicProtein = Palette.Ramp(name: "protein",
+                              faint: [Color(hex: 0xA0F4FD), Color(hex: 0x80E3FC)],
+                              pale: [Color(hex: 0x5DD9E6), Color(hex: 0x2DBBDF)])
+    fileprivate static let classicFat = Palette.Ramp(name: "fat",
+                          faint: [Color(hex: 0xFED5BE), Color(hex: 0xFEBEAA)],
+                          pale: [Color(hex: 0xF5B591), Color(hex: 0xF59172)])
+    /// Сирень. Сочный конец смещён по тону к розовому: та же насыщенность,
+    /// взятая на своём тоне, давала фиолетовый — цвет из другой палитры.
+    fileprivate static let classicCarbs = Palette.Ramp(name: "carbs",
+                            faint: [Color(hex: 0xE3CDFE), Color(hex: 0xCCB1FE)],
+                            pale: [Color(hex: 0xCAA8F5), Color(hex: 0xA77DF5)])
+
+    // Макросы «Тепла» — земляные: пыльная бирюза, горчица, слива. Те же три
+    // тона, но приглушённые, как шалфей и кофе вокруг них.
+    private static let warmProtein = Palette.Ramp(name: "protein-warm",
+        faint: [Color(hex: 0xC7E0EA), Color(hex: 0xAED1DF)],
+        pale: [Color(hex: 0x8CBDD0), Color(hex: 0x4E8DA6)])
+    private static let warmFat = Palette.Ramp(name: "fat-warm",
+        faint: [Color(hex: 0xF7E5C4), Color(hex: 0xF2D7A8)],
+        pale: [Color(hex: 0xEECB8E), Color(hex: 0xE0A04A)])
+    private static let warmCarbs = Palette.Ramp(name: "carbs-warm",
+        faint: [Color(hex: 0xE5DAEE), Color(hex: 0xD6C7E4)],
+        pale: [Color(hex: 0xC6B0D8), Color(hex: 0x9B7BB5)])
+
+    // Макросы «Графита» — дымчатые: на чёрно-белом ярким остаётся только
+    // кольцо калорий, макросы ему не спорят.
+    private static let graphiteProtein = Palette.Ramp(name: "protein-graphite",
+        faint: [Color(hex: 0xD6E6F5), Color(hex: 0xC0D9F0)],
+        pale: [Color(hex: 0xA9CBEB), Color(hex: 0x6FA8DC)])
+    private static let graphiteFat = Palette.Ramp(name: "fat-graphite",
+        faint: [Color(hex: 0xF9E3D6), Color(hex: 0xF5D2BE)],
+        pale: [Color(hex: 0xF3C7AE), Color(hex: 0xE9A27A)])
+    private static let graphiteCarbs = Palette.Ramp(name: "carbs-graphite",
+        faint: [Color(hex: 0xEAE3F7), Color(hex: 0xDED3F2)],
+        pale: [Color(hex: 0xD1C4EC), Color(hex: 0xB39DDB)])
 
     /// Мята — прежнее кольцо калорий.
     private static let freshKcal = Palette.Ramp(name: "kcal-fresh",

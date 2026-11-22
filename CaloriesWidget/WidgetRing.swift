@@ -32,7 +32,7 @@ enum WidgetPalette {
         case "protein": return protein
         case "fat":     return fat
         case "carbs":   return carbs
-        // Цвет по умолчанию — тот же, что рисует приложение: фирменное индиго.
+        // Цвет по умолчанию — тот же, что рисует приложение: обычный синий iOS.
         default:        return [Palette.tint, Palette.tint]
         }
     }

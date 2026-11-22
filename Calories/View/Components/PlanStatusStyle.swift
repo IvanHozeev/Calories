@@ -24,7 +24,7 @@ extension PlanStatus {
         switch self {
         case .insufficientData: return .secondary
         case .onTrack: return Palette.good
-        case .ahead: return Palette.good
+        case .ahead: return Palette.tint
         case .behind: return Palette.warn
         }
     }

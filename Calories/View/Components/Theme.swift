@@ -209,13 +209,13 @@ extension View {
     }
 }
 
-/// Главная кнопка экрана: цвет схемы с подписью, подобранной под него.
+/// Главная кнопка экрана: чёрная в светлой теме и белая в тёмной.
 ///
 /// Акцент приложения — цвет значков, переключателей и выбранных строк, и он
-/// настраивается: в том числе бирюзой и персиком, которые под белым текстом
-/// не читаются. Кнопка, которую нажимают чаще всего, должна быть самой
-/// читаемой вещью на экране. Поэтому она берёт не акцент, а `Palette.brand`
-/// и `Palette.onBrand`: эта пара подобрана в каждой схеме и в обеих темах.
+/// настраивается: от голубого до персикового. Голубой и персиковый на белом
+/// читаются хуже чёрного, а кнопка, которую нажимают чаще всего, должна быть
+/// самой читаемой вещью на экране. Поэтому она берёт не акцент, а
+/// `Palette.brand` с подписью `Palette.onBrand`.
 struct MainActionButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -512,7 +512,7 @@ enum AppAccent: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .focus:   return String(localized: "По макросу")
-        case .system:  return String(localized: "Фирменный")
+        case .system:  return String(localized: "Системный")
         case .kcal:    return String(localized: "Калории")
         case .protein: return String(localized: "Белки")
         case .fat:     return String(localized: "Жиры")

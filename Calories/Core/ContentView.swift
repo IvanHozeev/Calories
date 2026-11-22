@@ -483,9 +483,6 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showingPaywall) {
                 PaywallView(store: store)
             }
-            // Настройки открываются и отсюда — ради копии; вернувшись,
-            // применяем палитру, если её там сменили.
-            .onAppear { PaletteScheme.requestApply() }
             .navigationDestination(isPresented: $showingBackupSettings) {
                 SettingsView(store: store)
             }
@@ -1512,10 +1509,10 @@ private struct PullableRing: View {
         // дольше ухода, и кольцо доезжало уже по пустому экрану.
         .scaleEffect(atSplashSize ? Self.splashScale : 1)
         .opacity(atSplashSize ? 0 : 1)
-        // Кольцо собрали заново уже после заставки — сменили палитру, и блок
-        // пересобрался. Сигнала «расти» больше не будет: он пришёл раньше, чем
-        // это кольцо появилось, и без этой строки оно так и осталось бы
-        // невидимым в размере знака.
+        // Кольцо собрали заново уже после заставки — экран пересобрался.
+        // Сигнала «расти» больше не будет: он пришёл раньше, чем это кольцо
+        // появилось, и без этой строки оно так и осталось бы невидимым в
+        // размере знака.
         .onAppear {
             if entrance == .grow { grown = true }
         }

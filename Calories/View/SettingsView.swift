@@ -12,7 +12,6 @@ struct SettingsView: View {
     @AppStorage(RingSound.defaultsKey) private var ringSound = RingSound.wheel.rawValue
     @AppStorage(AppAccent.defaultsKey) private var appAccent = AppAccent.system.rawValue
     @AppStorage(PaletteIntensity.key) private var paletteIntensity = PaletteIntensity.standard
-    @AppStorage(PaletteScheme.key, store: PaletteScheme.store) private var paletteScheme = PaletteScheme.standard.rawValue
     
     @State private var exportDocument: ExportDocument?
     @State private var exportFilename = ""
@@ -589,7 +588,7 @@ private extension SettingsView {
         .padding(.vertical, 6)
         // Пересобирается вместе с ползунком: цвета кольца читаются из
         // настроек при сборке, а не следят за ними сами.
-        .id("\(paletteIntensity)-\(paletteScheme)")
+        .id(paletteIntensity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Так будет выглядеть день"))
         .accessibilityIdentifier("ringSample")
@@ -694,60 +693,6 @@ private extension SettingsView {
 /// Секция «Вид» стала большой, и компилятор перестал укладываться в проверку
 /// типов — всё, что можно, вынесено из её тела отдельными свойствами.
 private extension SettingsView {
-    /// Схема — кольцами без подписей, как выбор иконки в системе: названия
-    /// у схем есть только для VoiceOver. Кольцо — макросы схемы, как на
-    /// «Сегодня», точка внутри — цвет её главной кнопки.
-    var schemeRow: some View {
-        HStack {
-            settingLabel("Палитра", systemImage: "swatchpalette")
-            Spacer(minLength: 12)
-            HStack(spacing: 12) {
-                ForEach(PaletteScheme.allCases) { scheme in
-                    schemeSwatch(scheme)
-                }
-            }
-        }
-        // Без идентификатора на всей строке: он перекрыл бы идентификаторы
-        // колец внутри, и до схем не дотянулся бы ни тест, ни VoiceOver-навигация.
-    }
-
-    func schemeSwatch(_ scheme: PaletteScheme) -> some View {
-        let selected = paletteScheme == scheme.rawValue
-        return Button {
-            paletteScheme = scheme.rawValue
-        } label: {
-            ZStack {
-                // Дуги макросов в тех же местах, что на кольце «Сегодня».
-                schemeArc(scheme.protein, from: 8.05, share: 0.150)
-                schemeArc(scheme.fat, from: 79.65, share: 0.070)
-                schemeArc(scheme.carbs, from: 122.7, share: 0.448)
-                Circle()
-                    .fill(scheme.brand)
-                    .frame(width: 8, height: 8)
-            }
-            .frame(width: 24, height: 24)
-            .padding(3)
-            .overlay {
-                Circle()
-                    .strokeBorder(Color.primary.opacity(selected ? 0.7 : 0), lineWidth: 2)
-                    .padding(-2)
-            }
-            .contentShape(Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(Text(verbatim: scheme.title))
-        .accessibilityAddTraits(selected ? .isSelected : [])
-        .accessibilityIdentifier("paletteScheme-\(scheme.rawValue)")
-    }
-
-    func schemeArc(_ ramp: Palette.Ramp, from degrees: Double, share: Double) -> some View {
-        Circle()
-            .trim(from: 0, to: share)
-            .rotation(.degrees(degrees))
-            .stroke(LinearGradient(colors: ramp.pale, startPoint: .top, endPoint: .bottom),
-                    style: StrokeStyle(lineWidth: 4, lineCap: .round))
-    }
-
     var accentRow: some View {
         // Цвета кружками и без названий: «Белки» в строке про цвет читались
         // как настройка макросов, а кружок говорит всё сам.
@@ -829,7 +774,6 @@ private extension SettingsView {
         ringSampleRow
         themeRow
         fontRow
-        schemeRow
         accentRow
         intensityRow
         ringSoundRow
@@ -1023,16 +967,4 @@ private extension SettingsView {
     }
     }
 
-}
-
-/// Названия схем — только для VoiceOver: на экране схемы без подписей.
-extension PaletteScheme {
-    var title: String {
-        switch self {
-        case .fresh: return String(localized: "Свежесть")
-        case .trust: return String(localized: "Уверенность")
-        case .warm: return String(localized: "Тепло")
-        case .graphite: return String(localized: "Графит")
-        }
-    }
 }

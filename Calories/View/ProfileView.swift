@@ -242,9 +242,6 @@ struct ProfileView: View {
                 .accessibilityIdentifier("openSettings")
             }
         }
-        // Вернулись к «Профилю» — значит, из настроек: если там сменили
-        // палитру, теперь самое время пересобрать экраны в новой.
-        .onAppear { PaletteScheme.requestApply() }
         .navigationDestination(isPresented: $showingSettings) {
             SettingsView(store: store)
         }

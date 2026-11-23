@@ -25,7 +25,7 @@ struct AddWeightView: View {
 
     private static let hundredthsStep = 5
 
-    /// Высота листа: ровно под «Когда» и колёса, плюс немного воздуха снизу.
+    /// Высота листа: ровно под колёса и «Когда», плюс немного воздуха снизу.
     ///
     /// Константой, а не числом на каждом показе: экранов, откуда взвешиваются,
     /// два — «Сегодня» и профиль, — и они уже разъезжались (в профиле лист был
@@ -50,18 +50,6 @@ struct AddWeightView: View {
     var body: some View {
         NavigationStack {
             Form {
-                // «Когда» первым: дату правят реже веса, но, если правят,
-                // искать её ниже колёс приходилось прокруткой — а лист
-                // открывается ровно под свою высоту.
-                Section {
-                    DatePicker(
-                        "Когда",
-                        selection: $date,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                }
-
                 Section {
                     HStack(spacing: 0) {
                         Picker("", selection: $wholeKg) {
@@ -92,6 +80,17 @@ struct AddWeightView: View {
                     }
                 }
 
+                // «Когда» под колёсами: вес — то, ради чего лист открывают, и
+                // он первый; дату правят реже. Лист открывается ровно под
+                // свою высоту (`sheetHeight`), так что прокрутки нет.
+                Section {
+                    DatePicker(
+                        "Когда",
+                        selection: $date,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                }
             }
             .glassRow()
             .navigationTitle("Взвешивание")

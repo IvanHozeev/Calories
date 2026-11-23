@@ -149,6 +149,134 @@ struct RubberSign: View {
     }
 }
 
+/// Резиновое кольцо, нарисованное вживую, — чтобы его можно было крутить по-настоящему.
+///
+/// Картинку (`RubberSign`) провернуть нельзя: свет сверху слева и тень снизу справа
+/// нарисованы в ней, и вместе с ней они поехали бы по кругу — вышла бы вращающаяся
+/// наклейка. У настоящего предмета на оси свет стоит на месте, а едет сам предмет. Здесь
+/// так же: дуги движутся по кольцу, а сдвиг толщины, тень и блики остаются там, где
+/// были — свет и взгляд не вращаются.
+///
+/// Геометрия и цвета — те же, что у картинки (`Tools/IconRender/rubber.html`, дуги
+/// `Ring.svg` в масштабе 1.02): на нуле градусов кольцо совпадает с ней, и заставка
+/// продолжает лаунч-скрин. Рисуется в клетке 1024 на 1024, как картинка, и размер
+/// задаётся по кольцу.
+struct RubberRing: View, Animatable {
+    /// Поворот дуг по часовой, в градусах.
+    var turn: Double
+    let ring: CGFloat
+    let dark: Bool
+
+    var animatableData: Double {
+        get { turn }
+        set { turn = newValue }
+    }
+
+    private struct Piece {
+        let start: Double, end: Double
+        let lit: Color, face: Color, edge: Color, thick: Color
+    }
+
+    /// Углы дуг от трёх часов по часовой — из `Ring.svg`.
+    private static let pieces: [Piece] = [
+        Piece(start: 150, end: 290,                                   // углеводы
+              lit: Color(.sRGB, red: 204 / 255, green: 159 / 255, blue: 1),
+              face: Color(.sRGB, red: 178 / 255, green: 109 / 255, blue: 1),
+              edge: Color(.sRGB, red: 150 / 255, green: 92 / 255, blue: 214 / 255),
+              thick: Color(.sRGB, red: 103 / 255, green: 63 / 255, blue: 148 / 255)),
+        Piece(start: -15, end: 82,                                    // белки
+              lit: Color(.sRGB, red: 91 / 255, green: 211 / 255, blue: 232 / 255),
+              face: Color(.sRGB, red: 6 / 255, green: 188 / 255, blue: 220 / 255),
+              edge: Color(.sRGB, red: 5 / 255, green: 158 / 255, blue: 185 / 255),
+              thick: Color(.sRGB, red: 3 / 255, green: 109 / 255, blue: 128 / 255)),
+        Piece(start: 90, end: 142,                                    // жиры
+              lit: Color(.sRGB, red: 1, green: 170 / 255, blue: 130 / 255),
+              face: Color(.sRGB, red: 1, green: 127 / 255, blue: 66 / 255),
+              edge: Color(.sRGB, red: 214 / 255, green: 107 / 255, blue: 56 / 255),
+              thick: Color(.sRGB, red: 148 / 255, green: 74 / 255, blue: 38 / 255)),
+    ]
+
+    var body: some View {
+        let side = ring / RubberSign.ringShare
+        Color.clear
+            .frame(width: ring, height: ring)
+            .overlay {
+                Canvas { context, size in
+                    draw(&context, size: size)
+                }
+                .frame(width: side, height: side)
+            }
+            .accessibilityHidden(true)
+    }
+
+    private func draw(_ context: inout GraphicsContext, size: CGSize) {
+        let u = size.width / 1024
+        let scale = 1.02
+        let centre = CGPoint(x: 512 * u, y: 512 * u)
+        let radius = 312 * scale * u
+        let width = 122 * scale * u
+        let style = StrokeStyle(lineWidth: width, lineCap: .round)
+
+        func path(_ piece: Piece, dx: CGFloat = 0, dy: CGFloat = 0) -> Path {
+            Path { p in
+                p.addArc(center: CGPoint(x: centre.x + dx, y: centre.y + dy), radius: radius,
+                         startAngle: .degrees(piece.start + turn), endAngle: .degrees(piece.end + turn),
+                         clockwise: false)
+            }
+        }
+
+        // Тень под знаком: сдвинута вправо-вниз и размыта.
+        context.drawLayer { layer in
+            layer.addFilter(.blur(radius: 26 * u))
+            let shadow = dark ? Color.black.opacity(0.7) : Color(red: 70 / 255, green: 55 / 255, blue: 40 / 255).opacity(0.42)
+            for piece in Self.pieces {
+                layer.stroke(path(piece, dx: 26 * u, dy: 44 * u), with: .color(shadow), style: style)
+            }
+        }
+
+        // Толщина: шестнадцать копий вправо-вниз, каждая темнее. Сдвиг не зависит от
+        // поворота: взгляд на предмет не меняется.
+        for k in stride(from: 16, through: 1, by: -1) {
+            for piece in Self.pieces {
+                context.stroke(path(piece, dx: CGFloat(k) * 1.6 * u, dy: CGFloat(k) * 2.4 * u),
+                               with: .color(piece.thick), style: style)
+            }
+        }
+
+        // Лицо дуги: свет падает слева сверху, потому градиент привязан к экрану, а не к
+        // дуге, — дуга, уезжая в нижнюю правую часть, темнеет.
+        for piece in Self.pieces {
+            let arc = path(piece)
+            let outline = arc.strokedPath(style)
+            let shading = GraphicsContext.Shading.radialGradient(
+                Gradient(stops: [.init(color: piece.lit, location: 0),
+                                 .init(color: piece.face, location: 0.48),
+                                 .init(color: piece.edge, location: 1)]),
+                center: CGPoint(x: 300 * u, y: 260 * u), startRadius: 0, endRadius: 900 * u)
+            context.stroke(arc, with: shading, style: style)
+
+            // Блик сверху и тень снизу внутри формы — как у резины.
+            let big = CGRect(x: -64 * u, y: -64 * u, width: 1152 * u, height: 1152 * u)
+            context.drawLayer { layer in
+                layer.clip(to: outline)
+                layer.addFilter(.blur(radius: 6 * u))
+                var inverse = Path()
+                inverse.addRect(big)
+                inverse.addPath(outline.offsetBy(dx: 0, dy: 7 * u))
+                layer.fill(inverse, with: .color(.white.opacity(0.42)), style: FillStyle(eoFill: true))
+            }
+            context.drawLayer { layer in
+                layer.clip(to: outline)
+                layer.addFilter(.blur(radius: 9 * u))
+                var inverse = Path()
+                inverse.addRect(big)
+                inverse.addPath(outline.offsetBy(dx: 0, dy: -11 * u))
+                layer.fill(inverse, with: .color(.black.opacity(0.2)), style: FillStyle(eoFill: true))
+            }
+        }
+    }
+}
+
 /// Резиновый знак, который медленно «дышит»: чуть растёт и оседает. Объём нарисован заранее,
 /// поэтому двигается вся картинка целиком, как предмет на столе, а не слои по отдельности.
 struct BreathingSign: View {
@@ -184,7 +312,7 @@ struct BreathingSign: View {
 /// он читался увеличенным индикатором загрузки.
 ///
 /// Анимация одна и цельная, а не кусок бесконечного цикла: знак с
-/// лаунч-скрина один раз плавно подрастает, замирает и растворяется. Цикл
+/// лаунч-скрина делает один плавный оборот, замирает полным и растворяется. Цикл
 /// «убежали — заполнились» обрывался посередине, и экран появлялся
 /// на полузаполненном кольце.
 struct SplashView: View {
@@ -195,10 +323,10 @@ struct SplashView: View {
     var onLeaving: () -> Void = {}
     var onFinish: () -> Void
 
-    /// Знак чуть подрастает и оседает обратно, пока заставка стоит. Оборот на
-    /// месте, как было у плоского знака, резине не идёт: свет на ней нарисован
-    /// сверху слева, и вместе со знаком проворачивался бы и он.
-    @State private var lift: CGFloat = 0
+    /// Поворот дуг, в градусах. Крутятся именно дуги (`RubberRing`), а не картинка:
+    /// свет и тень стоят на месте, как у настоящего предмета на оси.
+    @State private var turn: Double = 0
+    @Environment(\.colorScheme) private var colorScheme
     @State private var dissolving = false
 
     var body: some View {
@@ -213,8 +341,7 @@ struct SplashView: View {
             // Движется только кольцо: название стоит на месте, как стояло бы
             // на самой картинке. Крутящееся слово читалось бы как сбой.
             VStack(spacing: BrandLockup.gap) {
-                RubberSign(ring: BrandLockup.markSize)
-                    .scaleEffect(1 + 0.05 * lift)
+                RubberRing(turn: turn, ring: BrandLockup.markSize, dark: colorScheme == .dark)
                 Text(verbatim: "Calories")
                     .font(BrandLockup.titleFont)
                     .fontDesign(BrandLockup.titleDesign)
@@ -226,7 +353,7 @@ struct SplashView: View {
         .ignoresSafeArea()
         .task {
             withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
-                lift = 1
+                turn = 360
             } completion: {
                 onLeaving()
                 withAnimation(.easeOut(duration: BrandLockup.exitDuration)) {

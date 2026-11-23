@@ -41,12 +41,21 @@ func image(_ url: URL) -> CGImage {
     CGImageSourceCreateImageAtIndex(CGImageSourceCreateWithURL(url as CFURL, nil)!, 0, nil)!
 }
 
-func launch(mark: URL, scale: CGFloat, name: String) {
+/// Цвета букв по кругу — те же, что `BrandLockup.letterHexLight/Dark` в приложении.
+let letterHexLight: [UInt32] = [0x8C4AF0, 0xF85B31, 0x00BED8, 0x00BA9D]
+let letterHexDark: [UInt32] = [0xAF7BFD, 0xFF8B6A, 0x00BEE3, 0x00C39A]
+
+func launch(mark: URL, scale: CGFloat, name: String, dark: Bool) {
     let plain = NSFont.systemFont(ofSize: titleSize, weight: .semibold)
     let font = (plain.fontDescriptor.withDesign(.rounded)
                 .flatMap { NSFont(descriptor: $0, size: titleSize) } ?? plain) as CTFont
-    let line = CTLineCreateWithAttributedString(NSAttributedString(
-        string: "Calories", attributes: [.font: font, .foregroundColor: rgb(0x8E8E93)]))
+    let hexes = dark ? letterHexDark : letterHexLight
+    let word = NSMutableAttributedString(string: "Calories", attributes: [.font: font])
+    for index in 0..<word.length {
+        word.addAttribute(.foregroundColor, value: rgb(hexes[index % hexes.count]),
+                          range: NSRange(location: index, length: 1))
+    }
+    let line = CTLineCreateWithAttributedString(word)
     let bounds = CTLineGetBoundsWithOptions(line, .useOpticalBounds)
 
     let width = max(bounds.width + 32, markSize + 32)
@@ -77,6 +86,6 @@ func launch(mark: URL, scale: CGFloat, name: String) {
 }
 
 for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {
-    launch(mark: markLight, scale: scale, name: "LaunchLogo\(suffix).png")
-    launch(mark: markDark, scale: scale, name: "LaunchLogoDark\(suffix).png")
+    launch(mark: markLight, scale: scale, name: "LaunchLogo\(suffix).png", dark: false)
+    launch(mark: markDark, scale: scale, name: "LaunchLogoDark\(suffix).png", dark: true)
 }

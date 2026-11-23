@@ -342,10 +342,9 @@ struct SplashView: View {
             // на самой картинке. Крутящееся слово читалось бы как сбой.
             VStack(spacing: BrandLockup.gap) {
                 RubberRing(turn: turn, ring: BrandLockup.markSize, dark: colorScheme == .dark)
-                Text(verbatim: "Calories")
+                Text(BrandLockup.coloredTitle)
                     .font(BrandLockup.titleFont)
                     .fontDesign(BrandLockup.titleDesign)
-                    .foregroundStyle(BrandLockup.ink)
             }
             .scaleEffect(dissolving ? BrandLockup.exitScale : 1)
             .opacity(dissolving ? 0 : 1)

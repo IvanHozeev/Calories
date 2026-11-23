@@ -16,11 +16,31 @@ enum BrandLockup {
     static let titleSize: CGFloat = 28
     /// Просвет между кольцом и словом — как в подписи внизу настроек.
     static let gap: CGFloat = markSize * 4 / 22
-    /// Черный с опаситю 0.85 на светлой теме, белый на тёмной: на запуске знак главный,
-    /// название под ним — подпись.
-    static let ink = Color(UIColor { traitCollection in
-        traitCollection.userInterfaceStyle == .dark ? UIColor.white : UIColor.black.withAlphaComponent(0.85)
-    })
+    /// Цвета букв «Calories» по кругу: углеводы, жиры, белок, калории — как подпись
+    /// внизу настроек. Числа — те, что у дуг кольца при стандартной плотности пастели
+    /// (светлая тема гуще, тёмная светлее), но заданы твёрдо, а не берутся из палитры:
+    /// картинка лаунч-скрина одна на всех, и заставка обязана совпасть с ней, какую
+    /// плотность ни выбрал бы человек. Те же числа — в `Tools/IconRender/launch_logo.swift`.
+    static let letterHexLight: [UInt32] = [0x8C4AF0, 0xF85B31, 0x00BED8, 0x00BA9D]
+    static let letterHexDark: [UInt32] = [0xAF7BFD, 0xFF8B6A, 0x00BEE3, 0x00C39A]
+
+    /// Название одной строкой с разметкой: у букв остаются кернинг и лигатуры, а
+    /// экранному диктору слово читается целым.
+    static var coloredTitle: AttributedString {
+        func color(_ hex: UInt32) -> UIColor {
+            UIColor(red: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
+                    blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
+        }
+        var result = AttributedString()
+        for (index, letter) in "Calories".enumerated() {
+            let slot = index % letterHexLight.count
+            let dynamic = UIColor { $0.userInterfaceStyle == .dark ? color(letterHexDark[slot]) : color(letterHexLight[slot]) }
+            var piece = AttributedString(String(letter))
+            piece.foregroundColor = Color(uiColor: dynamic)
+            result += piece
+        }
+        return result
+    }
     /// Название набрано системным шрифтом — скруглённым, полужирным.
     ///
     /// Не тем, которым набран интерфейс: Nunito под знаком оказался плотнее и

@@ -29,9 +29,9 @@ func rgb(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
                                             CGFloat((hex >> 8) & 0xFF) / 255, CGFloat(hex & 0xFF) / 255, a])!
 }
 
-/// Кольцо знака занимает столько от ширины картинки знака (внешний радиус 358 из 512).
+/// Кольцо знака занимает столько от ширины картинки знака (внешний радиус 380 из 512).
 /// Тот же множитель — `RubberSign.ringShare` в приложении.
-let ringShare: CGFloat = 0.6994
+let ringShare: CGFloat = 0.7431
 /// Кольцо — 96 пунктов от края до края, как было у плоского знака.
 let markSize: CGFloat = 96
 let titleSize: CGFloat = 28

@@ -23,3 +23,12 @@ swiftc -O Tools/IconRender/render.swift -o /tmp/icon-render
 
 Подводный камень: `AppIcon.icon` и `AppIcon.appiconset` называются одинаково, и iOS 26 берёт
 именно `.icon` — PNG из набора там не показываются. Менять нужно оба.
+
+## Экран запуска
+
+Раскладка — `Calories/LaunchScreen.storyboard`: резиновое кольцо по центру
+(`LaunchLogo`, делает `launch_logo.swift`) и подпись «from Vanya Hozeyev» на 24 pt выше нижней
+безопасной зоны (`LaunchFooter`, делает `footer.swift`) — как у GymLogger и Budget. Слова
+«Calories» на запуске и на заставке нет. Подпись — картинка, потому что раскладка не умеет ни
+скруглённого шрифта, ни градиента в буквах; имя залито цветами дуг иконки. Заставка
+(`SplashView`) повторяет раскладку до точки, размеры подписи лежат и там, и в storyboard.

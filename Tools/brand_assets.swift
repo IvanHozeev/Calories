@@ -257,9 +257,10 @@ func launch(scale: CGFloat, name: String) {
 
     save(ctx, name)
 }
-for (scale, suffix) in [(1.0, ""), (2.0, "@2x"), (3.0, "@3x")] {
-    launch(scale: scale, name: "LaunchLogo\(suffix).png")
-}
+// Картинку лаунч-скрина больше не рисуем здесь: на ней теперь резиновое кольцо без
+// слова, её делает `Tools/IconRender/launch_logo.swift`, а подпись внизу экрана —
+// `Tools/IconRender/footer.swift`. Если запустить `launch` отсюда, она затрёт их плоским
+// знаком со словом.
 
 // MARK: - Иконка вкладки «Сегодня»
 

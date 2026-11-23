@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Размеры знака с названием — для лаунч-скрина и заставки.
+/// Размеры знака — для лаунч-скрина и заставки. Названия на них нет: внизу экрана стоит
+/// подпись «from Vanya Hozeyev» (`LaunchFooter`, рисует `Tools/IconRender/footer.swift`).
 ///
 /// Заставка продолжает лаунч-скрин: её первый кадр обязан совпасть с ним до
 /// точки, иначе на запуске видно подмену. Один раз они уже разошлись — на
@@ -14,56 +15,6 @@ import SwiftUI
 enum BrandLockup {
     static let markSize: CGFloat = 96
     static let titleSize: CGFloat = 28
-    /// Просвет между кольцом и словом — как в подписи внизу настроек.
-    static let gap: CGFloat = markSize * 4 / 22
-    /// Цвета букв «Calories» по кругу: углеводы, жиры, белок, калории — как подпись
-    /// внизу настроек. Числа — те, что у дуг кольца при стандартной плотности пастели
-    /// (светлая тема гуще, тёмная светлее), но заданы твёрдо, а не берутся из палитры:
-    /// картинка лаунч-скрина одна на всех, и заставка обязана совпасть с ней, какую
-    /// плотность ни выбрал бы человек. Те же числа — в `Tools/IconRender/launch_logo.swift`.
-    static let letterHexLight: [UInt32] = [0x8C4AF0, 0xF85B31, 0x00BED8, 0x00BA9D]
-    static let letterHexDark: [UInt32] = [0xAF7BFD, 0xFF8B6A, 0x00BEE3, 0x00C39A]
-
-    /// Название одной строкой с разметкой: у букв остаются кернинг и лигатуры, а
-    /// экранному диктору слово читается целым.
-    static var coloredTitle: AttributedString {
-        func color(_ hex: UInt32) -> UIColor {
-            UIColor(red: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255,
-                    blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
-        }
-        var result = AttributedString()
-        for (index, letter) in "Calories".enumerated() {
-            let slot = index % letterHexLight.count
-            let dynamic = UIColor { $0.userInterfaceStyle == .dark ? color(letterHexDark[slot]) : color(letterHexLight[slot]) }
-            var piece = AttributedString(String(letter))
-            piece.foregroundColor = Color(uiColor: dynamic)
-            result += piece
-        }
-        return result
-    }
-    /// Название набрано системным шрифтом — скруглённым, полужирным.
-    ///
-    /// Не тем, которым набран интерфейс: Nunito под знаком оказался плотнее и
-    /// уже, чем нужно, а системный скруглённый повторяет сами дуги знака —
-    /// у них тоже круглые концы. Полужирный потому, что слово стоит под
-    /// знаком подписью и на обычном весе рядом с ним выцветало.
-    ///
-    /// И ещё одно достоинство системного: он один на все семь языков, а
-    /// Nunito не знает ни арабской вязи, ни иврита.
-    ///
-    /// Картинку лаунч-скрина рисует `Tools/brand_assets.swift` тем же
-    /// шрифтом, весом и кеглем: заставка обязана совпасть с ней до точки.
-    static var titleFont: Font { .system(size: titleSize, weight: titleWeight, design: titleDesign) }
-    static let titleWeight: Font.Weight = .semibold
-    /// Начертание задано и шрифту, и отдельным модификатором.
-    ///
-    /// Выбор шрифта приложения применяется `.fontDesign` на корне и подменяет
-    /// любой шрифт ниже по дереву, заставку в том числе: у человека с
-    /// засечками название на ней вышло бы с засечками, а на картинке
-    /// лаунч-скрина — нет, и подмену снова стало бы видно. Картинка одна на
-    /// всех, поэтому и заставка одна на всех.
-    static let titleDesign: Font.Design = .rounded
-
     /// Насколько знак подрастает, уходя. Кольцо дня начинается с этого же
     /// размера и продолжает движение — поэтому число общее, а не своё у
     /// заставки.

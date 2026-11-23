@@ -329,25 +329,33 @@ struct SplashView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var dissolving = false
 
+    /// Размер подписи в пунктах — как в `LaunchScreen.storyboard`.
+    private static let footerWidth: CGFloat = 158.66666666666666
+    private static let footerHeight: CGFloat = 50.333333333333336
+    private static var safeBottom: CGFloat {
+        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows).first(where: \.isKeyWindow)?.safeAreaInsets.bottom ?? 0
+    }
+
     var body: some View {
         ZStack {
             Color("LaunchBackground")
                 .opacity(dissolving ? 0 : 1)
-            // Тот же состав, что на лаунч-скрине: кольцо и название под ним,
-            // теми же размерами из `BrandLockup`. Первый кадр обязан быть
-            // его копией — иначе на запуске видно подмену, а сквозь заставку
-            // просвечивает слово с кадра под ней.
+            // Тот же состав, что на лаунч-скрине: кольцо по центру экрана и подпись
+            // внизу. Первый кадр обязан быть его копией — иначе на запуске видно подмену.
             //
-            // Движется только кольцо: название стоит на месте, как стояло бы
-            // на самой картинке. Крутящееся слово читалось бы как сбой.
-            VStack(spacing: BrandLockup.gap) {
-                RubberRing(turn: turn, ring: BrandLockup.markSize, dark: colorScheme == .dark)
-                Text(BrandLockup.coloredTitle)
-                    .font(BrandLockup.titleFont)
-                    .fontDesign(BrandLockup.titleDesign)
-            }
-            .scaleEffect(dissolving ? BrandLockup.exitScale : 1)
-            .opacity(dissolving ? 0 : 1)
+            // Движется только кольцо: подпись стоит на месте и растворяется вместе со знаком.
+            RubberRing(turn: turn, ring: BrandLockup.markSize, dark: colorScheme == .dark)
+                .scaleEffect(dissolving ? BrandLockup.exitScale : 1)
+                .opacity(dissolving ? 0 : 1)
+            // Подпись стоит там же, где в раскладке лаунч-скрина: на 24 pt выше нижней
+            // безопасной зоны, по центру.
+            Image("LaunchFooter")
+                .resizable()
+                .frame(width: Self.footerWidth, height: Self.footerHeight)
+                .position(x: UIScreen.main.bounds.midX,
+                          y: UIScreen.main.bounds.maxY - Self.safeBottom - 24 - Self.footerHeight / 2)
+                .opacity(dissolving ? 0 : 1)
         }
         .ignoresSafeArea()
         .task {

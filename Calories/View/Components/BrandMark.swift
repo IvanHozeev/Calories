@@ -120,6 +120,51 @@ struct BrandMark: View {
     }
 }
 
+/// Резиновый знак — тот же, что на иконке: готовая картинка (`Tools/IconRender`) со
+/// светлой и тёмной версией. Объём и тень нарисованы заранее, а не слоями на экране.
+///
+/// Картинка шире самого кольца: вокруг него поле под толщину и тень. Поэтому размер
+/// задаётся по кольцу (`ring`), а не по картинке — так он стоит там же, где стоял плоский
+/// знак, и лаунч-скрин, нарисованный по тем же числам, совпадает с ним до точки.
+struct RubberSign: View {
+    /// Кольцо занимает столько от ширины картинки (внешний радиус 358 из 512).
+    /// Второй экземпляр числа — `ringShare` в `Tools/IconRender/launch_logo.swift`.
+    static let ringShare: CGFloat = 0.6994
+
+    /// Поперечник кольца от края до края, в пунктах.
+    let ring: CGFloat
+
+    var body: some View {
+        // Рамка — по кольцу, картинка выходит за неё полем: раскладка видит знак
+        // того же размера, что и прежний, а тень и объём лежат за рамкой.
+        Color.clear
+            .frame(width: ring, height: ring)
+            .overlay {
+                Image("RubberMark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: ring / Self.ringShare, height: ring / Self.ringShare)
+            }
+            .accessibilityHidden(true)
+    }
+}
+
+/// Резиновый знак, который медленно «дышит»: чуть растёт и оседает. Объём нарисован заранее,
+/// поэтому двигается вся картинка целиком, как предмет на столе, а не слои по отдельности.
+struct BreathingSign: View {
+    @State private var inhaled = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        RubberSign(ring: 150)
+            .scaleEffect(inhaled ? 1.04 : 1)
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) { inhaled = true }
+            }
+    }
+}
+
 /// Продолжение лаунч-скрина: тот же фон и тот же знак на том же месте.
 ///
 /// Размеры повторяют картинку лаунч-скрина (Tools/brand_assets.swift): знак
@@ -131,8 +176,8 @@ struct BrandMark: View {
 /// он читался увеличенным индикатором загрузки.
 ///
 /// Анимация одна и цельная, а не кусок бесконечного цикла: знак с
-/// лаунч-скрина делает один плавный оборот, замирает полным и растворяется.
-/// Цикл «убежали — заполнились» обрывался посередине, и экран появлялся
+/// лаунч-скрина один раз плавно подрастает, замирает и растворяется. Цикл
+/// «убежали — заполнились» обрывался посередине, и экран появлялся
 /// на полузаполненном кольце.
 struct SplashView: View {
     /// Заставка начала уходить. Нужен отдельно от `onFinish`: кольцо дня
@@ -142,7 +187,10 @@ struct SplashView: View {
     var onLeaving: () -> Void = {}
     var onFinish: () -> Void
 
-    @State private var turn: Double = 0
+    /// Знак чуть подрастает и оседает обратно, пока заставка стоит. Оборот на
+    /// месте, как было у плоского знака, резине не идёт: свет на ней нарисован
+    /// сверху слева, и вместе со знаком проворачивался бы и он.
+    @State private var lift: CGFloat = 0
     @State private var dissolving = false
 
     var body: some View {
@@ -157,9 +205,8 @@ struct SplashView: View {
             // Движется только кольцо: название стоит на месте, как стояло бы
             // на самой картинке. Крутящееся слово читалось бы как сбой.
             VStack(spacing: BrandLockup.gap) {
-                BrandMark()
-                    .frame(width: BrandLockup.markSize, height: BrandLockup.markSize)
-                    .rotationEffect(.degrees(turn))
+                RubberSign(ring: BrandLockup.markSize)
+                    .scaleEffect(1 + 0.05 * lift)
                 Text(verbatim: "Calories")
                     .font(BrandLockup.titleFont)
                     .fontDesign(BrandLockup.titleDesign)
@@ -171,7 +218,7 @@ struct SplashView: View {
         .ignoresSafeArea()
         .task {
             withAnimation(.timingCurve(0.45, 0, 0.2, 1, duration: 1.2)) {
-                turn = 360
+                lift = 1
             } completion: {
                 onLeaving()
                 withAnimation(.easeOut(duration: BrandLockup.exitDuration)) {

@@ -266,7 +266,11 @@ struct ProgressRing: View {
                      // процентов цвета почти не читались: непонятно, что их
                      // три и что они делят день. Пока ничего не съедено,
                      // дорожки ярче; с первой записью — обычные.
-                     trackOpacity: consumed == 0 ? 0.30 : 0.20)
+                     trackOpacity: consumed == 0 ? 0.30 : 0.20,
+                     volume: miniature == nil && side >= 120,
+                     // Кольцо стоит повёрнутым на `rotation`; свет и толщина смотрят
+                     // вправо-вниз на экране, а не на кольце.
+                     lightTurn: -Self.rotation)
                 // Одним слоем: каждая дуга крутилась отдельно,
                 // и на обороте цвета размазывались друг по другу. Склеенное кольцо
                 // поворачивается как цельная картинка.
@@ -390,8 +394,21 @@ private struct RingArcs: View {
     let segments: [ProgressRing.Segment]
     let lineWidth: CGFloat
     var trackOpacity: Double = 0.20
+    /// Объёмные дуги — для крупного кольца. Миниатюре в шапке объём не нужен: на
+    /// тридцати точках толщина и тень сливаются в грязь, и знак узнаётся плоским.
+    var volume = false
+    /// На сколько кольцо повёрнуто снаружи, чтобы свет у объёма не поворачивался с ним.
+    var lightTurn: Double = 0
 
     var body: some View {
+        if volume {
+            RubberArcs(segments: segments, lineWidth: lineWidth, trackOpacity: trackOpacity, lightTurn: lightTurn)
+        } else {
+            flat
+        }
+    }
+
+    private var flat: some View {
         ZStack {
             ForEach(segments) { segment in
                 // Дорожка — цвет самой дуги, приглушённый, как у полосок

@@ -54,13 +54,17 @@ struct OnboardingView: View {
     @State private var obstacle: PastObstacle = .firstTime
 
     enum Step: Int, CaseIterable {
-        case welcome, explanations, sex, birthday, height, weight, activity, training, goal, obstacle, cutOptions, macros, tradition, gear, backup, health, result
+        /// Десять экранов вместо семнадцати: вопросы одной темы собраны вместе. «О тебе» —
+        /// пол, возраст, рост и вес; «Образ жизни» — работа и зал; «Как идти к цели» — что
+        /// мешало и как держать дефицит (только у сушки); «Питание» — белок, жир, кашрут;
+        /// «Подключения» — копии и шаги.
+        case welcome, explanations, about, lifestyle, goal, cutPlan, nutrition, gear, connections, result
     }
 
     /// Шаги, которые реально показываются: прошлые попытки, брейки и цикл —
     /// только у дефицита.
     private var steps: [Step] {
-        Step.allCases.filter { ($0 != .cutOptions && $0 != .obstacle) || intent == .cut }
+        Step.allCases.filter { $0 != .cutPlan || intent == .cut }
     }
 
     private var answers: OfferAnswers {
@@ -129,23 +133,19 @@ struct OnboardingView: View {
                 switch step {
                 case .welcome:      welcomeStep
                 case .explanations: explanationsStep
-                case .sex:        sexStep
-                case .birthday:   birthdayStep
-                case .height:     heightStep
-                case .weight:     weightStep
-                case .activity:   activityStep
-                case .training:   trainingStep
-                case .goal:       goalStep
-                case .obstacle:   obstacleStep
-                case .cutOptions: cutOptionsStep
-                case .macros:     macrosStep
-                case .tradition:  traditionStep
-                case .gear:       gearStep
-                case .backup:     backupStep
-                case .health:     healthStep
-                case .result:     resultStep
+                case .about:        aboutStep
+                case .lifestyle:    lifestyleStep
+                case .goal:         goalStep
+                case .cutPlan:      cutPlanStep
+                case .nutrition:    nutritionStep
+                case .gear:         gearStep
+                case .connections:  connectionsStep
+                case .result:       resultStep
                 }
             }
+            // Всё, что красится акцентом, — цветом текущего шага: переключатели,
+            // меню, значки. Тот же цвет у точки сверху и у кнопки «Далее».
+            .tint(accent)
             .id(step)
             .transition(.asymmetric(
                 insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -215,7 +215,7 @@ struct OnboardingView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.app(.body, weight: .semibold))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(accent)
                 }
                 .accessibilityLabel("Назад")
                 Spacer()
@@ -260,7 +260,7 @@ struct OnboardingView: View {
                     // только одна. Это знак, как и само название.
                     Text(verbatim: "Nutrition Coach")
                         .font(.app(.footnote, weight: .semibold))
-                        .foregroundStyle(Color.accentColor)
+                        .foregroundStyle(accent)
                         .textCase(.uppercase)
                         .tracking(0.8)
                     Text(verbatim: "Calories")
@@ -313,81 +313,88 @@ struct OnboardingView: View {
         }
     }
 
-    private var sexStep: some View {
-        stepShell(title: "Ты...", subtitle: "Пол учитывается в формуле метаболизма") {
-            HStack(spacing: 12) {
-                ForEach(Sex.allCases) { s in
-                    tileCard(icon: s.symbol, title: s.title, selected: sex == s) {
-                        sex = s
-                    }
-                }
-            }
-        }
-    }
-
-    /// Спрашиваем дату, а потом считаем годы сами.
+    /// Пол, возраст, рост и вес — одним экраном: все четыре нужны ради одной формулы
+    /// базового обмена, и четыре отдельных шага с одним колесом на каждом растягивали
+    /// самое скучное место онбординга.
     ///
-    /// Раньше спрашивали число лет, и оно врало: человек ставил его один раз
-    /// при установке, а базовый обмен считался от него годами. Дата не
-    /// устаревает, и заодно её проще вспомнить, чем сосчитать.
-    private var birthdayStep: some View {
-        stepShell(title: "Когда у тебя день рождения?",
-                  subtitle: "Возраст влияет на базовый обмен — считать его приложение будет само") {
-            DatePicker("День рождения",
-                       selection: $birthDate,
-                       in: UserProfile.birthDateRange(),
-                       displayedComponents: .date)
-                .datePickerStyle(.wheel)
-                .labelsHidden()
-                .frame(maxWidth: 280)
-                .accessibilityIdentifier("onboardingBirthDate")
-        }
-    }
-
-    private var heightStep: some View {
-        stepShell(title: "Рост, см", subtitle: "Нужен для расчёта базового обмена") {
-            Picker("Рост", selection: $heightInt) {
-                ForEach(130...220, id: \.self) { Text("\($0) см").tag($0) }
-            }
-            .pickerStyle(.wheel)
-            .frame(maxWidth: 240)
-        }
-    }
-
-    private var weightStep: some View {
-        stepShell(title: "Вес, кг", subtitle: "От него считаются калории, белок и жир") {
-            Picker("Вес", selection: $weightTenths) {
-                ForEach(350...2000, id: \.self) { v in
-                    Text(verbatim: String(format: "%.1f \(String(localized: "кг"))", Double(v) / 10.0)).tag(v)
-                }
-            }
-            .pickerStyle(.wheel)
-            .frame(maxWidth: 240)
-        }
-    }
-
-    private var activityStep: some View {
-        stepShell(title: "Активность", subtitle: "Работа и зал за типичную неделю") {
-            VStack(spacing: 8) {
-                ForEach(ActivityLevel.allCases) { level in
-                    selectableRow(title: level.title, subtitle: level.subtitle, selected: activityLevel == level) {
-                        activityLevel = level
+    /// Возраст — датой, а не числом лет: число устаревает ровно через год, и человек об
+    /// этом не вспомнит, а дату проще вспомнить, чем сосчитать. Рост и вес — колёсами
+    /// рядом: на одном экране им хватает места, а выбирать числа колесом привычнее всего.
+    private var aboutStep: some View {
+        stepShell(title: "О тебе", subtitle: "Из этого считается базовый обмен — основа нормы калорий") {
+            VStack(spacing: 14) {
+                HStack(spacing: 12) {
+                    ForEach(Sex.allCases) { s in
+                        compactTile(icon: s.symbol, title: s.title, selected: sex == s) { sex = s }
                     }
                 }
+
+                DatePicker("День рождения",
+                           selection: $birthDate,
+                           in: UserProfile.birthDateRange(),
+                           displayedComponents: .date)
+                    .font(.app(.body, weight: .medium))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .tileSurface(cornerRadius: 20)
+                    .accessibilityIdentifier("onboardingBirthDate")
+
+                HStack(spacing: 12) {
+                    VStack(spacing: 2) {
+                        Text("Рост, см")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                        Picker("Рост", selection: $heightInt) {
+                            ForEach(130...220, id: \.self) { Text(verbatim: "\($0)").tag($0) }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 120)
+                    }
+                    VStack(spacing: 2) {
+                        Text("Вес, кг")
+                            .font(.app(.caption))
+                            .foregroundStyle(.secondary)
+                        Picker("Вес", selection: $weightTenths) {
+                            ForEach(350...2000, id: \.self) { v in
+                                Text(verbatim: String(format: "%.1f", Double(v) / 10.0)).tag(v)
+                            }
+                        }
+                        .pickerStyle(.wheel)
+                        .frame(height: 120)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .tileSurface(cornerRadius: 20)
             }
         }
     }
 
-    /// Зал — до цели: от ответа зависит темп сушки по умолчанию и белок, и
-    /// человек видит их уже выставленными, а не переписанными после.
-    private var trainingStep: some View {
-        stepShell(title: "Ходишь в зал?", subtitle: "Силовые решают, сколько белка и какой темп") {
-            VStack(spacing: 8) {
-                ForEach(TrainingHabit.allCases) { habit in
-                    selectableRow(title: habit.title, subtitle: habit.subtitle, selected: training == habit) {
-                        chooseTraining(habit)
+    /// Работа и зал — одним экраном: оба вопроса про привычный образ жизни, и от обоих
+    /// зависит, сколько калорий и белка нужно. Зал идёт до цели: от ответа зависит темп
+    /// сушки по умолчанию и белок, и человек видит их уже выставленными, а не
+    /// переписанными после.
+    private var lifestyleStep: some View {
+        stepShell(title: "Образ жизни", subtitle: "Работа, зал и типичная неделя") {
+            VStack(alignment: .leading, spacing: 18) {
+                questionBlock("Активность") {
+                    VStack(spacing: 8) {
+                        ForEach(ActivityLevel.allCases) { level in
+                            selectableRow(title: level.title, subtitle: level.subtitle, selected: activityLevel == level) {
+                                activityLevel = level
+                            }
+                        }
                     }
-                    .accessibilityIdentifier("onboardingTraining-\(habit.rawValue)")
+                }
+                questionBlock("Ходишь в зал?") {
+                    VStack(spacing: 8) {
+                        ForEach(TrainingHabit.allCases) { habit in
+                            selectableRow(title: habit.title, subtitle: habit.subtitle, selected: training == habit) {
+                                chooseTraining(habit)
+                            }
+                            .accessibilityIdentifier("onboardingTraining-\(habit.rawValue)")
+                        }
+                    }
                 }
             }
         }
@@ -402,15 +409,13 @@ struct OnboardingView: View {
     /// Что мешало раньше — та боль, которую человек пришёл решить. По ней
     /// собирается предложение на финише, и она же меняет план: тому, кто
     /// срывался, — цикл калорий, кто терял силу — бережный темп и больше белка.
-    private var obstacleStep: some View {
-        stepShell(title: "Что мешало раньше?", subtitle: "Под это соберём план") {
-            VStack(spacing: 8) {
-                ForEach(PastObstacle.allCases) { item in
-                    selectableRow(title: item.title, subtitle: item.subtitle, selected: obstacle == item) {
-                        chooseObstacle(item)
-                    }
-                    .accessibilityIdentifier("onboardingObstacle-\(item.rawValue)")
+    private var obstacleChoices: some View {
+        VStack(spacing: 8) {
+            ForEach(PastObstacle.allCases) { item in
+                selectableRow(title: item.title, subtitle: item.subtitle, selected: obstacle == item) {
+                    chooseObstacle(item)
                 }
+                .accessibilityIdentifier("onboardingObstacle-\(item.rawValue)")
             }
         }
     }
@@ -522,9 +527,19 @@ struct OnboardingView: View {
         }
     }
 
-    private var cutOptionsStep: some View {
-        stepShell(title: "Как держать дефицит", subtitle: "Можно настроить потом") {
-            VStack(alignment: .leading, spacing: 20) {
+    /// Сушка — одним экраном: что мешало раньше и как держать дефицит. Первое меняет
+    /// второе (кому срываться — цикл калорий), поэтому рядом, а не через шаг.
+    private var cutPlanStep: some View {
+        stepShell(title: "Как идти к цели", subtitle: "Под это соберём план. Остальное можно настроить потом") {
+            VStack(alignment: .leading, spacing: 18) {
+                questionBlock("Что мешало раньше?") { obstacleChoices }
+                cutOptionsContent
+            }
+        }
+    }
+
+    private var cutOptionsContent: some View {
+        VStack(alignment: .leading, spacing: 20) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Диет-брейки")
                         .font(.app(.headline))
@@ -553,12 +568,23 @@ struct OnboardingView: View {
                         .font(.app(.caption))
                         .foregroundStyle(.secondary)
                 }
+        }
+    }
+
+    /// Белок, жир и кашрут — одним экраном про питание: нормы макросов и то, по каким
+    /// правилам человек ест. Кашрут и посты спрашиваем, а не прячем в настройки: тому,
+    /// кто их соблюдает, иначе пришлось бы узнавать о кашруте и календаре случайно. Не
+    /// соблюдающему вопрос ничего не стоит — по умолчанию выбрано «Нет».
+    private var nutritionStep: some View {
+        stepShell(title: "Питание", subtitle: "Углеводы — всё, что останется от нормы калорий") {
+            VStack(alignment: .leading, spacing: 18) {
+                macrosCard
+                questionBlock("Кашрут и посты") { traditionChoices }
             }
         }
     }
 
-    private var macrosStep: some View {
-        stepShell(title: "Белок и жир", subtitle: "Углеводы — всё, что останется от нормы калорий") {
+    private var macrosCard: some View {
             VStack(spacing: 0) {
                 Stepper(value: $proteinTenths, in: 10...30) {
                     macroLine(title: "Белок", perKg: Double(proteinTenths) / 10, grams: proteinGrams, color: MacroKind.protein.color)
@@ -583,7 +609,6 @@ struct OnboardingView: View {
             }
             .padding(.horizontal, 16)
             .tileSurface(cornerRadius: 20)
-        }
     }
 
     /// Доступ к шагам — здесь, с объяснением, а не системным окном на первом
@@ -640,56 +665,62 @@ struct OnboardingView: View {
         .padding(.top, 8)
     }
 
-    /// Куда класть копии дневника.
+    /// Копии дневника и шаги — одним экраном «Подключения»: обе вещи про то, откуда и
+    /// куда уходят данные, обе по одной кнопке, и обе можно пропустить.
     ///
-    /// Спрашиваем здесь, пока терять нечего, — и именно поэтому. Контейнер
-    /// приложения удаляется вместе с приложением, а копия внутри него спасает
-    /// от порчи данных, но не от «удалил и поставил заново» и не от потерянного
-    /// телефона. Папка в «Файлах» или iCloud Drive лежит снаружи и переживает
-    /// и то, и другое.
+    /// Копии спрашиваем здесь, пока терять нечего. Контейнер приложения удаляется
+    /// вместе с приложением, а копия внутри него спасает от порчи данных, но не от
+    /// «удалил и поставил заново» и не от потерянного телефона. Папка в «Файлах» или
+    /// iCloud Drive лежит снаружи и переживает и то, и другое. Синхронизации у
+    /// приложения нет, и выбранная папка — единственное, что стоит между годом
+    /// дневника и пустым экраном. Пропустить можно, но молча мимо не пройдёшь: отказ
+    /// явный, а на «Сегодня» потом придёт напоминание.
     ///
-    /// Синхронизации у приложения нет, и это не оговорка в сноске: выбранная
-    /// папка — единственное, что стоит между годом дневника и пустым экраном.
-    /// Поэтому шаг свой, а не строка в настройках, куда не заходят.
-    ///
-    /// Пропустить можно — запирать человека в онбординге из-за папки нельзя,
-    /// — но молча он мимо не пройдёт: отказ здесь явный, а на «Сегодня» потом
-    /// придёт напоминание, когда дневнику будет что терять.
-    private var backupStep: some View {
-        stepShell(title: "Копии дневника",
-                  subtitle: "Там, где их не унесёт вместе с приложением") {
-            VStack(spacing: 20) {
-                Image(systemName: backups.isConfigured
-                      ? "externaldrive.badge.checkmark" : "externaldrive.badge.icloud")
-                    .font(.app(size: 72))
-                    .foregroundStyle(backups.isConfigured ? Palette.good : Color.accentColor)
-
-                if let folder = backups.folderName {
-                    Text(verbatim: folder)
-                        .font(.app(.body, weight: .semibold))
-                    Text("Копия будет обновляться раз в сутки, последние четырнадцать сохранятся.")
-                        .font(.app(.footnote))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                } else {
-                    Text("Выбери папку в «Файлах» или iCloud Drive. Приложение само положит туда копию раз в сутки — она переживёт и переустановку, и новый телефон.")
-                        .font(.app(.body))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
+    /// Доступ к шагам — здесь, с объяснением, а не системным окном на первом запуске.
+    /// Приложение только читает шаги из «Здоровья», ничего туда не пишет.
+    private var connectionsStep: some View {
+        stepShell(title: "Подключения", subtitle: "Можно пропустить и подключить позже") {
+            VStack(spacing: 14) {
+                connectionCard(
+                    icon: backups.isConfigured ? "externaldrive.badge.checkmark" : "externaldrive.badge.icloud",
+                    title: "Копии дневника",
+                    text: backups.folderName.map { _ in "Копия будет обновляться раз в сутки, последние четырнадцать сохранятся." }
+                        ?? "Папка в «Файлах» или iCloud Drive: копия переживёт и переустановку, и новый телефон.",
+                    folder: backups.folderName
+                ) {
+                    Button {
+                        showingBackupPicker = true
+                    } label: {
+                        Label(backups.isConfigured ? "Выбрать другую папку" : "Выбрать папку",
+                              systemImage: "folder")
+                            .font(.app(.body, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("onboardingBackupFolder")
                 }
 
-                Button {
-                    showingBackupPicker = true
-                } label: {
-                    Label(backups.isConfigured ? "Выбрать другую папку" : "Выбрать папку",
-                          systemImage: "folder")
-                        .font(.app(.body, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
+                connectionCard(
+                    icon: "figure.walk.circle.fill",
+                    title: "Шаги",
+                    text: "Шаги и активные калории появятся на «Сегодня» рядом с едой. Приложение только читает их из «Здоровья», ничего туда не пишет.",
+                    folder: nil
+                ) {
+                    Button {
+                        stepStore.requestAuthorization()
+                        healthAsked = true
+                    } label: {
+                        Label(healthAsked ? "Доступ запрошен" : "Разрешить доступ",
+                              systemImage: healthAsked ? "checkmark" : "heart.fill")
+                            .font(.app(.body, weight: .semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(healthAsked)
+                    .accessibilityIdentifier("onboardingHealthAccess")
                 }
-                .buttonStyle(.bordered)
-                .tint(.accentColor)
-                .accessibilityIdentifier("onboardingBackupFolder")
             }
         }
         .fileImporter(isPresented: $showingBackupPicker, allowedContentTypes: [.folder]) { result in
@@ -697,50 +728,45 @@ struct OnboardingView: View {
         }
     }
 
-    /// Кашрут, посты и праздники — одним вопросом.
-    ///
-    /// Спрашиваем, а не прячем в настройки: человек, который их соблюдает,
-    /// иначе узнал бы о кашруте и календаре случайно. Не соблюдающему вопрос
-    /// стоит одного «Далее» — по умолчанию выбрано «Нет».
-    private var traditionStep: some View {
-        stepShell(title: "Кашрут и посты", subtitle: "Можно поменять потом в профиле") {
-            VStack(spacing: 12) {
-                selectableRow(title: String(localized: "Соблюдаю"),
-                              subtitle: String(localized: "Ожидание между мясным и молочным, посты и праздники с подсказками на «Сегодня»"),
-                              selected: observesTradition) { observesTradition = true }
-                    .accessibilityIdentifier("onboardingObservesTradition")
-                selectableRow(title: String(localized: "Нет"),
-                              subtitle: String(localized: "Ни кашрута, ни календаря"),
-                              selected: !observesTradition) { observesTradition = false }
+    /// Карточка подключения: значок цветом шага, название, пояснение и кнопка.
+    private func connectionCard<Action: View>(icon: String, title: LocalizedStringKey, text: LocalizedStringKey,
+                                              folder: String?, @ViewBuilder action: () -> Action) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.app(size: 34))
+                    .foregroundStyle(accent)
+                    .frame(width: 44)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.app(.headline))
+                    if let folder {
+                        Text(verbatim: folder)
+                            .font(.app(.subheadline, weight: .semibold))
+                    }
+                    Text(text)
+                        .font(.app(.footnote))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
+            action()
         }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .tileSurface(cornerRadius: 20)
     }
 
-    private var healthStep: some View {
-        stepShell(title: "Шаги", subtitle: "Приложение только читает их из «Здоровья», ничего туда не пишет") {
-            VStack(spacing: 20) {
-                Image(systemName: "figure.walk.circle.fill")
-                    .font(.app(size: 72))
-                    .foregroundStyle(.tint)
-                Text("Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода.")
-                    .font(.app(.body))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                Button {
-                    stepStore.requestAuthorization()
-                    healthAsked = true
-                } label: {
-                    Label(healthAsked ? "Доступ запрошен" : "Разрешить доступ",
-                          systemImage: healthAsked ? "checkmark" : "heart.fill")
-                        .font(.app(.body, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                }
-                .buttonStyle(.bordered)
-                .tint(.accentColor)
-                .disabled(healthAsked)
-                .accessibilityIdentifier("onboardingHealthAccess")
-            }
+    /// Выбор кашрута и постов: «Соблюдаю» или «Нет».
+    private var traditionChoices: some View {
+        VStack(spacing: 8) {
+            selectableRow(title: String(localized: "Соблюдаю"),
+                          subtitle: String(localized: "Ожидание между мясным и молочным, посты и праздники с подсказками на «Сегодня»"),
+                          selected: observesTradition) { observesTradition = true }
+                .accessibilityIdentifier("onboardingObservesTradition")
+            selectableRow(title: String(localized: "Нет"),
+                          subtitle: String(localized: "Ни кашрута, ни календаря"),
+                          selected: !observesTradition) { observesTradition = false }
         }
     }
 
@@ -842,7 +868,7 @@ struct OnboardingView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.mainAction)
+                .buttonStyle(AccentActionButtonStyle(color: accent))
                 .disabled(isPurchasing)
                 .accessibilityIdentifier("onboardingTrial")
 
@@ -875,11 +901,11 @@ struct OnboardingView: View {
     /// какому дню, и сколько удержания после.
     private var routeCard: some View {
         HStack(spacing: 16) {
-            ProgressRing(consumed: 0, goal: dailyCalories, macros: .zero,
-                         proteinTarget: proteinGrams, fatTarget: fatGrams, carbsTarget: carbGrams,
-                         showsTargets: true, miniature: 76, onOpen: {})
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
+            // Резиновый знак вместо кольца с нормой: норма в калориях и белке
+            // стоит текстом рядом, а знак здесь — то же, что на иконке и
+            // заставке, и финиш онбординга приходит к тому, с чего он начался.
+            RubberSign(ring: 76)
+                .frame(width: 88, height: 88)
             VStack(alignment: .leading, spacing: 4) {
                 if let plan = draftPlan {
                     Text(verbatim: String(format: "%.1f → %.1f %@", plan.startWeightKg, plan.targetWeightKg,
@@ -943,6 +969,9 @@ struct OnboardingView: View {
         subtitle: LocalizedStringKey? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
+        // Содержимое собираем до замыкания прокрутки: параметр-билдер в него
+        // не попадает, он не «убегающий».
+        let body = content()
         VStack(spacing: 0) {
             VStack(spacing: 8) {
                 Text(title)
@@ -955,24 +984,45 @@ struct OnboardingView: View {
             .padding(.top, 20)
             .padding(.horizontal, 24)
 
-            Spacer()
-
-            content()
-                .padding(.horizontal, 24)
-
-            Spacer()
+            // Содержимое прокручивается: на экранах из нескольких вопросов оно
+            // выше окна, а кнопка «Далее» стоит под ним и не уезжает. Пока оно
+            // ниже окна, прокрутки нет и оно по центру, как стояло раньше.
+            GeometryReader { proxy in
+                ScrollView {
+                    body
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity, minHeight: proxy.size.height)
+                }
+                .scrollIndicators(.hidden)
+                .scrollBounceBehavior(.basedOnSize)
+            }
 
             primaryButton(title: "Далее") { go(1) }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    /// Блок вопроса внутри экрана из нескольких: подпись и варианты под ней.
+    private func questionBlock<Content: View>(_ title: LocalizedStringKey,
+                                              @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.app(.subheadline, weight: .semibold))
+                .padding(.horizontal, 4)
+            content()
+        }
+    }
+
+    /// Кнопка шага — цветом шага, тем же, что точка сверху и значки на экране: чёрная
+    /// кнопка на каждом шаге была единственным, что не менялось, и выбивалась из
+    /// цветного онбординга. Подпись чёрная: на пастели белая не читалась бы.
     private func primaryButton(title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.mainAction)
+        .buttonStyle(AccentActionButtonStyle(color: accent))
         .padding(.horizontal, 24)
         .padding(.bottom, 44)
     }
@@ -1005,28 +1055,39 @@ struct OnboardingView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
-    private func tileCard(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
+    /// Компактная плитка выбора: значок цветом шага и название в строку.
+    private func compactTile(icon: String, title: String, selected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 10) {
-                // Знак акцентом: он текстовый, а не эмодзи, и своего цвета
-                // у него нет — без краски плитка выглядела бы выцветшей.
+            HStack(spacing: 8) {
                 Text(verbatim: icon)
-                    .font(.app(size: 36))
-                    .foregroundStyle(.tint)
+                    .font(.app(size: 24))
+                    .foregroundStyle(accent)
                 Text(verbatim: title)
                     .font(.app(.body, weight: .medium))
                     .foregroundStyle(.primary)
-                if selected {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(accent)
-                } else {
-                    Color.clear.frame(height: 20)
-                }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
+            .padding(.vertical, 14)
             .selectionSurface(selected, accent: accent)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// Кнопка онбординга: капсула цветом шага.
+private struct AccentActionButtonStyle: ButtonStyle {
+    let color: Color
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.app(.subheadline, weight: .semibold))
+            .foregroundStyle(Color.black)
+            .padding(.horizontal, 18)
+            .frame(minHeight: 48)
+            .background(color, in: Capsule())
+            .opacity(configuration.isPressed ? 0.7 : 1)
+            .contentShape(Capsule())
     }
 }
 

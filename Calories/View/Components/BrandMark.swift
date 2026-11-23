@@ -159,7 +159,15 @@ struct BreathingSign: View {
         RubberSign(ring: 150)
             .scaleEffect(inhaled ? 1.04 : 1)
             .onAppear {
-                guard !reduceMotion else { return }
+                // Без заставки не дышит: этот флаг выключает её у UI-тестов, а
+                // бесконечная анимация не даёт приложению «успокоиться», и тест
+                // ждёт каждый экран минутами.
+                // Флаг из аргументов запуска приходит строкой «NO», а не булевым
+                // значением, поэтому читаем его через `bool`, а не через `as? Bool`.
+                let defaults = UserDefaults.standard
+                let animates = defaults.object(forKey: "show_launch_splash") == nil
+                    || defaults.bool(forKey: "show_launch_splash")
+                guard !reduceMotion, animates else { return }
                 withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) { inhaled = true }
             }
     }

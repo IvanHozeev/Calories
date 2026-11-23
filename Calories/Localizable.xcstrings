@@ -13686,53 +13686,6 @@
         }
       }
     },
-    "Возраст влияет на базовый обмен — считать его приложение будет само" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "العمر يؤثر في معدل الأيض الأساسي — والتطبيق يحسبه بنفسه"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Alter beeinflusst den Grundumsatz — die App rechnet es selbst aus"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Age affects your basal metabolism — the app works it out itself"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La edad influye en el metabolismo basal: la app la calcula sola"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’âge influe sur le métabolisme de base — l’app le calcule elle-même"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הגיל משפיע על חילוף החומרים הבסיסי — האפליקציה מחשבת אותו בעצמה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A idade influencia o metabolismo basal — o app a calcula sozinho"
-          }
-        }
-      }
-    },
     "Возьмём только витамины и минералы. Калории и БЖУ останутся твои." : {
       "localizations" : {
         "ar" : {
@@ -14893,52 +14846,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ontem a esta hora"
-          }
-        }
-      }
-    },
-    "Выбери папку в «Файлах» или iCloud Drive. Приложение само положит туда копию раз в сутки — она переживёт и переустановку, и новый телефон." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "اختر مجلدًا في «الملفات» أو iCloud Drive. سيضع التطبيق نسخة هناك مرة كل يوم، وتبقى بعد إعادة التثبيت وبعد تغيير الهاتف."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wählen Sie einen Ordner in Dateien oder iCloud Drive. Die App legt dort täglich eine Kopie ab — sie übersteht eine Neuinstallation und ein neues Telefon."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick a folder in Files or iCloud Drive. The app will put a copy there once a day — it survives a reinstall and a new phone."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Elige una carpeta en Archivos o iCloud Drive. La app dejará allí una copia cada día: sobrevive a una reinstalación y a un teléfono nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisissez un dossier dans Fichiers ou iCloud Drive. L'app y déposera une copie chaque jour : elle survit à une réinstallation et à un nouveau téléphone."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "בחר תיקייה ב״קבצים״ או ב-iCloud Drive. האפליקציה תניח שם עותק פעם ביום — הוא שורד התקנה מחדש וטלפון חדש."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escolha uma pasta em Ficheiros ou iCloud Drive. O app deixará lá uma cópia por dia — ela sobrevive a uma reinstalação e a um telefone novo."
           }
         }
       }
@@ -23158,53 +23065,6 @@
         }
       }
     },
-    "замеры %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "القياسات %@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maße %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "measured %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "medidas %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "mesures %@"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מדידות %@"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "medidas %@"
-          }
-        }
-      }
-    },
     "Замеры %1$@ и %2$@ · лентой, ±%3$.1f кг сухой массы — шум" : {
       "localizations" : {
         "ar" : {
@@ -27068,52 +26928,6 @@
         }
       }
     },
-    "Как держать дефицит" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "كيف تحافظ على العجز"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wie du das Defizit hältst"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "How to hold the deficit"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cómo mantener el déficit"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comment tenir le déficit"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "איך להחזיק את הגירעון"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Como manter o déficit"
-          }
-        }
-      }
-    },
     "как другая сторона" : {
       "localizations" : {
         "ar" : {
@@ -29340,53 +29154,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quando"
-          }
-        }
-      }
-    },
-    "Когда у тебя день рождения?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "متى عيد ميلادك؟"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wann hast du Geburtstag?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "When is your birthday?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cuándo es tu cumpleaños?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quand est ton anniversaire ?"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "מתי יום ההולדת שלך?"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quando é o seu aniversário?"
           }
         }
       }
@@ -32362,98 +32129,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pode ganhar massa"
-          }
-        }
-      }
-    },
-    "Можно настроить потом" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يمكن ضبطه لاحقًا"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Später einstellbar"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Can be set up later"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se puede ajustar luego"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réglable plus tard"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשר להגדיר בהמשך"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dá para ajustar depois"
-          }
-        }
-      }
-    },
-    "Можно поменять потом в профиле" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يمكن تغييره لاحقًا في الملف الشخصي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Später im Profil änderbar"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can change this later in Profile"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puedes cambiarlo luego en Perfil"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifiable plus tard dans le Profil"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אפשר לשנות אחר כך בפרופיל"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dá para mudar depois no Perfil"
           }
         }
       }
@@ -39427,53 +39102,6 @@
         }
       }
     },
-    "Нужен для расчёта базового обмена" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مطلوب لحساب معدل الأيض الأساسي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Für die Berechnung des Grundumsatzes erforderlich"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Needed to calculate your base metabolism"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Necesario para calcular el metabolismo basal"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nécessaire pour calculer le métabolisme de base"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "נדרש לחישוב חילוף חומרים בסיסי"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Necessário para calcular o metabolismo basal"
-          }
-        }
-      }
-    },
     "Нужен процент жира: сними шею и пояс в замерах." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42832,52 +42460,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "do quadríceps"
-          }
-        }
-      }
-    },
-    "От него считаются калории, белок и жир" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "منه تُحسب السعرات والبروتين والدهون"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Daraus werden Kalorien, Protein und Fett berechnet"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calories, protein and fat are counted from it"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A partir de él se calculan calorías, proteína y grasa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Calories, protéines et lipides en découlent"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ממנו מחושבים קלוריות, חלבון ושומן"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dele saem calorias, proteína e gordura"
           }
         }
       }
@@ -48827,53 +48409,6 @@
         }
       }
     },
-    "Пол учитывается в формуле метаболизма" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "يُؤخذ الجنس في الاعتبار في صيغة الأيض"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Geschlecht wird in der Stoffwechselformel berücksichtigt"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sex is used in the metabolism formula"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El sexo se usa en la fórmula del metabolismo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le sexe est pris en compte dans la formule du métabolisme"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "המין נלקח בחשבון בנוסחת חילוף החומרים"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O sexo é usado na fórmula do metabolismo"
-          }
-        }
-      }
-    },
     "Полдник" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -54027,52 +53562,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vazio: a busca vai para o Open Food Facts, como para qualquer usuário."
-          }
-        }
-      }
-    },
-    "Работа и зал за типичную неделю" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "العمل والصالة خلال أسبوع عادي"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arbeit und Training in einer typischen Woche"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Work and gym over a typical week"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trabajo y gimnasio en una semana típica"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Travail et salle sur une semaine type"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עבודה וחדר כושר בשבוע רגיל"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trabalho e academia numa semana típica"
           }
         }
       }
@@ -59326,52 +58815,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Musculação duas vezes por semana ou mais"
-          }
-        }
-      }
-    },
-    "Силовые решают, сколько белка и какой темп" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تمارين القوة تحدد كمية البروتين والوتيرة"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Krafttraining entscheidet über Eiweiß und Tempo"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Strength training decides how much protein and what pace"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La fuerza decide cuánta proteína y qué ritmo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La musculation décide des protéines et du rythme"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "אימוני כוח קובעים כמה חלבון ובאיזה קצב"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A musculação decide quanta proteína e qual ritmo"
           }
         }
       }
@@ -64857,52 +64300,6 @@
         }
       }
     },
-    "Там, где их не унесёт вместе с приложением" : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "في مكان لا تذهب فيه مع التطبيق"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dort, wo sie nicht mit der App verschwinden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Somewhere they will not go with the app"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Donde no se vayan con la app"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Là où elles ne partiront pas avec l'app"
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "במקום שלא ייעלם יחד עם האפליקציה"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Onde não sumam junto com o app"
-          }
-        }
-      }
-    },
     "Тап по части открывает её экран порции: калории и БЖУ пересчитываются пропорционально новому весу, а итог складывается заново." : {
       "localizations" : {
         "ar" : {
@@ -66850,53 +66247,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "You haven't logged food"
-          }
-        }
-      }
-    },
-    "Ты..." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "عنك..."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Über Sie..."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "About you"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sobre ti..."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À votre sujet..."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "עליך..."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sobre você..."
           }
         }
       }
@@ -70822,52 +70172,6 @@
         }
       }
     },
-    "Шаги и активные калории появятся на «Сегодня» рядом с едой — сами, без ручного ввода." : {
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ستظهر الخطوات والسعرات النشطة في «اليوم» بجانب الطعام — تلقائيًا، دون إدخال يدوي."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schritte und aktive Kalorien erscheinen unter „Heute“ neben dem Essen – von selbst, ohne Eintippen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps and active calories show up on Today next to your food — on their own, no typing."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los pasos y las calorías activas aparecerán en Hoy junto a la comida, solos, sin escribir nada."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les pas et les calories actives apparaîtront dans Aujourd’hui à côté des repas — tout seuls, sans saisie."
-          }
-        },
-        "he" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "הצעדים והקלוריות הפעילות יופיעו ב״היום״ ליד האוכל — לבד, בלי הקלדה."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passos e calorias ativas aparecem em Hoje ao lado da comida — sozinhos, sem digitar."
-          }
-        }
-      }
-    },
     "шагов" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -72588,6 +71892,466 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "הקש על + למעלה כדי לרשום את הארוחה הראשונה שלך."
+          }
+        }
+      }
+    },
+    "О тебе" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About you"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre ti"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre você"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À propos de toi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über dich"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عنك"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עליך"
+          }
+        }
+      }
+    },
+    "Из этого считается базовый обмен — основа нормы калорий" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This sets your basal metabolism, the base of your calorie target"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De esto sale tu metabolismo basal, la base de tu meta de calorías"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disso sai o seu metabolismo basal, a base da sua meta de calorias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela donne ton métabolisme de base, la base de ta cible calorique"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daraus ergibt sich dein Grundumsatz, die Basis deines Kalorienziels"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "منه يُحسب معدل الأيض الأساسي، أساس هدفك من السعرات"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "מזה מחושב קצב חילוף החומרים הבסיסי, בסיס יעד הקלוריות שלך"
+          }
+        }
+      }
+    },
+    "Образ жизни" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifestyle"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estilo de vida"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estilo de vida"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode de vie"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lebensstil"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نمط الحياة"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אורח חיים"
+          }
+        }
+      }
+    },
+    "Работа, зал и типичная неделя" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work, the gym and a typical week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trabajo, gimnasio y una semana típica"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trabalho, academia e uma semana típica"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travail, salle et semaine type"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arbeit, Gym und eine typische Woche"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "العمل والنادي وأسبوع عادي"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "עבודה, חדר כושר ושבוע רגיל"
+          }
+        }
+      }
+    },
+    "Как идти к цели" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to reach the goal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo llegar a la meta"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como chegar à meta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment atteindre l’objectif"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie du zum Ziel kommst"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف تصل إلى الهدف"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "איך מגיעים ליעד"
+          }
+        }
+      }
+    },
+    "Под это соберём план. Остальное можно настроить потом" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We’ll build the plan around this. The rest can be set up later"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Armaremos el plan según esto. Lo demás se puede ajustar después"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montaremos o plano a partir disso. O resto pode ser ajustado depois"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On construira le plan là-dessus. Le reste se règle plus tard"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Daran bauen wir den Plan. Alles andere lässt sich später einstellen"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سنبني الخطة على هذا. يمكن ضبط الباقي لاحقًا"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "נבנה את התוכנית לפי זה. את השאר אפשר להגדיר אחר כך"
+          }
+        }
+      }
+    },
+    "Подключения" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connections"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conexiones"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conexões"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connexions"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindungen"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاتصالات"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "חיבורים"
+          }
+        }
+      }
+    },
+    "Можно пропустить и подключить позже" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can skip this and connect later"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puedes omitirlo y conectar después"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pode pular e conectar depois"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu peux passer et connecter plus tard"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du kannst das überspringen und später verbinden"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يمكنك التخطي والاتصال لاحقًا"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "אפשר לדלג ולחבר מאוחר יותר"
+          }
+        }
+      }
+    },
+    "Папка в «Файлах» или iCloud Drive: копия переживёт и переустановку, и новый телефон." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A folder in Files or iCloud Drive: the copy survives a reinstall and a new phone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una carpeta en Archivos o iCloud Drive: la copia sobrevive a una reinstalación y a un teléfono nuevo."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma pasta em Arquivos ou iCloud Drive: a cópia sobrevive a uma reinstalação e a um telefone novo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un dossier dans Fichiers ou iCloud Drive : la copie survit à une réinstallation et à un nouveau téléphone."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Ordner in Dateien oder iCloud Drive: Die Kopie überlebt eine Neuinstallation und ein neues Telefon."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مجلد في «الملفات» أو iCloud Drive: تبقى النسخة بعد إعادة التثبيت وعلى هاتف جديد."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "תיקייה ב״קבצים״ או ב‑iCloud Drive: העותק שורד התקנה מחדש וטלפון חדש."
+          }
+        }
+      }
+    },
+    "Шаги и активные калории появятся на «Сегодня» рядом с едой. Приложение только читает их из «Здоровья», ничего туда не пишет." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps and active calories will appear on Today next to your food. The app only reads them from Health and writes nothing back."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pasos y las calorías activas aparecerán en Hoy junto a la comida. La app solo los lee de Salud y no escribe nada."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os passos e as calorias ativas aparecerão em Hoje ao lado da comida. O app só os lê do Saúde e não grava nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pas et les calories actives apparaîtront sur Aujourd’hui à côté des repas. L’app les lit seulement dans Santé et n’y écrit rien."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schritte und aktive Kalorien erscheinen unter Heute neben dem Essen. Die App liest sie nur aus Health und schreibt nichts zurück."
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ستظهر الخطوات والسعرات النشطة في «اليوم» بجانب الطعام. التطبيق يقرؤها فقط من «الصحة» ولا يكتب شيئًا فيها."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "הצעדים והקלוריות הפעילות יופיעו ב״היום״ לצד האוכל. האפליקציה רק קוראת אותם מ״בריאות״ ולא כותבת אליה דבר."
           }
         }
       }

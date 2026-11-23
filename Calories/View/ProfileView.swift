@@ -62,8 +62,6 @@ struct ProfileView: View {
     /// Экран оплаты со строки «Premium» внизу профиля.
     @State private var showingPaywall = false
     @State private var showingSettings = false
-    @State private var showingWeight = false
-    @State private var showingMeasurements = false
 
     /// Профиль, который получится из черновика. Опционален ради тех мест,
     /// где он читается как «есть ли что считать».
@@ -127,28 +125,6 @@ struct ProfileView: View {
             GoalSection(store: store, goal: $draft.goal)
             
             bodyParametersSection
-
-            // Как идёт тело: вес, жир, сухая масса и тренд веса за полтора
-            // месяца — сразу под параметрами тела, из которых он и читается.
-            if let weight = store.weightKg {
-                Section {
-                    BodySnapshotCard(weightKg: weight,
-                                     fatPercent: store.measuredBodyFatPercent,
-                                     leanKg: draftProfile?.leanMassKg(from: measurement),
-                                     trend: store.weightTrendSeries(weeks: 6),
-                                     weeks: 6,
-                                     imperial: useImperial,
-                                     measuredOn: store.latestMeasurement?.date,
-                                     onOpenWeight: { showingWeight = true },
-                                     onOpenBody: { showingMeasurements = true })
-                        // Без своих отступов: карточка во всю ширину секции,
-                        // как строки соседних карточек. С шестнадцатью точками
-                        // по бокам она выходила уже остальных.
-                        .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets())
-                }
-            }
-
 
             // Питание сразу перед нормами белка и жира: расписание приёмов и
             // эти нормы — про одно и то же, про еду. Параметры тела идут
@@ -237,12 +213,6 @@ struct ProfileView: View {
         }
         .navigationDestination(isPresented: $showingPaywall) {
             PaywallView(store: store, focus: .plan)
-        }
-        .navigationDestination(isPresented: $showingWeight) {
-            WeightDetailView(store: store)
-        }
-        .navigationDestination(isPresented: $showingMeasurements) {
-            MeasurementsView(store: store)
         }
         .onChange(of: draftProfile) { _, newProfile in
             if let p = newProfile { store.updateProfile(p) }
@@ -554,6 +524,41 @@ private extension ProfileView {
                 .labelsHidden()
                 .frame(height: 160)
                 .accessibilityIdentifier("profileBirthDate")
+        }
+        // Вес, жир и сухая масса — строками здесь, а не отдельной карточкой с
+        // графиком: графиков в приложении и так хватает, а это такие же
+        // параметры тела, как рост. Вес ведёт на экран взвешиваний, жир и
+        // сухая масса — на замеры, из которых они считаются. Жир и сухую массу
+        // показываем, только когда они известны: пустая строка с прочерком
+        // ничего не говорит, а «Замеры» стоят ниже.
+        if let weight = store.weightKg {
+            NavigationLink {
+                WeightDetailView(store: store)
+            } label: {
+                valueRow("Вес", systemImage: "scalemass",
+                         value: String(format: "%.1f", useImperial ? weight * 2.20462 : weight),
+                         unit: LocalizedStringKey(useImperial ? "фунт" : "кг"), onInfo: nil)
+            }
+            .accessibilityIdentifier("openWeight")
+        }
+        if let fat = store.measuredBodyFatPercent {
+            NavigationLink {
+                MeasurementsView(store: store)
+            } label: {
+                valueRow("Жир", systemImage: "drop",
+                         value: String(format: "%.1f", fat), unit: "%", onInfo: nil)
+            }
+            .accessibilityIdentifier("openBodyFat")
+        }
+        if let lean = leanMassKg {
+            NavigationLink {
+                MeasurementsView(store: store)
+            } label: {
+                valueRow("Сухая масса", systemImage: "figure.strengthtraining.traditional",
+                         value: String(format: "%.1f", useImperial ? lean * 2.20462 : lean),
+                         unit: LocalizedStringKey(useImperial ? "фунт" : "кг"), onInfo: nil)
+            }
+            .accessibilityIdentifier("openLeanMass")
         }
         // Замеры — пятой строкой, рядом с ростом и весом: это такой же
         // параметр тела, просто снимаемый лентой. В тулбаре их искали

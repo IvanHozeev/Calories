@@ -11,9 +11,12 @@ svg { position: absolute; left: 0; top: 0; }
 <body>
 <div id="icon"><svg id="svg" width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"></svg></div>
 <script>
-// "Резина" for Calories: the ring's three arcs drawn like the GymLogger dumbbell - each piece
-// a solid lit from the top left, thickness from 16 darker copies shifted down-right, a soft
-// shadow underneath. The hash is "<concept>-<mode>": concept 1, 2 or 3; mode light or dark.
+// "Резина" for Calories, thin: the ring's three arcs, each a near-flat colour with a soft
+// highlight on top, a faint shade below, thickness from four darker copies shifted down-right
+// and a short soft shadow. The same recipe as the day ring (`RubberArcs`) and the macro bars
+// (`RubberCapsule`) in the app, in fractions of the arc width, so the icon, the ring and the
+// bars look like one material. The heavy version (sixteen copies, a long shadow) is in git
+// history before this one. The hash is "<concept>-<mode>": concept 1, 2 or 3; mode light or dark.
 const [concept, mode] = (location.hash || '#1-light').slice(1).split('-');
 const svg = document.getElementById('svg');
 const NS = 'http://www.w3.org/2000/svg';
@@ -103,19 +106,19 @@ const inner = (name, dy, blur, color, opacity) => {
   el('feFlood', { 'flood-color': color, 'flood-opacity': opacity, result: name + 'f' }, f);
   el('feComposite', { in: name + 'f', in2: name + 'a', operator: 'in', result: name }, f);
 };
-inner('hl', 7, 6, '#FFFFFF', 0.42);
-inner('sh', -11, 9, '#000000', 0.2);
+inner('hl', 6.8, 6.2, '#FFFFFF', 0.38);
+inner('sh', -8.7, 8.7, '#000000', 0.14);
 const merge = el('feMerge', {}, f);
 ['SourceGraphic', 'hl', 'sh'].forEach((n) => el('feMergeNode', { in: n }, merge));
 
 const blurF = el('filter', { id: 'soft', filterUnits: 'userSpaceOnUse', x: -128, y: -128, width: 1280, height: 1280 }, defs);
-el('feGaussianBlur', { stdDeviation: 26 }, blurF);
+el('feGaussianBlur', { stdDeviation: 20 }, blurF);
 
 const stroke = (d, color, extra) => el('path', Object.assign({ d, fill: 'none', stroke: color,
   'stroke-width': WIDTH, 'stroke-linecap': 'round' }, extra || {}));
 
 // Shadow under the sign.
-const shadowGroup = el('g', { filter: 'url(#soft)', transform: 'translate(26 44)' });
+const shadowGroup = el('g', { filter: 'url(#soft)', transform: 'translate(5 15)' });
 arcs.forEach((a) => stroke(a.d, shadow, {}).setAttribute('stroke', shadow));
 shadowGroup.append(...Array.from(svg.querySelectorAll('path')).slice(-arcs.length));
 
@@ -130,10 +133,10 @@ const ball = (() => {
 })();
 
 // Thickness: sixteen copies, each a step further down-right and darker.
-for (let k = 16; k >= 1; k--) {
-  const g = el('g', { transform: 'translate(' + (k * 1.6) + ' ' + (k * 2.4) + ')' });
+for (let k = 4; k >= 1; k--) {
+  const g = el('g', { transform: 'translate(' + (k * 1.49) + ' ' + (k * 2.73) + ')' });
   arcs.forEach((a) => {
-    const p = stroke(a.d, mix(colors[a.id], '#000000', 0.42));
+    const p = stroke(a.d, mix(colors[a.id], '#000000', 0.30));
     g.appendChild(p);
   });
   if (ball) {
@@ -147,11 +150,11 @@ arcs.forEach((a) => {
   const path = stroke(a.d, c);
   const b = path.getBBox();
   const x0 = b.x - WIDTH / 2, y0 = b.y - WIDTH / 2, w = b.width + WIDTH, h = b.height + WIDTH;
-  const g = el('radialGradient', { id: 'g-' + a.id, gradientUnits: 'userSpaceOnUse',
-    cx: x0 + w * 0.28, cy: y0 + h * 0.12, r: Math.max(w, h) * 1.05 }, defs);
-  el('stop', { offset: 0, 'stop-color': mix(c, '#FFFFFF', 0.34) }, g);
-  el('stop', { offset: 0.48, 'stop-color': c }, g);
-  el('stop', { offset: 1, 'stop-color': mix(c, '#000000', 0.16) }, g);
+  const g = el('linearGradient', { id: 'g-' + a.id, gradientUnits: 'userSpaceOnUse',
+    x1: 512 - 130, y1: 512 - 330, x2: 512 + 130, y2: 512 + 330 }, defs);
+  el('stop', { offset: 0, 'stop-color': mix(c, '#FFFFFF', 0.12) }, g);
+  el('stop', { offset: 0.5, 'stop-color': c }, g);
+  el('stop', { offset: 1, 'stop-color': mix(c, '#000000', 0.06) }, g);
   path.setAttribute('stroke', 'url(#g-' + a.id + ')');
   path.setAttribute('filter', 'url(#rubber)');
 });

@@ -174,26 +174,14 @@ struct RubberRing: View, Animatable {
 
     private struct Piece {
         let start: Double, end: Double
-        let lit: Color, face: Color, edge: Color, thick: Color
+        let colour: Color
     }
 
-    /// Углы дуг от трёх часов по часовой — из `Ring.svg`.
+    /// Углы дуг от трёх часов по часовой — из `Ring.svg`; цвета иконки.
     private static let pieces: [Piece] = [
-        Piece(start: 150, end: 290,                                   // углеводы
-              lit: Color(.sRGB, red: 204 / 255, green: 159 / 255, blue: 1),
-              face: Color(.sRGB, red: 178 / 255, green: 109 / 255, blue: 1),
-              edge: Color(.sRGB, red: 150 / 255, green: 92 / 255, blue: 214 / 255),
-              thick: Color(.sRGB, red: 103 / 255, green: 63 / 255, blue: 148 / 255)),
-        Piece(start: -15, end: 82,                                    // белки
-              lit: Color(.sRGB, red: 91 / 255, green: 211 / 255, blue: 232 / 255),
-              face: Color(.sRGB, red: 6 / 255, green: 188 / 255, blue: 220 / 255),
-              edge: Color(.sRGB, red: 5 / 255, green: 158 / 255, blue: 185 / 255),
-              thick: Color(.sRGB, red: 3 / 255, green: 109 / 255, blue: 128 / 255)),
-        Piece(start: 90, end: 142,                                    // жиры
-              lit: Color(.sRGB, red: 1, green: 170 / 255, blue: 130 / 255),
-              face: Color(.sRGB, red: 1, green: 127 / 255, blue: 66 / 255),
-              edge: Color(.sRGB, red: 214 / 255, green: 107 / 255, blue: 56 / 255),
-              thick: Color(.sRGB, red: 148 / 255, green: 74 / 255, blue: 38 / 255)),
+        Piece(start: 150, end: 290, colour: Color(.sRGB, red: 178 / 255, green: 109 / 255, blue: 1)),                 // углеводы
+        Piece(start: -15, end: 82, colour: Color(.sRGB, red: 6 / 255, green: 188 / 255, blue: 220 / 255)),             // белки
+        Piece(start: 90, end: 142, colour: Color(.sRGB, red: 1, green: 127 / 255, blue: 66 / 255)),                    // жиры
     ]
 
     var body: some View {
@@ -209,6 +197,10 @@ struct RubberRing: View, Animatable {
             .accessibilityHidden(true)
     }
 
+    /// Тонкий объём — тот же рецепт, что у картинки знака (`Tools/IconRender/rubber.html`),
+    /// у кольца дня (`RubberArcs`) и у полосок макросов (`RubberCapsule`): почти ровный
+    /// цвет, блик по верху, четыре копии толщины, короткая мягкая тень. Числа — в единицах
+    /// картинки 1024.
     private func draw(_ context: inout GraphicsContext, size: CGSize) {
         let u = size.width / 1024
         let scale = 1.02
@@ -225,53 +217,55 @@ struct RubberRing: View, Animatable {
             }
         }
 
-        // Тень под знаком: сдвинута вправо-вниз и размыта.
+        // Тень под знаком: короткая и мягкая.
         context.drawLayer { layer in
-            layer.addFilter(.blur(radius: 26 * u))
+            layer.addFilter(.blur(radius: 20 * u))
             let shadow = dark ? Color.black.opacity(0.7) : Color(red: 70 / 255, green: 55 / 255, blue: 40 / 255).opacity(0.42)
             for piece in Self.pieces {
-                layer.stroke(path(piece, dx: 26 * u, dy: 44 * u), with: .color(shadow), style: style)
+                layer.stroke(path(piece, dx: 5 * u, dy: 15 * u), with: .color(shadow), style: style)
             }
         }
 
-        // Толщина: шестнадцать копий вправо-вниз, каждая темнее. Сдвиг не зависит от
+        // Толщина: четыре копии вправо-вниз, каждая темнее лица. Сдвиг не зависит от
         // поворота: взгляд на предмет не меняется.
-        for k in stride(from: 16, through: 1, by: -1) {
+        for k in stride(from: 4, through: 1, by: -1) {
             for piece in Self.pieces {
-                context.stroke(path(piece, dx: CGFloat(k) * 1.6 * u, dy: CGFloat(k) * 2.4 * u),
-                               with: .color(piece.thick), style: style)
+                context.stroke(path(piece, dx: CGFloat(k) * 1.49 * u, dy: CGFloat(k) * 2.73 * u),
+                               with: .color(piece.colour.mix(with: .black, by: 0.30)), style: style)
             }
         }
 
-        // Лицо дуги: свет падает слева сверху, потому градиент привязан к экрану, а не к
-        // дуге, — дуга, уезжая в нижнюю правую часть, темнеет.
+        // Лицо дуги: почти ровный цвет, вертикальный переход привязан к экрану, а не к дуге.
+        let shading = { (piece: Piece) in
+            GraphicsContext.Shading.linearGradient(
+                Gradient(stops: [.init(color: piece.colour.mix(with: .white, by: 0.12), location: 0),
+                                 .init(color: piece.colour, location: 0.5),
+                                 .init(color: piece.colour.mix(with: .black, by: 0.06), location: 1)]),
+                startPoint: CGPoint(x: (512 - 130) * u, y: (512 - 330) * u),
+                endPoint: CGPoint(x: (512 + 130) * u, y: (512 + 330) * u))
+        }
         for piece in Self.pieces {
             let arc = path(piece)
             let outline = arc.strokedPath(style)
-            let shading = GraphicsContext.Shading.radialGradient(
-                Gradient(stops: [.init(color: piece.lit, location: 0),
-                                 .init(color: piece.face, location: 0.48),
-                                 .init(color: piece.edge, location: 1)]),
-                center: CGPoint(x: 300 * u, y: 260 * u), startRadius: 0, endRadius: 900 * u)
-            context.stroke(arc, with: shading, style: style)
+            context.stroke(arc, with: shading(piece), style: style)
 
-            // Блик сверху и тень снизу внутри формы — как у резины.
+            // Блик сверху и тень снизу внутри формы.
             let big = CGRect(x: -64 * u, y: -64 * u, width: 1152 * u, height: 1152 * u)
             context.drawLayer { layer in
                 layer.clip(to: outline)
-                layer.addFilter(.blur(radius: 6 * u))
+                layer.addFilter(.blur(radius: 6.2 * u))
                 var inverse = Path()
                 inverse.addRect(big)
-                inverse.addPath(outline.offsetBy(dx: 0, dy: 7 * u))
-                layer.fill(inverse, with: .color(.white.opacity(0.42)), style: FillStyle(eoFill: true))
+                inverse.addPath(outline.offsetBy(dx: 0, dy: 6.8 * u))
+                layer.fill(inverse, with: .color(.white.opacity(0.38)), style: FillStyle(eoFill: true))
             }
             context.drawLayer { layer in
                 layer.clip(to: outline)
-                layer.addFilter(.blur(radius: 9 * u))
+                layer.addFilter(.blur(radius: 8.7 * u))
                 var inverse = Path()
                 inverse.addRect(big)
-                inverse.addPath(outline.offsetBy(dx: 0, dy: -11 * u))
-                layer.fill(inverse, with: .color(.black.opacity(0.2)), style: FillStyle(eoFill: true))
+                inverse.addPath(outline.offsetBy(dx: 0, dy: -8.7 * u))
+                layer.fill(inverse, with: .color(.black.opacity(0.14)), style: FillStyle(eoFill: true))
             }
         }
     }

@@ -292,15 +292,9 @@ struct MacrosCard: View {
                 .minimumScaleFactor(0.75)
                 }
 
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(color.opacity(0.18))
-                        Capsule().fill(color)
-                            .frame(width: geometry.size.width * progress)
-                            .animation(.spring(response: 0.65, dampingFraction: 0.85), value: progress)
-                    }
-                }
-                .frame(height: 4)
+                // С объёмом, как дуги кольца: полоска макроса и его дуга — один цвет
+                // и один материал.
+                RubberBar(color: color, progress: progress, height: 6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }

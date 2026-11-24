@@ -29,10 +29,10 @@ struct MacroSplitBar: View {
                     segment(kcal.carbs, color: MacroKind.carbs.color, width: geo.size.width)
                 }
             }
-            .frame(height: 4)
-            .clipShape(Capsule())
-            // Тонкая плоская дорожка, как полоски под плашкой макросов на
-            // «Сегодня». Видна и пустой, когда макросов ещё нет.
+            // Без обрезки по капсуле: у каждого куска свой борт и своя тень, и общая
+            // рамка срезала бы их.
+            .frame(height: 6)
+            // Бледная дорожка под кусками: видна и пустой, когда макросов ещё нет.
             .background {
                 Capsule().fill(Color.secondary.opacity(0.15))
             }
@@ -49,8 +49,7 @@ struct MacroSplitBar: View {
 
     private func segment(_ value: Double, color: Color, width: CGFloat) -> some View {
         let share = kcal.total > 0 ? value / kcal.total : 0
-        return Capsule()
-            .fill(color)
+        return RubberCapsule(color: color, height: 6)
             .frame(width: max(0, width * share))
     }
 

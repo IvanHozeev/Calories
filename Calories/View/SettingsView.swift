@@ -595,13 +595,7 @@ private extension SettingsView {
     }
 
     private func sampleBar(_ color: Color, share: Double) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Capsule().fill(color.opacity(0.22))
-                Capsule().fill(color).frame(width: geometry.size.width * share)
-            }
-        }
-        .frame(height: 4)
+        RubberBar(color: color, progress: share, height: 6, trackOpacity: 0.22)
     }
 
     var intensityRow: some View {

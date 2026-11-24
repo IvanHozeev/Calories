@@ -94,8 +94,9 @@ struct FoodQuantityView: View {
                 FoodSummaryCard(
                     calories: calories,
                     densityLine: isHundredGrams ? nil
-                        : (food.isPerUnit ? "\(food.caloriesPer100g) ккал / шт"
-                                          : "\(basis.calories) ккал / 100 г"),
+                        : (food.isPerUnit
+                           ? String(localized: "\(food.caloriesPer100g) ккал / шт")
+                           : String(localized: "\(basis.calories) ккал / 100 г")),
                     macros: macros,
                     traits: food.traits)
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))
@@ -487,7 +488,9 @@ struct DishQuantityView: View {
                 // Название — в заголовке экрана, как и у продукта.
                 FoodSummaryCard(
                     calories: calories,
-                    densityLine: isHundredGrams ? nil : "\(dish.caloriesPer100g) ккал / 100 г",
+                    densityLine: isHundredGrams
+                        ? nil
+                        : String(localized: "\(dish.caloriesPer100g) ккал / 100 г"),
                     macros: macros,
                     traits: dish.traits)
                 .listRowInsets(EdgeInsets(top: 10, leading: 16, bottom: 10, trailing: 16))

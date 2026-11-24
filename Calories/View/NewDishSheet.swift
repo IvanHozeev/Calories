@@ -405,7 +405,9 @@ struct NewDishSheet: View {
             FoodSummaryCard(
                 calories: portionCalories,
                 densityLine: totalGrams > 0
-                    ? "\(Int((Double(totalCalories) / totalGrams * 100).rounded())) ккал / 100 г" : nil,
+                    ? String(localized:
+                        "\(Int((Double(totalCalories) / totalGrams * 100).rounded())) ккал / 100 г")
+                    : nil,
                 macros: totalGrams > 0 ? portionMacros : .zero)
             .padding(.vertical, 6)
         }

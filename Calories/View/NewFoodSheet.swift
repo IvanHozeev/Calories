@@ -427,7 +427,8 @@ struct NewFoodSheet: View {
                 FoodSummaryCard(
                     calories: enteredCalories,
                     densityLine: servingToSave != 100 && enteredCalories > 0
-                        ? "\(portionCalories) ккал / \(Int(servingToSave)) г" : nil,
+                        ? String(localized: "\(portionCalories) ккал / \(Int(servingToSave)) г")
+                        : nil,
                     macros: hasMacros ? draftMacros : .zero,
                     traits: editingFood?.traits ?? [])
             }

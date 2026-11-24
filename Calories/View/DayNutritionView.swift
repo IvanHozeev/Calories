@@ -278,8 +278,9 @@ struct DayNutritionView: View {
             }
 
             if let target, target > 0 {
-                ProgressView(value: min(value / target, 1))
-                    .progressViewStyle(.engraved(color, thickness: 6))
+                // Тот же объём, что у полосок на «Сегодня» и у дуг кольца:
+                // здесь макрос показан тем же материалом, что и везде.
+                RubberBar(color: color, progress: min(value / target, 1), height: 6)
             }
 
             caption(for: kind, value: value)

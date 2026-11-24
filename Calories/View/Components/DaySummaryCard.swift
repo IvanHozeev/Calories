@@ -98,8 +98,10 @@ struct DaySummaryCard: View {
             .monospacedDigit()
             .lineLimit(1)
             .minimumScaleFactor(0.75)
-            ProgressView(value: progress)
-                .progressViewStyle(.engraved(kind.color))
+            // С объёмом, как у полосок макросов на «Сегодня» и у дуг кольца:
+            // плоская заливка в карточке дня читалась другим материалом, хотя
+            // это тот же макрос и тот же цвет.
+            RubberBar(color: kind.color, progress: progress, height: 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

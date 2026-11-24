@@ -37,11 +37,14 @@ struct MacroShareBar: View {
             let free = width - Self.gap * CGFloat(shares.count - 1)
             HStack(spacing: Self.gap) {
                 ForEach(shares, id: \.kind) { part in
-                    Capsule()
-                        .fill(part.kind.color)
+                    // Тот же объём, что у дуг кольца и полосок макросов на
+                    // «Сегодня» (`RubberCapsule`): в строке продукта цвет
+                    // макроса остался единственным цветом, и он должен
+                    // выглядеть тем же материалом, что и на карточке дня.
+                    RubberCapsule(color: part.kind.color, height: height)
                         // Не уже двух точек: доля в один-два процента иначе
                         // пропала бы вовсе, а её отсутствие читалось бы как ноль.
-                        .frame(width: max(2, free * CGFloat(part.share)), height: height)
+                        .frame(width: max(2, free * CGFloat(part.share)))
                 }
             }
             .frame(width: width, alignment: .leading)

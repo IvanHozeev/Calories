@@ -168,6 +168,8 @@ private struct DayRing: View {
 
     /// Доля окружности под дугу: 360° минус раскрытие в 84°, как у главного кольца.
     private static let arcShare = 0.766
+    /// Раскрытие сверху: кольцо повёрнуто на 8°, как и главное.
+    private static let turn: Double = 8
     private static let lineWidth: CGFloat = 4.5
     private static let size: CGFloat = 36
 
@@ -199,16 +201,15 @@ private struct DayRing: View {
                     .fill(Color(.secondarySystemGroupedBackground))
                     .shadow(color: .black.opacity(0.10), radius: 5, y: 2)
             }
-            arc(Self.arcShare)
-                .stroke(color.opacity(0.18), style: stroke)
-            arc(Self.arcShare * share)
-                .stroke(color, style: stroke)
-                .opacity(share > 0 ? 1 : 0)
-            // Перебор — короткой тёмной дугой в начале красной: ровно
-            // насколько вышло за норму, а не просто «много».
-            arc(Self.arcShare * excess)
-                .stroke(ProgressRing.overColors[1], style: stroke)
-                .opacity(excess > 0 ? 1 : 0)
+            DayRingArcs(share: share, excess: excess, color: color,
+                        overColor: ProgressRing.overColors[1],
+                        arcShare: Self.arcShare, lineWidth: Self.lineWidth,
+                        turn: Self.turn)
+                // Поле под толщину и тень: Canvas обрезает всё, что выходит за
+                // рамку, а кольцо рисует тень за её пределами. Тот же приём, что
+                // у большого кольца: поле добавляется и тут же снимается.
+                .padding(-Self.lineWidth)
+                .padding(Self.lineWidth / 2)
             Text(verbatim: "\(number)")
                 .font(.app(.caption, weight: isToday ? .bold : .semibold))
                 .monospacedDigit()
@@ -218,34 +219,68 @@ private struct DayRing: View {
         .frame(width: Self.size, height: Self.size)
         .animation(.spring(response: 0.65, dampingFraction: 0.85), value: share)
     }
-
-    private var stroke: StrokeStyle {
-        StrokeStyle(lineWidth: Self.lineWidth, lineCap: .round)
-    }
-
-    /// Дуга от раскрытия по часовой, внутри рамки кольца.
-    private func arc(_ end: Double) -> some Shape {
-        InsetArc(end: end, inset: Self.lineWidth / 2)
-    }
 }
 
-/// Часть окружности, начиная с трёх часов и повёрнутая на 8°, чтобы раскрытие
-/// пришлось на верх — как у главного кольца.
-private struct InsetArc: Shape {
-    var end: Double
-    var inset: CGFloat
+/// Дуги кольца недели с тем же объёмом, что у большого кольца и у иконки:
+/// рецепт вынесен в `RubberArcRecipe`, здесь — только геометрия и цвета.
+///
+/// Дорожка плоская, как и у большого кольца: пустая часть не должна выглядеть
+/// вещью. Доли отдаются системе как числа, поэтому пружина по `share` растит
+/// дугу, а не перескакивает.
+private struct DayRingArcs: View, Animatable {
+    var share: Double
+    var excess: Double
+    let color: Color
+    let overColor: Color
+    let arcShare: Double
+    let lineWidth: CGFloat
+    /// Раскрытие сверху — то же, что у главного кольца.
+    let turn: Double
 
-    var animatableData: Double {
-        get { end }
-        set { end = newValue }
+    @Environment(\.colorScheme) private var scheme
+
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(share, excess) }
+        set { share = newValue.first; excess = newValue.second }
     }
 
-    func path(in rect: CGRect) -> Path {
-        Circle()
-            .trim(from: 0, to: max(0, min(end, 1)))
-            .path(in: rect.insetBy(dx: inset, dy: inset))
-            .applying(CGAffineTransform(translationX: -rect.midX, y: -rect.midY)
-                .concatenating(CGAffineTransform(rotationAngle: 8 * .pi / 180))
-                .concatenating(CGAffineTransform(translationX: rect.midX, y: rect.midY)))
+    var body: some View {
+        Canvas { context, size in
+            let lw = lineWidth
+            let centre = CGPoint(x: size.width / 2, y: size.height / 2)
+            // Поле под тень больше рамки кольца на толщину дуги с каждой
+            // стороны — радиус считается от рамки, а не от поля.
+            let radius = (min(size.width, size.height) - 2 * lw) / 2
+            let style = StrokeStyle(lineWidth: lw, lineCap: .round)
+
+            /// Дуга от раскрытия по часовой, внутри рамки кольца.
+            func arc(_ end: Double) -> Path {
+                Path { p in
+                    p.addArc(center: centre, radius: radius,
+                             startAngle: .degrees(turn),
+                             endAngle: .degrees(turn + 360 * max(0, min(end, 1))),
+                             clockwise: false)
+                }
+            }
+            func shift(_ dx: CGFloat, _ dy: CGFloat) -> CGSize {
+                RubberArcRecipe.offset(dx, dy, compensating: turn)
+            }
+
+            // Дорожка — плоская, цветом дуги, приглушённым, как под макросами.
+            context.stroke(arc(arcShare), with: .color(color.opacity(0.18)), style: style)
+
+            var arcs: [(path: Path, colour: Color)] = []
+            if share > 0 { arcs.append((path: arc(arcShare * share), colour: color)) }
+            // Перебор — короткой тёмной дугой в начале красной: ровно насколько
+            // вышло за норму, и вторым в списке, чтобы лицо легло поверх.
+            if excess > 0 { arcs.append((path: arc(arcShare * excess), colour: overColor)) }
+            guard !arcs.isEmpty else { return }
+
+            let field = CGRect(x: -lw * 4, y: -lw * 4,
+                               width: size.width + lw * 8, height: size.height + lw * 8)
+            RubberArcRecipe.draw(&context, arcs: arcs, lineWidth: lw, style: style,
+                                 field: field, centre: centre, radius: radius,
+                                 dark: scheme == .dark, shift: shift)
+        }
     }
 }
